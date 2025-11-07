@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ⚙️ Actions pour boutons -->
+    <record id="filtered_sortie_action" model="ir.actions.act_window">
+        <field name="name">Sorties du client</field>
+        <field name="res_model">kal3iyasortie</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('client_id', '=', active_id)]</field>
+    </record>
+
+    <record id="filtered_retour_action" model="ir.actions.act_window">
+        <field name="name">Retours du client</field>
+        <field name="res_model">kal3iyaentry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('client_id', '=', active_id)]</field>
+    </record>
+
+    <record id="view_kal3iya_client_form" model="ir.ui.view">
+        <field name="name">kal3iya.client.form</field>
+        <field name="model">kal3iya.client</field>
+        <field name="arch" type="xml">
+            <form string="Client">
+                <sheet>
+                    <!-- 🧍 Informations principales -->
+                    <div class="oe_button_box" name="button_box">
+                        <!-- 🔹 Bouton sorties -->
+                        <button name="%(filtered_sortie_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-truck">
+                            <field name="sortie_count" string="Sorties" widget="statinfo"/>
+                        </button>
+
+                        <!-- 🔹 Bouton retours -->
+                        <button name="%(filtered_retour_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-undo">
+                            <field name="retour_count" string="Retours" widget="statinfo"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+
+                    <!-- Espacement visuel -->
+                    <separator string="Historique du client" colspan="2"/>
+
+                    <!-- ✅ Onglets pour Commandes et Retours -->
+                    <notebook>
+                        <page string="Commandes">
+                            <field name="sortie_ids" readonly="1" nolabel="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price"/>
+                                    <field name="date_exit"/>
+                                    <field name="driver_id"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Retours">
+                            <field name="retour_ids" readonly="1" nolabel="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price"/>
+                                    <field name="date_entry"/>
+                                    <field name="driver_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 🌳 Vue liste des clients -->
+    <record id="view_kal3iya_client_tree" model="ir.ui.view">
+        <field name="name">kal3iya.client.tree</field>
+        <field name="model">kal3iya.client</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="sortie_count"/>
+                <field name="retour_count"/>
+            </tree>
+        </field>
+    </record>
+
+    
+
+    <!-- 🧭 Menu principal -->
+    <record id="kal3iya_client_action" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">kal3iya.client</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="client_menu"
+              name="Clients"
+              parent="data_menu"
+              action="kal3iya_client_action"/>
+</odoo>

@@ -1,0 +1,48 @@
+<odoo>
+
+    <record id="kal3iyareturn_action" model="ir.actions.act_window">
+        <field name="name">Retour</field>
+        <field name="res_model">kal3iyareturn</field>
+    </record>
+
+    <menuitem 
+        id="return_menu"
+        name="Retour"
+        parent="Kal3iya_root_menu"
+        action="kal3iyareturn_action"
+    />
+
+    <record id="return_view_tree" model="ir.ui.view">
+        <field name="name">return tree</field>
+        <field name="model">kal3iyareturn</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="quantity"/>
+                <field name="date_return"/>
+                <field name="client_id"/>
+                <field name="dum"/>
+                <field name="lot"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
+                <field name="calibre"/>
+                <field name="driver_id"/>
+                <field name="cellphone"/>
+                <field name="garage"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="sortie_view_search" model="ir.ui.view">
+        <field name="name">return search</field>
+        <field name="model">kal3iyareturn</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="dum"/>
+                <field name="lot"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

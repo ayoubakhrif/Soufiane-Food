@@ -1,0 +1,91 @@
+<odoo>
+    <menuitem 
+        id="Kal3iya_root_menu"
+        name="Kal3iya"
+        web_icon="kal3iya,static/description/icon.svg"
+        sequence="1"
+    />
+
+    <record id="kal3iyaentry_action" model="ir.actions.act_window">
+        <field name="name">Entrée</field>
+        <field name="res_model">kal3iyaentry</field>
+    </record>
+
+    <menuitem 
+        id="entree_menu"
+        name="Entrée"
+        parent="Kal3iya_root_menu"
+        action="kal3iyaentry_action"
+    />
+
+    <record id="entree_view_tree" model="ir.ui.view">
+        <field name="name">entree tree</field>
+        <field name="model">kal3iyaentry</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="quantity"/>
+                <field name="price"/>
+                <field name="date_entry"/>
+                <field name="dum"/>
+                <field name="lot"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
+                <field name="calibre"/>
+                <field name="driver_id"/>
+                <field name="cellphone"/>
+                <field name="garage"/>
+                <field name="ste_id"/>
+                <field name="provider_id"/>
+                <field name="client_id"/>
+                <field name="state_badge" widget="html" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="entree_view_form" model="ir.ui.view">
+        <field name="name">entree form</field>
+        <field name="model">kal3iyaentry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': true}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="quantity"/>
+                        <field name="price"/>
+                        <field name="date_entry"/>
+                        <field name="dum"/>
+                        <field name="lot"/>
+                        <field name="weight"/>
+                        <field name="tonnage"/>
+                        <field name="calibre"/>
+                        <field name="driver_id"/>
+                        <field name="cellphone"/>
+                        <field name="garage"/>
+                        <field name="ste_id"/>
+                        <field name="provider_id"/>
+                        <field name="client_id" invisible="state == 'entree'"/>
+                        <field name="image_1920"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="entree_view_search" model="ir.ui.view">
+        <field name="name">entree search</field>
+        <field name="model">kal3iyaentry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="dum"/>
+                <field name="lot"/>
+                <field name="state"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

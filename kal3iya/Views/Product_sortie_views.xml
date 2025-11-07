@@ -1,0 +1,95 @@
+<odoo>
+
+    <record id="kal3iyasortie_action" model="ir.actions.act_window">
+        <field name="name">Sortie</field>
+        <field name="res_model">kal3iyasortie</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem 
+        id="sortie_menu"
+        name="Sortie"
+        parent="Kal3iya_root_menu"
+        action="kal3iyasortie_action"
+    />
+
+    <!-- Vue liste -->
+    <record id="sortie_view_tree" model="ir.ui.view">
+        <field name="name">sortie tree</field>
+        <field name="model">kal3iyasortie</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="quantity"/>
+                <field name="selling_price"/>
+                <field name="date_exit"/>
+                <field name="client_id"/>
+                <field name="dum"/>
+                <field name="lot"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
+                <field name="calibre"/>
+                <field name="driver_id"/>
+                <field name="cellphone"/>
+                <field name="garage"/>
+                <field name="ste_id" optional="1"/>
+                <!-- Champ masqué pour le lien -->
+                <field name="drive_file_url" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="sortie_view_form" model="ir.ui.view">
+        <field name="name">sortie form</field>
+        <field name="model">kal3iyasortie</field>
+        <field name="arch" type="xml">
+            <form string="Sortie de stock">
+                <sheet>
+                    <group>
+                        <field name="entry_id" required="1"/>
+                        <field name="date_exit"/>
+                        <field name="quantity"/>
+                        <field name="selling_price"/>
+                        <field name="client_id"/>
+                        <field name="indirect"/>
+                        <field name="client2" invisible="indirect == False"/>
+                        <field name="driver_id"/>
+                        <field name="cellphone"/>
+                    </group>
+                    <group>
+                        <field name="name" readonly="1"/>
+                        <field name="weight" readonly="1"/>
+                        <field name="tonnage" readonly="1"/>
+                        <field name="calibre" readonly="1"/>
+                        <field name="garage" readonly="1"/>
+                        <field name="provider_id" readonly="1"/>
+                        <field name="lot" readonly="1"/>
+                        <field name="dum" readonly="1"/>
+                        <field name="ste_id" readonly="1"/>
+                        <field name="image_1920" widget="image" class="oe_avatar"
+                               options="{'preview_image': 'image_1920'}" readonly="1"/>
+                        <field name="drive_file_url" invisible="1"/>
+                        <field name="drive_file_id" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue recherche -->
+    <record id="sortie_view_search" model="ir.ui.view">
+        <field name="name">sortie search</field>
+        <field name="model">kal3iyasortie</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="dum"/>
+                <field name="lot"/>
+                <field name="client_id"/>
+                <field name="garage"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

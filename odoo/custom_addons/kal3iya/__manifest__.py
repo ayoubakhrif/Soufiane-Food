@@ -9,7 +9,6 @@
         'security/ir.model.access.csv',
         'views/product_entry_views.xml',
         'views/product_sortie_views.xml',
-        'views/product_return_views.xml',
         'views/product_stock_views.xml',
         'views/data_views.xml',
         'views/base_menu.xml',

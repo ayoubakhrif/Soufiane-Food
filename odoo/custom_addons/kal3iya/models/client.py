@@ -20,6 +20,9 @@ class Kal3iyaClient(models.Model):
         compute='_compute_sortie_ids'
     )
 
+    avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
+
+
     def _compute_sortie_ids(self):
         """Récupère automatiquement les sorties liées à ce client"""
         for client in self:

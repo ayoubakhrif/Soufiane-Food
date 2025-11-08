@@ -34,7 +34,7 @@ class ProductExit(models.Model):
         readonly=False
     )
     quantity = fields.Integer(string='Qté', required=True, tracking=True)
-    price = fields.Float(string='Prix de vente', required=True, tracking=True)
+    selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
     date_exit = fields.Date(string='Date de sortie', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage(Kg)', compute='_compute_tonnage', store=True, readonly=True)
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur', tracking=True)
@@ -64,6 +64,39 @@ class ProductExit(models.Model):
     def _compute_tonnage(self):
         for record in self:
             record.tonnage = record.quantity * record.weight if record.quantity and record.weight else 0.0
+
+    # ------------------------------------------------------------
+    # AFFICHAGE
+    # ------------------------------------------------------------
+    display_name = fields.Char(
+        string='Nom affiché', 
+        compute='_compute_display_name', 
+        store=False
+    )
+
+    @api.depends('client_id', 'name', 'lot', 'dum', 'quantity')
+    def _compute_display_name(self):
+        """Construit le texte affiché dans les menus déroulants"""
+        for rec in self:
+            client = rec.client_id.name or ''
+            produit = rec.name or ''
+            lot = rec.lot or ''
+            dum = rec.dum or ''
+            qty = rec.quantity or 0
+            rec.display_name = f"{client} - {produit} - Lot {lot} - DUM {dum} - Qté {qty}"
+
+    def name_get(self):
+        """Personnaliser le nom affiché dans les listes déroulantes"""
+        result = []
+        for rec in self:
+            client = rec.client_id.name or ''
+            produit = rec.name or ''
+            lot = rec.lot or ''
+            dum = rec.dum or ''
+            qty = rec.quantity or 0
+            name = f"{client} - {produit} - Lot {lot} - DUM {dum} - Qté {qty}"
+            result.append((rec.id, name))
+        return result
 
     # ------------------------------------------------------------
     # CRUD OVERRIDES

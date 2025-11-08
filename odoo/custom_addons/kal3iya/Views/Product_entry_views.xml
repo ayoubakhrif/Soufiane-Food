@@ -53,22 +53,28 @@
                 </header>
                 <sheet>
                     <group>
+                        <field name="return_id" invisible="state == 'entree'" domain="[('client_id', '=', client_id)]"/>
+                    </group>
+                    <group>
+                        <field name="client_id" invisible="state == 'entree'"/>
                         <field name="name"/>
                         <field name="quantity"/>
-                        <field name="price"/>
+                        <field name="price" invisible="state == 'retour'"/>
                         <field name="date_entry"/>
-                        <field name="dum"/>
-                        <field name="lot"/>
-                        <field name="weight"/>
-                        <field name="tonnage"/>
-                        <field name="calibre"/>
                         <field name="driver_id"/>
                         <field name="cellphone"/>
                         <field name="garage"/>
+                    </group>
+                    <group>
+                        <field name="weight"/>
+                        <field name="tonnage"/>
+                        <field name="calibre"/>
+                        <field name="dum"/>
+                        <field name="lot"/>
                         <field name="ste_id"/>
                         <field name="provider_id"/>
-                        <field name="client_id" invisible="state == 'entree'"/>
                         <field name="image_1920"/>
+                        <field name="selling_price" invisible="state == 'entree'"/>
                     </group>
                 </sheet>
             </form>

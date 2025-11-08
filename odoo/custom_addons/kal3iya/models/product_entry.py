@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class ProductEntry(models.Model):
     _name = 'kal3iyaentry'
@@ -9,6 +10,7 @@ class ProductEntry(models.Model):
     name = fields.Char(string='Nom du produit', required=True, tracking=True)
     quantity = fields.Integer(string='Quantité', required=True, tracking=True)
     price = fields.Float(string='Prix d’achat', required=True, tracking=True)
+    selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
     date_entry = fields.Date(string='Date d’entrée', tracking=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)
@@ -32,11 +34,20 @@ class ProductEntry(models.Model):
     provider_id = fields.Many2one('kal3iya.provider', tracking=True)
     client_id = fields.Many2one('kal3iya.client', tracking=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
+    
 
     state = fields.Selection([
         ('entree', 'Entrée'),
         ('retour', 'Retour'),
     ], string='État', default='entree', tracking=True)
+
+    return_id = fields.Many2one(
+        'kal3iyasortie',
+        string='Produit retourné',
+        tracking=True,
+        required=False,
+        help="Sortie de stock liée pour un retour"
+    )
 
     state_badge = fields.Html(string='État (badge)', compute='_compute_state_badge', sanitize=False)
 
@@ -54,6 +65,48 @@ class ProductEntry(models.Model):
             )
 
     # ------------------------------------------------------------
+    # ONCHANGE SUR RETOUR
+    # ------------------------------------------------------------
+    @api.onchange('return_id')
+    def _onchange_return_id(self):
+        """Remplit automatiquement les infos à partir de la sortie sélectionnée."""
+        if self.return_id:
+            sortie = self.return_id
+            self.lot = sortie.lot
+            self.dum = sortie.dum
+            self.name = sortie.name
+            self.weight = sortie.weight
+            self.calibre = sortie.calibre
+            self.ste_id = sortie.ste_id
+            self.provider_id = sortie.provider_id
+            self.client_id = sortie.client_id
+            self.garage = sortie.garage
+            self.image_1920 = sortie.image_1920
+            self.selling_price = sortie.selling_price
+        else:
+            # Si aucun retour sélectionné, ne rien écraser
+            pass
+
+    # ------------------------------------------------------------
+    # Changer return_id selon client
+    # ------------------------------------------------------------
+    @api.onchange('client_id')
+    def _onchange_client_id(self):
+        """Filtrer les sorties selon le client sélectionné"""
+        if self.client_id:
+            return {
+                'domain': {
+                    'return_id': [('client_id', '=', self.client_id.id)]
+                }
+            }
+        else:
+            return {
+                'domain': {
+                    'return_id': []
+                }
+            }
+    
+    # ------------------------------------------------------------
     # TONNAGE
     # ------------------------------------------------------------
     @api.depends('quantity', 'weight')
@@ -68,6 +121,18 @@ class ProductEntry(models.Model):
         ('unique_lot_dum_garage', 'unique(lot, dum, garage, state)',
          'Une entrée avec le même Lot, DUM et Garage existe déjà !')
     ]
+
+    # ------------------------------------------------------------
+    # CONTRAINTE RETOUR
+    # ------------------------------------------------------------
+    @api.constrains('quantity', 'return_id', 'state')
+    def _check_return_quantity(self):
+        for rec in self:
+            if rec.state == 'retour' and rec.return_id:
+                if rec.quantity > rec.return_id.quantity:
+                    raise ValidationError(
+                        "❌ La quantité retournée ne peut pas dépasser la quantité sortie."
+                    )
 
     # ------------------------------------------------------------
     # CRUD OVERRIDES

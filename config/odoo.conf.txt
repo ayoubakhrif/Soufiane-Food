@@ -1,0 +1,11 @@
+[options]
+admin_passwd = admin123
+db_host = db
+db_port = 5432
+db_user = odoo
+db_password = KB220166
+addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons
+dbfilter = .*
+proxy_mode = True
+dev_mode = True
+auto_reload = True

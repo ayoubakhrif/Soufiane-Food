@@ -14,6 +14,7 @@
         'views/base_menu.xml',
         'views/property_view.xml',
         'views/client_view.xml',
+        'views/advance_view.xml',
         'reports/bon_report.xml',
     ],
     'images': ['static/description/icon.svg'],

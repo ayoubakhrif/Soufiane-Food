@@ -64,7 +64,7 @@ class ProductExit(models.Model):
             record.tonnage = record.quantity * record.weight if record.quantity and record.weight else 0.0
 
     @api.depends('tonnage')
-    def _compute_tonnage(self):
+    def _compute_charge_transport(self):
         for record in self:
             record.charge_transport = record.tonnage * 20 if record.tonnage else 0.0
 

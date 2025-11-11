@@ -31,7 +31,7 @@
                 <field name="calibre"/>
                 <field name="driver_id"/>
                 <field name="cellphone"/>
-                <field name="garage"/>
+                <field name="frigo"/>
                 <field name="ste_id" optional="1"/>
                 <!-- Champ masqué pour le lien -->
                 <field name="drive_file_url" invisible="1"/>
@@ -62,7 +62,7 @@
                         <field name="weight" readonly="1"/>
                         <field name="tonnage" readonly="1"/>
                         <field name="calibre" readonly="1"/>
-                        <field name="garage" readonly="1"/>
+                        <field name="frigo" readonly="1"/>
                         <field name="provider_id" readonly="1"/>
                         <field name="lot" readonly="1"/>
                         <field name="dum" readonly="1"/>
@@ -87,7 +87,7 @@
                 <field name="dum"/>
                 <field name="lot"/>
                 <field name="client_id"/>
-                <field name="garage"/>
+                <field name="frigo"/>
             </search>
         </field>
     </record>

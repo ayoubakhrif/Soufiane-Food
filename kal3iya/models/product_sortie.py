@@ -42,17 +42,10 @@ class ProductExit(models.Model):
     client_id = fields.Many2one('kal3iya.client', tracking=True)
     client2 = fields.Selection([('soufiane', 'Soufiane'), ('hamza', 'Hamza'),], string='Client 2', tracking=True)
     indirect = fields.Boolean(string='S/H', default=False)
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-    ], string='Garage', related='entry_id.garage', store=True, readonly=False, tracking=True)
+    frigo = fields.Selection([
+        ('frigo1', 'Frigo 1'),
+        ('frigo2', 'Frigo 2'),
+    ], string='Frigo', related='entry_id.frigo', store=True, readonly=False, tracking=True)
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
@@ -136,31 +129,31 @@ class ProductExit(models.Model):
 
     def unlink(self):
         # Sauvegarder les infos avant suppression
-        lots_to_update = [(rec.lot, rec.dum, rec.garage) for rec in self]
+        lots_to_update = [(rec.lot, rec.dum, rec.frigo) for rec in self]
         res = super().unlink()
         # Recalculer après suppression
-        for lot, dum, garage in lots_to_update:
-            self._recalculate_stock(lot, dum, garage)
+        for lot, dum, frigo in lots_to_update:
+            self._recalculate_stock(lot, dum, frigo)
         return res
 
     # ------------------------------------------------------------
     # LOGIQUE DU STOCK
     # ------------------------------------------------------------
-    def _recalculate_stock(self, lot=None, dum=None, garage=None):
+    def _recalculate_stock(self, lot=None, dum=None, frigo=None):
         if self and all(r.exists() for r in self):
-            lots = [(rec.lot, rec.dum, rec.garage) for rec in self]
-        elif lot and dum and garage:
-            lots = [(lot, dum, garage)]
+            lots = [(rec.lot, rec.dum, rec.frigo) for rec in self]
+        elif lot and dum and frigo:
+            lots = [(lot, dum, frigo)]
         else:
             return
 
 
-        for lot, dum, garage in lots:
+        for lot, dum, frigo in lots:
             # Chercher l’entrée correspondante
             entries = self.env['kal3iyaentry'].search([
                 ('lot', '=', lot),
                 ('dum', '=', dum),
-                ('garage', '=', garage)
+                ('frigo', '=', frigo)
             ])
             total_entries = sum(e.quantity for e in entries)
 
@@ -169,7 +162,7 @@ class ProductExit(models.Model):
                 stock = self.env['kal3iya.stock'].search([
                     ('lot', '=', lot),
                     ('dum', '=', dum),
-                    ('garage', '=', garage)
+                    ('frigo', '=', frigo)
                 ])
                 if stock:
                     stock.unlink()
@@ -179,7 +172,7 @@ class ProductExit(models.Model):
             sorties = self.env['kal3iyasortie'].search([
                 ('lot', '=', lot),
                 ('dum', '=', dum),
-                ('garage', '=', garage)
+                ('frigo', '=', frigo)
             ])
             total_sorties = sum(s.quantity for s in sorties)
 
@@ -192,7 +185,7 @@ class ProductExit(models.Model):
             stock = self.env['kal3iya.stock'].search([
                 ('lot', '=', lot),
                 ('dum', '=', dum),
-                ('garage', '=', garage)
+                ('frigo', '=', frigo)
             ], limit=1)
 
             valeurs = {
@@ -213,7 +206,7 @@ class ProductExit(models.Model):
                 valeurs.update({
                     'lot': lot,
                     'dum': dum,
-                    'garage': garage,
+                    'frigo': frigo,
                 })
                 self.env['kal3iya.stock'].create(valeurs)
 

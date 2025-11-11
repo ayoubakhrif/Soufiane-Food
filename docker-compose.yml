@@ -23,6 +23,7 @@ services:
       DB_USER: odoo
       DB_PASSWORD: KB220166
     volumes:
-      - ./odoo/custom_addons:/mnt/extra-addons
+      - C:/odoo-repos/Soufiane-Food:/mnt/extra-addons
       - ./config:/etc/odoo
+      - ./data:/var/lib/odoo
     restart: always

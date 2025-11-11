@@ -12,7 +12,10 @@ class ProductStock(models.Model):
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
     ], string='Frigo', tracking=True)
-    
+    stock = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+    ], string='Stock', tracking=True)
     quantity = fields.Float(string='Quantité disponible', default=0)
     price = fields.Float(string='Prix d’achat')
     weight = fields.Float(string='Poids (kg)', required=True)
@@ -22,6 +25,8 @@ class ProductStock(models.Model):
     provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', optional=True)
     active = fields.Boolean(string='Actif', default=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
+
+    _order = 'name asc, quantity asc'
 
 
     # ------------------------------------------------------------

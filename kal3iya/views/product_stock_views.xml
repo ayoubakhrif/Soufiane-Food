@@ -9,7 +9,7 @@
                 <field name="quantity"/>
                 <field name="price"/>
                 <field name="lot"/>
-                <field name="garage"/>
+                <field name="frigo"/>
                 <field name="image_1920"/>
 
                 <templates>
@@ -38,7 +38,7 @@
                                     <div><b>Prix :</b> <field name="price"/></div>
                                     <div><b>Quantité :</b> <field name="quantity"/></div>
                                     <div><b>Lot :</b> <field name="lot"/></div>
-                                    <div><b>Garage :</b> <field name="garage"/></div>
+                                    <div><b>frigo :</b> <field name="frigo"/></div>
                                 </div>
                             </div>
                         </div>

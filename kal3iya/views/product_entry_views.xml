@@ -35,6 +35,7 @@
                 <field name="calibre"/>
                 <field name="driver_id"/>
                 <field name="cellphone"/>
+                <field name="stock"/>
                 <field name="frigo"/>
                 <field name="ste_id" optional="1"/>
                 <field name="provider_id" optional="1"/>
@@ -60,15 +61,17 @@
                         <field name="client_id" invisible="state == 'entree'"/>
                         <field name="name"/>
                         <field name="quantity"/>
+                        <field name="weight"/>
+                        <field name="tonnage"/>
                         <field name="price" invisible="state == 'retour'"/>
+                        <field name="total_price" invisible="state == 'retour'"/>
                         <field name="date_entry"/>
                         <field name="driver_id"/>
                         <field name="cellphone"/>
-                        <field name="frigo"/>
                     </group>
                     <group>
-                        <field name="weight"/>
-                        <field name="tonnage"/>
+                        <field name="stock"/>
+                        <field name="frigo" invisible="stock == 'tanger'"/>
                         <field name="calibre"/>
                         <field name="dum"/>
                         <field name="lot"/>

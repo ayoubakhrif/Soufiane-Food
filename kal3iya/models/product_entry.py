@@ -14,6 +14,10 @@ class ProductEntry(models.Model):
     date_entry = fields.Date(string='Date d’entrée', tracking=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)
+    stock = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+    ], string='Stock', tracking=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
@@ -74,7 +78,7 @@ class ProductEntry(models.Model):
             self.ste_id = sortie.ste_id
             self.provider_id = sortie.provider_id
             self.client_id = sortie.client_id
-            self.garage = sortie.garage
+            self.frigo = sortie.frigo
             self.image_1920 = sortie.image_1920
             self.selling_price = sortie.selling_price
         else:
@@ -117,8 +121,8 @@ class ProductEntry(models.Model):
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     _sql_constraints = [
-        ('unique_lot_dum_garage', 'unique(lot, dum, garage, state)',
-         'Une entrée avec le même Lot, DUM et Garage existe déjà !')
+        ('unique_lot_dum_frigo', 'unique(lot, dum, frigo, state)',
+         'Une entrée avec le même Lot, DUM et frigo existe déjà !')
     ]
 
     # ------------------------------------------------------------
@@ -149,31 +153,31 @@ class ProductEntry(models.Model):
 
     def unlink(self):
         # Sauvegarder les infos avant suppression
-        lots_to_update = [(rec.lot, rec.dum, rec.garage) for rec in self]
+        lots_to_update = [(rec.lot, rec.dum, rec.frigo) for rec in self]
         res = super().unlink()
         # Recalculer après suppression
-        for lot, dum, garage in lots_to_update:
-            self._recalculate_stock(lot, dum, garage)
+        for lot, dum, frigo in lots_to_update:
+            self._recalculate_stock(lot, dum, frigo)
         return res
 
     # ------------------------------------------------------------
     # LOGIQUE DU STOCK
     # ------------------------------------------------------------
-    def _recalculate_stock(self, lot=None, dum=None, garage=None):
+    def _recalculate_stock(self, lot=None, dum=None, frigo=None):
         if self and all(r.exists() for r in self):
-            lots = [(rec.lot, rec.dum, rec.garage) for rec in self]
-        elif lot and dum and garage:
-            lots = [(lot, dum, garage)]
+            lots = [(rec.lot, rec.dum, rec.frigo) for rec in self]
+        elif lot and dum and frigo:
+            lots = [(lot, dum, frigo)]
         else:
             return
 
 
-        for lot, dum, garage in lots:
+        for lot, dum, frigo in lots:
             # Chercher l’entrée correspondante
             entries = self.env['kal3iyaentry'].search([
                 ('lot', '=', lot),
                 ('dum', '=', dum),
-                ('garage', '=', garage)
+                ('frigo', '=', frigo)
             ])
             total_entries = sum(e.quantity for e in entries)
 
@@ -182,7 +186,7 @@ class ProductEntry(models.Model):
                 stock = self.env['kal3iya.stock'].search([
                     ('lot', '=', lot),
                     ('dum', '=', dum),
-                    ('garage', '=', garage)
+                    ('frigo', '=', frigo)
                 ])
                 if stock:
                     stock.unlink()
@@ -192,7 +196,7 @@ class ProductEntry(models.Model):
             sorties = self.env['kal3iyasortie'].search([
                 ('lot', '=', lot),
                 ('dum', '=', dum),
-                ('garage', '=', garage)
+                ('frigo', '=', frigo)
             ])
             total_sorties = sum(s.quantity for s in sorties)
 
@@ -205,7 +209,7 @@ class ProductEntry(models.Model):
             stock = self.env['kal3iya.stock'].search([
                 ('lot', '=', lot),
                 ('dum', '=', dum),
-                ('garage', '=', garage)
+                ('frigo', '=', frigo)
             ], limit=1)
 
             valeurs = {
@@ -226,7 +230,7 @@ class ProductEntry(models.Model):
                 valeurs.update({
                     'lot': lot,
                     'dum': dum,
-                    'garage': garage,
+                    'frigo': frigo,
                 })
                 self.env['kal3iya.stock'].create(valeurs)
 

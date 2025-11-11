@@ -37,6 +37,7 @@
                 <field name="cellphone" optional="1"/>
                 <field name="stock"/>
                 <field name="frigo"/>
+                <field name="charge_transport"/>
                 <field name="ste_id" optional="1"/>
                 <field name="provider_id" optional="1"/>
                 <field name="client_id"/>
@@ -72,6 +73,7 @@
                     <group>
                         <field name="stock"/>
                         <field name="frigo" invisible="stock == 'tanger'"/>
+                        <field name="charge_transport"/>
                         <field name="calibre"/>
                         <field name="dum"/>
                         <field name="lot"/>

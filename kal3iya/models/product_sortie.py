@@ -50,6 +50,7 @@ class ProductExit(models.Model):
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
     ], string='Frigo', related='entry_id.frigo', store=True, readonly=False, tracking=True)
+    charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)

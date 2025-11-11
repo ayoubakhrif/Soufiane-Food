@@ -32,7 +32,8 @@ class ProductEntry(models.Model):
     provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', tracking=True)
     client_id = fields.Many2one('kal3iya.client', string='Client', tracking=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
-    
+    charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
+
 
     state = fields.Selection([
         ('entree', 'Entrée'),
@@ -116,6 +117,11 @@ class ProductEntry(models.Model):
     def _compute_total_price(self):
         for record in self:
             record.total_price = record.price * record.tonnage if record.price and record.tonnage else 0.0
+
+    @api.depends('tonnage')
+    def _compute_charge_transport(self):
+        for record in self:
+            record.charge_transport = record.tonnage * 20 if record.tonnage else 0.0
 
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ

@@ -42,6 +42,10 @@ class ProductExit(models.Model):
     client_id = fields.Many2one('kal3iya.client', tracking=True)
     client2 = fields.Selection([('soufiane', 'Soufiane'), ('hamza', 'Hamza'),], string='Client 2', tracking=True)
     indirect = fields.Boolean(string='S/H', default=False)
+    stock = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+    ], string='Stock', tracking=True, related='entry_id.frigo', store=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),

@@ -9,7 +9,7 @@
     <menuitem 
         id="advances_menu"
         name="Avances"
-        parent="Kal3iya_root_menu"
+        parent="data_menu"
         action="advances_action"
     />
 

@@ -14,25 +14,19 @@ class ProductEntry(models.Model):
     date_entry = fields.Date(string='Date d’entrée', tracking=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-    ], tracking=True)
+    frigo = fields.Selection([
+        ('frigo1', 'Frigo 1'),
+        ('frigo2', 'Frigo 2'),
+    ], string='Frigo', tracking=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
+    total_price = fields.Integer(string='total', compute='_compute_total_price', store=True)
     calibre = fields.Char(string='Calibre', tracking=True)
-    driver_id = fields.Many2one('kal3iya.driver', tracking=True)
+    driver_id = fields.Many2one('kal3iya.driver',string='Chauffeur' , tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
-    ste_id = fields.Many2one('kal3iya.ste', tracking=True)
-    provider_id = fields.Many2one('kal3iya.provider', tracking=True)
-    client_id = fields.Many2one('kal3iya.client', tracking=True)
+    ste_id = fields.Many2one('kal3iya.ste', string='Société', tracking=True)
+    provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', tracking=True)
+    client_id = fields.Many2one('kal3iya.client', string='Client', tracking=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
     
 
@@ -107,12 +101,17 @@ class ProductEntry(models.Model):
             }
     
     # ------------------------------------------------------------
-    # TONNAGE
+    # Calculs
     # ------------------------------------------------------------
     @api.depends('quantity', 'weight')
     def _compute_tonnage(self):
         for record in self:
             record.tonnage = record.quantity * record.weight if record.quantity and record.weight else 0.0
+
+    @api.depends('price', 'tonnage')
+    def _compute_total_price(self):
+        for record in self:
+            record.total_price = record.price * record.tonnage if record.price and record.tonnage else 0.0
 
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ

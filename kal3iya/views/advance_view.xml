@@ -38,7 +38,7 @@
                 <field name="date_paid"/>
                 <field name="driver_id"/>
                 <field name="payment_mode"/>
-                <field name="comment" invisible="payment_mode =! 'charge'"/>
+                <field name="comment" invisible="payment_mode != 'charge'"/>
             </form>
         </field>
     </record>

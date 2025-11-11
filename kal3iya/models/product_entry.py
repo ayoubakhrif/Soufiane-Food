@@ -17,7 +17,7 @@ class ProductEntry(models.Model):
     stock = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Stock', tracking=True)
+    ], string='Stock', tracking=True, default='casa')
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),

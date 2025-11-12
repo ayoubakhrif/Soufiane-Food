@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 class ProductEntry(models.Model):
     _name = 'kal3iyaentry'
@@ -14,13 +14,14 @@ class ProductEntry(models.Model):
     date_entry = fields.Date(string='Date d’entrée', tracking=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)
-    stock = fields.Selection([
+    ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Stock', tracking=True, default='casa')
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
+        ('stock_casa', 'Stock'),
     ], string='Frigo', tracking=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
@@ -47,6 +48,8 @@ class ProductEntry(models.Model):
         required=False,
         help="Sortie de stock liée pour un retour"
     )
+
+    stock_id = fields.One2many('kal3iya.stock', 'entry_id', string='Ligne de stock liée', readonly=True)
 
     state_badge = fields.Html(string='État (badge)', compute='_compute_state_badge', sanitize=False)
 
@@ -80,6 +83,7 @@ class ProductEntry(models.Model):
             self.provider_id = sortie.provider_id
             self.client_id = sortie.client_id
             self.frigo = sortie.frigo
+            self.ville = sortie.ville
             self.image_1920 = sortie.image_1920
             self.selling_price = sortie.selling_price
         else:
@@ -127,9 +131,25 @@ class ProductEntry(models.Model):
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     _sql_constraints = [
-        ('unique_lot_dum_frigo', 'unique(lot, dum, frigo, state)',
-         'Une entrée avec le même Lot, DUM et frigo existe déjà !')
+        ('unique_lot_dum_frigo_ville', 'unique(lot, dum, ville, frigo)',
+        'Cette entrée existe déjà. Juste modifiez la quantité.')
     ]
+
+    @api.constrains('lot', 'dum', 'frigo', 'ville', 'state')
+    def _check_unique_for_entree(self):
+        """Empêche de créer une deuxième entrée réelle sur la même combinaison."""
+        for rec in self:
+            if rec.state == 'entree':
+                existing = self.search([
+                    ('id', '!=', rec.id),
+                    ('lot', '=', rec.lot),
+                    ('dum', '=', rec.dum),
+                    ('frigo', '=', rec.frigo),
+                    ('stock', '=', rec.ville),
+                    ('state', '=', 'entree'),
+                ], limit=1)
+                if existing:
+                    raise ValidationError("Cette entrée existe déjà. Modifiez la quantité au lieu d’en créer une nouvelle.")
 
     # ------------------------------------------------------------
     # CONTRAINTE RETOUR
@@ -148,101 +168,188 @@ class ProductEntry(models.Model):
     # ------------------------------------------------------------
     @api.model
     def create(self, vals):
-        record = super().create(vals)
-        record._recalculate_stock()
-        return record
+        rec = super().create(vals)
+        # 1) Si entrée réelle → créer SA ligne de stock (1:1)
+        if rec.state == 'entree':
+            self.env['kal3iya.stock'].sudo().create({
+                'entry_id': rec.id,
+                'name': rec.name,
+                'lot': rec.lot,
+                'dum': rec.dum,
+                'frigo': rec.frigo,
+                'ville': rec.ville,
+                'price': rec.price,
+                'weight': rec.weight,
+                'tonnage': rec.tonnage,
+                'calibre': rec.calibre,
+                'ste_id': rec.ste_id.id,
+                'provider_id': rec.provider_id.id,
+                'image_1920': rec.image_1920,
+            })
 
+        rec._touch_related_stock_qty()
+        return rec
+        
     def write(self, vals):
+        # On mémorise l’ancienne combinaison pour recalculer si elle change
+        before = [(r.lot, r.dum, r.frigo, r.ville) for r in self]
         res = super().write(vals)
-        self._recalculate_stock()
+
+        # Recalculer la/les lignes de stock impactées
+        self._touch_related_stock_qty()
+
+        # Si combo changée (cas retour), recalculer l’ancien
+        after = [(r.lot, r.dum, r.frigo, r.ville) for r in self]
+        for (lot0, dum0, frigo0, ville0), (lot1, dum1, frigo1, ville1) in zip(before, after):
+            if (lot0, dum0, frigo0, ville0) != (lot1, dum1, frigo1, ville1):
+                self._recompute_combo(lot0, dum0, frigo0, ville0)
         return res
 
     def unlink(self):
-        # Sauvegarder les infos avant suppression
-        lots_to_update = [(rec.lot, rec.dum, rec.frigo) for rec in self]
+        for rec in self:
+            if rec.state == 'entree':
+                # Entrée réelle: sa ligne stock ne peut être supprimée que si aucune sortie liée
+                stock = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)], limit=1)
+                if stock:
+                    has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', stock.id)]) > 0
+                    if has_out:
+                        raise UserError("Impossible de supprimer l’entrée: des sorties existent pour le stock lié.")
+                    # pas de sorties → on peut supprimer la ligne de stock
+                    stock.unlink()
+
+        # Supprimer l’entrée puis recalculer les combos impactées (cas retour)
+        combos = [(r.lot, r.dum, r.frigo, r.ville) for r in self]
         res = super().unlink()
-        # Recalculer après suppression
-        for lot, dum, frigo in lots_to_update:
-            self._recalculate_stock(lot, dum, frigo)
+        for lot, dum, frigo, ville in combos:
+            self._recompute_combo(lot, dum, frigo, ville)
         return res
+    
+    def _touch_related_stock_qty(self):
+        """Recalcule la quantité de stock pour les combos concernées par self."""
+        combos = {(r.lot, r.dum, r.frigo, r.ville) for r in self}
+        for lot, dum, frigo, ville in combos:
+            self._recompute_combo(lot, dum, frigo, ville)
+
+    def _recompute_combo(self, lot, dum, frigo, ville):
+        """Trouve la ligne de stock (1:1 via entrée réelle) et recalcule sa quantité."""
+        Stock = self.env['kal3iya.stock'].sudo()
+
+        # Quel est l'entry 'entree' d’origine pour cette combo ?
+        origin_entry = self.search([
+            ('state', '=', 'entree'),
+            ('lot', '=', lot), ('dum', '=', dum),
+            ('frigo', '=', frigo), ('ville', '=', ville),
+        ], limit=1)
+
+        if not origin_entry:
+            # Plus d’entrée réelle → s’il existe un stock, on le supprime (s’il n’a pas de sorties)
+            orphan = Stock.search([('lot', '=', lot), ('dum', '=', dum), ('frigo', '=', frigo), ('ville', '=', ville)], limit=1)
+            if orphan:
+                has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', orphan.id)]) > 0
+                if has_out:
+                    # On garde le stock mais on met sa qty à (retours - sorties), logique rare mais safe
+                    orphan.recompute_qty()
+                else:
+                    orphan.unlink()
+            return
+
+        # OK: on a l’entrée d’origine → retrouver/créer la ligne stock si besoin
+        stock = Stock.search([('entry_id', '=', origin_entry.id)], limit=1)
+        if not stock:
+            stock = Stock.create({
+                'entry_id': origin_entry.id,
+                'name': origin_entry.name,
+                'lot': lot, 'dum': dum, 'frigo': frigo, 'ville': ville,
+                'price': origin_entry.price, 'weight': origin_entry.weight, 'tonnage': origin_entry.tonnage,
+                'calibre': origin_entry.calibre, 'ste_id': origin_entry.ste_id.id, 'provider_id': origin_entry.provider_id.id,
+                'image_1920': origin_entry.image_1920,
+            })
+
+        # Recalculer la quantité
+        stock.recompute_qty()
 
     # ------------------------------------------------------------
     # LOGIQUE DU STOCK
     # ------------------------------------------------------------
-    def _recalculate_stock(self, lot=None, dum=None, frigo=None):
-        if self and all(r.exists() for r in self):
-            lots = [(rec.lot, rec.dum, rec.frigo) for rec in self]
-        elif lot and dum and frigo:
-            lots = [(lot, dum, frigo)]
-        else:
-            return
+    #def _recalculate_stock(self, lot=None, dum=None, frigo=None):
+     #   if self and all(r.exists() for r in self):
+      #      lots = [(rec.lot, rec.dum, rec.frigo, rec.ville) for rec in self]
+       # elif lot and dum and frigo and ville:
+        #    lots = [(lot, dum, frigo, ville)]
+        #else:
+         #   return
 
 
-        for lot, dum, frigo in lots:
+        #for lot, dum, frigo, ville in lots:
             # Chercher l’entrée correspondante
-            entries = self.env['kal3iyaentry'].search([
-                ('lot', '=', lot),
-                ('dum', '=', dum),
-                ('frigo', '=', frigo)
-            ])
-            total_entries = sum(e.quantity for e in entries)
+         #   entries = self.env['kal3iyaentry'].search([
+          #      ('lot', '=', lot),
+           #     ('dum', '=', dum),
+            #    ('frigo', '=', frigo)
+             #   ('ville', '=', ville)
+            #])
+            #total_entries = sum(e.quantity for e in entries)
 
             # Si aucune entrée n'existe → on supprime la ligne de stock
-            if not entries:
-                stock = self.env['kal3iya.stock'].search([
-                    ('lot', '=', lot),
-                    ('dum', '=', dum),
-                    ('frigo', '=', frigo)
-                ])
-                if stock:
-                    stock.unlink()
-                continue
+#            if not entries:
+ #               stock = self.env['kal3iya.stock'].search([
+  #                  ('lot', '=', lot),
+   #                 ('dum', '=', dum),
+    #                ('frigo', '=', frigo)
+     #               ('ville', '=', ville)
+      #          ])
+       #         if stock:
+        #            stock.unlink()
+         #       continue
 
             # Calcul de la somme des sorties
-            sorties = self.env['kal3iyasortie'].search([
-                ('lot', '=', lot),
-                ('dum', '=', dum),
-                ('frigo', '=', frigo)
-            ])
-            total_sorties = sum(s.quantity for s in sorties)
+          #  sorties = self.env['kal3iyasortie'].search([
+           #     ('lot', '=', lot),
+            #    ('dum', '=', dum),
+             #   ('frigo', '=', frigo)
+              #  ('ville', '=', ville)
+            #])
+#            total_sorties = sum(s.quantity for s in sorties)
 
-            # Calcul du stock
-            stock_actuel = total_entries - total_sorties
+           # Calcul du stock
+#            stock_actuel = total_entries - total_sorties
 
-            ref_entry = entries.sorted(lambda e: e.id, reverse=True)[0]
+#            ref_entry = entries.sorted(lambda e: e.id, reverse=True)[0]
 
             # Mettre à jour ou créer la ligne correspondante
-            stock = self.env['kal3iya.stock'].search([
-                ('lot', '=', lot),
-                ('dum', '=', dum),
-                ('frigo', '=', frigo)
-            ], limit=1)
+ #           stock = self.env['kal3iya.stock'].search([
+  #              ('lot', '=', lot),
+   #             ('dum', '=', dum),
+    #            ('frigo', '=', frigo)
+     #           ('ville', '=', ville)
+      #      ], limit=1)
 
-            valeurs = {
-                'name': ref_entry.name,
-                'quantity': stock_actuel,
-                'price': ref_entry.price,
-                'weight': ref_entry.weight,
-                'tonnage': ref_entry.tonnage,
-                'calibre': ref_entry.calibre,
-                'ste_id': ref_entry.ste_id.id,
-                'provider_id': ref_entry.provider_id.id,
-                'image_1920' : ref_entry.image_1920,
-            }
+       #     valeurs = {
+        #        'name': ref_entry.name,
+         #       'quantity': stock_actuel,
+          #      'price': ref_entry.price,
+           #     'weight': ref_entry.weight,
+            #    'tonnage': ref_entry.tonnage,
+             #   'calibre': ref_entry.calibre,
+              #  'ste_id': ref_entry.ste_id.id,
+               # 'provider_id': ref_entry.provider_id.id,
+                #'image_1920' : ref_entry.image_1920,
+            #}
 
-            if stock:
-                stock.write(valeurs)
-            else:
-                valeurs.update({
-                    'lot': lot,
-                    'dum': dum,
-                    'frigo': frigo,
-                })
-                self.env['kal3iya.stock'].create(valeurs)
+            #if stock:
+             #   stock.write(valeurs)
+            #else:
+             #   valeurs.update({
+              #      'lot': lot,
+               #     'dum': dum,
+                #    'frigo': frigo,
+                 #   'ville': ville,
+#                })
+ #               self.env['kal3iya.stock'].create(valeurs)
 
-            if stock.quantity == 0 and stock.active:
-                stock.active = False
-            elif stock.quantity > 0 and not stock.active:
-                stock.active = True
+#            if stock.quantity == 0 and stock.active:
+ #               stock.active = False
+  #          elif stock.quantity > 0 and not stock.active:
+   #             stock.active = True
 
-        self.env['kal3iya.stock'].update_stock_archive_status()
+    #    self.env['kal3iya.stock'].update_stock_archive_status()

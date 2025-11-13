@@ -132,7 +132,7 @@ class ProduitEntry(models.Model):
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     _sql_constraints = [
-        ('unique_lot_dum_garage', 'unique(lot, dum, garage)',
+        ('unique_lot_dum_garage_state', 'unique(lot, dum, garage, state)',
         'Cette entrée existe déjà. Juste modifiez la quantité.')
     ]
 

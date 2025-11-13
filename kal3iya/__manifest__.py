@@ -6,6 +6,7 @@
     'version': '1.0',
     'depends': ['base', 'mail'],
     'data': [
+        'security/groups.xml',
         'security/ir.model.access.csv',
         'views/product_entry_views.xml',
         'views/product_sortie_views.xml',

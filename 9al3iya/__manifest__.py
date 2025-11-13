@@ -1,5 +1,5 @@
 {
-    'name': 'Kal3iya',
+    'name': '9al3iya',
     'summary': 'Module pour la gestion du stock de Kal3iya (Entrée, Sortie, Stock, Retour)',
     'author': 'Ayoub Akhrif',
     'category': 'Inventory',
@@ -11,11 +11,7 @@
         'views/product_sortie_views.xml',
         'views/product_stock_views.xml',
         'views/data_views.xml',
-        'views/base_menu.xml',
-        'views/property_view.xml',
         'views/client_view.xml',
-        'views/advance_view.xml',
-        'views/hide_apps.xml',
         'reports/bon_report.xml',
     ],
     'images': ['static/description/icon.svg'],

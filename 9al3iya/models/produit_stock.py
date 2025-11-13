@@ -15,14 +15,17 @@ class ProduitStock(models.Model):
     name = fields.Char(string='Nom du produit', required=True)
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-    ], string='Frigo', tracking=True)
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Stock', tracking=True)
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Garage', tracking=True)
     quantity = fields.Float(string='Quantité disponible', default=0)
     price = fields.Float(string='Prix d’achat')
     weight = fields.Float(string='Poids (kg)', required=True)

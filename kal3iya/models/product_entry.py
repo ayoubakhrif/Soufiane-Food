@@ -145,7 +145,7 @@ class ProductEntry(models.Model):
                     ('lot', '=', rec.lot),
                     ('dum', '=', rec.dum),
                     ('frigo', '=', rec.frigo),
-                    ('stock', '=', rec.ville),
+                    ('ville', '=', rec.ville),
                     ('state', '=', 'entree'),
                 ], limit=1)
                 if existing:
@@ -191,19 +191,52 @@ class ProductEntry(models.Model):
         return rec
         
     def write(self, vals):
-        # On mémorise l’ancienne combinaison pour recalculer si elle change
-        before = [(r.lot, r.dum, r.frigo, r.ville) for r in self]
         res = super().write(vals)
 
-        # Recalculer la/les lignes de stock impactées
-        self._touch_related_stock_qty()
+        for rec in self:
+            if rec.state == 'entree':
+                # 🔗 Chercher la ligne stock liée à cette entrée
+                stock = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)], limit=1)
+                if stock:
+                    # 🧩 Mettre à jour la ligne liée
+                    stock.write({
+                        'name': rec.name,
+                        'lot': rec.lot,
+                        'dum': rec.dum,
+                        'frigo': rec.frigo,
+                        'ville': rec.ville,
+                        'price': rec.price,
+                        'weight': rec.weight,
+                        'tonnage': rec.tonnage,
+                        'calibre': rec.calibre,
+                        'ste_id': rec.ste_id.id,
+                        'provider_id': rec.provider_id.id,
+                        'image_1920': rec.image_1920,
+                    })
+                    stock.recompute_qty()
+                else:
+                    # Cas rare : si la ligne a été supprimée manuellement
+                    self.env['kal3iya.stock'].sudo().create({
+                        'entry_id': rec.id,
+                        'name': rec.name,
+                        'lot': rec.lot,
+                        'dum': rec.dum,
+                        'frigo': rec.frigo,
+                        'ville': rec.ville,
+                        'price': rec.price,
+                        'weight': rec.weight,
+                        'tonnage': rec.tonnage,
+                        'calibre': rec.calibre,
+                        'ste_id': rec.ste_id.id,
+                        'provider_id': rec.provider_id.id,
+                        'image_1920': rec.image_1920,
+                    })
+            else:
+                # 🔄 Pour les retours → recalcul classique
+                rec._touch_related_stock_qty()
 
-        # Si combo changée (cas retour), recalculer l’ancien
-        after = [(r.lot, r.dum, r.frigo, r.ville) for r in self]
-        for (lot0, dum0, frigo0, ville0), (lot1, dum1, frigo1, ville1) in zip(before, after):
-            if (lot0, dum0, frigo0, ville0) != (lot1, dum1, frigo1, ville1):
-                self._recompute_combo(lot0, dum0, frigo0, ville0)
         return res
+
 
     def unlink(self):
         for rec in self:
@@ -231,42 +264,37 @@ class ProductEntry(models.Model):
             self._recompute_combo(lot, dum, frigo, ville)
 
     def _recompute_combo(self, lot, dum, frigo, ville):
-        """Trouve la ligne de stock (1:1 via entrée réelle) et recalcule sa quantité."""
+        """Recalcule uniquement pour les retours ou suppression d'entrées."""
         Stock = self.env['kal3iya.stock'].sudo()
 
-        # Quel est l'entry 'entree' d’origine pour cette combo ?
-        origin_entry = self.search([
-            ('state', '=', 'entree'),
-            ('lot', '=', lot), ('dum', '=', dum),
-            ('frigo', '=', frigo), ('ville', '=', ville),
+        # 🔸 On ignore les combinaisons déjà couvertes par une entrée réelle
+        entries = self.search([
+            ('lot', '=', lot),
+            ('dum', '=', dum),
+            ('frigo', '=', frigo),
+            ('ville', '=', ville),
+            ('state', '=', 'entree')
+        ])
+        if entries:
+            return  # ✅ Rien à recalculer : stock déjà géré via entry_id
+
+        # 🔸 Aucun entry réel → on recalcul ou on supprime le stock orphelin
+        orphan = Stock.search([
+            ('lot', '=', lot),
+            ('dum', '=', dum),
+            ('frigo', '=', frigo),
+            ('ville', '=', ville)
         ], limit=1)
 
-        if not origin_entry:
-            # Plus d’entrée réelle → s’il existe un stock, on le supprime (s’il n’a pas de sorties)
-            orphan = Stock.search([('lot', '=', lot), ('dum', '=', dum), ('frigo', '=', frigo), ('ville', '=', ville)], limit=1)
-            if orphan:
-                has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', orphan.id)]) > 0
-                if has_out:
-                    # On garde le stock mais on met sa qty à (retours - sorties), logique rare mais safe
-                    orphan.recompute_qty()
-                else:
-                    orphan.unlink()
+        if not orphan:
             return
 
-        # OK: on a l’entrée d’origine → retrouver/créer la ligne stock si besoin
-        stock = Stock.search([('entry_id', '=', origin_entry.id)], limit=1)
-        if not stock:
-            stock = Stock.create({
-                'entry_id': origin_entry.id,
-                'name': origin_entry.name,
-                'lot': lot, 'dum': dum, 'frigo': frigo, 'ville': ville,
-                'price': origin_entry.price, 'weight': origin_entry.weight, 'tonnage': origin_entry.tonnage,
-                'calibre': origin_entry.calibre, 'ste_id': origin_entry.ste_id.id, 'provider_id': origin_entry.provider_id.id,
-                'image_1920': origin_entry.image_1920,
-            })
+        has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', orphan.id)]) > 0
+        if has_out:
+            orphan.recompute_qty()  # garde mais met à jour la quantité
+        else:
+            orphan.unlink()
 
-        # Recalculer la quantité
-        stock.recompute_qty()
 
     # ------------------------------------------------------------
     # LOGIQUE DU STOCK

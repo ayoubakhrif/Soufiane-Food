@@ -71,7 +71,7 @@
                         <field name="cellphone"/>
                     </group>
                     <group>
-                        <field name="stock"/>
+                        <field name="ville"/>
                         <field name="frigo" invisible="stock == 'tanger'"/>
                         <field name="charge_transport"/>
                         <field name="calibre"/>

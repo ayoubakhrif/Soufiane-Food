@@ -24,7 +24,7 @@ class ProduitEntry(models.Model):
         ('garage7', 'Garage 7'),
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
-    ], string='Garage', tracking=True)
+    ], string='Garage', tracking=True, required=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
     total_price = fields.Integer(string='total', compute='_compute_total_price', store=True)

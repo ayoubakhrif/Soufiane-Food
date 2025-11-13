@@ -16,7 +16,6 @@
         'views/property_view.xml',
         'views/client_view.xml',
         'views/advance_view.xml',
-        'views/hide_apps.xml',
         'reports/bon_report.xml',
     ],
     'images': ['static/description/icon.svg'],

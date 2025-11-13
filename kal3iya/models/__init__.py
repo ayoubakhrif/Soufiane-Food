@@ -7,3 +7,4 @@ from . import client
 from . import ste
 from . import product_stock
 from . import advance
+from . import employees

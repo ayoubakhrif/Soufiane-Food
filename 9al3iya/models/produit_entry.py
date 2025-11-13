@@ -84,7 +84,7 @@ class ProduitEntry(models.Model):
             self.ste_id = sortie.ste_id
             self.provider_id = sortie.provider_id
             self.client_id = sortie.client_id
-            self.gaarge = sortie.garage
+            self.garage = sortie.garage
             self.image_1920 = sortie.image_1920
             self.selling_price = sortie.selling_price
         else:

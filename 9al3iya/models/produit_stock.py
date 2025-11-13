@@ -44,19 +44,19 @@ class ProduitStock(models.Model):
     # ------------------------------------------------------------
     display_name = fields.Char(string='Nom affiché', compute='_compute_display_name', store=False)
 
-    @api.depends('name', 'lot', 'dum', 'frigo', 'ville')
+    @api.depends('name', 'lot', 'dum', 'garage')
     def _compute_display_name(self):
         """Construit le texte affiché dans les menus déroulants"""
         for rec in self:
-            frigo_label = dict(self._fields['frigo'].selection).get(rec.frigo, rec.frigo or '')
-            rec.display_name = f"{rec.name} – Lot {rec.lot} – DUM {rec.dum} – {frigo_label}"
+            garage_label = dict(self._fields['garage'].selection).get(rec.garage, rec.garage or '')
+            rec.display_name = f"{rec.name} – Lot {rec.lot} – DUM {rec.dum} – {garage_label}"
 
     def name_get(self):
-        """Afficher: Produit_lot_dum_frigo"""
+        """Afficher: Produit_lot_dum_garage"""
         result = []
         for record in self:
-            frigo_label = dict(self._fields['frigo'].selection).get(record.frigo, record.frigo or '')
-            name = f"{record.name}_{record.lot}_{record.dum}_{frigo_label}"
+            garage_label = dict(self._fields['gaarge'].selection).get(record.garage, record.garage or '')
+            name = f"{record.name}_{record.lot}_{record.dum}_{garage_label}"
             result.append((record.id, name))
         return result
 
@@ -92,8 +92,7 @@ class ProduitStock(models.Model):
                 ('state', '=', 'retour'),
                 ('lot', '=', stock.lot),
                 ('dum', '=', stock.dum),
-                ('frigo', '=', stock.frigo),
-                ('ville', '=', stock.ville),
+                ('garage', '=', stock.garage),
             ])
             qty_returns = sum(r.quantity for r in returns)
 

@@ -1,6 +1,6 @@
 <odoo>
     <!-- Action du rapport -->
-    <record id="create_bon_report" model="ir.actions.report">
+    <record id="create_bon_reportv2" model="ir.actions.report">
         <field name="name">Bon de Livraison</field>
         <field name="model">cal3iyasortie</field>
         <field name="report_type">qweb-pdf</field>

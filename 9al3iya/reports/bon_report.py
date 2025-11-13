@@ -3,7 +3,7 @@ from collections import defaultdict
 import tempfile
 import os
 import logging
-from ..services.google_drive_uploader import upload_to_drive, DEFAULT_AUTH_DIR
+from ..services.google_drive_uploader import upload_to_drivev2, DEFAULT_AUTH_DIR
 
 _logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class IrActionsReportDrivev2(models.Model):
                 file_name = f"BL_{client_name}_{date_str}.pdf"
 
                 # Upload sur Google Drive
-                link, file_id = upload_to_drive(tmp.name, file_name, auth_dir=DEFAULT_AUTH_DIR, ste_name=sorties[0].ste_id.name if sorties[0].ste_id else None)
+                link, file_id = upload_to_drivev2(tmp.name, file_name, auth_dir=DEFAULT_AUTH_DIR, ste_name=sorties[0].ste_id.name if sorties[0].ste_id else None)
                 _logger.info(f"✅ Upload réussi ! Lien : {link}")
 
                 # Mise à jour des sorties

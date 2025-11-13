@@ -35,7 +35,7 @@
                 <field name="calibre" optional="1"/>
                 <field name="driver_id"/>
                 <field name="cellphone" optional="1"/>
-                <field name="stock"/>
+                <field name="ville"/>
                 <field name="frigo"/>
                 <field name="charge_transport"/>
                 <field name="ste_id" optional="1"/>

@@ -16,7 +16,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
 # Répertoire par défaut où sont stockés les credentials
 DEFAULT_AUTH_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),  # /kal3iya
+    os.path.dirname(os.path.dirname(__file__)),  # /cal3iya
     'static', 'drive_auth'
 )
 
@@ -27,7 +27,7 @@ ROOT_FOLDER_ID = "1YVjJOOPHsVwW7TeE6oxQFSna9bEOylXa"
 # ------------------------------------------------------------
 # 🔐 Authentification
 # ------------------------------------------------------------
-def get_drive_service(auth_dir=None, port=8081):
+def get_drive_servicev2(auth_dir=None, port=8081):
     """Authentifie l'utilisateur et retourne un service Google Drive."""
     auth_dir = auth_dir or DEFAULT_AUTH_DIR
     credentials_path = os.path.join(auth_dir, 'credentials.json')
@@ -61,7 +61,7 @@ def get_drive_service(auth_dir=None, port=8081):
 # ------------------------------------------------------------
 # 📁 Gestion des dossiers
 # ------------------------------------------------------------
-def get_or_create_folder(service, parent_id, folder_name):
+def get_or_create_folderv2(service, parent_id, folder_name):
     """Cherche un dossier dans parent_id avec ce nom, sinon le crée."""
     results = service.files().list(
         q=f"'{parent_id}' in parents and name='{folder_name}' "
@@ -86,7 +86,7 @@ def get_or_create_folder(service, parent_id, folder_name):
 # ------------------------------------------------------------
 # ☁️ Upload de fichiers
 # ------------------------------------------------------------
-def upload_to_drive(file_path, file_name, auth_dir=None, ste_name=None):
+def upload_to_drivev2(file_path, file_name, auth_dir=None, ste_name=None):
     """
     Envoie un fichier vers Google Drive et retourne (lien, id).
     - file_path : chemin local du fichier (PDF)
@@ -94,12 +94,12 @@ def upload_to_drive(file_path, file_name, auth_dir=None, ste_name=None):
     - ste_name  : nom de la société pour le sous-dossier
     """
     auth_dir = auth_dir or DEFAULT_AUTH_DIR
-    service = get_drive_service(auth_dir=auth_dir)
+    service = get_drive_servicev2(auth_dir=auth_dir)
 
     # Trouver/créer le sous-dossier de la société
     parent_folder_id = ROOT_FOLDER_ID
     if ste_name:
-        parent_folder_id = get_or_create_folder(service, ROOT_FOLDER_ID, ste_name)
+        parent_folder_id = get_or_create_folderv2(service, ROOT_FOLDER_ID, ste_name)
 
     # Type MIME
     mime_type, _ = mimetypes.guess_type(file_path)
@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     if os.path.exists(test_file):
         print("📤 Envoi du fichier sur Google Drive...")
-        link, file_id = upload_to_drive(test_file, 'Bon_Test.pdf', auth_dir=base_dir, ste_name='STE_Test')
+        link, file_id = upload_to_drivev2(test_file, 'Bon_Test.pdf', auth_dir=base_dir, ste_name='STE_Test')
         print("✅ Lien public :", link)
         print("🆔 ID du fichier :", file_id)
     else:

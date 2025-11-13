@@ -3,19 +3,18 @@ from collections import defaultdict
 import tempfile
 import os
 import logging
-
 from ..services.google_drive_uploader import upload_to_drive, DEFAULT_AUTH_DIR
 
 _logger = logging.getLogger(__name__)
 
 
-class BonLivraisonReport(models.AbstractModel):
-    _name = 'report.kal3iya.bon_report_template'
+class BonLivraisonReportv2(models.AbstractModel):
+    _name = 'report.cal3iya.bon_report_template'
     _description = 'Bon de Livraison Groupé'
 
     def _get_report_values(self, docids, data=None):
         """Regroupe les sorties par client/chauffeur/société pour le rendu QWeb."""
-        docs = self.env['kal3iyasortie'].browse(docids)
+        docs = self.env['cal3iyasortie'].browse(docids)
 
         grouped = defaultdict(list)
         for rec in docs:
@@ -24,9 +23,9 @@ class BonLivraisonReport(models.AbstractModel):
 
         grouped_bons = []
         for (client_id, driver_id, ste_id), sorties in grouped.items():
-            client = self.env['kal3iya.client'].browse(client_id)
-            driver = self.env['kal3iya.driver'].browse(driver_id)
-            ste_rec = self.env['kal3iya.ste'].browse(ste_id)
+            client = self.env['cal3iya.client'].browse(client_id)
+            driver = self.env['cal3iya.driver'].browse(driver_id)
+            ste_rec = self.env['cal3iya.ste'].browse(ste_id)
             date = min((s.date_exit for s in sorties if s.date_exit), default=None)
 
             grouped_bons.append({
@@ -45,7 +44,7 @@ class BonLivraisonReport(models.AbstractModel):
 # 👇 Extension du moteur PDF Odoo pour inclure l’upload Drive automatiquement
 # -------------------------------------------------------------------------
 
-class IrActionsReportDrive(models.Model):
+class IrActionsReportDrivev2(models.Model):
     _inherit = 'ir.actions.report'
 
     """Extension du rendu PDF pour uploader automatiquement sur Google Drive."""
@@ -55,7 +54,7 @@ class IrActionsReportDrive(models.Model):
         pdf_content, content_type = super()._render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
 
         # On ne déclenche l’upload que pour ton rapport
-        if report_ref == 'kal3iya.bon_report_template':
+        if report_ref == 'cal3iya.bon_report_template':
             _logger.info("=== 📄 Début upload automatique Google Drive ===")
 
             try:
@@ -65,7 +64,7 @@ class IrActionsReportDrive(models.Model):
                 tmp.close()
                 _logger.info(f"📂 Fichier temp créé : {tmp.name}")
 
-                sorties = self.env['kal3iyasortie'].browse(res_ids)
+                sorties = self.env['cal3iyasortie'].browse(res_ids)
                 client_name = sorties[0].client_id.name or "Client"
                 date_str = (sorties[0].date_exit or fields.Date.today()).strftime("%Y-%m-%d")
                 file_name = f"BL_{client_name}_{date_str}.pdf"

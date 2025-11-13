@@ -4,6 +4,7 @@
         name="Kal3iya"
         web_icon="kal3iya,static/description/icon.svg"
         sequence="1"
+        groups="9al3iya.group_kal3iya_user"
     />
 
     <record id="kal3iyaentry_action" model="ir.actions.act_window">

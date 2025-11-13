@@ -133,11 +133,11 @@ class ProduitEntry(models.Model):
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     _sql_constraints = [
-        ('unique_lot_dum_frigo_ville', 'unique(lot, dum, ville, frigo)',
+        ('unique_lot_dum_garage', 'unique(lot, dum, garage)',
         'Cette entrée existe déjà. Juste modifiez la quantité.')
     ]
 
-    @api.constrains('lot', 'dum', 'frigo', 'ville', 'state')
+    @api.constrains('lot', 'dum', 'garage', 'state')
     def _check_unique_for_entree(self):
         """Empêche de créer une deuxième entrée réelle sur la même combinaison."""
         for rec in self:
@@ -146,8 +146,7 @@ class ProduitEntry(models.Model):
                     ('id', '!=', rec.id),
                     ('lot', '=', rec.lot),
                     ('dum', '=', rec.dum),
-                    ('frigo', '=', rec.frigo),
-                    ('ville', '=', rec.ville),
+                    ('garage', '=', rec.garage),
                     ('state', '=', 'entree'),
                 ], limit=1)
                 if existing:

@@ -53,7 +53,7 @@ class ProduitExit(models.Model):
         ('garage7', 'Garage 7'),
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
-    ], string='Stock', tracking=True)
+    ], string='Garage', tracking=True)
     charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)

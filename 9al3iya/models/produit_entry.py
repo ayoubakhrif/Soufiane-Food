@@ -14,15 +14,17 @@ class ProduitEntry(models.Model):
     date_entry = fields.Date(string='Date d’entrée', tracking=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Stock', tracking=True, default='casa')
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock'),
-    ], string='Frigo', tracking=True)
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Stock', tracking=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
     total_price = fields.Integer(string='total', compute='_compute_total_price', store=True)
@@ -174,6 +176,7 @@ class ProduitEntry(models.Model):
             self.env['cal3iya.stock'].sudo().create({
                 'entry_id': rec.id,
                 'name': rec.name,
+                'quantity': rec.quantity,
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'frigo': rec.frigo,
@@ -203,8 +206,8 @@ class ProduitEntry(models.Model):
                         'name': rec.name,
                         'lot': rec.lot,
                         'dum': rec.dum,
-                        'frigo': rec.frigo,
-                        'ville': rec.ville,
+                        'quantity': rec.quantity,
+                        'garage': rec.garage,
                         'price': rec.price,
                         'weight': rec.weight,
                         'tonnage': rec.tonnage,
@@ -221,8 +224,8 @@ class ProduitEntry(models.Model):
                         'name': rec.name,
                         'lot': rec.lot,
                         'dum': rec.dum,
-                        'frigo': rec.frigo,
-                        'ville': rec.ville,
+                        'quantity': rec.quantity,
+                        'garage': rec.garage,
                         'price': rec.price,
                         'weight': rec.weight,
                         'tonnage': rec.tonnage,
@@ -251,19 +254,19 @@ class ProduitEntry(models.Model):
                     stock.unlink()
 
         # Supprimer l’entrée puis recalculer les combos impactées (cas retour)
-        combos = [(r.lot, r.dum, r.frigo, r.ville) for r in self]
+        combos = [(r.lot, r.dum, r.garage) for r in self]
         res = super().unlink()
-        for lot, dum, frigo, ville in combos:
-            self._recompute_combo(lot, dum, frigo, ville)
+        for lot, dum, garage in combos:
+            self._recompute_combo(lot, dum, garage)
         return res
     
     def _touch_related_stock_qty(self):
         """Recalcule la quantité de stock pour les combos concernées par self."""
-        combos = {(r.lot, r.dum, r.frigo, r.ville) for r in self}
-        for lot, dum, frigo, ville in combos:
-            self._recompute_combo(lot, dum, frigo, ville)
+        combos = {(r.lot, r.dum, r.garage) for r in self}
+        for lot, dum, garage in combos:
+            self._recompute_combo(lot, dum, garage)
 
-    def _recompute_combo(self, lot, dum, frigo, ville):
+    def _recompute_combo(self, lot, dum, garage):
         """Recalcule uniquement pour les retours ou suppression d'entrées."""
         Stock = self.env['cal3iya.stock'].sudo()
 
@@ -271,8 +274,7 @@ class ProduitEntry(models.Model):
         entries = self.search([
             ('lot', '=', lot),
             ('dum', '=', dum),
-            ('frigo', '=', frigo),
-            ('ville', '=', ville),
+            ('garage', '=', garage),
             ('state', '=', 'entree')
         ])
         if entries:
@@ -282,8 +284,7 @@ class ProduitEntry(models.Model):
         orphan = Stock.search([
             ('lot', '=', lot),
             ('dum', '=', dum),
-            ('frigo', '=', frigo),
-            ('ville', '=', ville)
+            ('garage', '=', garage)
         ], limit=1)
 
         if not orphan:

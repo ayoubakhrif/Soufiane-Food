@@ -43,16 +43,17 @@ class ProduitExit(models.Model):
     client_id = fields.Many2one('cal3iya.client', tracking=True)
     client2 = fields.Selection([('soufiane', 'Soufiane'), ('hamza', 'Hamza'),], string='Client 2', tracking=True)
     indirect = fields.Boolean(string='S/H', default=False)
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-        ('stock_casa', 'Stock'),
-    ], string='Stock', tracking=True, related='entry_id.ville', store=True)
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock'),
-    ], string='Frigo', related='entry_id.frigo', store=True, readonly=False, tracking=True)
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Stock', tracking=True)
     charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
@@ -133,7 +134,7 @@ class ProduitExit(models.Model):
 
     def unlink(self):
         # Retours liés ? Si tu gères des retours par lien Many2one, bloque ici.
-        # Exemple: returns = self.env['kal3iyaentry'].search_count([('return_id', 'in', self.ids)]) > 0
+        # Exemple: returns = self.env['cal3iyaentry'].search_count([('return_id', 'in', self.ids)]) > 0
         # if returns: raise UserError("Supprimer d’abord les retours liés.")
         stocks = self.mapped('entry_id')
         res = super().unlink()
@@ -217,11 +218,11 @@ class ProduitExit(models.Model):
 #                    'frigo': frigo,
 #                    'ville': ville,
 #                })
-#                self.env['kal3iya.stock'].create(valeurs)
+#                self.env['cal3iya.stock'].create(valeurs)
 
 #            if stock.quantity == 0 and stock.active:
 #                stock.active = False
 #            elif stock.quantity > 0 and not stock.active:
 #                stock.active = True
 
-#        self.env['kal3iya.stock'].update_stock_archive_status()
+#        self.env['cal3iya.stock'].update_stock_archive_status()

@@ -55,7 +55,7 @@ class ProduitStock(models.Model):
         """Afficher: Produit_lot_dum_garage"""
         result = []
         for record in self:
-            garage_label = dict(self._fields['gaarge'].selection).get(record.garage, record.garage or '')
+            garage_label = dict(self._fields['garage'].selection).get(record.garage, record.garage or '')
             name = f"{record.name}_{record.lot}_{record.dum}_{garage_label}"
             result.append((record.id, name))
         return result

@@ -9,7 +9,7 @@
                 <field name="quantity"/>
                 <field name="price"/>
                 <field name="lot"/>
-                <field name="frigo"/>
+                <field name="ville"/>
                 <field name="image_1920"/>
                 <field name="weight"/>
 
@@ -40,7 +40,7 @@
                                     <div><b>Quantité :</b> <field name="quantity"/></div>
                                     <div><b>Poids :</b> <field name="weight"/></div>
                                     <div><b>Lot :</b> <field name="lot"/></div>
-                                    <div><b>frigo :</b> <field name="frigo"/></div>
+                                    <div><b>ville :</b> <field name="ville"/></div>
                                 </div>
                             </div>
                         </div>

@@ -38,7 +38,7 @@
                                     <div><b>Prix :</b> <field name="price"/></div>
                                     <div><b>Quantité :</b> <field name="quantity"/></div>
                                     <div><b>Lot :</b> <field name="lot"/></div>
-                                    <div><b>frigo :</b> <field name="frigo"/></div>
+                                    <div><b>garage :</b> <field name="garage"/></div>
                                 </div>
                             </div>
                         </div>

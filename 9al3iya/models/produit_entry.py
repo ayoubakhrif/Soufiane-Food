@@ -24,7 +24,7 @@ class ProduitEntry(models.Model):
         ('garage7', 'Garage 7'),
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
-    ], string='Stock', tracking=True)
+    ], string='Garage', tracking=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
     total_price = fields.Integer(string='total', compute='_compute_total_price', store=True)
@@ -84,8 +84,7 @@ class ProduitEntry(models.Model):
             self.ste_id = sortie.ste_id
             self.provider_id = sortie.provider_id
             self.client_id = sortie.client_id
-            self.frigo = sortie.frigo
-            self.ville = sortie.ville
+            self.gaarge = sortie.garage
             self.image_1920 = sortie.image_1920
             self.selling_price = sortie.selling_price
         else:
@@ -178,8 +177,7 @@ class ProduitEntry(models.Model):
                 'quantity': rec.quantity,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'frigo': rec.frigo,
-                'ville': rec.ville,
+                'garage': rec.garage,
                 'price': rec.price,
                 'weight': rec.weight,
                 'tonnage': rec.tonnage,

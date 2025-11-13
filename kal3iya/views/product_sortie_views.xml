@@ -37,7 +37,7 @@
                 <field name="ste_id" optional="1"/>
                 <field name="provider_id" optional="1"/>
                 <!-- Champ masqué pour le lien -->
-                <field name="drive_file_url"/>
+                <field name="drive_file_url" invisible="1"/>
             </tree>
         </field>
     </record>
@@ -74,7 +74,7 @@
                         <field name="ste_id" readonly="1"/>
                         <field name="image_1920" widget="image" class="oe_avatar"
                                options="{'preview_image': 'image_1920'}" readonly="1"/>
-                        <field name="drive_file_url" invisible="1"/>
+                        <field name="drive_file_url"/>
                         <field name="drive_file_id" invisible="1"/>
                     </group>
                 </sheet>

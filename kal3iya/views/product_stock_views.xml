@@ -11,6 +11,7 @@
                 <field name="lot"/>
                 <field name="frigo"/>
                 <field name="image_1920"/>
+                <field name="weight"/>
 
                 <templates>
                     <t t-name="kanban-box">
@@ -37,6 +38,7 @@
                                 <div style="font-size:13px; color:#444; line-height:1.5;">
                                     <div><b>Prix :</b> <field name="price"/></div>
                                     <div><b>Quantité :</b> <field name="quantity"/></div>
+                                    <div><b>Poids :</b> <field name="weight"/></div>
                                     <div><b>Lot :</b> <field name="lot"/></div>
                                     <div><b>frigo :</b> <field name="frigo"/></div>
                                 </div>

@@ -44,8 +44,9 @@
                     <group>
                         <group col="2">
                             <field name="name" nolabel="1"/>
-                            <div class="o_form_label" style="display:flex; align-items:center;">
-                                💰 <span style="margin-left:8px; font-weight:600; color:#155724;">
+                            <div class="o_form_label" style="display:flex; align-items:center; margin-left:40px;">
+                                <span style="font-size:18px; margin-right:8px;">💰</span>
+                                <span style="font-weight:600; color:#155724;">
                                     <field name="compte" nolabel="1" readonly="1" widget="monetary"/>
                                 </span>
                             </div>

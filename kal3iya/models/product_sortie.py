@@ -38,6 +38,9 @@ class ProductExit(models.Model):
     selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
     date_exit = fields.Date(string='Date de sortie', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage(Kg)', compute='_compute_tonnage', store=True, readonly=True)
+    price = fields.Integer(string='Prix d’achat', related='entry_id.price', readonly=True)
+    mt_achat = fields.Integer(string='Mt.Achat', compute='_compute_mt_achat', store=True)
+    mt_vente = fields.Integer(string='Mt.Vente', compute='_compute_mt_vente', store=True)
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur', tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
     client_id = fields.Many2one('kal3iya.client', tracking=True)
@@ -53,7 +56,7 @@ class ProductExit(models.Model):
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock'),
     ], string='Frigo', related='entry_id.frigo', store=True, readonly=False, tracking=True)
-    charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
+    charge_transport = fields.Float(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
@@ -70,6 +73,16 @@ class ProductExit(models.Model):
     def _compute_charge_transport(self):
         for record in self:
             record.charge_transport = record.tonnage * 0.02 if record.tonnage else 0.0
+
+    @api.depends('price', 'tonnage')
+    def _compute_mt_achat(self):
+        for record in self:
+            record.total_price = record.price * record.tonnage if record.price and record.tonnage else 0.0
+
+    @api.depends('selling_price', 'tonnage')
+    def _compute_mt_vente(self):
+        for record in self:
+            record.mt_vente = record.selling_price * record.tonnage if record.selling_price and record.tonnage else 0.0
 
     # ------------------------------------------------------------
     # AFFICHAGE

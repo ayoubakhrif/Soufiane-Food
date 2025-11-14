@@ -28,7 +28,10 @@
                 <field name="quantity"/>
                 <field name="weight"/>
                 <field name="tonnage"/>
+                <field name="price"/>
                 <field name="selling_price"/>
+                <field name="mt_achat"/>
+                <field name="mt_vente"/>
                 <field name="driver_id"/>
                 <field name="cellphone"/>
                 <field name="ville"/>
@@ -70,6 +73,8 @@
                         <field name="provider_id" readonly="1"/>
                         <field name="lot" readonly="1"/>
                         <field name="dum" readonly="1"/>
+                        <field name="mt_achat" readonly="1"/>
+                        <field name="mt_vente" readonly="1"/>
                         <field name="charge_transport"/>
                         <field name="ste_id" readonly="1"/>
                         <field name="image_1920" widget="image" class="oe_avatar"

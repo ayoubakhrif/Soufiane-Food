@@ -188,7 +188,15 @@ class ProductEntry(models.Model):
                 'image_1920': rec.image_1920,
             })
 
-        rec._touch_related_stock_qty()
+        elif rec.state == 'retour':
+            stock = self.env['kal3iya.stock'].sudo().search([
+                ('lot', '=', rec.lot),
+                ('dum', '=', rec.dum),
+                ('frigo', '=', rec.frigo),
+                ('ville', '=', rec.ville),
+            ], limit=1)
+            if stock:
+                stock.recompute_qty()
         return rec
         
     def write(self, vals):

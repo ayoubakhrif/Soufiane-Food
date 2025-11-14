@@ -1,5 +1,4 @@
 from . import product_entry
-from . import property
 from . import product_sortie
 from . import driver
 from . import provider

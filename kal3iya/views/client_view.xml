@@ -42,13 +42,15 @@
                     </div>
 
                     <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="compte" 
-                                readonly="1" 
-                                widget="statinfo"
-                                string="Compte total"
-                                options="{'icon': 'fa-money-bill', 'digits': [16, 2]}"/>
+                        <group col="2">
+                            <field name="name" nolabel="1"/>
+                            <div>
+                                <label string="💰 Compte total :"/>
+                                <span style="font-weight:600; color:#155724;">
+                                    <field name="compte" nolabel="1" readonly="1" widget="monetary"
+                                        options="{'currency_field': 'currency_id'}"/>
+                                </span>
+                            </div>
                         </group>
                     </group>
 

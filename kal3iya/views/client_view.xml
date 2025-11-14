@@ -45,7 +45,7 @@
                         <group>
                             <field name="name"/>
                             <field name="compte" readonly="1" widget="statinfo"
-                                string="Total ventes"
+                                string="Dh"
                                 options="{'icon': 'fa-money-bill', 'digits': [16, 2]}"/>
                         </group>
                     </group>

@@ -77,7 +77,7 @@ class ProductExit(models.Model):
     @api.depends('price', 'tonnage')
     def _compute_mt_achat(self):
         for record in self:
-            record.total_price = record.price * record.tonnage if record.price and record.tonnage else 0.0
+            record.mt_achat = record.price * record.tonnage if record.price and record.tonnage else 0.0
 
     @api.depends('selling_price', 'tonnage')
     def _compute_mt_vente(self):

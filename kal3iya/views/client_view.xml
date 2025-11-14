@@ -44,9 +44,11 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="compte" readonly="1" widget="statinfo"
-                                string="Dh"
-                                options="{'icon': 'fa-money-bill', 'digits': [16, 2]}"/>
+                            <div t-if="record.compte.value"
+                                style="margin-top:10px; font-size:16px; font-weight:600; color:#155724;
+                                        background:#d4edda; border-radius:8px; padding:6px 12px; display:inline-block;">
+                                💰 Compte total : <t t-esc="record.compte.value"/> Dh
+                            </div>
                         </group>
                     </group>
 

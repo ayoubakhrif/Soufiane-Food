@@ -54,7 +54,7 @@ class Kal3iyaClient(models.Model):
             client.retour_count = len(retours)
 
 
-    @api.depends('sortie_ids.mt_vente', 'avances.amount', 'retour_ids.price', 'retour_ids.tonnage', 'retour_ids.state')
+    @api.depends('sortie_ids.mt_vente', 'avances.amount', 'retour_ids.selling_price', 'retour_ids.tonnage', 'retour_ids.state')
     def _compute_compte(self):
         """Compte = ventes - avances - retours"""
         for client in self:

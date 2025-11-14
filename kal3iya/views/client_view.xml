@@ -67,6 +67,7 @@
                                     <field name="name"/>
                                     <field name="quantity"/>
                                     <field name="selling_price"/>
+                                    <field name="mt_vente"/>
                                     <field name="date_exit"/>
                                     <field name="driver_id"/>
                                 </tree>

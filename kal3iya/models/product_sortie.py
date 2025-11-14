@@ -41,6 +41,7 @@ class ProductExit(models.Model):
     price = fields.Float(string='Prix d’achat', related='entry_id.price', readonly=True)
     mt_achat = fields.Float(string='Mt.Achat', compute='_compute_mt_achat', store=True)
     mt_vente = fields.Float(string='Mt.Vente', compute='_compute_mt_vente', store=True)
+    diff = fields.Float(String='Différence', compute='_compute_diff', store=True)
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur', tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
     client_id = fields.Many2one('kal3iya.client', tracking=True)
@@ -84,6 +85,10 @@ class ProductExit(models.Model):
         for record in self:
             record.mt_vente = record.selling_price * record.tonnage if record.selling_price and record.tonnage else 0.0
 
+    @api.depends('mt_achat', 'mt_vente')
+    def _compute_diff(self):
+        for record in self:
+            record.diff = record.mt_vente - record.mt_achat if record.mt_achat and record.mt_vente else 0.0
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

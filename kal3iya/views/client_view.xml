@@ -45,14 +45,14 @@
                         <group col="2">
                             <field name="name" nolabel="1"/>
                             <div>
-                                <label string="💰 Compte total :"/>
+                                <label class="o_form_label" string="💰 Compte total :"/>
                                 <span style="font-weight:600; color:#155724;">
-                                    <field name="compte" nolabel="1" readonly="1" widget="monetary"
-                                        options="{'currency_field': 'currency_id'}"/>
+                                    <field name="compte" nolabel="1" readonly="1" widget="monetary"/>
                                 </span>
                             </div>
                         </group>
                     </group>
+
 
 
                     <!-- Espacement visuel -->

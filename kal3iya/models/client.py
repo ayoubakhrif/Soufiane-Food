@@ -21,6 +21,7 @@ class Kal3iyaClient(models.Model):
     )
 
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
+    compte = fields.Float(string='Compte', readonly=True, compute='_compute_compte', store=True)
 
     def _compute_sortie_ids(self):
         """Récupère automatiquement les sorties liées à ce client"""
@@ -51,3 +52,10 @@ class Kal3iyaClient(models.Model):
             retours = self.env['kal3iyaentry'].search([('client_id', '=', client.id)])
             client.retour_ids = retours
             client.retour_count = len(retours)
+
+
+    @api.depends('sortie_ids.mt_vente')
+    def _compute_total_mt_vente(self):
+        """Somme de tous les montants de vente pour ce client."""
+        for client in self:
+            client.compte = sum(client.sortie_ids.mapped('mt_vente'))

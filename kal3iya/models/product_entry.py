@@ -25,7 +25,7 @@ class ProductEntry(models.Model):
     ], string='Frigo', tracking=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
-    mt_achat = fields.Integer(string='Mt.Achat', compute='_compute_mt_achat', store=True)
+    mt_achat = fields.Float(string='Mt.Achat', compute='_compute_mt_achat', store=True)
     calibre = fields.Char(string='Calibre', tracking=True)
     driver_id = fields.Many2one('kal3iya.driver',string='Chauffeur' , tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)

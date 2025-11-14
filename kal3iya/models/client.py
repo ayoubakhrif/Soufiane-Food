@@ -55,7 +55,7 @@ class Kal3iyaClient(models.Model):
 
 
     @api.depends('sortie_ids.mt_vente')
-    def _compute_total_mt_vente(self):
+    def _compute_compte(self):
         """Somme de tous les montants de vente pour ce client."""
         for client in self:
             client.compte = sum(client.sortie_ids.mapped('mt_vente'))

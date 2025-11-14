@@ -34,7 +34,7 @@
                 <field name="dum"/>
                 <field name="lot"/>
                 <field name="client_id"/>
-                <field name="total_price" optional="1"/>
+                <field name="mt_achat" optional="1"/>
                 <field name="driver_id" optional="1"/>
                 <field name="cellphone" optional="1"/>
                 <field name="ville" optional="1"/>
@@ -66,7 +66,7 @@
                         <field name="weight"/>
                         <field name="tonnage"/>
                         <field name="price" invisible="state == 'retour'"/>
-                        <field name="total_price" invisible="state == 'retour'"/>
+                        <field name="mt_achat" invisible="state == 'retour'"/>
                         <field name="date_entry"/>
                         <field name="driver_id"/>
                         <field name="cellphone"/>

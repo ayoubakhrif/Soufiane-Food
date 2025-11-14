@@ -54,8 +54,19 @@ class Kal3iyaClient(models.Model):
             client.retour_count = len(retours)
 
 
-    @api.depends('sortie_ids.mt_vente')
+    @api.depends('sortie_ids.mt_vente', 'avances.amount', 'retour_ids.price', 'retour_ids.tonnage', 'retour_ids.state')
     def _compute_compte(self):
-        """Somme de tous les montants de vente pour ce client."""
+        """Compte = ventes - avances - retours"""
         for client in self:
-            client.compte = sum(client.sortie_ids.mapped('mt_vente'))
+            # 💰 Total des ventes
+            total_ventes = sum(client.sortie_ids.mapped('mt_vente'))
+
+            # 💵 Total des avances
+            total_avances = sum(client.avances.mapped('amount'))
+
+            # 🔄 Total des retours (entrées avec state='retour')
+            retours = client.retour_ids.filtered(lambda r: r.state == 'retour')
+            total_retours = sum(r.selling_price*r.tonnage for r in retours)
+
+            # 🧮 Calcul final
+            client.compte = total_ventes - total_avances - total_retours

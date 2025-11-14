@@ -21,7 +21,7 @@ class Kal3iyaClient(models.Model):
     )
 
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
-    compte = fields.Float(string='Compte', readonly=True, compute='_compute_compte', store=True)
+    compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
 
     def _compute_sortie_ids(self):
         """Récupère automatiquement les sorties liées à ce client"""

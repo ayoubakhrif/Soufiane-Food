@@ -188,11 +188,10 @@ class ProduitEntry(models.Model):
             })
 
         elif rec.state == 'retour':
-            stock = self.env['kal3iya.stock'].sudo().search([
+            stock = self.env['cal3iya.stock'].sudo().search([
                 ('lot', '=', rec.lot),
                 ('dum', '=', rec.dum),
-                ('frigo', '=', rec.frigo),
-                ('ville', '=', rec.ville),
+                ('garage', '=', rec.garage),
             ], limit=1)
             if stock:
                 stock.recompute_qty()

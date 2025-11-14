@@ -25,7 +25,7 @@ class ProductEntry(models.Model):
     ], string='Frigo', tracking=True)
     weight = fields.Float(string='Poids (kg)', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True)
-    total_price = fields.Integer(string='total', compute='_compute_total_price', store=True)
+    mt_achat = fields.Integer(string='Mt.Achat', compute='_compute_mt_achat', store=True)
     calibre = fields.Char(string='Calibre', tracking=True)
     driver_id = fields.Many2one('kal3iya.driver',string='Chauffeur' , tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
@@ -33,7 +33,7 @@ class ProductEntry(models.Model):
     provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', tracking=True)
     client_id = fields.Many2one('kal3iya.client', string='Client', tracking=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
-    charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
+    charge_transport = fields.Float(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
 
 
     state = fields.Selection([
@@ -118,9 +118,9 @@ class ProductEntry(models.Model):
             record.tonnage = record.quantity * record.weight if record.quantity and record.weight else 0.0
 
     @api.depends('price', 'tonnage')
-    def _compute_total_price(self):
+    def _compute_mt_achat(self):
         for record in self:
-            record.total_price = record.price * record.tonnage if record.price and record.tonnage else 0.0
+            record.mt_achat = record.price * record.tonnage if record.price and record.tonnage else 0.0
 
     @api.depends('tonnage')
     def _compute_charge_transport(self):

@@ -40,8 +40,6 @@
                 <field name="frigo" optional="1"/>
                 <field name="ste_id" optional="1"/>
                 <field name="provider_id" optional="1"/>
-                <!-- Champ masqué pour le lien -->
-                <field name="drive_file_url" invisible="1"/>
             </tree>
         </field>
     </record>

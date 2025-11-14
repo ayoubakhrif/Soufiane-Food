@@ -133,6 +133,6 @@
 
     <menuitem id="client_menu"
               name="Clients"
-              parent="data_menu"
+              parent="Kal3iya_root_menu"
               action="kal3iya_client_action"/>
 </odoo>

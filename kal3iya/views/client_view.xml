@@ -64,7 +64,7 @@
                         <page string="Commandes">
                             <field name="sortie_ids" readonly="1" nolabel="1">
                                 <tree>
-                                    <field name="week" invisible="1"/>
+                                    <field name="week"/>
                                     <field name="name"/>
                                     <field name="quantity"/>
                                     <field name="selling_price"/>

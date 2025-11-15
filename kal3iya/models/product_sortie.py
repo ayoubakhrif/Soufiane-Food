@@ -122,6 +122,8 @@ class ProductExit(models.Model):
         for record in self:
             if record.date_exit:
                 record.week = record.date_exit.strftime("%Y-W%W")
+            else:
+                record.week = False
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

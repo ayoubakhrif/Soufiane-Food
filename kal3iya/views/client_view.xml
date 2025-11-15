@@ -75,7 +75,6 @@
                                 </tree>
                             </field>
                         </page>
-
                         <page string="Avances">
                             <!-- One2many éditable directement dans la fiche client -->
                             <field name="avances" nolabel="1"

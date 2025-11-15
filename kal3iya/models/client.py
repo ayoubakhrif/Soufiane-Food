@@ -79,36 +79,89 @@ class Kal3iyaClient(models.Model):
             # 🧮 Calcul final
             client.compte = total_ventes - total_avances - total_retours
 
-    @api.depends('sortie_ids', 'sortie_ids.week')
+    @api.depends('sortie_ids', 'sortie_ids.week', 'sortie_ids.mt_vente')
     def _compute_sorties_grouped_html(self):
         for rec in self:
             html = ""
-            sorties = rec.sortie_ids.sorted(lambda s: s.week or "")
-            
-            # Regroupement en dictionnaire
+            sorties = rec.sortie_ids.sorted(lambda s: s.date_exit or "")
+
+            # Regroupement par semaine
             groups = {}
             for s in sorties:
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            # Construction du HTML
+            # Construction du HTML amélioré
             for week, records in groups.items():
+
+                # Total ventes de la semaine
+                total_week = sum(r.mt_vente for r in records)
+
                 html += f"""
-                    <div style="padding:10px; margin:10px 0; border:2px solid #ccc; border-radius:8px;">
-                        <h3 style="color:#6a1b9a;">Semaine {week}</h3>
+                    <div style="
+                        padding:18px; 
+                        margin:18px 0; 
+                        border:2px solid #d9d9d9; 
+                        border-radius:12px; 
+                        background:#f8f9fa;
+                        box-shadow:0 2px 6px rgba(0,0,0,0.06);
+                    ">
+                        <h3 style="
+                            margin:0 0 12px 0; 
+                            color:#5a2ca0; 
+                            font-size:20px;
+                            font-weight:700;
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                        ">
+                            <span>📅 Semaine {week}</span>
+                            <span style="
+                                font-size:18px;
+                                color:#155724;
+                                background:#d4edda;
+                                padding:4px 10px;
+                                border-radius:8px;
+                                font-weight:600;
+                            ">
+                                Total : {total_week:,.2f} Dh
+                            </span>
+                        </h3>
+
+                        <div style="
+                            display:grid; 
+                            grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); 
+                            gap:12px;
+                            margin-top:10px;
+                        ">
                 """
 
+                # Cartes pour chaque produit
                 for s in records:
                     html += f"""
-                        <div style="margin-left:20px; padding:5px 0;">
-                            <b>{s.name}</b><br/>
-                            Qté : {s.quantity}<br/>
-                            Prix : {s.selling_price}<br/>
-                            Mt : {s.mt_vente}<br/>
-                            Date : {s.date_exit}
+                        <div style="
+                            background:white;
+                            border:1px solid #e2e2e2; 
+                            border-radius:10px; 
+                            padding:12px;
+                            box-shadow:0 1px 4px rgba(0,0,0,0.05);
+                        ">
+                            <div style="font-size:16px; font-weight:700; color:#333;">
+                                {s.name}
+                            </div>
+                            <div style="margin-top:6px; font-size:14px; color:#555;">
+                                Qté : <b>{s.quantity}</b><br/>
+                                Prix : <b>{s.selling_price}</b><br/>
+                                Mt : <b style="color:#0069d9;">{s.mt_vente}</b><br/>
+                                Date : {s.date_exit}
+                            </div>
                         </div>
                     """
 
-                html += "</div>"
+                html += """
+                        </div>
+                    </div>
+                """
 
             rec.sorties_grouped_html = html
+

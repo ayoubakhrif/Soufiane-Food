@@ -62,12 +62,20 @@
                     <!-- ✅ Onglets pour Commandes et Retours -->
                     <notebook>
                         <page string="Commandes">
-                            <field name="sortie_ids"
-                                readonly="1"
-                                nolabel="1"
-                                mode="kanban"
-                                context="{'group_by': 'week'}"
-                                views="{'kanban': 'kal3iya.view_sortie_kanban_by_week'}">
+                            <field name="sortie_ids" readonly="1" nolabel="1" mode="kanban">
+                                <kanban default_group_by="week" class="o_kanban_small">
+                                    <templates>
+                                        <t t-name="kanban-box">
+                                            <div class="oe_kanban_global_click">
+                                                <strong><t t-esc="record.name.value"/></strong><br/>
+                                                Qté: <t t-esc="record.quantity.value"/><br/>
+                                                Prix: <t t-esc="record.selling_price.value"/><br/>
+                                                Mt: <t t-esc="record.mt_vente.value"/><br/>
+                                                Date: <t t-esc="record.date_exit.value"/>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </page>
 

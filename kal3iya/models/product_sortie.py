@@ -62,7 +62,7 @@ class ProductExit(models.Model):
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
     benif_perte = fields.Html(string='Bénéfice/ perte', compute='_compute_benif_perte', sanitize=False)
-    week = fields.Char(string='Semaine', compute='_compute_week')
+    week = fields.Char(string='Semaine', compute='_compute_week', store=True)
 
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -122,8 +122,6 @@ class ProductExit(models.Model):
         for record in self:
             if record.date_exit:
                 record.week = record.date_exit.strftime("%Y-W%W")
-            else:
-                record.week = False
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

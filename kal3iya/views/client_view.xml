@@ -62,17 +62,12 @@
                     <!-- ✅ Onglets pour Commandes et Retours -->
                     <notebook>
                         <page string="Commandes">
-                            <field name="sortie_ids" readonly="1" nolabel="1">
-                                <tree>
-                                    <field name="week"/>
-                                    <field name="name"/>
-                                    <field name="quantity"/>
-                                    <field name="selling_price"/>
-                                    <field name="mt_vente"/>
-                                    <field name="date_exit"/>
-                                    <field name="driver_id"/>
-                                </tree>
-                                <field name="sort" invisible="1">week asc</field>
+                            <field name="sortie_ids"
+                                readonly="1"
+                                nolabel="1"
+                                mode="kanban"
+                                context="{'group_by': 'week'}"
+                                views="{'kanban': 'kal3iya.view_sortie_kanban_by_week'}">
                             </field>
                         </page>
 

@@ -61,8 +61,8 @@ class ProductExit(models.Model):
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
-    benif_perte = fields.Html(string='Benifice/ perte', compute='_compute_benif_perte', sanitize=False)
-    week = fields.Char(string='Semaine', compute='_compute_week', store=True)
+    benif_perte = fields.Html(string='Bénéfice/ perte', compute='_compute_benif_perte', sanitize=False)
+    week = fields.Char(string='Semaine', compute='_compute_week')
 
     # ------------------------------------------------------------
     # BADGE VISUEL

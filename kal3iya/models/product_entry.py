@@ -34,13 +34,10 @@ class ProductEntry(models.Model):
     client_id = fields.Many2one('kal3iya.client', string='Client', tracking=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
     charge_transport = fields.Float(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
-
-
     state = fields.Selection([
         ('entree', 'Entrée'),
         ('retour', 'Retour'),
     ], string='État', default='entree', tracking=True)
-
     return_id = fields.Many2one(
         'kal3iyasortie',
         string='Produit retourné',
@@ -48,11 +45,8 @@ class ProductEntry(models.Model):
         required=False,
         help="Sortie de stock liée pour un retour"
     )
-
     stock_id = fields.One2many('kal3iya.stock', 'entry_id', string='Ligne de stock liée', readonly=True)
-
     state_badge = fields.Html(string='État (badge)', compute='_compute_state_badge', sanitize=False)
-
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------

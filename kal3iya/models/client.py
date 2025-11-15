@@ -82,7 +82,122 @@ class Kal3iyaClient(models.Model):
     @api.depends('sortie_ids', 'sortie_ids.week', 'sortie_ids.mt_vente')
     def _compute_sorties_grouped_html(self):
         for rec in self:
-            html = ""
+            html = """
+                <style>
+                    .sorties-container {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        max-width: 100%;
+                        padding: 10px;
+                    }
+                    .week-card {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border-radius: 16px;
+                        padding: 24px;
+                        margin: 24px 0;
+                        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.25);
+                        transition: transform 0.3s ease;
+                    }
+                    .week-card:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.35);
+                    }
+                    .week-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                    }
+                    .week-title {
+                        color: white;
+                        font-size: 24px;
+                        font-weight: 700;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .week-total {
+                        background: rgba(255, 255, 255, 0.95);
+                        color: #667eea;
+                        padding: 10px 20px;
+                        border-radius: 12px;
+                        font-size: 18px;
+                        font-weight: 700;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    }
+                    .products-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                        gap: 16px;
+                    }
+                    .product-card {
+                        background: white;
+                        border-radius: 14px;
+                        padding: 18px;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                        transition: all 0.3s ease;
+                        border-left: 4px solid #667eea;
+                    }
+                    .product-card:hover {
+                        transform: translateY(-4px);
+                        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                        border-left-color: #764ba2;
+                    }
+                    .product-name {
+                        font-size: 17px;
+                        font-weight: 700;
+                        color: #2d3748;
+                        margin-bottom: 12px;
+                        line-height: 1.4;
+                    }
+                    .product-details {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                    }
+                    .product-detail-row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-size: 14px;
+                        color: #4a5568;
+                        padding: 6px 0;
+                        border-bottom: 1px solid #f7fafc;
+                    }
+                    .product-detail-row:last-child {
+                        border-bottom: none;
+                    }
+                    .detail-label {
+                        font-weight: 500;
+                        color: #718096;
+                    }
+                    .detail-value {
+                        font-weight: 600;
+                        color: #2d3748;
+                    }
+                    .detail-value.amount {
+                        color: #667eea;
+                        font-size: 16px;
+                    }
+                    .detail-value.date {
+                        color: #805ad5;
+                        font-size: 13px;
+                    }
+                    @media (max-width: 768px) {
+                        .week-header {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                        .products-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                </style>
+                <div class="sorties-container">
+            """
+            
             sorties = rec.sortie_ids.sorted(lambda s: s.date_exit or "")
 
             # Regroupement par semaine
@@ -91,69 +206,48 @@ class Kal3iyaClient(models.Model):
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            # Construction du HTML amélioré
+            # Construction du HTML
             for week, records in groups.items():
-
                 # Total ventes de la semaine
                 total_week = sum(r.mt_vente for r in records)
 
                 html += f"""
-                    <div style="
-                        padding:18px; 
-                        margin:18px 0; 
-                        border:2px solid #d9d9d9; 
-                        border-radius:12px; 
-                        background:#f8f9fa;
-                        box-shadow:0 2px 6px rgba(0,0,0,0.06);
-                    ">
-                        <h3 style="
-                            margin:0 0 12px 0; 
-                            color:#5a2ca0; 
-                            font-size:20px;
-                            font-weight:700;
-                            display:flex;
-                            justify-content:space-between;
-                            align-items:center;
-                        ">
-                            <span>📅 Semaine {week}</span>
-                            <span style="
-                                font-size:18px;
-                                color:#155724;
-                                background:#d4edda;
-                                padding:4px 10px;
-                                border-radius:8px;
-                                font-weight:600;
-                            ">
-                                Total : {total_week:,.2f} Dh
-                            </span>
-                        </h3>
+                    <div class="week-card">
+                        <div class="week-header">
+                            <h3 class="week-title">
+                                <span>📅</span>
+                                <span>Semaine {week}</span>
+                            </h3>
+                            <div class="week-total">
+                                {total_week:,.2f} Dh
+                            </div>
+                        </div>
 
-                        <div style="
-                            display:grid; 
-                            grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); 
-                            gap:12px;
-                            margin-top:10px;
-                        ">
+                        <div class="products-grid">
                 """
 
                 # Cartes pour chaque produit
                 for s in records:
                     html += f"""
-                        <div style="
-                            background:white;
-                            border:1px solid #e2e2e2; 
-                            border-radius:10px; 
-                            padding:12px;
-                            box-shadow:0 1px 4px rgba(0,0,0,0.05);
-                        ">
-                            <div style="font-size:16px; font-weight:700; color:#333;">
-                                {s.name}
-                            </div>
-                            <div style="margin-top:6px; font-size:14px; color:#555;">
-                                Qté : <b>{s.quantity}</b><br/>
-                                Prix : <b>{s.selling_price}</b><br/>
-                                Mt : <b style="color:#0069d9;">{s.mt_vente}</b><br/>
-                                Date : {s.date_exit}
+                        <div class="product-card">
+                            <div class="product-name">{s.name}</div>
+                            <div class="product-details">
+                                <div class="product-detail-row">
+                                    <span class="detail-label">Quantité</span>
+                                    <span class="detail-value">{s.quantity}</span>
+                                </div>
+                                <div class="product-detail-row">
+                                    <span class="detail-label">Prix unitaire</span>
+                                    <span class="detail-value">{s.selling_price} Dh</span>
+                                </div>
+                                <div class="product-detail-row">
+                                    <span class="detail-label">Montant</span>
+                                    <span class="detail-value amount">{s.mt_vente} Dh</span>
+                                </div>
+                                <div class="product-detail-row">
+                                    <span class="detail-label">Date</span>
+                                    <span class="detail-value date">{s.date_exit}</span>
+                                </div>
                             </div>
                         </div>
                     """
@@ -163,5 +257,5 @@ class Kal3iyaClient(models.Model):
                     </div>
                 """
 
+            html += "</div>"
             rec.sorties_grouped_html = html
-

@@ -67,8 +67,8 @@
                                     <templates>
                                         <t t-name="kanban-box">
                                             <div class="oe_kanban_global_click">
-                                                <strong><t t-esc="record.name.value"/></strong><br/>
-                                                Semaine: <t t-esc="record.week.value"/><br/>
+                                                <strong><t t-esc="record.week.value"/></strong><br/>
+                                                Produit: <t t-esc="record.name.value"/><br/>
                                                 Qté: <t t-esc="record.quantity.value"/><br/>
                                                 Prix: <t t-esc="record.selling_price.value"/><br/>
                                                 Mt: <t t-esc="record.mt_vente.value"/><br/>

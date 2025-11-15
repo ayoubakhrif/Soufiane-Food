@@ -62,6 +62,7 @@ class ProductExit(models.Model):
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
     benif_perte = fields.Html(string='Benifice/ perte', compute='_compute_benif_perte', sanitize=False)
+    week = fields.Char(String='Semaine', compute='_compute_week', store=True)
 
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -114,7 +115,15 @@ class ProductExit(models.Model):
     @api.depends('mt_achat', 'mt_vente')
     def _compute_diff(self):
         for record in self:
-            record.diff = record.mt_vente - record.mt_achat if record.mt_achat and record.mt_vente else 0.0
+            record.diff = record.mt_vente - record.mt_achat
+
+    @api.depends('date_exit')
+    def _compute_week(self):
+        for record in self:
+            if record.date_exit:
+                record.week = record.date_exit.strftime("%Y-W%W")
+            else:
+                record.week = False
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

@@ -82,6 +82,7 @@
                                options="{'preview_image': 'image_1920'}" readonly="1"/>
                         <field name="drive_file_url"/>
                         <field name="drive_file_id" invisible="1"/>
+                        <field name="week"/>
                     </group>
                 </sheet>
             </form>
@@ -132,6 +133,4 @@
             </kanban>
         </field>
     </record>
-
-
 </odoo>

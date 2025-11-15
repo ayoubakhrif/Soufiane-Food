@@ -72,7 +72,7 @@
                                     <field name="date_exit"/>
                                     <field name="driver_id"/>
                                 </tree>
-                                <groupby name="week"/>
+                                <field name="sort" invisible="1">week asc</field>
                             </field>
                         </page>
 

@@ -62,24 +62,8 @@
                     <!-- ✅ Onglets pour Commandes et Retours -->
                     <notebook>
                         <page string="Commandes">
-                            <field name="sortie_ids" readonly="1" nolabel="1" mode="kanban">
-                                <kanban default_group_by="week" class="o_kanban_small">
-                                    <templates>
-                                        <t t-name="kanban-box">
-                                            <div class="oe_kanban_global_click">
-                                                <strong><t t-esc="record.week.value"/></strong><br/>
-                                                Produit: <t t-esc="record.name.value"/><br/>
-                                                Qté: <t t-esc="record.quantity.value"/><br/>
-                                                Prix: <t t-esc="record.selling_price.value"/><br/>
-                                                Mt: <t t-esc="record.mt_vente.value"/><br/>
-                                                Date: <t t-esc="record.date_exit.value"/>
-                                            </div>
-                                        </t>
-                                    </templates>
-                                </kanban>
-                            </field>
+                            <field name="sorties_grouped_html" nolabel="1" readonly="1"/>
                         </page>
-
                         <page string="Retour">
                             <field name="retour_ids" readonly="1" nolabel="1">
                                 <tree>

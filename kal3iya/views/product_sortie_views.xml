@@ -104,33 +104,3 @@
             </search>
         </field>
     </record>
-
-     <!-- Vue kanban pour clients -->
-    <record id="view_sortie_kanban_by_week" model="ir.ui.view">
-        <field name="name">kal3iyasortie.week.kanban</field>
-        <field name="model">kal3iyasortie</field>
-        <field name="arch" type="xml">
-            <kanban default_group_by="week">
-                <field name="week"/>
-                <field name="name"/>
-                <field name="quantity"/>
-                <field name="selling_price"/>
-                <field name="mt_vente"/>
-                <field name="date_exit"/>
-                <field name="driver_id"/>
-
-                <templates>
-                    <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click">
-                            <strong><t t-esc="record.name.value"/></strong><br/>
-                            Qté: <t t-esc="record.quantity.value"/><br/>
-                            Prix: <t t-esc="record.selling_price.value"/><br/>
-                            Mt: <t t-esc="record.mt_vente.value"/><br/>
-                            Date: <t t-esc="record.date_exit.value"/>
-                        </div>
-                    </t>
-                </templates>
-            </kanban>
-        </field>
-    </record>
-</odoo>

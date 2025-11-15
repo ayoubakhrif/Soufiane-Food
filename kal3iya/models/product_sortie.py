@@ -61,7 +61,33 @@ class ProductExit(models.Model):
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
+    benif_perte = fields.Html(string='Benifice/ perte', compute='_compute_benif_perte', sanitize=False)
 
+    # ------------------------------------------------------------
+    # BADGE VISUEL
+    # ------------------------------------------------------------
+    @api.depends('diff')
+    def _compute_benif_perte(self):
+        for rec in self:
+            if rec.diff > 0:
+                label = "bénéfice"
+                color = "#28a745"
+                bg = "rgba(40,167,69,0.12)"
+            elif rec.diff < 0:
+                label = "perte"
+                color = "#dc3545"
+                bg = "rgba(220,53,69,0.12)"
+            else:
+                label = "0"
+                color = "#6c757d"  # gris neutre
+                bg = "rgba(108,117,125,0.12)"
+            rec.benif_perte = (
+                f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
+                f"font-weight:600;background:{bg};color:{color};'>"
+                f"{label}"
+                f"</span>"
+            )
+    
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE
     # ------------------------------------------------------------

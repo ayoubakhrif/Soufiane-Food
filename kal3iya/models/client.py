@@ -198,7 +198,11 @@ class Kal3iyaClient(models.Model):
                 groups.setdefault(w, []).append(s)
 
             for week, records in groups.items():
-                total_week = sum(r.mt_vente_final for r in records)
+                total_week = sum(
+                    r.mt_vente_final or r.mt_vente
+                    for r in records
+                )
+
 
                 html += f"""
                     <div class="week-card">

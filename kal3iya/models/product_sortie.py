@@ -109,6 +109,13 @@ class ProductExit(models.Model):
 
         rec = super().create(vals)
         return rec
+    
+    def action_refresh_parent(self):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
 
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE

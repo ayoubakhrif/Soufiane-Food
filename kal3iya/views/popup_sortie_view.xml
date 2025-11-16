@@ -31,6 +31,9 @@
                                 class="btn-primary"/>
                         <button string="Fermer" class="btn-secondary"
                                 special="cancel"/>
+                        <button string="Sauvegarder et rafraîchir client"
+                                type="object"
+                                name="action_refresh_parent"/>
                     </footer>
                 </sheet>
             </form>

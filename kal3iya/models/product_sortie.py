@@ -111,14 +111,21 @@ class ProductExit(models.Model):
         return rec
     
     def action_refresh_parent(self):
+        """Sauvegarde, ferme le popup et actualise la vue parent"""
+        self.ensure_one()
+        
+        # Forcer la sauvegarde si nécessaire
+        # (normalement Odoo sauvegarde automatiquement avant d'appeler la méthode)
+        
+        # Déclencher le recalcul du champ HTML du client
+        if self.client_id:
+            self.client_id._compute_sorties_grouped_html()
+        
+        # Fermer le popup et recharger la vue parente
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',
         }
-    def action_save_only(self):
-    # Simple sauvegarde
-        return True
-
 
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE

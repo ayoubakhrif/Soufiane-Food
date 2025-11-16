@@ -223,8 +223,7 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
-                    popup_url = f"/web#id={s.id}&model=kal3iyasortie&view_type=form"
-
+                    popup_url = "/web#id=%s&model=kal3iyasortie&view_type=form&view_id=kal3iya.view_kal3iya_sortie_popup" % s.id
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>

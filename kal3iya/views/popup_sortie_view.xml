@@ -4,7 +4,7 @@
         <field name="model">kal3iyasortie</field>
         <field name="priority">1</field>
         <field name="arch" type="xml">
-            <form string="Modifier les valeurs finales" js_class="modal" edit="true">
+            <form string="Modifier les valeurs finales" edit="true">
                 <sheet>
                     <group>
                         <h2>Produit : <span><field name="name"/></span></h2>
@@ -24,19 +24,20 @@
                         <field name="price_gap" readonly="1"/>
                         <field name="tonnage_gap" readonly="1"/>
                     </group>
-
-                    <footer>
-                        <button string="Enregistrer" type="object"
-                                name="action_save_only"
-                                class="btn-primary"/>
-
-                        <button string="Sauvegarder et rafraîchir client"
-                                type="object"
-                                name="action_refresh_parent"/>
-
-                        <button string="Fermer" special="cancel"/>
-                    </footer>
                 </sheet>
+                
+                <footer>
+                    <button string="Enregistrer" type="object"
+                            name="action_save_only"
+                            class="btn-primary"/>
+
+                    <button string="Sauvegarder et rafraîchir client"
+                            type="object"
+                            name="action_refresh_parent"
+                            class="btn-secondary"/>
+
+                    <button string="Fermer" special="cancel" class="btn-secondary"/>
+                </footer>
             </form>
         </field>
     </record>

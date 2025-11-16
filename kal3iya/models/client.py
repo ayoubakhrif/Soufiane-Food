@@ -26,7 +26,6 @@ class Kal3iyaClient(models.Model):
         sanitize=False,
     )
 
-
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
     compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
 
@@ -36,8 +35,6 @@ class Kal3iyaClient(models.Model):
             sorties = self.env['kal3iyasortie'].search([('client_id', '=', client.id)])
             client.sortie_ids = sorties
             client.sortie_count = len(sorties)
-
-
 
     # Lignes de retours automatiquement calculées
     retour_ids = fields.One2many(
@@ -53,14 +50,12 @@ class Kal3iyaClient(models.Model):
         compute='_compute_retour_ids'
     )
 
-
     def _compute_retour_ids(self):
         """Récupère automatiquement les retours liées à ce client"""
         for client in self:
             retours = self.env['kal3iyaentry'].search([('client_id', '=', client.id)])
             client.retour_ids = retours
             client.retour_count = len(retours)
-
 
     @api.depends('sortie_ids.mt_vente', 'avances.amount', 'retour_ids.selling_price', 'retour_ids.tonnage', 'retour_ids.state')
     def _compute_compte(self):
@@ -83,6 +78,28 @@ class Kal3iyaClient(models.Model):
     def _compute_sorties_grouped_html(self):
         for rec in self:
             html = """
+                <script>
+                function openPopup(recordId) {
+                    var action = {
+                        type: 'ir.actions.act_window',
+                        res_model: 'kal3iyasortie',
+                        res_id: recordId,
+                        views: [[588, 'form']],
+                        view_mode: 'form',
+                        target: 'new',
+                        context: {}
+                    };
+                    
+                    if (odoo.__DEBUG__ && odoo.__DEBUG__.services && odoo.__DEBUG__.services['action']) {
+                        odoo.__DEBUG__.services['action'].doAction(action);
+                    } else if (window.parent && window.parent.odoo && window.parent.odoo.action_manager) {
+                        window.parent.odoo.action_manager.do_action(action);
+                    } else {
+                        console.error('Impossible d\'ouvrir le popup');
+                    }
+                }
+                </script>
+                
                 <style>
                     .sorties-container {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -173,13 +190,16 @@ class Kal3iyaClient(models.Model):
                     .edit-btn {
                         background: #4c51bf;
                         color: white !important;
-                        padding: 6px 10px;
+                        padding: 6px 12px;
                         border-radius: 6px;
                         font-weight: 600;
                         font-size: 13px;
                         text-decoration: none;
                         text-align: center;
                         display: inline-block;
+                        border: none;
+                        cursor: pointer;
+                        transition: background 0.2s ease;
                     }
 
                     .edit-btn:hover {
@@ -203,7 +223,6 @@ class Kal3iyaClient(models.Model):
                     for r in records
                 )
 
-
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
@@ -223,7 +242,6 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
-                    popup_url = f"/web#id={s.id}&model=kal3iyasortie&view_type=form&view_id=588"
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
@@ -233,10 +251,9 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
-                                <a href="{popup_url}"
-                                class="edit-btn oe_kanban_action oe_kanban_global_click">
-                                ✏️ Modifier
-                                </a>
+                                <button class="edit-btn" onclick="openPopup({s.id})">
+                                    ✏️ Modifier
+                                </button>
                             </div>
                         </div>
                     """

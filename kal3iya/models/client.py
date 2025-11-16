@@ -223,7 +223,7 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
-                    popup_url = f"/web#id={s.id}&model=kal3iyasortie&view_type=form&menu_id=false"
+                    popup_url = f"/web#action=&id={s.id}&model=kal3iyasortie&view_type=form&view_id=588"
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
@@ -233,8 +233,9 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
-                                <a href="{popup_url}" target="_blank" class="edit-sortie-btn">
-                                    ✏️ Modifier
+                                <a href="{popup_url}"
+                                class="edit-btn oe_kanban_action oe_kanban_global_click">
+                                ✏️ Modifier
                                 </a>
                             </div>
                         </div>

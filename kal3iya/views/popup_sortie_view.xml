@@ -26,18 +26,18 @@
                     </group>
                 </sheet>
                 
-                <footer>
-                    <button string="Enregistrer" type="object"
+                <header>
+                    <button string="Enregistrer" 
+                            type="object"
                             name="action_save_only"
-                            class="btn-primary"/>
-
-                    <button string="Sauvegarder et rafraîchir client"
+                            class="oe_highlight"
+                            icon="fa-save"/>
+                    <button string="Sauvegarder et rafraîchir" 
                             type="object"
                             name="action_refresh_parent"
-                            class="btn-secondary"/>
-
-                    <button string="Fermer" special="cancel" class="btn-secondary"/>
-                </footer>
+                            class="oe_highlight"
+                            icon="fa-refresh"/>
+                </header>
             </form>
         </field>
     </record>

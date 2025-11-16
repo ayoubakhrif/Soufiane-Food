@@ -27,11 +27,6 @@
                 </sheet>
                 
                 <header>
-                    <button string="Enregistrer" 
-                            type="object"
-                            name="action_save_only"
-                            class="oe_highlight"
-                            icon="fa-save"/>
                     <button string="Sauvegarder et rafraîchir" 
                             type="object"
                             name="action_refresh_parent"

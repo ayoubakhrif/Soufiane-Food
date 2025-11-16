@@ -106,7 +106,7 @@ class ProductExit(models.Model):
             vals['selling_price_final'] = vals['selling_price']
         if 'tonnage_final' not in vals and vals.get('tonnage'):
             vals['tonnage_final'] = vals['tonnage']
-            
+
         rec = super().create(vals)
         return rec
 
@@ -152,10 +152,20 @@ class ProductExit(models.Model):
             rec.price_gap = (rec.selling_price_final or rec.selling_price) - rec.selling_price
             rec.tonnage_gap = (rec.tonnage_final or rec.tonnage) - rec.tonnage
 
-    @api.depends('selling_price_final', 'tonnage_final')
+    @api.depends('selling_price', 'selling_price_final', 'tonnage', 'tonnage_final')
     def _compute_mt_vente_final(self):
-        for record in self:
-            record.mt_vente_final = record.selling_price_final * record.tonnage_final if record.selling_price_final and record.tonnage_final else 0.0
+        for rec in self:
+            # Si aucun changement → garder la valeur originale
+            if not rec.selling_price_final and not rec.tonnage_final:
+                rec.mt_vente_final = rec.mt_vente
+                continue
+
+            price = rec.selling_price_final or rec.selling_price
+            tonnage = rec.tonnage_final or rec.tonnage
+
+            rec.mt_vente_final = price * tonnage
+
+
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

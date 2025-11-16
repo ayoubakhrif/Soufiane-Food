@@ -227,7 +227,7 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value">{s.quantity}</div>
                             <div class="col-value">{s.tonnage_final or s.tonnage}</div>
                             <div class="col-value">{(s.selling_price_final or s.selling_price)} Dh</div>
-                            <div class="col-value amount">{s.mt_vente_final} Dh</div>
+                            <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
                                 <a href="{popup_url}"

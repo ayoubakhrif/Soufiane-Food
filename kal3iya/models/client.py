@@ -89,173 +89,132 @@ class Kal3iyaClient(models.Model):
                         max-width: 100%;
                         padding: 10px;
                     }
+
+                    /* Bloc semaine */
                     .week-card {
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        border-radius: 16px;
-                        padding: 24px;
-                        margin: 24px 0;
-                        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.25);
-                        transition: transform 0.3s ease;
+                        background: white;
+                        border-radius: 12px;
+                        border: 2px solid #e2e8f0;
+                        padding: 18px;
+                        margin: 22px 0;
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
                     }
-                    .week-card:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.35);
-                    }
+
                     .week-header {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        margin-bottom: 20px;
+                        margin-bottom: 15px;
                         flex-wrap: wrap;
-                        gap: 12px;
                     }
+
                     .week-title {
-                        color: white;
-                        font-size: 24px;
+                        font-size: 22px;
                         font-weight: 700;
-                        margin: 0;
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
+                        color: #4c51bf;
                     }
+
                     .week-total {
-                        background: rgba(255, 255, 255, 0.95);
-                        color: #667eea;
-                        padding: 10px 20px;
-                        border-radius: 12px;
-                        font-size: 18px;
-                        font-weight: 700;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                    }
-                    .products-grid {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                        gap: 16px;
-                    }
-                    .product-card {
-                        background: white;
-                        border-radius: 14px;
-                        padding: 18px;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                        transition: all 0.3s ease;
-                        border-left: 4px solid #667eea;
-                    }
-                    .product-card:hover {
-                        transform: translateY(-4px);
-                        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-                        border-left-color: #764ba2;
-                    }
-                    .product-name {
+                        background: #4c51bf;
+                        color: white;
+                        padding: 8px 18px;
+                        border-radius: 10px;
                         font-size: 17px;
                         font-weight: 700;
-                        color: #2d3748;
-                        margin-bottom: 12px;
-                        line-height: 1.4;
+                        box-shadow: 0 4px 12px rgba(76,81,191,0.3);
                     }
-                    .product-details {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
+
+                    /* Style tableau / lignes */
+                    .list-row {
+                        display: grid;
+                        grid-template-columns: 1.3fr 0.6fr 0.6fr 0.8fr 0.7fr;
+                        padding: 12px 10px;
+                        background: #f7fafc;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        border-left: 4px solid #4c51bf;
+                        transition: 0.2s ease;
                     }
-                    .product-detail-row {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
+                    .list-row:hover {
+                        background: #edf2f7;
+                        transform: translateX(4px);
+                    }
+
+                    .col-label {
                         font-size: 14px;
-                        color: #4a5568;
-                        padding: 6px 0;
-                        border-bottom: 1px solid #f7fafc;
-                    }
-                    .product-detail-row:last-child {
-                        border-bottom: none;
-                    }
-                    .detail-label {
-                        font-weight: 500;
-                        color: #718096;
-                    }
-                    .detail-value {
-                        font-weight: 600;
                         color: #2d3748;
+                        font-weight: 600;
                     }
-                    .detail-value.amount {
-                        color: #667eea;
-                        font-size: 16px;
+                    .col-value {
+                        font-size: 15px;
+                        color: #4a5568;
+                        font-weight: 500;
                     }
-                    .detail-value.date {
+
+                    .amount {
+                        color: #4c51bf;
+                        font-weight: 700;
+                    }
+
+                    .date {
+                        font-size: 14px;
                         color: #805ad5;
-                        font-size: 13px;
                     }
-                    @media (max-width: 768px) {
-                        .week-header {
-                            flex-direction: column;
-                            align-items: flex-start;
-                        }
-                        .products-grid {
-                            grid-template-columns: 1fr;
-                        }
+
+                    /* Header de colonnes */
+                    .table-header {
+                        display: grid;
+                        grid-template-columns: 1.3fr 0.6fr 0.6fr 0.8fr 0.7fr;
+                        padding: 10px;
+                        background: #e2e8f0;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        color: #2d3748;
+                        margin-bottom: 10px;
                     }
                 </style>
+
                 <div class="sorties-container">
             """
-            
+
             sorties = rec.sortie_ids.sorted(lambda s: s.date_exit or "")
 
-            # Regroupement par semaine
             groups = {}
             for s in sorties:
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            # Construction du HTML
             for week, records in groups.items():
-                # Total ventes de la semaine
                 total_week = sum(r.mt_vente for r in records)
 
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
-                            <h3 class="week-title">
-                                <span>📅</span>
-                                <span>Semaine {week}</span>
-                            </h3>
-                            <div class="week-total">
-                                {total_week:,.2f} Dh
-                            </div>
+                            <div class="week-title">📅 Semaine {week}</div>
+                            <div class="week-total">{total_week:,.2f} Dh</div>
                         </div>
 
-                        <div class="products-grid">
+                        <div class="table-header">
+                            <div>Produit</div>
+                            <div>Qté</div>
+                            <div>Prix U.</div>
+                            <div>Montant</div>
+                            <div>Date</div>
+                        </div>
                 """
 
-                # Cartes pour chaque produit
                 for s in records:
                     html += f"""
-                        <div class="product-card">
-                            <div class="product-name">{s.name}</div>
-                            <div class="product-details">
-                                <div class="product-detail-row">
-                                    <span class="detail-label">Quantité</span>
-                                    <span class="detail-value">{s.quantity}</span>
-                                </div>
-                                <div class="product-detail-row">
-                                    <span class="detail-label">Prix unitaire</span>
-                                    <span class="detail-value">{s.selling_price} Dh</span>
-                                </div>
-                                <div class="product-detail-row">
-                                    <span class="detail-label">Montant</span>
-                                    <span class="detail-value amount">{s.mt_vente} Dh</span>
-                                </div>
-                                <div class="product-detail-row">
-                                    <span class="detail-label">Date</span>
-                                    <span class="detail-value date">{s.date_exit}</span>
-                                </div>
-                            </div>
+                        <div class="list-row">
+                            <div class="col-label">{s.name}</div>
+                            <div class="col-value">{s.quantity}</div>
+                            <div class="col-value">{s.selling_price} Dh</div>
+                            <div class="col-value amount">{s.mt_vente} Dh</div>
+                            <div class="col-value date">{s.date_exit}</div>
                         </div>
                     """
 
-                html += """
-                        </div>
-                    </div>
-                """
+                html += "</div>"
 
             html += "</div>"
             rec.sorties_grouped_html = html

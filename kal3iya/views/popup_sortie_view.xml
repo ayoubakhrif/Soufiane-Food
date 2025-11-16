@@ -4,7 +4,7 @@
         <field name="model">kal3iyasortie</field>
         <field name="priority">1</field>
         <field name="arch" type="xml">
-            <form string="Modifier les valeurs finales">
+            <form string="Modifier les valeurs finales" js_class="modal" edit="true">
                 <sheet>
                     <group>
                         <h2>Produit : <span><field name="name"/></span></h2>

@@ -79,7 +79,7 @@ class Kal3iyaClient(models.Model):
             # 🧮 Calcul final
             client.compte = total_ventes - total_avances - total_retours
 
-    @api.depends('sortie_ids', 'sortie_ids.week', 'sortie_ids.mt_vente')
+    @api.depends('sortie_ids', 'sortie_ids.week', 'sortie_ids.mt_vente_final')
     def _compute_sorties_grouped_html(self):
         for rec in self:
             html = """
@@ -125,7 +125,7 @@ class Kal3iyaClient(models.Model):
 
                     .table-header {
                         display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.5fr 0.8fr 0.7fr 0.6fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr;
                         padding: 10px;
                         background: #e2e8f0;
                         border-radius: 8px;
@@ -136,7 +136,7 @@ class Kal3iyaClient(models.Model):
 
                     .list-row {
                         display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.5fr 0.8fr 0.7fr 0.6fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr;
                         padding: 12px 10px;
                         background: #f7fafc;
                         border-radius: 8px;
@@ -185,7 +185,6 @@ class Kal3iyaClient(models.Model):
                     .edit-btn:hover {
                         background: #3b42a1;
                     }
-
                 </style>
 
                 <div class="sorties-container">
@@ -199,7 +198,7 @@ class Kal3iyaClient(models.Model):
                 groups.setdefault(w, []).append(s)
 
             for week, records in groups.items():
-                total_week = sum(r.mt_vente for r in records)
+                total_week = sum(r.mt_vente_final for r in records)
 
                 html += f"""
                     <div class="week-card">
@@ -211,25 +210,25 @@ class Kal3iyaClient(models.Model):
                         <div class="table-header">
                             <div>Produit</div>
                             <div>Qté</div>
-                            <div>Prix U.</div>
-                            <div>Montant</div>
+                            <div>Tonnage final</div>
+                            <div>Prix final</div>
+                            <div>Montant final</div>
                             <div>Date</div>
                             <div>Action</div>
                         </div>
                 """
 
                 for s in records:
-                    # Popup Odoo
                     popup_url = f"/web#id={s.id}&model=kal3iyasortie&view_type=form"
 
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
                             <div class="col-value">{s.quantity}</div>
-                            <div class="col-value">{s.selling_price} Dh</div>
-                            <div class="col-value amount">{s.mt_vente} Dh</div>
+                            <div class="col-value">{s.tonnage_final or s.tonnage}</div>
+                            <div class="col-value">{(s.selling_price_final or s.selling_price)} Dh</div>
+                            <div class="col-value amount">{s.mt_vente_final} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
-
                             <div>
                                 <a href="{popup_url}"
                                 class="edit-btn oe_kanban_action oe_kanban_global_click">

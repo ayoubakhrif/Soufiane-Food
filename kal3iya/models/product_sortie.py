@@ -67,7 +67,8 @@ class ProductExit(models.Model):
     tonnage_final = fields.Float(string="Tonnage final")
     price_gap = fields.Float(string="Écart prix", compute="_compute_gaps", store=True)
     tonnage_gap = fields.Float(string="Écart tonnage", compute="_compute_gaps", store=True)
-
+    mt_vente_final = fields.Float(string='Mt.Vente', compute='_compute_mt_vente_final', store=True)
+    tonnage_final = fields.Float(string='tonnage', tracking=True)
 
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -94,6 +95,21 @@ class ProductExit(models.Model):
                 f"</span>"
             )
     
+
+    # ------------------------------------------------------------
+    # Copier valeurs finaux
+    # ------------------------------------------------------------
+    @api.model
+    def create(self, vals):
+        # Si final non renseigné, on copie la valeur initiale
+        if 'selling_price_final' not in vals and vals.get('selling_price'):
+            vals['selling_price_final'] = vals['selling_price']
+        if 'tonnage_final' not in vals and vals.get('tonnage'):
+            vals['tonnage_final'] = vals['tonnage']
+            
+        rec = super().create(vals)
+        return rec
+
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE
     # ------------------------------------------------------------
@@ -135,6 +151,11 @@ class ProductExit(models.Model):
         for rec in self:
             rec.price_gap = (rec.selling_price_final or rec.selling_price) - rec.selling_price
             rec.tonnage_gap = (rec.tonnage_final or rec.tonnage) - rec.tonnage
+
+    @api.depends('selling_price_final', 'tonnage_final')
+    def _compute_mt_vente_final(self):
+        for record in self:
+            record.mt_vente_final = record.selling_price_final * record.tonnage_final if record.selling_price_final and record.tonnage_final else 0.0
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

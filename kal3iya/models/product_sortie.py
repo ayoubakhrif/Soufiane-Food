@@ -115,6 +115,9 @@ class ProductExit(models.Model):
             'type': 'ir.actions.client',
             'tag': 'reload',
         }
+    def action_save_only(self):
+    # Simple sauvegarde
+        return True
 
 
     # ------------------------------------------------------------

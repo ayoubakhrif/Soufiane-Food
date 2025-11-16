@@ -114,17 +114,23 @@ class ProductExit(models.Model):
         """Sauvegarde, ferme le popup et actualise la vue parent"""
         self.ensure_one()
         
-        # Forcer la sauvegarde si nécessaire
-        # (normalement Odoo sauvegarde automatiquement avant d'appeler la méthode)
-        
-        # Déclencher le recalcul du champ HTML du client
+        # Déclencher les recalculs nécessaires
         if self.client_id:
             self.client_id._compute_sorties_grouped_html()
         
-        # Fermer le popup et recharger la vue parente
         return {
             'type': 'ir.actions.client',
-            'tag': 'reload',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Succès',
+                'message': 'Modifications enregistrées',
+                'type': 'success',
+                'sticky': False,
+                'next': {
+                    'type': 'ir.actions.client',
+                    'tag': 'reload',
+                }
+            }
         }
 
     # ------------------------------------------------------------

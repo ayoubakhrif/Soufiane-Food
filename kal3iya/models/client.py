@@ -90,7 +90,6 @@ class Kal3iyaClient(models.Model):
                         padding: 10px;
                     }
 
-                    /* Bloc semaine */
                     .week-card {
                         background: white;
                         border-radius: 12px;
@@ -124,10 +123,20 @@ class Kal3iyaClient(models.Model):
                         box-shadow: 0 4px 12px rgba(76,81,191,0.3);
                     }
 
-                    /* Style tableau / lignes */
+                    .table-header {
+                        display: grid;
+                        grid-template-columns: 1.2fr 0.5fr 0.5fr 0.8fr 0.7fr 0.6fr;
+                        padding: 10px;
+                        background: #e2e8f0;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        color: #2d3748;
+                        margin-bottom: 10px;
+                    }
+
                     .list-row {
                         display: grid;
-                        grid-template-columns: 1.3fr 0.6fr 0.6fr 0.8fr 0.7fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.5fr 0.8fr 0.7fr 0.6fr;
                         padding: 12px 10px;
                         background: #f7fafc;
                         border-radius: 8px;
@@ -161,17 +170,22 @@ class Kal3iyaClient(models.Model):
                         color: #805ad5;
                     }
 
-                    /* Header de colonnes */
-                    .table-header {
-                        display: grid;
-                        grid-template-columns: 1.3fr 0.6fr 0.6fr 0.8fr 0.7fr;
-                        padding: 10px;
-                        background: #e2e8f0;
-                        border-radius: 8px;
-                        font-weight: 700;
-                        color: #2d3748;
-                        margin-bottom: 10px;
+                    .edit-btn {
+                        background: #4c51bf;
+                        color: white !important;
+                        padding: 6px 10px;
+                        border-radius: 6px;
+                        font-weight: 600;
+                        font-size: 13px;
+                        text-decoration: none;
+                        text-align: center;
+                        display: inline-block;
                     }
+
+                    .edit-btn:hover {
+                        background: #3b42a1;
+                    }
+
                 </style>
 
                 <div class="sorties-container">
@@ -200,10 +214,14 @@ class Kal3iyaClient(models.Model):
                             <div>Prix U.</div>
                             <div>Montant</div>
                             <div>Date</div>
+                            <div>Action</div>
                         </div>
                 """
 
                 for s in records:
+                    # Popup Odoo
+                    popup_url = f"/web#id={s.id}&model=kal3iyasortie&view_type=form"
+
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
@@ -211,6 +229,13 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value">{s.selling_price} Dh</div>
                             <div class="col-value amount">{s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
+
+                            <div>
+                                <a href="{popup_url}"
+                                class="edit-btn oe_kanban_action oe_kanban_global_click">
+                                ✏️ Modifier
+                                </a>
+                            </div>
                         </div>
                     """
 

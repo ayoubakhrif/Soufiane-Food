@@ -63,6 +63,11 @@ class ProductExit(models.Model):
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
     benif_perte = fields.Html(string='Bénéfice/ perte', compute='_compute_benif_perte', sanitize=False)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
+    selling_price_final = fields.Float(string="Prix final")
+    tonnage_final = fields.Float(string="Tonnage final")
+    price_gap = fields.Float(string="Écart prix", compute="_compute_gaps", store=True)
+    tonnage_gap = fields.Float(string="Écart tonnage", compute="_compute_gaps", store=True)
+
 
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -124,6 +129,12 @@ class ProductExit(models.Model):
                 record.week = record.date_exit.strftime("%Y-W%W")
             else:
                 record.week = False
+
+    @api.depends('selling_price', 'selling_price_final', 'tonnage', 'tonnage_final')
+    def _compute_gaps(self):
+        for rec in self:
+            rec.price_gap = (rec.selling_price_final or rec.selling_price) - rec.selling_price
+            rec.tonnage_gap = (rec.tonnage_final or rec.tonnage) - rec.tonnage
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

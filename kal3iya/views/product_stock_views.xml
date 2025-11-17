@@ -47,9 +47,25 @@
                     </t>
                 </templates>
             </kanban>
-
         </field>
     </record>
+
+    <record id="view_kal3iya_stock_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.tree</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="ville"/>
+                <field name="frigo"/>
+                <field name="quantity"/>
+                <field name="tonnage"/>
+            </tree>
+        </field>
+    </record>
+
 
     
 

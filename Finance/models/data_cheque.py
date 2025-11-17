@@ -34,7 +34,7 @@ class DataCheque(models.Model):
             factur = rec.facture or ""  # nom de la facture
 
             # --- Conditions selon ta demande ---
-            if factur == "facture":           # commence par 
+            if factur == "fact":           # commence par 
                 label = rec.serie or "F/"
                 color = "#28a745"  # vert
                 bg = "rgba(40,167,69,0.12)"

@@ -234,10 +234,13 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
                                 <button type="object" 
-                                        name="action_open_popup" 
+                                        name="action_open_popup"
+                                        context="{{'active_id': {s.id}}}" 
                                         class="btn btn-sm btn-primary">
                                     ✏️ Modifier
                                 </button>
                             </div>
                         </div>
                     """
+                html += "</div>"  # fermer container principal
+                rec.sorties_grouped_html = html

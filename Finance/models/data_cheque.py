@@ -22,70 +22,40 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
-    @api.depends('facture_tag')
+    @api.depends('facture_tag', 'facture')
     def _compute_facture_tag(self):
         for rec in self:
-            if rec.diff > 0:
-                label = "bénéfice"
-                color = "#28a745"
+
+            factur = rec.facture or ""  # nom de la facture
+
+            # --- Conditions selon ta demande ---
+            if factur.startswith("F/"):           # commence par F/
+                label = factur
+                color = "#28a745"  # vert
                 bg = "rgba(40,167,69,0.12)"
-            elif rec.diff < 0:
-                label = "perte"
-                color = "#dc3545"
+
+            elif factur == "M":                   # exactement = M
+                label = factur
+                color = "#dc3545"  # rouge
                 bg = "rgba(220,53,69,0.12)"
-            else:
-                label = "0"
-                color = "#6c757d"  # gris neutre
+
+            elif factur == "Bureau":             # exactement = Bureau
+                label = factur
+                color = "#007bff"  # bleu
+                bg = "rgba(0,123,255,0.12)"
+
+            else:                                  # tout le reste
+                label = factur
+                color = "#6c757d"  # gris
                 bg = "rgba(108,117,125,0.12)"
-            rec.benif_perte = (
+
+            rec.facture_tag = (
                 f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
                 f"font-weight:600;background:{bg};color:{color};'>"
                 f"{label}"
                 f"</span>"
             )
 
-    # ------------------------------------------------------------
-    # ONCHANGE SUR RETOUR
-    # ------------------------------------------------------------
-    @api.onchange('return_id')
-    def _onchange_return_id(self):
-        """Remplit automatiquement les infos à partir de la sortie sélectionnée."""
-        if self.return_id:
-            sortie = self.return_id
-            self.lot = sortie.lot
-            self.dum = sortie.dum
-            self.name = sortie.name
-            self.weight = sortie.weight
-            self.calibre = sortie.calibre
-            self.ste_id = sortie.ste_id
-            self.provider_id = sortie.provider_id
-            self.client_id = sortie.client_id
-            self.garage = sortie.garage
-            self.image_1920 = sortie.image_1920
-            self.selling_price = sortie.selling_price
-        else:
-            # Si aucun retour sélectionné, ne rien écraser
-            pass
-
-    # ------------------------------------------------------------
-    # Changer return_id selon client
-    # ------------------------------------------------------------
-    @api.onchange('client_id')
-    def _onchange_client_id(self):
-        """Filtrer les sorties selon le client sélectionné"""
-        if self.client_id:
-            return {
-                'domain': {
-                    'return_id': [('client_id', '=', self.client_id.id)]
-                }
-            }
-        else:
-            return {
-                'domain': {
-                    'return_id': []
-                }
-            }
-    
     # ------------------------------------------------------------
     # Calculs
     # ------------------------------------------------------------
@@ -96,30 +66,9 @@ class DataCheque(models.Model):
                 record.week = record.date_emission.strftime("%Y-W%W")
             else:
                 record.week = False
-    
-    @api.depends('quantity', 'weight')
-    def _compute_tonnage(self):
-        for record in self:
-            record.tonnage = record.quantity * record.weight if record.quantity and record.weight else 0.0
-
-    @api.depends('price', 'tonnage')
-    def _compute_total_price(self):
-        for record in self:
-            record.total_price = record.price * record.tonnage if record.price and record.tonnage else 0.0
-
-    @api.depends('tonnage')
-    def _compute_charge_transport(self):
-        for record in self:
-            record.charge_transport = record.tonnage * 20 if record.tonnage else 0.0
-
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
-    _sql_constraints = [
-        ('unique_lot_dum_garage_state', 'unique(lot, dum, garage, state)',
-        'Cette entrée existe déjà. Juste modifiez la quantité.')
-    ]
-
     @api.constrains('chq')
     def _check_exactly_seven_digits(self):
         for rec in self:
@@ -128,20 +77,38 @@ class DataCheque(models.Model):
                     raise ValidationError("Le chèque doit contenir exactement 7 chiffres.")
 
 
-    @api.constrains('lot', 'dum', 'garage', 'state')
-    def _check_unique_for_entree(self):
-        """Empêche de créer une deuxième entrée réelle sur la même combinaison."""
+    @api.constrains('chq')
+    def _check_unique_chq(self):
         for rec in self:
-            if rec.state == 'entree':
+            if rec.chq:
                 existing = self.search([
                     ('id', '!=', rec.id),
-                    ('lot', '=', rec.lot),
-                    ('dum', '=', rec.dum),
-                    ('garage', '=', rec.garage),
-                    ('state', '=', 'entree'),
+                    ('chq', '=', rec.chq),
                 ], limit=1)
+
                 if existing:
-                    raise ValidationError("Cette entrée existe déjà. Modifiez la quantité au lieu d’en créer une nouvelle.")
+                    raise ValidationError("Ce numéro de chèque existe déjà. Il doit être unique.")
+
+                
+    @api.constrains('name')
+    def _check_facture_format(self):
+        for rec in self:
+            facture = rec.name or ""
+
+            # Conditions autorisées :
+            cond_f = facture.startswith("F/")
+            cond_m = facture == "M"
+            cond_b = facture == "Bureau"
+
+            if not (cond_f or cond_m or cond_b):
+                raise ValidationError(
+                    "Valeur facture invalide.\n"
+                    "Elle doit être :\n"
+                    "- exactement 'M', ou\n"
+                    "- exactement 'Bureau', ou\n"
+                    "- commencer par 'F/'."
+                )
+
 
     # ------------------------------------------------------------
     # CONTRAINTE RETOUR

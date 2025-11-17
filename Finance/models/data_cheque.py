@@ -120,6 +120,14 @@ class DataCheque(models.Model):
         'Cette entrée existe déjà. Juste modifiez la quantité.')
     ]
 
+    @api.constrains('chq')
+    def _check_exactly_seven_digits(self):
+        for rec in self:
+            if rec.chq is not None:
+                if len(str(abs(rec.chq))) != 7:
+                    raise ValidationError("Le chèque doit contenir exactement 7 chiffres.")
+
+
     @api.constrains('lot', 'dum', 'garage', 'state')
     def _check_unique_for_entree(self):
         """Empêche de créer une deuxième entrée réelle sur la même combinaison."""

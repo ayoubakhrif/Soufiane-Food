@@ -5,9 +5,17 @@
         <field name="priority">1</field>
         <field name="arch" type="xml">
             <form string="Modifier les valeurs finales" edit="true">
+                <header>
+                    <button string="Sauvegarder et fermer"
+                            type="object"
+                            name="action_save_and_close"
+                            class="oe_highlight"/>
+                    <button string="Fermer" special="cancel" class="btn-secondary"/>
+                </header>
+                
                 <sheet>
                     <group>
-                        <h2>Produit : <span><field name="name"/></span></h2>
+                        <h2>Produit : <field name="name" readonly="1" class="oe_inline"/></h2>
                     </group>
 
                     <group string="Valeurs initiales">
@@ -25,15 +33,16 @@
                         <field name="tonnage_gap" readonly="1"/>
                     </group>
                 </sheet>
-                
-                <header>
-                    <button string="Sauvegarder et rafraîchir" 
-                            type="object"
-                            name="action_refresh_parent"
-                            class="oe_highlight"
-                            icon="fa-refresh"/>
-                </header>
             </form>
         </field>
+    </record>
+
+    <!-- Action pour ouvrir le popup -->
+    <record id="action_kal3iya_sortie_popup" model="ir.actions.act_window">
+        <field name="name">Modifier les valeurs finales</field>
+        <field name="res_model">kal3iyasortie</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_kal3iya_sortie_popup"/>
+        <field name="target">new</field>
     </record>
 </odoo>

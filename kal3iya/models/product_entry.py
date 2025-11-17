@@ -47,6 +47,7 @@ class ProductEntry(models.Model):
     )
     stock_id = fields.One2many('kal3iya.stock', 'entry_id', string='Ligne de stock liée', readonly=True)
     state_badge = fields.Html(string='État (badge)', compute='_compute_state_badge', sanitize=False)
+    mt_achat = fields.Float(string='Mt.Achat', compute='_compute_mt_achat', store=True, group_operator="sum")
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -120,6 +121,11 @@ class ProductEntry(models.Model):
     def _compute_charge_transport(self):
         for record in self:
             record.charge_transport = record.tonnage * 20 if record.tonnage else 0.0
+
+    @api.depends('price', 'tonnage')
+    def _compute_mt_achat(self):
+        for record in self:
+            record.mt_achat = record.price * record.tonnage if record.price and record.tonnage else 0.0
 
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ

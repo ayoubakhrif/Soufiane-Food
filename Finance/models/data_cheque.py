@@ -74,14 +74,13 @@ class DataCheque(models.Model):
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     @api.onchange('chq')
-    def _check_unique_chq(self):
+    def _onchange_chq_unique(self):
         for rec in self:
             if rec.chq:
-                existing = self.search([
+                existing = self.env['nombre.de.ton.model'].search([
                     ('id', '!=', rec.id),
                     ('chq', '=', rec.chq),
                 ], limit=1)
 
                 if existing:
-                    raise ValidationError("Ce numéro de chèque existe déjà. Il doit être unique.")
-
+                    raise ValidationError("⚠️ Ce numéro de chèque existe déjà. Il doit être unique.")

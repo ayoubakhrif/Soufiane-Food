@@ -23,7 +23,6 @@ class Kal3iyaClient(models.Model):
     sorties_grouped_html = fields.Html(
         string="Sorties groupées",
         compute="_compute_sorties_grouped_html",
-        store=False,
         sanitize=False,
     )
 
@@ -204,6 +203,7 @@ class Kal3iyaClient(models.Model):
                     for r in records
                 )
 
+
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
@@ -223,12 +223,7 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
-                    try:
-                        view_id = self.env.ref('kal3iya.view_kal3iya_sortie_popup', raise_if_not_found=False)
-                        view_id_str = view_id.id if view_id else '588'
-                    except:
-                        view_id_str = '588'
-                    
+                    popup_url = "/web#id=%s&model=kal3iyasortie&view_type=form&view_id=588" % s.id
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
@@ -238,19 +233,15 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
-                                <a href="#" 
-                                class="edit-btn open-sortie-popup" 
-                                data-sortie-id="{s.id}"
-                                data-view-id="{view_id_str}">
-                                    ✏️ Modifier
+                                <a href="{popup_url}"
+                                class="edit-btn oe_kanban_action oe_kanban_global_click">
+                                ✏️ Modifier
                                 </a>
                             </div>
                         </div>
                     """
 
-                html += "</div>"  # Ferme week-card
+                html += "</div>"
 
-            html += "</div>"  # Ferme sorties-container
-            
-            # ⚠️ CRITIQUE : Assigner la valeur pour chaque enregistrement
+            html += "</div>"
             rec.sorties_grouped_html = html

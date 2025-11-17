@@ -5,11 +5,6 @@
     'category': 'Inventory',
     'version': '1.0',
     'depends': ['base', 'mail'],
-    "assets": {
-        "web.assets_backend": [
-            "kal3iya/static/src/js/sortie_popup.js",
-        ],
-    },
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',

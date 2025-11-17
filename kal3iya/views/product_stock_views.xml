@@ -59,6 +59,7 @@
                 <field name="price"/>
                 <field name="quantity"/>
                 <field name="tonnage"/>
+                <field name="mt_achat"/>
             </tree>
         </field>
     </record>

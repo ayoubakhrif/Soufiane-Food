@@ -84,7 +84,7 @@ class DataCheque(models.Model):
     @api.constrains('name')
     def _check_facture_format(self):
         for rec in self:
-            facture = rec.name or ""
+            facture = rec.facture or ""
 
             # Conditions autorisées :
             cond_f = facture.startswith("F/")

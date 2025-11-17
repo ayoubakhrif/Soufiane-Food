@@ -8,9 +8,9 @@
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
-        'views/benif_view.xml',
         'views/data_cheque_view.xml',
         'views/data_views.xml',
+        'views/benif_view.xml',
         'reports/bon_report.xml',
     ],
     'images': ['static/description/icon.svg'],

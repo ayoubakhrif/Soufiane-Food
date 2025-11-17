@@ -77,7 +77,7 @@ class DataCheque(models.Model):
     def _onchange_chq_unique(self):
         for rec in self:
             if rec.chq:
-                existing = self.env['nombre.de.ton.model'].search([
+                existing = self.env['datacheque'].search([
                     ('id', '!=', rec.id),
                     ('chq', '=', rec.chq),
                 ], limit=1)

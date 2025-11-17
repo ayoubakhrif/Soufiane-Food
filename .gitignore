@@ -60,7 +60,6 @@ src/
 # --- Reports / Generated Files ---
 *.pdf
 *.xlsx
-*.csv
 *.rtf
 *.zip
 *.bak

@@ -235,7 +235,7 @@ class Kal3iyaClient(models.Model):
                             <div>
                                 <button type="object" 
                                         name="action_open_popup" 
-                                        class="btn btn-sm btn-primary"
+                                        class="btn btn-sm btn-primary">
                                     ✏️ Modifier
                                 </button>
                             </div>

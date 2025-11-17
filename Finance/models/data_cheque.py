@@ -21,7 +21,7 @@ class DataCheque(models.Model):
         ('bureau', 'Bureau'),
         ('facture', 'F/'),
     ], string='Facture', tracking=True, required=True)
-    journal = fields.Char(string='Journal N°', required=True)
+    journal = fields.Integer(string='Journal N°', required=True)
     facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False)
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -33,18 +33,18 @@ class DataCheque(models.Model):
             factur = rec.facture or ""  # nom de la facture
 
             # --- Conditions selon ta demande ---
-            if factur.startswith("F/"):           # commence par F/
-                label = factur
+            if factur == "facture":           # commence par 
+                label = "F/"
                 color = "#28a745"  # vert
                 bg = "rgba(40,167,69,0.12)"
 
-            elif factur == "M":                   # exactement = M
-                label = factur
+            elif factur == "m":                   # exactement = M
+                label = "M"
                 color = "#dc3545"  # rouge
                 bg = "rgba(220,53,69,0.12)"
 
-            elif factur == "Bureau":             # exactement = Bureau
-                label = factur
+            elif factur == "bureau":             # exactement = Bureau
+                label = "Bureau"
                 color = "#007bff"  # bleu
                 bg = "rgba(0,123,255,0.12)"
 

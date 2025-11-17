@@ -12,7 +12,7 @@
 
     <menuitem 
         id="data_cheque_menu"
-        name="Data chèques"
+        name="Saisie"
         parent="finance_root_menu"
         action="data_cheque_action"
     />

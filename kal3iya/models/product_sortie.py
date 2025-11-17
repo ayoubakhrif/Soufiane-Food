@@ -117,7 +117,7 @@ class ProductExit(models.Model):
         # Déclencher les recalculs nécessaires
         if self.client_id:
             self.client_id._compute_sorties_grouped_html()
-        
+        self.ensure_one()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -131,6 +131,18 @@ class ProductExit(models.Model):
                     'tag': 'reload',
                 }
             }
+        }
+    
+    def action_open_popup(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Modifier les valeurs finales',
+            'res_model': 'kal3iyasortie',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'view_id': self.env.ref('kal3iyasortie.view_kal3iya_sortie_popup').id,
+            'target': 'new',  # Ouvre en popup modal
+            'context': self.env.context,
         }
 
     # ------------------------------------------------------------

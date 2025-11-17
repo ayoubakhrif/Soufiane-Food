@@ -223,6 +223,10 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
+                    # Créer l'URL pour l'action popup
+                    action_id = self.env.ref('kal3iya.action_kal3iya_sortie_popup').id  # Remplacez 'votre_module'
+                    popup_url = f"/web#action={action_id}&id={s.id}&model=kal3iyasortie&view_type=form"
+                    
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
@@ -232,13 +236,29 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
-                                <button type="object" 
-                                        name="action_open_popup" 
-                                        class="btn btn-sm btn-primary oe_link"
-                                        context="{{'default_id': {s.id}}}"
-                                        style="cursor: pointer; border: none; background: #007bff; color: white; padding: 5px 10px; border-radius: 3px;">
+                                <a href="#" 
+                                class="btn btn-sm btn-primary edit-btn" 
+                                onclick="event.preventDefault(); 
+                                            var action = {{
+                                                type: 'ir.actions.act_window',
+                                                name: 'Modifier les valeurs finales',
+                                                res_model: 'kal3iyasortie',
+                                                res_id: {s.id},
+                                                view_mode: 'form',
+                                                view_id: {self.env.ref('kal3iya.view_kal3iya_sortie_popup').id},
+                                                target: 'new',
+                                                views: [[{self.env.ref('kal3iya.view_kal3iya_sortie_popup').id}, 'form']]
+                                            }};
+                                            var widget = $(this).closest('.o_content').data('controller') || 
+                                                        $(this).closest('.o_form_view').data('controller');
+                                            if (widget && widget.do_action) {{
+                                                widget.do_action(action);
+                                            }} else {{
+                                                window.location.href = '{popup_url}';
+                                            }}"
+                                style="cursor: pointer; text-decoration: none; background: #007bff; color: white; padding: 5px 10px; border-radius: 3px; display: inline-block;">
                                     ✏️ Modifier
-                                </button>
+                                </a>
                             </div>
                         </div>
                     """

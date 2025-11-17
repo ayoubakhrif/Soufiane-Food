@@ -7,7 +7,7 @@
 
     <record id="data_cheque_action" model="ir.actions.act_window">
         <field name="name">Data chèque</field>
-        <field name="res_model">data.cheque</field>
+        <field name="res_model">datacheque</field>
     </record>
 
     <menuitem 
@@ -19,7 +19,7 @@
 
     <record id="datachq_view_tree" model="ir.ui.view">
         <field name="name">datachq tree</field>
-        <field name="model">data.cheque</field>
+        <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="perso_id"/>
@@ -38,7 +38,7 @@
 
     <record id="datachq_view_form" model="ir.ui.view">
         <field name="name">datachq form</field>
-        <field name="model">data.cheque</field>
+        <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -61,7 +61,7 @@
 
     <record id="datachq_view_search" model="ir.ui.view">
         <field name="name">datachq search</field>
-        <field name="model">data.cheque</field>
+        <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <search>
                 <field name="chq"/>

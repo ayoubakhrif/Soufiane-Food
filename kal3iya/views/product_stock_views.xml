@@ -56,10 +56,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="lot"/>
-                <field name="dum"/>
-                <field name="ville"/>
-                <field name="frigo"/>
+                <field name="price"/>
                 <field name="quantity"/>
                 <field name="tonnage"/>
             </tree>

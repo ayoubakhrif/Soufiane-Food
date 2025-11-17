@@ -11,6 +11,7 @@ class DataCheque(models.Model):
     amount = fields.Float(string='Montant', required=True, tracking=True, group_operator="sum")
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
+    serie = fields.Char(string='Facture', tracking=True)
     date_echeance = fields.Date(string='Date d’échéance', tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True)
@@ -26,7 +27,7 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
-    @api.depends('facture_tag', 'facture')
+    @api.depends('facture_tag', 'facture', 'serie')
     def _compute_facture_tag(self):
         for rec in self:
 
@@ -34,7 +35,7 @@ class DataCheque(models.Model):
 
             # --- Conditions selon ta demande ---
             if factur == "facture":           # commence par 
-                label = "F/"
+                label = rec.serie or "F/"
                 color = "#28a745"  # vert
                 bg = "rgba(40,167,69,0.12)"
 

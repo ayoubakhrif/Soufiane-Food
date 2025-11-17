@@ -55,6 +55,7 @@
                         <field name="benif_id"/>
                         <field name="amount"/>
                         <field name="facture"/>
+                        <field name="serie" invisible="['|', ('facture','=','m'), ('facture','=','bureau')]"/>
                     </group>
                 </sheet>
             </form>

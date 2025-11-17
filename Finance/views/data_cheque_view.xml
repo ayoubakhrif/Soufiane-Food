@@ -56,7 +56,7 @@
                         <field name="amount"/>
                         <field name="facture"/>
                         <field name="serie"
-                            attrs="{'invisible': [('facture', '!=', 'facture')]}"/>
+                            attrs="{'invisible': [('facture', '!=', 'fact')]}"/>
                     </group>
                 </sheet>
             </form>

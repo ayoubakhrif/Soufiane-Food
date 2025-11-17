@@ -134,16 +134,23 @@ class ProductExit(models.Model):
         }
     
     def action_open_popup(self):
+        """Ouvre le popup de modification"""
         return {
             'type': 'ir.actions.act_window',
             'name': 'Modifier les valeurs finales',
             'res_model': 'kal3iyasortie',
             'res_id': self.id,
             'view_mode': 'form',
-            'view_id': self.env.ref('kal3iyasortie.view_kal3iya_sortie_popup').id,
-            'target': 'new',  # Ouvre en popup modal
+            'view_id': self.env.ref('kal3iya.view_kal3iya_sortie_popup').id,  # Remplacez 'votre_module' par le nom de votre module
+            'target': 'new',
             'context': dict(self.env.context),
         }
+    
+    def action_save_and_close(self):
+        """Sauvegarde et ferme le popup (rafraîchit automatiquement la vue parent)"""
+        # Les modifications sont déjà sauvegardées automatiquement par Odoo
+        # On ferme juste le popup et la vue parent se rafraîchit automatiquement
+        return {'type': 'ir.actions.act_window_close'}
 
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE

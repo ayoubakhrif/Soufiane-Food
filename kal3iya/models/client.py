@@ -223,7 +223,6 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
-                    popup_url = f"/web#action=&id={s.id}&model=kal3iyasortie&view_type=form&view_id=588"
                     html += f"""
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
@@ -234,13 +233,14 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
                                 <button type="object" 
-                                        name="action_open_popup"
-                                        context="{{'active_id': {s.id}}}" 
-                                        class="btn btn-sm btn-primary">
+                                        name="action_open_popup" 
+                                        class="btn btn-sm btn-primary oe_link"
+                                        context="{{'default_id': {s.id}}}"
+                                        style="cursor: pointer; border: none; background: #007bff; color: white; padding: 5px 10px; border-radius: 3px;">
                                     ✏️ Modifier
                                 </button>
                             </div>
                         </div>
                     """
-                html += "</div>"  # fermer container principal
-                rec.sorties_grouped_html = html
+
+                html += "</div>"

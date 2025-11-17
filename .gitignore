@@ -60,6 +60,7 @@ src/
 # --- Reports / Generated Files ---
 *.pdf
 *.xlsx
+*.csv
 *.rtf
 *.zip
 *.bak
@@ -69,3 +70,4 @@ src/
 !.github/
 !.mailmap
 !.weblate.json
+!ir.model.access.csv

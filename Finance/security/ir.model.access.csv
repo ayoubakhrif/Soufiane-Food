@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_data_cheque,access.data_cheque,model_data_cheque,,1,1,1,1
+access_datacheque,access.datacheque,model_datacheque,,1,1,1,1
 access_finance_benif,access_finance_benif,model_finance_benif,base.group_user,1,1,1,1
 access_finance_perso,access_finance_perso,model_finance_perso,base.group_user,1,1,1,1
 access_finance_ste,access_finance_ste,model_finance_ste,base.group_user,1,1,1,1

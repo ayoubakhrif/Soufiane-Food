@@ -77,10 +77,14 @@ class DataCheque(models.Model):
     def _onchange_chq_unique(self):
         for rec in self:
             if rec.chq:
-                existing = self.env['datacheque'].search([
-                    ('id', '!=', rec.id),
-                    ('chq', '=', rec.chq),
-                ], limit=1)
+                domain = [('chq', '=', rec.chq)]
+
+                # 🔥 si le record existe déjà en base
+                if rec.id and isinstance(rec.id, int):
+                    domain.append(('id', '!=', rec.id))
+
+                # 🔍 Recherche
+                existing = self.env['datacheque'].search(domain, limit=1)
 
                 if existing:
                     raise ValidationError("⚠️ Ce numéro de chèque existe déjà. Il doit être unique.")

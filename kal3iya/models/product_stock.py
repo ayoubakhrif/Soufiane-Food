@@ -24,9 +24,10 @@ class ProductStock(models.Model):
         ('casa', 'Casa'),
     ], string='Stock', tracking=True)
     quantity = fields.Float(string='Quantité disponible', default=0, group_operator="sum")
-    price = fields.Float(string='Prix d’achat', group_operator="sum")
+    price = fields.Float(string='Prix d’achat')
     weight = fields.Float(string='Poids (kg)', required=True)
     tonnage = fields.Float(string='Tonnage (Kg)', group_operator="sum")
+    mt_achat = fields.Float(string='Mt.Achat', compute='_compute_mt_achat', store=True, group_operator="sum")
     calibre = fields.Char(string='Calibre')
     ste_id = fields.Many2one('kal3iya.ste', string='Société', optional=True)
     provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', optional=True)
@@ -117,3 +118,8 @@ class ProductStock(models.Model):
         # Réactiver les produits qui reviennent en stock
         active_stocks = self.search([('quantity', '>', 0), ('active', '=', False)])
         active_stocks.write({'active': True})
+
+    @api.depends('price', 'tonnage')
+    def _compute_mt_achat(self):
+        for record in self:
+            record.mt_achat = record.price * record.tonnage if record.price and record.tonnage else 0.0

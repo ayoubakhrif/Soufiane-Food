@@ -55,7 +55,7 @@
                         <field name="benif_id"/>
                         <field name="amount"/>
                         <field name="facture"/>
-                        <field name="serie" attrs="{'invisible': [('facture', '!=', 'fact')]}"/>
+                        <field name="serie" modifiers="{'invisible': [['facture', '!=', 'fact']]}"/>
                     </group>
                 </sheet>
             </form>

@@ -73,7 +73,7 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
-    @api.constrains('chq')
+    @api.onchange('chq')
     def _check_unique_chq(self):
         for rec in self:
             if rec.chq:

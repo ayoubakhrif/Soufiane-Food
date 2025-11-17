@@ -19,31 +19,6 @@ class DataCheque(models.Model):
     perso_id = fields.Many2one('finance.perso', string='Personnes', tracking=True)
     facture = fields.Char(string='Facture', compute='_compute_fact', store=True)
     facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False)
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-    ], string='Garage', tracking=True, required=True)
-    state = fields.Selection([
-        ('entree', 'Entrée'),
-        ('retour', 'Retour'),
-    ], string='État', default='entree', tracking=True)
-
-    return_id = fields.Many2one(
-        'cal3iyasortie',
-        string='Produit retourné',
-        tracking=True,
-        required=False,
-        help="Sortie de stock liée pour un retour"
-    )
-
-    stock_id = fields.One2many('cal3iya.stock', 'entry_id', string='Ligne de stock liée', readonly=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------

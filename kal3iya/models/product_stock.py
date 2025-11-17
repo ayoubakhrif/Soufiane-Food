@@ -23,10 +23,10 @@ class ProductStock(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Stock', tracking=True)
-    quantity = fields.Float(string='Quantité disponible', default=0)
-    price = fields.Float(string='Prix d’achat')
+    quantity = fields.Float(string='Quantité disponible', default=0, group_operator="sum")
+    price = fields.Float(string='Prix d’achat', group_operator="sum")
     weight = fields.Float(string='Poids (kg)', required=True)
-    tonnage = fields.Float(string='Tonnage (Kg)')
+    tonnage = fields.Float(string='Tonnage (Kg)', group_operator="sum")
     calibre = fields.Char(string='Calibre')
     ste_id = fields.Many2one('kal3iya.ste', string='Société', optional=True)
     provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', optional=True)

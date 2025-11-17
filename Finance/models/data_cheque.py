@@ -16,7 +16,12 @@ class DataCheque(models.Model):
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True)
     perso_id = fields.Many2one('finance.perso', string='Personnes', tracking=True)
-    facture = fields.Char(string='Facture', store=True)
+    facture = fields.Selection([
+        ('m', 'M'),
+        ('bureau', 'Bureau'),
+        ('facture', 'F/'),
+    ], string='Facture', tracking=True, required=True)
+    journal = fields.Char(string='Journal N°', required=True)
     facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False)
     # ------------------------------------------------------------
     # BADGE VISUEL

@@ -26,6 +26,7 @@
                 <field name="chq"/>
                 <field name="date_emission"/>
                 <field name="week"/>
+                <field name="journal"/>
                 <field name="date_echeance"/>
                 <field name="date_encaissement"/>
                 <field name="ste_id"/>
@@ -47,6 +48,7 @@
                         <field name="chq"/>
                         <field name="date_emission"/>
                         <field name="week"/>
+                        <field name="journal"/>
                         <field name="date_echeance"/>
                         <field name="date_encaissement"/>
                         <field name="ste_id"/>

@@ -41,7 +41,7 @@ class ProductExit(models.Model):
     price = fields.Float(string='Prix d’achat', related='entry_id.price', readonly=True)
     mt_achat = fields.Float(string='Mt.Achat', compute='_compute_mt_achat', store=True)
     mt_vente = fields.Float(string='Mt.Vente', compute='_compute_mt_vente', store=True)
-    diff = fields.Float(string='Différence', compute='_compute_diff', store=True)
+    diff = fields.Float(string='Différence', compute='_compute_diff', store=True, group_operator="sum")
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur', tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
     client_id = fields.Many2one('kal3iya.client', tracking=True)

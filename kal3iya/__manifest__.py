@@ -1,10 +1,15 @@
 {
     'name': 'Kal3iya',
-    'summary': 'Module pour la gestion du stock de Kal3iya (Entrée, Sortie, Stock, Retour)',
+    'summary': 'Module pour la gestion du stock de Casa et Tanger',
     'author': 'Ayoub Akhrif',
     'category': 'Inventory',
     'version': '1.0',
     'depends': ['base', 'mail'],
+    "assets": {
+        "web.assets_backend": [
+            "kal3iya/static/src/js/sortie_popup.js",
+        ],
+    },
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
@@ -17,11 +22,6 @@
         'views/popup_sortie_view.xml',
         'reports/bon_report.xml',
     ],
-    "assets": {
-        "web.assets_backend": [
-            "kal3iya/static/src/js/sortie_popup.js",
-        ],
-    },
     'images': ['static/description/icon.svg'],
     'installable': True,
     'application': True,

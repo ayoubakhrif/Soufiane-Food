@@ -81,7 +81,7 @@ class DataCheque(models.Model):
                     raise ValidationError("Ce numéro de chèque existe déjà. Il doit être unique.")
 
                 
-    @api.constrains('name')
+    @api.constrains('facture')
     def _check_facture_format(self):
         for rec in self:
             facture = rec.facture or ""

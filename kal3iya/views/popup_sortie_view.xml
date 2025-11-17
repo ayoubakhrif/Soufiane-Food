@@ -24,18 +24,6 @@
                         <field name="price_gap" readonly="1"/>
                         <field name="tonnage_gap" readonly="1"/>
                     </group>
-
-                    <footer>
-                        <button string="Enregistrer" type="object"
-                                name="action_save_only"
-                                class="btn-primary"/>
-
-                        <button string="Sauvegarder et rafraîchir client"
-                                type="object"
-                                name="action_refresh_parent"/>
-
-                        <button string="Fermer" special="cancel"/>
-                    </footer>
                 </sheet>
             </form>
         </field>

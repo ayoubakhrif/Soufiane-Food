@@ -142,7 +142,7 @@ class ProductExit(models.Model):
             'view_mode': 'form',
             'view_id': self.env.ref('kal3iyasortie.view_kal3iya_sortie_popup').id,
             'target': 'new',  # Ouvre en popup modal
-            'context': self.env.context,
+            'context': dict(self.env.context),
         }
 
     # ------------------------------------------------------------

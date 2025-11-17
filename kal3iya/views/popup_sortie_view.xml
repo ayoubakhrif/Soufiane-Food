@@ -2,7 +2,7 @@
     <record id="view_kal3iya_sortie_popup" model="ir.ui.view">
         <field name="name">kal3iyasortie.popup.form</field>
         <field name="model">kal3iyasortie</field>
-        <field name="priority">1</field>
+        <field name="priority">99</field>
         <field name="arch" type="xml">
             <form string="Modifier les valeurs finales" js_class="modal" >
                 <sheet>

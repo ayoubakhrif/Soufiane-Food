@@ -15,9 +15,13 @@
         'views/data_views.xml',
         'views/advance_view.xml',
         'views/popup_sortie_view.xml',
-        'views/assets.xml',
         'reports/bon_report.xml',
     ],
+    "assets": {
+        "web.assets_backend": [
+            "kal3iya/static/src/js/sortie_popup.js",
+        ],
+    },
     'images': ['static/description/icon.svg'],
     'installable': True,
     'application': True,

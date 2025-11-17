@@ -65,7 +65,7 @@
                             <field name="sorties_grouped_html" nolabel="1" readonly="1"/>
                         </page>
                         <page string="Retour">
-                            <field name="retour_ids" readonly="1" nolabel="1">
+                            <field name="retour_ids" widget="sorties_html" readonly="1" nolabel="1">
                                 <tree>
                                     <field name="name"/>
                                     <field name="quantity"/>

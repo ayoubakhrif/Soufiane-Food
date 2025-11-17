@@ -23,6 +23,7 @@ class Kal3iyaClient(models.Model):
     sorties_grouped_html = fields.Html(
         string="Sorties groupées",
         compute="_compute_sorties_grouped_html",
+        store=False,
         sanitize=False,
     )
 
@@ -238,33 +239,9 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
                                 <a href="#" 
-                                class="edit-btn" 
-                                onclick="event.preventDefault(); 
-                                            var action = {{
-                                                type: 'ir.actions.act_window',
-                                                name: 'Modifier les valeurs finales',
-                                                res_model: 'kal3iyasortie',
-                                                res_id: {s.id},
-                                                view_mode: 'form',
-                                                view_id: {view_id_str},
-                                                target: 'new',
-                                                views: [[{view_id_str}, 'form']]
-                                            }};
-                                            try {{
-                                                var widget = $(this).closest('.o_content, .o_form_view').find('.o_form_view').data('controller');
-                                                if (!widget) widget = $(this).closest('.o_form_view').data('controller');
-                                                if (widget && widget.do_action) {{
-                                                    widget.do_action(action);
-                                                }} else if (window.odoo && window.odoo.__DEBUG__ && window.odoo.__DEBUG__.services) {{
-                                                    window.odoo.__DEBUG__.services['action'].doAction(action);
-                                                }} else {{
-                                                    console.log('Fallback to URL');
-                                                    window.open('/web#action=&id={s.id}&model=kal3iyasortie&view_type=form&view_id={view_id_str}', '_blank');
-                                                }}
-                                            }} catch(e) {{
-                                                console.error('Erreur:', e);
-                                                window.open('/web#action=&id={s.id}&model=kal3iyasortie&view_type=form&view_id={view_id_str}', '_blank');
-                                            }}">
+                                class="edit-btn open-sortie-popup" 
+                                data-sortie-id="{s.id}"
+                                data-view-id="{view_id_str}">
                                     ✏️ Modifier
                                 </a>
                             </div>

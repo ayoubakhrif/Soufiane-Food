@@ -35,6 +35,6 @@
 
     <menuitem id="finance_benif_menu"
               name="Bénificiaires"
-              parent="data_cheque_menu"
-              action="finance_root_menu"/>
+              parent="finance_root_menu"
+              action="finance_benif_action"/>
 </odoo>

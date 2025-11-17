@@ -6,7 +6,7 @@
     />
 
     <record id="data_cheque_action" model="ir.actions.act_window">
-        <field name="name">Data chèque</field>
+        <field name="name">Saisie</field>
         <field name="res_model">datacheque</field>
     </record>
 

@@ -203,7 +203,6 @@ class Kal3iyaClient(models.Model):
                     for r in records
                 )
 
-
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
@@ -223,9 +222,11 @@ class Kal3iyaClient(models.Model):
                 """
 
                 for s in records:
-                    # Créer l'URL pour l'action popup
-                    action_id = self.env.ref('kal3iya.action_kal3iya_sortie_popup').id  # Remplacez 'votre_module'
-                    popup_url = f"/web#action={action_id}&id={s.id}&model=kal3iyasortie&view_type=form"
+                    try:
+                        view_id = self.env.ref('kal3iya.view_kal3iya_sortie_popup', raise_if_not_found=False)
+                        view_id_str = view_id.id if view_id else '588'
+                    except:
+                        view_id_str = '588'
                     
                     html += f"""
                         <div class="list-row">
@@ -237,7 +238,7 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
                                 <a href="#" 
-                                class="btn btn-sm btn-primary edit-btn" 
+                                class="edit-btn" 
                                 onclick="event.preventDefault(); 
                                             var action = {{
                                                 type: 'ir.actions.act_window',
@@ -245,22 +246,34 @@ class Kal3iyaClient(models.Model):
                                                 res_model: 'kal3iyasortie',
                                                 res_id: {s.id},
                                                 view_mode: 'form',
-                                                view_id: {self.env.ref('kal3iya.view_kal3iya_sortie_popup').id},
+                                                view_id: {view_id_str},
                                                 target: 'new',
-                                                views: [[{self.env.ref('kal3iya.view_kal3iya_sortie_popup').id}, 'form']]
+                                                views: [[{view_id_str}, 'form']]
                                             }};
-                                            var widget = $(this).closest('.o_content').data('controller') || 
-                                                        $(this).closest('.o_form_view').data('controller');
-                                            if (widget && widget.do_action) {{
-                                                widget.do_action(action);
-                                            }} else {{
-                                                window.location.href = '{popup_url}';
-                                            }}"
-                                style="cursor: pointer; text-decoration: none; background: #007bff; color: white; padding: 5px 10px; border-radius: 3px; display: inline-block;">
+                                            try {{
+                                                var widget = $(this).closest('.o_content, .o_form_view').find('.o_form_view').data('controller');
+                                                if (!widget) widget = $(this).closest('.o_form_view').data('controller');
+                                                if (widget && widget.do_action) {{
+                                                    widget.do_action(action);
+                                                }} else if (window.odoo && window.odoo.__DEBUG__ && window.odoo.__DEBUG__.services) {{
+                                                    window.odoo.__DEBUG__.services['action'].doAction(action);
+                                                }} else {{
+                                                    console.log('Fallback to URL');
+                                                    window.open('/web#action=&id={s.id}&model=kal3iyasortie&view_type=form&view_id={view_id_str}', '_blank');
+                                                }}
+                                            }} catch(e) {{
+                                                console.error('Erreur:', e);
+                                                window.open('/web#action=&id={s.id}&model=kal3iyasortie&view_type=form&view_id={view_id_str}', '_blank');
+                                            }}">
                                     ✏️ Modifier
                                 </a>
                             </div>
                         </div>
                     """
 
-                html += "</div>"
+                html += "</div>"  # Ferme week-card
+
+            html += "</div>"  # Ferme sorties-container
+            
+            # ⚠️ CRITIQUE : Assigner la valeur pour chaque enregistrement
+            rec.sorties_grouped_html = html

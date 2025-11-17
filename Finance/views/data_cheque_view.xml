@@ -1,0 +1,74 @@
+<odoo>
+    <menuitem 
+        id="finance_root_menu"
+        name="Finance"
+        sequence="1"
+    />
+
+    <record id="data_cheque_action" model="ir.actions.act_window">
+        <field name="name">Data chèque</field>
+        <field name="res_model">data.cheque</field>
+    </record>
+
+    <menuitem 
+        id="data_cheque_menu"
+        name="Data chèques"
+        parent="finance_root_menu"
+        action="data_cheque_action"
+    />
+
+    <record id="datachq_view_tree" model="ir.ui.view">
+        <field name="name">datachq tree</field>
+        <field name="model">data.cheque</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="perso_id"/>
+                <field name="chq"/>
+                <field name="date_emission"/>
+                <field name="week"/>
+                <field name="date_echeance"/>
+                <field name="date_encaissement"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="amount"/>
+                <field name="facture_tag" widget="html" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="datachq_view_form" model="ir.ui.view">
+        <field name="name">datachq form</field>
+        <field name="model">data.cheque</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="perso_id"/>
+                        <field name="chq"/>
+                        <field name="date_emission"/>
+                        <field name="week"/>
+                        <field name="date_echeance"/>
+                        <field name="date_encaissement"/>
+                        <field name="ste_id"/>
+                        <field name="benif_id"/>
+                        <field name="amount"/>
+                        <field name="facture"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="datachq_view_search" model="ir.ui.view">
+        <field name="name">datachq search</field>
+        <field name="model">data.cheque</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="chq"/>
+                <field name="week"/>
+                <field name="facture"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

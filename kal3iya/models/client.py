@@ -233,15 +233,11 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
                             <div>
-                                <a href="{popup_url}"
-                                class="edit-btn oe_kanban_action oe_kanban_global_click">
-                                ✏️ Modifier
-                                </a>
+                                <button type="object" 
+                                        name="action_open_popup" 
+                                        class="btn btn-sm btn-primary"
+                                    ✏️ Modifier
+                                </button>
                             </div>
                         </div>
                     """
-
-                html += "</div>"
-
-            html += "</div>"
-            rec.sorties_grouped_html = html

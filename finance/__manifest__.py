@@ -1,5 +1,5 @@
 {
-    'name': 'Finance',
+    'name': 'finance',
     'summary': 'Module pour la gestion finance',
     'author': 'Ayoub Akhrif',
     'category': 'Accounting',

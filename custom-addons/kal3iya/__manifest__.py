@@ -15,7 +15,6 @@
         'views/data_views.xml',
         'views/advance_view.xml',
         'views/popup_sortie_view.xml',
-        'reports/bon_report.xml',
     ],
     'images': ['static/description/icon.svg'],
     'installable': True,

@@ -1,4 +1,4 @@
-<odoo>
+<odoo noupdate="0">
     <record id="group_finance_user" model="res.groups">
         <field name="name">Utilisateur finance</field>
         <field name="category_id" ref="base.module_category_inventory"/>

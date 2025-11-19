@@ -1,0 +1,11 @@
+<odoo>
+    <record id="group_kal3iya_user" model="res.groups">
+        <field name="name">Utilisateur kal3iya</field>
+        <field name="category_id" ref="base.module_category_inventory"/>
+    </record>
+
+    <record id="group_admin" model="res.groups">
+        <field name="name">Admins de groupe</field>
+        <field name="category_id" ref="base.module_category_inventory"/>
+    </record>
+</odoo>

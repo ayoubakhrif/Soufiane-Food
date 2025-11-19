@@ -1,5 +1,5 @@
 <odoo>
-    <record id="group_finance_user" model="res.groups">
+    <record id="group_finance_user" model="res.groups" forcecreate="True">
         <field name="name">Utilisateur finance</field>
         <field name="category_id" ref="base.module_category_inventory"/>
     </record>

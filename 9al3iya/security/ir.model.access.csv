@@ -1,8 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_cal3iyaentry,access.cal3iyaentry,model_cal3iyaentry,,1,1,1,1
-access_cal3iyasortie,access_cal3iyasortie,model_cal3iyasortie,base.group_user,1,1,1,1
-access_cal3iya_driver,access_cal3iya_driver,model_cal3iya_driver,base.group_user,1,1,1,1
-access_cal3iya_client,access_cal3iya_client,model_cal3iya_client,base.group_user,1,1,1,1
-access_cal3iya_provider,access_cal3iya_provider,model_cal3iya_provider,base.group_user,1,1,1,1
-access_cal3iya_ste,access_cal3iya_ste,model_cal3iya_ste,base.group_user,1,1,1,1
-access_cal3iya_stock,access_cal3iya_stock,model_cal3iya_stock,base.group_user,1,1,1,1

@@ -1,0 +1,6 @@
+<odoo>
+    <record id="group_9al3iya_user" model="res.groups">
+        <field name="name">Utilisateur 9al3iya</field>
+        <field name="category_id" ref="base.module_category_inventory"/>
+    </record>
+</odoo>

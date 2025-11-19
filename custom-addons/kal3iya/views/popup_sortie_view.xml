@@ -1,0 +1,31 @@
+<odoo>
+    <record id="view_kal3iya_sortie_popup" model="ir.ui.view">
+        <field name="name">kal3iyasortie.popup.form</field>
+        <field name="model">kal3iyasortie</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Modifier les valeurs finales" js_class="modal" >
+                <sheet>
+                    <group>
+                        <h2>Produit : <span><field name="name"/></span></h2>
+                    </group>
+
+                    <group string="Valeurs initiales">
+                        <field name="selling_price" readonly="1"/>
+                        <field name="tonnage" readonly="1"/>
+                    </group>
+
+                    <group string="Valeurs finales (corrigées)">
+                        <field name="selling_price_final"/>
+                        <field name="tonnage_final"/>
+                    </group>
+
+                    <group string="Écarts">
+                        <field name="price_gap" readonly="1"/>
+                        <field name="tonnage_gap" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

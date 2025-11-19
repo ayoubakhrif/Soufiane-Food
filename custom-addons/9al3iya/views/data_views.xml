@@ -1,0 +1,80 @@
+<odoo>
+
+    <record id="cal3iyadriver_action" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">cal3iya.driver</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="cal3iyaprovider_action" model="ir.actions.act_window">
+        <field name="name">Fournisseurs</field>
+        <field name="res_model">cal3iya.provider</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="cal3iyaste_action" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">cal3iya.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem 
+        id="datav2_menu"
+        name="Données"
+        parent="cal3iya_root_menu"
+    />
+
+    <menuitem 
+        id="driver_menu"
+        name="Chauffeurs"
+        parent="datav2_menu"
+        action="cal3iyadriver_action"
+    />
+    
+    <record id="driverv2_view_tree" model="ir.ui.view">
+        <field name="name">driver tree</field>
+        <field name="model">cal3iya.driver</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="phone"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem 
+        id="providerv2_menu"
+        name="Fournisseurs"
+        parent="datav2_menu"
+        action="cal3iyaprovider_action"
+    />
+
+    <menuitem 
+        id="stev2_menu"
+        name="Sociétés"
+        parent="datav2_menu"
+        action="cal3iyaste_action"
+    />
+    
+    <record id="providerv2_view_tree" model="ir.ui.view">
+        <field name="name">provider tree</field>
+        <field name="model">cal3iya.provider</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="stev2_view_tree" model="ir.ui.view">
+        <field name="name">ste tree</field>
+        <field name="model">cal3iya.ste</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="logo"/>
+                <field name="cachee"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

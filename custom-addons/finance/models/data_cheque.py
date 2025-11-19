@@ -11,7 +11,7 @@ class DataCheque(models.Model):
     amount = fields.Float(string='Montant', required=True, tracking=True, group_operator="sum")
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
-    serie = fields.Char(string='Facture', tracking=True)
+    serie = fields.Char(string='Série de facture', tracking=True)
     date_echeance = fields.Date(string='Date d’échéance', tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True)

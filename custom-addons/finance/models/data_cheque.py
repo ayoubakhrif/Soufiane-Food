@@ -4,7 +4,6 @@ from odoo.exceptions import UserError, ValidationError
 class DataCheque(models.Model):
     _name = 'datacheque'
     _description = 'Data chèque'
-    _rec_name = 'display_name'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
@@ -68,7 +67,7 @@ class DataCheque(models.Model):
     def _compute_week(self):
         for record in self:
             if record.date_emission:
-                record.week = record.date_emission.strftime("%Y-W%W")
+                record.week = record.date_emission.isocalendar().strftime("%G-W%V")
             else:
                 record.week = False
     # ------------------------------------------------------------
@@ -81,7 +80,7 @@ class DataCheque(models.Model):
                 domain = [('chq', '=', rec.chq)]
 
                 # 🔥 si le record existe déjà en base
-                if rec.id and isinstance(rec.id, int):
+                if rec.id:
                     domain.append(('id', '!=', rec.id))
 
                 # 🔍 Recherche
@@ -89,3 +88,7 @@ class DataCheque(models.Model):
 
                 if existing:
                     raise ValidationError("⚠️ Ce numéro de chèque existe déjà. Il doit être unique.")
+
+    _sql_constraints = [
+        ('unique_chq', 'unique(chq)', '⚠️ Le numéro du chèque doit être unique.')
+    ]

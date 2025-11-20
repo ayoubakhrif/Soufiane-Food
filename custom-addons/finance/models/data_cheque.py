@@ -7,8 +7,8 @@ class DataCheque(models.Model):
     _rec_name = 'display_name'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    chq = fields.Char(string='Chèque', required=True, tracking=True, size=7)
-    amount = fields.Float(string='Montant', required=True, tracking=True, group_operator="sum")
+    chq = fields.Char(string='Chèque', tracking=True, size=7)
+    amount = fields.Float(string='Montant', tracking=True, group_operator="sum")
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)

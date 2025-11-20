@@ -16,7 +16,7 @@ class DataCheque(models.Model):
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
-    perso_id = fields.Many2one('finance.perso', string='Personne', tracking=True, required=True)
+    perso_id = fields.Many2one('finance.perso', string='Personnes', tracking=True, required=True)
     facture = fields.Selection([
         ('m', 'M'),
         ('bureau', 'Bureau'),
@@ -74,18 +74,4 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
-    @api.onchange('chq')
-    def _onchange_chq_unique(self):
-        for rec in self:
-            if rec.chq:
-                domain = [('chq', '=', rec.chq)]
-
-                # 🔥 si le record existe déjà en base
-                if rec.id and isinstance(rec.id, int):
-                    domain.append(('id', '!=', rec.id))
-
-                # 🔍 Recherche
-                existing = self.env['datacheque'].search(domain, limit=1)
-
-                if existing:
-                    raise ValidationError("⚠️ Ce numéro de chèque existe déjà. Il doit être unique.")
+    

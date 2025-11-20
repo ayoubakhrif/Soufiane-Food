@@ -92,3 +92,9 @@ class DataCheque(models.Model):
     _sql_constraints = [
         ('unique_chq', 'unique(chq)', '⚠️ Le numéro du chèque doit être unique.')
     ]
+
+    @api.onchange('chq')
+    def _onchange_chq_length(self):
+        for rec in self:
+            if rec.chq and len(rec.chq) != 7:
+                raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")

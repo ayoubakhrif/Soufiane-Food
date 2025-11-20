@@ -74,27 +74,24 @@ class DataCheque(models.Model):
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     @api.onchange('chq')
-    def _onchange_chq_unique(self):
+    def _onchange_chq_checks(self):
         for rec in self:
+
+            # 1️⃣ Longueur exacte = 7
+            if rec.chq and len(rec.chq) != 7:
+                raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")
+
+            # 2️⃣ Unicité
             if rec.chq:
                 domain = [('chq', '=', rec.chq)]
 
-                # 🔥 si le record existe déjà en base
                 if rec.id:
                     domain.append(('id', '!=', rec.id))
 
-                # 🔍 Recherche
                 existing = self.env['datacheque'].search(domain, limit=1)
-
                 if existing:
                     raise ValidationError("⚠️ Ce numéro de chèque existe déjà. Il doit être unique.")
 
     _sql_constraints = [
         ('unique_chq', 'unique(chq)', '⚠️ Le numéro du chèque doit être unique.')
     ]
-
-    @api.onchange('chq')
-    def _onchange_chq_length(self):
-        for rec in self:
-            if rec.chq and len(rec.chq) != 7:
-                raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")

@@ -7,16 +7,16 @@ class DataCheque(models.Model):
     _rec_name = 'display_name'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    chq = fields.Char(string='Chèque', tracking=True, size=7)
-    amount = fields.Float(string='Montant', tracking=True, group_operator="sum")
+    chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
+    amount = fields.Float(string='Montant', tracking=True, group_operator="sum", required=True)
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
     date_echeance = fields.Date(string='Date d’échéance', tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
-    ste_id = fields.Many2one('finance.ste', string='Société', tracking=True)
-    benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True)
-    perso_id = fields.Many2one('finance.perso', string='Personnes', tracking=True)
+    ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
+    benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
+    perso_id = fields.Many2one('finance.perso', string='Personne', tracking=True, required=True)
     facture = fields.Selection([
         ('m', 'M'),
         ('bureau', 'Bureau'),

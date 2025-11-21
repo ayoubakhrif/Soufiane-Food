@@ -32,7 +32,7 @@
                 <field name="ste_id"/>
                 <field name="benif_id"/>
                 <field name="amount"/>
-                <field name="state"/>
+                <field name="state" optional=True/>
                 <field name="facture_tag" widget="html" readonly="1"/>
             </tree>
         </field>

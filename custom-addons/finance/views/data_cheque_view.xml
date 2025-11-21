@@ -42,6 +42,9 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': true}"/>
+                </header>
                 <sheet>
                     <group>
                         <field name="perso_id"/>

@@ -72,7 +72,9 @@ class DataCheque(models.Model):
     def _compute_week(self):
         for record in self:
             if record.date_emission:
-                record.week = record.date_emission.isocalendar().strftime("%G-W%V")
+                iso = record.date_emission.isocalendar()
+                # iso.year, iso.week, iso.weekday
+                record.week = f"{iso.year}-W{iso.week:02d}"
             else:
                 record.week = False
     # ------------------------------------------------------------

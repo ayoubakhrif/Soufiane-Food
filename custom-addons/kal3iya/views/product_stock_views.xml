@@ -4,9 +4,9 @@
         <field name="name">kal3iya.stock.kanban</field>
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
-           <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false">
+           <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false" groups="yes">
                 <field name="name"/>
-                <field name="quantity"/>
+                <field name="quantity" sum="Total quantité"/>
                 <field name="price"/>
                 <field name="lot"/>
                 <field name="ville"/>

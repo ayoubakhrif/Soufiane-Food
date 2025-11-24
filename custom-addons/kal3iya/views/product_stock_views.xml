@@ -4,45 +4,25 @@
         <field name="name">kal3iya.stock.kanban</field>
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
-           <kanban class="o_kanban_example o_kanban_small_column"
-                   editable="false" create="false" delete="false"
-                   default_group_by="name">
-
-                <!-- 🔹 Champs utilisés dans le Kanban -->
+           <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false" default_group_by="name" quick_create="false">
                 <field name="name"/>
-                <field name="quantity" sum="Total"/>
+                <field name="quantity"/>
                 <field name="price"/>
                 <field name="lot"/>
                 <field name="ville"/>
                 <field name="image_1920"/>
                 <field name="weight"/>
 
-                <!-- 🆕 Nouveau champ (CHANGEMENT 1) -->
-                <field name="qty_total_group"/>
-
-                <progressbar field="quantity" colors='{"100": "success"}'/>
+                <field name="quantity" aggregate="sum"/>
 
                 <templates>
-
-                    <!-- 🆕 HEADER DE GROUP (CHANGEMENT 2) -->
-                    <t t-name="kanban-group-header">
-                        <div class="o_kanban_group_header"
-                             style="font-size:18px; font-weight:700; margin-bottom:8px;">
-                            <t t-esc="group_value"/>
-                            <span style="color:#6c6c6c;">
-                                (<t t-esc="sum([r.qty_total_group for r in records])"/>)
-                            </span>
-                        </div>
-                    </t>
-
-                    <!-- Template Kanban normal -->
                     <t t-name="kanban-box">
                         <div class="o_kanban_record"
-                            style="border-radius:8px; border:1px solid #ddd;
-                                   box-shadow:0 2px 6px rgba(0,0,0,0.08);
-                                   background:#fff; padding:8px; display:flex; align-items:center;">
+                            style="border-radius:8px; border:1px solid #ddd; 
+                                    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+                                    background:#fff; padding:8px; display:flex; align-items:center;">
 
-                            <!-- Image -->
+                            <!-- 🖼️ Image à gauche (widget Odoo natif) -->
                             <aside style="width:90px; height:90px; flex-shrink:0; margin-right:12px;">
                                 <div class="o_kanban_image_fill position-relative w-100 h-100">
                                     <field name="image_1920"
@@ -52,7 +32,7 @@
                                 </div>
                             </aside>
 
-                            <!-- Détails -->
+                            <!-- 📋 Détails à droite -->
                             <div class="flex-grow-1">
                                 <div style="font-weight:600; font-size:14px; color:#2b2b2b; margin-bottom:6px;">
                                     <field name="name"/>
@@ -62,13 +42,11 @@
                                     <div><b>Quantité :</b> <field name="quantity"/></div>
                                     <div><b>Poids :</b> <field name="weight"/></div>
                                     <div><b>Lot :</b> <field name="lot"/></div>
-                                    <div><b>Ville :</b> <field name="ville"/></div>
+                                    <div><b>ville :</b> <field name="ville"/></div>
                                 </div>
                             </div>
-
                         </div>
                     </t>
-
                 </templates>
             </kanban>
         </field>
@@ -87,6 +65,9 @@
             </tree>
         </field>
     </record>
+
+
+    
 
     <record id="action_kal3iya_stock" model="ir.actions.act_window">
         <field name="name">Stock</field>

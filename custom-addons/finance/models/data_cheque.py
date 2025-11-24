@@ -102,3 +102,18 @@ class DataCheque(models.Model):
     _sql_constraints = [
         ('unique_chq', 'unique(chq)', '⚠️ Le numéro du chèque doit être unique.')
     ]
+
+    # ------------------------------------------------------------
+    # Bureau state
+    # ------------------------------------------------------------
+    @api.onchange('state')
+    def _onchange_state_force_facture(self):
+        for rec in self:
+            if rec.state == 'bureau':
+                rec.facture = 'bureau'
+
+    @api.constrains('state')
+    def _check_state_force_facture(self):
+        for rec in self:
+            if rec.state == 'bureau' and rec.facture != 'bureau':
+                rec.facture = 'bureau'

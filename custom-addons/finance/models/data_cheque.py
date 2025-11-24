@@ -27,7 +27,7 @@ class DataCheque(models.Model):
         ('actif', 'Actif'),
         ('annule', 'Annulé'),
         ('bureau', 'Bureau'),
-    ], string='État', default='actif', tracking=True)
+    ], string='État', default='actif', tracking=True, store=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------

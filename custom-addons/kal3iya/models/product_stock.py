@@ -18,6 +18,7 @@ class ProductStock(models.Model):
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
+        ('stock_casa', 'Stock'),
     ], string='Frigo', tracking=True)
     ville = fields.Selection([
         ('tanger', 'Tanger'),

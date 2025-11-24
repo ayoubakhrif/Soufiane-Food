@@ -34,10 +34,19 @@ class ProductStock(models.Model):
     provider_id = fields.Many2one('kal3iya.provider', string='Fournisseur', optional=True)
     active = fields.Boolean(string='Actif', default=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
+    qty_total_group = fields.Float(
+        compute="_compute_qty_total_group",
+        string="Total Quantité",
+        store=False
+    )
 
     _order = 'name asc, quantity asc'
 
-
+    @api.depends('name')
+    def _compute_qty_total_group(self):
+        for rec in self:
+            total = sum(self.search([('name', '=', rec.name)]).mapped('quantity'))
+            rec.qty_total_group = total
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------

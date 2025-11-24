@@ -74,13 +74,32 @@
     </record>
 
 
-    
+    <record id="view_kal3iya_stock_search" model="ir.ui.view">
+        <field name="name">kal3iya.stock.search</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+
+                <filter string="Tanger"
+                        name="ville_tanger"
+                        domain="[('ville','=','tanger')]"/>
+
+                <filter string="Casa"
+                        name="ville_casa"
+                        domain="[('ville','=','casa')]"/>
+
+            </search>
+        </field>
+    </record>
+
 
     <record id="action_kal3iya_stock" model="ir.actions.act_window">
         <field name="name">Stock</field>
         <field name="res_model">kal3iya.stock</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="view_id" ref="view_kal3iya_stock_kanban"/>
+        <field name="search_view_id" ref="view_kal3iya_stock_search"/>
     </record>
 
     <menuitem id="menu_kal3iya_stock" name="Stock"

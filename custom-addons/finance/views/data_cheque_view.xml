@@ -22,8 +22,8 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="perso_id"/>
                 <field name="chq"/>
+                <field name="perso_id"/>
                 <field name="date_emission"/>
                 <field name="week"/>
                 <field name="journal"/>
@@ -48,8 +48,8 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="perso_id"/>
                         <field name="chq"/>
+                        <field name="perso_id"/>
                         <field name="date_emission"/>
                         <field name="week"/>
                         <field name="journal"/>

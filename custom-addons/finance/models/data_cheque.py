@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
+from datetime import timedelta
 
 class DataCheque(models.Model):
     _name = 'datacheque'
@@ -117,3 +118,25 @@ class DataCheque(models.Model):
         for rec in self:
             if rec.state == 'bureau' and rec.facture != 'bureau':
                 rec.facture = 'bureau'
+
+    # ------------------------------------------------------------
+    # Calcul de week
+    # ------------------------------------------------------------
+
+    def french_week_number(date_obj):
+        if not date_obj:
+            return False
+
+        year = date_obj.year
+        first_jan = date_obj.replace(month=1, day=1)
+        first_monday = first_jan - timedelta(days=first_jan.weekday())
+
+        # Si le 1er janvier tombe après jeudi => semaine 1 commence la semaine suivante
+        if first_jan.weekday() > 3:
+            first_monday += timedelta(days=7)
+
+        # Numéro de semaine selon la norme française
+        delta_days = (date_obj - first_monday).days
+        week = (delta_days // 7) + 1
+
+        return f"W{week:02d}"

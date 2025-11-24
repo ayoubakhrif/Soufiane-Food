@@ -5,6 +5,15 @@
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
            <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false" default_group_by="name">
+                <control>
+                    <filter string="Tanger"
+                            name="ville_tanger"
+                            domain="[('ville','=','tanger')]"/>
+
+                    <filter string="Casa"
+                            name="ville_casa"
+                            domain="[('ville','=','casa')]"/>
+                </control>
                 <field name="name"/>
                 <field name="quantity"/>
                 <field name="price"/>

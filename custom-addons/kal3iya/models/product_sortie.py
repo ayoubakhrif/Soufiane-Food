@@ -68,7 +68,6 @@ class ProductExit(models.Model):
     price_gap = fields.Float(string="Écart prix", compute="_compute_gaps", store=True)
     tonnage_gap = fields.Float(string="Écart tonnage", compute="_compute_gaps", store=True)
     mt_vente_final = fields.Float(string='Mt.Vente', compute='_compute_mt_vente_final', store=True)
-    tonnage_final = fields.Float(string='tonnage', tracking=True)
 
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -252,21 +251,40 @@ class ProductExit(models.Model):
         rec = super().create(vals)
         stock.recompute_qty()
         return rec
-
+    
     def write(self, vals):
-        # Vérif basique sur dépassement (optionnel, on peut autoriser la modif puis recompute_qty refusera via process métier)
+        # STOCK LOGIC (déjà existant)
         for r in self:
             if 'quantity' in vals:
                 new_q = vals['quantity']
-                # quantité dispo = qty_actuelle + qty_sortie_courante (qu’on s’apprête à remplacer)
                 avail = r.entry_id.quantity + (r.quantity or 0.0)
                 if new_q > avail:
                     raise UserError(f"Impossible: demande={new_q} > disponible={avail}.")
+        
         res = super().write(vals)
-        # Recalculer la/les lignes touchées
+
+        # 🔥 NOUVELLE PARTIE : Recalcul après MODIFICATION POPUP
+        for r in self:
+
+            # 1️⃣ Recalcul du montant final
+            if 'selling_price_final' in vals or 'tonnage_final' in vals:
+                price = r.selling_price_final or r.selling_price
+                tonnage = r.tonnage_final or r.tonnage
+                r.mt_vente_final = price * tonnage
+
+            # 2️⃣ Recalcul du compte client
+            if r.client_id:
+                r.client_id._compute_compte()
+
+            # 3️⃣ Mise à jour du tableau HTML dans la fiche client
+                r.client_id._compute_sorties_grouped_html()
+
+        # Recalcul stock
         for r in self:
             r.entry_id.recompute_qty()
+
         return res
+
 
     def unlink(self):
         # Retours liés ? Si tu gères des retours par lien Many2one, bloque ici.

@@ -24,7 +24,7 @@ class ProductStock(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Stock', tracking=True)
-    quantity = fields.Float(string='Quantité disponible', default=0, group_operator="sum")
+    quantity = fields.Float(string='Quantité disponible', default=0, group_operator="sum", store=True)
     price = fields.Float(string='Prix d’achat')
     weight = fields.Float(string='Poids (kg)', required=True)
     tonnage = fields.Float(string='Tonnage (Kg)', group_operator="sum")

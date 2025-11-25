@@ -29,6 +29,11 @@ class DataCheque(models.Model):
         ('annule', 'Annulé'),
         ('bureau', 'Bureau'),
     ], string='État', default='actif', tracking=True, store=True)
+    type = fields.Selection([
+        ('magasinage', 'Magasinage'),
+        ('surestarie', 'Surestarie'),
+        ('change', 'Change'),
+    ], store=True, string='Type', tracking=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -67,17 +72,39 @@ class DataCheque(models.Model):
             )
 
     # ------------------------------------------------------------
+    # Calcul de week
+    # ------------------------------------------------------------
+
+    @staticmethod
+    def french_week_number(date_obj):
+        if not date_obj:
+            return False
+
+        year = date_obj.year
+        first_jan = date_obj.replace(month=1, day=1)
+        first_monday = first_jan - timedelta(days=first_jan.weekday())
+
+        # Si le 1er janvier tombe après jeudi => semaine 1 commence la semaine suivante
+        if first_jan.weekday() > 3:
+            first_monday += timedelta(days=7)
+
+        # Numéro de semaine selon la norme française
+        delta_days = (date_obj - first_monday).days
+        week = (delta_days // 7) + 1
+
+        return f"W{week:02d}"
+
+    # ------------------------------------------------------------
     # Calculs
     # ------------------------------------------------------------
     @api.depends('date_emission')
     def _compute_week(self):
-        for record in self:
-            if record.date_emission:
-                iso = record.date_emission.isocalendar()
-                # iso.year, iso.week, iso.weekday
-                record.week = f"{iso.year}-W{iso.week:02d}"
+        for rec in self:
+            if rec.date_emission:
+                rec.week = self.french_week_number(rec.date_emission)
             else:
-                record.week = False
+                rec.week = False
+
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
@@ -119,24 +146,4 @@ class DataCheque(models.Model):
             if rec.state == 'bureau' and rec.facture != 'bureau':
                 rec.facture = 'bureau'
 
-    # ------------------------------------------------------------
-    # Calcul de week
-    # ------------------------------------------------------------
-
-    def french_week_number(date_obj):
-        if not date_obj:
-            return False
-
-        year = date_obj.year
-        first_jan = date_obj.replace(month=1, day=1)
-        first_monday = first_jan - timedelta(days=first_jan.weekday())
-
-        # Si le 1er janvier tombe après jeudi => semaine 1 commence la semaine suivante
-        if first_jan.weekday() > 3:
-            first_monday += timedelta(days=7)
-
-        # Numéro de semaine selon la norme française
-        delta_days = (date_obj - first_monday).days
-        week = (delta_days // 7) + 1
-
-        return f"W{week:02d}"
+    

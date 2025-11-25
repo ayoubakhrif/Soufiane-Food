@@ -58,8 +58,6 @@
                         <field name="quantity"/>
                         <field name="selling_price"/>
                         <field name="client_id"/>
-                        <field name="indirect"/>
-                        <field name="client2" invisible="indirect == False"/>
                         <field name="driver_id"/>
                         <field name="cellphone"/>
                     </group>

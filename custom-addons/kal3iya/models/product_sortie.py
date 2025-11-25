@@ -45,8 +45,6 @@ class ProductExit(models.Model):
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur', tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
     client_id = fields.Many2one('kal3iya.client', tracking=True)
-    client2 = fields.Selection([('soufiane', 'Soufiane'), ('hamza', 'Hamza'),], string='Client 2', tracking=True)
-    indirect = fields.Boolean(string='S/H', default=False)
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),

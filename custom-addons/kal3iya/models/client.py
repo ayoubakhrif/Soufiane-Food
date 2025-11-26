@@ -11,13 +11,12 @@ class Kal3iyaClient(models.Model):
         'kal3iyasortie',
         'client_id',
         string='Sorties de ce client',
-        compute='_compute_sortie_ids',
-        store=False,
     )
 
     sortie_count = fields.Integer(
         string="Nombre de commandes",
-        compute='_compute_sortie_ids'
+        compute='_compute_sortie_count',
+        store=True
     )
 
     sorties_grouped_html = fields.Html(
@@ -30,12 +29,10 @@ class Kal3iyaClient(models.Model):
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
     compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
 
-    def _compute_sortie_ids(self):
-        """Récupère automatiquement les sorties liées à ce client"""
-        for client in self:
-            sorties = self.env['kal3iyasortie'].search([('client_id', '=', client.id)])
-            client.sortie_ids = sorties
-            client.sortie_count = len(sorties)
+    @api.depends('sortie_ids')
+    def _compute_sortie_count(self):
+            for rec in self:
+                rec.sortie_count = len(rec.sortie_ids)
 
 
 
@@ -44,30 +41,34 @@ class Kal3iyaClient(models.Model):
         'kal3iyaentry',
         'client_id',
         string='Retours de ce client',
-        compute='_compute_retour_ids',
-        store=False,
     )
 
     retour_count = fields.Integer(
         string="Nombre de retours",
-        compute='_compute_retour_ids'
+        compute='_compute_retour_count',
+        store=True
     )
 
 
-    def _compute_retour_ids(self):
-        """Récupère automatiquement les retours liées à ce client"""
-        for client in self:
-            retours = self.env['kal3iyaentry'].search([('client_id', '=', client.id)])
-            client.retour_ids = retours
-            client.retour_count = len(retours)
+    @api.depends('retour_ids')
+    def _compute_retour_count(self):
+        for rec in self:
+            rec.retour_count = len(rec.retour_ids)
 
 
-    @api.depends('sortie_ids.mt_vente', 'avances.amount', 'retour_ids.selling_price', 'retour_ids.tonnage', 'retour_ids.state')
+    @api.depends(
+        'sortie_ids.mt_vente',
+        'sortie_ids.mt_vente_final',
+        'avances.amount',
+        'retour_ids.selling_price',
+        'retour_ids.tonnage',
+        'retour_ids.state'
+    )
     def _compute_compte(self):
         """Compte = ventes - avances - retours"""
         for client in self:
             # 💰 Total des ventes
-            total_ventes = sum(client.sortie_ids.mapped('mt_vente'))
+            total_ventes = sum(client.sortie_ids.mapped('mt_vente_final' or 'mt_vente'))
 
             # 💵 Total des avances
             total_avances = sum(client.avances.mapped('amount'))
@@ -79,7 +80,16 @@ class Kal3iyaClient(models.Model):
             # 🧮 Calcul final
             client.compte = total_ventes - total_avances - total_retours
 
-    @api.depends('sortie_ids', 'sortie_ids.week', 'sortie_ids.mt_vente_final')
+    @api.depends(
+    'sortie_ids',
+    'sortie_ids.name',
+    'sortie_ids.quantity',
+    'sortie_ids.weight',
+    'sortie_ids.tonnage_final',
+    'sortie_ids.selling_price_final',
+    'sortie_ids.date_exit',
+    'sortie_ids.week',
+    )
     def _compute_sorties_grouped_html(self):
         for rec in self:
             html = """
@@ -125,7 +135,7 @@ class Kal3iyaClient(models.Model):
 
                     .table-header {
                         display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr 0.6fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr 0.8fr;
                         padding: 10px;
                         background: #e2e8f0;
                         border-radius: 8px;
@@ -136,7 +146,7 @@ class Kal3iyaClient(models.Model):
 
                     .list-row {
                         display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr 0.6fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr 0.8fr;
                         padding: 12px 10px;
                         background: #f7fafc;
                         border-radius: 8px;

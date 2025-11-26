@@ -96,6 +96,46 @@ class ProductEntry(models.Model):
             rec.charge_transport = rec.tonnage * 20 if rec.tonnage else 0.0
 
     # ------------------------------------------------------------
+    # REMPLISSAGE AUTOMATIQUE DE RETOUR
+    # ------------------------------------------------------------
+    @api.onchange('return_id')
+    def _onchange_return_id(self):
+        """Remplit automatiquement les infos à partir de la sortie sélectionnée."""
+        if self.return_id:
+            sortie = self.return_id
+            self.lot = sortie.lot
+            self.dum = sortie.dum
+            self.name = sortie.name
+            self.weight = sortie.weight
+            self.calibre = sortie.calibre
+            self.ste_id = sortie.ste_id
+            self.provider_id = sortie.provider_id
+            self.client_id = sortie.client_id
+            self.frigo = sortie.frigo
+            self.ville = sortie.ville
+            self.image_1920 = sortie.image_1920
+            self.selling_price = sortie.selling_price
+        else:
+            pass
+    
+    @api.onchange('client_id')
+    def _onchange_client_id(self):
+        """Filtrer les sorties selon le client sélectionné"""
+        if self.client_id:
+            return {
+                'domain': {
+                    'return_id': [('client_id', '=', self.client_id.id)]
+                }
+            }
+        else:
+            return {
+                'domain': {
+                    'return_id': []
+                }
+            }
+
+
+    # ------------------------------------------------------------
     # CONTRAINTES
     # ------------------------------------------------------------
     @api.constrains('quantity', 'return_id', 'state')

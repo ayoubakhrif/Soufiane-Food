@@ -1,0 +1,49 @@
+<odoo>
+    <record id="kal3iyadriver_action" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">kal3iya.driver</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem 
+        id="driver_menu"
+        name="Chauffeurs"
+        parent="data_menu"
+        action="kal3iyadriver_action"
+    />
+    <record id="driver_view_tree" model="ir.ui.view">
+        <field name="name">driver tree</field>
+        <field name="model">kal3iya.driver</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="phone"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_kal3iya_driver_form" model="ir.ui.view">
+        <field name="name">kal3iya.driver.form</field>
+        <field name="model">kal3iya.driver</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1><field name="name"/></h1>
+                    <group>
+                        <field name="phone"/>
+                    </group>
+                    <notebook>
+                        <!-- Onglet Avances du chauffeur -->
+                        <page string="Avances">
+                            <field name="advance_ids">
+                                <tree editable="bottom">
+                                    <field name="date_paid"/>
+                                    <field name="amount"/>
+                                    <field name="client_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

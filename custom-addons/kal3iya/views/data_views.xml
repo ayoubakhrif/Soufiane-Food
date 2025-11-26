@@ -1,11 +1,4 @@
 <odoo>
-
-    <record id="kal3iyadriver_action" model="ir.actions.act_window">
-        <field name="name">Chauffeurs</field>
-        <field name="res_model">kal3iya.driver</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
     <record id="kal3iyaprovider_action" model="ir.actions.act_window">
         <field name="name">Fournisseurs</field>
         <field name="res_model">kal3iya.provider</field>
@@ -23,25 +16,6 @@
         name="Données"
         parent="Kal3iya_root_menu"
     />
-
-    <menuitem 
-        id="driver_menu"
-        name="Chauffeurs"
-        parent="data_menu"
-        action="kal3iyadriver_action"
-    />
-    
-    <record id="driver_view_tree" model="ir.ui.view">
-        <field name="name">driver tree</field>
-        <field name="model">kal3iya.driver</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name"/>
-                <field name="phone"/>
-            </tree>
-        </field>
-    </record>
-
     <menuitem 
         id="provider_menu"
         name="Fournisseurs"

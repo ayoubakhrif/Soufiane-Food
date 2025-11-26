@@ -14,6 +14,7 @@
         'views/client_view.xml',
         'views/data_views.xml',
         'views/advance_view.xml',
+        'views/driver_view.xml',
         'views/popup_sortie_view.xml',
     ],
     'images': ['static/description/icon.svg'],

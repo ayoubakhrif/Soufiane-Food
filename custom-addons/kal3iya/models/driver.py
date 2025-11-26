@@ -6,3 +6,5 @@ class Kal3iyadriver(models.Model):
 
     name = fields.Char(string='Chauffeur', required=True)
     phone = fields.Char(string='Téléphone')
+    amount_id = fields.One2many('kal3iya.advance', 'driver_id', string='Avances')
+    client_id = fields.One2many('kal3iya.client', 'driver_id', string='Client')

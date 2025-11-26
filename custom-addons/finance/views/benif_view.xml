@@ -16,6 +16,8 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="type"/>
+                        <field name="days"/>
                     </group>
                 </sheet>
             </form>
@@ -29,6 +31,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
+                <field name="type"/>
+                <field name="days"/>
             </tree>
         </field>
     </record>

@@ -52,6 +52,7 @@ class ProductEntry(models.Model):
         ('entree', 'Entrée'),
         ('retour', 'Retour'),
     ], string='État', default='entree', tracking=True)
+    state_badge = fields.Html(string='État (badge)', compute='_compute_state_badge', sanitize=False)
 
     return_id = fields.Many2one(
         'kal3iyasortie',
@@ -61,6 +62,20 @@ class ProductEntry(models.Model):
     )
 
     stock_id = fields.One2many('kal3iya.stock', 'entry_id', string='Ligne de stock liée', readonly=True)
+
+    # ------------------------------------------------------------ 
+    # BADGE VISUEL 
+    # ------------------------------------------------------------ 
+    def _compute_state_badge(self):
+        for rec in self:
+            label = dict(self._fields['state'].selection).get(rec.state, '') or ''
+            color = "#28a745" if rec.state == 'entree' else "#dc3545"
+            bg = "rgba(40,167,69,0.12)" if rec.state == 'entree' else "rgba(220,53,69,0.12)"
+
+            rec.state_badge = (
+                f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
+                f"font-weight:600;background:{bg};color:{color};'>{label}</span>"
+            )
 
     # ------------------------------------------------------------
     # CALCULS

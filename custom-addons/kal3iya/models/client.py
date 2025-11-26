@@ -25,11 +25,12 @@ class Kal3iyaClient(models.Model):
         sanitize=False,
     )
 
-    avances_grouped_html = fields.Html(
-        string="Avances",
-        compute="_compute_avances_grouped_html",
+    retours_grouped_html = fields.Html(
+        string="Retours groupés",
+        compute="_compute_retours_grouped_html",
         sanitize=False,
     )
+
 
 
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
@@ -266,36 +267,35 @@ class Kal3iyaClient(models.Model):
             html += "</div>"
             rec.sorties_grouped_html = html
 
-    
     @api.depends(
-        'avances.amount',
-        'avances.date_paid',
-        'avances.payment_mode',
-        'avances.driver_id',
+        'retour_ids',
+        'retour_ids.name',
+        'retour_ids.quantity',
+        'retour_ids.weight',
+        'retour_ids.tonnage',
+        'retour_ids.selling_price',
+        'retour_ids.date_entry',
     )
-    def _compute_avances_grouped_html(self):
+    def _compute_retours_grouped_html(self):
         for rec in self:
-
-            avances = rec.avances.sorted(lambda a: a.date_paid or "")
-
             html = """
                 <style>
-                    .avance-container {
+                    .retours-container {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                         max-width: 100%;
                         padding: 10px;
                     }
 
-                    .week-card {
+                    .retour-card {
                         background: white;
                         border-radius: 12px;
-                        border: 2px solid #e2e8f0;
+                        border: 2px solid #feb2b2;
                         padding: 18px;
                         margin: 22px 0;
                         box-shadow: 0 6px 20px rgba(0,0,0,0.06);
                     }
 
-                    .week-header {
+                    .retour-header {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
@@ -303,96 +303,120 @@ class Kal3iyaClient(models.Model):
                         flex-wrap: wrap;
                     }
 
-                    .week-title {
+                    .retour-title {
                         font-size: 22px;
                         font-weight: 700;
-                        color: #2b6cb0;
+                        color: #e53e3e;
                     }
 
-                    .week-total {
-                        background: #2b6cb0;
+                    .retour-total {
+                        background: #e53e3e;
                         color: white;
                         padding: 8px 18px;
                         border-radius: 10px;
                         font-size: 17px;
                         font-weight: 700;
-                    }
-
-                    .table-header, .list-row {
-                        display: grid;
-                        grid-template-columns: 0.8fr 0.8fr 1fr 1fr;
-                        padding: 12px 10px;
-                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(229,62,62,0.3);
                     }
 
                     .table-header {
-                        background: #e2e8f0;
+                        display: grid;
+                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.8fr 0.8fr;
+                        padding: 10px;
+                        background: #fed7d7;
+                        border-radius: 8px;
                         font-weight: 700;
                         color: #2d3748;
+                        margin-bottom: 10px;
                     }
 
                     .list-row {
-                        background: #f7fafc;
+                        display: grid;
+                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.8fr 0.8fr;
+                        padding: 12px 10px;
+                        background: #fff5f5;
+                        border-radius: 8px;
                         margin-bottom: 8px;
-                        border-left: 4px solid #2b6cb0;
+                        border-left: 4px solid #e53e3e;
+                        transition: 0.2s ease;
+                    }
+                    .list-row:hover {
+                        background: #fed7d7;
+                        transform: translateX(4px);
+                    }
+
+                    .col-label {
+                        font-size: 14px;
+                        color: #2d3748;
+                        font-weight: 600;
+                    }
+                    .col-value {
+                        font-size: 15px;
+                        color: #4a5568;
+                        font-weight: 500;
                     }
 
                     .amount {
-                        color: #2b6cb0;
+                        color: #e53e3e;
                         font-weight: 700;
                     }
+
+                    .date {
+                        font-size: 14px;
+                        color: #c53030;
+                    }
+
                 </style>
 
-                <div class="avance-container">
+                <div class="retours-container">
             """
 
-            # ---------------------------------------
-            # GROUPER LES AVANCES PAR SEMAINE
-            # ---------------------------------------
+            # Trier par date
+            retours = rec.retour_ids.sorted(lambda r: r.date_entry or "")
+
+            # Regroupement par semaine
             groups = {}
-            for a in avances:
+            for r in retours:
+                week = r.week if hasattr(r, 'week') and r.week else "Sans semaine"
+                groups.setdefault(week, []).append(r)
 
-                if a.date_paid:
-                    week = f"W{a.date_paid.isocalendar()[1]:02d}"
-                else:
-                    week = "Sans semaine"
-
-                groups.setdefault(week, []).append(a)
-
-            # ---------------------------------------
-            # BOUCLER SUR LES SEMAINES
-            # ---------------------------------------
+            # Construire les cartes
             for week, records in groups.items():
 
-                total_week = sum(r.amount for r in records)
+                total_week = sum(r.selling_price * r.tonnage for r in records)
 
                 html += f"""
-                    <div class="week-card">
-                        <div class="week-header">
-                            <div class="week-title">💵 Semaine {week}</div>
-                            <div class="week-total">{total_week:,.2f} Dh</div>
+                    <div class="retour-card">
+                        <div class="retour-header">
+                            <div class="retour-title">🔄 Retours – Semaine {week}</div>
+                            <div class="retour-total">{total_week:,.2f} Dh</div>
                         </div>
 
                         <div class="table-header">
-                            <div>Date</div>
+                            <div>Produit</div>
+                            <div>Qté</div>
+                            <div>Poids(Kg)</div>
+                            <div>Tonnage</div>
+                            <div>Prix</div>
                             <div>Montant</div>
-                            <div>Mode</div>
-                            <div>Chauffeur</div>
                         </div>
                 """
 
-                for a in records:
+                for r in records:
+                    mt_total = r.selling_price * r.tonnage
+
                     html += f"""
                         <div class="list-row">
-                            <div>{a.date_paid or ""}</div>
-                            <div class="amount">{a.amount} Dh</div>
-                            <div>{a.payment_mode or ""}</div>
-                            <div>{a.driver_id.name if a.driver_id else "-"}</div>
+                            <div class="col-label">{r.name}</div>
+                            <div class="col-value">{r.quantity}</div>
+                            <div class="col-value">{r.weight}</div>
+                            <div class="col-value">{r.tonnage}</div>
+                            <div class="col-value">{r.selling_price} Dh</div>
+                            <div class="col-value amount">{mt_total} Dh</div>
                         </div>
                     """
 
                 html += "</div>"
 
             html += "</div>"
-
-            rec.avances_grouped_html = html
+            rec.retours_grouped_html = html

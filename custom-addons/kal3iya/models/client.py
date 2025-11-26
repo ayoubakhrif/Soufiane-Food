@@ -125,7 +125,7 @@ class Kal3iyaClient(models.Model):
 
                     .table-header {
                         display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr 0.6fr;
                         padding: 10px;
                         background: #e2e8f0;
                         border-radius: 8px;
@@ -136,7 +136,7 @@ class Kal3iyaClient(models.Model):
 
                     .list-row {
                         display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr;
+                        grid-template-columns: 1.2fr 0.5fr 0.7fr 0.6fr 0.8fr 0.7fr 0.6fr 0.6fr;
                         padding: 12px 10px;
                         background: #f7fafc;
                         border-radius: 8px;
@@ -214,6 +214,7 @@ class Kal3iyaClient(models.Model):
                         <div class="table-header">
                             <div>Produit</div>
                             <div>Qté</div>
+                            <div>Poids(Kg)</div>
                             <div>Tonnage final</div>
                             <div>Prix final</div>
                             <div>Montant final</div>
@@ -230,6 +231,7 @@ class Kal3iyaClient(models.Model):
                         <div class="list-row">
                             <div class="col-label">{s.name}</div>
                             <div class="col-value">{s.quantity}</div>
+                            <div class="col-value">{s.weight}</div>
                             <div class="col-value">{s.tonnage_final or s.tonnage}</div>
                             <div class="col-value">{(s.selling_price_final or s.selling_price)} Dh</div>
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>

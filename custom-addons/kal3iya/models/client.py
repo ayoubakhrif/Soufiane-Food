@@ -68,7 +68,7 @@ class Kal3iyaClient(models.Model):
         """Compte = ventes - avances - retours"""
         for client in self:
             # 💰 Total des ventes
-            total_ventes = sum(client.sortie_ids.mapped('mt_vente_final' or 'mt_vente'))
+            total_ventes = sum(s.mt_vente_final or s.mt_vente for s in client.sortie_ids)
 
             # 💵 Total des avances
             total_avances = sum(client.avances.mapped('amount'))

@@ -38,7 +38,17 @@
                                     <field name="date_paid"/>
                                     <field name="amount"/>
                                     <field name="client_id"/>
+                                    <field name="payment_mode"/>
                                 </tree>
+                                <form>
+                                    <group>
+                                        <field name="date_paid"/>
+                                        <field name="amount"/>
+                                        <field name="client_id"/>
+                                        <field name="payment_mode"/>
+                                        <field name="comment"/>
+                                    </group>
+                                </form>
                             </field>
                         </page>
                     </notebook>

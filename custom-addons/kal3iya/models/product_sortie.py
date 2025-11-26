@@ -236,37 +236,26 @@ class ProductExit(models.Model):
     
     
     def write(self, vals):
-        # STOCK LOGIC (déjà existant)
-        for r in self:
-            if 'quantity' in vals:
-                new_q = vals['quantity']
-                avail = r.entry_id.quantity + (r.quantity or 0.0)
-                if new_q > avail:
-                    raise UserError(f"Impossible: demande={new_q} > disponible={avail}.")
-        
+        # 1️⃣ Vérification de stock (avant écriture)
+        if 'quantity' in vals:
+            for rec in self:
+                old_qty = rec.quantity
+                new_qty = vals['quantity']
+                diff = new_qty - old_qty
+
+                if diff > 0 and diff > rec.entry_id.quantity:
+                    raise UserError(
+                        f"Stock insuffisant : demande +{diff} > disponible {rec.entry_id.quantity}."
+                    )
+
+        # 2️⃣ Écriture normale
         res = super().write(vals)
 
-        # 🔥 NOUVELLE PARTIE : Recalcul après MODIFICATION POPUP
-        for r in self:
-
-            # 1️⃣ Recalcul du montant final
-            if 'selling_price_final' in vals or 'tonnage_final' in vals:
-                price = r.selling_price_final or r.selling_price
-                tonnage = r.tonnage_final or r.tonnage
-                r.mt_vente_final = price * tonnage
-
-            # 2️⃣ Recalcul du compte client
-            if r.client_id:
-                r.client_id._compute_compte()
-
-            # 3️⃣ Mise à jour du tableau HTML dans la fiche client
-                r.client_id._compute_sorties_grouped_html()
-
-        # Recalcul stock
-        for r in self:
-            r.entry_id.recompute_qty()
+        # 3️⃣ Recalcul du stock une seule fois par entrée
+        self.mapped('entry_id').recompute_qty()
 
         return res
+
 
 
     def unlink(self):

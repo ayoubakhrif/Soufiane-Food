@@ -25,6 +25,12 @@ class Kal3iyaClient(models.Model):
         sanitize=False,
     )
 
+    avances_grouped_html = fields.Html(
+        string="Avances",
+        compute="_compute_avances_grouped_html",
+        sanitize=False,
+    )
+
 
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
     compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
@@ -259,3 +265,134 @@ class Kal3iyaClient(models.Model):
 
             html += "</div>"
             rec.sorties_grouped_html = html
+
+    
+    @api.depends(
+        'avances.amount',
+        'avances.date_paid',
+        'avances.payment_mode',
+        'avances.driver_id',
+    )
+    def _compute_avances_grouped_html(self):
+        for rec in self:
+
+            avances = rec.avances.sorted(lambda a: a.date_paid or "")
+
+            html = """
+                <style>
+                    .avance-container {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        max-width: 100%;
+                        padding: 10px;
+                    }
+
+                    .week-card {
+                        background: white;
+                        border-radius: 12px;
+                        border: 2px solid #e2e8f0;
+                        padding: 18px;
+                        margin: 22px 0;
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+                    }
+
+                    .week-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 15px;
+                        flex-wrap: wrap;
+                    }
+
+                    .week-title {
+                        font-size: 22px;
+                        font-weight: 700;
+                        color: #2b6cb0;
+                    }
+
+                    .week-total {
+                        background: #2b6cb0;
+                        color: white;
+                        padding: 8px 18px;
+                        border-radius: 10px;
+                        font-size: 17px;
+                        font-weight: 700;
+                    }
+
+                    .table-header, .list-row {
+                        display: grid;
+                        grid-template-columns: 0.8fr 0.8fr 1fr 1fr;
+                        padding: 12px 10px;
+                        border-radius: 8px;
+                    }
+
+                    .table-header {
+                        background: #e2e8f0;
+                        font-weight: 700;
+                        color: #2d3748;
+                    }
+
+                    .list-row {
+                        background: #f7fafc;
+                        margin-bottom: 8px;
+                        border-left: 4px solid #2b6cb0;
+                    }
+
+                    .amount {
+                        color: #2b6cb0;
+                        font-weight: 700;
+                    }
+                </style>
+
+                <div class="avance-container">
+            """
+
+            # ---------------------------------------
+            # GROUPER LES AVANCES PAR SEMAINE
+            # ---------------------------------------
+            groups = {}
+            for a in avances:
+
+                if a.date_paid:
+                    week = f"W{a.date_paid.isocalendar()[1]:02d}"
+                else:
+                    week = "Sans semaine"
+
+                groups.setdefault(week, []).append(a)
+
+            # ---------------------------------------
+            # BOUCLER SUR LES SEMAINES
+            # ---------------------------------------
+            for week, records in groups.items():
+
+                total_week = sum(r.amount for r in records)
+
+                html += f"""
+                    <div class="week-card">
+                        <div class="week-header">
+                            <div class="week-title">💵 Semaine {week}</div>
+                            <div class="week-total">{total_week:,.2f} Dh</div>
+                        </div>
+
+                        <div class="table-header">
+                            <div>Date</div>
+                            <div>Montant</div>
+                            <div>Mode</div>
+                            <div>Chauffeur</div>
+                        </div>
+                """
+
+                for a in records:
+                    html += f"""
+                        <div class="list-row">
+                            <div>{a.date_paid or ""}</div>
+                            <div class="amount">{a.amount} Dh</div>
+                            <div>{a.payment_mode or ""}</div>
+                            <div>{a.driver_id.name if a.driver_id else "-"}</div>
+                        </div>
+                    """
+
+                html += "</div>"
+
+            html += "</div>"
+
+            rec.avances_grouped_html = html

@@ -51,10 +51,12 @@
                     <group>
                         <field name="chq"/>
                         <field name="perso_id"/>
+                        <field name="benif_id"/>
                         <field name="date_emission"/>
                         <field name="week"/>
                         <field name="journal"/>
-                        <field name="date_echeance"/>
+                        <field name="date_echeance"
+                            attrs="{'readonly': [('benif_type', '=', 'import')]}" />
                         <field name="date_encaissement"/>
                         <field name="ste_id"/>
                         <field name="benif_id"/>

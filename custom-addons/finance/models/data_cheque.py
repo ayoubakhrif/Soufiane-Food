@@ -12,7 +12,7 @@ class DataCheque(models.Model):
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
-    date_echeance = fields.Date(string='Date d’échéance', tracking=True)
+    date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
@@ -34,6 +34,7 @@ class DataCheque(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
     ], store=True, string='Type', tracking=True)
+    benif_type = fields.Selection(related="benif_id.type", store=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -104,6 +105,14 @@ class DataCheque(models.Model):
                 rec.week = self.french_week_number(rec.date_emission)
             else:
                 rec.week = False
+
+    @api.depends('date_emission', 'benif_id.days', 'benif_id')
+    def _compute_date_echeance(self):
+        for rec in self:
+            if rec.date_emission and rec.benif_id and rec.benif_id.days:
+                rec.date_echeance = rec.date_emission + timedelta(days=rec.benif_id.days)
+            else:
+                rec.date_echeance = rec.date_emission
 
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ

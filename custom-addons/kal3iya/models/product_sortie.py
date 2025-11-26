@@ -98,38 +98,30 @@ class ProductExit(models.Model):
     # ------------------------------------------------------------
     @api.model
     def create(self, vals):
-        # Si final non renseigné, on copie la valeur initiale
+        # 1️⃣ Contrôle de stock avant création
+        stock = self.env['kal3iya.stock'].browse(vals.get('entry_id'))
+        if stock and vals.get('quantity', 0.0) > stock.quantity:
+            raise UserError(
+                f"Stock insuffisant: demande={vals.get('quantity')} > disponible={stock.quantity}."
+            )
+
+        # 2️⃣ Pré-remplir le prix final si non fourni
         if 'selling_price_final' not in vals and vals.get('selling_price'):
             vals['selling_price_final'] = vals['selling_price']
-        if 'tonnage_final' not in vals and vals.get('tonnage'):
-            vals['tonnage_final'] = vals['tonnage']
 
+        # 3️⃣ Création de l'enregistrement
         rec = super().create(vals)
+
+        # 4️⃣ Après création, tonnage est calculé → on peut copier tonnage_final
+        if not rec.tonnage_final:
+            rec.tonnage_final = rec.tonnage
+
+        # 5️⃣ Recalcul du stock restant
+        if stock:
+            stock.recompute_qty()
+
         return rec
-    
-    def action_refresh_parent(self):
-        """Sauvegarde, ferme le popup et actualise la vue parent"""
-        self.ensure_one()
-        
-        # Déclencher les recalculs nécessaires
-        if self.client_id:
-            self.client_id._compute_sorties_grouped_html()
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': 'Succès',
-                'message': 'Modifications enregistrées',
-                'type': 'success',
-                'sticky': False,
-                'next': {
-                    'type': 'ir.actions.client',
-                    'tag': 'reload',
-                }
-            }
-        }
-    
+
     def action_open_popup(self):
         """Ouvre le popup de modification"""
         return {
@@ -241,14 +233,7 @@ class ProductExit(models.Model):
     # ------------------------------------------------------------
     # CRUD OVERRIDES
     # ------------------------------------------------------------
-    @api.model
-    def create(self, vals):
-        stock = self.env['kal3iya.stock'].browse(vals.get('entry_id'))
-        if stock and vals.get('quantity', 0.0) > stock.quantity:
-            raise UserError(f"Stock insuffisant: demande={vals.get('quantity')} > disponible={stock.quantity}.")
-        rec = super().create(vals)
-        stock.recompute_qty()
-        return rec
+    
     
     def write(self, vals):
         # STOCK LOGIC (déjà existant)

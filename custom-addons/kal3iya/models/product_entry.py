@@ -93,7 +93,7 @@ class ProductEntry(models.Model):
     @api.depends('tonnage')
     def _compute_charge_transport(self):
         for rec in self:
-            rec.charge_transport = rec.tonnage * 20 if rec.tonnage else 0.0
+            rec.charge_transport = rec.tonnage * 0.02 if rec.tonnage else 0.0
 
     # ------------------------------------------------------------
     # REMPLISSAGE AUTOMATIQUE DE RETOUR

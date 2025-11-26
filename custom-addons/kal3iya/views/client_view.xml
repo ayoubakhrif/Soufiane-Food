@@ -64,17 +64,10 @@
                         <page string="Commandes">
                             <field name="sorties_grouped_html" nolabel="1" readonly="1"/>
                         </page>
-                        <page string="Retour">
-                            <field name="retour_ids" widget="sorties_html" readonly="1" nolabel="1">
-                                <tree>
-                                    <field name="name"/>
-                                    <field name="quantity"/>
-                                    <field name="selling_price"/>
-                                    <field name="date_entry"/>
-                                    <field name="driver_id"/>
-                                </tree>
-                            </field>
+                        <page string="Retours">
+                            <field name="retours_grouped_html" nolabel="1"/>
                         </page>
+
                         <page string="Avances">
                             <!-- One2many éditable directement dans la fiche client -->
                             <field name="avances" nolabel="1"

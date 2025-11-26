@@ -98,12 +98,10 @@ class ProductStock(models.Model):
             # 🔹 Retours sur la même combinaison
             returns = self.env['kal3iyaentry'].sudo().search([
                 ('state', '=', 'retour'),
-                ('lot', '=', stock.lot),
-                ('dum', '=', stock.dum),
-                ('frigo', '=', stock.frigo),
-                ('ville', '=', stock.ville),
+                ('return_id.entry_id', '=', stock.id),
             ])
             qty_returns = sum(r.quantity for r in returns)
+
 
             # 🔹 Sorties liées à cette ligne
             sorties = self.env['kal3iyasortie'].sudo().search([('entry_id', '=', stock.id)])

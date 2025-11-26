@@ -45,7 +45,7 @@ class ProductEntry(models.Model):
     client_id = fields.Many2one('kal3iya.client', string='Client', tracking=True)
 
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
-
+    week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     charge_transport = fields.Float(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
 
     state = fields.Selection([
@@ -94,6 +94,14 @@ class ProductEntry(models.Model):
     def _compute_charge_transport(self):
         for rec in self:
             rec.charge_transport = rec.tonnage * 0.02 if rec.tonnage else 0.0
+
+    @api.depends('date_entry')
+    def _compute_week(self):
+        for record in self:
+            if record.date_entry:
+                record.week = record.date_entry.strftime("%Y-W%W")
+            else:
+                record.week = False
 
     # ------------------------------------------------------------
     # REMPLISSAGE AUTOMATIQUE DE RETOUR

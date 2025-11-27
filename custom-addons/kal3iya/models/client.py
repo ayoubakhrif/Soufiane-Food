@@ -98,6 +98,7 @@ class Kal3iyaClient(models.Model):
     'sortie_ids.selling_price_final',
     'sortie_ids.date_exit',
     'sortie_ids.week',
+    'compte'
     )
     def _compute_sorties_grouped_html(self):
         for rec in self:

@@ -12,7 +12,7 @@ class ProductEntry(models.Model):
     # CHAMPS
     # ------------------------------------------------------------
     name = fields.Char(string='Nom du produit', required=True, tracking=True)
-    quantity = fields.Integer(string='Quantité', required=True, tracking=True, group_operator="sum")
+    quantity = fields.Float(string='Quantité', required=True, tracking=True, group_operator="sum")
     price = fields.Float(string='Prix d’achat', required=True, tracking=True)
     selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
     date_entry = fields.Date(string='Date d’entrée', tracking=True)

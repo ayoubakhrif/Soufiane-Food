@@ -58,7 +58,7 @@
         <field name="name">kal3iya.stock.tree</field>
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
-            <tree editable="false" create="false" delete="false">
+            <tree>
                 <field name="name"/>
                 <field name="tonnage"/>
                 <field name="mt_achat"/>

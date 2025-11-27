@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 class Kal3iyaClient(models.Model):
     _name = 'kal3iya.client'
@@ -62,6 +63,14 @@ class Kal3iyaClient(models.Model):
     def _compute_retour_count(self):
         for rec in self:
             rec.retour_count = len(rec.retour_ids)
+
+    def write(self, vals):
+        for rec in self:
+            # si tentative de modification et non création
+            if 'compte_initial' in vals and rec.compte_initial:
+                raise UserError("Impossible de modifier le compte initial après création.")
+        return super().write(vals)
+
 
 
     @api.depends(

@@ -207,22 +207,23 @@ class Kal3iyaClient(models.Model):
                 <div class="sorties-container">
             """
             html += f"""
-                <div style="
-                    text-align:center;
-                    font-size:24px;
-                    font-weight:800;
-                    color:#4c51bf;
-                    margin: 20px 0;
-                    padding: 12px 24px;
-                    display:inline-block;
-                    background:#ebf4ff;
-                    border:2px solid #4c51bf;
-                    border-radius:12px;
-                    box-shadow:0 4px 14px rgba(76,81,191,0.25);
-                ">
-                    💰 Total Compte : {rec.compte:,.2f} Dh
+                <div style="width:100%; text-align:center; margin-bottom:25px;">
+                    <div style="
+                        font-size:26px;
+                        font-weight:800;
+                        color:#4c51bf;
+                        padding: 14px 28px;
+                        display:inline-block;
+                        background:#ebf4ff;
+                        border:2px solid #4c51bf;
+                        border-radius:14px;
+                        box-shadow:0 4px 14px rgba(76,81,191,0.25);
+                    ">
+                        💰 Total Compte : {rec.compte:,.2f} Dh
+                    </div>
                 </div>
             """
+
 
 
             sorties = rec.sortie_ids.sorted(lambda s: s.date_exit or "")

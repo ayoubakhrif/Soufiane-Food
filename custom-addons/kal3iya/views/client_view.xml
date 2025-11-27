@@ -44,10 +44,12 @@
                     <group>
                         <group col="2">
                             <field name="name" nolabel="1"/>
-                            <field name="compte_initial" modifiers="{'readonly': [('id', '!=', False)]}"/>
+                            <field name="compte_initial"/>
                         </group>
                     </group>
-
+                    <xpath expr="//field[@name='compte_initial']" position="attributes">
+                        <attribute name="modifiers">{'readonly': [('id','!=', False)]}</attribute>
+                    </xpath>
                     <!-- Espacement visuel -->
                     <separator string="Historique du client" colspan="2"/>
 

@@ -44,10 +44,10 @@
                     <group>
                         <group col="2">
                             <field name="name" nolabel="1"/>
-                            <field name="compte_initial"/>
+                            <field name="compte_initial" modifiers="{'readonly': [('id', '!=', False)]}"/>
                         </group>
                     </group>
-                    
+
                     <!-- Espacement visuel -->
                     <separator string="Historique du client" colspan="2"/>
 
@@ -100,6 +100,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
+                <field name="compte"/>
                 <field name="sortie_count"/>
                 <field name="retour_count"/>
             </tree>

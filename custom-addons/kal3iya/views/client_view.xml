@@ -42,12 +42,12 @@
                     </div>
 
                     <group>
-                        <group col="2">
-                            <field name="name" nolabel="1"/>
+                        <group>
+                            <field name="name"/>
                             <field name="compte_initial"/>
                         </group>
                     </group>
-                    
+
                     <!-- Espacement visuel -->
                     <separator string="Historique du client" colspan="2"/>
 

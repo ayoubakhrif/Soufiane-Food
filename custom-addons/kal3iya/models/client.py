@@ -67,8 +67,9 @@ class Kal3iyaClient(models.Model):
     def write(self, vals):
         for rec in self:
             # si tentative de modification et non création
-            if 'compte_initial' in vals and rec.compte_initial:
-                raise UserError("Impossible de modifier le compte initial après création.")
+            if 'compte_initial' in vals:
+                if rec.id:
+                    raise UserError("Impossible de modifier le compte initial après création.")
         return super().write(vals)
 
 

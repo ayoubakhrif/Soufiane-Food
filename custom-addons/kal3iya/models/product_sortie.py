@@ -34,7 +34,7 @@ class ProductExit(models.Model):
         store=True, 
         readonly=False
     )
-    quantity = fields.Integer(string='Qté', required=True, tracking=True, group_operator="sum")
+    quantity = fields.Float(string='Qté', required=True, tracking=True, group_operator="sum")
     selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
     date_exit = fields.Date(string='Date de sortie', required=True, tracking=True)
     tonnage = fields.Float(string='Tonnage(Kg)', compute='_compute_tonnage', store=True, readonly=True)

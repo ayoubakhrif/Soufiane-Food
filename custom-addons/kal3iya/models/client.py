@@ -35,6 +35,7 @@ class Kal3iyaClient(models.Model):
 
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
     compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
+    compte_initial = fields.Float(string='Compte initial')
 
     @api.depends('sortie_ids')
     def _compute_sortie_count(self):
@@ -85,7 +86,7 @@ class Kal3iyaClient(models.Model):
             total_retours = sum(r.selling_price*r.tonnage for r in retours)
 
             # 🧮 Calcul final
-            client.compte = total_ventes - total_avances - total_retours
+            client.compte = total_ventes - total_avances - total_retours + client.compte_initial
 
     @api.depends(
     'sortie_ids',

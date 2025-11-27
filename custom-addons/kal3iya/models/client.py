@@ -70,7 +70,8 @@ class Kal3iyaClient(models.Model):
         'avances.amount',
         'retour_ids.selling_price',
         'retour_ids.tonnage',
-        'retour_ids.state'
+        'retour_ids.state',
+        'compte_initial'
     )
     def _compute_compte(self):
         """Compte = ventes - avances - retours"""

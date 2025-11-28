@@ -17,7 +17,13 @@ class ProductExit(models.Model):
 
     lot = fields.Char(string='Lot', related='entry_id.lot', store=True, readonly=True)
     dum = fields.Char(string='DUM', related='entry_id.dum', store=True, readonly=True)
-    name = fields.Char(string='Nom du produit', related='entry_id.name', store=True, readonly=True)
+    product_id = fields.Many2one(
+        'kal3iya.product', 
+        string='Produit',
+        related='entry_id.product_id', 
+        store=True, 
+        readonly=True
+    )
     weight = fields.Float(string='Poids (kg)', related='entry_id.weight', store=True, readonly=True)
     calibre = fields.Char(string='Calibre', related='entry_id.calibre', store=True, readonly=True)
     ste_id = fields.Many2one(
@@ -206,12 +212,12 @@ class ProductExit(models.Model):
         store=False
     )
 
-    @api.depends('client_id', 'name', 'lot', 'dum', 'quantity')
+    @api.depends('client_id', 'product_id', 'lot', 'dum', 'quantity')
     def _compute_display_name(self):
         """Construit le texte affiché dans les menus déroulants"""
         for rec in self:
             client = rec.client_id.name or ''
-            produit = rec.name or ''
+            produit = rec.product_id.name or ''
             lot = rec.lot or ''
             dum = rec.dum or ''
             qty = rec.quantity or 0
@@ -222,7 +228,7 @@ class ProductExit(models.Model):
         result = []
         for rec in self:
             client = rec.client_id.name or ''
-            produit = rec.name or ''
+            produit = rec.product_id.name or ''
             lot = rec.lot or ''
             dum = rec.dum or ''
             qty = rec.quantity or 0

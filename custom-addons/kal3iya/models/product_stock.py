@@ -12,7 +12,7 @@ class ProductStock(models.Model):
         help="Entrée de stock à l'origine de cette ligne",
     )
     
-    name = fields.Char(string='Nom du produit', required=True)
+    product_id = fields.Many2one('kal3iya.product', string='Nom du produit', optional=True)
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     frigo = fields.Selection([
@@ -40,31 +40,31 @@ class ProductStock(models.Model):
         store=False
     )
 
-    _order = 'name asc, quantity asc'
+    _order = 'product_id asc, quantity asc'
 
-    @api.depends('name')
+    @api.depends('product_id')
     def _compute_qty_total_group(self):
         for rec in self:
-            total = sum(self.search([('name', '=', rec.name)]).mapped('quantity'))
+            total = sum(self.search([('product_id', '=', rec.product_id)]).mapped('quantity'))
             rec.qty_total_group = total
     # ------------------------------------------------------------
     # AFFICHAGE
     # ------------------------------------------------------------
     display_name = fields.Char(string='Nom affiché', compute='_compute_display_name', store=False)
 
-    @api.depends('name', 'lot', 'dum', 'frigo', 'ville')
+    @api.depends('product_id', 'lot', 'dum', 'frigo', 'ville')
     def _compute_display_name(self):
         """Construit le texte affiché dans les menus déroulants"""
         for rec in self:
             frigo_label = dict(self._fields['frigo'].selection).get(rec.frigo, rec.frigo or '')
-            rec.display_name = f"{rec.name} – Lot {rec.lot} – DUM {rec.dum} – {frigo_label}"
+            rec.display_name = f"{rec.product_id} – Lot {rec.lot} – DUM {rec.dum} – {frigo_label}"
 
     def name_get(self):
         """Afficher: Produit_lot_dum_frigo"""
         result = []
         for record in self:
             frigo_label = dict(self._fields['frigo'].selection).get(record.frigo, record.frigo or '')
-            name = f"{record.name}_{record.lot}_{record.dum}_{frigo_label}"
+            name = f"{record.product_id}_{record.lot}_{record.dum}_{frigo_label}"
             result.append((record.id, name))
         return result
 

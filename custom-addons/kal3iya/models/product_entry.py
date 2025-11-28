@@ -11,7 +11,7 @@ class ProductEntry(models.Model):
     # ------------------------------------------------------------
     # CHAMPS
     # ------------------------------------------------------------
-    name = fields.Char(string='Nom du produit', required=True, tracking=True)
+    product_id = fields.Many2one('kal3iya.product', string='Nom du produit', tracking=True)
     quantity = fields.Float(string='Quantité', required=True, tracking=True, group_operator="sum")
     price = fields.Float(string='Prix d’achat', required=True, tracking=True)
     selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
@@ -113,7 +113,7 @@ class ProductEntry(models.Model):
             sortie = self.return_id
             self.lot = sortie.lot
             self.dum = sortie.dum
-            self.name = sortie.name
+            self.product_id = sortie.product_id
             self.weight = sortie.weight
             self.calibre = sortie.calibre
             self.ste_id = sortie.ste_id
@@ -169,7 +169,7 @@ class ProductEntry(models.Model):
         if rec.state == 'entree':
             self.env['kal3iya.stock'].sudo().create({
                 'entry_id': rec.id,
-                'name': rec.name,
+                'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'quantity': rec.quantity,
@@ -204,7 +204,7 @@ class ProductEntry(models.Model):
                 stock = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)], limit=1)
                 if stock:
                     stock.write({
-                        'name': rec.name,
+                        'product_id': rec.product_id.id,
                         'lot': rec.lot,
                         'dum': rec.dum,
                         'quantity': rec.quantity,

@@ -1,7 +1,7 @@
 <odoo>
-    <record id="kal3iyaprovider_action" model="ir.actions.act_window">
-        <field name="name">Fournisseurs</field>
-        <field name="res_model">kal3iya.provider</field>
+    <record id="kal3iyaproduct_action" model="ir.actions.act_window">
+        <field name="name">Produits</field>
+        <field name="res_model">kal3iya.product</field>
         <field name="view_mode">tree,form</field>
     </record>
 
@@ -17,10 +17,10 @@
         parent="Kal3iya_root_menu"
     />
     <menuitem 
-        id="provider_menu"
-        name="Fournisseurs"
+        id="product_menu"
+        name="Produits"
         parent="data_menu"
-        action="kal3iyaprovider_action"
+        action="kal3iyaproduct_action"
     />
 
     <menuitem 
@@ -30,9 +30,9 @@
         action="kal3iyaste_action"
     />
     
-    <record id="provider_view_tree" model="ir.ui.view">
-        <field name="name">provider tree</field>
-        <field name="model">kal3iya.provider</field>
+    <record id="product_view_tree" model="ir.ui.view">
+        <field name="name">product tree</field>
+        <field name="model">kal3iya.product</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>

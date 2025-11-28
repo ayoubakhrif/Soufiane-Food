@@ -21,7 +21,7 @@
             <tree>
                 <field name="date_exit"/>
                 <field name="client_id"/>
-                <field name="name"/>
+                <field name="product_id"/>
                 <field name="dum"/>
                 <field name="lot"/>
                 <field name="calibre"/>
@@ -62,7 +62,7 @@
                         <field name="cellphone"/>
                     </group>
                     <group>
-                        <field name="name" readonly="1"/>
+                        <field name="product_id" readonly="1"/>
                         <field name="weight" readonly="1"/>
                         <field name="tonnage" readonly="1"/>
                         <field name="calibre" readonly="1"/>
@@ -93,7 +93,7 @@
         <field name="model">kal3iyasortie</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
+                <field name="product_id"/>
                 <field name="dum"/>
                 <field name="lot"/>
                 <field name="client_id"/>

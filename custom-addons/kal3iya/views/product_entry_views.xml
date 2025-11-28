@@ -25,7 +25,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="date_entry"/>
-                <field name="name"/>
+                <field name="product_id"/>
                 <field name="quantity"/>
                 <field name="weight"/>
                 <field name="tonnage" optional="1"/>
@@ -61,7 +61,7 @@
                     </group>
                     <group>
                         <field name="client_id" invisible="state == 'entree'"/>
-                        <field name="name"/>
+                        <field name="product_id"/>
                         <field name="quantity"/>
                         <field name="weight"/>
                         <field name="tonnage"/>
@@ -93,7 +93,7 @@
         <field name="model">kal3iyaentry</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
+                <field name="product_id"/>
                 <field name="dum"/>
                 <field name="lot"/>
                 <field name="state"/>

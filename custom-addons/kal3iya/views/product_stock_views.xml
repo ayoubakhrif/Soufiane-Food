@@ -4,8 +4,8 @@
         <field name="name">kal3iya.stock.kanban</field>
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
-           <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false" default_group_by="name">
-                <field name="name"/>
+           <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false" default_group_by="product_id">
+                <field name="product_id"/>
                 <field name="quantity"/>
                 <field name="calibre"/>
                 <field name="price"/>
@@ -35,7 +35,7 @@
                             <!-- 📋 Détails à droite -->
                             <div class="flex-grow-1">
                                 <div style="font-weight:600; font-size:14px; color:#2b2b2b; margin-bottom:6px;">
-                                    <field name="name"/>
+                                    <field name="product_id"/>
                                 </div>
                                 <div style="font-size:13px; color:#444; line-height:1.5;">
                                     <div><b>Quantité :</b> <field name="quantity"/></div>
@@ -59,7 +59,7 @@
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="name"/>
+                <field name="product_id"/>
                 <field name="tonnage"/>
                 <field name="mt_achat"/>
             </tree>

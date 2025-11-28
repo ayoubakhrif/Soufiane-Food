@@ -7,3 +7,5 @@ access_kal3iya_provider,access_kal3iya_provider,model_kal3iya_provider,base.grou
 access_kal3iya_ste,access_kal3iya_ste,model_kal3iya_ste,base.group_user,1,1,1,1
 access_kal3iya_stock,access_kal3iya_stock,model_kal3iya_stock,base.group_user,1,1,1,1
 access_kal3iya_advance,access_kal3iya_advance,model_kal3iya_advance,base.group_user,1,1,1,1
+access_kal3iya_product,access_kal3iya_product,model_kal3iya_product,base.group_user,1,1,1,1
+

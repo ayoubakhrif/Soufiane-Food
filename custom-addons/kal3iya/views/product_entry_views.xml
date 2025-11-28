@@ -25,6 +25,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="date_entry"/>
+                <field name="name"/>
                 <field name="product_id"/>
                 <field name="quantity"/>
                 <field name="weight"/>
@@ -62,6 +63,7 @@
                     <group>
                         <field name="client_id" invisible="state == 'entree'"/>
                         <field name="product_id"/>
+                        <field name="name"/>
                         <field name="quantity"/>
                         <field name="weight"/>
                         <field name="tonnage"/>

@@ -101,7 +101,7 @@ class Kal3iyaClient(models.Model):
 
     @api.depends(
     'sortie_ids',
-    'sortie_ids.name',
+    'sortie_ids.product_id',
     'sortie_ids.quantity',
     'sortie_ids.weight',
     'sortie_ids.tonnage_final',
@@ -278,7 +278,7 @@ class Kal3iyaClient(models.Model):
 
                     html += f"""
                         <div class="list-row">
-                            <div class="col-label">{s.name}</div>
+                            <div class="col-label">{s.product_id}</div>
                             <div class="col-value">{s.quantity}</div>
                             <div class="col-value">{s.weight}</div>
                             <div class="col-value">{s.tonnage_final or s.tonnage}</div>
@@ -301,7 +301,7 @@ class Kal3iyaClient(models.Model):
 
     @api.depends(
         'retour_ids',
-        'retour_ids.name',
+        'retour_ids.product_id',
         'retour_ids.quantity',
         'retour_ids.weight',
         'retour_ids.tonnage',
@@ -439,7 +439,7 @@ class Kal3iyaClient(models.Model):
 
                     html += f"""
                         <div class="list-row">
-                            <div class="col-label">{r.name}</div>
+                            <div class="col-label">{r.product_id}</div>
                             <div class="col-value">{r.quantity}</div>
                             <div class="col-value">{r.weight}</div>
                             <div class="col-value">{r.tonnage}</div>

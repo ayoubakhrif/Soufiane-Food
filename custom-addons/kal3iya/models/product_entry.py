@@ -11,7 +11,6 @@ class ProductEntry(models.Model):
     # ------------------------------------------------------------
     # CHAMPS
     # ------------------------------------------------------------
-    name = fields.Char(string='Nom du produit')
     product_id = fields.Many2one('kal3iya.product', string='Nom du produit', tracking=True)
     quantity = fields.Float(string='Quantité', required=True, tracking=True, group_operator="sum")
     price = fields.Float(string='Prix d’achat', required=True, tracking=True)

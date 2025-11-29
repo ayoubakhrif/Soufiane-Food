@@ -2,7 +2,11 @@
     <record id="group_kal3iya_user" model="res.groups">
         <field name="name">Utilisateur kal3iya</field>
         <field name="category_id" ref="base.module_category_hidden"/>
-        <!-- Très important : retirer le groupe utilisateur interne (sinon il voit tout) -->
+
+        <!-- Empêcher l'accès automatique à Odoo -->
         <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
+        <field name="implied_ids" eval="[(3, ref('base.group_partner_manager'))]"/>
+        <field name="implied_ids" eval="[(3, ref('base.group_erp_manager'))]"/>
+        <field name="implied_ids" eval="[(3, ref('base.group_system'))]"/>
     </record>
 </odoo>

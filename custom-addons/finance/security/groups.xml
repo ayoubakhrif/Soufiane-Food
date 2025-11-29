@@ -1,6 +1,7 @@
 <odoo>
-    <record id="group_finance_user" model="res.groups" forcecreate="True">
+    <record id="group_finance_user" model="res.groups">
         <field name="name">Utilisateur finance</field>
-        <field name="category_id" ref="base.module_category_inventory"/>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
     </record>
 </odoo>

@@ -148,19 +148,21 @@ class ProductExit(models.Model):
     
     @api.onchange('ville')
     def _onchange_ville(self):
-        """Filtrer le stock selon la ville choisie."""
+        """Filtrer stock selon ville + texte tapé dans la recherche."""
+        search = self._context.get('search_term', '')
+
+        domain = []
+
+        # Filtrer selon ville
         if self.ville:
-            return {
-                'domain': {
-                    'entry_id': [('ville', '=', self.ville)]
-                }
-            }
-        else:
-            return {
-                'domain': {
-                    'entry_id': []
-                }
-            }
+            domain.append(('ville', '=', self.ville))
+
+        # Filtrer selon texte tapé
+        if search:
+            domain.append(('product_id.name', 'ilike', search))
+
+        return {'domain': {'entry_id': domain}}
+
 
 
     # ------------------------------------------------------------

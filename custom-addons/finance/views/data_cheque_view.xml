@@ -61,7 +61,7 @@
                         <field name="amount"/>
                         <field name="facture"/>
                         <field name="serie" invisible="facture in ['m', 'bureau']"/>
-                        <field name="type"/>
+                        <field name="type" options="{'horizontal': true}"/>
                     </group>
                 </sheet>
             </form>

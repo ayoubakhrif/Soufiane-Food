@@ -2,14 +2,11 @@
 <odoo>
     <template id="custom_login_logo" inherit_id="web.login" name="Custom Login Logo">
         
-        <!-- Remplacer complètement le div contenant le logo par défaut -->
-        <xpath expr="//div[contains(@class, 'text-center') and .//img[@src='/web/static/img/logo.png']]" position="replace">
-            <div class="text-center mb-4">
-                <img src="/custom_login_logo/static/src/img/logo.png"
-                     alt="Company Logo"
-                     class="img-fluid"
-                     style="max-width: 250px; height: auto;"/>
-            </div>
+        <!-- Trouver et remplacer l'image du logo -->
+        <xpath expr="//img[contains(@src, 'logo')]" position="replace">
+            <img src="/custom_login_logo/static/src/img/logo.png"
+                 alt="Company Logo"
+                 style="max-width: 200px; height: auto;"/>
         </xpath>
         
     </template>

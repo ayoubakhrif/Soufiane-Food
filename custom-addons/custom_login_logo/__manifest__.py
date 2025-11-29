@@ -1,14 +1,14 @@
 {
     'name': "Custom Login Logo",
-    'version': '1.0',
+    'version': '17.0.1.0.0',
     'author': "Ayoub Akhrif",
+    'category': 'Website',
+    'summary': 'Personnaliser le logo de la page de login',
     'depends': ['web'],
     'data': [
         'views/login_inherit.xml',
     ],
-    'assets': {
-        'web.assets_frontend': [
-            'custom_login_logo/static/src/css/login.scss',
-        ],
-    },
+    'installable': True,
+    'application': False,
+    'license': 'LGPL-3',
 }

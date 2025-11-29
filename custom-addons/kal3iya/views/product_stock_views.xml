@@ -73,6 +73,7 @@
             <pivot string="Analyse stock">
                 <field name="product_id" type="row"/>
                 <field name="mt_achat" type="measure"/>
+                <field name="tonnage" type="measure"/>
             </pivot>
         </field>
     </record>

@@ -50,7 +50,7 @@ class ProductExit(models.Model):
     diff = fields.Float(string='Différence', compute='_compute_diff', store=True, group_operator="sum")
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur', tracking=True)
     cellphone = fields.Char(string='Téléphone', related='driver_id.phone', readonly=True)
-    client_id = fields.Many2one('kal3iya.client', tracking=True)
+    client_id = fields.Many2one('kal3iya.client', tracking=True, required=True)
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
@@ -256,7 +256,6 @@ class ProductExit(models.Model):
                 old_qty = rec.quantity
                 new_qty = vals['quantity']
                 diff = new_qty - old_qty
-
                 if diff > 0 and diff > rec.entry_id.quantity:
                     raise UserError(
                         f"Stock insuffisant : demande +{diff} > disponible {rec.entry_id.quantity}."

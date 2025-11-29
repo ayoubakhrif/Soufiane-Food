@@ -278,7 +278,7 @@ class Kal3iyaClient(models.Model):
 
                     html += f"""
                         <div class="list-row">
-                            <div class="col-label">{s.product_id}</div>
+                            <div class="col-label">{s.product_id.name}</div>
                             <div class="col-value">{s.quantity}</div>
                             <div class="col-value">{s.weight}</div>
                             <div class="col-value">{s.tonnage_final or s.tonnage}</div>
@@ -439,7 +439,7 @@ class Kal3iyaClient(models.Model):
 
                     html += f"""
                         <div class="list-row">
-                            <div class="col-label">{r.product_id}</div>
+                            <div class="col-label">{r.product_id.name}</div>
                             <div class="col-value">{r.quantity}</div>
                             <div class="col-value">{r.weight}</div>
                             <div class="col-value">{r.tonnage}</div>

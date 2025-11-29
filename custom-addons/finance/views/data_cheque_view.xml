@@ -55,7 +55,8 @@
                         <field name="date_emission"/>
                         <field name="week"/>
                         <field name="journal"/>
-                        <field name="date_echeance" modifiers="{'readonly': [('benif_id.type', '=', 'import')]}" />
+                        <field name="benif_type" invisible="1"/>
+                        <field name="date_echeance" modifiers="{'readonly': [('benif_type', '=', 'import')]}" />
                         <field name="date_encaissement"/>
                         <field name="amount"/>
                         <field name="type" options="{'horizontal': true}"/>

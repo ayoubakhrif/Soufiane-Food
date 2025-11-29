@@ -15,7 +15,7 @@ class DataCheque(models.Model):
     date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
-    benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
+    benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True)
     perso_id = fields.Many2one('finance.perso', string='Personnes', tracking=True, required=True)
     facture = fields.Selection([
         ('m', 'M'),
@@ -115,7 +115,7 @@ class DataCheque(models.Model):
                 rec.date_echeance = rec.date_emission
 
     # ------------------------------------------------------------
-    # CONTRAINTE D’UNICITÉ
+    # CONTRAINTES
     # ------------------------------------------------------------
     @api.onchange('chq')
     def _onchange_chq_checks(self):
@@ -142,6 +142,19 @@ class DataCheque(models.Model):
     _sql_constraints = [
         ('unique_chq_ste', 'unique(chq, ste_id)', '⚠️ Ce numéro du chèque existe déja pour cette société.')
     ]
+
+    @api.constrains('state')
+    def _check_state_annule(self):
+        for rec in self:
+            if rec.state == 'annule':
+
+                annule_perso = rec._get_annule_perso()
+                if annule_perso:
+                    rec.perso_id = annule_perso
+
+                rec.date_echeance = False
+                rec.benif_id = False
+                rec.serie = "Annulé"
 
     # ------------------------------------------------------------
     # Bureau state

@@ -1,11 +1,8 @@
 <odoo>
     <record id="group_kal3iya_user" model="res.groups">
         <field name="name">Utilisateur kal3iya</field>
-        <field name="category_id" ref="base.module_category_inventory"/>
-    </record>
-
-    <record id="group_admin" model="res.groups">
-        <field name="name">Admins de groupe</field>
-        <field name="category_id" ref="base.module_category_inventory"/>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <!-- Très important : retirer le groupe utilisateur interne (sinon il voit tout) -->
+        <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
     </record>
 </odoo>

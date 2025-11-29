@@ -86,6 +86,18 @@
         <field name="view_id" ref="view_kal3iya_stock_kanban"/>
     </record>
 
+    <record id="stock_view_search" model="ir.ui.view">
+        <field name="name">stock search</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="dum"/>
+                <field name="lot"/>
+            </search>
+        </field>
+    </record>
+
     <menuitem id="menu_kal3iya_stock" name="Stock"
               parent="Kal3iya_root_menu"
               action="action_kal3iya_stock"/>

@@ -54,7 +54,9 @@
                 <sheet>
                     <group>
                         <field name="ville" required="1"/>
-                        <field name="entry_id" required="1" domain="[('ville', '=', ville)]"/>
+                        <field name="entry_id" 
+                            domain="[('ville', '=', ville), ('quantity', '>', 0)]"
+                            options="{'no_create': True}"/>
                         <field name="date_exit"/>
                         <field name="quantity"/>
                         <field name="selling_price"/>

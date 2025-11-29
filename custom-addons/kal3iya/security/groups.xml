@@ -1,12 +1,11 @@
 <odoo>
     <record id="group_kal3iya_user" model="res.groups">
         <field name="name">Utilisateur kal3iya</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
 
-        <!-- Empêcher l'accès automatique à Odoo -->
+        <!-- Catégorie visible pour TOUS types d'utilisateurs -->
+        <field name="category_id" ref="base.module_category_user_type"/>
+
+        <!-- Empêcher d’hériter des droits internes -->
         <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
-        <field name="implied_ids" eval="[(3, ref('base.group_partner_manager'))]"/>
-        <field name="implied_ids" eval="[(3, ref('base.group_erp_manager'))]"/>
-        <field name="implied_ids" eval="[(3, ref('base.group_system'))]"/>
     </record>
 </odoo>

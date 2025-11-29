@@ -126,18 +126,21 @@ class DataCheque(models.Model):
                 raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")
 
             # 2️⃣ Unicité
-            if rec.chq:
-                domain = [('chq', '=', rec.chq)]
+            if rec.chq and rec.ste_id:
+                domain = [
+                    ('chq', '=', rec.chq)
+                    ('ste_id', '=', rec.ste_id.id)
+                    ]
 
                 if rec.id:
                     domain.append(('id', '!=', rec.id))
 
                 existing = self.env['datacheque'].search(domain, limit=1)
                 if existing:
-                    raise ValidationError("⚠️ Ce numéro de chèque existe déjà. Il doit être unique.")
+                    raise ValidationError("⚠️ Ce numéro du chèque existe déja pour cette société.")
 
     _sql_constraints = [
-        ('unique_chq', 'unique(chq)', '⚠️ Le numéro du chèque doit être unique.')
+        ('unique_chq_ste', 'unique(chq, ste_id)', '⚠️ Ce numéro du chèque existe déja pour cette société.')
     ]
 
     # ------------------------------------------------------------

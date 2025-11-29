@@ -8,7 +8,7 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'custom_login_logo/static/src/css/login.css',
+            'custom_login_logo/static/src/css/login.scss',
         ],
     },
 }

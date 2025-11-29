@@ -100,7 +100,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="compte"/>
+                <field name="compte" sum="Compte client"/>
                 <field name="sortie_count"/>
                 <field name="retour_count"/>
             </tree>

@@ -63,8 +63,9 @@ class ProductStock(models.Model):
         """Afficher: Produit_lot_dum_frigo"""
         result = []
         for record in self:
+            product = record.product_id.name or ''
             frigo_label = dict(self._fields['frigo'].selection).get(record.frigo, record.frigo or '')
-            name = f"{record.product_id.name}_{record.lot}_{record.dum}_{frigo_label}"
+            name = f"{product}_{record.lot}_{record.dum}_{frigo_label}"
             result.append((record.id, name))
         return result
 

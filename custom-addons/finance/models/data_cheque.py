@@ -128,8 +128,8 @@ class DataCheque(models.Model):
             # 2️⃣ Unicité
             if rec.chq and rec.ste_id:
                 domain = [
-                    ('chq', '=', rec.chq)
-                    ('ste_id', '=', rec.ste_id.id)
+                    ('chq', '=', rec.chq),
+                    ('ste_id', '=', rec.ste_id.id),
                 ]
 
                 if rec.id:

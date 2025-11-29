@@ -146,6 +146,8 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # Bureau state
     # ------------------------------------------------------------
+    def _get_annule_perso(self):
+        return self.env['finance.perso'].search([('name', '=', 'Annulé')], limit=1)
     @api.onchange('state')
     def _onchange_state_force_facture(self):
         for rec in self:

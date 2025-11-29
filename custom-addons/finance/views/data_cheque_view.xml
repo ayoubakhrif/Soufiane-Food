@@ -24,7 +24,6 @@
             <tree>
                 <field name="ste_id"/>
                 <field name="chq"/>
-                <field name="perso_id"/>
                 <field name="date_emission"/>
                 <field name="week"/>
                 <field name="journal"/>
@@ -32,9 +31,10 @@
                 <field name="date_encaissement"/>
                 <field name="benif_id"/>
                 <field name="amount"/>
+                <field name="type"/>
                 <field name="state" optional="1"/>
                 <field name="facture_tag" widget="html" readonly="1"/>
-                <field name="type"/>
+                <field name="perso_id"/>
             </tree>
         </field>
     </record>
@@ -51,17 +51,17 @@
                     <group>
                         <field name="ste_id"/>
                         <field name="chq"/>
-                        <field name="perso_id"/>
-                        <field name="benif_id"/>
                         <field name="date_emission"/>
                         <field name="week"/>
                         <field name="journal"/>
                         <field name="date_echeance" modifiers="{'readonly': [('benif_type', '=', 'import')]}" />
                         <field name="date_encaissement"/>
+                        <field name="benif_id"/>
                         <field name="amount"/>
+                        <field name="type" options="{'horizontal': true}"/>
                         <field name="facture"/>
                         <field name="serie" invisible="facture in ['m', 'bureau']"/>
-                        <field name="type" options="{'horizontal': true}"/>
+                        <field name="perso_id"/>
                     </group>
                 </sheet>
             </form>

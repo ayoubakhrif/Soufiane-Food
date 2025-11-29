@@ -2,25 +2,19 @@
 <odoo>
     <template id="custom_login_logo" inherit_id="web.login" name="Custom Login Logo">
         
-        <!-- Cacher uniquement les images de logo par défaut -->
+        <!-- Cacher le logo par défaut -->
         <xpath expr="//head" position="inside">
             <style>
-                /* Cacher toutes les images dans le premier div text-center */
-                .card-body .text-center img {
+                .card-body > .text-center.pb-3 {
                     display: none !important;
-                }
-                
-                /* Réafficher votre logo personnalisé */
-                .custom-company-logo img {
-                    display: block !important;
                 }
             </style>
         </xpath>
         
-        <!-- Ajouter votre logo personnalisé -->
+        <!-- Ajouter votre logo -->
         <xpath expr="//form" position="before">
-            <div class="custom-company-logo" style="text-align: center; margin-bottom: 20px;">
-                <img t-att-src="'/custom_login_logo/static/src/img/logo.png'"
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="/custom_login_logo/static/src/img/logo.png"
                      alt="Company Logo"
                      style="max-width: 200px; height: auto;"/>
             </div>

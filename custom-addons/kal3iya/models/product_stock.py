@@ -12,7 +12,7 @@ class ProductStock(models.Model):
         help="Entrée de stock à l'origine de cette ligne",
     )
     
-    product_id = fields.Many2one('kal3iya.product', string='Nom du produit', optional=True)
+    product_id = fields.Many2one('kal3iya.product', string='Nom du produit', optional=True, store=True)
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     frigo = fields.Selection([

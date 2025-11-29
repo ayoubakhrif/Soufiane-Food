@@ -158,4 +158,18 @@ class DataCheque(models.Model):
             if rec.state == 'bureau' and rec.facture != 'bureau':
                 rec.facture = 'bureau'
 
-    
+    # ------------------------------------------------------------
+    # if state == Annulé
+    # ------------------------------------------------------------
+    @api.onchange('state')
+    def _onchange_state_annule(self):
+        for rec in self:
+            if rec.state == 'annule':
+
+                annule_perso = rec._get_annule_perso()
+                if annule_perso:
+                    rec.perso_id = annule_perso
+
+                rec.date_echeance = False
+                rec.benif_id = False
+                rec.serie = "Annulé"

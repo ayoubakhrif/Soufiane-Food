@@ -1,9 +1,15 @@
+/* Style de ton propre logo */
 .o_login_logo {
     text-align: center;
     margin: 20px 0;
-    
-    img {
-        max-width: 200px;
-        height: auto;
-    }
+}
+
+.o_login_logo img {
+    max-width: 200px;
+    height: auto;
+}
+
+/* Masquer le logo Odoo "Your logo" */
+.o_company_logo {
+    display: none !important;
 }

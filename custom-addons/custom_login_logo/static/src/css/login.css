@@ -1,0 +1,9 @@
+.o_login_logo {
+    text-align: center;
+    margin: 20px 0;
+    
+    img {
+        max-width: 200px;
+        height: auto;
+    }
+}

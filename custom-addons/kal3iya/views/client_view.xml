@@ -107,14 +107,38 @@
         </field>
     </record>
 
-    
+    <record id="view_kal3iya_client_pivot" model="ir.ui.view">
+        <field name="name">kal3iya.client.pivot</field>
+        <field name="model">kal3iya.client</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Comptes Clients">
+                <!-- 🧍 Dimension principale -->
+                <field name="name" type="row"/>
+
+                <!-- 💰 Mesure : total compte -->
+                <field name="compte" type="measure"/>
+
+                <!-- (Optionnel) regrouper par chauffeur si tu veux un jour -->
+                <!-- <field name="driver_id" type="col"/> -->
+            </pivot>
+        </field>
+    </record>
+
 
     <!-- 🧭 Menu principal -->
     <record id="kal3iya_client_action" model="ir.actions.act_window">
         <field name="name">Clients</field>
         <field name="res_model">kal3iya.client</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
     </record>
+
+    <record id="kal3iya_client_action_view_pivot" model="ir.actions.act_window.view">
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_kal3iya_client_pivot"/>
+        <field name="sequence" eval="3"/>
+        <field name="act_window_id" ref="kal3iya_client_action"/>
+    </record>
+
 
     <menuitem id="client_menu"
               name="Clients"

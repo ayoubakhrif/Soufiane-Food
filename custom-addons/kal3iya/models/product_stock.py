@@ -64,7 +64,7 @@ class ProductStock(models.Model):
         result = []
         for record in self:
             frigo_label = dict(self._fields['frigo'].selection).get(record.frigo, record.frigo or '')
-            name = f"{record.product_id}_{record.lot}_{record.dum}_{frigo_label}"
+            name = f"{record.product_id.name}_{record.lot}_{record.dum}_{frigo_label}"
             result.append((record.id, name))
         return result
 

@@ -55,7 +55,7 @@ class ProductExit(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
         ('stock_casa', 'Stock'),
-    ], string='Stock', tracking=True, related='entry_id.ville', store=True)
+    ], string='Stock', tracking=True, store=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
@@ -146,6 +146,23 @@ class ProductExit(models.Model):
         # Les modifications sont déjà sauvegardées automatiquement par Odoo
         # On ferme juste le popup et la vue parent se rafraîchit automatiquement
         return {'type': 'ir.actions.act_window_close'}
+    
+    @api.onchange('ville')
+    def _onchange_ville(self):
+        """Filtrer le stock selon la ville choisie."""
+        if self.ville:
+            return {
+                'domain': {
+                    'entry_id': [('ville', '=', self.ville)]
+                }
+            }
+        else:
+            return {
+                'domain': {
+                    'entry_id': []
+                }
+            }
+
 
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE

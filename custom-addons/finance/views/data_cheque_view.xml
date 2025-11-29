@@ -22,6 +22,7 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="ste_id"/>
                 <field name="chq"/>
                 <field name="perso_id"/>
                 <field name="date_emission"/>
@@ -29,7 +30,6 @@
                 <field name="journal"/>
                 <field name="date_echeance"/>
                 <field name="date_encaissement"/>
-                <field name="ste_id"/>
                 <field name="benif_id"/>
                 <field name="amount"/>
                 <field name="state" optional="1"/>
@@ -49,6 +49,7 @@
                 </header>
                 <sheet>
                     <group>
+                        <field name="ste_id"/>
                         <field name="chq"/>
                         <field name="perso_id"/>
                         <field name="benif_id"/>
@@ -57,7 +58,6 @@
                         <field name="journal"/>
                         <field name="date_echeance" modifiers="{'readonly': [('benif_type', '=', 'import')]}" />
                         <field name="date_encaissement"/>
-                        <field name="ste_id"/>
                         <field name="amount"/>
                         <field name="facture"/>
                         <field name="serie" invisible="facture in ['m', 'bureau']"/>

@@ -59,20 +59,29 @@
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="product_id"/>
+                <field name="product_id" string="Nom du produit"/>
                 <field name="mt_achat" sum="Total Mt. Achat"/>
                 <field name="tonnage"/>
             </tree>
         </field>
     </record>
 
-
+    <record id="view_kal3iya_stock_pivot" model="ir.ui.view">
+        <field name="name">kal3iya.stock.pivot</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse stock">
+                <field name="product_id" type="row"/>
+                <field name="mt_achat" type="measure"/>
+            </pivot>
+        </field>
+    </record>
     
 
     <record id="action_kal3iya_stock" model="ir.actions.act_window">
         <field name="name">Stock</field>
         <field name="res_model">kal3iya.stock</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,tree,form,pivot</field>
         <field name="view_id" ref="view_kal3iya_stock_kanban"/>
     </record>
 

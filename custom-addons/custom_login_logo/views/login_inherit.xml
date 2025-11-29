@@ -2,8 +2,8 @@
 <odoo>
     <template id="custom_login_logo" inherit_id="web.login">
         
-        <!-- insérer juste avant le formulaire -->
-        <xpath expr="//div[hasclass('o_login_auth')]//form" position="before">
+        <!-- Injecter le logo au-dessus du formulaire de login -->
+        <xpath expr="//div[contains(@class, 'o_login_form')]" position="before">
             <div class="my-login-logo" style="text-align:center; margin-bottom:20px;">
                 <img src="/custom_login_logo/static/src/img/logo.png"
                      style="max-width:200px;"/>

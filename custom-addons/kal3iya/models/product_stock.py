@@ -132,3 +132,24 @@ class ProductStock(models.Model):
     def _compute_mt_achat(self):
         for record in self:
             record.mt_achat = record.price * record.tonnage if record.price and record.tonnage else 0.0
+
+    # filtrer sur ville et valeur rentrée
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        """
+        Surcharge pour filtrer selon ville ET recherche textuelle.
+        """
+        args = args or []
+        
+        # Récupérer la ville depuis le contexte
+        ville = self._context.get('default_ville') or self._context.get('ville_filter')
+        
+        if ville:
+            args = args + [('ville', '=', ville)]
+        
+        # Ajouter filtre sur quantité disponible
+        args = args + [('quantity', '>', 0)]
+        
+        return super(ProductStock, self).name_search(
+            name=name, args=args, operator=operator, limit=limit
+        )

@@ -4,4 +4,11 @@
         <field name="category_id" ref="base.module_category_hidden"/>
         <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
     </record>
+
+    <!-- Catégorie personnalisée -->
+    <record id="module_category_9al3iya" model="ir.module.category">
+        <field name="name">9al3iya Access</field>
+        <field name="sequence">20</field>
+        <field name="description">Groupes d'accès pour le module 9al3iya</field>
+    </record>
 </odoo>

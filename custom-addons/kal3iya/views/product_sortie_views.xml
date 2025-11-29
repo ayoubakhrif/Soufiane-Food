@@ -53,8 +53,10 @@
             <form string="Sortie de stock">
                 <sheet>
                     <group>
-                        <field name="ville" required="1"/>
-                        <field name="entry_id" context="{'ville_filter': ville}" domain="[('quantity', '>', 0)]" options="{'no_create': True, 'no_quick_create': True}"/>
+                        <field name="ville" widget="radio" 
+                            options="{'horizontal': true}"/>
+                        <field name="entry_id" context="{'ville_filter': ville}"
+                            options="{'no_create': True, 'no_quick_create': True}"/>
                         <field name="date_exit"/>
                         <field name="quantity"/>
                         <field name="selling_price"/>

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <template id="custom_login_logo" inherit_id="web.login" name="Custom Login Logo">
-        
-        <!-- Trouver et remplacer l'image du logo -->
-        <xpath expr="//img[contains(@src, 'logo')]" position="replace">
-            <img src="/custom_login_logo/static/src/img/logo.png"
-                 alt="Company Logo"
-                 style="max-width: 200px; height: auto;"/>
+        <xpath expr="//form" position="before">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img t-att-src="'/custom_login_logo/static/src/img/logo.png'"
+                     alt="Logo"
+                     style="max-width: 200px;"/>
+            </div>
         </xpath>
-        
     </template>
 </odoo>

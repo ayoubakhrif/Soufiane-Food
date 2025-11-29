@@ -2,20 +2,24 @@
 <odoo>
     <template id="custom_login_logo" inherit_id="web.login" name="Custom Login Logo">
         
-        <!-- Cacher le logo par défaut d'Odoo -->
+        <!-- Cacher uniquement les images de logo par défaut -->
         <xpath expr="//head" position="inside">
             <style>
-                /* Cacher le logo par défaut "Your Logo" */
-                .card-body > .text-center:first-child,
-                .card-body .text-center.pb-3 {
+                /* Cacher toutes les images dans le premier div text-center */
+                .card-body .text-center img {
                     display: none !important;
+                }
+                
+                /* Réafficher votre logo personnalisé */
+                .custom-company-logo img {
+                    display: block !important;
                 }
             </style>
         </xpath>
         
         <!-- Ajouter votre logo personnalisé -->
         <xpath expr="//form" position="before">
-            <div style="text-align: center; margin-bottom: 20px;">
+            <div class="custom-company-logo" style="text-align: center; margin-bottom: 20px;">
                 <img t-att-src="'/custom_login_logo/static/src/img/logo.png'"
                      alt="Company Logo"
                      style="max-width: 200px; height: auto;"/>

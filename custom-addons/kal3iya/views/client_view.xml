@@ -44,7 +44,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="compte_initial" modifiers="{'readonly': [('id','!=', False)]}"/>
+                            <field name="compte_initial"/>
                         </group>
                     </group>
 

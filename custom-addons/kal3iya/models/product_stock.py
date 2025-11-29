@@ -57,7 +57,7 @@ class ProductStock(models.Model):
         """Construit le texte affiché dans les menus déroulants"""
         for rec in self:
             frigo_label = dict(self._fields['frigo'].selection).get(rec.frigo, rec.frigo or '')
-            rec.display_name = f"{rec.product_id} – Lot {rec.lot} – DUM {rec.dum} – {frigo_label}"
+            rec.display_name = f"{rec.product_id.name} – Lot {rec.lot} – DUM {rec.dum} – {frigo_label}"
 
     def name_get(self):
         """Afficher: Produit_lot_dum_frigo"""

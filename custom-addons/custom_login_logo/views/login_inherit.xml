@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="custom_login_logo" inherit_id="web.login_layout">
+        <xpath expr="//div[@id='wrapwrap']" position="replace">
+            <div id="wrapwrap">
+                <div class="my-login-logo" style="text-align:center; margin-top:40px;">
+                    <img src="/custom_login_logo/static/src/img/logo.png"
+                         style="width:170px;"/>
+                </div>
+
+                <!-- Contenu original du login -->
+                <t t-call="web.login_content"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

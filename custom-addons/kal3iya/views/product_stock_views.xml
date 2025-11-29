@@ -91,7 +91,7 @@
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
             <search>
-                <field name="product_id"/>
+                <field name="product_id" string="Nom du produit"/>
                 <field name="dum"/>
                 <field name="lot"/>
             </search>

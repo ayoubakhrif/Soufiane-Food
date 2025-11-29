@@ -130,7 +130,7 @@ class DataCheque(models.Model):
                 domain = [
                     ('chq', '=', rec.chq)
                     ('ste_id', '=', rec.ste_id.id)
-                    ]
+                ]
 
                 if rec.id:
                     domain.append(('id', '!=', rec.id))

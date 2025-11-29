@@ -4,7 +4,7 @@
         <field name="name">kal3iya.stock.kanban</field>
         <field name="model">kal3iya.stock</field>
         <field name="arch" type="xml">
-           <kanban class="o_kanban_example" editable="false" create="false" delete="false" default_group_by="product_id" group_expand="1" groups_draggable="0" quick_create="0">
+           <kanban class="o_kanban_example" editable="false" create="false" delete="false">
                 <field name="product_id"/>
                 <field name="quantity"/>
                 <field name="calibre"/>

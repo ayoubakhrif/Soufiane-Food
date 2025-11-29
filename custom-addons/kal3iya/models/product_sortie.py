@@ -146,10 +146,10 @@ class ProductExit(models.Model):
         # On ferme juste le popup et la vue parent se rafraîchit automatiquement
         return {'type': 'ir.actions.act_window_close'}
     
-    @api.onchange('ville')
+    @api.onchange('ville', 'entry_id')
     def _onchange_ville(self):
         """Filtrer stock selon ville + texte tapé dans la recherche."""
-        search = self._context.get('search_term', '')
+        search = self._context.get('search_name', '')
 
         domain = []
 

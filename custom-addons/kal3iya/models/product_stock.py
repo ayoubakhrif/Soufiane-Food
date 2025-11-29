@@ -142,7 +142,7 @@ class ProductStock(models.Model):
         args = args or []
         
         # Récupérer la ville depuis le contexte
-        ville = self._context.get('default_ville') or self._context.get('ville_filter')
+        ville = self._context.get('ville_filter')
         
         if ville:
             args = args + [('ville', '=', ville)]
@@ -150,6 +150,14 @@ class ProductStock(models.Model):
         # Ajouter filtre sur quantité disponible
         args = args + [('quantity', '>', 0)]
         
-        return super(ProductStock, self).name_search(
-            name=name, args=args, operator=operator, limit=limit
-        )
+        # Si l'utilisateur tape quelque chose, chercher dans product_id.name
+        if name:
+            # Chercher les produits correspondants
+            products = self.env['kal3iya.product'].search([('name', operator, name)])
+            if products:
+                args += [('product_id', 'in', products.ids)]
+        
+        # Rechercher les enregistrements
+        stocks = self.search(args, limit=limit)
+        
+        return stocks.name_get()

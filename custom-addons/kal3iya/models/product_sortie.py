@@ -146,25 +146,15 @@ class ProductExit(models.Model):
         # On ferme juste le popup et la vue parent se rafraîchit automatiquement
         return {'type': 'ir.actions.act_window_close'}
     
-    #@api.onchange('ville', 'entry_id')
-    #def _onchange_ville(self):
-     #   """Filtrer stock selon ville + texte tapé dans la recherche."""
-      #  search = self._context.get('search_name', '')
-
-       # domain = []
-
-        # Filtrer selon ville
-        #if self.ville:
-         #   domain.append(('ville', '=', self.ville))
-
-        # Filtrer selon texte tapé
-        #if search:
-         #   domain.append(('product_id.name', 'ilike', search))
-
-        #return {'domain': {'entry_id': domain}}
-
-
-
+    @api.onchange('ville')
+    def _onchange_ville(self):
+        """Réinitialiser entry_id quand ville change et passer le contexte."""
+        self.entry_id = False
+        
+        return {
+            'domain': {'entry_id': [('quantity', '>', 0)]},
+            'context': {'ville_filter': self.ville}
+        }
     # ------------------------------------------------------------
     # CALCUL DU TONNAGE
     # ------------------------------------------------------------

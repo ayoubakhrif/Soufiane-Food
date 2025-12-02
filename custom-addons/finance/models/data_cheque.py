@@ -1,6 +1,8 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from datetime import timedelta
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 class DataCheque(models.Model):
     _name = 'datacheque'
@@ -35,6 +37,7 @@ class DataCheque(models.Model):
         ('change', 'Change'),
     ], store=True, string='Type', tracking=True)
     benif_type = fields.Selection(related="benif_id.type", store=True)
+    chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -188,3 +191,106 @@ class DataCheque(models.Model):
                 rec.date_echeance = False
                 rec.benif_id = False
                 rec.serie = "Annulé"
+    # ------------------------------------------------------------
+    # RECHERCHE DE CHQ
+    # ------------------------------------------------------------
+    # Chemin vers le JSON
+    def _get_drive_credentials_path(self):
+        return "/mnt/extra-addons/google_credentials/odoo_drive_service.json"
+
+    # 1) Connexion API Google Drive
+    def _get_drive_service(self):
+        creds_path = self._get_drive_credentials_path()
+        scopes = ['https://www.googleapis.com/auth/drive.readonly']
+        creds = service_account.Credentials.from_service_account_file(creds_path, scopes=scopes)
+        return build('drive', 'v3', credentials=creds)
+
+    # 2) Recherche dossier exact
+    def _find_folder_exact(self, service, folder_name, parent_id):
+        query = (
+            "mimeType='application/vnd.google-apps.folder' "
+            f"and name='{folder_name}' "
+            f"and '{parent_id}' in parents and trashed=false"
+        )
+        res = service.files().list(q=query, fields="files(id, name)").execute()
+        f = res.get("files", [])
+        return f[0]["id"] if f else None
+
+    # 3) Trouver sous-dossier contenant le numéro du chèque
+    def _find_folder_contains(self, service, keyword, parent_id):
+        query = (
+            "mimeType='application/vnd.google-apps.folder' "
+            f"and name contains '{keyword}' "
+            f"and '{parent_id}' in parents and trashed=false"
+        )
+        res = service.files().list(q=query, fields="files(id, name)").execute()
+        f = res.get("files", [])
+        return f[0]["id"] if f else None
+
+    # 4) Recherche PDF contenant CHQ
+    def _find_pdf_chq(self, service, parent_id):
+        query = (
+            "mimeType='application/pdf' "
+            "and name contains 'CHQ' "
+            f"and '{parent_id}' in parents "
+            "and trashed=false"
+        )
+        res = service.files().list(q=query, fields="files(id, name, webViewLink)").execute()
+        f = res.get("files", [])
+        return f[0]["webViewLink"] if f else None
+
+    # 5) Fonction principale : trouver URL du CHQ
+    def _get_chq_pdf_url(self, ste_name, cheque_number):
+        icp = self.env["ir.config_parameter"].sudo()
+        root_id = icp.get_param("finance.drive.root_folder_id")
+
+        if not root_id or not ste_name or not cheque_number:
+            return False
+
+        service = self._get_drive_service()
+
+        # Étape 1 : dossier société
+        ste_folder_id = self._find_folder_exact(service, ste_name, root_id)
+        if not ste_folder_id:
+            return False
+
+        # Étape 2 : sous-dossier contenant numéro chèque
+        sub_folder_id = self._find_folder_contains(service, cheque_number, ste_folder_id)
+        if not sub_folder_id:
+            return False
+
+        # Étape 3 : PDF contenant "CHQ"
+        url = self._find_pdf_chq(service, sub_folder_id)
+        return url or False
+
+    # 6) Mettre à jour automatiquement l’URL
+    def _sync_pdf_url(self):
+        for rec in self:
+            if rec.ste_id and rec.chq:
+                rec.chq_pdf_url = rec._get_chq_pdf_url(rec.ste_id.name, rec.chq)
+            else:
+                rec.chq_pdf_url = False
+
+    # 7) Override create/write
+    @api.model
+    def create(self, vals):
+        rec = super().create(vals)
+        rec._sync_pdf_url()
+        return rec
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "chq" in vals or "ste_id" in vals:
+            self._sync_pdf_url()
+        return res
+
+    # 8) Bouton ouverture PDF
+    def action_open_pdf_chq(self):
+        self.ensure_one()
+        if not self.chq_pdf_url:
+            raise UserError("Aucun PDF CHQ trouvé sur Drive.")
+        return {
+            "type": "ir.actions.act_url",
+            "url": self.chq_pdf_url,
+            "target": "new",
+        }

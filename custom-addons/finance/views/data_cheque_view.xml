@@ -64,6 +64,14 @@
                         <field name="serie" invisible="facture in ['m', 'bureau']" readonly="state == 'annule'" />
                         <field name="perso_id" readonly="state == 'annule'"/>
                     </group>
+                    <group>
+                        <field name="chq_pdf_url" widget="url" string="PDF CHQ" />
+                        <button name="action_open_pdf_chq"
+                                string="Ouvrir PDF CHQ"
+                                type="object"
+                                class="btn-primary"
+                                modifiers="{'invisible': [('chq_pdf_url', '=', False)]}"/>
+                    </group>
                 </sheet>
             </form>
         </field>

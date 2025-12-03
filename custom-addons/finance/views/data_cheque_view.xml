@@ -70,7 +70,7 @@
                                 string="Ouvrir PDF CHQ"
                                 type="object"
                                 class="btn-primary"
-                                modifiers="{'invisible': [('chq_pdf_url', '=', False)]}"/>
+                                invisible= "chq_pdf_url ==, False"/>
                     </group>
                 </sheet>
             </form>

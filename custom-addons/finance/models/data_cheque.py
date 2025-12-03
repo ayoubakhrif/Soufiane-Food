@@ -287,8 +287,16 @@ class DataCheque(models.Model):
     # 8) Bouton ouverture PDF
     def action_open_pdf_chq(self):
         self.ensure_one()
+
+        # 🔄 1) Si aucune URL → essayer de synchroniser maintenant
+        if not self.chq_pdf_url:
+            self._sync_pdf_url()
+
+        # ❌ 2) Toujours rien après la sync → message d’erreur
         if not self.chq_pdf_url:
             raise UserError("Aucun PDF CHQ trouvé sur Drive.")
+
+        # ✅ 3) PDF trouvé → ouvrir
         return {
             "type": "ir.actions.act_url",
             "url": self.chq_pdf_url,

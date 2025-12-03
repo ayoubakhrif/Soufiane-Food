@@ -35,6 +35,7 @@
                 <field name="state" optional="1"/>
                 <field name="facture_tag" widget="html" readonly="1"/>
                 <field name="perso_id"/>
+                <field name="chq_exist"/>
             </tree>
         </field>
     </record>

@@ -25,7 +25,7 @@ class DataCheque(models.Model):
         ('fact', 'F/'),
     ], string='Facture', tracking=True, required=True, default='m')
     journal = fields.Integer(string='Journal N°', required=True)
-    facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False)
+    facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False, optional=True)
     state = fields.Selection([
         ('actif', 'Actif'),
         ('annule', 'Annulé'),
@@ -38,6 +38,10 @@ class DataCheque(models.Model):
     ], store=True, string='Type', tracking=True)
     benif_type = fields.Selection(related="benif_id.type", store=True)
     chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)
+    chq_exist = fields.Selection([
+        ('exist', 'Existe'),
+        ('not_exist', 'Absent'),
+    ], string='Présence CHQ', readonly=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -267,9 +271,12 @@ class DataCheque(models.Model):
     def _sync_pdf_url(self):
         for rec in self:
             if rec.ste_id and rec.chq:
-                rec.chq_pdf_url = rec._get_chq_pdf_url(rec.ste_id.name, rec.chq)
+                url = rec._get_chq_pdf_url(rec.ste_id.name, rec.chq)
+                rec.chq_pdf_url = url
+                rec.chq_exist = 'exist' if url else 'not_exist'
             else:
                 rec.chq_pdf_url = False
+                rec.chq_exist = 'not_exist'
 
     # 7) Override create/write
     @api.model

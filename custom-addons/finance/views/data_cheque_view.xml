@@ -69,8 +69,7 @@
                         <button name="action_open_pdf_chq"
                                 string="Ouvrir PDF CHQ"
                                 type="object"
-                                class="btn-primary"
-                                invisible= "chq_pdf_url == False"/>
+                                class="btn-primary"/>
                     </group>
                 </sheet>
             </form>

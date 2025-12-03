@@ -41,7 +41,7 @@ class DataCheque(models.Model):
     chq_exist = fields.Selection([
         ('exist', 'Existe'),
         ('not_exist', 'Absent'),
-    ], string='Présence CHQ', readonly=True)
+    ], string='Présence CHQ', readonly=True, optional=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -194,7 +194,6 @@ class DataCheque(models.Model):
 
                 rec.date_echeance = False
                 rec.benif_id = False
-                rec.serie = "Annulé"
     # ------------------------------------------------------------
     # RECHERCHE DE CHQ
     # ------------------------------------------------------------
@@ -273,11 +272,13 @@ class DataCheque(models.Model):
             if rec.ste_id and rec.chq:
                 url = rec._get_chq_pdf_url(rec.ste_id.name, rec.chq)
                 rec.chq_pdf_url = url
-                rec.chq_exist = 'exist' if url else 'not_exist'
+                if url:
+                    rec.chq_exist = 'exist'
+                else:
+                    rec.chq_exist = 'not_exist'
             else:
-                rec.chq_pdf_url = False
                 rec.chq_exist = 'not_exist'
-
+                rec.chq_pdf_url = False
     # 7) Override create/write
     @api.model
     def create(self, vals):

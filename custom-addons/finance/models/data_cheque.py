@@ -80,7 +80,7 @@ class DataCheque(models.Model):
                 f"</span>"
             )
 
-    @api.depends('existing_tag', 'chq_exist', 'pdf_chq_url')
+    @api.depends('existing_tag', 'chq_exist', 'chq_pdf_url')
     def _compute_existance_tag(self):
         for rec in self:
 

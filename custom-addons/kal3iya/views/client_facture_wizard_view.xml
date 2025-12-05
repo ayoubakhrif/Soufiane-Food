@@ -1,0 +1,33 @@
+<odoo>
+    <!-- Vue du Wizard -->
+    <record id="client_facture_wizard_form" model="ir.ui.view">
+        <field name="name">client.facture.wizard.form</field>
+        <field name="model">client.facture.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimer Facture Client">
+                <group>
+                    <field name="client_id"/>
+                    <field name="week"/>
+                </group>
+
+                <footer>
+                    <button name="action_print"
+                            type="object"
+                            string="Imprimer"
+                            class="btn-primary"/>
+
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action du wizard -->
+    <record id="client_facture_wizard_action" model="ir.actions.act_window">
+        <field name="name">Imprimer Facture Client</field>
+        <field name="res_model">client.facture.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_client_id': active_id}</field>
+    </record>
+</odoo>

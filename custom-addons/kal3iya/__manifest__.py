@@ -16,6 +16,7 @@
         'views/advance_view.xml',
         'views/driver_view.xml',
         'views/popup_sortie_view.xml',
+        'views/client_facture_wizard_view.xml',
     ],
     'images': ['static/description/icon.svg'],
     'installable': True,

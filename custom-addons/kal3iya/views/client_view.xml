@@ -24,6 +24,8 @@
                 <sheet>
                     <!-- 🧍 Informations principales -->
                     <div class="oe_button_box" name="button_box">
+                        <button name="%(client_facture_wizard_action)d" type="action"
+                            string="Imprimer Facture" class="oe_highlight"/>
                         <!-- 🔹 Bouton sorties -->
                         <button name="%(filtered_sortie_action)d"
                                 type="action"

@@ -14,6 +14,7 @@
         'views/data_views.xml',
         'views/client_view.xml',
         'reports/bon_report.xml',
+        'reports/client_facture.xml',
     ],
     'images': ['static/description/icon.svg'],
     'installable': True,

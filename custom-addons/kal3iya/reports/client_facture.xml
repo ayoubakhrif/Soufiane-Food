@@ -1,0 +1,100 @@
+<odoo>
+    <!-- Déclaration du report -->
+    <report
+        id="client_facture_report"
+        model="kal3iya.client"
+        string="Facture Client"
+        report_type="qweb-pdf"
+        name="kal3iya.client_facture_template"
+        file="kal3iya.client_facture_template"
+    />
+
+    <!-- Template -->
+    <template id="client_facture_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+
+                <div class="page">
+
+                    <h2>Facture Client – <t t-esc="docs.name"/></h2>
+                    <h4>Semaine : <t t-esc="week"/></h4>
+
+                    <hr/>
+
+                    <!-- Compte total & semaine -->
+                    <h3>Résumé des Comptes</h3>
+                    <table class="table table-sm table-bordered">
+                        <tr><th>Compte Total</th><td><t t-esc="week_data['compte_total']"/> DH</td></tr>
+                        <tr><th>Compte Semaine</th><td><t t-esc="week_data['compte_semaine']"/> DH</td></tr>
+                    </table>
+
+                    <!-- SORTIES -->
+                    <h3>Sorties</h3>
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <th>Produit</th><th>Qté</th><th>Prix</th><th>Montant</th><th>Date</th>
+                        </tr>
+                        <t t-foreach="week_data['sorties']" t-as="s">
+                            <tr>
+                                <td><t t-esc="s.product_id.name"/></td>
+                                <td><t t-esc="s.quantity"/></td>
+                                <td><t t-esc="s.selling_price_final or s.selling_price"/> DH</td>
+                                <td><t t-esc="s.mt_vente_final or s.mt_vente"/> DH</td>
+                                <td><t t-esc="s.date_exit"/></td>
+                            </tr>
+                        </t>
+                        <tr>
+                            <th colspan="3">TOTAL</th>
+                            <th><t t-esc="week_data['total_sorties']"/> DH</th>
+                            <th></th>
+                        </tr>
+                    </table>
+
+                    <!-- RETOURS -->
+                    <h3>Retours</h3>
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <th>Produit</th><th>Qté</th><th>Prix</th><th>Montant</th><th>Date</th>
+                        </tr>
+                        <t t-foreach="week_data['retours']" t-as="r">
+                            <tr>
+                                <td><t t-esc="r.product_id.name"/></td>
+                                <td><t t-esc="r.quantity"/></td>
+                                <td><t t-esc="r.selling_price"/> DH</td>
+                                <td><t t-esc="r.selling_price * r.tonnage"/> DH</td>
+                                <td><t t-esc="r.date_entry"/></td>
+                            </tr>
+                        </t>
+                        <tr>
+                            <th colspan="3">TOTAL</th>
+                            <th><t t-esc="week_data['total_retours']"/> DH</th>
+                            <th></th>
+                        </tr>
+                    </table>
+
+                    <!-- AVANCES -->
+                    <h3>Avances</h3>
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <th>Date</th><th>Montant</th><th>Chauffeur</th>
+                        </tr>
+                        <t t-foreach="week_data['avances']" t-as="a">
+                            <tr>
+                                <td><t t-esc="a.date_paid"/></td>
+                                <td><t t-esc="a.amount"/> DH</td>
+                                <td><t t-esc="a.driver_id.name"/></td>
+                            </tr>
+                        </t>
+                        <tr>
+                            <th>TOTAL</th>
+                            <th><t t-esc="week_data['total_avances']"/> DH</th>
+                            <th></th>
+                        </tr>
+                    </table>
+
+                </div>
+
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -452,3 +452,46 @@ class Kal3iyaClient(models.Model):
 
             html += "</div>"
             rec.retours_grouped_html = html
+
+    # ==============================
+    #  🧮 Utilitaire pour le rapport
+    # ==============================
+
+    def _get_week_data(self, week):
+        """
+        Retourne un dict avec tous les totaux pour une semaine donnée.
+        week : string au format 'YYYY-Www' (ex: '2025-W48')
+        Utilisé par le rapport (QWeb).
+        """
+        self.ensure_one()
+
+        # 1️⃣ Filtrer sorties de la semaine
+        sorties = self.sortie_ids.filtered(lambda s: s.week == week)
+        total_sorties = sum((s.mt_vente_final or s.mt_vente or 0.0) for s in sorties)
+
+        # 2️⃣ Filtrer retours de la semaine (state = 'retour')
+        retours = self.retour_ids.filtered(
+            lambda r: r.week == week and r.state == 'retour'
+        )
+        total_retours = sum((r.selling_price or 0.0) * (r.tonnage or 0.0) for r in retours)
+
+        # 3️⃣ Filtrer avances de la semaine (en se basant sur la date)
+        avances = self.avances.filtered(
+            lambda a: a.date_paid and a.date_paid.strftime("%Y-W%W") == week
+        )
+        total_avances = sum(avances.mapped('amount'))
+
+        # 4️⃣ Compte de la semaine
+        compte_semaine = total_sorties - total_retours - total_avances
+
+        return {
+            'week': week,
+            'sorties': sorties,
+            'retours': retours,
+            'avances': avances,
+            'total_sorties': total_sorties,
+            'total_retours': total_retours,
+            'total_avances': total_avances,
+            'compte_semaine': compte_semaine,
+            'compte_total': self.compte,  # ton champ déjà calculé
+        }

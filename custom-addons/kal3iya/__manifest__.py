@@ -12,7 +12,7 @@
         'views/product_sortie_views.xml',
         'views/product_stock_views.xml',
         'views/client_view.xml',
-        'views/client_facture.xml',
+        'reports/client_facture.xml',
         'views/client_facture_wizard_view.xml',
         'views/data_views.xml',
         'views/advance_view.xml',

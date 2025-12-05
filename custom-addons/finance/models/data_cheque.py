@@ -41,7 +41,8 @@ class DataCheque(models.Model):
     chq_exist = fields.Selection([
         ('exist', 'Existe'),
         ('not_exist', 'Absent'),
-    ], string='Présence CHQ', readonly=True, optional=True)
+    ], readonly=True, optional=True)
+    existing_tag = fields.Html(string='Présence CHQ', compute='_compute_existance_tag', sanitize=False, optional=True)
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -73,6 +74,30 @@ class DataCheque(models.Model):
                 bg = "rgba(108,117,125,0.12)"
 
             rec.facture_tag = (
+                f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
+                f"font-weight:600;background:{bg};color:{color};'>"
+                f"{label}"
+                f"</span>"
+            )
+
+    @api.depends('existing_tag', 'chq_exist', 'pdf_chq_url')
+    def _compute_existance_tag(self):
+        for rec in self:
+
+            existance = rec.chq_exist or ""  # présence de chèque
+
+            # --- Conditions selon ta demande ---
+            if existance == "exist":           # commence par 
+                label = "CHQ Existe"
+                color = "#28a745"  # vert
+                bg = "rgba(40,167,69,0.12)"
+
+            else:                   # exactement = M
+                label = "CHQ Absent"
+                color = "#dc3545"  # rouge
+                bg = "rgba(220,53,69,0.12)"
+
+            rec.existing_tag = (
                 f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
                 f"font-weight:600;background:{bg};color:{color};'>"
                 f"{label}"

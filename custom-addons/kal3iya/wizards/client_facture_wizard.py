@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 class ClientFactureWizard(models.TransientModel):
     _name = "client.facture.wizard"
@@ -8,8 +9,19 @@ class ClientFactureWizard(models.TransientModel):
     week = fields.Char(string="Semaine (ex: 2025-W48)", required=True)
 
     def action_print(self):
-        client = self.client_id
-        return self.env.ref("kal3iya.action_report_client_facture").report_action(
-            client,
+        # Rechercher le rapport directement dans ir.actions.report
+        report = self.env['ir.actions.report'].search([
+            ('report_name', '=', 'kal3iya.client_facture_template'),
+            ('model', '=', 'kal3iya.client')
+        ], limit=1)
+        
+        if not report:
+            raise UserError(
+                "Le rapport 'Facture Client' n'est pas trouvé.\n"
+                "Veuillez désinstaller puis réinstaller le module Kal3iya."
+            )
+        
+        return report.report_action(
+            self.client_id,
             data={'week': self.week}
         )

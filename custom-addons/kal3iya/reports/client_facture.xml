@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Déclaration du report -->
-    <record id="client_facture_report" model="ir.actions.report">
-        <field name="name">Facture Client</field>
-        <field name="model">kal3iya.client</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">kal3iya.client_facture_template</field>
-        <field name="report_file">kal3iya.client_facture_template</field>
-        <field name="binding_model_id" ref="model_kal3iya_client"/>
-        <field name="binding_type">report</field>
-    </record>
 
-    <!-- Template -->
+    <!-- Déclaration DU REPORT (liée à ton AbstractModel) -->
+    <report
+        id="client_facture_report"
+        model="kal3iya.client"
+        string="Facture Client"
+        report_type="qweb-pdf"
+        name="kal3iya.client_facture_template"
+        file="kal3iya.client_facture_template"
+        print_report_name="'Facture_%s' % (object.name)"
+    />
+
+    <!-- TEMPLATE du PDF -->
     <template id="client_facture_template">
         <t t-call="web.external_layout">
             <div class="page">
+
                 <h2>Facture Client – <t t-esc="docs.name"/></h2>
                 <h4>Semaine : <t t-esc="week"/></h4>
 
@@ -95,4 +97,5 @@
 
         </t>
     </template>
+
 </odoo>

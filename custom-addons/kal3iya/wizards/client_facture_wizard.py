@@ -8,7 +8,8 @@ class ClientFactureWizard(models.TransientModel):
     week = fields.Char(string="Semaine (ex: 2025-W48)", required=True)
 
     def action_print(self):
+        client = self.client_id
         return self.env.ref("kal3iya.client_facture_report").report_action(
-            self.client_id.id,
+            client,
             data={'week': self.week}
         )

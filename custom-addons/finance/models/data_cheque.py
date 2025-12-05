@@ -342,3 +342,17 @@ class DataCheque(models.Model):
             "url": self.chq_pdf_url,
             "target": "new",
         }
+
+    # ------------------------------------------------------------
+    # CRON : synchroniser les PDF CHQ tous les jours
+    # ------------------------------------------------------------
+    @api.model
+    def cron_sync_all_chq_pdf(self):
+        """Tâche planifiée : met à jour les liens PDF et chq_exist pour tous les chèques."""
+        # On peut limiter uniquement aux chèques sans lien :
+        records = self.search([
+            ('chq', '!=', False),
+            ('ste_id', '!=', False),
+            ('chq_pdf_url', '=', False),
+        ])
+        records._sync_pdf_url()

@@ -1,0 +1,24 @@
+<odoo>
+    <data noupdate="1">
+
+        <record id="ir_cron_sync_chq_pdf" model="ir.cron">
+            <field name="name">Synchroniser PDF CHQ</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_sync_all_chq_pdf()</field>
+
+            <!-- Tous les jours -->
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+
+            <!-- Nombre d'exécutions : -1 = illimité -->
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+
+            <!-- Première exécution : à adapter si tu veux -->
+            <!-- ATTENTION : heure en UTC côté serveur -->
+            <field name="nextcall">2025-12-05 19:00:00</field>
+        </record>
+
+    </data>
+</odoo>

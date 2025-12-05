@@ -11,6 +11,7 @@
         'views/product_entry_views.xml',
         'views/product_sortie_views.xml',
         'views/product_stock_views.xml',
+        'reports/client_facture.xml',
         'views/client_facture_wizard_view.xml',
         'views/client_view.xml',
         'views/data_views.xml',

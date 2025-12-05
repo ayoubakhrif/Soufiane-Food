@@ -89,4 +89,20 @@
         </field>
     </record>
 
+    <record id="datachq_view_pivot" model="ir.ui.view">
+        <field name="name">datachq pivot</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Chèques">
+                <field name="amount" type="measure"/>
+                <field name="week"/>
+                <field name="ste_id"/>
+                <field name="type"/>
+                <field name="state"/>
+                <field name="benif_id"/>
+            </pivot>
+        </field>
+    </record>
+
+
 </odoo>

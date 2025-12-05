@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Déclaration du report -->
-    <report
-        id="client_facture_report"
-        model="kal3iya.client"
-        string="Facture Client"
-        report_type="qweb-pdf"
-        name="kal3iya.client_facture_template"
-        file="kal3iya.client_facture_template"
-    />
+    <record id="client_facture_report" model="ir.actions.report">
+        <field name="name">Facture Client</field>
+        <field name="model">kal3iya.client</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kal3iya.client_facture_template</field>
+        <field name="report_file">kal3iya.client_facture_template</field>
+        <field name="binding_model_id" ref="model_kal3iya_client"/>
+        <field name="binding_type">report</field>
+    </record>
 
     <!-- Template -->
     <template id="client_facture_template">

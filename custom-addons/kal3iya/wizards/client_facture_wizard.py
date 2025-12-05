@@ -9,7 +9,7 @@ class ClientFactureWizard(models.TransientModel):
 
     def action_print(self):
         client = self.client_id
-        return self.env.ref("kal3iya.client_facture_report").report_action(
+        return self.env.ref("kal3iya.action_report_client_facture").report_action(
             client,
             data={'week': self.week}
         )

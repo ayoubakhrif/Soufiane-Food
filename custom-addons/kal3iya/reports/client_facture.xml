@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Déclaration DU REPORT (liée à ton AbstractModel) -->
+    <!-- ACTION DE RAPPORT -->
     <report
-        id="client_facture_report"
+        id="action_report_client_facture"
         model="kal3iya.client"
         string="Facture Client"
         report_type="qweb-pdf"
@@ -12,11 +12,10 @@
         print_report_name="'Facture_%s' % (object.name)"
     />
 
-    <!-- TEMPLATE du PDF -->
+    <!-- TEMPLATE QWEB -->
     <template id="client_facture_template">
         <t t-call="web.external_layout">
             <div class="page">
-
                 <h2>Facture Client – <t t-esc="docs.name"/></h2>
                 <h4>Semaine : <t t-esc="week"/></h4>
 
@@ -25,8 +24,14 @@
                 <!-- Compte total & semaine -->
                 <h3>Résumé des Comptes</h3>
                 <table class="table table-sm table-bordered">
-                    <tr><th>Compte Total</th><td><t t-esc="week_data['compte_total']"/> DH</td></tr>
-                    <tr><th>Compte Semaine</th><td><t t-esc="week_data['compte_semaine']"/> DH</td></tr>
+                    <tr>
+                        <th>Compte Total</th>
+                        <td><t t-esc="week_data['compte_total']"/> DH</td>
+                    </tr>
+                    <tr>
+                        <th>Compte Semaine</th>
+                        <td><t t-esc="week_data['compte_semaine']"/> DH</td>
+                    </tr>
                 </table>
 
                 <!-- SORTIES -->
@@ -94,7 +99,6 @@
                 </table>
 
             </div>
-
         </t>
     </template>
 

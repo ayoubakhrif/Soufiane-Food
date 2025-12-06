@@ -9,25 +9,36 @@ class ClientWeekInvoiceWizard(models.TransientModel):
     week = fields.Selection(selection='_get_available_weeks', string='Semaine', required=True)
 
     @api.model
+    def default_get(self, fields_list):
+        """Initialiser le wizard avec le client actif"""
+        res = super().default_get(fields_list)
+        if self.env.context.get('active_id'):
+            res['client_id'] = self.env.context.get('active_id')
+        return res
+
     def _get_available_weeks(self):
         """Retourne toutes les semaines où le client a eu une activité"""
-        if not self.client_id:
+        # Si le wizard n'est pas encore créé (premier appel), utiliser le contexte
+        client_id = self.client_id.id if self.client_id else self.env.context.get('active_id')
+        
+        if not client_id:
             return []
         
+        client = self.env['kal3iya.client'].browse(client_id)
         weeks = set()
         
         # Récupérer les semaines des sorties
-        for sortie in self.client_id.sortie_ids:
+        for sortie in client.sortie_ids:
             if sortie.week:
                 weeks.add(sortie.week)
         
         # Récupérer les semaines des retours
-        for retour in self.client_id.retour_ids:
+        for retour in client.retour_ids:
             if hasattr(retour, 'week') and retour.week:
                 weeks.add(retour.week)
         
         # Récupérer les semaines des avances
-        for avance in self.client_id.avances:
+        for avance in client.avances:
             if avance.date_paid:
                 week_str = avance.date_paid.strftime("%Y-W%W")
                 weeks.add(week_str)

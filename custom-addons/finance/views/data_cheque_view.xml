@@ -86,6 +86,7 @@
                 <field name="chq"/>
                 <field name="week"/>
                 <field name="facture"/>
+                <filter name="no_pdf" string="Liens inexistant" domain="[('chq_pdf_url', '=', False)]"/>
             </search>
         </field>
     </record>

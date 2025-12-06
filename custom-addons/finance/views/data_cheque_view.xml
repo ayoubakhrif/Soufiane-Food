@@ -8,7 +8,7 @@
     <record id="data_cheque_action" model="ir.actions.act_window">
         <field name="name">Saisie</field>
         <field name="res_model">datacheque</field>
-        <field name="view_mode">tree,form,pivot</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
     </record>
 
     <menuitem 
@@ -105,6 +105,20 @@
             </pivot>
         </field>
     </record>
+
+    <record id="datachq_view_graph" model="ir.ui.view">
+        <field name="name">datachq graph</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <graph string="Graphique des Chèques" type="bar">
+                <field name="amount" type="measure"/>
+                <field name="week" />
+                <field name="ste_id" />
+                <field name="type" />
+            </graph>
+        </field>
+    </record>
+
 
 
 </odoo>

@@ -124,7 +124,7 @@
                             <strong>Client:</strong> <t t-esc="client.name"/>
                         </div>
                         <div class="client-info">
-                            <strong>Période:</strong> <t t-esc="week_data['week'].split('-W')[1]"/> (<t t-esc="week_data['week'].split('-W')[0]"/>)
+                            <strong>Semaine:</strong> <t t-esc="week_data['week'].split('-W')[1]"/> (<t t-esc="week_data['week'].split('-W')[0]"/>)
                         </div>
                         <div class="client-info">
                             <strong>Date d'impression:</strong> <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
@@ -141,7 +141,7 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Produit</th>
-                                    <th>Quantité</th>
+                                    <th>Quantite</th>
                                     <th>Poids (Kg)</th>
                                     <th>Tonnage</th>
                                     <th>Prix Unitaire</th>
@@ -178,7 +178,7 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Produit</th>
-                                    <th>Quantité</th>
+                                    <th>Quantite</th>
                                     <th>Poids (Kg)</th>
                                     <th>Tonnage</th>
                                     <th>Prix Unitaire</th>
@@ -240,7 +240,7 @@
 
                     <!-- Récapitulatif -->
                     <div class="section-title section-recap">
-                        📊 RÉCAPITULATIF FINANCIER
+                         RECAPITULATIF FINANCIER
                     </div>
                     <div class="recap-box">
                         <div class="recap-line">
@@ -267,7 +267,7 @@
 
                     <!-- Pied de page -->
                     <div class="footer-note">
-                        Document généré automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                        Document genere automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
                     </div>
                 </div>
             </t>

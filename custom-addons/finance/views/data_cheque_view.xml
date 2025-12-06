@@ -61,8 +61,7 @@
                         <field name="date_echeance" readonly="benif_type == 'import'" />
                         <field name="date_encaissement"/>
                         <field name="amount"/>
-                        <field name="type" options="{'horizontal': true}"
-                            attrs="{'invisible': ['|', ('benif_type', '=', 'divers'), ('state', '=', 'annule')]}"/>
+                        <field name="type" options="{'horizontal': true}" invisible="benif_type == 'divers' or state == 'annule'"/>
                         <field name="facture"/>
                         <field name="serie" invisible="facture in ['m', 'bureau']" />
                         <field name="perso_id" readonly="state == 'annule'"/>

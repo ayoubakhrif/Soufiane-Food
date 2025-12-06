@@ -30,6 +30,5 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="client_facture_wizard_form"/>
         <field name="target">new</field>
-        <field name="view_id" ref="client_facture_wizard_form"/>
     </record>
 </odoo>

@@ -134,7 +134,7 @@
                     <!-- Section Sorties -->
                     <t t-if="week_data['sorties']">
                         <div class="section-title section-sorties">
-                            🚚 SORTIES DE LA SEMAINE
+                             SORTIES DE LA SEMAINE
                         </div>
                         <table class="data-table">
                             <thead>
@@ -171,7 +171,7 @@
                     <!-- Section Retours -->
                     <t t-if="week_data['retours']">
                         <div class="section-title section-retours">
-                            🔄 RETOURS DE LA SEMAINE
+                             RETOURS DE LA SEMAINE
                         </div>
                         <table class="data-table">
                             <thead>
@@ -208,7 +208,7 @@
                     <!-- Section Avances -->
                     <t t-if="week_data['avances']">
                         <div class="section-title section-avances">
-                            💵 AVANCES DE LA SEMAINE
+                             AVANCES DE LA SEMAINE
                         </div>
                         <table class="data-table">
                             <thead>

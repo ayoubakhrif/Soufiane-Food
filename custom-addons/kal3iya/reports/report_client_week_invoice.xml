@@ -20,128 +20,284 @@
                 
                 <div class="page">
                     <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap');
+                        
+                        * {
+                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        }
+                        
+                        body {
+                            background: #f8fafc;
+                        }
+                        
+                        .page {
+                            background: white;
+                            padding: 40px;
+                        }
+                        
                         .invoice-header {
                             text-align: center;
-                            margin-bottom: 30px;
-                            border-bottom: 3px solid #4c51bf;
-                            padding-bottom: 20px;
+                            margin-bottom: 40px;
+                            padding: 30px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            border-radius: 16px;
+                            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
                         }
+                        
                         .invoice-title {
-                            font-size: 32px;
-                            font-weight: bold;
-                            color: #4c51bf;
-                            margin-bottom: 10px;
-                        }
-                        .client-info {
-                            font-size: 18px;
-                            color: #2d3748;
-                            margin: 5px 0;
-                        }
-                        .section-title {
-                            font-size: 20px;
-                            font-weight: bold;
+                            font-size: 36px;
+                            font-weight: 800;
                             color: white;
-                            padding: 10px 15px;
-                            margin-top: 25px;
                             margin-bottom: 15px;
-                            border-radius: 8px;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
                         }
+                        
+                        .client-info-grid {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 15px;
+                            margin-top: 20px;
+                        }
+                        
+                        .client-info-card {
+                            background: rgba(255, 255, 255, 0.15);
+                            backdrop-filter: blur(10px);
+                            padding: 15px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                        }
+                        
+                        .info-label {
+                            font-size: 12px;
+                            color: rgba(255, 255, 255, 0.8);
+                            font-weight: 600;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .info-value {
+                            font-size: 18px;
+                            color: white;
+                            font-weight: 700;
+                        }
+                        
+                        .section-title {
+                            font-size: 22px;
+                            font-weight: 700;
+                            color: white;
+                            padding: 15px 25px;
+                            margin-top: 35px;
+                            margin-bottom: 20px;
+                            border-radius: 12px;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+                        }
+                        
                         .section-sorties {
-                            background: #4c51bf;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                         }
+                        
                         .section-retours {
-                            background: #e53e3e;
+                            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
                         }
+                        
                         .section-avances {
-                            background: #38a169;
+                            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
                         }
+                        
                         .section-recap {
-                            background: #2d3748;
+                            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
                         }
+                        
                         .data-table {
                             width: 100%;
-                            border-collapse: collapse;
-                            margin-bottom: 20px;
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            margin-bottom: 25px;
+                            overflow: hidden;
+                            border-radius: 12px;
+                            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
                         }
+                        
+                        .data-table thead {
+                            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                        }
+                        
                         .data-table th {
-                            background: #e2e8f0;
-                            padding: 10px;
+                            padding: 15px;
                             text-align: left;
-                            font-weight: bold;
-                            border: 1px solid #cbd5e0;
+                            font-weight: 700;
+                            color: #1e293b;
+                            border-bottom: 2px solid #cbd5e0;
+                            font-size: 13px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
                         }
+                        
                         .data-table td {
-                            padding: 8px;
-                            border: 1px solid #e2e8f0;
+                            padding: 14px 15px;
+                            border-bottom: 1px solid #f1f5f9;
+                            color: #475569;
+                            font-size: 14px;
                         }
-                        .data-table tr:nth-child(even) {
-                            background: #f7fafc;
+                        
+                        .data-table tbody tr {
+                            transition: all 0.2s ease;
                         }
+                        
+                        .data-table tbody tr:hover {
+                            background: #f8fafc;
+                            transform: scale(1.01);
+                        }
+                        
+                        .data-table tr:last-child td {
+                            border-bottom: none;
+                        }
+                        
                         .total-row {
-                            background: #edf2f7 !important;
-                            font-weight: bold;
-                            font-size: 16px;
+                            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%) !important;
+                            font-weight: 700 !important;
+                            font-size: 16px !important;
+                            border-top: 3px solid #667eea !important;
                         }
+                        
+                        .total-row td {
+                            padding: 18px 15px !important;
+                            color: #1e293b !important;
+                        }
+                        
                         .amount {
                             text-align: right;
-                            font-weight: bold;
+                            font-weight: 700;
+                            color: #667eea;
                         }
+                        
                         .recap-box {
-                            background: #f7fafc;
-                            border: 2px solid #cbd5e0;
-                            border-radius: 10px;
-                            padding: 20px;
+                            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                            border: 3px solid #cbd5e0;
+                            border-radius: 16px;
+                            padding: 30px;
                             margin-top: 30px;
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
                         }
+                        
                         .recap-line {
                             display: flex;
                             justify-content: space-between;
-                            padding: 8px 0;
-                            font-size: 16px;
+                            padding: 12px 0;
+                            font-size: 17px;
+                            color: #475569;
+                            border-bottom: 1px solid #e2e8f0;
                         }
+                        
+                        .recap-line:last-child {
+                            border-bottom: none;
+                        }
+                        
+                        .recap-line span:first-child {
+                            font-weight: 600;
+                        }
+                        
+                        .recap-line span:last-child {
+                            font-weight: 700;
+                            color: #1e293b;
+                        }
+                        
+                        .big-total-box {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 25px 30px;
+                            border-radius: 14px;
+                            margin: 25px 0;
+                            text-align: center;
+                            font-size: 24px;
+                            font-weight: 800;
+                            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                        }
+                        
                         .recap-total {
-                            border-top: 3px solid #4c51bf;
-                            margin-top: 10px;
-                            padding-top: 15px;
-                            font-size: 20px;
-                            font-weight: bold;
-                            color: #4c51bf;
+                            background: linear-gradient(135deg, #43e97b15 0%, #38f9d715 100%);
+                            border: 2px solid #43e97b;
+                            border-radius: 12px;
+                            margin-top: 20px;
+                            padding: 20px !important;
+                            font-size: 22px !important;
+                            font-weight: 800 !important;
                         }
+                        
+                        .recap-total span {
+                            color: #059669 !important;
+                        }
+                        
                         .footer-note {
                             text-align: center;
-                            margin-top: 40px;
-                            padding-top: 20px;
-                            border-top: 1px solid #cbd5e0;
-                            color: #718096;
-                            font-size: 12px;
+                            margin-top: 50px;
+                            padding-top: 25px;
+                            border-top: 2px solid #e2e8f0;
+                            color: #94a3b8;
+                            font-size: 13px;
+                            font-weight: 500;
+                        }
+                        
+                        .icon {
+                            background: rgba(255, 255, 255, 0.2);
+                            padding: 8px 12px;
+                            border-radius: 8px;
+                            font-weight: 800;
+                            font-size: 16px;
+                            display: inline-block;
+                            margin-right: 5px;
+                        }
+                        
+                        .empty-section {
+                            text-align: center;
+                            padding: 40px;
+                            color: #94a3b8;
+                            font-style: italic;
+                            background: #f8fafc;
+                            border-radius: 12px;
+                            margin-bottom: 20px;
                         }
                     </style>
 
                     <!-- En-tête de la facture -->
                     <div class="invoice-header">
-                        <div class="invoice-title">📄 FACTURE HEBDOMADAIRE</div>
-                        <div class="client-info">
-                            <strong>Client:</strong> <t t-esc="client.name"/>
-                        </div>
-                        <div class="client-info">
-                            <strong>Semaine:</strong> <t t-esc="week_data['week'].split('-W')[1]"/> (<t t-esc="week_data['week'].split('-W')[0]"/>)
-                        </div>
-                        <div class="client-info">
-                            <strong>Date d'impression:</strong> <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                        <div class="invoice-title">FACTURE HEBDOMADAIRE</div>
+                        <div class="client-info-grid">
+                            <div class="client-info-card">
+                                <div class="info-label">Client</div>
+                                <div class="info-value"><t t-esc="client.name"/></div>
+                            </div>
+                            <div class="client-info-card">
+                                <div class="info-label">Semaine</div>
+                                <div class="info-value">Semaine <t t-esc="week_data['week'].split('-W')[1]"/> (<t t-esc="week_data['week'].split('-W')[0]"/>)</div>
+                            </div>
+                            <div class="client-info-card">
+                                <div class="info-label">Date d'impression</div>
+                                <div class="info-value"><t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Section Sorties -->
+                    <div class="section-title section-sorties">
+                        <span class="icon">SORTIES</span>
+                        <span>DE LA SEMAINE</span>
+                    </div>
+                    
                     <t t-if="week_data['sorties']">
-                        <div class="section-title section-sorties">
-                             SORTIES DE LA SEMAINE
-                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Produit</th>
-                                    <th>Quantite</th>
+                                    <th>Quantité</th>
                                     <th>Poids (Kg)</th>
                                     <th>Tonnage</th>
                                     <th>Prix Unitaire</th>
@@ -152,33 +308,38 @@
                                 <t t-foreach="week_data['sorties']" t-as="sortie">
                                     <tr>
                                         <td><t t-esc="sortie.date_exit"/></td>
-                                        <td><t t-esc="sortie.product_id.name"/></td>
+                                        <td><strong><t t-esc="sortie.product_id.name"/></strong></td>
                                         <td><t t-esc="sortie.quantity"/></td>
                                         <td><t t-esc="sortie.weight"/></td>
                                         <td><t t-esc="sortie.tonnage_final or sortie.tonnage"/></td>
                                         <td><t t-esc="sortie.selling_price_final or sortie.selling_price"/> Dh</td>
-                                        <td class="amount"><t t-esc="sortie.mt_vente_final or sortie.mt_vente"/> Dh</td>
+                                        <td class="amount"><t t-esc="'%.2f' % (sortie.mt_vente_final or sortie.mt_vente)"/> Dh</td>
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="6" style="text-align: right;">TOTAL SORTIES:</td>
+                                    <td colspan="6" style="text-align: right; font-size: 16px;">TOTAL SORTIES</td>
                                     <td class="amount"><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
                     </t>
+                    <t t-else="">
+                        <div class="empty-section">Aucune sortie pour cette semaine</div>
+                    </t>
 
                     <!-- Section Retours -->
+                    <div class="section-title section-retours">
+                        <span class="icon">RETOURS</span>
+                        <span>DE LA SEMAINE</span>
+                    </div>
+                    
                     <t t-if="week_data['retours']">
-                        <div class="section-title section-retours">
-                             RETOURS DE LA SEMAINE
-                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Produit</th>
-                                    <th>Quantite</th>
+                                    <th>Quantité</th>
                                     <th>Poids (Kg)</th>
                                     <th>Tonnage</th>
                                     <th>Prix Unitaire</th>
@@ -189,7 +350,7 @@
                                 <t t-foreach="week_data['retours']" t-as="retour">
                                     <tr>
                                         <td><t t-esc="retour.date_entry"/></td>
-                                        <td><t t-esc="retour.product_id.name"/></td>
+                                        <td><strong><t t-esc="retour.product_id.name"/></strong></td>
                                         <td><t t-esc="retour.quantity"/></td>
                                         <td><t t-esc="retour.weight"/></td>
                                         <td><t t-esc="retour.tonnage"/></td>
@@ -198,18 +359,23 @@
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="6" style="text-align: right;">TOTAL RETOURS:</td>
+                                    <td colspan="6" style="text-align: right; font-size: 16px;">TOTAL RETOURS</td>
                                     <td class="amount"><t t-esc="'%.2f' % week_data['total_retours']"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
                     </t>
+                    <t t-else="">
+                        <div class="empty-section">Aucun retour pour cette semaine</div>
+                    </t>
 
                     <!-- Section Avances -->
+                    <div class="section-title section-avances">
+                        <span class="icon">AVANCES</span>
+                        <span>DE LA SEMAINE</span>
+                    </div>
+                    
                     <t t-if="week_data['avances']">
-                        <div class="section-title section-avances">
-                             AVANCES DE LA SEMAINE
-                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -224,51 +390,58 @@
                                 <t t-foreach="week_data['avances']" t-as="avance">
                                     <tr>
                                         <td><t t-esc="avance.date_paid"/></td>
-                                        <td><t t-esc="avance.driver_id.name if avance.driver_id else '-'"/></td>
+                                        <td><strong><t t-esc="avance.driver_id.name if avance.driver_id else '-'"/></strong></td>
                                         <td><t t-esc="dict(avance._fields['payment_mode'].selection).get(avance.payment_mode, '-')"/></td>
                                         <td><t t-esc="avance.comment or '-'"/></td>
                                         <td class="amount"><t t-esc="'%.2f' % avance.amount"/> Dh</td>
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="4" style="text-align: right;">TOTAL AVANCES:</td>
+                                    <td colspan="4" style="text-align: right; font-size: 16px;">TOTAL AVANCES</td>
                                     <td class="amount"><t t-esc="'%.2f' % week_data['total_avances']"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
                     </t>
+                    <t t-else="">
+                        <div class="empty-section">Aucune avance pour cette semaine</div>
+                    </t>
 
                     <!-- Récapitulatif -->
                     <div class="section-title section-recap">
-                         RECAPITULATIF FINANCIER
+                        <span class="icon">RECAP</span>
+                        <span>FINANCIER</span>
                     </div>
+                    
                     <div class="recap-box">
                         <div class="recap-line">
-                            <span>Total Sorties:</span>
+                            <span>Total Sorties</span>
                             <span><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</span>
                         </div>
                         <div class="recap-line">
-                            <span>Total Retours:</span>
+                            <span>Total Retours</span>
                             <span>- <t t-esc="'%.2f' % week_data['total_retours']"/> Dh</span>
                         </div>
                         <div class="recap-line">
-                            <span>Total Avances:</span>
+                            <span>Total Avances</span>
                             <span>- <t t-esc="'%.2f' % week_data['total_avances']"/> Dh</span>
                         </div>
-                        <!-- GRAND TOTAL CLIENT -->
+                        
                         <div class="big-total-box">
-                            COMPTE DE LA SEMAINE :  
-                            <t t-esc="'%.2f' % week_data['compte_semaine']"/> Dh
+                            COMPTE DE LA SEMAINE : <t t-esc="'%.2f' % week_data['compte_semaine']"/> Dh
                         </div>
+                        
                         <div class="recap-line recap-total">
-                            <span>COMPTE TOTAL:</span>
+                            <span>COMPTE TOTAL DU CLIENT</span>
                             <span><t t-esc="'%.2f' % week_data['compte_total']"/> Dh</span>
                         </div>
                     </div>
 
                     <!-- Pied de page -->
                     <div class="footer-note">
-                        Document genere automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                        Document généré automatiquement le <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                        <br/>
+                        Ce document est confidentiel et destiné uniquement à l'usage du destinataire.
                     </div>
                 </div>
             </t>

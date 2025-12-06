@@ -86,7 +86,7 @@
                 <field name="chq"/>
                 <field name="week"/>
                 <field name="facture"/>
-                <filter name="no_pdf" string="Liens inexistant" domain="[('chq_pdf_url', '=', False)]"/>
+                <filter name="no_pdf" string="Liens inexistants" domain="[('chq_pdf_url', '=', False)]"/>
             </search>
         </field>
     </record>
@@ -111,10 +111,9 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <graph string="Graphique des Chèques" type="bar">
-                <field name="amount" type="measure"/>
+                <field name="number" type="measure"/>
                 <field name="week" />
-                <field name="ste_id" />
-                <field name="type" />
+                <field name="benif_id" />
             </graph>
         </field>
     </record>

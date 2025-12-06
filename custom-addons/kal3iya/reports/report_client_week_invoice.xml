@@ -1,238 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Définition du rapport -->
+    <record id="action_report_client_week_invoice" model="ir.actions.report">
+        <field name="name">Facture Hebdomadaire Client</field>
+        <field name="model">client.week.invoice.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kal3iya.report_client_week_invoice_document</field>
+        <field name="report_file">kal3iya.report_client_week_invoice_document</field>
+        <field name="binding_model_id" ref="model_client_week_invoice_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+    <template id="report_client_week_invoice_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
 
-<template id="report_client_week_invoice">
-    <t t-call="web.html_container">
-        <t t-foreach="docs" t-as="wizard">
+                <!-- RÉCUPÉRATION CLIENT + DONNÉES SEMAINE -->
+                <t t-set="client" t-value="wizard.client_id"/>
+                <t t-set="week_data" t-value="client._get_week_data(wizard.week)"/>
 
-            <!-- RÉCUPÉRATION CLIENT + DONNÉES SEMAINE -->
-            <t t-set="client" t-value="wizard.client_id"/>
-            <t t-set="week_data" t-value="client._get_week_data(wizard.week)"/>
+                <!-- CALCUL DES DATES DE LA SEMAINE -->
+                <t t-set="year" t-value="int(wizard.week.split('-W')[0])"/>
+                <t t-set="week_no" t-value="int(wizard.week.split('-W')[1])"/>
 
-            <!-- CALCUL DES DATES DE LA SEMAINE -->
-            <t t-set="year" t-value="int(wizard.week.split('-W')[0])"/>
-            <t t-set="week_no" t-value="int(wizard.week.split('-W')[1])"/>
+                <t t-set="date_start"
+                t-value="datetime.date.fromisocalendar(year, week_no, 1)"/>
+                <t t-set="date_end"
+                t-value="datetime.date.fromisocalendar(year, week_no, 7)"/>
 
-            <t t-set="date_start"
-               t-value="datetime.date.fromisocalendar(year, week_no, 1)"/>
-            <t t-set="date_end"
-               t-value="datetime.date.fromisocalendar(year, week_no, 7)"/>
+                <div class="page">
 
-            <div class="page">
+                    <!-- STYLE GLOBAL -->
+                    <style>
+                        body {
+                            font-family: 'Helvetica', 'Arial', sans-serif;
+                        }
+                        .invoice-header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            border-bottom: 4px solid #4c51bf;
+                            padding-bottom: 20px;
+                        }
+                        .invoice-title {
+                            font-size: 34px;
+                            font-weight: 900;
+                            color: #4c51bf;
+                            margin-bottom: 15px;
+                        }
+                        .client-info {
+                            font-size: 18px;
+                            color: #2d3748;
+                            margin: 4px 0;
+                        }
 
-                <!-- STYLE GLOBAL -->
-                <style>
-                    body {
-                        font-family: 'Helvetica', 'Arial', sans-serif;
-                    }
-                    .invoice-header {
-                        text-align: center;
-                        margin-bottom: 30px;
-                        border-bottom: 4px solid #4c51bf;
-                        padding-bottom: 20px;
-                    }
-                    .invoice-title {
-                        font-size: 34px;
-                        font-weight: 900;
-                        color: #4c51bf;
-                        margin-bottom: 15px;
-                    }
-                    .client-info {
-                        font-size: 18px;
-                        color: #2d3748;
-                        margin: 4px 0;
-                    }
+                        .date-range {
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: #2d3748;
+                            margin-top: 8px;
+                        }
 
-                    .date-range {
-                        font-size: 18px;
-                        font-weight: bold;
-                        color: #2d3748;
-                        margin-top: 8px;
-                    }
+                        .section-title {
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: white;
+                            padding: 12px 18px;
+                            margin-top: 25px;
+                            margin-bottom: 15px;
+                            border-radius: 8px;
+                        }
+                        .section-sorties { background: #4c51bf; }
+                        .section-retours { background: #e53e3e; }
+                        .section-avances { background: #38a169; }
+                        .section-recap { background: #2d3748; }
 
-                    .section-title {
-                        font-size: 20px;
-                        font-weight: bold;
-                        color: white;
-                        padding: 12px 18px;
-                        margin-top: 25px;
-                        margin-bottom: 15px;
-                        border-radius: 8px;
-                    }
-                    .section-sorties { background: #4c51bf; }
-                    .section-retours { background: #e53e3e; }
-                    .section-avances { background: #38a169; }
-                    .section-recap { background: #2d3748; }
+                        .data-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                            font-size: 14px;
+                        }
+                        .data-table th {
+                            background: #e2e8f0;
+                            padding: 10px;
+                            border: 1px solid #cbd5e0;
+                        }
+                        .data-table td {
+                            padding: 8px;
+                            border: 1px solid #e2e8f0;
+                        }
+                        .total-row {
+                            background: #edf2f7!important;
+                            font-weight: bold;
+                        }
 
-                    .data-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-bottom: 20px;
-                        font-size: 14px;
-                    }
-                    .data-table th {
-                        background: #e2e8f0;
-                        padding: 10px;
-                        border: 1px solid #cbd5e0;
-                    }
-                    .data-table td {
-                        padding: 8px;
-                        border: 1px solid #e2e8f0;
-                    }
-                    .total-row {
-                        background: #edf2f7!important;
-                        font-weight: bold;
-                    }
+                        /* GRAND CADRE POUR TOTAL CLIENT */
+                        .big-total-box {
+                            background: #ebf4ff;
+                            border: 3px solid #4c51bf;
+                            padding: 25px;
+                            border-radius: 12px;
+                            margin-top: 30px;
+                            font-size: 24px;
+                            font-weight: 900;
+                            text-align: center;
+                            color: #4c51bf;
+                            box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+                        }
 
-                    /* GRAND CADRE POUR TOTAL CLIENT */
-                    .big-total-box {
-                        background: #ebf4ff;
-                        border: 3px solid #4c51bf;
-                        padding: 25px;
-                        border-radius: 12px;
-                        margin-top: 30px;
-                        font-size: 24px;
-                        font-weight: 900;
-                        text-align: center;
-                        color: #4c51bf;
-                        box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-                    }
+                        .footer-note {
+                            text-align: center;
+                            margin-top: 40px;
+                            padding-top: 20px;
+                            border-top: 1px solid #cbd5e0;
+                            color: #718096;
+                            font-size: 12px;
+                        }
+                    </style>
 
-                    .footer-note {
-                        text-align: center;
-                        margin-top: 40px;
-                        padding-top: 20px;
-                        border-top: 1px solid #cbd5e0;
-                        color: #718096;
-                        font-size: 12px;
-                    }
-                </style>
+                    <!-- EN-TÊTE FACTURE -->
+                    <div class="invoice-header">
+                        <div class="invoice-title">📄 FACTURE HEBDOMADAIRE</div>
 
-                <!-- EN-TÊTE FACTURE -->
-                <div class="invoice-header">
-                    <div class="invoice-title">📄 FACTURE HEBDOMADAIRE</div>
+                        <div class="client-info"><strong>Client :</strong> <t t-esc="client.name"/></div>
 
-                    <div class="client-info"><strong>Client :</strong> <t t-esc="client.name"/></div>
+                        <div class="client-info">
+                            <strong>Semaine :</strong>
+                            <t t-esc="week_no"/> (<t t-esc="year"/>)
+                        </div>
 
-                    <div class="client-info">
-                        <strong>Semaine :</strong>
-                        <t t-esc="week_no"/> (<t t-esc="year"/>)
+                        <div class="date-range">
+                            📅 Du <t t-esc="date_start.strftime('%d/%m/%Y')"/>
+                            au <t t-esc="date_end.strftime('%d/%m/%Y')"/>
+                        </div>
+
+                        <div class="client-info">
+                            <strong>Date d'impression :</strong>
+                            <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                        </div>
                     </div>
 
-                    <div class="date-range">
-                        📅 Du <t t-esc="date_start.strftime('%d/%m/%Y')"/>
-                        au <t t-esc="date_end.strftime('%d/%m/%Y')"/>
+                    <!-- SORTIES -->
+                    <t t-if="week_data['sorties']">
+                        <div class="section-title section-sorties">🚚 SORTIES DE LA SEMAINE</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th><th>Produit</th><th>Quantité</th><th>Poids</th>
+                                    <th>Tonnage</th><th>Prix</th><th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['sorties']" t-as="s">
+                                    <tr>
+                                        <td><t t-esc="s.date_exit"/></td>
+                                        <td><t t-esc="s.product_id.name"/></td>
+                                        <td><t t-esc="s.quantity"/></td>
+                                        <td><t t-esc="s.weight"/></td>
+                                        <td><t t-esc="s.tonnage_final or s.tonnage"/></td>
+                                        <td><t t-esc="s.selling_price_final or s.selling_price"/> Dh</td>
+                                        <td><t t-esc="s.mt_vente_final or s.mt_vente"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="6" style="text-align:right;">TOTAL :</td>
+                                    <td><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- RETOURS -->
+                    <t t-if="week_data['retours']">
+                        <div class="section-title section-retours">🔄 RETOURS DE LA SEMAINE</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th><th>Produit</th><th>Qté</th><th>Poids</th>
+                                    <th>Tonnage</th><th>Prix</th><th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['retours']" t-as="r">
+                                    <tr>
+                                        <td><t t-esc="r.date_entry"/></td>
+                                        <td><t t-esc="r.product_id.name"/></td>
+                                        <td><t t-esc="r.quantity"/></td>
+                                        <td><t t-esc="r.weight"/></td>
+                                        <td><t t-esc="r.tonnage"/></td>
+                                        <td><t t-esc="r.selling_price"/> Dh</td>
+                                        <td><t t-esc="'%.2f' % (r.selling_price * r.tonnage)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="6" style="text-align:right;">TOTAL :</td>
+                                    <td><t t-esc="'%.2f' % week_data['total_retours']"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- AVANCES -->
+                    <t t-if="week_data['avances']">
+                        <div class="section-title section-avances">💵 AVANCES DE LA SEMAINE</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th><th>Chauffeur</th><th>Mode</th><th>Commentaire</th><th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['avances']" t-as="a">
+                                    <tr>
+                                        <td><t t-esc="a.date_paid"/></td>
+                                        <td><t t-esc="a.driver_id.name or '-'"/></td>
+                                        <td><t t-esc="a.payment_mode"/></td>
+                                        <td><t t-esc="a.comment or '-'"/></td>
+                                        <td><t t-esc="'%.2f' % a.amount"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="4" style="text-align:right;">TOTAL :</td>
+                                    <td><t t-esc="'%.2f' % week_data['total_avances']"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- GRAND TOTAL CLIENT -->
+                    <div class="big-total-box">
+                        COMPTE TOTAL CLIENT :  
+                        <t t-esc="'%.2f' % week_data['compte_total']"/> Dh
                     </div>
 
-                    <div class="client-info">
-                        <strong>Date d'impression :</strong>
+                    <!-- FOOTER -->
+                    <div class="footer-note">
+                        Document généré automatiquement —
                         <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
                     </div>
+
                 </div>
 
-                <!-- SORTIES -->
-                <t t-if="week_data['sorties']">
-                    <div class="section-title section-sorties">🚚 SORTIES DE LA SEMAINE</div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th><th>Produit</th><th>Quantité</th><th>Poids</th>
-                                <th>Tonnage</th><th>Prix</th><th>Montant</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="week_data['sorties']" t-as="s">
-                                <tr>
-                                    <td><t t-esc="s.date_exit"/></td>
-                                    <td><t t-esc="s.product_id.name"/></td>
-                                    <td><t t-esc="s.quantity"/></td>
-                                    <td><t t-esc="s.weight"/></td>
-                                    <td><t t-esc="s.tonnage_final or s.tonnage"/></td>
-                                    <td><t t-esc="s.selling_price_final or s.selling_price"/> Dh</td>
-                                    <td><t t-esc="s.mt_vente_final or s.mt_vente"/> Dh</td>
-                                </tr>
-                            </t>
-                            <tr class="total-row">
-                                <td colspan="6" style="text-align:right;">TOTAL :</td>
-                                <td><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </t>
-
-                <!-- RETOURS -->
-                <t t-if="week_data['retours']">
-                    <div class="section-title section-retours">🔄 RETOURS DE LA SEMAINE</div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th><th>Produit</th><th>Qté</th><th>Poids</th>
-                                <th>Tonnage</th><th>Prix</th><th>Montant</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="week_data['retours']" t-as="r">
-                                <tr>
-                                    <td><t t-esc="r.date_entry"/></td>
-                                    <td><t t-esc="r.product_id.name"/></td>
-                                    <td><t t-esc="r.quantity"/></td>
-                                    <td><t t-esc="r.weight"/></td>
-                                    <td><t t-esc="r.tonnage"/></td>
-                                    <td><t t-esc="r.selling_price"/> Dh</td>
-                                    <td><t t-esc="'%.2f' % (r.selling_price * r.tonnage)"/> Dh</td>
-                                </tr>
-                            </t>
-                            <tr class="total-row">
-                                <td colspan="6" style="text-align:right;">TOTAL :</td>
-                                <td><t t-esc="'%.2f' % week_data['total_retours']"/> Dh</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </t>
-
-                <!-- AVANCES -->
-                <t t-if="week_data['avances']">
-                    <div class="section-title section-avances">💵 AVANCES DE LA SEMAINE</div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th><th>Chauffeur</th><th>Mode</th><th>Commentaire</th><th>Montant</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="week_data['avances']" t-as="a">
-                                <tr>
-                                    <td><t t-esc="a.date_paid"/></td>
-                                    <td><t t-esc="a.driver_id.name or '-'"/></td>
-                                    <td><t t-esc="a.payment_mode"/></td>
-                                    <td><t t-esc="a.comment or '-'"/></td>
-                                    <td><t t-esc="'%.2f' % a.amount"/> Dh</td>
-                                </tr>
-                            </t>
-                            <tr class="total-row">
-                                <td colspan="4" style="text-align:right;">TOTAL :</td>
-                                <td><t t-esc="'%.2f' % week_data['total_avances']"/> Dh</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </t>
-
-                <!-- GRAND TOTAL CLIENT -->
-                <div class="big-total-box">
-                    COMPTE TOTAL CLIENT :  
-                    <t t-esc="'%.2f' % week_data['compte_total']"/> Dh
-                </div>
-
-                <!-- FOOTER -->
-                <div class="footer-note">
-                    Document généré automatiquement —
-                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
-                </div>
-
-            </div>
-
+            </t>
         </t>
-    </t>
-</template>
+    </template>
 
 </odoo>

@@ -5,59 +5,73 @@ class ClientWeekInvoiceWizard(models.TransientModel):
     _name = 'client.week.invoice.wizard'
     _description = 'Wizard pour imprimer la facture hebdomadaire du client'
 
-    client_id = fields.Many2one('kal3iya.client', string='Client', required=True, readonly=True)
+    client_id = fields.Many2one(
+        'kal3iya.client',
+        string='Client',
+        required=True,
+        readonly=True,
+    )
+    # on laisse la sélection vide ici, on la remplit dynamiquement
     week = fields.Selection([], string='Semaine', required=True)
 
     @api.model
     def default_get(self, fields_list):
-        """Initialiser automatiquement le client"""
+        """Initialise le wizard avec le client actif + remplit la liste des semaines."""
         res = super().default_get(fields_list)
-        if self.env.context.get('active_id'):
-            res['client_id'] = self.env.context.get('active_id')
-        return res
 
-    @api.onchange('client_id')
-    def _onchange_client_id(self):
-        """Recharge dynamiquement la liste des semaines disponibles"""
-        if not self.client_id:
-            self.week = False
-            return
+        client_id = self.env.context.get('active_id')
+        if not client_id:
+            return res
+
+        res['client_id'] = client_id
+        client = self.env['kal3iya.client'].browse(client_id)
 
         weeks = set()
 
         # Sorties
-        for s in self.client_id.sortie_ids:
+        for s in client.sortie_ids:
             if s.week:
                 weeks.add(s.week)
 
         # Retours
-        for r in self.client_id.retour_ids:
-            if hasattr(r, 'week') and r.week:
+        for r in client.retour_ids:
+            if getattr(r, 'week', False):
                 weeks.add(r.week)
 
-        # Avances
-        for a in self.client_id.avances:
+        # Avances (date → semaine)
+        for a in client.avances:
             if a.date_paid:
                 weeks.add(a.date_paid.strftime("%Y-W%W"))
 
-        # Trier
+        # Tri décroissant
         sorted_weeks = sorted(weeks, reverse=True)
 
-        # Construire la liste finale
         selection = []
         for week in sorted_weeks:
-            year, week_num = week.split('-W')
-            label = f"Semaine {week_num} ({year})"
-            selection.append((week, label))
+            # "2025-W47" → "Semaine 47 (2025)"
+            parts = week.split('-W')
+            if len(parts) == 2:
+                year, week_num = parts
+                label = f"Semaine {week_num} ({year})"
+                selection.append((week, label))
 
-        # 🔥 appliquer dynamiquement les valeurs possibles :
+        # 👉 IMPORTANT : on injecte la sélection dans le champ AVANT la création du record
         self._fields['week'].selection = selection
-        self.week = False   # réinitialiser l'ancien choix
+
+        # optionnel : mettre par défaut la semaine la plus récente
+        if selection:
+            res.setdefault('week', selection[0][0])
+
+        return res
 
     def action_print_invoice(self):
+        """Génère le PDF pour la semaine choisie."""
         self.ensure_one()
 
         if not self.week:
             raise UserError("Veuillez sélectionner une semaine.")
 
-        return self.env.ref('kal3iya.action_report_client_week_invoice').report_action(self)
+        # on garde ton action de rapport telle quelle
+        return self.env.ref(
+            'kal3iya.action_report_client_week_invoice'
+        ).report_action(self)

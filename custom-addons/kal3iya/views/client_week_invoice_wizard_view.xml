@@ -8,7 +8,7 @@
             <form string="Imprimer Facture Hebdomadaire">
                 <group>
                     <field name="client_id" readonly="1"/>
-                    <field name="week" widget="selection"/>
+                    <field name="week" required="1"/>
                 </group>
                 <footer>
                     <button name="action_print_invoice" 
@@ -28,7 +28,8 @@
         <field name="name">Imprimer Facture Hebdomadaire</field>
         <field name="res_model">client.week.invoice.wizard</field>
         <field name="view_mode">form</field>
+        <field name="view_id" ref="client_facture_wizard_form"/>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="model_kal3iya_client"/>
+        <field name="view_id" ref="client_facture_wizard_form"/>
     </record>
 </odoo>

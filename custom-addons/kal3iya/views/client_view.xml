@@ -29,7 +29,7 @@
                                 class="oe_stat_button"
                                 icon="fa-print"
                                 context="{'default_client_id': active_id}">
-                            <field name="id" string="Facture" widget="statinfo"/>
+                            <span class="o_stat_text">Facture</span>
                         </button>
                         <!-- 🔹 Bouton sorties -->
                         <button name="%(filtered_sortie_action)d"

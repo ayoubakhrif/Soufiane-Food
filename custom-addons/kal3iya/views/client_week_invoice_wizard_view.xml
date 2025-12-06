@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue formulaire du wizard -->
+    <record id="view_client_week_invoice_wizard_form" model="ir.ui.view">
+        <field name="name">client.week.invoice.wizard.form</field>
+        <field name="model">client.week.invoice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimer Facture Hebdomadaire">
+                <group>
+                    <field name="client_id" readonly="1"/>
+                    <field name="week" widget="selection"/>
+                </group>
+                <footer>
+                    <button name="action_print_invoice" 
+                            string="Imprimer" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Annuler" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour ouvrir le wizard -->
+    <record id="client_facture_wizard_action" model="ir.actions.act_window">
+        <field name="name">Imprimer Facture Hebdomadaire</field>
+        <field name="res_model">client.week.invoice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_kal3iya_client"/>
+    </record>
+</odoo>

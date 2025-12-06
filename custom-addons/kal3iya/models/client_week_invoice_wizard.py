@@ -6,64 +6,58 @@ class ClientWeekInvoiceWizard(models.TransientModel):
     _description = 'Wizard pour imprimer la facture hebdomadaire du client'
 
     client_id = fields.Many2one('kal3iya.client', string='Client', required=True, readonly=True)
-    week = fields.Selection(selection='_get_available_weeks', string='Semaine', required=True)
+    week = fields.Selection([], string='Semaine', required=True)
 
     @api.model
     def default_get(self, fields_list):
-        """Initialiser le wizard avec le client actif"""
+        """Initialiser automatiquement le client"""
         res = super().default_get(fields_list)
         if self.env.context.get('active_id'):
             res['client_id'] = self.env.context.get('active_id')
         return res
 
-    def _get_available_weeks(self):
-        """Retourne toutes les semaines où le client a eu une activité"""
-        # Si le wizard n'est pas encore créé (premier appel), utiliser le contexte
-        client_id = self.client_id.id if self.client_id else self.env.context.get('active_id')
-        
-        if not client_id:
-            return []
-        
-        client = self.env['kal3iya.client'].browse(client_id)
+    @api.onchange('client_id')
+    def _onchange_client_id(self):
+        """Recharge dynamiquement la liste des semaines disponibles"""
+        if not self.client_id:
+            self.week = False
+            return
+
         weeks = set()
-        
-        # Récupérer les semaines des sorties
-        for sortie in client.sortie_ids:
-            if sortie.week:
-                weeks.add(sortie.week)
-        
-        # Récupérer les semaines des retours
-        for retour in client.retour_ids:
-            if hasattr(retour, 'week') and retour.week:
-                weeks.add(retour.week)
-        
-        # Récupérer les semaines des avances
-        for avance in client.avances:
-            if avance.date_paid:
-                week_str = avance.date_paid.strftime("%Y-W%W")
-                weeks.add(week_str)
-        
-        # Trier par ordre décroissant (plus récent en premier)
+
+        # Sorties
+        for s in self.client_id.sortie_ids:
+            if s.week:
+                weeks.add(s.week)
+
+        # Retours
+        for r in self.client_id.retour_ids:
+            if hasattr(r, 'week') and r.week:
+                weeks.add(r.week)
+
+        # Avances
+        for a in self.client_id.avances:
+            if a.date_paid:
+                weeks.add(a.date_paid.strftime("%Y-W%W"))
+
+        # Trier
         sorted_weeks = sorted(weeks, reverse=True)
-        
-        # Formater pour l'affichage : "Semaine 48 (2025)"
-        result = []
+
+        # Construire la liste finale
+        selection = []
         for week in sorted_weeks:
-            # week format: "2025-W48"
-            parts = week.split('-W')
-            if len(parts) == 2:
-                year, week_num = parts[0], parts[1]
-                label = f"Semaine {week_num} ({year})"
-                result.append((week, label))
-        
-        return result
+            year, week_num = week.split('-W')
+            label = f"Semaine {week_num} ({year})"
+            selection.append((week, label))
+
+        # 🔥 appliquer dynamiquement les valeurs possibles :
+        self._fields['week'].selection = selection
+        self.week = False   # réinitialiser l'ancien choix
 
     def action_print_invoice(self):
-        """Génère et télécharge le PDF de la facture hebdomadaire"""
         self.ensure_one()
-        
+
         if not self.week:
             raise UserError("Veuillez sélectionner une semaine.")
-        
-        # Appeler le rapport QWeb
+
         return self.env.ref('kal3iya.action_report_client_week_invoice').report_action(self)

@@ -28,7 +28,7 @@
         <field name="name">Imprimer Facture Hebdomadaire</field>
         <field name="res_model">client.week.invoice.wizard</field>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="client_facture_wizard_form"/>
+        <field name="view_id" ref="view_client_week_invoice_wizard_form"/>
         <field name="target">new</field>
     </record>
 </odoo>

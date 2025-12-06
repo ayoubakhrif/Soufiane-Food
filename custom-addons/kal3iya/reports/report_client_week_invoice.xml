@@ -9,16 +9,33 @@
         <field name="report_file">kal3iya.report_client_week_invoice_document</field>
         <field name="binding_model_id" ref="model_client_week_invoice_wizard"/>
         <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="kal3iya.paperformat_client_invoice"/>
+    </record>
+
+    <record id="paperformat_client_invoice" model="report.paperformat">
+        <field name="name">Facture Client A4</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
     </record>
 
     <!-- Template QWeb du rapport -->
-    <template id="report_client_week_invoice_document">
-        <t t-call="web.html_container">
+     <template id="report_client_week_invoice_document">
+        <t t-call="web.basic_layout">
             <t t-foreach="docs" t-as="wizard">
                 <t t-set="client" t-value="wizard.client_id"/>
                 <t t-set="week_data" t-value="client._get_week_data(wizard.week)"/>
                 
-                <div class="page">
+                <div class="article o_report_layout_standard">
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap');
                         
@@ -28,11 +45,13 @@
                         
                         body {
                             background: #f8fafc;
+                            margin: 0;
+                            padding: 0;
                         }
                         
-                        .page {
+                        .article {
                             background: white;
-                            padding: 40px;
+                            padding: 20px;
                         }
                         
                         .invoice-header {

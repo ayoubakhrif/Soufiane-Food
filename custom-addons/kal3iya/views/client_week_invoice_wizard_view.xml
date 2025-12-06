@@ -7,8 +7,8 @@
         <field name="arch" type="xml">
             <form string="Imprimer Facture Hebdomadaire">
                 <group>
-                    <field name="client_id" readonly="1"/>
-                    <field name="week" required="1"/>
+                    <field name="client_id" invisible="1"/>
+                    <field name="week" widget="selection"/>
                 </group>
                 <footer>
                     <button name="action_print_invoice" 
@@ -24,11 +24,12 @@
     </record>
 
     <!-- Action pour ouvrir le wizard -->
-    <record id="client_facture_wizard_action" model="ir.actions.act_window">
-        <field name="name">Imprimer Facture Hebdomadaire</field>
+    <record id="action_open_week_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Sélectionner une semaine</field>
         <field name="res_model">client.week.invoice.wizard</field>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="view_client_week_invoice_wizard_form"/>
         <field name="target">new</field>
+        <field name="view_id" ref="view_client_week_invoice_wizard_form"/>
+        <field name="context">{'default_client_id': active_id}</field>
     </record>
 </odoo>

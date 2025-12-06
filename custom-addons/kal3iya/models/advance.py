@@ -10,7 +10,7 @@ class Kal3iyaAdvance(models.Model):
     comment = fields.Text(string='Commentaire')
     payment_mode = fields.Selection([
         ('chq', 'CHQ'),
-        ('espece', 'Espèce'),
+        ('espece', 'Espece'),
         ('virement', 'Virement'),
         ('versement', 'Versement'),
         ('charge', 'Charges'),

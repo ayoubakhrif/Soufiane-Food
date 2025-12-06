@@ -255,14 +255,14 @@
                             <span>Total Avances:</span>
                             <span>- <t t-esc="'%.2f' % week_data['total_avances']"/> Dh</span>
                         </div>
-                        <div class="recap-line recap-total">
-                            <span>COMPTE DE LA SEMAINE:</span>
-                            <span><t t-esc="'%.2f' % week_data['compte_semaine']"/> Dh</span>
-                        </div>
                         <!-- GRAND TOTAL CLIENT -->
                         <div class="big-total-box">
-                            COMPTE TOTAL CLIENT :  
-                            <t t-esc="'%.2f' % week_data['compte_total']"/> Dh
+                            COMPTE DE LA SEMAINE :  
+                            <t t-esc="'%.2f' % week_data['compte_semaine']"/> Dh
+                        </div>
+                        <div class="recap-line recap-total">
+                            <span>COMPTE TOTAL:</span>
+                            <span><t t-esc="'%.2f' % week_data['compte_total']"/> Dh</span>
                         </div>
                     </div>
 

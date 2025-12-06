@@ -463,6 +463,8 @@ class Kal3iyaClient(models.Model):
         week : string au format 'YYYY-Www' (ex: '2025-W48')
         Utilisé par le rapport (QWeb).
         """
+        from datetime import datetime, timedelta
+        
         self.ensure_one()
 
         # 1️⃣ Filtrer sorties de la semaine
@@ -484,8 +486,36 @@ class Kal3iyaClient(models.Model):
         # 4️⃣ Compte de la semaine
         compte_semaine = total_sorties - total_retours - total_avances
 
+        # 5️⃣ Calculer les dates de début et fin de semaine
+        start_date = None
+        end_date = None
+        
+        try:
+            # Parser le format 'YYYY-Www' (ex: '2025-W48')
+            year, week_num = week.split('-W')
+            year = int(year)
+            week_num = int(week_num)
+            
+            # Trouver le premier jour de la semaine (Lundi)
+            # ISO: semaine commence le lundi
+            jan_4 = datetime(year, 1, 4)
+            week_1_monday = jan_4 - timedelta(days=jan_4.weekday())
+            start_date_obj = week_1_monday + timedelta(weeks=week_num - 1)
+            
+            # Calculer le dernier jour (Dimanche)
+            end_date_obj = start_date_obj + timedelta(days=6)
+            
+            # Formater les dates
+            start_date = start_date_obj.strftime('%d/%m/%Y')
+            end_date = end_date_obj.strftime('%d/%m/%Y')
+        except:
+            # En cas d'erreur, laisser vide
+            pass
+
         return {
             'week': week,
+            'start_date': start_date,
+            'end_date': end_date,
             'sorties': sorties,
             'retours': retours,
             'avances': avances,
@@ -493,5 +523,5 @@ class Kal3iyaClient(models.Model):
             'total_retours': total_retours,
             'total_avances': total_avances,
             'compte_semaine': compte_semaine,
-            'compte_total': self.compte,  # ton champ déjà calculé
+            'compte_total': self.compte,
         }

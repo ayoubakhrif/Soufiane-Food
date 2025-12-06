@@ -127,7 +127,7 @@
                             <strong>Semaine:</strong> <t t-esc="week_data['week'].split('-W')[1]"/> (<t t-esc="week_data['week'].split('-W')[0]"/>)
                         </div>
                         <div class="client-info">
-                            <strong>Période:</strong> 
+                            <strong>Periode:</strong> 
                             Du <t t-esc="week_data['start_date']"/>  
                             au <t t-esc="week_data['end_date']"/>
                         </div>

@@ -25,10 +25,12 @@
                     <!-- 🧍 Informations principales -->
                     <div class="oe_button_box" name="button_box">
                         <button name="%(client_facture_wizard_action)d"
-                            type="action"
-                            context="{'default_client_id': active_id}"
-                            string="Imprimer Facture"
-                            class="oe_highlight"/>
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-print"
+                                context="{'default_client_id': active_id}">
+                            <field name="id" string="Facture" widget="statinfo"/>
+                        </button>
                         <!-- 🔹 Bouton sorties -->
                         <button name="%(filtered_sortie_action)d"
                                 type="action"

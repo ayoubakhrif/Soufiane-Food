@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Définition du rapport -->
-    <record id="action_report_client_week_invoice" model="ir.actions.report">
-        <field name="name">Facture Hebdomadaire Client</field>
-        <field name="model">client.week.invoice.wizard</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">kal3iya.report_client_week_invoice_document</field>
-        <field name="report_file">kal3iya.report_client_week_invoice_document</field>
-        <field name="binding_model_id" ref="model_client_week_invoice_wizard"/>
-        <field name="binding_type">report</field>
-        <field name="paperformat_id" ref="kal3iya.paperformat_client_invoice"/>
-    </record>
-
+    
     <record id="paperformat_client_invoice" model="report.paperformat">
         <field name="name">Facture Client A4</field>
         <field name="default" eval="True"/>
@@ -26,6 +15,18 @@
         <field name="header_line" eval="False"/>
         <field name="header_spacing">0</field>
         <field name="dpi">90</field>
+    </record>
+    
+    <!-- Définition du rapport -->
+    <record id="action_report_client_week_invoice" model="ir.actions.report">
+        <field name="name">Facture Hebdomadaire Client</field>
+        <field name="model">client.week.invoice.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">kal3iya.report_client_week_invoice_document</field>
+        <field name="report_file">kal3iya.report_client_week_invoice_document</field>
+        <field name="binding_model_id" ref="model_client_week_invoice_wizard"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="kal3iya.paperformat_client_invoice"/>
     </record>
 
     <!-- Template QWeb du rapport -->

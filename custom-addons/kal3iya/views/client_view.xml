@@ -24,8 +24,9 @@
                 <sheet>
                     <!-- 🧍 Informations principales -->
                     <div class="oe_button_box" name="button_box">
-                        <button name="%(action_open_week_invoice_wizard)d"
+                        <button name="%(client_facture_wizard_action)d"
                             type="action"
+                            context="{'default_client_id': active_id}"
                             string="Imprimer Facture"
                             class="oe_highlight"/>
                         <!-- 🔹 Bouton sorties -->

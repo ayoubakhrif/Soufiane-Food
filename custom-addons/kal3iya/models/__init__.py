@@ -2,6 +2,7 @@ from . import product_entry
 from . import product_sortie
 from . import driver
 from . import provider
+from . import week_update_wizard
 from . import client
 from . import ste
 from . import product_stock

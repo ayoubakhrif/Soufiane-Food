@@ -246,21 +246,36 @@ class Kal3iyaClient(models.Model):
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
+            wizard_action = self.env.ref('kal3iya.action_kal3iya_week_update_wizard')
+            wizard_action_id = wizard_action.id if wizard_action else False
+
             for week, records in groups.items():
                 total_week = sum(
                     r.mt_vente_final or r.mt_vente
                     for r in records
                 )
 
+                # URL du wizard (on utilise le premier record comme contexte pour récupérer la semaine)
+                wizard_url = "#"
+                if records and wizard_action_id:
+                    first_id = records[0].id
+                    wizard_url = f"/web#action={wizard_action_id}&active_id={first_id}&model=kal3iyasortie&view_type=form"
 
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
-                            <div class="week-title">📅 Semaine {week}</div>
+                            <div class="week-title">
+                                📅 Semaine {week}
+                                <a href="{wizard_url}" 
+                                   class="edit-btn oe_kanban_action oe_kanban_global_click"
+                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea;">
+                                   ✏️ Modifier la semaine
+                                </a>
+                            </div>
                             <div class="week-total">{total_week:,.2f} Dh</div>
                         </div>
 
-                        <div class="table-header">
+                        <div class="table-header" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
                             <div>Produit</div>
                             <div>Qté</div>
                             <div>Poids(Kg)</div>
@@ -268,16 +283,12 @@ class Kal3iyaClient(models.Model):
                             <div>Prix final</div>
                             <div>Montant final</div>
                             <div>Date</div>
-                            <div>Action</div>
                         </div>
                 """
 
                 for s in records:
-                    view_id = self.env.ref("kal3iya.view_kal3iya_sortie_popup").id
-                    popup_url = f"/web#id={s.id}&model=kal3iyasortie&view_type=form&view_id={view_id}"
-
                     html += f"""
-                        <div class="list-row">
+                        <div class="list-row" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
                             <div class="col-label">{s.product_id.name}</div>
                             <div class="col-value">{s.quantity}</div>
                             <div class="col-value">{s.weight}</div>
@@ -285,12 +296,6 @@ class Kal3iyaClient(models.Model):
                             <div class="col-value">{(s.selling_price_final or s.selling_price)} Dh</div>
                             <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
                             <div class="col-value date">{s.date_exit}</div>
-                            <div>
-                                <a href="{popup_url}"
-                                class="edit-btn oe_kanban_action oe_kanban_global_click">
-                                ✏️ Modifier
-                                </a>
-                            </div>
                         </div>
                     """
 

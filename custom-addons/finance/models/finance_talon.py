@@ -6,4 +6,4 @@ class FinanceSte(models.Model):
 
     name = fields.Char(string='Talon', required=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
-    num_chq = fields.Integer(string='Numéro de chqs', required=True)
+    num_chq = fields.Integer(string='Nombres de chqs', required=True)

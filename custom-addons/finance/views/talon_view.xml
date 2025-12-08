@@ -15,9 +15,9 @@
             <form string="Talons">
                 <sheet>
                     <group>
+                        <field name="num_chq"/>
                         <field name="name"/>
                         <field name="ste_id"/>
-                        <field name="num_chq"/>
                     </group>
                 </sheet>
             </form>
@@ -30,9 +30,9 @@
         <field name="model">finance.talon</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="num_chq"/>
                 <field name="name"/>
                 <field name="ste_id"/>
-                <field name="num_chq"/>
             </tree>
         </field>
     </record>

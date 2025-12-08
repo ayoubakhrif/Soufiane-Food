@@ -62,7 +62,7 @@ class WeekUpdateLine(models.TransientModel):
     _description = 'Ligne de modification hebdomadaire'
 
     wizard_id = fields.Many2one('kal3iya.week.update.wizard', required=True)
-    sortie_id = fields.Many2one('kal3iyasortie', string='Commande', required=True, readonly=True)
+    sortie_id = fields.Many2one('kal3iyasortie', string='Commande', required=True)
     
     # Related fields for display
     product_id = fields.Many2one(related='sortie_id.product_id', readonly=True)

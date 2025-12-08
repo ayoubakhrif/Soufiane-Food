@@ -23,10 +23,5 @@
     'images': ['static/description/icon.svg'],
     'installable': True,
     'application': True,
-    'assets': {
-        'web.assets_backend': [
-            'kal3iya/static/js/week_grouped_html.js',
-        ],
-    },
     'license': 'LGPL-3',
 }

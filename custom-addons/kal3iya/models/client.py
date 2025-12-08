@@ -255,24 +255,22 @@ class Kal3iyaClient(models.Model):
                     for r in records
                 )
 
-                # Bouton via JS Widget (pour popup)
-                btn_html = ""
-                if records:
+                # URL du wizard (on utilise le premier record comme contexte pour récupérer la semaine)
+                wizard_url = "#"
+                if records and wizard_action_id:
                     first_id = records[0].id
-                    btn_html = f"""
-                        <span class="js_open_week_wizard edit-btn oe_kanban_action oe_kanban_global_click"
-                              data-active-id="{first_id}"
-                              style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea; cursor: pointer; color: white;">
-                           ✏️ Modifier la semaine
-                        </span>
-                    """
+                    wizard_url = f"/web#action={wizard_action_id}&active_id={first_id}&model=kal3iyasortie&view_type=form"
 
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
                             <div class="week-title">
                                 📅 Semaine {week}
-                                {btn_html}
+                                <a href="{wizard_url}" 
+                                   class="edit-btn oe_kanban_action oe_kanban_global_click"
+                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea;">
+                                   ✏️ Modifier la semaine
+                                </a>
                             </div>
                             <div class="week-total">{total_week:,.2f} Dh</div>
                         </div>

@@ -3,6 +3,7 @@
         id="cal3iya_root_menu"
         name="9al3iya"
         sequence="1"
+        groups="9al3iya.group_9al3iya_user"
     />
 
     <record id="cal3iyaentry_action" model="ir.actions.act_window">

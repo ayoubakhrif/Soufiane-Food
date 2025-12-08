@@ -3,6 +3,7 @@
         id="finance_root_menu"
         name="Finance"
         sequence="1"
+        groups="finance.group_finance_user"
     />
 
     <record id="data_cheque_action" model="ir.actions.act_window">

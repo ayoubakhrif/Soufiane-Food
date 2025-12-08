@@ -111,7 +111,6 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <graph string="Graphique des Chèques" type="bar">
-                <field name="__count" type="measure"/>
                 <field name="week" />
                 <field name="benif_id" />
             </graph>

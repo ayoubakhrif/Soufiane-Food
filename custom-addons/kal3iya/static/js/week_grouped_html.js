@@ -1,23 +1,24 @@
-odoo.define('kal3iya.week_grouped_html', function (require) {
-    "use strict";
+/** @odoo-module */
 
-    var FieldHtml = require('web.basic_fields').FieldHtml;
-    var field_registry = require('web.field_registry');
+import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { useService } from "@web/core/utils/hooks";
+import { Component, xml } from "@odoo/owl";
 
-    var WeekGroupedHtml = FieldHtml.extend({
-        events: _.extend({}, FieldHtml.prototype.events, {
-            'click .js_open_week_wizard': '_onOpenWeekWizard',
-        }),
+export class WeekGroupedHtml extends Component {
+    setup() {
+        this.action = useService("action");
+    }
 
-        _onOpenWeekWizard: function (ev) {
+    onClick(ev) {
+        const target = ev.target.closest(".js_open_week_wizard");
+        if (target) {
             ev.preventDefault();
             ev.stopPropagation();
+            // dataset attributes are strings, parse if needed, but passing ID as is usually works for context
+            const activeId = parseInt(target.dataset.activeId);
 
-            var $target = $(ev.currentTarget);
-            var activeId = $target.data('active-id');
-
-            // Ouvrir le wizard via do_action
-            this.do_action({
+            this.action.doAction({
                 type: 'ir.actions.act_window',
                 name: 'Modifier la semaine',
                 res_model: 'kal3iya.week.update.wizard',
@@ -29,10 +30,19 @@ odoo.define('kal3iya.week_grouped_html', function (require) {
                     active_model: 'kal3iyasortie'
                 }
             });
-        },
-    });
+        }
+    }
+}
 
-    field_registry.add('week_grouped_html', WeekGroupedHtml);
+WeekGroupedHtml.template = xml`
+    <div class="o_field_html" t-on-click="onClick" t-out="props.record.data[props.name] || ''" />
+`;
 
-    return WeekGroupedHtml;
+WeekGroupedHtml.props = {
+    ...standardFieldProps,
+};
+
+registry.category("fields").add("week_grouped_html", {
+    component: WeekGroupedHtml,
+    supportedTypes: ["html"],
 });

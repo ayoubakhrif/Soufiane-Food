@@ -25,6 +25,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="ste_id"/>
+                <field name="talon_id"/>
                 <field name="chq"/>
                 <field name="benif_id"/>
                 <field name="date_emission"/>
@@ -53,6 +54,7 @@
                 <sheet>
                     <group>
                         <field name="ste_id"/>
+                        <field name="talon_id"/>
                         <field name="chq"/>
                         <field name="benif_id"/>
                         <field name="date_emission"/>

@@ -61,7 +61,7 @@
                     <!-- ✅ Onglets pour Commandes et Retours -->
                     <notebook>
                         <page string="Commandes">
-                            <field name="sorties_grouped_html" nolabel="1" readonly="1"/>
+                            <field name="sorties_grouped_html" nolabel="1" readonly="1" widget="week_grouped_html"/>
                         </page>
                         <page string="Retours">
                             <field name="retours_grouped_html" nolabel="1"/>

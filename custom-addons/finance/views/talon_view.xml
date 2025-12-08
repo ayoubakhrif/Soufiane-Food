@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ⚙️ Actions pour boutons -->
+    <record id="finance_talon_action" model="ir.actions.act_window">
+        <field name="name">Talons</field>
+        <field name="res_model">finance.talon</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_finance_talon_form" model="ir.ui.view">
+        <field name="name">finance.talon.form</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <form string="Talons">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="ste_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 🌳 Vue liste des clients -->
+    <record id="view_finance_talon_tree" model="ir.ui.view">
+        <field name="name">finance.talon.tree</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="ste_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="finance_talon_menu"
+              name="Talons"
+              parent="finance_root_menu"
+              action="finance_talon_action"/>
+</odoo>

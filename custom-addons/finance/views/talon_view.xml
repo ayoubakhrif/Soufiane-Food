@@ -18,6 +18,8 @@
                         <field name="num_chq"/>
                         <field name="name"/>
                         <field name="ste_id"/>
+                        <field name="serie"/>
+                        <field name="etat"/>
                     </group>
                 </sheet>
             </form>
@@ -33,6 +35,8 @@
                 <field name="num_chq"/>
                 <field name="name"/>
                 <field name="ste_id"/>
+                <field name="serie"/>
+                <field name="etat"/>
             </tree>
         </field>
     </record>

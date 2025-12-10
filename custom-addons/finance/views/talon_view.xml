@@ -53,6 +53,7 @@
         <field name="arch" type="xml">
             <graph string="Talons Analytics" type="bar">
                 <field name="name_shown" type="row"/>
+                <field name="usage_percentage" type="measure"/>
             </graph>
         </field>
     </record>

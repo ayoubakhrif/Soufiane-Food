@@ -16,8 +16,11 @@ class FinanceTalon(models.Model):
         ('coffre', 'Coffre'),
     ], string='Etat', store=True)
 
-    used_chqs = fields.Integer(string='Nombre de chqs utilisés', compute='_compute_counts')
-    unused_chqs = fields.Integer(string='Nombre de chqs restants', compute='_compute_counts')
+    used_chqs = fields.Integer(string='Nombre de chqs utilisés', compute='_compute_counts', store=True)
+    unused_chqs = fields.Integer(string='Nombre de chqs restants', compute='_compute_counts', store=True)
+    usage_percentage = fields.Float(string='% Utilisation', compute='_compute_usage_percentage', store=True)
+    
+    cheque_ids = fields.One2many('datacheque', 'talon_id', string='Chèques')
 
     progress_html = fields.Html(string="Progression", compute="_compute_progress", sanitize=False)
     summary_card = fields.Html(string="Résumé", compute="_compute_card", sanitize=False)
@@ -72,10 +75,18 @@ class FinanceTalon(models.Model):
             """
 
     # -------------------------------------------------------------------
-    # Calcul des chèques utilisés/restants
+    # Calcul des chèques utilisés/restants + Pourcentage (Stored)
     # -------------------------------------------------------------------
-    @api.depends('num_chq')
+    @api.depends('used_chqs', 'num_chq')
+    def _compute_usage_percentage(self):
+        for rec in self:
+            if rec.num_chq:
+                rec.usage_percentage = (rec.used_chqs / rec.num_chq) * 100
+            else:
+                rec.usage_percentage = 0.0
+
+    @api.depends('cheque_ids', 'num_chq')
     def _compute_counts(self):
         for rec in self:
-            rec.used_chqs = self.env['datacheque'].search_count([('talon_id', '=', rec.id)])
+            rec.used_chqs = len(rec.cheque_ids)
             rec.unused_chqs = rec.num_chq - rec.used_chqs

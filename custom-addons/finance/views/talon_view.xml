@@ -16,6 +16,7 @@
                 <sheet>
                     <group>
                         <field name="num_chq"/>
+                        <field name="name_shown"/>
                         <field name="name"/>
                         <field name="ste_id"/>
                         <field name="serie"/>
@@ -33,6 +34,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="num_chq"/>
+                <field name="name_shown"/>
                 <field name="name"/>
                 <field name="ste_id"/>
                 <field name="serie"/>

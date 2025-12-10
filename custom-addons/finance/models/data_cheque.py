@@ -235,30 +235,38 @@ class DataCheque(models.Model):
     @api.onchange('chq', 'ste_id')
     def _onchange_find_talon(self):
         """Détecte automatiquement le talon en fonction de la société + numéro de chèque."""
-           for rec in self:
-               rec.talon_id = False  # réinitialiser par défaut
-                # Il faut la société et le numéro de chèque
-               if not rec.chq or not rec.ste_id:
-                   continue
-                # On ne joue qu'avec des numéros de chèque numériques
-               if not rec.chq.isdigit():
-                   continue
-                chq_num = int(rec.chq)
-                # Tous les talons de cette société
-               talons = self.env['finance.talon'].search([
-                   ('ste_id', '=', rec.ste_id.id),
-                   ('num_chq', '>', 0),
-                   ('serie', '!=', False),
-               ])
-                for talon in talons:
-                   # Ignorer les séries non numériques
-                   if not talon.serie or not talon.serie.isdigit():
-                       continue
-                    start = int(talon.serie)
-                   end = start + talon.num_chq - 1  # exemple : 1200000 + 50 - 1 = 1200049
-                    if start <= chq_num <= end:
-                       rec.talon_id = talon
-                       break
+        for rec in self:
+            rec.talon_id = False  # réinitialiser par défaut
+
+            # Il faut la société et le numéro de chèque
+            if not rec.chq or not rec.ste_id:
+                continue
+
+            # On ne joue qu'avec des numéros de chèque numériques
+            if not rec.chq.isdigit():
+                continue
+
+            chq_num = int(rec.chq)
+
+            # Tous les talons de cette société
+            talons = self.env['finance.talon'].search([
+                ('ste_id', '=', rec.ste_id.id),
+                ('num_chq', '>', 0),
+                ('serie', '!=', False),
+            ])
+
+            for talon in talons:
+                # Ignorer les séries non numériques
+                if not talon.serie or not talon.serie.isdigit():
+                    continue
+
+                start = int(talon.serie)
+                end = start + talon.num_chq - 1  # exemple : 1200000 + 50 - 1 = 1200049
+
+                if start <= chq_num <= end:
+                    rec.talon_id = talon
+                    break
+
     # ------------------------------------------------------------
     # RECHERCHE DE CHQ
     # ------------------------------------------------------------

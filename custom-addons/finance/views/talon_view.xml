@@ -5,7 +5,7 @@
     <record id="finance_talon_action" model="ir.actions.act_window">
         <field name="name">Talons</field>
         <field name="res_model">finance.talon</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,graph</field>
     </record>
 
     <record id="view_finance_talon_form" model="ir.ui.view">
@@ -22,8 +22,6 @@
                         <field name="ste_id"/>
                         <field name="serie"/>
                         <field name="etat"/>
-                        <field name="used_chqs"/>
-                        <field name="unused_chqs"/>
                     </group>
                     <field name="summary_card" widget="html"/>
                 </sheet>
@@ -46,6 +44,17 @@
                 <field name="used_chqs"/>
                 <field name="unused_chqs"/>
             </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_talon_graph" model="ir.ui.view">
+        <field name="name">finance.talon.graph</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <graph string="Talons Analytics" type="bar">
+                <field name="ste_id" type="row"/>
+                <field name="num_chq" type="measure"/>
+            </graph>
         </field>
     </record>
 

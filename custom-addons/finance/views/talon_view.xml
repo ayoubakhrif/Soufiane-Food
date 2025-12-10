@@ -43,7 +43,7 @@
                 <field name="etat"/>
                 <field name="used_chqs"/>
                 <field name="unused_chqs"/>
-                <field name="usage_percentage"/>
+                <field name="usage_percentage" widget="percentpie"/>
             </tree>
         </field>
     </record>
@@ -54,7 +54,7 @@
         <field name="arch" type="xml">
             <graph string="Talons Analytics" type="bar">
                 <field name="name_shown" type="row"/>
-                <field name="usage_percentage" type="measure" widget="percentpie"/>
+                <field name="usage_percentage" type="measure"/>
             </graph>
         </field>
     </record>

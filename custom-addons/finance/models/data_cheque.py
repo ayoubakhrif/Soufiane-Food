@@ -43,7 +43,7 @@ class DataCheque(models.Model):
         ('not_exist', 'Absent'),
     ], readonly=True, optional=True)
     existing_tag = fields.Html(string='Présence CHQ', compute='_compute_existance_tag', sanitize=False, optional=True)
-    talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, required=True)
+    talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, required=True, domain="[('ste_id', '=', ste_id)]")
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------

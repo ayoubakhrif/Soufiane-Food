@@ -18,17 +18,43 @@ class FinanceTalon(models.Model):
 
     used_chqs = fields.Integer(string='Nombre de chqs utilisés', compute='_compute_counts')
     unused_chqs = fields.Integer(string='Nombre de chqs restants', compute='_compute_counts')
-    progress_html = fields.Html(string="Progression", compute="_compute_progress", sanitize=False)
 
+    progress_html = fields.Html(string="Progression", compute="_compute_progress", sanitize=False)
+    summary_card = fields.Html(string="Résumé", compute="_compute_card", sanitize=False)
+
+    # -------------------------------------------------------------------
+    # Résumé stylé (carte HTML)
+    # -------------------------------------------------------------------
+    @api.depends('used_chqs', 'unused_chqs', 'num_chq')
+    def _compute_card(self):
+        for rec in self:
+            rec.summary_card = f"""
+            <div style="padding:12px; border-radius:12px; background:#fafafa;
+                        border:1px solid #ddd; width:100%; margin-top:10px;">
+                <h3 style="margin:0; font-size:16px;">📄 Talon : {rec.name_shown}</h3>
+                <p style="margin:4px 0;">Total : <b>{rec.num_chq}</b></p>
+                <p style="margin:4px 0; color:#dc3545;">
+                    🔴 Utilisés : <b>{rec.used_chqs}</b>
+                </p>
+                <p style="margin:4px 0; color:#28a745;">
+                    🟢 Restants : <b>{rec.unused_chqs}</b>
+                </p>
+            </div>
+            """
+
+    # -------------------------------------------------------------------
+    # Barre de progression dynamique
+    # -------------------------------------------------------------------
     @api.depends('used_chqs', 'num_chq')
     def _compute_progress(self):
         for rec in self:
+
             if rec.num_chq:
                 pct = int((rec.used_chqs / rec.num_chq) * 100)
             else:
                 pct = 0
 
-            # 🔥 Couleur dynamique
+            # Couleur dynamique
             if pct < 50:
                 color = "#28a745"  # vert
             elif pct < 80:
@@ -38,18 +64,18 @@ class FinanceTalon(models.Model):
 
             rec.progress_html = f"""
                 <div style="width:100%; background:#e9ecef; border-radius:8px; height:18px;">
-                    <div style="width:{pct}%; background:{color};
-                                height:18px; border-radius:8px;">
-                    </div>
+                    <div style="width:{pct}%; background:{color}; height:18px; border-radius:8px;"></div>
                 </div>
                 <div style="font-size:12px; text-align:center; margin-top:3px; font-weight:600;">
                     {pct}% utilisé
                 </div>
             """
 
-    @api.depends('used_chqs', 'num_chq')
+    # -------------------------------------------------------------------
+    # Calcul des chèques utilisés/restants
+    # -------------------------------------------------------------------
+    @api.depends('num_chq')
     def _compute_counts(self):
         for rec in self:
             rec.used_chqs = self.env['datacheque'].search_count([('talon_id', '=', rec.id)])
             rec.unused_chqs = rec.num_chq - rec.used_chqs
-    

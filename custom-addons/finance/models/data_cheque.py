@@ -252,15 +252,15 @@ class DataCheque(models.Model):
             talons = self.env['finance.talon'].search([
                 ('ste_id', '=', rec.ste_id.id),
                 ('num_chq', '>', 0),
-                ('serie', '!=', False),
+                ('name', '!=', False),
             ])
 
             for talon in talons:
                 # Ignorer les séries non numériques
-                if not talon.serie or not talon.serie.isdigit():
+                if not talon.name or not talon.name.isdigit():
                     continue
 
-                start = int(talon.serie)
+                start = int(talon.name)
                 end = start + talon.num_chq - 1  # exemple : 1200000 + 50 - 1 = 1200049
 
                 if start <= chq_num <= end:

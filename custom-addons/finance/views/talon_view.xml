@@ -25,6 +25,7 @@
                         <field name="used_chqs"/>
                         <field name="unused_chqs"/>
                     </group>
+                    <field name="summary_card" widget="html"/>
                 </sheet>
             </form>
         </field>

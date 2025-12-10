@@ -28,13 +28,21 @@ class FinanceTalon(models.Model):
             else:
                 pct = 0
 
+            # 🔥 Couleur dynamique
+            if pct < 50:
+                color = "#28a745"  # vert
+            elif pct < 80:
+                color = "#fd7e14"  # orange
+            else:
+                color = "#dc3545"  # rouge
+
             rec.progress_html = f"""
-                <div style="width:100%; background:#eee; border-radius:8px; height:18px;">
-                    <div style="width:{pct}%; background:#007bff; 
-                            height:18px; border-radius:8px;">
+                <div style="width:100%; background:#e9ecef; border-radius:8px; height:18px;">
+                    <div style="width:{pct}%; background:{color};
+                                height:18px; border-radius:8px;">
                     </div>
                 </div>
-                <div style="font-size:12px; text-align:center;">
+                <div style="font-size:12px; text-align:center; margin-top:3px; font-weight:600;">
                     {pct}% utilisé
                 </div>
             """

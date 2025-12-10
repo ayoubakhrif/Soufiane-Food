@@ -42,6 +42,9 @@ class FinanceTalon(models.Model):
                 <p style="margin:4px 0; color:#28a745;">
                     🟢 Restants : <b>{rec.unused_chqs}</b>
                 </p>
+                <p style="margin:4px 0; color:#17a2b8;">
+                    📊 Pourcentage : <b>{round(rec.usage_percentage, 2)}%</b>
+                </p>
             </div>
             """
 

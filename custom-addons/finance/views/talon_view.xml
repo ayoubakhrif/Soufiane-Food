@@ -43,6 +43,7 @@
                 <field name="etat"/>
                 <field name="used_chqs"/>
                 <field name="unused_chqs"/>
+                <field name="usage_percentage"/>
             </tree>
         </field>
     </record>

@@ -52,8 +52,7 @@
         <field name="model">finance.talon</field>
         <field name="arch" type="xml">
             <graph string="Talons Analytics" type="bar">
-                <field name="ste_id" type="row"/>
-                <field name="num_chq" type="measure"/>
+                <field name="name_shown" type="row"/>
             </graph>
         </field>
     </record>

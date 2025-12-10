@@ -356,12 +356,14 @@ class DataCheque(models.Model):
     @api.model
     def create(self, vals):
         rec = super().create(vals)
+        rec._onchange_find_talon()
         rec._sync_pdf_url()
         return rec
 
     def write(self, vals):
         res = super().write(vals)
         if "chq" in vals or "ste_id" in vals:
+            self._onchange_find_talon()
             self._sync_pdf_url()
         return res
 

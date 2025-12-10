@@ -229,43 +229,55 @@ class DataCheque(models.Model):
                 rec.date_echeance = False
                 rec.benif_id = False
 
-    # ------------------------------------------------------------
+    # -------------------------------------------------------------------
     # Calculate TALON
-    # ------------------------------------------------------------
+    # -------------------------------------------------------------------
+    def _find_talon_logic(self):
+        self.ensure_one()
+        if not self.chq or not self.ste_id:
+            return False
+            
+        if not self.chq.isdigit():
+            return False
+
+        chq_num = int(self.chq)
+
+        talons = self.env['finance.talon'].search([
+            ('ste_id', '=', self.ste_id.id),
+            ('num_chq', '>', 0),
+            ('name', '!=', False),
+        ])
+
+        for talon in talons:
+            if not talon.name or not talon.name.isdigit():
+                continue
+
+            start = int(talon.name)
+            end = start + talon.num_chq - 1
+
+            if start <= chq_num <= end:
+                return talon
+        return False
+
     @api.onchange('chq', 'ste_id')
     def _onchange_find_talon(self):
         """Détecte automatiquement le talon en fonction de la société + numéro de chèque."""
         for rec in self:
-            rec.talon_id = False  # réinitialiser par défaut
+            rec.talon_id = rec._find_talon_logic()
 
-            # Il faut la société et le numéro de chèque
-            if not rec.chq or not rec.ste_id:
-                continue
-
-            # On ne joue qu'avec des numéros de chèque numériques
-            if not rec.chq.isdigit():
-                continue
-
-            chq_num = int(rec.chq)
-
-            # Tous les talons de cette société
-            talons = self.env['finance.talon'].search([
-                ('ste_id', '=', rec.ste_id.id),
-                ('num_chq', '>', 0),
-                ('name', '!=', False),
-            ])
-
-            for talon in talons:
-                # Ignorer les séries non numériques
-                if not talon.name or not talon.name.isdigit():
-                    continue
-
-                start = int(talon.name)
-                end = start + talon.num_chq - 1  # exemple : 1200000 + 50 - 1 = 1200049
-
-                if start <= chq_num <= end:
-                    rec.talon_id = talon
-                    break
+    # -------------------------------------------------------------------
+    # CRON : Update talons
+    # -------------------------------------------------------------------
+    @api.model
+    def cron_find_all_talons(self):
+        """Met à jour les talons pour tous les chèques (3 fois seulement)."""
+        # On peut optimiser en ne prenant que ceux sans talon, 
+        # mais la demande semble générale.
+        records = self.search([])
+        for rec in records:
+            found = rec._find_talon_logic()
+            if found and rec.talon_id != found:
+                rec.talon_id = found
 
     # ------------------------------------------------------------
     # RECHERCHE DE CHQ

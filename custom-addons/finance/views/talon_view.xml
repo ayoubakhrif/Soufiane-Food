@@ -21,6 +21,8 @@
                         <field name="ste_id"/>
                         <field name="serie"/>
                         <field name="etat"/>
+                        <field name="used_chqs"/>
+                        <field name="unused_chqs"/>
                     </group>
                 </sheet>
             </form>
@@ -39,6 +41,8 @@
                 <field name="ste_id"/>
                 <field name="serie"/>
                 <field name="etat"/>
+                <field name="used_chqs"/>
+                <field name="unused_chqs"/>
             </tree>
         </field>
     </record>

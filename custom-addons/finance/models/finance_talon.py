@@ -15,4 +15,12 @@ class FinanceSte(models.Model):
         ('cloture', 'Cloturé'),
         ('coffre', 'Coffre'),
     ], string='Etat', store=True)
+
+    used_chqs = fields.Integer(string='Utilisés', compute='_compute_counts')
+    unused_chqs = fields.Integer(string='Restants', compute='_compute_counts')
+
+    def _compute_counts(self):
+        for rec in self:
+            rec.used_chqs = self.env['datacheque'].search_count([('talon_id', '=', rec.id)])
+            rec.unused_chqs = rec.num_chq - rec.used_chqs
     

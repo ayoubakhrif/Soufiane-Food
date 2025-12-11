@@ -463,6 +463,7 @@ class DataCheque(models.Model):
     def action_open_pdf_chq(self):
         self.ensure_one()
         if self.chq_pdf_url:
+            self.chq_exist = 'chq_exists'
             return {
                 "type": "ir.actions.act_url",
                 "url": self.chq_pdf_url,
@@ -496,6 +497,7 @@ class DataCheque(models.Model):
     def action_open_pdf_dem(self):
         self.ensure_one()
         if self.dem_pdf_url:
+            self.dem_exist = 'dem_exists'
             return {
                 "type": "ir.actions.act_url",
                 "url": self.dem_pdf_url,
@@ -526,6 +528,7 @@ class DataCheque(models.Model):
     def action_open_pdf_doc(self):
         self.ensure_one()
         if self.doc_pdf_url:
+            self.doc_exist = 'doc_exists'
             return {
                 "type": "ir.actions.act_url",
                 "url": self.doc_pdf_url,
@@ -556,10 +559,13 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     @api.model
     def cron_sync_all_chq_pdf(self):
-        """Tâche planifiée : met à jour les liens PDF et chq_exist pour tous les chèques."""
-        # On peut limiter uniquement aux chèques sans lien :
+        """Met à jour les liens PDF manquants pour les chèques incomplets."""
         records = self.search([
             ('chq', '!=', False),
             ('ste_id', '!=', False),
+            '|', '|',
+            ('chq_pdf_url', '=', False),
+            ('dem_pdf_url', '=', False),
+            ('doc_pdf_url', '=', False),
         ])
         records._sync_pdf_url()

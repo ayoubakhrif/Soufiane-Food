@@ -561,8 +561,5 @@ class DataCheque(models.Model):
         records = self.search([
             ('chq', '!=', False),
             ('ste_id', '!=', False),
-            ('chq_pdf_url', '=', False),
-            ('dem_pdf_url', '=', False),
-            ('doc_pdf_url', '=', False),
         ])
         records._sync_pdf_url()

@@ -42,10 +42,20 @@ class DataCheque(models.Model):
     dem_pdf_url = fields.Char("Lien PDF DEM", readonly=True)
     doc_pdf_url = fields.Char("Lien PDF DOC", readonly=True)
     chq_exist = fields.Selection([
-        ('exist', 'Existe'),
-        ('not_exist', 'Absent'),
+        ('chq_exists', 'Existe'),
+        ('chq_not_exists', 'Absent'),
+    ], readonly=True, optional=True)
+    dem_exist = fields.Selection([
+        ('dem_exists', 'Existe'),
+        ('dem_not_exists', 'Absent'),
+    ], readonly=True, optional=True)
+    doc_exist = fields.Selection([
+        ('doc_exists', 'Existe'),
+        ('doc_not_exists', 'Absent'),
     ], readonly=True, optional=True)
     existing_tag = fields.Html(string='Présence CHQ', compute='_compute_existance_tag', sanitize=False, optional=True)
+    existing_dem_tag = fields.Html(string='Présence DEM', compute='_compute_existance_dem_tag', sanitize=False, optional=True)
+    existing_doc_tag = fields.Html(string='Présence DOC', compute='_compute_existance_doc_tag', sanitize=False, optional=True)
     talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, domain="[('ste_id', '=', ste_id)]")
     # ------------------------------------------------------------
     # BADGE VISUEL
@@ -91,7 +101,7 @@ class DataCheque(models.Model):
             existance = rec.chq_exist or ""  # présence de chèque
 
             # --- Conditions selon ta demande ---
-            if existance == "exist":           # commence par 
+            if existance == "chq_exists":           # commence par 
                 label = "CHQ Existe"
                 color = "#28a745"  # vert
                 bg = "rgba(40,167,69,0.12)"
@@ -102,6 +112,52 @@ class DataCheque(models.Model):
                 bg = "rgba(220,53,69,0.12)"
 
             rec.existing_tag = (
+                f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
+                f"font-weight:600;background:{bg};color:{color};'>"
+                f"{label}"
+                f"</span>"
+            )
+
+    def _compute_existance_dem_tag(self):
+        for rec in self:
+
+            existance = rec.dem_exist or ""  # présence de chèque
+
+            # --- Conditions selon ta demande ---
+            if existance == "dem_exists":           # commence par 
+                label = "DEM Existe"
+                color = "#28a745"  # vert
+                bg = "rgba(40,167,69,0.12)"
+
+            else:                   # exactement = M
+                label = "DEM Absent"
+                color = "#dc3545"  # rouge
+                bg = "rgba(220,53,69,0.12)"
+
+            rec.existing_dem_tag = (
+                f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
+                f"font-weight:600;background:{bg};color:{color};'>"
+                f"{label}"
+                f"</span>"
+            )
+
+    def _compute_existance_doc_tag(self):
+        for rec in self:
+
+            existance = rec.doc_exist or ""  # présence de chèque
+
+            # --- Conditions selon ta demande ---
+            if existance == "doc_exists":           # commence par 
+                label = "DOC Existe"
+                color = "#28a745"  # vert
+                bg = "rgba(40,167,69,0.12)"
+
+            else:                   # exactement = M
+                label = "DOC Absent"
+                color = "#dc3545"  # rouge
+                bg = "rgba(220,53,69,0.12)"
+
+            rec.existing_doc_tag = (
                 f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
                 f"font-weight:600;background:{bg};color:{color};'>"
                 f"{label}"
@@ -361,13 +417,17 @@ class DataCheque(models.Model):
         """Met à jour les PDF CHQ, DEM et DOC en une seule opération."""
         for rec in self:
             if rec.ste_id and rec.chq:
-                rec.chq_pdf_url = rec._get_pdf_url("CHQ".strip())
-                rec.dem_pdf_url = rec._get_pdf_url("DEM".strip())
-                rec.doc_pdf_url = rec._get_pdf_url("DOC".strip())
+                rec.chq_pdf_url = rec._get_pdf_url("CHQ")
+                rec.dem_pdf_url = rec._get_pdf_url("DEM")
+                rec.doc_pdf_url = rec._get_pdf_url("DOC")
 
-                rec.chq_exist = 'exist' if rec.chq_pdf_url else 'not_exist'
+                rec.chq_exist = 'chq_exists' if rec.chq_pdf_url else 'chq_not_exists'
+                rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
+                rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
             else:
-                rec.chq_exist = 'not_exist'
+                rec.chq_exist = 'chq_not_exists'
+                rec.dem_exist = 'dem_not_exists'
+                rec.doc_exist = 'doc_not_exists'
                 rec.chq_pdf_url = False
                 rec.dem_pdf_url = False
                 rec.doc_pdf_url = False
@@ -490,5 +550,7 @@ class DataCheque(models.Model):
             ('chq', '!=', False),
             ('ste_id', '!=', False),
             ('chq_pdf_url', '=', False),
+            ('dem_pdf_url', '=', False),
+            ('doc_pdf_url', '=', False),
         ])
         records._sync_pdf_url()

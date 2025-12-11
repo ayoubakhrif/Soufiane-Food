@@ -59,12 +59,12 @@
 
                         <button name="action_open_pdf_dem" type="object"
                                 string="DEM"
-                                class="btn btn-info"
+                                class="btn btn-primary"
                                 style="border-radius: 20px; padding: 4px 14px;"/>
 
                         <button name="action_open_pdf_doc" type="object"
                                 string="DOC"
-                                class="btn btn-secondary"
+                                class="btn btn-primary"
                                 style="border-radius: 20px; padding: 4px 14px;"/>
                     </header>
                     <group>
@@ -88,18 +88,6 @@
                         <field name="chq_pdf_url" widget="url" string="PDF CHQ" />
                         <field name="dem_pdf_url" widget="url" string="PDF DEM" />
                         <field name="doc_pdf_url" widget="url" string="PDF DOC" />
-                        <button name="action_open_pdf_chq"
-                                string="Ouvrir PDF CHQ"
-                                type="object"
-                                class="btn-primary"/>
-                        <button name="action_open_pdf_dem"
-                                string="Ouvrir PDF DEM"
-                                type="object"
-                                class="btn-secondary"/>
-                        <button name="action_open_pdf_doc"
-                                string="Ouvrir PDF DOC"
-                                type="object"
-                                class="btn-secondary"/>
                     </group>
                 </sheet>
             </form>

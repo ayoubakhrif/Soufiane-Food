@@ -42,7 +42,6 @@
             </tree>
         </field>
     </record>
-
     <record id="datachq_view_form" model="ir.ui.view">
         <field name="name">datachq form</field>
         <field name="model">datacheque</field>
@@ -100,6 +99,7 @@
         <field name="arch" type="xml">
             <pivot string="Analyse des Chèques">
                 <field name="amount" type="measure"/>
+                <field name="cheque_count" type="measure"/>
                 <field name="week" type="row"/>
                 <field name="ste_id"/>
                 <field name="type"/>

@@ -11,6 +11,7 @@ class DataCheque(models.Model):
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
     amount = fields.Float(string='Montant', tracking=True, group_operator="sum", required=True)
+    cheque_count = fields.Integer(string='Nombre de chèques', default=1, store=True)
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)

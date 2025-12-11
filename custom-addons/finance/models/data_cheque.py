@@ -575,6 +575,18 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     @api.model
     def cron_update_existence_flags(self):
-        """Met à jour les indicateurs d'existence : si lien présent maj flag, sinon recherche Drive."""
+        """Met à jour chq_exist, dem_exist, doc_exist + complète les PDF manquants."""
         records = self.search([])
-        records._sync_pdf_url()
+
+        for rec in records:
+
+            # 1) Si les URL existent déjà → mettre les flags
+            rec.chq_exist = 'chq_exists' if rec.chq_pdf_url else 'chq_not_exists'
+            rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
+            rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
+
+            # 2) Si une URL manque → tenter d'aller la chercher
+            if not rec.chq_pdf_url or not rec.dem_pdf_url or not rec.doc_pdf_url:
+                rec._sync_pdf_url()
+
+        return True   # valeur neutre pour un cron

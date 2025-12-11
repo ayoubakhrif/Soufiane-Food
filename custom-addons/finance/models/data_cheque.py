@@ -574,7 +574,7 @@ class DataCheque(models.Model):
     # CRON : check existence one time
     # ------------------------------------------------------------
     @api.model
-    def cron_sync_all_chq_pdf(self):
+    def cron_sync_all_pdf(self):
         """
         Cron qui imite le comportement du bouton pour TOUS les chèques.
         - Met à jour les flags si les URLs existent déjà.

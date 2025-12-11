@@ -32,11 +32,11 @@
             <field name="nextcall" eval="'2025-12-10 21:00:00'"/> <!-- 22:00 Local (UTC+1) -->
         </record>
 
-        <record id="ir_cron_sync_all_chq_pdf" model="ir.cron">
+        <record id="ir_cron_sync_all_pdf" model="ir.cron">
             <field name="name">Finance: Update Existence Flags</field>
             <field name="model_id" ref="model_datacheque"/>
             <field name="state">code</field>
-            <field name="code">model.cron_sync_all_chq_pdf()</field>
+            <field name="code">model.cron_sync_all_pdf()</field>
             <field name="user_id" ref="base.user_root"/>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>

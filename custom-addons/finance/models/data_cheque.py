@@ -390,6 +390,12 @@ class DataCheque(models.Model):
     # 8) Bouton ouverture PDF
     def action_open_pdf_chq(self):
         self.ensure_one()
+        if self.chq_pdf_url:
+            return {
+                "type": "ir.actions.act_url",
+                "url": self.chq_pdf_url,
+                "target": "new",
+            }
         self._sync_pdf_url()
 
 
@@ -417,6 +423,12 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     def action_open_pdf_dem(self):
         self.ensure_one()
+        if self.dem_pdf_url:
+            return {
+                "type": "ir.actions.act_url",
+                "url": self.dem_pdf_url,
+                "target": "new",
+            }
         self._sync_pdf_url()
 
         if not self.dem_pdf_url:
@@ -441,6 +453,12 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     def action_open_pdf_doc(self):
         self.ensure_one()
+        if self.doc_pdf_url:
+            return {
+                "type": "ir.actions.act_url",
+                "url": self.doc_pdf_url,
+                "target": "new",
+            }
         self._sync_pdf_url()
 
         if not self.doc_pdf_url:

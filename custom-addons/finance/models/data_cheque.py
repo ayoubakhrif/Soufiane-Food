@@ -569,3 +569,18 @@ class DataCheque(models.Model):
             ('doc_pdf_url', '=', False),
         ])
         records._sync_pdf_url()
+
+    # ------------------------------------------------------------
+    # CRON : check existence one time
+    # ------------------------------------------------------------
+    @api.model
+    def cron_update_existence_flags(self):
+        """Met à jour les indicateurs d'existence si l'URL est présente."""
+        records = self.search([])
+        for rec in records:
+            if rec.chq_pdf_url:
+                rec.chq_exist = 'chq_exists'
+            if rec.dem_pdf_url:
+                rec.dem_exist = 'dem_exists'
+            if rec.doc_pdf_url:
+                rec.doc_exist = 'doc_exists'

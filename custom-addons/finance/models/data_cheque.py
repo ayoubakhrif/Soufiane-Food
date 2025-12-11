@@ -118,7 +118,7 @@ class DataCheque(models.Model):
                 f"</span>"
             )
 
-    @api.depends('dem_exist')
+    @api.depends('dem_exist', 'dem_pdf_url', 'existing_dem_tag')
     def _compute_existance_dem_tag(self):
         for rec in self:
 
@@ -142,7 +142,7 @@ class DataCheque(models.Model):
                 f"</span>"
             )
 
-    @api.depends('doc_exist')
+    @api.depends('doc_exist', 'doc_pdf_url', 'existing_doc_tag')
     def _compute_existance_doc_tag(self):
         for rec in self:
 

@@ -592,5 +592,8 @@ class DataCheque(models.Model):
             # --- 2) Si au moins une URL manque -> aller chercher dans Drive ---
             if not rec.chq_pdf_url or not rec.dem_pdf_url or not rec.doc_pdf_url:
                 rec._sync_pdf_url()
+            rec._compute_existance_tag()
+            rec._compute_existance_dem_tag()
+            rec._compute_existance_doc_tag()
 
         return True

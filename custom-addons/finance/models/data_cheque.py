@@ -11,7 +11,7 @@ class DataCheque(models.Model):
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
     amount = fields.Float(string='Montant', tracking=True, group_operator="sum", required=True)
-    cheque_count = fields.Integer(string='Nombre de chèques', default=1, store=True)
+    cheque_count = fields.Integer(string='Nombre chèques', default=1, store=True)
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
@@ -39,6 +39,8 @@ class DataCheque(models.Model):
     ], store=True, string='Type', tracking=True)
     benif_type = fields.Selection(related="benif_id.type", store=True)
     chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)
+    dem_pdf_url = fields.Char("Lien PDF DEM", readonly=True)
+    doc_pdf_url = fields.Char("Lien PDF DOC", readonly=True)
     chq_exist = fields.Selection([
         ('exist', 'Existe'),
         ('not_exist', 'Absent'),
@@ -317,10 +319,11 @@ class DataCheque(models.Model):
         return f[0]["id"] if f else None
 
     # 4) Recherche PDF contenant CHQ
-    def _find_pdf_chq(self, service, parent_id):
+    def _find_pdf_by_keyword(self, service, parent_id, keyword):
+        """Cherche un PDF contenant un mot-clé (CHQ / DEM / DOC) dans le même dossier."""
         query = (
             "mimeType='application/pdf' "
-            "and name contains 'CHQ' "
+            f"and name contains '{keyword}' "
             f"and '{parent_id}' in parents "
             "and trashed=false"
         )
@@ -329,42 +332,46 @@ class DataCheque(models.Model):
         return f[0]["webViewLink"] if f else None
 
     # 5) Fonction principale : trouver URL du CHQ
-    def _get_chq_pdf_url(self, ste_name, cheque_number):
+    def _get_pdf_url(self, keyword):
+        """Retourne l'URL d'un PDF selon un mot-clé : CHQ, DEM ou DOC."""
         icp = self.env["ir.config_parameter"].sudo()
         root_id = icp.get_param("finance.drive.root_folder_id")
 
-        if not root_id or not ste_name or not cheque_number:
+        if not root_id or not self.ste_id or not self.chq:
             return False
 
         service = self._get_drive_service()
 
-        # Étape 1 : dossier société
-        ste_folder_id = self._find_folder_exact(service, ste_name, root_id)
+        # Dossier Société
+        ste_folder_id = self._find_folder_exact(service, self.ste_id.name, root_id)
         if not ste_folder_id:
             return False
 
-        # Étape 2 : sous-dossier contenant numéro chèque
-        sub_folder_id = self._find_folder_contains(service, cheque_number, ste_folder_id)
+        # Sous-dossier contenant le numéro de CHQ
+        sub_folder_id = self._find_folder_contains(service, self.chq, ste_folder_id)
         if not sub_folder_id:
             return False
 
-        # Étape 3 : PDF contenant "CHQ"
-        url = self._find_pdf_chq(service, sub_folder_id)
-        return url or False
+        # Chercher un PDF dans ce sous-dossier contenant le mot-clé
+        return self._find_pdf_by_keyword(service, sub_folder_id, keyword)
+
 
     # 6) Mettre à jour automatiquement l’URL
     def _sync_pdf_url(self):
+        """Met à jour les PDF CHQ, DEM et DOC en une seule opération."""
         for rec in self:
             if rec.ste_id and rec.chq:
-                url = rec._get_chq_pdf_url(rec.ste_id.name, rec.chq)
-                rec.chq_pdf_url = url
-                if url:
-                    rec.chq_exist = 'exist'
-                else:
-                    rec.chq_exist = 'not_exist'
+                rec.chq_pdf_url = rec._get_pdf_url("CHQ".strip())
+                rec.dem_pdf_url = rec._get_pdf_url("DEM".strip())
+                rec.doc_pdf_url = rec._get_pdf_url("DOC".strip())
+
+                rec.chq_exist = 'exist' if rec.chq_pdf_url else 'not_exist'
             else:
                 rec.chq_exist = 'not_exist'
                 rec.chq_pdf_url = False
+                rec.dem_pdf_url = False
+                rec.doc_pdf_url = False
+
     # 7) Override create/write
     @api.model
     def create(self, vals):
@@ -403,6 +410,54 @@ class DataCheque(models.Model):
         return {
             "type": "ir.actions.act_url",
             "url": self.chq_pdf_url,
+            "target": "new",
+        }
+    # ------------------------------------------------------------
+    # ACTION : ouvrir PDF DEM
+    # ------------------------------------------------------------
+    def action_open_pdf_dem(self):
+        self.ensure_one()
+        self._sync_pdf_url()
+
+        if not self.dem_pdf_url:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": "PDF DEM introuvable",
+                    "message": "Aucun PDF DEM n'a été trouvé dans Google Drive.",
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
+
+        return {
+            "type": "ir.actions.act_url",
+            "url": self.dem_pdf_url,
+            "target": "new",
+        }
+    # ------------------------------------------------------------
+    # ACTION : ouvrir PDF DOC
+    # ------------------------------------------------------------
+    def action_open_pdf_doc(self):
+        self.ensure_one()
+        self._sync_pdf_url()
+
+        if not self.doc_pdf_url:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": "PDF DOC introuvable",
+                    "message": "Aucun PDF DOC n'a été trouvé dans Google Drive.",
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
+
+        return {
+            "type": "ir.actions.act_url",
+            "url": self.doc_pdf_url,
             "target": "new",
         }
 

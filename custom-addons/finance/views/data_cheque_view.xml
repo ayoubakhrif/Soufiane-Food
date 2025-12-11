@@ -70,10 +70,20 @@
                     </group>
                     <group>
                         <field name="chq_pdf_url" widget="url" string="PDF CHQ" />
+                        <field name="dem_pdf_url" widget="url" string="PDF DEM" />
+                        <field name="doc_pdf_url" widget="url" string="PDF DOC" />
                         <button name="action_open_pdf_chq"
                                 string="Ouvrir PDF CHQ"
                                 type="object"
                                 class="btn-primary"/>
+                        <button name="action_open_pdf_dem"
+                                string="Ouvrir PDF DEM"
+                                type="object"
+                                class="btn-secondary"/>
+                        <button name="action_open_pdf_doc"
+                                string="Ouvrir PDF DOC"
+                                type="object"
+                                class="btn-secondary"/>
                     </group>
                 </sheet>
             </form>

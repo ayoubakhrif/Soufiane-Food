@@ -580,17 +580,17 @@ class DataCheque(models.Model):
         - Met à jour les flags si les URLs existent déjà.
         - Sinon lance _sync_pdf_url() pour récupérer CHQ, DEM, DOC.
         """
-    records = self.search([])
+        records = self.search([])
 
-    for rec in records:
+        for rec in records:
 
-        # --- 1) Si les URLs existent déjà, mise à jour des états ---
-        rec.chq_exist = 'chq_exists' if rec.chq_pdf_url else 'chq_not_exists'
-        rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
-        rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
+            # --- 1) Si les URLs existent déjà, mise à jour des états ---
+            rec.chq_exist = 'chq_exists' if rec.chq_pdf_url else 'chq_not_exists'
+            rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
+            rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
 
-        # --- 2) Si au moins une URL manque -> aller chercher dans Drive ---
-        if not rec.chq_pdf_url or not rec.dem_pdf_url or not rec.doc_pdf_url:
-            rec._sync_pdf_url()
+            # --- 2) Si au moins une URL manque -> aller chercher dans Drive ---
+            if not rec.chq_pdf_url or not rec.dem_pdf_url or not rec.doc_pdf_url:
+                rec._sync_pdf_url()
 
-    return True
+        return True

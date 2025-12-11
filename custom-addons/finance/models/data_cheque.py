@@ -414,23 +414,35 @@ class DataCheque(models.Model):
 
     # 6) Mettre à jour automatiquement l’URL
     def _sync_pdf_url(self):
-        """Met à jour les PDF CHQ, DEM et DOC en une seule opération."""
+        """Met à jour les PDF CHQ, DEM et DOC sans écraser les URLs déjà existantes."""
         for rec in self:
-            if rec.ste_id and rec.chq:
-                rec.chq_pdf_url = rec._get_pdf_url("CHQ")
-                rec.dem_pdf_url = rec._get_pdf_url("DEM")
-                rec.doc_pdf_url = rec._get_pdf_url("DOC")
 
-                rec.chq_exist = 'chq_exists' if rec.chq_pdf_url else 'chq_not_exists'
-                rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
-                rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
-            else:
-                rec.chq_exist = 'chq_not_exists'
-                rec.dem_exist = 'dem_not_exists'
-                rec.doc_exist = 'doc_not_exists'
+            # Si aucun contexte valide → tout désactiver
+            if not rec.ste_id or not rec.chq:
                 rec.chq_pdf_url = False
                 rec.dem_pdf_url = False
                 rec.doc_pdf_url = False
+
+                rec.chq_exist = 'chq_not_exists'
+                rec.dem_exist = 'dem_not_exists'
+                rec.doc_exist = 'doc_not_exists'
+                continue
+
+            # 🔹 Ne chercher sur Google Drive QUE si l'URL est absente
+            if not rec.chq_pdf_url:
+                rec.chq_pdf_url = rec._get_pdf_url("CHQ")
+
+            if not rec.dem_pdf_url:
+                rec.dem_pdf_url = rec._get_pdf_url("DEM")
+
+            if not rec.doc_pdf_url:
+                rec.doc_pdf_url = rec._get_pdf_url("DOC")
+
+            # Mettre à jour les badges d’existence
+            rec.chq_exist = 'chq_exists' if rec.chq_pdf_url else 'chq_not_exists'
+            rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
+            rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
+
 
     # 7) Override create/write
     @api.model

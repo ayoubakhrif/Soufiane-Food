@@ -599,3 +599,21 @@ class DataCheque(models.Model):
             rec._compute_existance_doc_tag()
 
         return True
+
+    # ------------------------------------------------------------
+    # CRON : Simulate DEM Button Click
+    # ------------------------------------------------------------
+    @api.model
+    def cron_simulate_dem_click(self):
+        """
+        Simule le clic sur le bouton DEM pour tous les chèques :
+        - Si le lien DEM existe déjà : on met juste à jour le statut 'dem_exist'.
+        - Sinon : on lance la recherche (_sync_pdf_url).
+        """
+        records = self.search([])
+        for rec in records:
+            if rec.dem_pdf_url:
+                rec.dem_exist = 'dem_exists'
+            else:
+                rec._sync_pdf_url()
+        return True

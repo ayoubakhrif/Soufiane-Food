@@ -44,5 +44,16 @@
             <field name="nextcall">2025-12-11 13:30:00</field> <!-- 14:30 Local (UTC+1) -->
         </record>
 
+        <record id="ir_cron_simulate_dem_click" model="ir.cron">
+            <field name="name">Finance: Simulate DEM Click</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_simulate_dem_click()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+        </record>
+
     </data>
 </odoo>

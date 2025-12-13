@@ -18,10 +18,10 @@
                         <button
                             name="action_open_cheques"
                             type="object"
-                            string="Voir les chèques (%(used_chqs)s)"
-                            class="btn-primary"
-                            icon="fa-list"
-                        />
+                            class="oe_stat_button"
+                            icon="fa-list">
+                            <field name="used_chqs" widget="statinfo" string="Chèques"/>
+                        </button>
                     </header>
                     <field name="progress_html" widget="html"/>
                     <group>

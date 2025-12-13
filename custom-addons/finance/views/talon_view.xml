@@ -24,6 +24,11 @@
                         <field name="etat"/>
                     </group>
                     <field name="summary_card" widget="html"/>
+                    <notebook>
+                        <page string="Chèques absents">
+                            <field name="missing_cheques_html" nolabel="1"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

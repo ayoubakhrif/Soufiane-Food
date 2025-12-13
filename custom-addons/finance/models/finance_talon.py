@@ -24,6 +24,11 @@ class FinanceTalon(models.Model):
 
     progress_html = fields.Html(string="Progression", compute="_compute_progress", sanitize=False)
     summary_card = fields.Html(string="Résumé", compute="_compute_card", sanitize=False)
+    missing_cheques_html = fields.Html(
+        string="Chèques absents",
+        compute="_compute_missing_cheques_html",
+        sanitize=False
+    )
 
     # -------------------------------------------------------------------
     # Résumé stylé (carte HTML)
@@ -93,3 +98,57 @@ class FinanceTalon(models.Model):
         for rec in self:
             rec.used_chqs = len(rec.cheque_ids)
             rec.unused_chqs = rec.num_chq - rec.used_chqs
+
+    @api.depends('cheque_ids.chq', 'num_chq', 'name', 'ste_id')
+    def _compute_missing_cheques_html(self):
+        for talon in self:
+            # Sécurité minimale
+            if not talon.name or not talon.name.isdigit() or not talon.num_chq:
+                talon.missing_cheques_html = "<i>Données du talon invalides</i>"
+                continue
+
+            start = int(talon.name)
+            end = start + talon.num_chq - 1
+
+            # Numéros de chèques existants (liés à ce talon)
+            existing_numbers = set()
+            for chq in talon.cheque_ids:
+                if chq.chq and chq.chq.isdigit():
+                    existing_numbers.add(int(chq.chq))
+
+            # Calcul des absents
+            missing = [
+                num for num in range(start, end + 1)
+                if num not in existing_numbers
+            ]
+
+            # Aucun chèque absent
+            if not missing:
+                talon.missing_cheques_html = """
+                    <div style="padding:8px; color:#28a745; font-weight:600;">
+                        ✅ Tous les chèques de ce talon sont présents
+                    </div>
+                """
+                continue
+
+            # Construction HTML
+            lines = []
+            for num in missing:
+                lines.append(f"""
+                    <div style="padding:6px 0; border-bottom:1px solid #eee;">
+                        <b style="color:#dc3545;">CHQ {str(num).zfill(7)}</b><br/>
+                        <span style="font-size:12px;">
+                            Société : <b>{talon.ste_id.name}</b> |
+                            Talon : <b>{talon.name_shown}</b>
+                        </span>
+                    </div>
+                """)
+
+            talon.missing_cheques_html = f"""
+                <div style="padding:10px;">
+                    <div style="margin-bottom:8px; font-weight:600; color:#dc3545;">
+                        🔴 Chèques absents ({len(missing)})
+                    </div>
+                    {''.join(lines)}
+                </div>
+            """

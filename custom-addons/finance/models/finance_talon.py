@@ -5,7 +5,7 @@ class FinanceTalon(models.Model):
     _description = 'Talons'
     _rec_name = 'name_shown'
 
-    name = fields.Char(string='Talon', required=True)
+    name = fields.Char(string='Talon', required=True, size=7)
     name_shown = fields.Char(string='Nom affiché', required=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     num_chq = fields.Integer(string='Nombres de chqs', required=True)
@@ -276,7 +276,26 @@ class FinanceTalon(models.Model):
                 """
                 continue
 
-            end = start + talon.num_chq - 1
+            # --- Numéros de chèques existants ---
+            existing_numbers = set()
+            for chq in talon.cheque_ids:
+                raw_chq = (chq.chq or "").strip()
+                try:
+                    existing_numbers.add(int(raw_chq))
+                except (ValueError, TypeError):
+                    continue
+
+            # 👉 S’il n’y a encore aucun chèque saisi, on n’affiche rien
+            if not existing_numbers:
+                talon.missing_cheques_html = """
+                    <div style="padding: 16px; color: #6c757d; font-style: italic;">
+                        ℹ️ Aucun chèque encore saisi pour ce talon
+                    </div>
+                """
+                continue
+
+            # --- Nouvelle borne de fin = plus grand chèque saisi ---
+            end = max(existing_numbers)
 
             # --- Numéros de chèques existants ---
             existing_numbers = set()

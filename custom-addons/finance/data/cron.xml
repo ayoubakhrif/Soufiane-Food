@@ -60,12 +60,34 @@
             <field name="name">Finance: Execute DEM Action Once</field>
             <field name="model_id" ref="model_datacheque"/>
             <field name="state">code</field>
-            <field name="code">model.cron_execute_dem_once()</field>
+            <field name="code">
+for rec in model.search([]):
+    rec.action_open_pdf_dem()
+            </field>
             <field name="user_id" ref="base.user_root"/>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">1</field> <!-- Une seule exécution -->
             <field name="nextcall">2025-12-13 11:40:00</field> <!-- 12:40 Local (UTC+1) = 11:40 UTC -->
+            <field name="active">True</field>
+        </record>
+
+        <!-- ✅ Computation des tags d'existence une seule fois aujourd'hui à 12:45 -->
+        <record id="ir_cron_compute_existance_tags_once" model="ir.cron">
+            <field name="name">Finance: Compute Existence Tags Once</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">
+records = model.search([])
+records._compute_existance_tag()
+records._compute_existance_dem_tag()
+records._compute_existance_doc_tag()
+            </field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">1</field>
+            <field name="nextcall">2025-12-13 11:45:00</field>
             <field name="active">True</field>
         </record>
 

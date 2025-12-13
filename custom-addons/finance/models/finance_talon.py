@@ -37,7 +37,7 @@ class FinanceTalon(models.Model):
     def _compute_card(self):
         for rec in self:
             rec.summary_card = f"""
-            <div style="display: flex; justify-content: center; width: 100%; margin-top: 10px;">
+            <div style="display: flex; justify-content: flex-start; width: 100%; margin-top: 10px;">
                 <div style="
                     max-width: 450px;
                     width: 100%;

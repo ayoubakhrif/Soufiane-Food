@@ -48,6 +48,7 @@
                 <field name="etat"/>
                 <field name="used_chqs"/>
                 <field name="unused_chqs"/>
+                <field name="missing_chqs"/>
                 <field name="usage_percentage" widget="percentpie"/>
             </tree>
         </field>

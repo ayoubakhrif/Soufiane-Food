@@ -29,6 +29,10 @@ class FinanceTalon(models.Model):
         compute="_compute_missing_cheques_html",
         sanitize=False
     )
+    missing_chqs = fields.Integer(
+        string="Chèques absents",
+        compute="_compute_missing_chqs"
+    )
 
     # -------------------------------------------------------------------
     # Résumé stylé (carte HTML moderne - centrée)
@@ -220,6 +224,35 @@ class FinanceTalon(models.Model):
                     </div>
                 </div>
             """
+
+    # -------------------------------------------------------------------
+    # Déterminer le nombre des chqs absents
+    # -------------------------------------------------------------------
+    @api.depends('cheque_ids.chq', 'name')
+    def _compute_missing_chqs(self):
+        for talon in self:
+            # sécurité
+            if not talon.name or not talon.name.strip().isdigit():
+                talon.missing_chqs = 0
+                continue
+
+            talon_start = int(talon.name.strip())
+
+            # récupérer les chèques numériques existants
+            chqs = [
+                int(c.chq) for c in talon.cheque_ids
+                if c.chq and c.chq.strip().isdigit()
+            ]
+
+            if not chqs:
+                talon.missing_chqs = 0
+                continue
+
+            max_chq = max(chqs)
+            used = len(chqs)
+
+            missing = (max_chq - talon_start + 1) - used
+            talon.missing_chqs = max(missing, 0)
 
     # -------------------------------------------------------------------
     # Calcul des chèques utilisés/restants + Pourcentage (Stored)

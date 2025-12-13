@@ -14,7 +14,7 @@ class FinanceTalon(models.Model):
         ('actif', 'Actif'),
         ('cloture', 'Cloturé'),
         ('coffre', 'Coffre'),
-    ], string='Etat', store=True)
+    ], string='Etat', compute="_compute_etat", store=True, readonly=True)
 
     used_chqs = fields.Integer(string='Nombre de chqs utilisés', compute='_compute_counts', store=True)
     unused_chqs = fields.Integer(string='Nombre de chqs restants', compute='_compute_counts', store=True)
@@ -49,6 +49,24 @@ class FinanceTalon(models.Model):
                 'default_talon_id': self.id,
             }
         }
+
+    # -------------------------------------------------------------------
+    # Détermination de l'état
+    # -------------------------------------------------------------------
+    @api.depends('used_chqs', 'num_chq')
+    def _compute_etat(self):
+        for rec in self:
+            # sécurité
+            if not rec.num_chq or rec.num_chq <= 0:
+                rec.etat = False
+                continue
+
+            if rec.used_chqs == 0:
+                rec.etat = 'coffre'
+            elif rec.used_chqs >= rec.num_chq:
+                rec.etat = 'cloture'
+            else:
+                rec.etat = 'actif'
 
     # -------------------------------------------------------------------
     # Résumé stylé (carte HTML moderne - centrée)

@@ -29,7 +29,7 @@
                         <field name="name"/>
                         <field name="ste_id"/>
                         <field name="serie"/>
-                        <field name="etat"/>
+                        <field name="etat" readonly="1"/>
                     </group>
                     <field name="summary_card" widget="html"/>
                     <notebook>

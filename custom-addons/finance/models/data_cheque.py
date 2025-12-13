@@ -596,21 +596,32 @@ class DataCheque(models.Model):
             rec._compute_existance_doc_tag()
 
         return True
-
+    
     # ------------------------------------------------------------
-    # CRON : Simulate DEM Button Click
+    # CRON : Vérifier existence DEM et DOC sur Drive
     # ------------------------------------------------------------
     @api.model
-    def cron_simulate_dem_click(self):
+    def cron_check_dem_doc_existence(self):
         """
-        Simule le clic sur le bouton DEM pour tous les chèques :
-        - Si le lien DEM existe déjà : on met juste à jour le statut 'dem_exist'.
-        - Sinon : on lance la recherche (_sync_pdf_url).
+        Cherche sur Google Drive et met à jour dem_exist et doc_exist
+        selon la disponibilité réelle des PDF.
         """
-        records = self.search([])
+        records = self.search([
+            ('chq', '!=', False),
+            ('ste_id', '!=', False),
+        ])
+        
         for rec in records:
-            if rec.dem_pdf_url:
-                rec.dem_exist = 'dem_exists'
-            else:
-                rec._sync_pdf_url()
+            # Forcer la recherche sur Drive même si l'URL existe déjà
+            dem_url = rec._get_pdf_url("DEM")
+            doc_url = rec._get_pdf_url("DOC")
+            
+            # Mettre à jour les URLs
+            rec.dem_pdf_url = dem_url
+            rec.doc_pdf_url = doc_url
+            
+            # Mettre à jour les statuts d'existence
+            rec.dem_exist = 'dem_exists' if dem_url else 'dem_not_exists'
+            rec.doc_exist = 'doc_exists' if doc_url else 'doc_not_exists'
+        
         return True

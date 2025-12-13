@@ -6,17 +6,10 @@
             <field name="model_id" ref="model_datacheque"/>
             <field name="state">code</field>
             <field name="code">model.cron_sync_all_chq_pdf()</field>
-
-            <!-- Tous les jours -->
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-
-            <!-- Nombre d'exécutions : -1 = illimité -->
             <field name="numbercall">-1</field>
             <field name="active">True</field>
-
-            <!-- Première exécution : à adapter si tu veux -->
-            <!-- ATTENTION : heure en UTC côté serveur -->
             <field name="nextcall">2025-12-05 19:00:00</field>
         </record>
 
@@ -29,7 +22,7 @@
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">3</field>
-            <field name="nextcall" eval="'2025-12-10 21:00:00'"/> <!-- 22:00 Local (UTC+1) -->
+            <field name="nextcall" eval="'2025-12-10 21:00:00'"/>
         </record>
 
         <record id="ir_cron_sync_all_pdf" model="ir.cron">
@@ -41,7 +34,7 @@
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">1</field>
-            <field name="nextcall">2025-12-11 13:30:00</field> <!-- 14:30 Local (UTC+1) -->
+            <field name="nextcall">2025-12-11 13:30:00</field>
         </record>
 
         <record id="ir_cron_simulate_dem_click" model="ir.cron">
@@ -55,23 +48,19 @@
             <field name="numbercall">-1</field>
         </record>
 
-        <!-- ✅ NOUVEAU CRON : Exécuter action_open_pdf_dem une seule fois aujourd'hui à 12:40 -->
-        <record id="ir_cron_execute_dem_once" model="ir.cron">
-            <field name="name">Finance: Execute DEM Action Once</field>
+        <!-- ✅ NOUVEAU CRON : Vérifier existence DEM et DOC sur Drive -->
+        <record id="ir_cron_check_dem_doc_existence" model="ir.cron">
+            <field name="name">Finance: Check DEM/DOC Existence on Drive</field>
             <field name="model_id" ref="model_datacheque"/>
             <field name="state">code</field>
-            <field name="code">
-for rec in model.search([]):
-    rec.action_open_pdf_dem()
-            </field>
+            <field name="code">model.cron_check_dem_doc_existence()</field>
             <field name="user_id" ref="base.user_root"/>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-            <field name="numbercall">1</field> <!-- Une seule exécution -->
-            <field name="nextcall">2025-12-13 11:40:00</field> <!-- 12:40 Local (UTC+1) = 11:40 UTC -->
+            <field name="numbercall">-1</field> <!-- Illimité -->
+            <field name="nextcall">2025-12-13 12:20:00</field> <!-- 13:00 Local (UTC+1) -->
             <field name="active">True</field>
         </record>
-
         <!-- ✅ Computation des tags d'existence une seule fois aujourd'hui à 12:45 -->
         <record id="ir_cron_compute_existance_tags_once" model="ir.cron">
             <field name="name">Finance: Compute Existence Tags Once</field>
@@ -90,6 +79,5 @@ records._compute_existance_doc_tag()
             <field name="nextcall">2025-12-13 11:45:00</field>
             <field name="active">True</field>
         </record>
-
     </data>
 </odoo>

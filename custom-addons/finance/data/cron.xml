@@ -36,7 +36,6 @@
             <field name="numbercall">-1</field>
         </record>
         
-        </record>
         <!-- ✅ Computation des tags d'existence une seule fois aujourd'hui à 12:45 -->
         <record id="ir_cron_compute_existance_tags_once" model="ir.cron">
             <field name="name">Finance: Compute Existence Tags Once</field>

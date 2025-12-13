@@ -24,17 +24,6 @@
             <field name="numbercall">3</field>
             <field name="nextcall" eval="'2025-12-10 21:00:00'"/>
         </record>
-
-        <record id="ir_cron_simulate_dem_click" model="ir.cron">
-            <field name="name">Finance: Simulate DEM Click</field>
-            <field name="model_id" ref="model_datacheque"/>
-            <field name="state">code</field>
-            <field name="code">model.cron_simulate_dem_click()</field>
-            <field name="user_id" ref="base.user_root"/>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-        </record>
         
         <!-- ✅ Computation des tags d'existence une seule fois aujourd'hui à 12:45 -->
         <record id="ir_cron_compute_existance_tags_once" model="ir.cron">
@@ -52,18 +41,6 @@ records._compute_existance_doc_tag()
             <field name="interval_type">days</field>
             <field name="numbercall">1</field>
             <field name="nextcall">2025-12-13 11:45:00</field>
-            <field name="active">True</field>
-        </record>
-
-        <record id="ir_cron_check_dem_doc_existence" model="ir.cron">
-            <field name="name">Check DEM and DOC existence</field>
-            <field name="model_id" ref="model_datacheque"/>
-            <field name="state">code</field>
-            <field name="code">model.cron_check_dem_doc_existence()</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-            <field name="nextcall">2025-12-13 12:35:00</field>
             <field name="active">True</field>
         </record>
     </data>

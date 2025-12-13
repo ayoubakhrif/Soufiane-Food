@@ -597,30 +597,3 @@ class DataCheque(models.Model):
 
         return True
 
-    # ------------------------------------------------------------
-    # CRON : Vérifier existence DEM et DOC sur Google Drive
-    # ------------------------------------------------------------
-    @api.model
-    def cron_check_dem_doc_existence(self):
-        """
-        Vérifie systématiquement DEM et DOC sur Drive
-        et met à jour dem_exist / doc_exist sans laisser NULL.
-        """
-        records = self.search([
-            ('chq', '!=', False),
-            ('ste_id', '!=', False),
-        ])
-
-        for rec in records:
-            # --- DEM ---
-            dem_url = rec._get_pdf_url("DEM")
-            rec.dem_pdf_url = dem_url or False
-            rec.dem_exist = 'dem_exists' if dem_url else 'dem_not_exists'
-
-            # --- DOC ---
-            doc_url = rec._get_pdf_url("DOC")
-            rec.doc_pdf_url = doc_url or False
-            rec.doc_exist = 'doc_exists' if doc_url else 'doc_not_exists'
-
-        return True
-

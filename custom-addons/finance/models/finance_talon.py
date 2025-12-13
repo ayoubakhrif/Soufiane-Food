@@ -31,102 +31,104 @@ class FinanceTalon(models.Model):
     )
 
     # -------------------------------------------------------------------
-    # Résumé stylé (carte HTML moderne)
+    # Résumé stylé (carte HTML moderne - centrée)
     # -------------------------------------------------------------------
     @api.depends('used_chqs', 'unused_chqs', 'num_chq')
     def _compute_card(self):
         for rec in self:
             rec.summary_card = f"""
-            <div style="
-                padding: 20px;
-                border-radius: 16px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
-                color: white;
-                width: 100%;
-                margin-top: 10px;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            ">
-                <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                    <div style="
-                        width: 48px;
-                        height: 48px;
-                        background: rgba(255,255,255,0.2);
-                        border-radius: 12px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 24px;
-                        margin-right: 12px;
-                    ">📄</div>
-                    <h3 style="margin: 0; font-size: 20px; font-weight: 600;">
-                        {rec.name_shown}
-                    </h3>
-                </div>
-                
+            <div style="display: flex; justify-content: center; width: 100%; margin-top: 10px;">
                 <div style="
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 12px;
-                    margin-top: 16px;
+                    max-width: 450px;
+                    width: 100%;
+                    padding: 20px;
+                    border-radius: 16px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+                    color: white;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 ">
-                    <div style="
-                        background: rgba(255,255,255,0.15);
-                        backdrop-filter: blur(10px);
-                        padding: 12px;
-                        border-radius: 12px;
-                        border: 1px solid rgba(255,255,255,0.2);
-                    ">
-                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
-                            Total
-                        </div>
-                        <div style="font-size: 24px; font-weight: 700;">
-                            {rec.num_chq}
-                        </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="
+                            width: 48px;
+                            height: 48px;
+                            background: rgba(255,255,255,0.2);
+                            border-radius: 12px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 24px;
+                            margin-right: 12px;
+                        ">📄</div>
+                        <h3 style="margin: 0; font-size: 20px; font-weight: 600;">
+                            {rec.name_shown}
+                        </h3>
                     </div>
                     
                     <div style="
-                        background: rgba(255,255,255,0.15);
-                        backdrop-filter: blur(10px);
-                        padding: 12px;
-                        border-radius: 12px;
-                        border: 1px solid rgba(255,255,255,0.2);
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 12px;
+                        margin-top: 16px;
                     ">
-                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
-                            📊 Utilisation
+                        <div style="
+                            background: rgba(255,255,255,0.15);
+                            backdrop-filter: blur(10px);
+                            padding: 12px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255,255,255,0.2);
+                        ">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
+                                Total
+                            </div>
+                            <div style="font-size: 24px; font-weight: 700;">
+                                {rec.num_chq}
+                            </div>
                         </div>
-                        <div style="font-size: 24px; font-weight: 700;">
-                            {round(rec.usage_percentage, 1)}%
+                        
+                        <div style="
+                            background: rgba(255,255,255,0.15);
+                            backdrop-filter: blur(10px);
+                            padding: 12px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(255,255,255,0.2);
+                        ">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
+                                📊 Utilisation
+                            </div>
+                            <div style="font-size: 24px; font-weight: 700;">
+                                {round(rec.usage_percentage, 1)}%
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div style="
-                        background: rgba(220, 53, 69, 0.3);
-                        backdrop-filter: blur(10px);
-                        padding: 12px;
-                        border-radius: 12px;
-                        border: 1px solid rgba(220, 53, 69, 0.4);
-                    ">
-                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
-                            🔴 Utilisés
+                        
+                        <div style="
+                            background: rgba(220, 53, 69, 0.3);
+                            backdrop-filter: blur(10px);
+                            padding: 12px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(220, 53, 69, 0.4);
+                        ">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
+                                🔴 Utilisés
+                            </div>
+                            <div style="font-size: 24px; font-weight: 700;">
+                                {rec.used_chqs}
+                            </div>
                         </div>
-                        <div style="font-size: 24px; font-weight: 700;">
-                            {rec.used_chqs}
-                        </div>
-                    </div>
-                    
-                    <div style="
-                        background: rgba(40, 167, 69, 0.3);
-                        backdrop-filter: blur(10px);
-                        padding: 12px;
-                        border-radius: 12px;
-                        border: 1px solid rgba(40, 167, 69, 0.4);
-                    ">
-                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
-                            🟢 Restants
-                        </div>
-                        <div style="font-size: 24px; font-weight: 700;">
-                            {rec.unused_chqs}
+                        
+                        <div style="
+                            background: rgba(40, 167, 69, 0.3);
+                            backdrop-filter: blur(10px);
+                            padding: 12px;
+                            border-radius: 12px;
+                            border: 1px solid rgba(40, 167, 69, 0.4);
+                        ">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 4px;">
+                                🟢 Restants
+                            </div>
+                            <div style="font-size: 24px; font-weight: 700;">
+                                {rec.unused_chqs}
+                            </div>
                         </div>
                     </div>
                 </div>

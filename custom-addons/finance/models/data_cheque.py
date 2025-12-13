@@ -53,9 +53,9 @@ class DataCheque(models.Model):
         ('doc_exists', 'Existe'),
         ('doc_not_exists', 'Absent'),
     ], readonly=True, optional=True)
-    existing_tag = fields.Html(string='Présence CHQ', compute='_compute_existance_tag', sanitize=False, optional=True)
-    existing_dem_tag = fields.Html(string='Présence DEM', compute='_compute_existance_dem_tag', sanitize=False, optional=True)
-    existing_doc_tag = fields.Html(string='Présence DOC', compute='_compute_existance_doc_tag', sanitize=False, optional=True)
+    existing_tag = fields.Html(string='Présence CHQ', compute='_compute_existance_tag', sanitize=False, optional=True, store=True)
+    existing_dem_tag = fields.Html(string='Présence DEM', compute='_compute_existance_dem_tag', sanitize=False, optional=True, store=True)
+    existing_doc_tag = fields.Html(string='Présence DOC', compute='_compute_existance_doc_tag', sanitize=False, optional=True, store=True)
     talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, domain="[('ste_id', '=', ste_id)]")
     # ------------------------------------------------------------
     # BADGE VISUEL

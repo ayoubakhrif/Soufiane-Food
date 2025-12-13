@@ -102,27 +102,42 @@ class FinanceTalon(models.Model):
     @api.depends('cheque_ids.chq', 'num_chq', 'name', 'ste_id')
     def _compute_missing_cheques_html(self):
         for talon in self:
-            # Sécurité minimale
-            if not talon.name or not talon.name.isdigit() or not talon.num_chq:
-                talon.missing_cheques_html = "<i>Données du talon invalides</i>"
+
+            # --- Validation robuste du talon ---
+            raw_name = (talon.name or "").strip()
+
+            try:
+                start = int(raw_name)
+            except (ValueError, TypeError):
+                talon.missing_cheques_html = (
+                    "<i>Données du talon invalides (numéro non numérique)</i>"
+                )
                 continue
 
-            start = int(talon.name)
+            if not talon.num_chq or talon.num_chq <= 0:
+                talon.missing_cheques_html = (
+                    "<i>Données du talon invalides (nombre de chèques)</i>"
+                )
+                continue
+
             end = start + talon.num_chq - 1
 
-            # Numéros de chèques existants (liés à ce talon)
+            # --- Numéros de chèques existants ---
             existing_numbers = set()
             for chq in talon.cheque_ids:
-                if chq.chq and chq.chq.isdigit():
-                    existing_numbers.add(int(chq.chq))
+                raw_chq = (chq.chq or "").strip()
+                try:
+                    existing_numbers.add(int(raw_chq))
+                except (ValueError, TypeError):
+                    continue
 
-            # Calcul des absents
+            # --- Calcul des chèques absents ---
             missing = [
                 num for num in range(start, end + 1)
                 if num not in existing_numbers
             ]
 
-            # Aucun chèque absent
+            # --- Aucun chèque manquant ---
             if not missing:
                 talon.missing_cheques_html = """
                     <div style="padding:8px; color:#28a745; font-weight:600;">
@@ -131,7 +146,7 @@ class FinanceTalon(models.Model):
                 """
                 continue
 
-            # Construction HTML
+            # --- Construction HTML ---
             lines = []
             for num in missing:
                 lines.append(f"""
@@ -152,3 +167,4 @@ class FinanceTalon(models.Model):
                     {''.join(lines)}
                 </div>
             """
+        

@@ -14,6 +14,15 @@
         <field name="arch" type="xml">
             <form string="Talons">
                 <sheet>
+                    <header>
+                        <button
+                            name="action_open_cheques"
+                            type="object"
+                            string="Voir les chèques (%(used_chqs)s)"
+                            class="btn-primary"
+                            icon="fa-list"
+                        />
+                    </header>
                     <field name="progress_html" widget="html"/>
                     <group>
                         <field name="num_chq"/>

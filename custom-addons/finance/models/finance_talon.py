@@ -35,6 +35,22 @@ class FinanceTalon(models.Model):
     )
 
     # -------------------------------------------------------------------
+    # Bouton vers chqs du talon
+    # -------------------------------------------------------------------
+    def action_open_cheques(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Chèques du talon',
+            'res_model': 'datacheque',
+            'view_mode': 'tree,form',
+            'domain': [('talon_id', '=', self.id)],
+            'context': {
+                'default_talon_id': self.id,
+            }
+        }
+
+    # -------------------------------------------------------------------
     # Résumé stylé (carte HTML moderne - centrée)
     # -------------------------------------------------------------------
     @api.depends('used_chqs', 'unused_chqs', 'num_chq')

@@ -614,3 +614,22 @@ class DataCheque(models.Model):
             else:
                 rec._sync_pdf_url()
         return True
+
+    # ------------------------------------------------------------
+    # CRON : Execute DEM Action Once and Correctify Tags
+    # ------------------------------------------------------------
+    @api.model
+    def cron_execute_dem_once(self):
+        """
+        Exécute action_open_pdf_dem pour tous les enregistrements
+        et corrige les tags d'existence.
+        """
+        for rec in self.search([]):
+            # Exécuter l'action existante
+            rec.action_open_pdf_dem()
+            
+            # Recalculer les tags pour s'assurer qu'ils sont corrects
+            rec._compute_existance_dem_tag()
+            rec._compute_existance_tag()
+            rec._compute_existance_doc_tag()
+        return True

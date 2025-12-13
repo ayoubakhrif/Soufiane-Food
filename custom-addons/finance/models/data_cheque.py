@@ -603,10 +603,8 @@ class DataCheque(models.Model):
     @api.model
     def cron_check_dem_doc_existence(self):
         """
-        Cron dédiée :
-        - Cherche DEM et DOC sur Google Drive pour chaque chèque
-        - Met à jour dem_pdf_url / doc_pdf_url
-        - Met à jour dem_exist / doc_exist
+        Vérifie systématiquement DEM et DOC sur Drive
+        et met à jour dem_exist / doc_exist sans laisser NULL.
         """
         records = self.search([
             ('chq', '!=', False),
@@ -614,16 +612,15 @@ class DataCheque(models.Model):
         ])
 
         for rec in records:
-            # --- Recherche FORCÉE sur Google Drive ---
+            # --- DEM ---
             dem_url = rec._get_pdf_url("DEM")
-            doc_url = rec._get_pdf_url("DOC")
-
-            # --- Mise à jour URLs ---
             rec.dem_pdf_url = dem_url or False
-            rec.doc_pdf_url = doc_url or False
-
-            # --- Mise à jour états ---
             rec.dem_exist = 'dem_exists' if dem_url else 'dem_not_exists'
+
+            # --- DOC ---
+            doc_url = rec._get_pdf_url("DOC")
+            rec.doc_pdf_url = doc_url or False
             rec.doc_exist = 'doc_exists' if doc_url else 'doc_not_exists'
 
         return True
+

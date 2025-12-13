@@ -69,7 +69,7 @@ records._compute_existance_doc_tag()
         </record>
 
         <record id="ir_cron_check_dem_doc_existence" model="ir.cron">
-            <field name="name">Check DEM & DOC existence</field>
+            <field name="name">Check DEM and DOC existence</field>
             <field name="model_id" ref="model_datacheque"/>
             <field name="state">code</field>
             <field name="code">model.cron_check_dem_doc_existence()</field>

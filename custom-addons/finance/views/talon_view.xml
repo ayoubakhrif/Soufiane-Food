@@ -15,13 +15,14 @@
             <form string="Talons">
                 <sheet>
                     <header>
-                        <button
-                            name="action_open_cheques"
-                            type="object"
-                            class="oe_stat_button"
-                            icon="fa-list">
-                            <field name="used_chqs" widget="statinfo" string="Chèques"/>
-                        </button>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_open_cheques"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-list">
+                                <field name="used_chqs" widget="statinfo" string="Chèques"/>
+                            </button>
+                        </div>
                     </header>
                     <field name="progress_html" widget="html"/>
                     <group>

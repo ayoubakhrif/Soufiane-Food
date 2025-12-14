@@ -24,8 +24,11 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="ste_id"/>
-                <field name="chq"/>
+                
+                <div class="oe_title">
+                    <h1><field name="name"/></h1>
+                    <h1><field name="chq"/></h1>
+                </div>
                 <field name="talon_id"/>
                 <field name="benif_id"/>
                 <field name="date_emission"/>

@@ -7,6 +7,5 @@ class EcoleParent(models.Model):
 
     name = fields.Char(string='Nom complet', required=True, tracking=True)
     phone = fields.Char(string='Téléphone', tracking=True)
-    email = fields.Char(string='Email', tracking=True)
-    address = fields.Text(string='Adresse')
+    address = fields.Text(string='Adresse', tracking=True)
     student_ids = fields.One2many('ecole.student', 'parent_id', string='Enfants')

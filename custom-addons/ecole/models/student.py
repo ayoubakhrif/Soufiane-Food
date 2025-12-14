@@ -19,10 +19,9 @@ class EcoleStudent(models.Model):
     ], string='Status', default='active', tracking=True)
     parent_id = fields.Many2one('ecole.parent', string='Parent/Tuteur', required=True, tracking=True)
     gender = fields.Selection([
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other')
-    ], string='Gender', tracking=True)
+        ('male', 'Homme'),
+        ('female', 'Femme')
+    ], string='Sexe', tracking=True)
     phone_number = fields.Char(string='Numéro de téléphone', size=10, tracking=True)
 
 

@@ -77,7 +77,7 @@
                     <notebook>
                         <page string="General Information">
                             <group>
-                                <field name="address_id" string="Contact Address" context="{'show_address': 1}" options='{"always_reload": True}' invisible="1"/> <!-- Placeholder if we linked to res.partner -->
+                                <!-- Address is managed via Parent -->
                             </group>
                         </page>
                     </notebook>

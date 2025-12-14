@@ -1,0 +1,45 @@
+<odoo>
+    <template id="report_payment_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="text-center">
+                            <h2>Payment Receipt</h2>
+                            <h4><span t-field="doc.name"/></h4>
+                        </div>
+                        
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>Student:</strong> <span t-field="doc.student_id.first_name"/> <span t-field="doc.student_id.last_name"/> <br/>
+                                <strong>Parent:</strong> <span t-field="doc.parent_id.name"/>
+                            </div>
+                            <div class="col-6 text-right">
+                                <strong>Date:</strong> <span t-field="doc.date"/> <br/>
+                                <strong>Status:</strong> <span t-field="doc.status"/>
+                            </div>
+                        </div>
+
+                        <div class="row mt32">
+                            <div class="col-12">
+                                <p>
+                                    Received with thanks from <strong><span t-field="doc.parent_id.name"/></strong> 
+                                    the sum of <strong><span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></strong>
+                                    via <strong><span t-field="doc.payment_method"/></strong>.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt64">
+                            <div class="col-6">
+                                <strong>Signature:</strong>
+                                <br/><br/><br/>
+                                _______________________
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

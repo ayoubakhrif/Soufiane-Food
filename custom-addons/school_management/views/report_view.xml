@@ -1,0 +1,59 @@
+<odoo>
+    <record id="view_school_academic_report_tree" model="ir.ui.view">
+        <field name="name">school.academic.report.tree</field>
+        <field name="model">school.academic.report</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="report_date"/>
+                <field name="student_id"/>
+                <field name="class_id"/>
+                <field name="average"/>
+                <field name="mention"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_school_academic_report_form" model="ir.ui.view">
+        <field name="name">school.academic.report.form</field>
+        <field name="model">school.academic.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <!-- Button to print report -->
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="student_id" placeholder="Student"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="class_id"/>
+                            <field name="academic_year"/>
+                        </group>
+                        <group>
+                            <field name="report_date"/>
+                            <field name="average"/>
+                            <field name="mention"/>
+                        </group>
+                    </group>
+                    <!-- Ideally we would list the grades here or calculated lines -->
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_school_academic_report" model="ir.actions.act_window">
+        <field name="name">Academic Reports</field>
+        <field name="res_model">school.academic.report</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_school_academic_report" name="Reports" parent="menu_school_grade_root" action="action_school_academic_report" sequence="20"/>
+</odoo>

@@ -596,4 +596,3 @@ class DataCheque(models.Model):
             rec._compute_existance_doc_tag()
 
         return True
-

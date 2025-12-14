@@ -1,0 +1,58 @@
+<odoo>
+    <template id="report_student_bulletin">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="text-center">
+                            <h2>Academic Report</h2>
+                        </div>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>Student:</strong> <span t-field="doc.student_id.first_name"/> <span t-field="doc.student_id.last_name"/> <br/>
+                                <strong>Registration:</strong> <span t-field="doc.student_id.registration_number"/> <br/>
+                                <strong>Class:</strong> <span t-field="doc.class_id.name"/>
+                            </div>
+                            <div class="col-6 text-right">
+                                <strong>Academic Year:</strong> <span t-field="doc.academic_year"/> <br/>
+                                <strong>Date:</strong> <span t-field="doc.report_date"/>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm table-bordered mt32">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Evaluation</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc.student_id.grade_ids" t-as="grade">
+                                    <td><span t-field="grade.subject_id.name"/></td>
+                                    <td><span t-field="grade.evaluation_type"/></td>
+                                    <td><span t-field="grade.score"/> / 20</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="row mt32">
+                            <div class="col-6 offset-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Overall Average:</strong></td>
+                                        <td class="text-right"><span t-field="doc.average"/> / 20</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Mention:</strong></td>
+                                        <td class="text-right"><span t-field="doc.mention"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,21 @@
+<odoo>
+    <record id="action_report_school_bulletin" model="ir.actions.report">
+        <field name="name">Academic Bulletin</field>
+        <field name="model">school.academic.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">school_management.report_student_bulletin</field>
+        <field name="report_file">school_management.report_student_bulletin</field>
+        <field name="binding_model_id" ref="model_school_academic_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_school_payment_receipt" model="ir.actions.report">
+        <field name="name">Payment Receipt</field>
+        <field name="model">school.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">school_management.report_payment_receipt</field>
+        <field name="report_file">school_management.report_payment_receipt</field>
+        <field name="binding_model_id" ref="model_school_payment"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

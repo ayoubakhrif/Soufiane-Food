@@ -1,0 +1,11 @@
+<odoo>
+    <menuitem id="menu_school_root" name="School" web_icon="school_management,static/description/icon.png" sequence="10"/>
+
+    <menuitem id="menu_school_student_root" name="Students" parent="menu_school_root" sequence="10"/>
+    <menuitem id="menu_school_parent_root" name="Parents" parent="menu_school_root" sequence="20"/>
+    <menuitem id="menu_school_academic_root" name="Academics" parent="menu_school_root" sequence="30"/>
+    <menuitem id="menu_school_grade_root" name="Grading" parent="menu_school_root" sequence="40"/>
+    <menuitem id="menu_school_finance_root" name="Finance" parent="menu_school_root" sequence="50"/>
+    
+    <!-- Submenus will be defined in respective view files or here if generic -->
+</odoo>

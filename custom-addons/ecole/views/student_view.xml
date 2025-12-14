@@ -1,0 +1,64 @@
+<odoo>
+    <record id="view_ecole_student_tree" model="ir.ui.view">
+        <field name="name">ecole.student.tree</field>
+        <field name="model">ecole.student</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="status == 'suspended'" decoration-danger="status == 'suspended'">
+                <field name="first_name"/>
+                <field name="last_name"/>
+                <field name="age"/>
+                <field name="current_class_id"/>
+                <field name="parent_id"/>
+                <field name="phone_number"/>
+                <field name="status" widget="badge" decoration-success="status == 'active'" decoration-danger="status == 'suspended'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_ecole_student_form" model="ir.ui.view">
+        <field name="name">ecole.student.form</field>
+        <field name="model">ecole.student</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <field name="photo" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="first_name" placeholder="Prénom"/>
+                            <field name="last_name" placeholder="Nom"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_of_birth"/>
+                            <field name="age"/>
+                            <field name="gender"/>
+                        </group>
+                        <group>
+                            <field name="parent_id"/>
+                            <field name="phone_number"/>
+                            <field name="current_class_id"/>
+                            <field name="academic_year"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ecole_student" model="ir.actions.act_window">
+        <field name="name">Etudiants</field>
+        <field name="res_model">ecole.student</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_ecole_student" name="Etudiants" parent="menu_ecole_root" action="action_ecole_student" sequence="10"/>
+</odoo>

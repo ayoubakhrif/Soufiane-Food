@@ -1,0 +1,60 @@
+<odoo>
+    <record id="view_ecole_parent_tree" model="ir.ui.view">
+        <field name="name">ecole.parent.tree</field>
+        <field name="model">ecole.parent</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_ecole_parent_form" model="ir.ui.view">
+        <field name="name">ecole.parent.form</field>
+        <field name="model">ecole.parent</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="address"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Enfants">
+                            <field name="student_ids">
+                                <tree readonly="1">
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                    <field name="current_class_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ecole_parent" model="ir.actions.act_window">
+        <field name="name">Parents</field>
+        <field name="res_model">ecole.parent</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_ecole_parent" name="Parents" parent="menu_ecole_root" action="action_ecole_parent" sequence="20"/>
+</odoo>

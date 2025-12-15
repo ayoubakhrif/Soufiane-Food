@@ -11,8 +11,8 @@
                 <field name="record_name"/>
                 <field name="reason"/>
                 <field name="state" widget="badge"/>
-                <button name="action_approve" states="pending" string="Approuver" type="object" icon="fa-check" groups="finance.group_finance_user" class="btn-success"/>
-                <button name="action_reject" states="pending" string="Rejeter" type="object" icon="fa-times" groups="finance.group_finance_user" class="btn-danger"/>
+                <button name="action_approve" invisible="state != 'pending'" string="Approuver" type="object" icon="fa-check" groups="finance.group_finance_user" class="btn-success"/>
+                <button name="action_reject" invisible="state != 'pending'" string="Rejeter" type="object" icon="fa-times" groups="finance.group_finance_user" class="btn-danger"/>
             </tree>
         </field>
     </record>
@@ -23,8 +23,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_approve" states="pending" string="Approuver la suppression" type="object" class="oe_highlight btn-danger" groups="finance.group_finance_user" confirm="Êtes-vous sûr de vouloir supprimer cet enregistrement définitivement ?"/>
-                    <button name="action_reject" states="pending" string="Rejeter" type="object" groups="finance.group_finance_user"/>
+                    <button name="action_approve" invisible="state != 'pending'" string="Approuver la suppression" type="object" class="oe_highlight btn-danger" groups="finance.group_finance_user" confirm="Êtes-vous sûr de vouloir supprimer cet enregistrement définitivement ?"/>
+                    <button name="action_reject" invisible="state != 'pending'" string="Rejeter" type="object" groups="finance.group_finance_user"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>

@@ -10,7 +10,7 @@
         - Monthly Salary Calculation
     """,
     'author': 'Antigravity',
-    'depends': ['base'],
+    'depends': ['base', 'mail'],
     'data': [
         'security/security_groups.xml',
         'security/ir.model.access.csv',

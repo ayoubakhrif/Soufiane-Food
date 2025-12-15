@@ -27,7 +27,7 @@
                             <field name="active"/>
                         </group>
                         <group>
-                            <field name="monthly_salary" groups="group_custom_attendance_admin,group_custom_attendance_manager" widget="monetary"/>
+                            <field name="monthly_salary" groups="custom_attendance.group_custom_attendance_admin,custom_attendance.group_custom_attendance_manager" widget="monetary"/>
                         </group>
                     </group>
                     <notebook>

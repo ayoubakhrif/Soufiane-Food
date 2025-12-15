@@ -29,8 +29,11 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="employee_id" readonly="state == 'validated'"/> - 
+                            <span> Employé: </span>
+                            <field name="employee_id" readonly="state == 'validated'"/>
+                            <span> Mois: </span>
                             <field name="month" readonly="state == 'validated'"/> 
+                            <span> Année: </span>
                             <field name="year" readonly="state == 'validated'"/>
                         </h1>
                     </div>

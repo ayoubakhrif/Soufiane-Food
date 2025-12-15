@@ -94,10 +94,4 @@
         <field name="res_model">custom.attendance</field>
         <field name="view_mode">tree,calendar,form</field>
     </record>
-    
-    <record id="action_custom_attendance_calendar" model="ir.actions.act_window">
-        <field name="name">Calendrier de présence</field>
-        <field name="res_model">custom.attendance</field>
-        <field name="view_mode">calendar,tree,form</field>
-    </record>
 </odoo>

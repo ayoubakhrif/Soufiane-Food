@@ -20,6 +20,7 @@
         'views/configuration_view.xml',
         'views/monthly_salary_view.xml',
     ],
+    'images': ['static/description/Presence_icon.svg'],
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

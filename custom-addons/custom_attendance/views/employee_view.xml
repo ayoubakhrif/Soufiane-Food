@@ -6,7 +6,7 @@
             <tree decoration-muted="not active">
                 <field name="name"/>
                 <field name="phone"/>
-                <field name="monthly_salary"/>
+                <field name="monthly_salary" groups="group_custom_attendance_admin,group_custom_attendance_manager"/>
                 <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>
@@ -27,7 +27,7 @@
                             <field name="active"/>
                         </group>
                         <group>
-                            <field name="monthly_salary" widget="monetary"/>
+                            <field name="monthly_salary" groups="group_custom_attendance_admin,group_custom_attendance_manager" widget="monetary"/>
                         </group>
                     </group>
                     <notebook>

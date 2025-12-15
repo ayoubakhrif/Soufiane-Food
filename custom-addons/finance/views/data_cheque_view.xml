@@ -73,7 +73,7 @@
                         <h1>
                             <span> Société: </span>
                             <field name="ste_id" class="oe_inline" string="Société" placeholder="Société"/>
-                            <span> Numéro de chèque: </span>
+                            <span style="margin: 0 8px;"> Numéro de chèque: </span>
                             <field name="chq" class="oe_inline" string="Num chq" placeholder="Numéro de chèque"/>
                         </h1>
                     </div>

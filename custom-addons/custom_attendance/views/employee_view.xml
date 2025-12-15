@@ -1,0 +1,64 @@
+<odoo>
+    <record id="view_custom_employee_tree" model="ir.ui.view">
+        <field name="name">custom.employee.tree</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not active">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="monthly_salary"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_custom_employee_form" model="ir.ui.view">
+        <field name="name">custom.employee.form</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Full Name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="monthly_salary" widget="monetary"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attendance History">
+                            <field name="attendance_ids" readonly="1">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="check_in" widget="float_time"/>
+                                    <field name="check_out" widget="float_time"/>
+                                    <field name="delay_minutes" decoration-danger="delay_minutes &gt; 0"/>
+                                    <field name="missing_hours" decoration-warning="missing_hours &gt; 0"/>
+                                    <field name="overtime_hours" decoration-success="overtime_hours &gt; 0"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_employee" model="ir.actions.act_window">
+        <field name="name">Employees</field>
+        <field name="res_model">custom.employee</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_action_custom_employee" parent="menu_custom_employee" action="action_custom_employee"/>
+</odoo>

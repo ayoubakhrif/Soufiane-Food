@@ -1,0 +1,106 @@
+<odoo>
+    <record id="view_custom_attendance_tree" model="ir.ui.view">
+        <field name="name">custom.attendance.tree</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="delay_minutes &gt; 0 or missing_hours &gt; 0" decoration-success="overtime_hours &gt; 0" decoration-muted="state == 'locked'">
+                <field name="date"/>
+                <field name="employee_id"/>
+                <field name="check_in" widget="float_time"/>
+                <field name="check_out" widget="float_time"/>
+                <field name="normal_working_hours" sum="Total Normal"/>
+                <field name="delay_minutes" sum="Total Delay"/>
+                <field name="missing_hours" sum="Total Missing"/>
+                <field name="overtime_hours" sum="Total Overtime"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-muted="state == 'locked'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_custom_attendance_form" model="ir.ui.view">
+        <field name="name">custom.attendance.form</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="check_in" widget="float_time"/>
+                            <field name="check_out" widget="float_time"/>
+                        </group>
+                    </group>
+                    <group string="Calculations">
+                        <group>
+                            <field name="normal_working_hours" widget="float_time"/>
+                            <field name="delay_minutes"/>
+                        </group>
+                        <group>
+                            <field name="missing_hours" widget="float_time" decoration-danger="missing_hours &gt; 0"/>
+                            <field name="overtime_hours" widget="float_time" decoration-success="overtime_hours &gt; 0"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="view_custom_attendance_calendar" model="ir.ui.view">
+        <field name="name">custom.attendance.calendar</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <calendar string="Attendance" date_start="date" color="state" mode="month">
+                <field name="employee_id"/>
+                <field name="check_in" widget="float_time"/>
+                <field name="check_out" widget="float_time"/>
+                <field name="delay_minutes"/>
+                <field name="missing_hours"/>
+            </calendar>
+        </field>
+    </record>
+    
+    <record id="view_custom_attendance_search" model="ir.ui.view">
+        <field name="name">custom.attendance.search</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <filter string="Late" name="late" domain="[('delay_minutes', '&gt;', 0)]"/>
+                <filter string="Missing Hours" name="missing" domain="[('missing_hours', '&gt;', 0)]"/>
+                <filter string="Overtime" name="overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_custom_attendance" model="ir.actions.act_window">
+        <field name="name">Daily Attendance</field>
+        <field name="res_model">custom.attendance</field>
+        <field name="view_mode">tree,calendar,form</field>
+    </record>
+    
+    <record id="action_custom_attendance_calendar" model="ir.actions.act_window">
+        <field name="name">Attendance Calendar</field>
+        <field name="res_model">custom.attendance</field>
+        <field name="view_mode">calendar,tree,form</field>
+    </record>
+
+    <menuitem id="menu_action_custom_attendance" parent="menu_custom_attendance_daily" action="action_custom_attendance"/>
+    <menuitem id="menu_action_custom_attendance_calendar" parent="menu_custom_attendance_dashboard" action="action_custom_attendance_calendar"/>
+</odoo>

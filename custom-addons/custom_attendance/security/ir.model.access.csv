@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_custom_employee_user,custom.employee.user,model_custom_employee,group_custom_attendance_employee,1,0,0,0
+access_custom_attendance_user,custom.attendance.user,model_custom_attendance,group_custom_attendance_employee,1,0,0,0
+access_custom_salary_user,custom.monthly.salary.user,model_custom_monthly_salary,group_custom_attendance_employee,1,0,0,0
+access_custom_config_user,custom.attendance.config.user,model_custom_attendance_config,group_custom_attendance_employee,1,0,0,0
+
+access_custom_employee_manager,custom.employee.manager,model_custom_employee,group_custom_attendance_manager,1,1,1,1
+access_custom_attendance_manager,custom.attendance.manager,model_custom_attendance,group_custom_attendance_manager,1,1,1,1
+access_custom_salary_manager,custom.monthly.salary.manager,model_custom_monthly_salary,group_custom_attendance_manager,1,1,1,1
+access_custom_config_manager,custom.attendance.config.manager,model_custom_attendance_config,group_custom_attendance_manager,1,0,0,0
+
+access_custom_config_admin,custom.attendance.config.admin,model_custom_attendance_config,group_custom_attendance_admin,1,1,1,1

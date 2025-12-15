@@ -29,7 +29,7 @@
         <field name="name">finance.benif.tree</field>
         <field name="model">finance.benif</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree editable="bottom">
                 <field name="name"/>
                 <field name="type"/>
                 <field name="days"/>

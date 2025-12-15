@@ -23,21 +23,48 @@ class BusinessApp(models.Model):
 
     def open_app(self):
         self.ensure_one()
-        if self.target_type == 'menu' and self.menu_id:
-            # Redirect to the menu. The web client handles menu IDs usually by hash.
-            # However, returning an action that points to a menu isn't standard in Odoo backend actions directly.
-            # We usually return the action associated with the menu.
-            if self.menu_id.action:
-                action = self.menu_id.action.read()[0]
-                # We can also add a context to highlight the menu if needed, 
-                # but Odoo 17 web client handles routing via menu_id in URL.
-                return action
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'reload',  # Fallback if no action
-            }
+        action_data = False
+        
+        if self.target_type == 'action' and self.action_id:
+            action_data = self.action_id.read()[0]
+        
+        elif self.target_type == 'menu' and self.menu_id:
+            # Recursive lookup to find the first actionable menu
+            target_menu = self._get_target_menu(self.menu_id)
+            if target_menu and target_menu.action:
+                action_data = target_menu.action.read()[0]
+                
+                # IMPORTANT: Set the active_id to the menu_id so the web client highlights the menu
+                # We add 'menu_id' to the context, although standard actions use params.
+                # However, resetting the breadcrumbs is handled by the client when switching apps.
+                # We can try to clear breadcrumbs by using target='main' if applicable, 
+                # but simply opening the action is usually standard.
+                if not action_data.get('help'):
+                     action_data['help'] = f'<p>Opened via Business App: {self.name}</p>'
 
-        elif self.target_type == 'action' and self.action_id:
-            return self.action_id.read()[0]
+        if action_data:
+            # Return the action
+            return action_data
+        
+        # Fallback: Reload if nothing found (shouldn't happen if configured correctly)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload', 
+        }
+
+    def _get_target_menu(self, menu):
+        """Recursively find the first menu (depth-first) that has an action."""
+        if menu.action:
+            return menu
             
-        return {'type': 'ir.actions.act_window_close'}
+        # Find children, ordered by sequence
+        # The search method implicitly filters by user access rights (ACLs/Groups)
+        child_menus = self.env['ir.ui.menu'].search([
+            ('parent_id', '=', menu.id)
+        ], order='sequence,id')
+        
+        for child in child_menus:
+             found = self._get_target_menu(child)
+             if found:
+                 return found
+        return False

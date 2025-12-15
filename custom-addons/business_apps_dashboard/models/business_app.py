@@ -23,65 +23,23 @@ class BusinessApp(models.Model):
 
     def open_app(self):
         self.ensure_one()
-        action_data = False
         
         if self.target_type == 'action' and self.action_id:
-            action_data = self.action_id.read()[0]
+            return self.action_id.read()[0]
         
         elif self.target_type == 'menu' and self.menu_id:
-            # Recursive lookup to find the first actionable menu
-            target_menu = self._get_target_menu(self.menu_id)
-            if target_menu and target_menu.action:
-                action_data = target_menu.action.read()[0]
-                
-                # CONTEXT INJECTION:
-                # We must tell the web client that the 'active' root menu is self.menu_id
-                # (e.g. Finance), even though we are opening a sub-action (e.g. Saisie).
-                # This ensures the top navigation bar switches to the correct App.
-                
-                context_str = action_data.get('context', '{}')
-                # Determine if context is a string or dict (read() usually returns string for context field)
-                if isinstance(context_str, str):
-                    # We append our key safely
-                    context_str = context_str.strip()
-                    if context_str == '{}':
-                         action_data['context'] = f"{{'menu_id': {self.menu_id.id}}}"
-                    else:
-                        # Remove trailing brace, add comma, add our key, close brace
-                        # A bit hacky string manipulation but standard for preserving complex python contexts
-                        # Alternatively, we can rely on the client accepting a dict if we parse it,
-                        # but keeping it as a string is safer for existing eval contexts.
-                        action_data['context'] = f"{context_str[:-1]}, 'menu_id': {self.menu_id.id}}}"
-                elif isinstance(context_str, dict):
-                    context_str['menu_id'] = self.menu_id.id
-                    action_data['context'] = context_str
-
-                if not action_data.get('help'):
-                     action_data['help'] = f'<p>Opened via Business App: {self.name}</p>'
-
-        if action_data:
-            # Return the action
-            return action_data
-        
-        # Fallback: Reload if nothing found (shouldn't happen if configured correctly)
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'reload', 
-        }
-
-    def _get_target_menu(self, menu):
-        """Recursively find the first menu (depth-first) that has an action."""
-        if menu.action:
-            return menu
+            # URL Redirection to force App Switch
+            # The backend cannot switch the top-level App Menu via context or params reliably.
+            # The only way to switch the "App" (and top navigation bar) is to change the URL hash.
+            # We redirect to /web#menu_id=<ROOT_ID>.
             
-        # Find children, ordered by sequence
-        # The search method implicitly filters by user access rights (ACLs/Groups)
-        child_menus = self.env['ir.ui.menu'].search([
-            ('parent_id', '=', menu.id)
-        ], order='sequence,id')
-        
-        for child in child_menus:
-             found = self._get_target_menu(child)
-             if found:
-                 return found
-        return False
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f'/web#menu_id={self.menu_id.id}',
+                'target': 'self', # This replaces the current page, effectively switching apps
+            }
+
+        return {'type': 'ir.actions.act_window_close'}
+
+    # _get_target_menu is no longer needed for this approach as we delegate resolution to the client via URL
+    # checking for child actions is handled by Odoo's default menu loading logic.

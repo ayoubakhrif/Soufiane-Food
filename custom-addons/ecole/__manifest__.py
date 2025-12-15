@@ -9,6 +9,7 @@
     'author': 'Antigravity',
     'depends': ['base', 'mail',],
     'data': [
+        'security/groups.xml',
         'security/ir.model.access.csv',
         'views/ecole_menus.xml',
         'views/student_view.xml',

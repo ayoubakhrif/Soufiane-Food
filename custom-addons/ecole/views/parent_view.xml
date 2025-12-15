@@ -6,7 +6,6 @@
             <tree>
                 <field name="name"/>
                 <field name="phone"/>
-                <field name="email"/>
             </tree>
         </field>
     </record>
@@ -23,7 +22,6 @@
                     <group>
                         <group>
                             <field name="phone"/>
-                            <field name="email"/>
                         </group>
                         <group>
                             <field name="address"/>

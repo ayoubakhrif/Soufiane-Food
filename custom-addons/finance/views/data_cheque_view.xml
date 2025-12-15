@@ -24,13 +24,8 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <tree>
-                
-                <div class="oe_title">
-                    <h1>
-                        <field name="name"/>
-                        <field name="chq"/>
-                    </h1>
-                </div>
+                <field name="ste_id"/>
+                <field name="chq"/>
                 <field name="talon_id"/>
                 <field name="benif_id"/>
                 <field name="date_emission"/>
@@ -75,8 +70,12 @@
                                 style="border-radius: 20px; padding: 4px 14px;"/>
                     </header>
                     <group>
-                        <field name="ste_id"/>
-                        <field name="chq"/>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                                <field name="chq"/>
+                            </h1>
+                        </div>
                         <field name="talon_id" readonly="1"/>
                         <field name="benif_id"/>
                         <field name="date_emission"/>

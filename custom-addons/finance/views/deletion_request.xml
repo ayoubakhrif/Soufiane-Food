@@ -60,7 +60,7 @@
 
     <menuitem id="menu_finance_deletion_requests" 
               name="Demandes de suppression" 
-              parent="finance.menu_finance_root" 
+              parent="finance_root_menu" 
               action="action_finance_deletion_request" 
               sequence="100" 
               groups="finance.group_finance_user"/>

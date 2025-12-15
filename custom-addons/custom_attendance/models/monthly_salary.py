@@ -28,8 +28,8 @@ class CustomMonthlySalary(models.Model):
     final_salary = fields.Float(string='Salaire final', compute='_compute_final_salary', store=True)
     
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('validated', 'Validated')
+        ('draft', 'Non payé'),
+        ('validated', 'Payé')
     ], default='draft', string='Status', tracking=True)
 
     @api.depends('employee_id', 'month', 'year')

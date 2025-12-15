@@ -17,6 +17,12 @@
         <field name="implied_ids" eval="[(4, ref('group_custom_attendance_employee'))]"/>
     </record>
 
+    <record id="group_custom_attendance_entry_agent" model="res.groups">
+        <field name="name">Entry Agent</field>
+        <field name="category_id" ref="module_category_custom_attendance"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
     <record id="group_custom_attendance_admin" model="res.groups">
         <field name="name">Administrator</field>
         <field name="category_id" ref="module_category_custom_attendance"/>

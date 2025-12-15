@@ -34,11 +34,28 @@ class BusinessApp(models.Model):
             if target_menu and target_menu.action:
                 action_data = target_menu.action.read()[0]
                 
-                # IMPORTANT: Set the active_id to the menu_id so the web client highlights the menu
-                # We add 'menu_id' to the context, although standard actions use params.
-                # However, resetting the breadcrumbs is handled by the client when switching apps.
-                # We can try to clear breadcrumbs by using target='main' if applicable, 
-                # but simply opening the action is usually standard.
+                # CONTEXT INJECTION:
+                # We must tell the web client that the 'active' root menu is self.menu_id
+                # (e.g. Finance), even though we are opening a sub-action (e.g. Saisie).
+                # This ensures the top navigation bar switches to the correct App.
+                
+                context_str = action_data.get('context', '{}')
+                # Determine if context is a string or dict (read() usually returns string for context field)
+                if isinstance(context_str, str):
+                    # We append our key safely
+                    context_str = context_str.strip()
+                    if context_str == '{}':
+                         action_data['context'] = f"{{'menu_id': {self.menu_id.id}}}"
+                    else:
+                        # Remove trailing brace, add comma, add our key, close brace
+                        # A bit hacky string manipulation but standard for preserving complex python contexts
+                        # Alternatively, we can rely on the client accepting a dict if we parse it,
+                        # but keeping it as a string is safer for existing eval contexts.
+                        action_data['context'] = f"{context_str[:-1]}, 'menu_id': {self.menu_id.id}}}"
+                elif isinstance(context_str, dict):
+                    context_str['menu_id'] = self.menu_id.id
+                    action_data['context'] = context_str
+
                 if not action_data.get('help'):
                      action_data['help'] = f'<p>Opened via Business App: {self.name}</p>'
 

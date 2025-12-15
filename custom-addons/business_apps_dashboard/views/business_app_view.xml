@@ -1,0 +1,123 @@
+<odoo>
+    <!-- KANBAN VIEW -->
+    <record id="view_business_app_kanban" model="ir.ui.view">
+        <field name="name">business.app.kanban</field>
+        <field name="model">business.app</field>
+        <field name="arch" type="xml">
+            <kanban action="open_app" type="object" class="o_kanban_dashboard" create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="description"/>
+                <field name="icon"/>
+                <field name="background_color"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                             <div class="o_kanban_image" t-if="record.icon.value">
+                                <field name="icon" widget="image" options="{'size': [64, 64]}"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="o_kanban_record_subtitle">
+                                    <field name="description"/>
+                                </div>
+                            </div>
+                            <!-- Background Color Logic can be added with style attributes if needed, 
+                                 but standard kanban structure is safer for layout consistency -->
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- FORM VIEW (Configuration) -->
+    <record id="view_business_app_form" model="ir.ui.view">
+        <field name="name">business.app.form</field>
+        <field name="model">business.app</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="icon" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Application Name"/></h1>
+                        <label for="description"/>
+                        <field name="description" placeholder="Short description..."/>
+                    </div>
+                    <group>
+                        <group string="Navigation">
+                            <field name="target_type" widget="radio"/>
+                            <field name="menu_id" invisible="target_type != 'menu'" required="target_type == 'menu'"/>
+                            <field name="action_id" invisible="target_type != 'action'" required="target_type == 'action'"/>
+                        </group>
+                        <group string="Display &amp; Access">
+                            <field name="sequence"/>
+                            <field name="background_color" widget="color"/>
+                            <field name="group_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- TREE VIEW -->
+    <record id="view_business_app_tree" model="ir.ui.view">
+        <field name="name">business.app.tree</field>
+        <field name="model">business.app</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="target_type"/>
+                <field name="group_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ACTIONS -->
+    <!-- Main Dashboard Action (Kanban only) -->
+    <record id="action_business_dashboard" model="ir.actions.act_window">
+        <field name="name">Applications</field>
+        <field name="res_model">business.app</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_business_app_kanban"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Welcome to your Business Applications.
+            </p>
+        </field>
+    </record>
+
+    <!-- Configuration Action (Tree/Form) -->
+    <record id="action_business_app_config" model="ir.actions.act_window">
+        <field name="name">App Configuration</field>
+        <field name="res_model">business.app</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- MENUS -->
+    <!-- Root Menu: 'Applications' -->
+    <menuitem id="menu_business_apps_root" 
+              name="Applications" 
+              web_icon="business_apps_dashboard,static/description/icon.png"
+              sequence="1"/>
+
+    <!-- Dashboard Menu (The Launcher) -->
+    <menuitem id="menu_business_apps_dashboard"
+              name="Dashboard"
+              parent="menu_business_apps_root"
+              action="action_business_dashboard"
+              sequence="1"/>
+
+    <!-- Configuration Menu (Admin Only) -->
+    <menuitem id="menu_business_apps_config"
+              name="Configuration"
+              parent="menu_business_apps_root"
+              action="action_business_app_config"
+              sequence="100"
+              groups="base.group_system"/>
+
+</odoo>

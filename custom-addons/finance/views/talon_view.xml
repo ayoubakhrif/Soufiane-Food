@@ -73,6 +73,18 @@
         </field>
     </record>
 
+    <record id="finance_talon_view_search" model="ir.ui.view">
+        <field name="name">fiance.talon.search</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name_shown"/>
+                <field name="ste_id"/>
+                <field name="etat"/>
+            </search>
+        </field>
+    </record>
+
     <menuitem id="finance_talon_menu"
               name="Talons"
               parent="finance_root_menu"

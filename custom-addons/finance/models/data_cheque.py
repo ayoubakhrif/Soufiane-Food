@@ -53,15 +53,15 @@ class DataCheque(models.Model):
     doc_pdf_url = fields.Char("Lien PDF DOC", readonly=True)
     chq_exist = fields.Selection([
         ('chq_exists', 'Existe'),
-        ('chq_not_exists', 'Absent'),
+        ('chq_not_exists', 'Manquant'),
     ], readonly=True, optional=True)
     dem_exist = fields.Selection([
         ('dem_exists', 'Existe'),
-        ('dem_not_exists', 'Absent'),
+        ('dem_not_exists', 'Manquant'),
     ], readonly=True, optional=True)
     doc_exist = fields.Selection([
         ('doc_exists', 'Existe'),
-        ('doc_not_exists', 'Absent'),
+        ('doc_not_exists', 'Manquant'),
     ], readonly=True, optional=True)
     existing_tag = fields.Html(string='Présence CHQ', compute='_compute_existance_tag', sanitize=False, optional=True, store=True)
     existing_dem_tag = fields.Html(string='Présence DEM', compute='_compute_existance_dem_tag', sanitize=False, optional=True, store=True)

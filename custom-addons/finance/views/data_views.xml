@@ -36,7 +36,7 @@
         <field name="name">perso tree</field>
         <field name="model">finance.perso</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <tree editable="top">
                 <field name="name"/>
             </tree>
         </field>

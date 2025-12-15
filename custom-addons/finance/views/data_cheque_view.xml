@@ -48,26 +48,27 @@
         <field name="name">datachq form</field>
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
-            <form string="Chèque">
+            <form>
                 <header>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
-
-                    <button name="action_open_pdf_chq" type="object"
-                            string="CHQ"
-                            class="btn-primary"/>
-
-                    <button name="action_open_pdf_dem" type="object"
-                            string="DEM"
-                            class="btn-primary"/>
-
-                    <button name="action_open_pdf_doc" type="object"
-                            string="DOC"
-                            class="btn-primary"/>
                 </header>
-
                 <sheet>
+                    <header>
+                        <button name="action_open_pdf_chq" type="object"
+                                string="CHQ"
+                                class="btn btn-primary"
+                                style="border-radius: 20px; padding: 4px 14px;"/>
 
-                    <!-- ✅ TITRE EN GROS -->
+                        <button name="action_open_pdf_dem" type="object"
+                                string="DEM"
+                                class="btn btn-primary"
+                                style="border-radius: 20px; padding: 4px 14px;"/>
+
+                        <button name="action_open_pdf_doc" type="object"
+                                string="DOC"
+                                class="btn btn-primary"
+                                style="border-radius: 20px; padding: 4px 14px;"/>
+                    </header>
                     <div class="oe_title">
                         <h1>
                             <field name="chq" class="oe_inline"/>
@@ -75,7 +76,6 @@
                             <field name="ste_id" class="oe_inline"/>
                         </h1>
                     </div>
-
                     <group>
                         <field name="talon_id" readonly="1"/>
                         <field name="benif_id"/>
@@ -83,32 +83,21 @@
                         <field name="week"/>
                         <field name="journal"/>
                         <field name="benif_type" invisible="1"/>
-                        <field name="date_echeance"
-                            attrs="{'readonly': [('benif_type', '=', 'import')]}"/>
+                        <field name="date_echeance" readonly="benif_type == 'import'" />
                         <field name="date_encaissement"/>
                         <field name="amount"/>
-                        <field name="type"
-                            options="{'horizontal': true}"
-                            attrs="{'invisible': ['|',
-                                    ('benif_type', '=', 'divers'),
-                                    ('state', '=', 'annule')
-                            ]}"/>
+                        <field name="type" options="{'horizontal': true}" invisible="benif_type == 'divers' or state == 'annule'"/>
                         <field name="facture"/>
-                        <field name="serie"
-                            attrs="{'invisible': [('facture', 'in', ['m', 'bureau'])]}"/>
-                        <field name="perso_id"
-                            attrs="{'readonly': [('state', '=', 'annule')]}"/>
+                        <field name="serie" invisible="facture in ['m', 'bureau']" />
+                        <field name="perso_id" readonly="state == 'annule'"/>
                     </group>
-
-                    <group string="Documents">
-                        <field name="chq_pdf_url" widget="url" string="PDF CHQ"/>
-                        <field name="dem_pdf_url" widget="url" string="PDF DEM"/>
-                        <field name="doc_pdf_url" widget="url" string="PDF DOC"/>
+                    <group>
+                        <field name="chq_pdf_url" widget="url" string="PDF CHQ" />
+                        <field name="dem_pdf_url" widget="url" string="PDF DEM" />
+                        <field name="doc_pdf_url" widget="url" string="PDF DOC" />
                     </group>
-
                 </sheet>
             </form>
-
         </field>
     </record>
 

@@ -51,22 +51,24 @@
             <form>
                 <header>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
-                    <button name="action_open_pdf_chq" type="object"
-                            string="CHQ"
-                            class="btn btn-primary"
-                            style="border-radius: 20px; padding: 4px 14px;"/>
-
-                    <button name="action_open_pdf_dem" type="object"
-                            string="DEM"
-                            class="btn btn-primary"
-                            style="border-radius: 20px; padding: 4px 14px;"/>
-
-                   <button name="action_open_pdf_doc" type="object"
-                            string="DOC"
-                            class="btn btn-primary"
-                            style="border-radius: 20px; padding: 4px 14px;"/>
                 </header>
                 <sheet>
+                    <header>
+                        <button name="action_open_pdf_chq" type="object"
+                                string="CHQ"
+                                class="btn btn-primary"
+                                style="border-radius: 20px; padding: 4px 14px;"/>
+
+                        <button name="action_open_pdf_dem" type="object"
+                                string="DEM"
+                                class="btn btn-primary"
+                                style="border-radius: 20px; padding: 4px 14px;"/>
+
+                        <button name="action_open_pdf_doc" type="object"
+                                string="DOC"
+                                class="btn btn-primary"
+                                style="border-radius: 20px; padding: 4px 14px;"/>
+                    </header>
                     <group>
                         <div class="oe_title">
                             <h1>

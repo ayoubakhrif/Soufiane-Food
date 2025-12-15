@@ -7,7 +7,7 @@
         Module Ecole pour la gestion scolaire.
     """,
     'author': 'Antigravity',
-    'depends': ['base'],
+    'depends': ['base', 'mail',],
     'data': [
         'security/ir.model.access.csv',
         'views/ecole_menus.xml',

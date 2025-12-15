@@ -1,0 +1,67 @@
+<odoo>
+    <record id="view_finance_deletion_request_tree" model="ir.ui.view">
+        <field name="name">finance.deletion.request.tree</field>
+        <field name="model">finance.deletion.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-warning="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
+                <field name="request_date"/>
+                <field name="user_id"/>
+                <field name="model"/>
+                <field name="res_id"/>
+                <field name="record_name"/>
+                <field name="reason"/>
+                <field name="state" widget="badge"/>
+                <button name="action_approve" states="pending" string="Approuver" type="object" icon="fa-check" groups="finance.group_finance_user" class="btn-success"/>
+                <button name="action_reject" states="pending" string="Rejeter" type="object" icon="fa-times" groups="finance.group_finance_user" class="btn-danger"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_deletion_request_form" model="ir.ui.view">
+        <field name="name">finance.deletion.request.form</field>
+        <field name="model">finance.deletion.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" states="pending" string="Approuver la suppression" type="object" class="oe_highlight btn-danger" groups="finance.group_finance_user" confirm="Êtes-vous sûr de vouloir supprimer cet enregistrement définitivement ?"/>
+                    <button name="action_reject" states="pending" string="Rejeter" type="object" groups="finance.group_finance_user"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Information de la demande">
+                            <field name="user_id"/>
+                            <field name="request_date"/>
+                            <field name="reason"/>
+                        </group>
+                        <group string="Enregistrement Technique">
+                            <field name="model"/>
+                            <field name="res_id"/>
+                            <field name="record_name"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_finance_deletion_request" model="ir.actions.act_window">
+        <field name="name">Demandes de suppression</field>
+        <field name="res_model">finance.deletion.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'pending')]</field> <!-- Focus managers on pending tasks -->
+        <field name="context">{'search_default_state': 'pending'}</field>
+    </record>
+
+    <menuitem id="menu_finance_deletion_requests" 
+              name="Demandes de suppression" 
+              parent="finance.menu_finance_root" 
+              action="action_finance_deletion_request" 
+              sequence="100" 
+              groups="finance.group_finance_user"/>
+</odoo>

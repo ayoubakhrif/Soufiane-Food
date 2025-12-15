@@ -11,6 +11,8 @@ class DataCheque(models.Model):
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
     amount = fields.Float(string='Montant', tracking=True, group_operator="sum", required=True)
+    date_operation = fields.Date(string='Date Operation', default=fields.Date.context_today)
+    date_payment = fields.Date(string='Date Paiement')
     cheque_count = fields.Integer(string='Nombre chèques', default=1, store=True)
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
@@ -445,6 +447,24 @@ class DataCheque(models.Model):
             rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
             rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
 
+
+    # ------------------------------------------------------------
+    # DELETION REQUEST
+    # ------------------------------------------------------------
+    def action_request_deletion(self):
+        self.ensure_one()
+        return {
+            'name': 'Demande de suppression',
+            'type': 'ir.actions.act_window',
+            'res_model': 'finance.deletion.request',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_model': self._name,
+                'default_res_id': self.id,
+                'default_reason': f"Suppression demandée pour {self.display_name}",
+            }
+        }
 
     # 7) Override create/write
     @api.model

@@ -1,5 +1,5 @@
 {
-    'name': 'Custom Attendance & Salary',
+    'name': 'Présence et salaire',
     'version': '17.0.1.0.0',
     'category': 'Human Resources',
     'summary': 'Manual Attendance and Monthly Salary Calculation',
@@ -9,7 +9,7 @@
         - Manual Daily Attendance with Lateness/Overtime logic
         - Monthly Salary Calculation
     """,
-    'author': 'Antigravity',
+    'author': 'Ayoub Akhrif',
     'depends': ['base', 'mail'],
     'data': [
         'security/security_groups.xml',

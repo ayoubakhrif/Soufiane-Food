@@ -12,6 +12,7 @@
         'views/data_views.xml',
         'views/benif_view.xml',
         'views/talon_view.xml',
+        'views/deletion_request.xml',
         'data/cron.xml',
     ],
     'images': ['static/description/icon.svg'],

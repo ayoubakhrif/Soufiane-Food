@@ -1,7 +1,20 @@
 <odoo>
+    <record id="module_category_finance" model="ir.module.category">
+        <field name="name">Finance</field>
+        <field name="description">Niveaux d'accès pour le module Finance</field>
+        <field name="sequence">15</field>
+    </record>
+
+    <record id="group_finance_employee" model="res.groups">
+        <field name="name">Employé Finance</field>
+        <field name="category_id" ref="module_category_finance"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
     <record id="group_finance_user" model="res.groups">
-        <field name="name">Utilisateur finance</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
-        <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
+        <field name="name">Manager Finance</field>
+        <field name="category_id" ref="module_category_finance"/>
+        <field name="implied_ids" eval="[(4, ref('group_finance_employee'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 </odoo>

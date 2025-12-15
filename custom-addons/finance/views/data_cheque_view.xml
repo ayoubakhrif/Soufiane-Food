@@ -3,7 +3,7 @@
         id="finance_root_menu"
         name="Finance"
         sequence="1"
-        groups="finance.group_finance_user"
+        groups="finance.group_finance_employee"
     />
 
     <record id="data_cheque_action" model="ir.actions.act_window">
@@ -50,6 +50,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_request_deletion" string="Demander la suppression" type="object" class="btn-danger" groups="finance.group_finance_employee"/>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
                 </header>
                 <sheet>

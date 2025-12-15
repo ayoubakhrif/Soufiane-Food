@@ -7,9 +7,17 @@ from googleapiclient.discovery import build
 class DataCheque(models.Model):
     _name = 'datacheque'
     _description = 'Data chèque'
+    _description = 'Data chèque'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _rec_name = 'chq'
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
+    
+    is_manager = fields.Boolean(compute='_compute_is_manager', string="Is Manager")
+
+    def _compute_is_manager(self):
+        for rec in self:
+            rec.is_manager = self.env.user.has_group('finance.group_finance_user')
     amount = fields.Float(string='Montant', tracking=True, group_operator="sum", required=True)
     date_operation = fields.Date(string='Date Operation', default=fields.Date.context_today)
     date_payment = fields.Date(string='Date Paiement')

@@ -90,17 +90,14 @@
     </record>
 
     <record id="action_custom_attendance" model="ir.actions.act_window">
-        <field name="name">Daily Attendance</field>
+        <field name="name">Présence journalière</field>
         <field name="res_model">custom.attendance</field>
         <field name="view_mode">tree,calendar,form</field>
     </record>
     
     <record id="action_custom_attendance_calendar" model="ir.actions.act_window">
-        <field name="name">Attendance Calendar</field>
+        <field name="name">Calendrier de présence</field>
         <field name="res_model">custom.attendance</field>
         <field name="view_mode">calendar,tree,form</field>
     </record>
-
-    <menuitem id="menu_action_custom_attendance" parent="menu_custom_attendance_daily" action="action_custom_attendance"/>
-    <menuitem id="menu_action_custom_attendance_calendar" parent="menu_custom_attendance_dashboard" action="action_custom_attendance_calendar"/>
 </odoo>

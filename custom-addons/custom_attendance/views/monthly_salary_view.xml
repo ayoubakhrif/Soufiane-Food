@@ -70,6 +70,4 @@
         <field name="res_model">custom.monthly.salary</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-    <menuitem id="menu_action_custom_monthly_salary" parent="menu_custom_attendance_salary" action="action_custom_monthly_salary"/>
 </odoo>

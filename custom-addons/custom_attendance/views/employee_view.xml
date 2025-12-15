@@ -55,10 +55,8 @@
     </record>
 
     <record id="action_custom_employee" model="ir.actions.act_window">
-        <field name="name">Employees</field>
+        <field name="name">Employés</field>
         <field name="res_model">custom.employee</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-    <menuitem id="menu_action_custom_employee" parent="menu_custom_employee" action="action_custom_employee"/>
 </odoo>

@@ -16,7 +16,11 @@
         'security/security_rules.xml',
         'views/business_app_view.xml',
     ],
-    'assets': {},
+    'assets': {
+        'web.assets_backend': [
+            'business_apps_dashboard/static/style.css',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

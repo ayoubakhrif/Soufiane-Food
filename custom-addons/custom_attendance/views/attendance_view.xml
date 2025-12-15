@@ -36,7 +36,7 @@
                             <field name="check_out" widget="float_time"/>
                         </group>
                     </group>
-                    <group string="Calculations">
+                    <group string="Calculs">
                         <group>
                             <field name="normal_working_hours" widget="float_time"/>
                             <field name="delay_minutes"/>
@@ -60,7 +60,7 @@
         <field name="name">custom.attendance.calendar</field>
         <field name="model">custom.attendance</field>
         <field name="arch" type="xml">
-            <calendar string="Attendance" date_start="date" color="state" mode="month">
+            <calendar string="Présence" date_start="date" color="state" mode="month">
                 <field name="employee_id"/>
                 <field name="check_in" widget="float_time"/>
                 <field name="check_out" widget="float_time"/>
@@ -77,11 +77,11 @@
             <search>
                 <field name="employee_id"/>
                 <field name="date"/>
-                <filter string="Late" name="late" domain="[('delay_minutes', '&gt;', 0)]"/>
-                <filter string="Missing Hours" name="missing" domain="[('missing_hours', '&gt;', 0)]"/>
-                <filter string="Overtime" name="overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
+                <filter string="Retard" name="late" domain="[('delay_minutes', '&gt;', 0)]"/>
+                <filter string="Heures manquantes" name="missing" domain="[('missing_hours', '&gt;', 0)]"/>
+                <filter string="Temps sup" name="overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Employés" name="group_employee" context="{'group_by': 'employee_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
                     <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
                 </group>

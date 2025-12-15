@@ -31,7 +31,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Attendance History">
+                        <page string="Historique de présence">
                             <field name="attendance_ids" readonly="1">
                                 <tree>
                                     <field name="date"/>

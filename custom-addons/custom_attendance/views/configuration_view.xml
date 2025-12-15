@@ -18,7 +18,7 @@
                             <field name="non_working_day"/>
                         </group>
                     </group>
-                    <group string="Calculation Rules">
+                    <group string="Règles de calcul">
                         <group>
                             <field name="delay_tolerance"/>
                         </group>

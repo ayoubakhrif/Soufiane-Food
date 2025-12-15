@@ -23,7 +23,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_validate" string="Validate" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Validé" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -35,18 +35,18 @@
                         </h1>
                     </div>
                     <group>
-                        <group string="Salary Basis">
+                        <group string="Salaire de base">
                             <field name="base_salary" widget="monetary"/>
                             <field name="working_days_count"/>
                             <field name="hourly_salary" widget="monetary"/>
                         </group>
-                        <group string="Attendance Summary">
+                        <group string="Résumé de présence">
                             <field name="total_normal_hours"/>
                             <field name="total_missing_hours" decoration-danger="total_missing_hours &gt; 0"/>
                             <field name="total_overtime_hours" decoration-success="total_overtime_hours &gt; 0"/>
                         </group>
                     </group>
-                    <group string="Final Calculation">
+                    <group string="Calcul final">
                         <group>
                             <field name="deduction_amount" widget="monetary" decoration-danger="1"/>
                             <field name="overtime_amount" widget="monetary" decoration-success="1"/>

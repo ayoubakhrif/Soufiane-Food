@@ -1,9 +1,8 @@
 <odoo>
-    <menuitem id="menu_custom_attendance_root" name="Attendance" sequence="10"/>
-    
+    <menuitem id="menu_custom_attendance_root" name="Suivi de présence" sequence="10"/>
     <menuitem id="menu_custom_attendance_dashboard" name="Dashboard" parent="menu_custom_attendance_root" sequence="10"/>
-    <menuitem id="menu_custom_attendance_daily" name="Daily Attendance" parent="menu_custom_attendance_root" sequence="20"/>
-    <menuitem id="menu_custom_attendance_salary" name="Monthly Salaries" parent="menu_custom_attendance_root" sequence="30"/>
-    <menuitem id="menu_custom_employee" name="Employees" parent="menu_custom_attendance_root" sequence="40"/>
+    <menuitem id="menu_custom_attendance_daily" name="Présence journalière" parent="menu_custom_attendance_root" sequence="20"/>
+    <menuitem id="menu_custom_attendance_salary" name="Salaire mensuel" parent="menu_custom_attendance_root" sequence="30"/>
+    <menuitem id="menu_custom_employee" name="Employés" parent="menu_custom_attendance_root" sequence="40"/>
     <menuitem id="menu_custom_attendance_config" name="Configuration" parent="menu_custom_attendance_root" sequence="50"/>
 </odoo>

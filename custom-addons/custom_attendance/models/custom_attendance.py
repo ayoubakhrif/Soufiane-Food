@@ -7,16 +7,16 @@ class CustomAttendance(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'employee_id'
 
-    employee_id = fields.Many2one('custom.employee', string='Employee', required=True, tracking=True)
+    employee_id = fields.Many2one('custom.employee', string='Employés', required=True, tracking=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     
-    check_in = fields.Float(string='Check-In Time', required=True, help="Format: 9.5 for 09:30")
-    check_out = fields.Float(string='Check-Out Time', required=True, help="Format: 17.5 for 17:30")
+    check_in = fields.Float(string='Heure entrée', required=True, help="Format: 9.5 for 09:30")
+    check_out = fields.Float(string='Heure de sortie', required=True, help="Format: 17.5 for 17:30")
     
     delay_minutes = fields.Integer(string='Delay (Minutes)', compute='_compute_hours', store=True)
-    missing_hours = fields.Float(string='Missing Hours', compute='_compute_hours', store=True)
-    overtime_hours = fields.Float(string='Overtime Hours', compute='_compute_hours', store=True)
-    normal_working_hours = fields.Float(string='Normal Hours', compute='_compute_hours', store=True)
+    missing_hours = fields.Float(string='Heures manquantes', compute='_compute_hours', store=True)
+    overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_hours', store=True)
+    normal_working_hours = fields.Float(string='Heures normales', compute='_compute_hours', store=True)
     
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -25,14 +25,14 @@ class CustomAttendance(models.Model):
     ], default='draft', string='Status', tracking=True)
 
     _sql_constraints = [
-        ('unique_employee_date', 'unique(employee_id, date)', 'Employee can have only one attendance record per day!')
+        ('unique_employee_date', 'unique(employee_id, date)', 'Chaque employé soit avoire une seule fiche de présence par jour!')
     ]
 
     @api.constrains('check_in', 'check_out')
     def _check_validity(self):
         for rec in self:
             if rec.check_out < rec.check_in:
-                raise exceptions.ValidationError("Check-Out time cannot be earlier than Check-In time.")
+                raise exceptions.ValidationError("Heure d'entrée ne peut pas etre supérieure à l'heure de sortie.")
 
     @api.depends('check_in', 'check_out', 'employee_id')
     def _compute_hours(self):

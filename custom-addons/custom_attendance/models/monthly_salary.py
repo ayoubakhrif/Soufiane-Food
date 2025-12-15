@@ -9,23 +9,23 @@ class CustomMonthlySalary(models.Model):
 
     employee_id = fields.Many2one('custom.employee', string='Employee', required=True)
     month = fields.Selection([
-        ('1', 'January'), ('2', 'February'), ('3', 'March'), ('4', 'April'),
-        ('5', 'May'), ('6', 'June'), ('7', 'July'), ('8', 'August'),
-        ('9', 'September'), ('10', 'October'), ('11', 'November'), ('12', 'December')
+        ('1', 'Janvier'), ('2', 'Février'), ('3', 'Mars'), ('4', 'Avril'),
+        ('5', 'Mai'), ('6', 'Juin'), ('7', 'Juillet'), ('8', 'Aout'),
+        ('9', 'Septembre'), ('10', 'Octobre'), ('11', 'Novembre'), ('12', 'Décembre')
     ], string='Month', required=True, default=lambda self: str(date.today().month))
-    year = fields.Integer(string='Year', required=True, default=lambda self: date.today().year)
+    year = fields.Integer(string='Année', required=True, default=lambda self: date.today().year)
     
-    base_salary = fields.Float(string='Base Salary', readonly=True)
-    working_days_count = fields.Integer(string='Working Days', compute='_compute_salary_details', store=True)
-    hourly_salary = fields.Float(string='Hourly Rate', compute='_compute_salary_details', store=True)
+    base_salary = fields.Float(string='Salaire de base', readonly=True)
+    working_days_count = fields.Integer(string='Jours de travaille', compute='_compute_salary_details', store=True)
+    hourly_salary = fields.Float(string='Salaire par heure', compute='_compute_salary_details', store=True)
     
-    total_normal_hours = fields.Float(string='Total Normal Hours', compute='_compute_salary_details', store=True)
-    total_missing_hours = fields.Float(string='Total Missing Hours', compute='_compute_salary_details', store=True)
-    total_overtime_hours = fields.Float(string='Total Overtime Hours', compute='_compute_salary_details', store=True)
+    total_normal_hours = fields.Float(string='Total des heures normaux', compute='_compute_salary_details', store=True)
+    total_missing_hours = fields.Float(string='Total des heures manquantes', compute='_compute_salary_details', store=True)
+    total_overtime_hours = fields.Float(string='Total des heures supplémentaires', compute='_compute_salary_details', store=True)
     
-    overtime_amount = fields.Float(string='Overtime Amount', compute='_compute_final_salary', store=True)
-    deduction_amount = fields.Float(string='Deduction Amount', compute='_compute_final_salary', store=True)
-    final_salary = fields.Float(string='Final Salary', compute='_compute_final_salary', store=True)
+    overtime_amount = fields.Float(string='Montant supplémentaire', compute='_compute_final_salary', store=True)
+    deduction_amount = fields.Float(string='Montant déduit', compute='_compute_final_salary', store=True)
+    final_salary = fields.Float(string='Salaire final', compute='_compute_final_salary', store=True)
     
     state = fields.Selection([
         ('draft', 'Draft'),

@@ -50,57 +50,92 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_request_deletion" string="Demander la suppression" type="object" class="btn-danger" 
+                    <button name="action_request_deletion"
+                            string="Demander la suppression"
+                            type="object"
+                            class="btn-danger"
                             invisible="is_manager"
                             groups="finance.group_finance_employee"/>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
                 </header>
+
                 <sheet>
                     <field name="is_manager" invisible="1"/>
-                    <header>
-                        <button name="action_open_pdf_chq" type="object"
-                                string="CHQ"
-                                class="btn btn-primary"
-                                style="border-radius: 20px; padding: 4px 14px;"/>
 
-                        <button name="action_open_pdf_dem" type="object"
-                                string="DEM"
-                                class="btn btn-primary"
-                                style="border-radius: 20px; padding: 4px 14px;"/>
+                    <!-- Boutons PDF style Odoo (stat buttons box) -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_pdf_chq" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">CHQ</span>
+                            </div>
+                        </button>
 
-                        <button name="action_open_pdf_doc" type="object"
-                                string="DOC"
-                                class="btn btn-primary"
-                                style="border-radius: 20px; padding: 4px 14px;"/>
-                    </header>
+                        <button name="action_open_pdf_dem" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">DEM</span>
+                            </div>
+                        </button>
+
+                        <button name="action_open_pdf_doc" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">DOC</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Titre propre -->
                     <div class="oe_title">
-                        <h1>
-                            <span> Société: </span>
-                            <field name="ste_id" class="oe_inline" string="Société" placeholder="Société"/>
-                            <span style="margin: 0 8px;"> Numéro de chèque: </span>
-                            <field name="chq" class="oe_inline" string="Num chq" placeholder="Numéro de chèque"/>
+                        <h1 class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                            <span class="text-muted" style="font-size:14px;">Société</span>
+                            <field name="ste_id" class="oe_inline" placeholder="Choisir une société"/>
+
+                            <span class="text-muted" style="font-size:14px;">Chèque</span>
+                            <field name="chq" class="oe_inline" placeholder="Numéro de chèque"/>
                         </h1>
                     </div>
-                    <group>
-                        <field name="talon_id" readonly="1"/>
-                        <field name="benif_id"/>
-                        <field name="date_emission"/>
-                        <field name="week"/>
-                        <field name="journal"/>
-                        <field name="benif_type" invisible="1"/>
-                        <field name="date_echeance" readonly="benif_type == 'import'" />
-                        <field name="date_encaissement"/>
-                        <field name="amount"/>
-                        <field name="type" options="{'horizontal': true}" invisible="benif_type == 'divers' or state == 'annule'"/>
-                        <field name="facture"/>
-                        <field name="serie" invisible="facture in ['m', 'bureau']" />
-                        <field name="perso_id" readonly="state == 'annule'"/>
+
+                    <!-- Infos principales -->
+                    <group string="Informations">
+                        <group>
+                            <field name="talon_id" readonly="1"/>
+                            <field name="benif_id"/>
+                            <field name="perso_id" readonly="state == 'annule'"/>
+                        </group>
+                        <group>
+                            <field name="date_emission"/>
+                            <field name="week"/>
+                            <field name="journal"/>
+                            <field name="benif_type" invisible="1"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="chq_pdf_url" widget="url" string="PDF CHQ" />
-                        <field name="dem_pdf_url" widget="url" string="PDF DEM" />
-                        <field name="doc_pdf_url" widget="url" string="PDF DOC" />
+
+                    <group string="Échéances et montant">
+                        <group>
+                            <field name="date_echeance" readonly="benif_type == 'import'"/>
+                            <field name="date_encaissement"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="type" options="{'horizontal': true}" invisible="benif_type == 'divers' or state == 'annule'"/>
+                        </group>
                     </group>
+
+                    <group string="Facturation">
+                        <group>
+                            <field name="facture"/>
+                            <field name="serie" invisible="facture in ['m', 'bureau']"/>
+                        </group>
+                    </group>
+
+                    <!-- Liens PDF -->
+                    <group string="Documents">
+                        <group>
+                            <field name="chq_pdf_url" widget="url" string="PDF CHQ"/>
+                            <field name="dem_pdf_url" widget="url" string="PDF DEM"/>
+                            <field name="doc_pdf_url" widget="url" string="PDF DOC"/>
+                        </group>
+                    </group>
+
                 </sheet>
             </form>
         </field>

@@ -12,6 +12,7 @@
         'security/groups.xml',
         'security/ir.model.access.csv',
         'views/ecole_menus.xml',
+        'views/hide_apps_view.xml',
         'views/student_view.xml',
         'views/parent_view.xml',
         'views/school_class_view.xml',

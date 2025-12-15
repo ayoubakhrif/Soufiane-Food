@@ -1,0 +1,7 @@
+<odoo>
+    <record id="group_ecole_user" model="res.groups">
+        <field name="name">Utilisateur école</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
+    </record>
+</odoo>

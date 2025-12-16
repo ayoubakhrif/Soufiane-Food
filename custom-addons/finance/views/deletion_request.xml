@@ -53,7 +53,7 @@
         <field name="res_model">finance.deletion.request</field>
         <field name="view_mode">tree,form</field>
         <!-- Removed domain to ensure history is visible -->
-        <field name="context">{'search_default_state': 'pending'}</field> <!-- Optional: if we want to default filter but allow clearing -->
+        <field name="context"></field> <!-- Optional: if we want to default filter but allow clearing -->
     </record>
 
     <menuitem id="menu_finance_deletion_requests" 

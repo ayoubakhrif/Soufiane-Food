@@ -27,7 +27,10 @@ class FinanceDeletionRequest(models.Model):
             if rec.model and rec.res_id:
                 try:
                     record = self.env[rec.model].sudo().browse(rec.res_id)
-                    rec.record_name = record.display_name or f"{rec.model},{rec.res_id}"
+                    if record.exists():
+                        rec.record_name = record.display_name
+                    else:
+                        rec.record_name = f"{rec.model},{rec.res_id}"
                 except:
                     rec.record_name = f"{rec.model},{rec.res_id}"
             else:

@@ -48,12 +48,31 @@
         </field>
     </record>
 
+    <record id="view_finance_deletion_request_search" model="ir.ui.view">
+        <field name="name">finance.deletion.request.search</field>
+        <field name="model">finance.deletion.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="record_name"/>
+                <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Traitées" name="processed" domain="[('state', 'in', ['approved', 'rejected'])]"/>
+                <group expand="0" string="Group By">
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Demandeur" name="group_user" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_finance_deletion_request" model="ir.actions.act_window">
         <field name="name">Demandes de suppression</field>
         <field name="res_model">finance.deletion.request</field>
         <field name="view_mode">tree,form</field>
-        <!-- Removed domain to ensure history is visible -->
-        <field name="context"></field> <!-- Optional: if we want to default filter but allow clearing -->
+        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
+        <!-- Clear context so we rely ONLY on the search default.
+             Using 'search_default_pending': 1 ensures the filter is active but REMOVABLE. -->
+        <field name="context">{'search_default_pending': 1}</field> 
     </record>
 
     <menuitem id="menu_finance_deletion_requests" 

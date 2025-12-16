@@ -4,12 +4,10 @@
         <field name="model">finance.deletion.request</field>
         <field name="arch" type="xml">
             <tree decoration-warning="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
-                <field name="request_date"/>
-                <field name="user_id"/>
-                <field name="model"/>
-                <field name="res_id"/>
-                <field name="record_name"/>
-                <field name="reason"/>
+                <field name="request_date" string="Date"/>
+                <field name="user_id" string="Demandeur"/>
+                <field name="record_name" string="Document"/>
+                <field name="reason" string="Motif" optional="show"/>
                 <field name="state" widget="badge"/>
                 <button name="action_approve" invisible="state != 'pending'" string="Approuver" type="object" icon="fa-check" groups="finance.group_finance_user" class="btn-success"/>
                 <button name="action_reject" invisible="state != 'pending'" string="Rejeter" type="object" icon="fa-times" groups="finance.group_finance_user" class="btn-danger"/>
@@ -54,8 +52,8 @@
         <field name="name">Demandes de suppression</field>
         <field name="res_model">finance.deletion.request</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('state', '=', 'pending')]</field> <!-- Focus managers on pending tasks -->
-        <field name="context">{'search_default_state': 'pending'}</field>
+        <!-- Removed domain to ensure history is visible -->
+        <field name="context">{'search_default_state': 'pending'}</field> <!-- Optional: if we want to default filter but allow clearing -->
     </record>
 
     <menuitem id="menu_finance_deletion_requests" 

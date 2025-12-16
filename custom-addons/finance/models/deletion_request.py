@@ -5,6 +5,7 @@ class FinanceDeletionRequest(models.Model):
     _description = 'Demande de suppression'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'res_id'
+    _order = 'request_date desc, id desc'
 
     user_id = fields.Many2one('res.users', string='Demandé par', default=lambda self: self.env.user, readonly=True, required=True)
     request_date = fields.Datetime(string='Date de demande', default=fields.Datetime.now, readonly=True)

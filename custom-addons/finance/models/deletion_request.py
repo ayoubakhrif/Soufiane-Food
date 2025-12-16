@@ -32,6 +32,22 @@ class FinanceDeletionRequest(models.Model):
             else:
                 rec.record_name = "N/A"
 
+    @api.model
+    def create(self, vals):
+        record = super(FinanceDeletionRequest, self).create(vals)
+        # Schedule activity for Finance Managers
+        group_finance_user = self.env.ref('finance.group_finance_user')
+        if group_finance_user:
+            managers = group_finance_user.users
+            for manager in managers:
+                record.activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    user_id=manager.id,
+                    summary=f'Demande de suppression de {record.user_id.name}',
+                    note=f'Demande de suppression pour {record.record_name}. Motif: {record.reason or "Non spécifié"}'
+                )
+        return record
+
     def action_approve(self):
         self.ensure_one()
         if self.state != 'pending':
@@ -45,8 +61,10 @@ class FinanceDeletionRequest(models.Model):
         
         self.state = 'approved'
         self.message_post(body="Demande approuvée et enregistrement supprimé.")
+        self.activity_feedback(['mail.mail_activity_data_todo'])
 
     def action_reject(self):
         self.ensure_one()
         self.state = 'rejected'
         self.message_post(body="Demande rejetée.")
+        self.activity_feedback(['mail.mail_activity_data_todo'])

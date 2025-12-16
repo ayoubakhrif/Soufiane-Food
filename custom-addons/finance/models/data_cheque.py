@@ -28,7 +28,7 @@ class DataCheque(models.Model):
     date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
-    benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True)
+    benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
     perso_id = fields.Many2one('finance.perso', string='Personnes', tracking=True, required=True)
     facture = fields.Selection([
         ('m', 'M'),
@@ -117,7 +117,7 @@ class DataCheque(models.Model):
                 bg = "rgba(40,167,69,0.12)"
 
             else:                   # exactement = M
-                label = "CHQ Absent"
+                label = "CHQ Manquant"
                 color = "#dc3545"  # rouge
                 bg = "rgba(220,53,69,0.12)"
 
@@ -141,7 +141,7 @@ class DataCheque(models.Model):
                 bg = "rgba(40,167,69,0.12)"
 
             else:                   # exactement = M
-                label = "DEM Absent"
+                label = "DEM Manquant"
                 color = "#dc3545"  # rouge
                 bg = "rgba(220,53,69,0.12)"
 
@@ -165,7 +165,7 @@ class DataCheque(models.Model):
                 bg = "rgba(40,167,69,0.12)"
 
             else:                   # exactement = M
-                label = "DOC Absent"
+                label = "DOC Manquant"
                 color = "#dc3545"  # rouge
                 bg = "rgba(220,53,69,0.12)"
 

@@ -83,7 +83,7 @@
     </record>
 
     <!-- Parent Menu: Demandes de suppression -->
-    <menuitem id="menu_finance_deletion_requests_root" 
+    <menuitem id="menu_finance_deletion_requests_root"
               name="Demandes de suppression" 
               parent="finance_root_menu" 
               sequence="100" 

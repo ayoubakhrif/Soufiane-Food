@@ -6,6 +6,8 @@ access_finance_benif_employee,access.finance.benif.employee,model_finance_benif,
 access_finance_benif_manager,access.finance.benif.manager,model_finance_benif,group_finance_user,1,1,1,1
 
 access_finance_perso_manager,access.finance.perso.manager,model_finance_perso,group_finance_user,1,1,1,1
+access_finance_perso_employee,access.finance.perso.employee,model_finance_perso,group_finance_employee,1,0,0,0
+
 
 access_finance_ste_employee,access.finance.ste.employee,model_finance_ste,group_finance_employee,1,0,0,0
 access_finance_ste_manager,access.finance.ste.manager,model_finance_ste,group_finance_user,1,1,1,1
@@ -13,5 +15,4 @@ access_finance_ste_manager,access.finance.ste.manager,model_finance_ste,group_fi
 access_finance_talon_employee,access.finance.talon.employee,model_finance_talon,group_finance_employee,1,0,0,0
 access_finance_talon_manager,access.finance.talon.manager,model_finance_talon,group_finance_user,1,1,1,1
 
-access_finance_deletion_request_employee,access.finance.deletion.request.employee,model_finance_deletion_request,group_finance_employee,1,1,1,0
 access_finance_deletion_request_manager,access.finance.deletion.request.manager,model_finance_deletion_request,group_finance_user,1,1,1,1

@@ -13,7 +13,7 @@ class FinanceDeletionRequest(models.Model):
     model = fields.Char(string='Modèle', required=True, readonly=True)
     res_id = fields.Integer(string='ID Enregistrement', required=True, readonly=True)
     record_name = fields.Char(string='Enregistrement', compute='_compute_record_name', store=True)
-    reason = fields.Text(string='Motif de suppression', tracking=True)
+    reason = fields.Text(string='Motif de suppression', tracking=True, required=True)
     
     state = fields.Selection([
         ('pending', 'En attente'),

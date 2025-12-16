@@ -24,22 +24,52 @@ class BusinessApp(models.Model):
     def open_app(self):
         self.ensure_one()
         
+        action_id = False
+        menu_id = False
+
         if self.target_type == 'action' and self.action_id:
-            return self.action_id.read()[0]
+            action_id = self.action_id.id
+            # If we have a menu_id set manually, use it. Otherwise, let Odoo resolve it or it might be empty.
+            if self.menu_id:
+                menu_id = self.menu_id.id
         
         elif self.target_type == 'menu' and self.menu_id:
-            # URL Redirection to force App Switch
-            # The backend cannot switch the top-level App Menu via context or params reliably.
-            # The only way to switch the "App" (and top navigation bar) is to change the URL hash.
-            # We redirect to /web#menu_id=<ROOT_ID>.
+            menu_id = self.menu_id.id
+            # Try to fund the action from the menu itself
+            if self.menu_id.action:
+                action_id = self.menu_id.action.id
+            else:
+                # If root menu has no action, find first child
+                # We need to re-implement _get_target_menu or similar logic just to get the action ID
+                target_menu = self._get_target_menu(self.menu_id)
+                if target_menu and target_menu.action:
+                    action_id = target_menu.action.id
+
+        if menu_id:
+            url = f'/web#menu_id={menu_id}'
+            if action_id:
+                url += f'&action={action_id}'
             
             return {
                 'type': 'ir.actions.act_url',
-                'url': f'/web#menu_id={self.menu_id.id}',
-                'target': 'self', # This replaces the current page, effectively switching apps
+                'url': url,
+                'target': 'self',
             }
-
+            
         return {'type': 'ir.actions.act_window_close'}
 
-    # _get_target_menu is no longer needed for this approach as we delegate resolution to the client via URL
-    # checking for child actions is handled by Odoo's default menu loading logic.
+    def _get_target_menu(self, menu):
+        """Recursively find the first menu (depth-first) that has an action."""
+        if menu.action:
+            return menu
+            
+        # Find children, ordered by sequence
+        child_menus = self.env['ir.ui.menu'].search([
+            ('parent_id', '=', menu.id)
+        ], order='sequence,id')
+        
+        for child in child_menus:
+             found = self._get_target_menu(child)
+             if found:
+                 return found
+        return False

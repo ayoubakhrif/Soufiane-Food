@@ -20,41 +20,6 @@ class FinanceDeletionRequest(models.Model):
         ('rejected', 'Rejeté')
     ], string='État', default='pending', tracking=True, readonly=True)
 
-    @api.model
-    def create(self, vals):
-        record = super(FinanceDeletionRequest, self).create(vals)
-        record._schedule_activity_for_managers()
-        return record
-
-    def _schedule_activity_for_managers(self):
-        """Schedules a todo activity for all finance managers."""
-        # Find the group
-        group_manager = self.env.ref('finance.group_finance_user', raise_if_not_found=False)
-        if not group_manager:
-            return
-
-        # Find users in the group
-        managers = group_manager.users
-        
-        # Activity details
-        activity_type_id = self.env.ref('mail.mail_activity_data_todo').id
-        summary = f"Nouvelle demande de suppression: {self.record_name}"
-        note = f"L'utilisateur {self.user_id.name} a demandé la suppression de {self.record_name}. Raison: {self.reason or 'Non spécifiée'}"
-        
-        # Create activity for each manager
-        for manager in managers:
-            # Avoid self-notification if manager creates the request (though minimal risk as managers delete directly)
-            if manager == self.env.user:
-                continue
-                
-            self.activity_schedule(
-                'mail.mail_activity_data_todo',
-                user_id=manager.id,
-                summary=summary,
-                note=note,
-                date_deadline=fields.Date.today()
-            )
-
     @api.depends('model', 'res_id')
     def _compute_record_name(self):
         for rec in self:

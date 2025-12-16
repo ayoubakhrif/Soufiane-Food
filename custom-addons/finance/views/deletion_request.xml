@@ -72,7 +72,7 @@
         <field name="search_view_id" ref="view_finance_deletion_request_search"/>
         <!-- Clear context so we rely ONLY on the search default.
              Using 'search_default_pending': 1 ensures the filter is active but REMOVABLE. -->
-        <field name="context">{'search_default_pending': 1}</field> 
+        <field name="context"></field> 
     </record>
 
     <menuitem id="menu_finance_deletion_requests" 

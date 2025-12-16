@@ -39,11 +39,6 @@
                         </group>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
             </form>
         </field>
     </record>
@@ -65,20 +60,46 @@
         </field>
     </record>
 
-    <record id="action_finance_deletion_request" model="ir.actions.act_window">
-        <field name="name">Demandes de suppression</field>
+    <!-- Action: Pending Requests (Default) -->
+    <record id="action_finance_deletion_request_pending" model="ir.actions.act_window">
+        <field name="name">Demande en attente</field>
         <field name="res_model">finance.deletion.request</field>
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_finance_deletion_request_search"/>
-        <!-- Clear context so we rely ONLY on the search default.
-             Using 'search_default_pending': 1 ensures the filter is active but REMOVABLE. -->
-        <field name="context"></field> 
+        <!-- Active Filter: Pending -->
+        <field name="context">{'search_default_pending': 1}</field> 
+        <field name="domain">[('state', '=', 'pending')]</field> <!-- Strict Domain for this specific menu -->
     </record>
 
-    <menuitem id="menu_finance_deletion_requests" 
+    <!-- Action: History (All Requests) -->
+    <record id="action_finance_deletion_request_history" model="ir.actions.act_window">
+        <field name="name">Historique des demandes</field>
+        <field name="res_model">finance.deletion.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
+        <!-- No default filter, shows everything -->
+        <field name="context">{}</field> 
+        <field name="domain">[]</field>
+    </record>
+
+    <!-- Parent Menu: Demandes de suppression -->
+    <menuitem id="menu_finance_deletion_requests_root" 
               name="Demandes de suppression" 
               parent="finance_root_menu" 
-              action="action_finance_deletion_request" 
               sequence="100" 
               groups="finance.group_finance_user"/>
+
+    <!-- Submenu: Pending -->
+    <menuitem id="menu_finance_deletion_request_pending" 
+              name="Demande en attente" 
+              parent="menu_finance_deletion_requests_root" 
+              action="action_finance_deletion_request_pending" 
+              sequence="1"/>
+
+    <!-- Submenu: History -->
+    <menuitem id="menu_finance_deletion_request_history" 
+              name="Historique des demandes" 
+              parent="menu_finance_deletion_requests_root" 
+              action="action_finance_deletion_request_history" 
+              sequence="2"/>
 </odoo>

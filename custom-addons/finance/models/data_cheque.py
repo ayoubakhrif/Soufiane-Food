@@ -470,7 +470,6 @@ class DataCheque(models.Model):
             'context': {
                 'default_model': self._name,
                 'default_res_id': self.id,
-                'default_reason': f"Suppression demandée pour {self.display_name}",
             }
         }
 

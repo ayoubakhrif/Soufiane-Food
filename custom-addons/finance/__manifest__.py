@@ -14,6 +14,7 @@
         'views/talon_view.xml',
         'views/deletion_request.xml',
         'views/cheque_request.xml',
+        'reports/cheque_request_report.xml',
         'data/cron.xml',
     ],
     'images': ['static/description/icon.svg'],

@@ -12,20 +12,26 @@ class FinanceChequeRequest(models.Model):
     
     state = fields.Selection([
         ('pending', 'En attente'),
-        ('done', 'Traité'),
+        ('approved', 'Approuvé'),
+        ('rejected', 'Rejeté'),
     ], string='État', default='pending', tracking=True, readonly=True)
 
     preview_html = fields.Html(string='Aperçu', sanitize=False, readonly=True)
 
     @api.model
     def create_request(self, ste_id):
-        """Creates a new request if one doesn't already exist in pending state."""
-        existing = self.search([
-            ('ste_id', '=', ste_id.id),
-            ('state', '=', 'pending')
-        ])
-        if existing:
-            return existing
+        """Creates a new request ONLY if the last one was rejected or none exists."""
+        
+        # Check LAST request state
+        last_request = self.search([
+            ('ste_id', '=', ste_id.id)
+        ], order='request_date desc, id desc', limit=1)
+
+        if last_request:
+            if last_request.state in ['pending', 'approved']:
+                # Do NOT create a new request
+                return last_request
+            # If rejected, we proceed to create a new one
 
         # Generate HTML Preview
         html_content = self._generate_html_content(ste_id)
@@ -44,84 +50,124 @@ class FinanceChequeRequest(models.Model):
                     'mail.mail_activity_data_todo',
                     user_id=manager.id,
                     summary=f'Stock chéquier bas pour {ste_id.name}',
-                    note=f'Le stock de chèques pour {ste_id.name} est presque épuisé (<= 20). Veuillez commander un nouveau carnet.'
+                    note=f'Le stock de chèques pour {ste_id.name} est presque épuisé. Veuillez valider la demande.'
                 )
         return request
 
+    # ... _generate_html_content ...
+
+    def action_approve(self):
+        """Approve request, clear activity, and print PDF."""
+        self.ensure_one()
+        self.state = 'approved'
+        self.activity_feedback(['mail.mail_activity_data_todo'])
+        
+        # Trigger PDF Download
+        return self.env.ref('finance.action_report_cheque_request').report_action(self)
+
+    def action_reject(self):
+        """Reject request and clear activity."""
+        self.ensure_one()
+        self.state = 'rejected'
+        self.activity_feedback(['mail.mail_activity_data_todo'])
+
     def _generate_html_content(self, ste_id):
         logo_url = f"/web/image/finance.ste/{ste_id.id}/logo"
-        
+        today = fields.Date.today().strftime('%d/%m/%Y')
+
         return f"""
         <div style="
-            font-family: 'Times New Roman', Times, serif; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 40px; 
-            background: white; 
-            border: 1px solid #ddd; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            color: #333;
+            font-family: 'Times New Roman', Times, serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+            color: #000;
+            line-height: 1.6;
         ">
             <!-- Header -->
-            <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                <img src="{logo_url}" style="max-height: 100px; margin-bottom: 20px;"/><br/>
-                <h1 style="margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">Demande de Chéquier</h1>
-                <p style="margin: 10px 0 0 0; color: #666; font-style: italic;">Document Interne - Département Finance</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <img src="{logo_url}" style="max-height: 80px;"/>
+                </div>
+                <div style="text-align: right;">
+                    <p>Tanger, le {today}</p>
+                </div>
             </div>
 
-            <!-- Company Info -->
-            <div style="margin-bottom: 40px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="width: 150px; font-weight: bold; padding: 5px;">Société :</td>
-                        <td style="padding: 5px; font-size: 18px;">{ste_id.raison_social or ste_id.name}</td>
-                    </tr>
-                    <tr>
-                        <td style="width: 150px; font-weight: bold; padding: 5px;">Compte Bancaire :</td>
-                        <td style="padding: 5px; font-family: monospace; font-size: 16px;">{ste_id.num_compte or 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td style="width: 150px; font-weight: bold; padding: 5px;">Date :</td>
-                        <td style="padding: 5px;">{fields.Date.today().strftime('%d/%m/%Y')}</td>
-                    </tr>
-                </table>
+            <br/><br/>
+
+            <!-- Recipient -->
+            <div>
+                <p>
+                    <strong>À</strong><br/>
+                    Mme la Directrice du Centre d’Affaires PDN<br/>
+                    Banque Populaire Tanger – Tétouan
+                </p>
+            </div>
+
+            <br/>
+
+            <!-- Subject -->
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="font-weight: bold; text-decoration: underline;">
+                    Objet : Demande de talons de chèques
+                </p>
             </div>
 
             <!-- Body -->
-            <div style="margin-bottom: 50px; line-height: 1.6; font-size: 16px;">
-                <p>Madame, Monsieur,</p>
+            <div>
+                <p>Madame,</p>
+
                 <p>
-                    Par la présente, nous sollicitons le renouvellement de notre carnet de chèques pour le compte susmentionné.
-                    Le stock actuel arrivant à épuisement, nous vous prions de bien vouloir procéder à la commande d'un nouveau chéquier
-                    dans les meilleurs délais.
+                    Nous vous prions de bien vouloir procéder à la mise à disposition de nouveaux
+                    carnets de chèques relatifs au compte professionnel de notre société,
+                    dont les coordonnées sont les suivantes :
                 </p>
+
+                <br/>
+
                 <p>
-                    Veuillez mettre le chéquier à disposition de notre mandataire habituel dès sa disponibilité.
+                    <strong>Raison sociale :</strong> {ste_id.raison_social or ste_id.name}<br/>
+                    <strong>Numéro de compte :</strong> {ste_id.num_compte or "—"}
+                </p>
+
+                <br/>
+
+                <p>
+                    Nous vous remercions de bien vouloir nous aviser dès la mise à disposition
+                    des carnets de chèques.
+                </p>
+
+                <p>
+                    Dans l’attente de votre confirmation, nous vous prions d’agréer,
+                    Madame, l’assurance de nos salutations distinguées.
                 </p>
             </div>
 
-            <!-- Signature Area -->
-            <div style="display: flex; justify-content: space-between; margin-top: 60px;">
-                <div style="text-align: center; width: 40%;">
-                    <p style="font-weight: bold; margin-bottom: 50px;">Le Demandeur</p>
-                    <div style="border-top: 1px solid #ccc; width: 80%; margin: 0 auto;"></div>
-                </div>
-                <div style="text-align: center; width: 40%;">
-                    <p style="font-weight: bold; margin-bottom: 50px;">Direction / Validation</p>
-                    <div style="border-top: 1px solid #ccc; width: 80%; margin: 0 auto;"></div>
-                </div>
+            <br/><br/><br/>
+
+            <!-- Signature -->
+            <div>
+                <p><strong>Signature</strong></p>
+                <br/><br/>
             </div>
-            
+
             <!-- Footer -->
-            <div style="margin-top: 60px; text-align: center; font-size: 10px; color: #999;">
-                <p>Ceci est un document généré automatiquement par le système de gestion financière.</p>
+            <div style="
+                margin-top: 60px;
+                font-size: 11px;
+                color: #000;
+                border-top: 1px solid #000;
+                padding-top: 10px;
+            ">
+                <p>
+                    {ste_id.raison_social or ste_id.name}<br/>
+                    {ste_id.adress or ""}<br/>
+                </p>
             </div>
         </div>
         """
 
-    def action_done(self):
-        """Mark request as done and close activities."""
-        self.ensure_one()
-        self.state = 'done'
-        self.activity_feedback(['mail.mail_activity_data_todo'])
-        return {'type': 'ir.actions.act_window_close'}
+
+

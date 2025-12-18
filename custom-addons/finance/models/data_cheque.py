@@ -497,7 +497,7 @@ class DataCheque(models.Model):
                     ('ste_id', '=', rec.ste_id.id),
                     ('id', '!=', talon.id),
                     ('etat', 'in', ['actif', 'coffre']),
-                    ('unused_chqs', '>', 20) 
+                    ('unused_chqs', '>', 15) 
                 ])
                 
                 if healthy_backups == 0:

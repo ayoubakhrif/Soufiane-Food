@@ -3,10 +3,10 @@
         <field name="name">finance.cheque.request.tree</field>
         <field name="model">finance.cheque.request</field>
         <field name="arch" type="xml">
-            <tree decoration-muted="state == 'done'" decoration-danger="state == 'pending'">
+            <tree decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-warning="state == 'pending'">
                 <field name="request_date"/>
                 <field name="ste_id"/>
-                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'pending'"/>
+                <field name="state" widget="badge"/>
             </tree>
         </field>
     </record>
@@ -17,12 +17,20 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_done" 
+                    <button name="action_approve" 
                             invisible="state != 'pending'" 
-                            string="Marquer comme traité" 
+                            string="Approuver" 
                             type="object" 
                             class="oe_highlight btn-success" 
                             icon="fa-check"/>
+                            
+                    <button name="action_reject" 
+                            invisible="state != 'pending'" 
+                            string="Rejeter" 
+                            type="object" 
+                            class="btn-danger" 
+                            icon="fa-times"/>
+
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -61,7 +69,7 @@
             <search>
                 <field name="ste_id"/>
                 <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
-                <filter string="Traités" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Traités" name="processed" domain="[('state', 'in', ['approved', 'rejected'])]"/>
                 <group expand="0" string="Group By">
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>

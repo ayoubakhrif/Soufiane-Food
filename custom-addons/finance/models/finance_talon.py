@@ -1,4 +1,11 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+import base64
+import io
+try:
+    import xlsxwriter
+except ImportError:
+    xlsxwriter = None
 
 class FinanceTalon(models.Model):
     _name = 'finance.talon'
@@ -305,6 +312,45 @@ class FinanceTalon(models.Model):
             rec.used_chqs = len(rec.cheque_ids)
             rec.unused_chqs = rec.num_chq - rec.used_chqs
 
+    # -------------------------------------------------------------------
+    # Helper: Get missing cheques numbers
+    # -------------------------------------------------------------------
+    def _get_missing_cheques_numbers(self):
+        self.ensure_one()
+        # --- Validation robuste du talon ---
+        raw_name = (self.name or "").strip()
+
+        try:
+            start = int(raw_name)
+        except (ValueError, TypeError):
+            return []
+
+        if not self.num_chq or self.num_chq <= 0:
+            return []
+
+        # --- Numéros de chèques existants ---
+        existing_numbers = set()
+        for chq in self.cheque_ids:
+            raw_chq = (chq.chq or "").strip()
+            try:
+                existing_numbers.add(int(raw_chq))
+            except (ValueError, TypeError):
+                continue
+
+        # 👉 S’il n’y a encore aucun chèque saisi, on n’affiche rien
+        if not existing_numbers:
+            return []
+
+        # --- Nouvelle borne de fin = plus grand chèque saisi ---
+        end = max(existing_numbers)
+
+        # --- Calcul des chèques absents ---
+        missing = [
+            num for num in range(start, end + 1)
+            if num not in existing_numbers
+        ]
+        return missing
+
     @api.depends('cheque_ids.chq', 'num_chq', 'name', 'ste_id')
     def _compute_missing_cheques_html(self):
         for talon in self:
@@ -342,42 +388,32 @@ class FinanceTalon(models.Model):
                     </div>
                 """
                 continue
-
-            # --- Numéros de chèques existants ---
-            existing_numbers = set()
-            for chq in talon.cheque_ids:
-                raw_chq = (chq.chq or "").strip()
-                try:
-                    existing_numbers.add(int(raw_chq))
-                except (ValueError, TypeError):
-                    continue
-
-            # 👉 S’il n’y a encore aucun chèque saisi, on n’affiche rien
-            if not existing_numbers:
-                talon.missing_cheques_html = """
+            
+            # --- Check if any cheques exist (simple check to avoid loading logic if empty) ---
+            if not talon.cheque_ids:
+                 talon.missing_cheques_html = """
                     <div style="padding: 16px; color: #6c757d; font-style: italic;">
                         ℹ️ Aucun chèque encore saisi pour ce talon
                     </div>
                 """
-                continue
+                 continue
 
-            # --- Nouvelle borne de fin = plus grand chèque saisi ---
-            end = max(existing_numbers)
-
-            # --- Numéros de chèques existants ---
-            existing_numbers = set()
-            for chq in talon.cheque_ids:
-                raw_chq = (chq.chq or "").strip()
-                try:
-                    existing_numbers.add(int(raw_chq))
-                except (ValueError, TypeError):
-                    continue
-
-            # --- Calcul des chèques absents ---
-            missing = [
-                num for num in range(start, end + 1)
-                if num not in existing_numbers
-            ]
+            # --- Use Helper ---
+            missing = talon._get_missing_cheques_numbers()
+            
+            # If helper returns empty, check why (validation handled above, so maybe no cheques valid?)
+            # Re-check existing numbers strictly for the "None info" message
+            existing_count = 0 
+            for c in talon.cheque_ids: 
+                if c.chq and c.chq.strip().isdigit(): existing_count += 1
+            
+            if existing_count == 0:
+                 talon.missing_cheques_html = """
+                    <div style="padding: 16px; color: #6c757d; font-style: italic;">
+                        ℹ️ Aucun chèque encore saisi pour ce talon
+                    </div>
+                """
+                 continue
 
             # --- Aucun chèque manquant ---
             if not missing:
@@ -443,7 +479,7 @@ class FinanceTalon(models.Model):
                                 width: 32px;
                                 height: 32px;
                                 background: rgba(220, 53, 69, 0.1);
-                                border-radius: 50%;
+                                # border-radius: 50%;
                                 display: flex;
                                 align-items: center;
                                 justify-content: center;
@@ -497,3 +533,69 @@ class FinanceTalon(models.Model):
                     </div>
                 </div>
             """
+
+    def action_export_missing_cheques_excel(self):
+        self.ensure_one()
+        if not xlsxwriter:
+            raise UserError("La librairie 'xlsxwriter' n'est pas installée.")
+
+        missing_list = self._get_missing_cheques_numbers()
+        if not missing_list:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": "Aucun chèque manquant",
+                    "message": "Bravo ! Tous les chèques sont présents, aucun fichier à générer.",
+                    "type": "success",
+                    "sticky": False,
+                },
+            }
+
+        # --- Generate Excel ---
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        sheet = workbook.add_worksheet("Chèques Manquants")
+
+        # Styles
+        style_header = workbook.add_format({'bold': True, 'align': 'center', 'bg_color': '#f2f2f2', 'border': 1})
+        style_cell = workbook.add_format({'align': 'center', 'border': 1})
+
+        # Headers
+        headers = ["Société", "Talon", "N° Chèque Manquant"]
+        sheet.set_column(0, 0, 25)  # Société
+        sheet.set_column(1, 1, 20)  # Talon
+        sheet.set_column(2, 2, 20)  # N° Chèque
+
+        sheet.write_row(0, 0, headers, style_header)
+
+        # Content
+        row = 1
+        for num in missing_list:
+            sheet.write(row, 0, self.ste_id.name or "", style_cell)
+            sheet.write(row, 1, self.name_shown or "", style_cell)
+            sheet.write(row, 2, str(num).zfill(7), style_cell)
+            row += 1
+
+        workbook.close()
+        output.seek(0)
+        file_data = base64.b64encode(output.read())
+        output.close()
+
+        # Create attachment
+        sanitized_talon = "".join([c for c in (self.name_shown or "") if c.isalnum() or c in (' ', '-', '_')]).strip()
+        filename = f"Manquants_{self.ste_id.name}_{sanitized_talon}.xlsx"
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': file_data,
+            'type': 'binary',
+            'res_model': self._name,
+            'res_id': self.id,
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }

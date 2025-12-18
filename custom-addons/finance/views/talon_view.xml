@@ -14,6 +14,14 @@
         <field name="model">finance.talon</field>
         <field name="arch" type="xml">
             <form string="Talons">
+                <header>
+                    <button string="Exporter chèques manquants (Excel)"
+                            name="action_export_missing_cheques_excel"
+                            type="object"
+                            class="oe_highlight"
+                            icon="fa-file-excel-o"
+                            groups="finance.group_finance_user"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_cheques"

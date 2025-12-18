@@ -257,8 +257,11 @@ class DataCheque(models.Model):
                 if annule_perso:
                     rec.perso_id = annule_perso
 
+                annule_benif = rec._get_annule_benif()
+                if annule_benif:
+                    rec.benif_id = annule_benif
+                
                 rec.date_echeance = False
-                rec.benif_id = False
                 rec.serie = "Annulé"
 
     @api.constrains('date_emission')

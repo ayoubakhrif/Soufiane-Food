@@ -61,45 +61,50 @@
     </record>
 
     <!-- Action: Pending Requests (Default) -->
-    <record id="action_finance_deletion_request_pending" model="ir.actions.act_window">
-        <field name="name">Demande en attente</field>
-        <field name="res_model">finance.deletion.request</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
-        <!-- Active Filter: Pending -->
-        <field name="context">{'search_default_pending': 1}</field> 
-        <field name="domain">[('state', '=', 'pending')]</field> <!-- Strict Domain for this specific menu -->
-    </record>
-
-    <!-- Action: History (All Requests) -->
-    <record id="action_finance_deletion_request_history" model="ir.actions.act_window">
-        <field name="name">Historique des demandes</field>
-        <field name="res_model">finance.deletion.request</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
-        <!-- No default filter, shows everything -->
-        <field name="context">{}</field> 
-        <field name="domain">[]</field>
-    </record>
-
-    <!-- Parent Menu: Demandes de suppression -->
-    <menuitem id="menu_finance_deletion_requests_root"
-              name="Demandes de suppression" 
-              parent="finance_root_menu" 
-              sequence="100" 
+    <!-- Top Level Menus -->
+    <menuitem id="menu_finance_demandes"
+              name="Demandes"
+              parent="finance_root_menu"
+              sequence="100"
               groups="finance.group_finance_user"/>
 
-    <!-- Submenu: Pending -->
-    <menuitem id="menu_finance_deletion_request_pending" 
-              name="Demande en attente" 
-              parent="menu_finance_deletion_requests_root" 
-              action="action_finance_deletion_request_pending" 
-              sequence="1"/>
+    <menuitem id="menu_finance_historique"
+              name="Historique"
+              parent="finance_root_menu"
+              sequence="110"
+              groups="finance.group_finance_user"/>
 
-    <!-- Submenu: History -->
-    <menuitem id="menu_finance_deletion_request_history" 
-              name="Historique des demandes" 
-              parent="menu_finance_deletion_requests_root" 
-              action="action_finance_deletion_request_history" 
-              sequence="2"/>
+    <!-- Action: Pending Deletion Requests -->
+    <record id="action_finance_deletion_request_pending" model="ir.actions.act_window">
+        <field name="name">Demande de suppression</field> <!-- Renamed for the menu -->
+        <field name="res_model">finance.deletion.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
+        <field name="title">Demande de suppression</field>
+        <field name="domain">[('state', '=', 'pending')]</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+
+    <!-- Action: History Deletion Requests -->
+    <record id="action_finance_deletion_request_history" model="ir.actions.act_window">
+        <field name="name">Demandes de suppression</field>
+        <field name="res_model">finance.deletion.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
+        <field name="domain">[('state', 'in', ['approved', 'rejected'])]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menus Placement -->
+    <menuitem id="menu_finance_deletion_request_pending"
+              name="Demande de suppression"
+              parent="menu_finance_demandes"
+              action="action_finance_deletion_request_pending"
+              sequence="10"/>
+
+    <menuitem id="menu_finance_deletion_request_history"
+              name="Demandes de suppression"
+              parent="menu_finance_historique"
+              action="action_finance_deletion_request_history"
+              sequence="10"/>
 </odoo>

@@ -146,7 +146,7 @@ class FinanceChequeRequest(models.Model):
                 </p>
             </div>
 
-            <br/><br/><br/>
+            <br/><br/>
 
             <!-- Signature -->
             <div style="margin-top: 40px;">

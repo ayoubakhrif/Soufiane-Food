@@ -73,6 +73,7 @@ class FinanceChequeRequest(models.Model):
 
     def _generate_html_content(self, ste_id):
         logo_url = f"/web/image/finance.ste/{ste_id.id}/logo"
+        cachet_url = f"/web/image/finance.ste/{ste_id.id}/cachee"
         today = fields.Date.today().strftime('%d/%m/%Y')
 
         return f"""
@@ -148,9 +149,16 @@ class FinanceChequeRequest(models.Model):
             <br/><br/><br/>
 
             <!-- Signature -->
-            <div>
+            <div style="margin-top: 40px;">
                 <p><strong>Signature</strong></p>
                 <br/><br/>
+
+                <!-- Cachet -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <img src="{cachet_url}"
+                        style="max-height: 120px; opacity: 0.9;"
+                        alt="Cachet société"/>
+                </div>
             </div>
 
             <!-- Footer -->

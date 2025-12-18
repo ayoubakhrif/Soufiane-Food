@@ -6,6 +6,7 @@
         <field name="name">Talons</field>
         <field name="res_model">finance.talon</field>
         <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_filter_actif': 1}</field>
     </record>
 
     <record id="view_finance_talon_form" model="ir.ui.view">
@@ -81,6 +82,10 @@
                 <field name="name_shown"/>
                 <field name="ste_id"/>
                 <field name="etat"/>
+                <filter string="Actif" name="filter_actif" domain="[('etat', '=', 'actif')]"/>
+                <separator/>
+                <filter string="Cloturé" name="filter_cloture" domain="[('etat', '=', 'cloture')]"/>
+                <filter string="Coffre" name="filter_coffre" domain="[('etat', '=', 'coffre')]"/>
             </search>
         </field>
     </record>

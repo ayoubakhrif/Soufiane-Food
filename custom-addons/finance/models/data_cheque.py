@@ -22,10 +22,10 @@ class DataCheque(models.Model):
     date_operation = fields.Date(string='Date Operation', default=fields.Date.context_today)
     date_payment = fields.Date(string='Date Paiement')
     cheque_count = fields.Integer(string='Nombre chèques', default=1, store=True)
-    date_emission = fields.Date(string='Date d’émission', tracking=True, required=True)
+    date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
-    date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True, required=True)
+    date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
@@ -272,19 +272,46 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # Bureau state
     # ------------------------------------------------------------
+    def _get_bureau_benif(self):
+        return self.env['finance.benif'].search([('name', '=', 'Bureau')], limit=1)
+        
+    def _get_bureau_perso(self):
+        return self.env['finance.perso'].search([('name', '=', 'Bureau')], limit=1)
+
     def _get_annule_perso(self):
         return self.env['finance.perso'].search([('name', '=', 'Annulé')], limit=1)
     @api.onchange('state')
     def _onchange_state_force_facture(self):
         for rec in self:
             if rec.state == 'bureau':
+                # Force Values
                 rec.facture = 'bureau'
+                rec.journal = '0'
+                rec.date_emission = False
+                rec.date_echeance = False
+                
+                # Set Bureau relations
+                bureau_benif = rec._get_bureau_benif()
+                if bureau_benif:
+                    rec.benif_id = bureau_benif
+                    
+                bureau_perso = rec._get_bureau_perso()
+                if bureau_perso:
+                    rec.perso_id = bureau_perso
 
-    @api.constrains('state')
-    def _check_state_force_facture(self):
+    @api.constrains('state', 'facture', 'date_emission', 'date_echeance')
+    def _check_state_rules(self):
         for rec in self:
-            if rec.state == 'bureau' and rec.facture != 'bureau':
-                rec.facture = 'bureau'
+            if rec.state == 'bureau':
+                # Force integrity for Bureau state
+                if rec.facture != 'bureau':
+                    rec.facture = 'bureau'
+            elif rec.state != 'annule':
+                # Make dates required for other active states
+                if not rec.date_emission:
+                    raise ValidationError("La date d'émission est requise sauf si l'état est 'Bureau' ou 'Annulé'.")
+                if not rec.date_echeance:
+                    raise ValidationError("La date d'échéance est requise sauf si l'état est 'Bureau' ou 'Annulé'.")
 
     # ------------------------------------------------------------
     # if state == Annulé

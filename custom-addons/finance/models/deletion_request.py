@@ -12,14 +12,31 @@ class FinanceDeletionRequest(models.Model):
     
     model = fields.Char(string='Modèle', required=True, readonly=True)
     res_id = fields.Integer(string='ID Enregistrement', required=True, readonly=True)
-    record_name = fields.Char(string='Enregistrement', compute='_compute_record_name', store=True)
+    record_name = fields.Char(string='N° chèque', compute='_compute_record_name', store=True)
     reason = fields.Text(string='Motif de suppression', tracking=True, required=True)
     
+    ste_id = fields.Many2one('finance.ste', string='Société', compute='_compute_details', store=True)
+    talon_id = fields.Many2one('finance.talon', string='Talon', compute='_compute_details', store=True)
+
     state = fields.Selection([
         ('pending', 'En attente'),
         ('approved', 'Approuvé'),
         ('rejected', 'Rejeté')
     ], string='État', default='pending', tracking=True, readonly=True)
+
+    @api.depends('model', 'res_id')
+    def _compute_details(self):
+        for rec in self:
+            rec.ste_id = False
+            rec.talon_id = False
+            if rec.model == 'datacheque' and rec.res_id:
+                try:
+                    record = self.env[rec.model].sudo().browse(rec.res_id)
+                    if record.exists():
+                        rec.ste_id = record.ste_id if 'ste_id' in record else False
+                        rec.talon_id = record.talon_id if 'talon_id' in record else False
+                except:
+                    pass
 
     @api.depends('model', 'res_id')
     def _compute_record_name(self):
@@ -28,7 +45,11 @@ class FinanceDeletionRequest(models.Model):
                 try:
                     record = self.env[rec.model].sudo().browse(rec.res_id)
                     if record.exists():
-                        rec.record_name = record.display_name
+                        # Use chq number specifically if available, else display name
+                        if 'chq' in record:
+                            rec.record_name = record.chq
+                        else:
+                            rec.record_name = record.display_name
                     else:
                         rec.record_name = f"{rec.model},{rec.res_id}"
                 except:

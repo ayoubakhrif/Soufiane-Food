@@ -6,7 +6,9 @@
             <tree decoration-warning="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
                 <field name="request_date" string="Date"/>
                 <field name="user_id" string="Demandeur"/>
-                <field name="record_name" string="Document"/>
+                <field name="ste_id"/>
+                <field name="talon_id"/>
+                <field name="record_name" string="N° chèque"/>
                 <field name="reason" string="Motif" optional="show"/>
                 <field name="state" widget="badge"/>
                 <button name="action_approve" invisible="state != 'pending'" string="Approuver" type="object" icon="fa-check" groups="finance.group_finance_user" class="btn-success"/>
@@ -30,12 +32,14 @@
                         <group string="Information de la demande">
                             <field name="user_id"/>
                             <field name="request_date"/>
-                            <field name="reason"/>
+                            <field name="ste_id"/>
+                            <field name="talon_id"/>
                         </group>
-                        <group string="Enregistrement Technique">
-                            <field name="model"/>
-                            <field name="res_id"/>
-                            <field name="record_name"/>
+                        <group string="Détails">
+                            <field name="record_name" string="N° chèque"/>
+                            <field name="reason"/>
+                            <field name="model" invisible="1"/>
+                            <field name="res_id" invisible="1"/>
                         </group>
                     </group>
                 </sheet>

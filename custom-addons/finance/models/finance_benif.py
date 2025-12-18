@@ -9,4 +9,6 @@ class Cal3iyaClient(models.Model):
     type = fields.Selection([
         ('import', 'Importation'),
         ('divers', 'Divers'),
+        ('bureau', 'Bureau'),
+        ('annule', 'Annulé'),
         ], string='Imp/Div', required=True, store=True)

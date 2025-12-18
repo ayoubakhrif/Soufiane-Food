@@ -35,7 +35,7 @@ class DataCheque(models.Model):
         ('bureau', 'Bureau'),
         ('fact', 'F/'),
     ], string='Facture', tracking=True, required=True, default='m')
-    journal = fields.Integer(string='Journal N°', required=True)
+    journal = fields.Char(string='Journal N°', required=True)
     facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False, optional=True)
     state = fields.Selection([
         ('actif', 'Actif'),

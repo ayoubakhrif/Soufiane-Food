@@ -12,9 +12,7 @@ class DataCheque(models.Model):
     _rec_name = 'chq'
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
-    
     is_manager = fields.Boolean(compute='_compute_is_manager', string="Is Manager")
-
     def _compute_is_manager(self):
         for rec in self:
             rec.is_manager = self.env.user.has_group('finance.group_finance_user')
@@ -211,10 +209,12 @@ class DataCheque(models.Model):
             else:
                 rec.week = False
 
-    @api.depends('date_emission', 'benif_id.days', 'benif_id')
+    @api.depends('date_emission', 'benif_id.days', 'benif_id', 'state')
     def _compute_date_echeance(self):
         for rec in self:
-            if rec.date_emission and rec.benif_id and rec.benif_id.days:
+            if rec.state == 'bureau':
+                rec.date_echeance = False
+            elif rec.date_emission and rec.benif_id and rec.benif_id.days:
                 rec.date_echeance = rec.date_emission + timedelta(days=rec.benif_id.days)
             else:
                 rec.date_echeance = rec.date_emission
@@ -287,8 +287,6 @@ class DataCheque(models.Model):
                 # Force Values
                 rec.facture = 'bureau'
                 rec.journal = '0'
-                rec.date_emission = False
-                rec.date_echeance = False
                 
                 # Set Bureau relations
                 bureau_benif = rec._get_bureau_benif()
@@ -298,6 +296,10 @@ class DataCheque(models.Model):
                 bureau_perso = rec._get_bureau_perso()
                 if bureau_perso:
                     rec.perso_id = bureau_perso
+
+                # Clear dates LAST to ensure they aren't overwritten by relation changes triggering computes
+                rec.date_emission = False
+                rec.date_echeance = False
 
     @api.constrains('state', 'facture', 'date_emission', 'date_echeance')
     def _check_state_rules(self):

@@ -308,6 +308,12 @@ class DataCheque(models.Model):
                 # Force integrity for Bureau state
                 if rec.facture != 'bureau':
                     rec.facture = 'bureau'
+                
+                # Force clear dates if they persisted
+                if rec.date_emission:
+                    rec.date_emission = False
+                # date_echeance is handled by compute, but we ensure consistency
+                
             elif rec.state != 'annule':
                 # Make dates required for other active states
                 if not rec.date_emission:

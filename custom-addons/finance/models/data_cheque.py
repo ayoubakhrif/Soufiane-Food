@@ -212,7 +212,7 @@ class DataCheque(models.Model):
     @api.depends('date_emission', 'benif_id.days', 'benif_id', 'state')
     def _compute_date_echeance(self):
         for rec in self:
-            if rec.state == 'bureau':
+            if rec.state in ['bureau', 'annule']:
                 rec.date_echeance = False
             elif rec.date_emission and rec.benif_id and rec.benif_id.days:
                 rec.date_echeance = rec.date_emission + timedelta(days=rec.benif_id.days)
@@ -280,6 +280,10 @@ class DataCheque(models.Model):
 
     def _get_annule_perso(self):
         return self.env['finance.perso'].search([('name', '=', 'Annulé')], limit=1)
+
+    def _get_annule_benif(self):
+        return self.env['finance.benif'].search([('name', '=', 'Annulé')], limit=1)
+
     @api.onchange('state')
     def _onchange_state_force_facture(self):
         for rec in self:
@@ -314,7 +318,16 @@ class DataCheque(models.Model):
                     rec.date_emission = False
                 # date_echeance is handled by compute, but we ensure consistency
                 
-            elif rec.state != 'annule':
+            elif rec.state == 'annule':
+                # Force integrity for Annulé state
+                if rec.facture != 'annule':
+                    rec.facture = 'annule'
+
+                # Force clear dates
+                if rec.date_emission:
+                    rec.date_emission = False
+
+            else:
                 # Make dates required for other active states
                 if not rec.date_emission:
                     raise ValidationError("La date d'émission est requise sauf si l'état est 'Bureau' ou 'Annulé'.")
@@ -328,14 +341,22 @@ class DataCheque(models.Model):
     def _onchange_state_annule(self):
         for rec in self:
             if rec.state == 'annule':
+                rec.facture = 'annule'
+                rec.journal = '0'
+                rec.serie = "Annulé"
 
                 annule_perso = rec._get_annule_perso()
                 if annule_perso:
                     rec.perso_id = annule_perso
 
-                rec.date_echeance = False
-                rec.benif_id = False
+                annule_benif = rec._get_annule_benif()
+                if annule_benif:
+                    rec.benif_id = annule_benif
 
+                # Clear dates LAST
+                rec.date_emission = False
+                rec.date_echeance = False
+                
     # -------------------------------------------------------------------
     # Calculate TALON
     # -------------------------------------------------------------------
@@ -541,15 +562,26 @@ class DataCheque(models.Model):
                 vals['benif_id'] = bureau_benif.id
 
         elif state == 'annule':
+            # Force integrity
+            if vals.get('facture') != 'annule':
+                vals['facture'] = 'annule'
+            vals['journal'] = 0
+            vals['date_emission'] = False
+            vals['date_echeance'] = False
+
             # Force Relationship : Person
             if not vals.get('perso_id'):
                 annule_perso = self._get_annule_perso()
                 if not annule_perso:
                     raise ValidationError("L'enregistrement 'Annulé' est introuvable dans la liste des Personnes. Veuillez le créer.")
                 vals['perso_id'] = annule_perso.id
-                
-            vals['date_echeance'] = False
-            vals['benif_id'] = False
+
+            # Force Relationship : Beneficiary
+            if not vals.get('benif_id'):
+                annule_benif = self._get_annule_benif()
+                if not annule_benif:
+                    raise ValidationError("L'enregistrement 'Annulé' est introuvable dans la liste des Bénéficiaires. Veuillez le créer.")
+                vals['benif_id'] = annule_benif.id
 
     # 7) Override create/write
     @api.model

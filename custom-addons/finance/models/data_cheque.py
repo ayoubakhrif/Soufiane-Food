@@ -479,6 +479,33 @@ class DataCheque(models.Model):
         rec = super().create(vals)
         rec._onchange_find_talon()
         rec._sync_pdf_url()
+        
+        # --- Check Stock Alert ---
+        try:
+            talon = rec.talon_id
+            # 1. Check if CURRENT talon is low
+            if talon and talon.unused_chqs <= 20:
+                # 2. Check for HEALTHY backups
+                # A healthy backup is another talon for the SAME company that is 'actif' or 'coffre'
+                # AND has a decent remaining stock (e.g., > 20).
+                # The user's rule: "If another talon exists and can take over, no notification"
+                # Reinforced rule: "If there is another talon... remaining chqs should be < 20 to trigger"
+                # => This means we scan for ANY talon with > 20 unused cheques. If found -> No Alert.
+                
+                healthy_backups = self.env['finance.talon'].search_count([
+                    ('ste_id', '=', rec.ste_id.id),
+                    ('id', '!=', talon.id),
+                    ('etat', 'in', ['actif', 'coffre']),
+                    ('unused_chqs', '>', 20) 
+                ])
+                
+                if healthy_backups == 0:
+                    # Alert Condition Met: Current is low, and no healthy backup exists.
+                    self.env['finance.cheque.request'].create_request(rec.ste_id)
+        except Exception as e:
+            # Prevent blocking cheque creation if alert system fails
+            pass
+            
         return rec
 
     def write(self, vals):

@@ -1,0 +1,79 @@
+<odoo>
+    <record id="view_finance_cheque_request_tree" model="ir.ui.view">
+        <field name="name">finance.cheque.request.tree</field>
+        <field name="model">finance.cheque.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="state == 'done'" decoration-danger="state == 'pending'">
+                <field name="request_date"/>
+                <field name="ste_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'pending'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_cheque_request_form" model="ir.ui.view">
+        <field name="name">finance.cheque.request.form</field>
+        <field name="model">finance.cheque.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_done" 
+                            invisible="state != 'pending'" 
+                            string="Marquer comme traité" 
+                            type="object" 
+                            class="oe_highlight btn-success" 
+                            icon="fa-check"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                    <group invisible="1">
+                        <field name="ste_id"/>
+                        <field name="request_date"/>
+                    </group>
+                    
+                    <!-- HTML Preview Display -->
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                        <field name="preview_html" widget="html" readonly="1" nolabel="1"/>
+                    </div>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_finance_cheque_request" model="ir.actions.act_window">
+        <field name="name">Demandes de Chéquier</field>
+        <field name="res_model">finance.cheque.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+
+    <record id="view_finance_cheque_request_search" model="ir.ui.view">
+        <field name="name">finance.cheque.request.search</field>
+        <field name="model">finance.cheque.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="ste_id"/>
+                <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Traités" name="done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="menu_finance_cheque_requests" 
+              name="Renouvellement Chéquier" 
+              parent="finance_root_menu" 
+              action="action_finance_cheque_request" 
+              sequence="110" 
+              groups="finance.group_finance_user"/>
+</odoo>

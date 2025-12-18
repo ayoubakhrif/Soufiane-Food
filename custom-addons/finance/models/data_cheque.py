@@ -509,9 +509,54 @@ class DataCheque(models.Model):
             }
         }
 
+    # 7) Helper to force state relation logic in backend
+    def _force_state_logic(self, vals):
+        """Ensures that validation rules are respected even if onchange is skipped."""
+        state = vals.get('state')
+        
+        # We need to know the state. In create, it's in vals or default.
+        # In write, it might not be in vals.
+        # This helper is designed to modify 'vals' in place.
+        
+        if state == 'bureau':
+            # Force integrity
+            if vals.get('facture') != 'bureau':
+                vals['facture'] = 'bureau'
+            vals['journal'] = 0
+            vals['date_emission'] = False
+            vals['date_echeance'] = False
+
+            # Force Relationship : Person
+            if not vals.get('perso_id'):
+                bureau_perso = self._get_bureau_perso()
+                if not bureau_perso:
+                    raise ValidationError("L'enregistrement 'Bureau' est introuvable dans la liste des Personnes. Veuillez le créer.")
+                vals['perso_id'] = bureau_perso.id
+
+            # Force Relationship : Beneficiary
+            if not vals.get('benif_id'):
+                bureau_benif = self._get_bureau_benif()
+                if not bureau_benif:
+                    raise ValidationError("L'enregistrement 'Bureau' est introuvable dans la liste des Bénéficiaires. Veuillez le créer.")
+                vals['benif_id'] = bureau_benif.id
+
+        elif state == 'annule':
+            # Force Relationship : Person
+            if not vals.get('perso_id'):
+                annule_perso = self._get_annule_perso()
+                if not annule_perso:
+                    raise ValidationError("L'enregistrement 'Annulé' est introuvable dans la liste des Personnes. Veuillez le créer.")
+                vals['perso_id'] = annule_perso.id
+                
+            vals['date_echeance'] = False
+            vals['benif_id'] = False
+
     # 7) Override create/write
     @api.model
     def create(self, vals):
+        # Apply backend logic for relations before super().create validates required constraints
+        self._force_state_logic(vals)
+        
         rec = super().create(vals)
         rec._onchange_find_talon()
         rec._sync_pdf_url()
@@ -545,6 +590,18 @@ class DataCheque(models.Model):
         return rec
 
     def write(self, vals):
+        # For write, we might not have 'state' in vals, so we check self if transitioning
+        for rec in self:
+            # We work on a copy of vals per record effectively?
+            # write is usually batch, but here we can only update val once.
+            # If state is changing in vals, we enforce.
+            
+            check_state = vals.get('state')
+            if check_state in ['bureau', 'annule']:
+                 # We simply apply the logic to the `vals` dict.
+                 # Since `_force_state_logic` modifies `vals` in place and lookups DB, it's safe.
+                 rec._force_state_logic(vals)
+
         res = super().write(vals)
         if "chq" in vals or "ste_id" in vals:
             self._onchange_find_talon()

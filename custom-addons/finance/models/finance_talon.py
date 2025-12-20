@@ -203,10 +203,49 @@ class FinanceTalon(models.Model):
                 emoji = "🟡"
                 status = "Attention"
             else:
-                color = "#dc3545"
-                gradient = "linear-gradient(90deg, #dc3545 0%, #e83e8c 100%)"
-                emoji = "🔴"
-                status = "Critique"
+                # > 80% usage: Check if a next numeric talon exists
+                next_talon_name = None
+                
+                # Only check if current name is numeric
+                current_name_raw = (rec.name or "").strip()
+                if current_name_raw.isdigit() and rec.ste_id:
+                    current_val = int(current_name_raw)
+                    
+                    # Find all talons for the same company
+                    company_talons = self.search([('ste_id', '=', rec.ste_id.id)])
+                    
+                    # Store (integer_value, original_name) tuples
+                    numeric_talons = []
+                    for t in company_talons:
+                        t_name_raw = (t.name or "").strip()
+                        if t_name_raw.isdigit():
+                            numeric_talons.append((int(t_name_raw), t.name_shown))
+                    
+                    # Sort numerically
+                    numeric_talons.sort(key=lambda x: x[0])
+                    
+                    # Find current position and check next
+                    # We iterate to find the exact match for current_val
+                    # Then look if there is an element at index + 1
+                    for idx, (val, name_shown) in enumerate(numeric_talons):
+                        if val == current_val:
+                            # If there is a next element
+                            if idx + 1 < len(numeric_talons):
+                                next_talon_name = numeric_talons[idx+1][1] # Get name_shown of next
+                            break
+
+                if next_talon_name:
+                    # Next talon exists -> Warning (Orange)
+                    color = "#fd7e14"
+                    gradient = "linear-gradient(90deg, #fd7e14 0%, #ffc107 100%)"
+                    emoji = "🟡"
+                    status = f"Attention – ouvrir talon {next_talon_name}"
+                else:
+                    # No next talon -> Critical (Red)
+                    color = "#dc3545"
+                    gradient = "linear-gradient(90deg, #dc3545 0%, #e83e8c 100%)"
+                    emoji = "🔴"
+                    status = "Critique"
 
             rec.progress_html = f"""
                 <div style="

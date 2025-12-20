@@ -2,3 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ecole_student_base,ecole.student.base,model_ecole_student,ecole.group_ecole_user,1,1,1,1
 access_ecole_parent_base,ecole.parent.base,model_ecole_parent,ecole.group_ecole_user,1,1,1,1
 access_ecole_class_base,ecole.class.base,model_ecole_class,ecole.group_ecole_user,1,1,1,1
+access_ecole_subject,ecole.subject,model_ecole_subject,ecole.group_ecole_user,1,1,1,1
+access_ecole_class_subject,ecole.class.subject,model_ecole_class_subject,ecole.group_ecole_user,1,1,1,1

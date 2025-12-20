@@ -11,3 +11,5 @@ class EcoleClass(models.Model):
         ('middle', 'Collège'),
         ('high', 'Lycée')
     ], string='Niveau', required=True)
+    subject_ids = fields.One2many('ecole.class.subject', 'class_id', string='Matières')
+    student_ids = fields.One2many('ecole.student', 'current_class_id', string='Etudiants')

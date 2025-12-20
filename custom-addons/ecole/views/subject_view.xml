@@ -1,0 +1,37 @@
+<odoo>
+    <record id="view_ecole_subject_tree" model="ir.ui.view">
+        <field name="name">ecole.subject.tree</field>
+        <field name="model">ecole.subject</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="code"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_ecole_subject_form" model="ir.ui.view">
+        <field name="name">ecole.subject.form</field>
+        <field name="model">ecole.subject</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nom de la matière"/></h1>
+                    </div>
+                    <group>
+                        <field name="code"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ecole_subject" model="ir.actions.act_window">
+        <field name="name">Matières</field>
+        <field name="res_model">ecole.subject</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_ecole_subject" name="Matières" parent="menu_ecole_root" action="action_ecole_subject" sequence="40"/>
+</odoo>

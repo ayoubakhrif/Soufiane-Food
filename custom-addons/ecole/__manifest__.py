@@ -6,7 +6,7 @@
     'description': """
         Module Ecole pour la gestion scolaire.
     """,
-    'author': 'Antigravity',
+    'author': 'Ayoub AKHRIF',
     'depends': ['base', 'mail',],
     'data': [
         'security/groups.xml',
@@ -16,6 +16,7 @@
         'views/student_view.xml',
         'views/parent_view.xml',
         'views/school_class_view.xml',
+        'views/subject_view.xml',
     ],
     'installable': True,
     'application': True,

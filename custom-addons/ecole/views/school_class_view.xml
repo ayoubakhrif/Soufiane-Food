@@ -22,6 +22,24 @@
                     <group>
                         <field name="level"/>
                     </group>
+                    <notebook>
+                        <page string="Etudiants">
+                            <field name="student_ids" readonly="1">
+                                <tree>
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Matières">
+                            <field name="subject_ids">
+                                <tree editable="bottom">
+                                    <field name="subject_id"/>
+                                    <field name="coefficient"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

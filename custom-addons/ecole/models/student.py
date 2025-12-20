@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 from datetime import date
+from odoo.exceptions import ValidationError
+import re
 
 class EcoleStudent(models.Model):
     _name = 'ecole.student'
@@ -33,3 +35,15 @@ class EcoleStudent(models.Model):
                 rec.age = today.year - rec.date_of_birth.year - ((today.month, today.day) < (rec.date_of_birth.month, rec.date_of_birth.day))
             else:
                 rec.age = 0
+
+    @api.constrains('date_of_birth')
+    def _check_dob(self):
+        for rec in self:
+            if rec.date_of_birth and rec.date_of_birth > fields.Date.today():
+                raise ValidationError("La date de naissance ne peut pas être dans le futur.")
+
+    @api.constrains('phone_number')
+    def _check_phone_number(self):
+        for rec in self:
+            if rec.phone_number and not rec.phone_number.isdigit():
+                raise ValidationError("Le numéro de téléphone ne doit contenir que des chiffres.")

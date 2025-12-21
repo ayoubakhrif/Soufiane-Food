@@ -62,7 +62,7 @@
                             class="btn-danger"
                             invisible="is_manager"
                             groups="finance.group_finance_employee"/>
-                    <div invisible="not unlock_until" style="flex: 1; display: flex; justify-content: center; align-items: center;">
+                    <div invisible="not unlock_until" style="flex: 1; display: flex; justify-content: center; text-align:center; align-items: center;">
                         <div style="padding: 8px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.1);">
                             <span style="color: white; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px;">
                                 <i class="fa fa-unlock-alt" style="font-size: 18px; color: #fbbf24;"/>

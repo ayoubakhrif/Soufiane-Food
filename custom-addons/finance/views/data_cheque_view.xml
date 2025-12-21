@@ -77,6 +77,7 @@
                 <sheet>
                     <field name="is_manager" invisible="1"/>
                     <field name="is_locked" invisible="1"/>
+                    <field name="unlock_until" invisible="1"/>
 
                     <!-- Boutons PDF style Odoo (stat buttons box) -->
                     <div class="oe_button_box" name="button_box">

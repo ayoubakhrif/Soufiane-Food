@@ -107,6 +107,16 @@ class DataCheque(models.Model):
             
             # Otherwise, it's editable
             rec.is_locked = False
+
+    @api.depends('unlock_until')
+    def _compute_unlock_until_formatted(self):
+        for rec in self:
+            if rec.unlock_until:
+                # Format: JJ/MM/AAAA HH:MM
+                local_dt = fields.Datetime.context_timestamp(rec, rec.unlock_until)
+                rec.unlock_until_formatted = local_dt.strftime('%d/%m/%Y %H:%M')
+            else:
+                rec.unlock_until_formatted = False
     
     # ------------------------------------------------------------
     # BADGE VISUEL

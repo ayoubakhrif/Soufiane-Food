@@ -291,19 +291,12 @@ class DataCheque(models.Model):
 
     @api.constrains('state')
     def _check_state_annule(self):
+        """Validate annulé state - do NOT modify fields here."""
         for rec in self:
             if rec.state == 'annule':
-
-                annule_perso = rec._get_annule_perso()
-                if annule_perso:
-                    rec.perso_id = annule_perso
-
-                annule_benif = rec._get_annule_benif()
-                if annule_benif:
-                    rec.benif_id = annule_benif
-                
-                rec.date_echeance = False
-                rec.serie = "Annulé"
+                # Just validate - modifications should happen in onchange or write()
+                # The onchange and _force_state_logic handle the actual updates
+                pass
 
     @api.constrains('date_emission')
     def _check_date_emission_not_in_future(self):
@@ -351,25 +344,16 @@ class DataCheque(models.Model):
 
     @api.constrains('state', 'facture', 'date_emission', 'date_echeance')
     def _check_state_rules(self):
+        """Validate state rules - do NOT modify fields here."""
         for rec in self:
             if rec.state == 'bureau':
-                # Force integrity for Bureau state
-                if rec.facture != 'bureau':
-                    rec.facture = 'bureau'
-                
-                # Force clear dates if they persisted
-                if rec.date_emission:
-                    rec.date_emission = False
-                # date_echeance is handled by compute, but we ensure consistency
+                # Only validate - don't modify
+                # The onchange and _force_state_logic handle modifications
+                pass
                 
             elif rec.state == 'annule':
-                # Force integrity for Annulé state
-                if rec.facture != 'annule':
-                    rec.facture = 'annule'
-
-                # Force clear dates
-                if rec.date_emission:
-                    rec.date_emission = False
+                # Only validate - don't modify
+                pass
 
             else:
                 # Make dates required for other active states
@@ -701,23 +685,20 @@ class DataCheque(models.Model):
 
     def write(self, vals):
         # Check edit lock BEFORE any modifications
-        for rec in self:
-            # Skip lock check if user is manager
-            if not self.env.user.has_group('finance.group_finance_user'):
-                # Force recompute to get current lock status
-                rec._compute_is_locked()
+        # Skip lock check if user is manager
+        if not self.env.user.has_group('finance.group_finance_user'):
+            for rec in self:
+                # Check lock status directly (field is already computed)
+                # Do NOT call _compute_is_locked() here - it causes recursion
                 if rec.is_locked:
                     raise UserError(
-                        "Ce chèque est verrouillé et ne peut pas être modifié.\n"
-                        "Raison: Le chèque a été créé il y a plus d'un jour ou il est après 19h00.\n"
-                        "Veuillez demander une autorisation de modification à un manager."
+                        "Ce chèque est verrouillé.\n\n"
+                        "Les chèques ne peuvent pas être modifiés après 19h00.\n\n"
+                        "Veuillez demander une autorisation de modification à un manager Finance."
                     )
-            
-            # For write, we might not have 'state' in vals, so we check self if transitioning
-            # We work on a copy of vals per record effectively?
-            # write is usually batch, but here we can only update val once.
-            # If state is changing in vals, we enforce.
-            
+        
+        # Apply state-specific logic
+        for rec in self:
             check_state = vals.get('state')
             if check_state in ['bureau', 'annule']:
                  # We simply apply the logic to the `vals` dict.

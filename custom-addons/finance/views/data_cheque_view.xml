@@ -112,6 +112,7 @@
                             <field name="date_emission" readonly="state in ['bureau','annule']" required="state not in ['bureau', 'annule']"/>
                             <field name="week"/>
                             <field name="journal"/>
+                            <field name="unlock_until" readonly="1" invisible="not unlock_until" string="Déverrouillé jusqu'à"/>
                             <field name="benif_type" invisible="1"/>
                         </group>
                     </group>

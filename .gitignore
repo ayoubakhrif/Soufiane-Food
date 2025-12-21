@@ -54,7 +54,6 @@ include/
 lib/
 man/
 share/
-src/
 
 # --- Reports / Generated Files ---
 *.pdf

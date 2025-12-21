@@ -9,9 +9,6 @@
     """,
     'author': 'Ayoub Akhrif',
     'depends': ['web'],
-    'data': [
-        'views/web_templates.xml',
-    ],
     'assets': {
         'web.assets_backend': [
             'gestia_branding/static/src/webclient/title_service.js',

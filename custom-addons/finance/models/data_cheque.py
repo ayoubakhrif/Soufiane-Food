@@ -70,6 +70,7 @@ class DataCheque(models.Model):
     # Edit Lock Fields
     unlock_until = fields.Datetime(string="Déverrouillé jusqu'à", help="Si défini, le chèque peut être modifié jusqu'à cette date", tracking=True)
     is_locked = fields.Boolean(string="Verrouillé", compute='_compute_is_locked', help="Indique si le chèque est verrouillé pour l'utilisateur actuel")
+    unlock_until_formatted = fields.Char(string="Date de verrouillage formatée", compute='_compute_unlock_until_formatted')
     # ------------------------------------------------------------
     # EDIT LOCK LOGIC
     # ------------------------------------------------------------

@@ -1,16 +1,7 @@
 <odoo>
-    <!-- Override Database Manager Logo -->
-    <template id="database_manager_gestia" inherit_id="web.database_manager">
-        <!-- Replace Odoo logo with Gestia logo -->
-        <xpath expr="//img[contains(@src, 'logo')]" position="attributes">
-            <attribute name="src">/gestia_branding/static/src/img/gestia_logo.png</attribute>
-            <attribute name="alt">Gestia</attribute>
-        </xpath>
-    </template>
-
     <!-- Override Login Page Logo -->
-    <template id="web_login_gestia" inherit_id="web.login">
-        <xpath expr="//img[contains(@src, 'logo')]" position="attributes">
+    <template id="web_login_gestia" inherit_id="web.login" priority="99">
+        <xpath expr="//div[hasclass('oe_logo')]//img" position="attributes">
             <attribute name="src">/gestia_branding/static/src/img/gestia_logo.png</attribute>
             <attribute name="alt">Gestia</attribute>
         </xpath>

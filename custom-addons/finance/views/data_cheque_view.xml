@@ -79,7 +79,7 @@
                         ">
                             <i class="fa fa-unlock-alt"/>
                             <strong>Autorisation temporaire de modification active jusqu’au</strong>
-                            <field name="unlock_until" readonly="1" nolabel="1"/>
+                            <field name="unlock_until_label" readonly="1" nolabel="1"/>
                         </div>
                     </div>
 

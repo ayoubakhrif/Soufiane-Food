@@ -69,10 +69,21 @@ class DataCheque(models.Model):
     
     # Edit Lock Fields
     unlock_until = fields.Datetime(string="Déverrouillé jusqu'à", help="Si défini, le chèque peut être modifié jusqu'à cette date", tracking=True)
+    unlock_until_label = fields.Char(compute='_compute_unlock_until_label', string="Label date déverrouillage")
     is_locked = fields.Boolean(string="Verrouillé", compute='_compute_is_locked', help="Indique si le chèque est verrouillé pour l'utilisateur actuel")
     # ------------------------------------------------------------
     # EDIT LOCK LOGIC
     # ------------------------------------------------------------
+    @api.depends('unlock_until')
+    def _compute_unlock_until_label(self):
+        for rec in self:
+            if rec.unlock_until:
+                # Convertir en heure locale de l'utilisateur
+                local_date = fields.Datetime.context_timestamp(rec, rec.unlock_until)
+                rec.unlock_until_label = local_date.strftime('%d/%m/%Y %H:%M')
+            else:
+                rec.unlock_until_label = ""
+
     @api.depends('unlock_until')
     def _compute_is_locked(self):
         """Compute if cheque is locked for current user."""

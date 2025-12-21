@@ -70,7 +70,6 @@ class DataCheque(models.Model):
     # Edit Lock Fields
     unlock_until = fields.Datetime(string="Déverrouillé jusqu'à", help="Si défini, le chèque peut être modifié jusqu'à cette date", tracking=True)
     is_locked = fields.Boolean(string="Verrouillé", compute='_compute_is_locked', help="Indique si le chèque est verrouillé pour l'utilisateur actuel")
-    unlock_until_formatted = fields.Char(string="Date de verrouillage formatée", compute='_compute_unlock_until_formatted')
     # ------------------------------------------------------------
     # EDIT LOCK LOGIC
     # ------------------------------------------------------------
@@ -107,16 +106,6 @@ class DataCheque(models.Model):
             
             # Otherwise, it's editable
             rec.is_locked = False
-
-    @api.depends('unlock_until')
-    def _compute_unlock_until_formatted(self):
-        for rec in self:
-            if rec.unlock_until:
-                # Format: JJ/MM/AAAA HH:MM
-                local_dt = fields.Datetime.context_timestamp(rec, rec.unlock_until)
-                rec.unlock_until_formatted = local_dt.strftime('%d/%m/%Y %H:%M')
-            else:
-                rec.unlock_until_formatted = False
     
     # ------------------------------------------------------------
     # BADGE VISUEL

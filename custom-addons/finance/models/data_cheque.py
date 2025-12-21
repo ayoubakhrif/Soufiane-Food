@@ -66,6 +66,47 @@ class DataCheque(models.Model):
     existing_dem_tag = fields.Html(string='Présence DEM', compute='_compute_existance_dem_tag', sanitize=False, optional=True, store=True)
     existing_doc_tag = fields.Html(string='Présence DOC', compute='_compute_existance_doc_tag', sanitize=False, optional=True, store=True)
     talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, domain="[('ste_id', '=', ste_id)]")
+    
+    # Edit Lock Fields
+    unlock_until = fields.Datetime(string="Déverrouillé jusqu'à", help="Si défini, le chèque peut être modifié jusqu'à cette date", tracking=True)
+    is_locked = fields.Boolean(string="Verrouillé", compute='_compute_is_locked', help="Indique si le chèque est verrouillé pour l'utilisateur actuel")
+    # ------------------------------------------------------------
+    # EDIT LOCK LOGIC
+    # ------------------------------------------------------------
+    @api.depends('unlock_until')
+    def _compute_is_locked(self):
+        """Compute if cheque is locked for current user."""
+        for rec in self:
+            # Managers are never locked
+            if self.env.user.has_group('finance.group_finance_user'):
+                rec.is_locked = False
+                continue
+            
+            now = fields.Datetime.now()
+            
+            # If temporarily unlocked and not expired, allow edit
+            if rec.unlock_until and rec.unlock_until > now:
+                rec.is_locked = False
+                continue
+            
+            # Check if created today and before 19:00
+            if rec.create_date:
+                create_date_local = fields.Datetime.context_timestamp(rec, rec.create_date)
+                today_local = fields.Datetime.context_timestamp(rec, now)
+                
+                # If created on a different day, it's locked
+                if create_date_local.date() != today_local.date():
+                    rec.is_locked = True
+                    continue
+                
+                # If created today but after 19:00, it's locked
+                if today_local.hour >= 19:
+                    rec.is_locked = True
+                    continue
+            
+            # Otherwise, it's editable
+            rec.is_locked = False
+    
     # ------------------------------------------------------------
     # BADGE VISUEL
     # ------------------------------------------------------------
@@ -532,6 +573,40 @@ class DataCheque(models.Model):
                 'default_res_id': self.id,
             }
         }
+    
+    # ------------------------------------------------------------
+    # EDIT AUTHORIZATION REQUEST
+    # ------------------------------------------------------------
+    def action_request_edit(self):
+        """Create an edit authorization request for a locked cheque."""
+        self.ensure_one()
+        
+        # Check if there's already a pending request
+        existing_request = self.env['finance.edit.request'].search([
+            ('cheque_id', '=', self.id),
+            ('state', '=', 'pending')
+        ], limit=1)
+        
+        if existing_request:
+            return {
+                'name': 'Demande existante',
+                'type': 'ir.actions.act_window',
+                'res_model': 'finance.edit.request',
+                'res_id': existing_request.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+        
+        return {
+            'name': 'Demande d\'autorisation de modification',
+            'type': 'ir.actions.act_window',
+            'res_model': 'finance.edit.request',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_cheque_id': self.id,
+            }
+        }
 
     # 7) Helper to force state relation logic in backend
     def _force_state_logic(self, vals):
@@ -625,8 +700,20 @@ class DataCheque(models.Model):
         return rec
 
     def write(self, vals):
-        # For write, we might not have 'state' in vals, so we check self if transitioning
+        # Check edit lock BEFORE any modifications
         for rec in self:
+            # Skip lock check if user is manager
+            if not self.env.user.has_group('finance.group_finance_user'):
+                # Force recompute to get current lock status
+                rec._compute_is_locked()
+                if rec.is_locked:
+                    raise UserError(
+                        "Ce chèque est verrouillé et ne peut pas être modifié.\n"
+                        "Raison: Le chèque a été créé il y a plus d'un jour ou il est après 19h00.\n"
+                        "Veuillez demander une autorisation de modification à un manager."
+                    )
+            
+            # For write, we might not have 'state' in vals, so we check self if transitioning
             # We work on a copy of vals per record effectively?
             # write is usually batch, but here we can only update val once.
             # If state is changing in vals, we enforce.
@@ -777,4 +864,19 @@ class DataCheque(models.Model):
             rec._compute_existance_dem_tag()
             rec._compute_existance_doc_tag()
 
+        return True
+
+    # ------------------------------------------------------------
+    # CRON: Clear expired temporary unlocks
+    # ------------------------------------------------------------
+    @api.model
+    def cron_clear_expired_unlocks(self):
+        """Clear unlock_until for cheques where the unlock has expired."""
+        now = fields.Datetime.now()
+        expired_cheques = self.search([
+            ('unlock_until', '!=', False),
+            ('unlock_until', '<', now)
+        ])
+        if expired_cheques:
+            expired_cheques.write({'unlock_until': False})
         return True

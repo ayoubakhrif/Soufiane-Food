@@ -1,0 +1,97 @@
+<odoo>
+    <!-- Edit Request Tree View -->
+    <record id="view_finance_edit_request_tree" model="ir.ui.view">
+        <field name="name">finance.edit.request.tree</field>
+        <field name="model">finance.edit.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
+                <field name="create_date"/>
+                <field name="cheque_id"/>
+                <field name="requested_by"/>
+                <field name="reason"/>
+                <field name="state" widget="badge" decoration-info="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'"/>
+                <field name="approved_by"/>
+                <field name="response_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Edit Request Form View -->
+    <record id="view_finance_edit_request_form" model="ir.ui.view">
+        <field name="name">finance.edit.request.form</field>
+        <field name="model">finance.edit.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" string="Approuver" type="object" class="oe_highlight" invisible="state != 'pending'" groups="finance.group_finance_user"/>
+                    <button name="action_reject" string="Rejeter" type="object" class="btn-danger" invisible="state != 'pending'" groups="finance.group_finance_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="cheque_id" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="requested_by" readonly="1"/>
+                            <field name="create_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="approved_by" readonly="1" invisible="state == 'pending'"/>
+                            <field name="response_date" readonly="1" invisible="state == 'pending'"/>
+                        </group>
+                    </group>
+                    <group string="Détails de la demande">
+                        <field name="reason" readonly="state != 'pending'" nolabel="1"/>
+                    </group>
+                    <group string="Réponse" invisible="state == 'pending'">
+                        <field name="response_note" readonly="state != 'pending'" nolabel="1"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Edit Request Action -->
+    <record id="action_finance_edit_request" model="ir.actions.act_window">
+        <field name="name">Demandes de modification</field>
+        <field name="res_model">finance.edit.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+
+    <!-- Edit Request Search View -->
+    <record id="view_finance_edit_request_search" model="ir.ui.view">
+        <field name="name">finance.edit.request.search</field>
+        <field name="model">finance.edit.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="cheque_id"/>
+                <field name="requested_by"/>
+                <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Approuvé" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejeté" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Demandé par" name="group_user" context="{'group_by': 'requested_by'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Menu for Managers -->
+    <menuitem 
+        id="menu_finance_edit_request"
+        name="Demandes de modification"
+        parent="finance_root_menu"
+        action="action_finance_edit_request"
+        groups="finance.group_finance_user"
+        sequence="100"/>
+</odoo>

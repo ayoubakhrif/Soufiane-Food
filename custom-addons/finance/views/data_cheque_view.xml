@@ -50,6 +50,12 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_request_edit"
+                            string="Demander une autorisation"
+                            type="object"
+                            class="btn-warning"
+                            invisible="not is_locked or is_manager"
+                            groups="finance.group_finance_employee"/>
                     <button name="action_request_deletion"
                             string="Demander la suppression"
                             type="object"
@@ -61,6 +67,7 @@
 
                 <sheet>
                     <field name="is_manager" invisible="1"/>
+                    <field name="is_locked" invisible="1"/>
 
                     <!-- Boutons PDF style Odoo (stat buttons box) -->
                     <div class="oe_button_box" name="button_box">

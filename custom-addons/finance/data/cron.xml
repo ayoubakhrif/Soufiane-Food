@@ -43,5 +43,18 @@ records._compute_existance_doc_tag()
             <field name="nextcall">2025-12-13 11:45:00</field>
             <field name="active">True</field>
         </record>
+
+        <!-- Cron to automatically re-lock cheques after temporary unlock expires -->
+        <record id="cron_clear_expired_unlocks" model="ir.cron">
+            <field name="name">Verrouiller les chèques expirés</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_clear_expired_unlocks()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+            <field name="active">True</field>
+        </record>
     </data>
 </odoo>

@@ -19,3 +19,6 @@ access_finance_deletion_request_manager,access.finance.deletion.request.manager,
 access_finance_deletion_request_employee,access.finance.deletion.request.employee,model_finance_deletion_request,group_finance_employee,1,1,1,0
 access_finance_cheque_request_manager,finance.cheque.request.manager,model_finance_cheque_request,finance.group_finance_user,1,1,1,1
 access_finance_cheque_request_user,finance.cheque.request.user,model_finance_cheque_request,finance.group_finance_employee,0,0,0,0
+
+access_finance_edit_request_manager,access.finance.edit.request.manager,model_finance_edit_request,group_finance_user,1,1,1,1
+access_finance_edit_request_employee,access.finance.edit.request.employee,model_finance_edit_request,group_finance_employee,1,1,1,0

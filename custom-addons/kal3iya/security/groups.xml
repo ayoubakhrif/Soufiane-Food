@@ -1,18 +1,10 @@
 <odoo>
 
-    <!-- Catégorie personnalisée -->
-    <record id="module_category_kal3iya" model="ir.module.category">
-        <field name="name">Kal3iya Access</field>
-        <field name="sequence">20</field>
-        <field name="description">Groupes d'accès pour le module Kal3iya</field>
-    </record>
-
-    <!-- Groupe utilisateur -->
     <record id="group_kal3iya_user" model="res.groups">
         <field name="name">Utilisateur kal3iya</field>
-        <field name="category_id" ref="kal3iya.module_category_kal3iya"/>
+        <field name="category_id" ref="base.module_category_hidden"/>
         <!-- NE PAS toucher aux types utilisateurs -->
-        <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
 </odoo>

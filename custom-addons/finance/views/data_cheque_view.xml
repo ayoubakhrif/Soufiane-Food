@@ -63,10 +63,10 @@
                             invisible="is_manager"
                             groups="finance.group_finance_employee"/>
                     <div invisible="not unlock_until"
-                        style="width: 100%; display: flex; justify-content: center; margin: 8px 0;">
+                        style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
                         
                         <div style="
-                            padding: 8px 18px;
+                            padding: 4px 12px;
                             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                             border-radius: 8px;
                             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -81,7 +81,7 @@
                             ">
                                 <i class="fa fa-clock-o" style="font-size: 16px;"/>
                                 <span>Déverrouillé jusqu’à :</span>
-                                <field name="unlock_until" readonly="1" nolabel="1"/>
+                                <field name="unlock_until" readonly="1" nolabel="1" widget="date"/>
                             </span>
                         </div>
                     </div>

@@ -62,27 +62,24 @@
                             class="btn-danger"
                             invisible="is_manager"
                             groups="finance.group_finance_employee"/>
-                    <div invisible="not unlock_until"
-                        style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
+                    <div invisible="not unlock_until or is_manager or is_locked"
+                        style="flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px;">
                         
-                        <div style="
-                            padding: 4px 12px;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            border-radius: 8px;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                        <div role="alert" style="
+                            padding: 6px 16px;
+                            background-color: #E3F2FD;
+                            border: 1px solid #90CAF9;
+                            color: #0D47A1;
+                            border-radius: 50px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            font-size: 13px;
                         ">
-                            <span style="
-                                color: white;
-                                font-weight: 600;
-                                font-size: 13px;
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                            ">
-                                <i class="fa fa-clock-o" style="font-size: 16px;"/>
-                                <span>Déverrouillé jusqu’à :</span>
-                                <field name="unlock_until" readonly="1" nolabel="1" widget="date"/>
-                            </span>
+                            <i class="fa fa-unlock-alt"/>
+                            <strong>Autorisation temporaire de modification active jusqu’au</strong>
+                            <field name="unlock_until" readonly="1" nolabel="1"/>
                         </div>
                     </div>
 

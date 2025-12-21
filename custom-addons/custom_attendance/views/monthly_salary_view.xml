@@ -67,5 +67,6 @@
         <field name="name">Monthly Salaries</field>
         <field name="res_model">custom.monthly.salary</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'group_by': 'employee_id'}</field>
     </record>
 </odoo>

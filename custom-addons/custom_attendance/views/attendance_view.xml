@@ -93,5 +93,6 @@
         <field name="name">Présence journalière</field>
         <field name="res_model">custom.attendance</field>
         <field name="view_mode">tree,calendar,form</field>
+        <field name="context">{'group_by': 'date:day'}</field>
     </record>
 </odoo>

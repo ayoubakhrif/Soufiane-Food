@@ -1,18 +1,28 @@
 /** @odoo-module **/
 
-import { patch } from "@web/core/utils/patch";
-import { TitleService } from "@web/core/browser/title_service";
+/**
+ * Simple and robust approach to replace "Odoo" with "Gestia" in browser title
+ * Uses MutationObserver to watch for title changes
+ */
 
-patch(TitleService.prototype, {
-    /**
-     * Override setParts to replace Odoo with Gestia in browser title
-     */
-    setParts(parts) {
-        // Call the original method
-        this._super(...arguments);
-        // Replace "Odoo" with "Gestia" in the document title
-        if (document.title.includes("Odoo")) {
-            document.title = document.title.replace(/Odoo/g, "Gestia");
-        }
-    },
+// Replace current title immediately
+if (document.title.includes("Odoo")) {
+    document.title = document.title.replace(/Odoo/g, "Gestia");
+}
+
+// Watch for future title changes
+const observer = new MutationObserver(() => {
+    if (document.title.includes("Odoo")) {
+        document.title = document.title.replace(/Odoo/g, "Gestia");
+    }
 });
+
+// Start observing the title element
+const titleElement = document.querySelector('title');
+if (titleElement) {
+    observer.observe(titleElement, {
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
+}

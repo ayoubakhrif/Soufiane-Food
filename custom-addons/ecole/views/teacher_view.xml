@@ -1,0 +1,66 @@
+<odoo>
+    <record id="view_ecole_teacher_tree" model="ir.ui.view">
+        <field name="name">ecole.teacher.tree</field>
+        <field name="model">ecole.teacher</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="first_name"/>
+                <field name="last_name"/>
+                <field name="phone"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_ecole_teacher_form" model="ir.ui.view">
+        <field name="name">ecole.teacher.form</field>
+        <field name="model">ecole.teacher</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="first_name" placeholder="Prénom"/>
+                            <field name="last_name" placeholder="Nom"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="rib"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Affectations">
+                            <field name="assignment_ids">
+                                <tree editable="bottom">
+                                    <field name="class_id"/>
+                                    <field name="subject_id" 
+                                           domain="[('id', 'in', available_subject_ids)]"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="available_subject_ids" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ecole_teacher" model="ir.actions.act_window">
+        <field name="name">Professeurs</field>
+        <field name="res_model">ecole.teacher</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_ecole_teacher" name="Professeurs" parent="menu_ecole_root" action="action_ecole_teacher" sequence="25"/>
+</odoo>

@@ -4,3 +4,5 @@ access_ecole_parent_base,ecole.parent.base,model_ecole_parent,ecole.group_ecole_
 access_ecole_class_base,ecole.class.base,model_ecole_class,ecole.group_ecole_user,1,1,1,1
 access_ecole_subject,ecole.subject,model_ecole_subject,ecole.group_ecole_user,1,1,1,1
 access_ecole_class_subject,ecole.class.subject,model_ecole_class_subject,ecole.group_ecole_user,1,1,1,1
+access_ecole_teacher,ecole.teacher,model_ecole_teacher,ecole.group_ecole_user,1,1,1,1
+access_ecole_teacher_assignment,ecole.teacher.assignment,model_ecole_teacher_assignment,ecole.group_ecole_user,1,1,1,1

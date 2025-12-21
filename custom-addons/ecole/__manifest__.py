@@ -17,6 +17,7 @@
         'views/parent_view.xml',
         'views/school_class_view.xml',
         'views/subject_view.xml',
+        'views/teacher_view.xml',
     ],
     'installable': True,
     'application': True,

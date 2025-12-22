@@ -20,6 +20,9 @@ class FinanceChequeEncaisse(models.Model):
     # Editable fields to sync
     amount = fields.Float(string='Montant', required=True, tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', required=True, tracking=True)
+    
+    # Store original amount for undo logic
+    original_amount = fields.Float(string='Montant Origine', readonly=True)
 
     # Readonly related fields for display
     journal = fields.Integer(related='cheque_id.journal', string='Journal N°', readonly=True)
@@ -31,12 +34,14 @@ class FinanceChequeEncaisse(models.Model):
         """Reset cheque selection if filters change"""
         self.cheque_id = False
         self.amount = 0.0
+        self.original_amount = 0.0
 
     @api.onchange('cheque_id')
     def _onchange_cheque_id(self):
         """Populate amount from selected cheque"""
         if self.cheque_id:
             self.amount = self.cheque_id.amount
+            self.original_amount = self.cheque_id.amount
 
     @api.model
     def create(self, vals):
@@ -59,11 +64,13 @@ class FinanceChequeEncaisse(models.Model):
         return record
 
     def unlink(self):
-        """Override unlink to revert date_encaissement on original cheque."""
+        """Override unlink to revert date_encaissement and amount on original cheque."""
         for rec in self:
             if rec.cheque_id:
-                # Clear the date on the original cheque
-                # We do this one by one or batch if possible, but safely here
-                rec.cheque_id.sudo().write({'date_encaissement': False})
+                # Clear the date on the original cheque AND revert amount
+                rec.cheque_id.sudo().write({
+                    'date_encaissement': False,
+                    'amount': rec.original_amount if rec.original_amount else rec.cheque_id.amount
+                })
         
         return super(FinanceChequeEncaisse, self).unlink()

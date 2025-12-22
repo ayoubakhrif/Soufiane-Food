@@ -81,6 +81,6 @@
                   name="Chèques Encaissés"
                   parent="finance_root_menu"
                   action="action_finance_cheque_encaisse"
-                  sequence="20"/>
+                  sequence="11"/>
     </data>
 </odoo>

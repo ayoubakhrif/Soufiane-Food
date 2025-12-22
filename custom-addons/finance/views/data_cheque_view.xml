@@ -17,6 +17,7 @@
         name="Saisie"
         parent="finance_root_menu"
         action="data_cheque_action"
+        sequence="10"
     />
 
     <record id="datachq_view_tree" model="ir.ui.view">

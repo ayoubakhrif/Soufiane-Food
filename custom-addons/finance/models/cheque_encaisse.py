@@ -43,6 +43,12 @@ class FinanceChequeEncaisse(models.Model):
             self.amount = self.cheque_id.amount
             self.original_amount = self.cheque_id.amount
 
+    @api.constrains('amount')
+    def _check_amount(self):
+        for rec in self:
+            if rec.amount == 0:
+                raise exceptions.ValidationError("Le montant ne peut pas être 0.")
+
     @api.model
     def create(self, vals):
         # Create record in this history model

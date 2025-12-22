@@ -61,11 +61,27 @@
             </field>
         </record>
 
+        <!-- Search View -->
+        <record id="view_finance_cheque_encaisse_search" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.search</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Chèques Encaissés">
+                    <field name="ste_id"/>
+                    <field name="cheque_id"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Date d'encaissement" name="groupby_date" context="{'group_by':'date_encaissement'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
         <!-- Action -->
         <record id="action_finance_cheque_encaisse" model="ir.actions.act_window">
             <field name="name">Chèques Encaissés</field>
             <field name="res_model">finance.cheque.encaisse</field>
             <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_groupby_date': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Enregistrer un chèque encaissé

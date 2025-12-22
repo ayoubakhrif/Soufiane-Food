@@ -142,10 +142,10 @@
                     <group string="Échéances et montant">
                         <group>
                             <field name="date_echeance" readonly="benif_type == 'import' or state in ['bureau', 'annule']" required="state not in ['bureau', 'annule']"/>
-                            <field name="date_encaissement"/>
+                            <field name="date_encaissement" readonly="1" invisible="not date_encaissement"/>
                         </group>
                         <group>
-                            <field name="amount"/>
+                            <field name="amount" readonly="date_encaissement"/>
                             <field name="type" options="{'horizontal': true}" invisible="benif_type == 'divers' or state == 'annule'"/>
                         </group>
                     </group>

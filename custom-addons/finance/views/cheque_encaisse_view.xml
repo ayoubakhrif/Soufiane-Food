@@ -79,7 +79,7 @@
             <field name="model">finance.cheque.encaisse</field>
             <field name="arch" type="xml">
                 <graph string="Analyse des Chèques Encaissés" type="bar">
-                    <field name="date_encaissement" interval="day"/>
+                    <field name="benif_id"/>
                     <field name="amount" type="measure"/>
                 </graph>
             </field>

@@ -33,21 +33,22 @@
                         <group>
                             <group string="Sélection">
                                 <field name="ste_id" options="{'no_create': True, 'no_open': True}"/>
-                                <field name="date_emission"/>
+                                <field name="benif_id" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="cheque_id" options="{'no_create': True, 'no_open': True}" 
-                                       invisible="not ste_id or not date_emission"/>
+                                       invisible="not ste_id or not benif_id"/>
                             </group>
-                            <group string="Action">
+                            <group string="Action" invisible="not cheque_id">
+                                <field name="amount" widget="monetary"/>
                                 <field name="date_encaissement"/>
                             </group>
                         </group>
                         <group string="Détails du chèque" invisible="not cheque_id">
                             <group>
                                 <field name="journal"/>
-                                <field name="benif_id"/>
+                                <field name="date_emission"/>
                             </group>
                             <group>
-                                <field name="amount" widget="monetary"/>
+                                <field name="date_echeance"/>
                             </group>
                         </group>
                     </sheet>
@@ -80,6 +81,6 @@
                   name="Chèques Encaissés"
                   parent="finance_root_menu"
                   action="action_finance_cheque_encaisse"
-                  sequence="30"/>
+                  sequence="20"/>
     </data>
 </odoo>

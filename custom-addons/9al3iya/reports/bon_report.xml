@@ -4,8 +4,8 @@
         <field name="name">Bon de Livraison</field>
         <field name="model">cal3iyasortie</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">cal3iya.bon_report_template</field>
-        <field name="report_file">cal3iya.bon_report_template</field>
+        <field name="report_name">9al3iya.bon_report_templatev2</field>
+        <field name="report_file">9al3iya.bon_report_templatev2</field>
         <field name="binding_model_id" ref="model_cal3iyasortie"/>
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="base.paperformat_euro"/>

@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class BonLivraisonReportv2(models.AbstractModel):
-    _name = 'report.cal3iya.bon_report_template'
+    _name = 'report.9al3iya.bon_report_templatev2'
     _description = 'Bon de Livraison Groupé'
 
     def _get_report_values(self, docids, data=None):
@@ -54,7 +54,7 @@ class IrActionsReportDrivev2(models.Model):
         pdf_content, content_type = super()._render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
 
         # On ne déclenche l’upload que pour ton rapport
-        if report_ref == 'cal3iya.bon_report_template':
+        if report_ref == '9al3iya.bon_report_templatev2':
             _logger.info("=== 📄 Début upload automatique Google Drive ===")
 
             try:

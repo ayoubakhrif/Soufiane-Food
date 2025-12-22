@@ -73,6 +73,18 @@
             </field>
         </record>
 
+        <!-- Graph View -->
+        <record id="view_finance_cheque_encaisse_graph" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.graph</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <graph string="Analyse des Chèques Encaissés" type="bar">
+                    <field name="date_encaissement" interval="day"/>
+                    <field name="amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
         <!-- Search View -->
         <record id="view_finance_cheque_encaisse_search" model="ir.ui.view">
             <field name="name">finance.cheque.encaisse.search</field>
@@ -92,7 +104,7 @@
         <record id="action_finance_cheque_encaisse" model="ir.actions.act_window">
             <field name="name">Chèques Encaissés</field>
             <field name="res_model">finance.cheque.encaisse</field>
-            <field name="view_mode">tree,form,pivot</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
             <field name="context">{'search_default_groupby_date': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">

@@ -73,7 +73,7 @@
         <!-- Menu -->
         <menuitem id="menu_finance_cheque_encaisse"
                   name="Chèques Encaissés"
-                  parent="menu_finance_root"
+                  parent="finance_root_menu"
                   action="action_finance_cheque_encaisse"
                   sequence="30"/>
     </data>

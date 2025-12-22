@@ -7,7 +7,7 @@ access_custom_employee_entry_agent,custom.employee.entry.agent,model_custom_empl
 access_custom_employee_manager,custom.employee.manager,model_custom_employee,group_custom_attendance_manager,1,1,1,1
 access_custom_attendance_manager,custom.attendance.manager,model_custom_attendance,group_custom_attendance_manager,1,1,1,1
 access_custom_salary_manager,custom.monthly.salary.manager,model_custom_monthly_salary,group_custom_attendance_manager,1,1,1,1
-access_custom_config_manager,custom.attendance.config.manager,model_custom_attendance_config,group_custom_attendance_manager,1,0,0,0
+access_custom_config_manager,custom.attendance.config.manager,model_custom_attendance_config,group_custom_attendance_manager,1,1,1,0
 
 access_custom_config_admin,custom.attendance.config.admin,model_custom_attendance_config,group_custom_attendance_admin,1,1,1,1
 access_custom_holiday_manager,custom.attendance.public.holiday.manager,model_custom_attendance_public_holiday,group_custom_attendance_manager,1,1,1,1

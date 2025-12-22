@@ -138,13 +138,17 @@ class CustomMonthlySalary(models.Model):
             attendances.write({'state': 'locked'})
 
     def write(self, vals):
-        for rec in self:
-            if rec.state == 'validated' and 'state' not in vals:
-                 raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
+        # Allow system updates (superuser) to bypass this check
+        if not self.env.su:
+            for rec in self:
+                if rec.state == 'validated' and 'state' not in vals:
+                     raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
         return super(CustomMonthlySalary, self).write(vals)
 
     def unlink(self):
-        for rec in self:
-            if rec.state == 'validated':
-                raise exceptions.UserError("Impossible de supprimer un bulletin de salaire validé.")
+        # Allow system updates (superuser) to bypass this check
+        if not self.env.su:
+            for rec in self:
+                if rec.state == 'validated':
+                    raise exceptions.UserError("Impossible de supprimer un bulletin de salaire validé.")
         return super(CustomMonthlySalary, self).unlink()

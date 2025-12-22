@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Tree View -->
+        <record id="view_finance_cheque_encaisse_tree" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.tree</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <tree string="Chèques Encaissés" decoration-info="create_date">
+                    <field name="create_date" string="Date de saisie"/>
+                    <field name="ste_id"/>
+                    <field name="cheque_id"/>
+                    <field name="amount" sum="Total"/>
+                    <field name="date_encaissement"/>
+                    <field name="create_uid" string="Saisi par"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_finance_cheque_encaisse_form" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.form</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <form string="Chèque Encaissé">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="cheque_id" readonly="1" invisible="not cheque_id"/>
+                                <span invisible="cheque_id">Nouveau Chèque Encaissé</span>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Sélection">
+                                <field name="ste_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="date_emission"/>
+                                <field name="cheque_id" options="{'no_create': True, 'no_open': True}" 
+                                       invisible="not ste_id or not date_emission"/>
+                            </group>
+                            <group string="Action">
+                                <field name="date_encaissement"/>
+                            </group>
+                        </group>
+                        <group string="Détails du chèque" invisible="not cheque_id">
+                            <group>
+                                <field name="journal"/>
+                                <field name="benif_id"/>
+                            </group>
+                            <group>
+                                <field name="amount" widget="monetary"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_finance_cheque_encaisse" model="ir.actions.act_window">
+            <field name="name">Chèques Encaissés</field>
+            <field name="res_model">finance.cheque.encaisse</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Enregistrer un chèque encaissé
+                </p>
+                <p>
+                    Utilisez ce formulaire pour marquer des chèques existants comme encaissés.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu -->
+        <menuitem id="menu_finance_cheque_encaisse"
+                  name="Chèques Encaissés"
+                  parent="menu_finance_root"
+                  action="action_finance_cheque_encaisse"
+                  sequence="30"/>
+    </data>
+</odoo>

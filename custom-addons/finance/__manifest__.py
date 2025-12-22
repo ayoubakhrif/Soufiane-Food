@@ -15,6 +15,7 @@
         'views/deletion_request.xml',
         'views/cheque_request.xml',
         'views/edit_request_view.xml',
+        'views/cheque_encaisse_view.xml',
         'reports/cheque_request_report.xml',
         'data/cron.xml',
     ],

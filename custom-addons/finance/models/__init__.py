@@ -6,3 +6,4 @@ from . import finance_benif
 from . import finance_ste
 from . import data_cheque
 from . import edit_request
+from . import cheque_encaisse

@@ -21,6 +21,22 @@ class FinanceEditRequest(models.Model):
     response_date = fields.Datetime(string='Date de réponse', readonly=True, tracking=True)
     response_note = fields.Text(string='Note de réponse', tracking=True)
 
+    @api.model
+    def create(self, vals):
+        record = super(FinanceEditRequest, self).create(vals)
+        # Notify Managers with an activity
+        group_finance_user = self.env.ref('finance.group_finance_user')
+        if group_finance_user:
+            managers = group_finance_user.users
+            for manager in managers:
+                record.activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    user_id=manager.id,
+                    summary=f'Demande de modification chèque (ID: {record.cheque_id.id})',
+                    note=f'Demande de modification pour le chèque {record.cheque_id.chq or "N/A"}. Demandé par {record.requested_by.name}.'
+                )
+        return record
+
     def action_approve(self):
         """Approve edit request and unlock cheque for 2 days."""
         self.ensure_one()
@@ -35,6 +51,9 @@ class FinanceEditRequest(models.Model):
             'approved_by': self.env.user.id,
             'response_date': fields.Datetime.now(),
         })
+        
+        # Close activity for managers
+        self.activity_feedback(['mail.mail_activity_data_todo'])
         
         # Send notification to requester
         self.message_post(
@@ -66,6 +85,9 @@ class FinanceEditRequest(models.Model):
             'approved_by': self.env.user.id,
             'response_date': fields.Datetime.now(),
         })
+        
+        # Close activity for managers
+        self.activity_feedback(['mail.mail_activity_data_todo'])
         
         # Send notification to requester
         self.message_post(

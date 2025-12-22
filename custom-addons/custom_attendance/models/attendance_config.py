@@ -21,6 +21,12 @@ class CustomAttendanceConfig(models.Model):
         ('3', 'Jeudi'), ('4', 'Vendredi'), ('5', 'Samedi'), ('6', 'Dimanche')
     ], string='Jour de repos', default='6', required=True)
 
+    public_holiday_ids = fields.One2many(
+        'custom.attendance.public.holiday', 
+        'config_id', 
+        string='Jours Fériés'
+    )
+
     @api.model
     def create(self, vals):
         if self.search_count([('active', '=', True)]) >= 1 and vals.get('active', True):
@@ -35,3 +41,11 @@ class CustomAttendanceConfig(models.Model):
     @api.model
     def get_main_config(self):
         return self.search([('active', '=', True)], limit=1)
+
+class CustomAttendancePublicHoliday(models.Model):
+    _name = 'custom.attendance.public.holiday'
+    _description = 'Public Holiday'
+    
+    config_id = fields.Many2one('custom.attendance.config', string='Configuration', ondelete='cascade')
+    name = fields.Char(string='Description', required=True)
+    date = fields.Date(string='Date', required=True)

@@ -16,6 +16,7 @@ class CustomAttendance(models.Model):
     delay_minutes = fields.Integer(string='Delay (Minutes)', compute='_compute_hours', store=True)
     missing_hours = fields.Float(string='Heures manquantes', compute='_compute_hours', store=True)
     overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_hours', store=True)
+    holiday_hours = fields.Float(string='Heures Fériés', compute='_compute_hours', store=True)
     normal_working_hours = fields.Float(string='Heures normales', compute='_compute_hours', store=True)
     
     state = fields.Selection([
@@ -34,7 +35,7 @@ class CustomAttendance(models.Model):
             if rec.check_out < rec.check_in:
                 raise exceptions.ValidationError("Heure d'entrée ne peut pas etre supérieure à l'heure de sortie.")
 
-    @api.depends('check_in', 'check_out', 'employee_id')
+    @api.depends('check_in', 'check_out', 'employee_id', 'date')
     def _compute_hours(self):
         config = self.env['custom.attendance.config'].get_main_config()
         if not config:
@@ -43,40 +44,55 @@ class CustomAttendance(models.Model):
             off_out = 17.5
             daily_hours = 8.0
             tolerance = 0
+            holidays = []
         else:
             off_in = config.official_check_in
             off_out = config.official_check_out
             daily_hours = config.working_hours_per_day
             tolerance = config.delay_tolerance
+            holidays = config.public_holiday_ids.mapped('date')
 
         for rec in self:
-            # Delay Calculation
-            if rec.check_in > off_in:
-                delay_min = int((rec.check_in - off_in) * 60)
-                rec.delay_minutes = delay_min if delay_min > tolerance else 0
-            else:
+            # Check if Public Holiday
+            if rec.date in holidays:
+                # Holiday Logic
+                duration = rec.check_out - rec.check_in
+                rec.holiday_hours = max(0.0, duration)
+                rec.normal_working_hours = rec.holiday_hours # Count as normal too for stats
+                rec.missing_hours = 0.0 # No penalty
+                rec.overtime_hours = 0.0 # Double pay replaces overtime
                 rec.delay_minutes = 0
-
-            # Core Logic: Hours within [Official_In, Official_Out]
-            # Effective In: max of Actual In vs Official In
-            eff_in = max(rec.check_in, off_in)
-            # Effective Out (for normal hours): min of Actual Out vs Official Out
-            eff_out = min(rec.check_out, off_out)
-            
-            # Normal Worked duration
-            if eff_out > eff_in:
-                worked = eff_out - eff_in
             else:
-                worked = 0.0
-            
-            rec.normal_working_hours = min(worked, daily_hours)
-            
-            # Missing Hours: Daily Target - Normal Worked
-            # Note: This accounts for Late Arrival AND Early Departure
-            rec.missing_hours = max(0.0, daily_hours - rec.normal_working_hours)
-            
-            # Overtime: Strictly time after Official Out
-            if rec.check_out > off_out:
-                rec.overtime_hours = rec.check_out - off_out
-            else:
-                rec.overtime_hours = 0.0
+                # Normal Day Logic
+                rec.holiday_hours = 0.0
+                
+                # Delay Calculation
+                if rec.check_in > off_in:
+                    delay_min = int((rec.check_in - off_in) * 60)
+                    rec.delay_minutes = delay_min if delay_min > tolerance else 0
+                else:
+                    rec.delay_minutes = 0
+    
+                # Core Logic: Hours within [Official_In, Official_Out]
+                # Effective In: max of Actual In vs Official In
+                eff_in = max(rec.check_in, off_in)
+                # Effective Out (for normal hours): min of Actual Out vs Official Out
+                eff_out = min(rec.check_out, off_out)
+                
+                # Normal Worked duration
+                if eff_out > eff_in:
+                    worked = eff_out - eff_in
+                else:
+                    worked = 0.0
+                
+                rec.normal_working_hours = min(worked, daily_hours)
+                
+                # Missing Hours: Daily Target - Normal Worked
+                # Note: This accounts for Late Arrival AND Early Departure
+                rec.missing_hours = max(0.0, daily_hours - rec.normal_working_hours)
+                
+                # Overtime: Strictly time after Official Out
+                if rec.check_out > off_out:
+                    rec.overtime_hours = rec.check_out - off_out
+                else:
+                    rec.overtime_hours = 0.0

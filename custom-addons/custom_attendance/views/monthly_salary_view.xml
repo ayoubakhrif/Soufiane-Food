@@ -47,12 +47,14 @@
                             <field name="total_normal_hours"/>
                             <field name="total_missing_hours" decoration-danger="total_missing_hours &gt; 0"/>
                             <field name="total_overtime_hours" decoration-success="total_overtime_hours &gt; 0"/>
+                            <field name="total_holiday_hours" decoration-info="total_holiday_hours &gt; 0"/>
                         </group>
                     </group>
                     <group string="Calcul final">
                         <group>
                             <field name="deduction_amount" widget="monetary" decoration-danger="1"/>
                             <field name="overtime_amount" widget="monetary" decoration-success="1"/>
+                            <field name="holiday_amount" widget="monetary" decoration-info="1"/>
                         </group>
                         <group>
                             <field name="final_salary" widget="monetary" decoration-bf="1" style="font-size: 1.5em;"/>

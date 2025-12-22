@@ -40,5 +40,6 @@
     <menuitem id="finance_benif_menu"
               name="Bénificiaires"
               parent="finance_root_menu"
-              action="finance_benif_action"/>
+              action="finance_benif_action"
+              sequence="20"/>
 </odoo>

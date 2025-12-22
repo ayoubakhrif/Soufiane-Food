@@ -16,6 +16,7 @@
         id="data_finance_menu"
         name="Données"
         parent="finance_root_menu"
+        sequence="30"
     />
 
     <menuitem 

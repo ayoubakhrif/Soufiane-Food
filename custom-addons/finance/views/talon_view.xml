@@ -101,5 +101,6 @@
     <menuitem id="finance_talon_menu"
               name="Talons"
               parent="finance_root_menu"
-              action="finance_talon_action"/>
+              action="finance_talon_action"
+              sequence="25"/>
 </odoo>

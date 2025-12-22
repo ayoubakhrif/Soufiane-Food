@@ -70,7 +70,7 @@
                     <field name="ste_id"/>
                     <field name="cheque_id"/>
                     <group expand="1" string="Group By">
-                        <filter string="Date d'encaissement" name="groupby_date" context="{'group_by':'date_encaissement'}"/>
+                        <filter string="Date d'encaissement" name="groupby_date" context="{'group_by':'date_encaissement:day'}"/>
                     </group>
                 </search>
             </field>

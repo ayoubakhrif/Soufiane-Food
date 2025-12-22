@@ -14,12 +14,18 @@ class BonLivraisonReportv2(models.AbstractModel):
 
     def _get_report_values(self, docids, data=None):
         """Regroupe les sorties par client/chauffeur/société pour le rendu QWeb."""
+        _logger.info(f"=== 🕵️‍♂️ GENERATING REPORT {self._name} ===")
+        _logger.info(f"DOCIDS: {docids}")
+        
         docs = self.env['cal3iyasortie'].browse(docids)
+        _logger.info(f"Records found: {len(docs)}")
 
         grouped = defaultdict(list)
         for rec in docs:
             key = (rec.client_id.id or 0, rec.driver_id.id or 0, rec.ste_id.id or 0)
             grouped[key].append(rec)
+            
+        _logger.info(f"Grouped Keys: {list(grouped.keys())}")
 
         grouped_bons = []
         for (client_id, driver_id, ste_id), sorties in grouped.items():

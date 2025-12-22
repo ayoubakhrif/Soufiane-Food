@@ -3,11 +3,12 @@ from odoo import models, fields, api, exceptions
 class FinanceChequeEncaisse(models.Model):
     _name = 'finance.cheque.encaisse'
     _description = 'Chèque Encaissé'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'cheque_id'
     _order = 'create_date desc'
 
-    ste_id = fields.Many2one('finance.ste', string='Société', required=True)
-    date_emission = fields.Date(string='Date d’émission', required=True)
+    ste_id = fields.Many2one('finance.ste', string='Société', required=True, tracking=True)
+    date_emission = fields.Date(string='Date d’émission', required=True, tracking=True)
     
     cheque_id = fields.Many2one(
         'datacheque', 
@@ -21,7 +22,7 @@ class FinanceChequeEncaisse(models.Model):
     benif_id = fields.Many2one(related='cheque_id.benif_id', string='Bénéficiaire', readonly=True)
     amount = fields.Float(related='cheque_id.amount', string='Montant', readonly=True)
     
-    date_encaissement = fields.Date(string='Date d’encaissement', required=True, default=fields.Date.context_today)
+    date_encaissement = fields.Date(string='Date d’encaissement', required=True, default=fields.Date.context_today, tracking=True)
 
     @api.onchange('ste_id', 'date_emission')
     def _onchange_filter_reset(self):
@@ -45,3 +46,13 @@ class FinanceChequeEncaisse(models.Model):
             })
             
         return record
+
+    def unlink(self):
+        """Override unlink to revert date_encaissement on original cheque."""
+        for rec in self:
+            if rec.cheque_id:
+                # Clear the date on the original cheque
+                # We do this one by one or batch if possible, but safely here
+                rec.cheque_id.sudo().write({'date_encaissement': False})
+        
+        return super(FinanceChequeEncaisse, self).unlink()

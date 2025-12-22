@@ -32,6 +32,11 @@ class CustomMonthlySalary(models.Model):
         ('validated', 'Payé')
     ], default='draft', string='Status', tracking=True)
 
+    _sql_constraints = [
+        ('unique_employee_month_year', 'unique(employee_id, month, year)', 
+         'Un bulletin de salaire existe déjà pour cet employé, ce mois et cette année.')
+    ]
+
     @api.depends('employee_id', 'month', 'year')
     def _compute_salary_details(self):
         config = self.env['custom.attendance.config'].get_main_config()
@@ -40,6 +45,11 @@ class CustomMonthlySalary(models.Model):
 
         for rec in self:
             if not rec.employee_id or not rec.month or not rec.year:
+                rec.working_days_count = 0
+                rec.hourly_salary = 0.0
+                rec.total_normal_hours = 0.0
+                rec.total_missing_hours = 0.0
+                rec.total_overtime_hours = 0.0
                 continue
 
             # Snap base salary
@@ -63,18 +73,30 @@ class CustomMonthlySalary(models.Model):
             total_expected_hours = rec.working_days_count * daily_hours
             rec.hourly_salary = (rec.base_salary / total_expected_hours) if total_expected_hours else 0.0
 
-            # Fetch Attendances
+            # Optimisation: read_group
             start_date = date(y, m, 1)
             end_date = date(y, m, num_days)
-            attendances = self.env['custom.attendance'].search([
+            
+            domain = [
                 ('employee_id', '=', rec.employee_id.id),
                 ('date', '>=', start_date),
                 ('date', '<=', end_date)
-            ])
+            ]
             
-            rec.total_normal_hours = sum(attendances.mapped('normal_working_hours'))
-            rec.total_missing_hours = sum(attendances.mapped('missing_hours'))
-            rec.total_overtime_hours = sum(attendances.mapped('overtime_hours'))
+            data = self.env['custom.attendance'].read_group(
+                domain,
+                ['normal_working_hours', 'missing_hours', 'overtime_hours'],
+                []
+            )
+            
+            if data:
+                rec.total_normal_hours = data[0]['normal_working_hours']
+                rec.total_missing_hours = data[0]['missing_hours']
+                rec.total_overtime_hours = data[0]['overtime_hours']
+            else:
+                rec.total_normal_hours = 0.0
+                rec.total_missing_hours = 0.0
+                rec.total_overtime_hours = 0.0
 
     @api.depends('total_missing_hours', 'total_overtime_hours', 'hourly_salary')
     def _compute_final_salary(self):
@@ -101,3 +123,15 @@ class CustomMonthlySalary(models.Model):
                 ('date', '<=', end_date)
             ])
             attendances.write({'state': 'locked'})
+
+    def write(self, vals):
+        for rec in self:
+            if rec.state == 'validated' and 'state' not in vals:
+                 raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
+        return super(CustomMonthlySalary, self).write(vals)
+
+    def unlink(self):
+        for rec in self:
+            if rec.state == 'validated':
+                raise exceptions.UserError("Impossible de supprimer un bulletin de salaire validé.")
+        return super(CustomMonthlySalary, self).unlink()

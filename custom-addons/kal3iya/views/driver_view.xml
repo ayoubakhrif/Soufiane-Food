@@ -25,19 +25,46 @@
         <field name="name">kal3iya.driver.form</field>
         <field name="model">kal3iya.driver</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Chauffeur">
                 <sheet>
-                    <h1><field name="name"/></h1>
+
+                    <!-- 🧑‍✈️ En-tête chauffeur -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du chauffeur"/>
+                        </h1>
+                    </div>
+
+                    <!-- 📞 Informations générales -->
                     <group>
-                        <field name="phone"/>
-                        <field name="total_advance" readonly="1" widget="monetary"/>
+                        <group>
+                            <field name="phone"/>
+                        </group>
+
+                        <group>
+                            <field name="total_advance"
+                                readonly="1"
+                                widget="monetary"
+                                string="Total des avances"/>
+                        </group>
                     </group>
+
+                    <separator string="Gestion des avances"/>
+
                     <notebook>
-                        <!-- Onglet Avances du chauffeur -->
-                        <page string="Avances">
+
+                        <!-- 💵 Onglet Avances -->
+                        <page string="Avances du chauffeur">
+
+                            <!-- 🔢 Récap rapide -->
                             <group>
-                                <field name="total_advance" readonly="1" widget="monetary"/>
+                                <field name="total_advance"
+                                    readonly="1"
+                                    widget="monetary"
+                                    string="Total cumulé"/>
                             </group>
+
+                            <!-- 📋 Liste des avances -->
                             <field name="advance_ids">
                                 <tree editable="bottom">
                                     <field name="date_paid"/>
@@ -45,18 +72,32 @@
                                     <field name="client_id"/>
                                     <field name="payment_mode"/>
                                 </tree>
-                                <form>
+
+                                <!-- 📝 Formulaire avance -->
+                                <form string="Avance chauffeur">
                                     <group>
-                                        <field name="date_paid"/>
-                                        <field name="amount"/>
-                                        <field name="client_id"/>
-                                        <field name="payment_mode"/>
+                                        <group>
+                                            <field name="date_paid"/>
+                                            <field name="amount"/>
+                                        </group>
+                                        <group>
+                                            <field name="client_id"/>
+                                            <field name="payment_mode"/>
+                                        </group>
+                                    </group>
+
+                                    <separator string="Détails"/>
+
+                                    <group>
                                         <field name="comment"/>
                                     </group>
                                 </form>
                             </field>
+
                         </page>
+
                     </notebook>
+
                 </sheet>
             </form>
         </field>

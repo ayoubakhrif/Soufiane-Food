@@ -113,7 +113,7 @@
                         </group>
                     </group>
 
-                    <separator string="Traçabilité & fournisseurs"/>
+                    <separator string="Traçabilité &amp; fournisseurs"/>
 
                     <!-- Bloc: Traçabilité -->
                     <group col="2" string="Traçabilité">

@@ -32,13 +32,33 @@
         <field name="name">kal3iya.advance.form</field>
         <field name="model">kal3iya.advance</field>
         <field name="arch" type="xml">
-            <form>
-                <field name="client_id"/>
-                <field name="amount"/>
-                <field name="date_paid"/>
-                <field name="driver_id"/>
-                <field name="payment_mode"/>
-                <field name="comment" invisible="payment_mode != 'charge'"/>
+            <form string="Saisie d'une avance client">
+                <sheet>
+
+                    <!-- 🧾 Informations principales -->
+                    <group>
+                        <group>
+                            <field name="client_id" options="{'no_create': True}"/>
+                            <field name="driver_id"/>
+                        </group>
+                        <group>
+                            <field name="amount" class="oe_inline"/>
+                            <field name="date_paid"/>
+                        </group>
+                    </group>
+
+                    <separator string="Détails de paiement"/>
+
+                    <!-- 💳 Paiement -->
+                    <group>
+                        <group>
+                            <field name="payment_mode"/>
+                        </group>
+                        <group>
+                            <field name="comment" invisible="payment_mode != 'charge'"/>
+                        </group>
+                    </group>
+                </sheet>
             </form>
         </field>
     </record>

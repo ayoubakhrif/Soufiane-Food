@@ -51,38 +51,93 @@
         <field name="name">entree form</field>
         <field name="model">kal3iyaentry</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Entrée / Retour">
                 <header>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
                 </header>
+
                 <sheet>
-                    <group>
-                        <field name="return_id" invisible="state == 'entree'" domain="[('client_id', '=', client_id)]"/>
+
+                    <!-- Bandeau titre / infos rapides -->
+                    <div class="oe_title">
+                        <h1>
+                            <span>Entrée / Retour</span>
+                        </h1>
+                    </div>
+
+                    <!-- Bloc: Liaison retour -->
+                    <group string="Référence" col="2">
+                        <group>
+                            <field name="return_id"
+                                invisible="state == 'entree'"
+                                domain="[('client_id', '=', client_id)]"
+                                placeholder="Sélectionner le retour lié..."/>
+                        </group>
+                        <group>
+                            <field name="client_id" invisible="state == 'entree'" options="{'no_create_edit': True}"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="client_id" invisible="state == 'entree'"/>
-                        <field name="product_id"/>
-                        <field name="quantity"/>
-                        <field name="weight"/>
-                        <field name="tonnage"/>
-                        <field name="price" invisible="state == 'retour'"/>
-                        <field name="mt_achat" invisible="state == 'retour'"/>
-                        <field name="date_entry"/>
-                        <field name="driver_id"/>
-                        <field name="cellphone"/>
+
+                    <separator string="Détails produit & quantités"/>
+
+                    <!-- Bloc: Produit / Quantités -->
+                    <group col="2" string="Produit">
+                        <group>
+                            <field name="product_id" options="{'no_create_edit': True}"/>
+                            <field name="quantity"/>
+                            <field name="weight"/>
+                            <field name="tonnage"/>
+                        </group>
+
+                        <group>
+                            <field name="price" invisible="state == 'retour'"/>
+                            <field name="mt_achat" invisible="state == 'retour'"/>
+                            <field name="selling_price" invisible="state == 'entree'"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="ville"/>
-                        <field name="frigo" invisible="ville == 'tanger'"/>
-                        <field name="charge_transport"/>
-                        <field name="calibre"/>
-                        <field name="dum"/>
-                        <field name="lot"/>
-                        <field name="ste_id"/>
-                        <field name="provider_id"/>
-                        <field name="image_1920"/>
-                        <field name="selling_price" invisible="state == 'entree'"/>
+
+                    <separator string="Informations logistiques"/>
+
+                    <!-- Bloc: Logistique -->
+                    <group col="2" string="Logistique">
+                        <group>
+                            <field name="date_entry"/>
+                            <field name="driver_id" options="{'no_create_edit': True}"/>
+                            <field name="cellphone" widget="phone"/>
+                        </group>
+
+                        <group>
+                            <field name="ville"/>
+                            <field name="frigo" invisible="ville == 'tanger'"/>
+                            <field name="charge_transport"/>
+                        </group>
                     </group>
+
+                    <separator string="Traçabilité & fournisseurs"/>
+
+                    <!-- Bloc: Traçabilité -->
+                    <group col="2" string="Traçabilité">
+                        <group>
+                            <field name="calibre"/>
+                            <field name="dum"/>
+                            <field name="lot"/>
+                        </group>
+                        <group>
+                            <field name="ste_id" options="{'no_create_edit': True}"/>
+                            <field name="provider_id" options="{'no_create_edit': True}"/>
+                        </group>
+                    </group>
+
+                    <separator string="Image"/>
+
+                    <!-- Bloc: Image -->
+                    <group>
+                        <field name="image_1920"
+                            widget="image"
+                            class="oe_avatar"
+                            options="{'preview_image': 'image_1920'}"/>
+                    </group>
+
                 </sheet>
             </form>
         </field>

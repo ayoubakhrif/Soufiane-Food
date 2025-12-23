@@ -52,42 +52,86 @@
         <field name="arch" type="xml">
             <form string="Sortie de stock">
                 <sheet>
+
+                    <!-- 📍 Informations générales -->
                     <group>
-                        <field name="ville" widget="radio" 
-                            options="{'horizontal': true}"/>
-                        <field name="entry_id" context="{'ville_filter': ville}"
-                            options="{'no_create': True, 'no_quick_create': True}"/>
-                        <field name="date_exit"/>
-                        <field name="quantity"/>
-                        <field name="selling_price"/>
-                        <field name="client_id"/>
-                        <field name="driver_id"/>
-                        <field name="cellphone"/>
+                        <group>
+                            <field name="ville" widget="radio"
+                                options="{'horizontal': true}"/>
+                            <field name="entry_id"
+                                context="{'ville_filter': ville}"
+                                options="{'no_create': True, 'no_quick_create': True}"/>
+                            <field name="date_exit"/>
+                        </group>
+
+                        <group>
+                            <field name="client_id"/>
+                            <field name="driver_id"/>
+                            <field name="cellphone"/>
+                        </group>
                     </group>
+
+                    <separator string="Détails de la sortie"/>
+
+                    <!-- 🧾 Détails de vente -->
                     <group>
-                        <field name="product_id" readonly="1"/>
-                        <field name="weight" readonly="1"/>
-                        <field name="tonnage" readonly="1"/>
-                        <field name="calibre" readonly="1"/>
-                        <field name="frigo" readonly="1"/>
-                        <field name="provider_id" readonly="1"/>
-                        <field name="lot" readonly="1"/>
-                        <field name="dum" readonly="1"/>
-                        <field name="mt_achat" readonly="1"/>
-                        <field name="mt_vente" readonly="1"/>
-                        <field name="diff" readonly="1"/>
-                        <field name="charge_transport"/>
-                        <field name="ste_id" readonly="1"/>
-                        <field name="image_1920" widget="image" class="oe_avatar"
-                               options="{'preview_image': 'image_1920'}" readonly="1"/>
-                        <field name="drive_file_url"/>
-                        <field name="drive_file_id" invisible="1"/>
-                        <field name="week"/>
+                        <group>
+                            <field name="quantity"/>
+                            <field name="selling_price"/>
+                            <field name="charge_transport"/>
+                            <field name="week"/>
+                        </group>
+
+                        <group>
+                            <field name="mt_vente" readonly="1"/>
+                            <field name="diff" readonly="1"/>
+                        </group>
                     </group>
+
+                    <separator string="Informations du stock (lecture seule)"/>
+
+                    <!-- 📦 Informations stock -->
+                    <group>
+                        <group>
+                            <field name="product_id" readonly="1"/>
+                            <field name="calibre" readonly="1"/>
+                            <field name="weight" readonly="1"/>
+                            <field name="tonnage" readonly="1"/>
+                            <field name="frigo" readonly="1"/>
+                        </group>
+
+                        <group>
+                            <field name="provider_id" readonly="1"/>
+                            <field name="lot" readonly="1"/>
+                            <field name="dum" readonly="1"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="mt_achat" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Documents"/>
+
+                    <!-- 🖼️ Image + Drive -->
+                    <group>
+                        <group>
+                            <field name="image_1920"
+                                widget="image"
+                                class="oe_avatar"
+                                options="{'preview_image': 'image_1920'}"
+                                readonly="1"/>
+                        </group>
+
+                        <group>
+                            <field name="drive_file_url"/>
+                            <field name="drive_file_id" invisible="1"/>
+                        </group>
+                    </group>
+
                 </sheet>
             </form>
         </field>
     </record>
+
 
     <!-- Vue recherche -->
     <record id="sortie_view_search" model="ir.ui.view">

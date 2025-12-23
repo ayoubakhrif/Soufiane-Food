@@ -18,33 +18,88 @@
                 <templates>
                     <t t-name="kanban-box">
                         <div class="o_kanban_record"
-                            style="border-radius:8px; border:1px solid #ddd; 
-                                    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-                                    background:#fff; padding:8px; display:flex; align-items:center;">
+                            style="
+                                border-radius:12px;
+                                border:1px solid #e5e7eb;
+                                box-shadow:0 4px 14px rgba(0,0,0,0.08);
+                                background:#ffffff;
+                                padding:12px;
+                                display:flex;
+                                gap:14px;
+                            ">
 
-                            <!-- 🖼️ Image à gauche (widget Odoo natif) -->
-                            <aside style="width:90px; height:90px; flex-shrink:0; margin-right:12px;">
-                                <div class="o_kanban_image_fill position-relative w-100 h-100">
+                            <!-- 🖼️ Image -->
+                            <aside style="width:90px; height:90px; flex-shrink:0;">
+                                <div class="o_kanban_image_fill w-100 h-100">
                                     <field name="image_1920"
                                         widget="image"
-                                        class="h-100 w-100"
-                                        options="{'img_class': 'object-fit-cover rounded'}"/>
+                                        class="w-100 h-100 rounded"
+                                        options="{'img_class': 'object-fit-cover'}"/>
                                 </div>
                             </aside>
 
-                            <!-- 📋 Détails à droite -->
+                            <!-- 📋 Infos -->
                             <div class="flex-grow-1">
-                                <div style="font-weight:600; font-size:14px; color:#2b2b2b; margin-bottom:6px;">
+
+                                <!-- Produit -->
+                                <div style="font-weight:700; font-size:15px; color:#111827; margin-bottom:6px;">
                                     <field name="product_id"/>
                                 </div>
-                                <div style="font-size:13px; color:#444; line-height:1.5;">
-                                    <div><b>Quantité :</b> <field name="quantity"/></div>
-                                    <div><b>Prix :</b> <field name="price"/></div>
-                                    <div><b>Calibre :</b> <field name="calibre"/></div>
-                                    <div><b>Poids :</b> <field name="weight"/></div>
-                                    <div><b>Mt d'achat :</b> <field name="mt_achat"/></div>
-                                    <div><b>Lot :</b> <field name="lot"/></div>
-                                    <div><b>ville :</b> <field name="ville"/></div>
+
+                                <!-- Badges -->
+                                <div style="margin-bottom:8px;">
+                                    <span style="
+                                        background:#e0f2fe;
+                                        color:#0369a1;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;
+                                        margin-right:6px;">
+                                        <field name="ville"/>
+                                    </span>
+
+                                    <span style="
+                                        background:#f3f4f6;
+                                        color:#374151;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;">
+                                        Calibre <field name="calibre"/>
+                                    </span>
+                                </div>
+
+                                <!-- Stock -->
+                                <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                    <div>
+                                        📦 <b>Quantité :</b>
+                                        <span style="color:#059669;">
+                                            <field name="quantity"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        ⚖️ <b>Poids :</b> <field name="weight"/>
+                                    </div>
+                                </div>
+
+                                <hr style="margin:8px 0; border:none; border-top:1px dashed #e5e7eb;"/>
+
+                                <!-- Financier -->
+                                <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                    <div>
+                                        💰 <b>Prix :</b>
+                                        <span style="color:#1d4ed8;">
+                                            <field name="price"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        🧾 <b>Montant achat :</b>
+                                        <span style="color:#7c2d12;">
+                                            <field name="mt_achat"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        🏷️ <b>Lot :</b> <field name="lot"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>

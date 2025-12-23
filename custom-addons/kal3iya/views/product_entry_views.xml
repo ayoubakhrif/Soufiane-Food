@@ -78,7 +78,7 @@
                         </group>
                     </group>
 
-                    <separator string="Détails produit & quantités"/>
+                    <separator string="Détails produit et quantités"/>
 
                     <!-- Bloc: Produit / Quantités -->
                     <group col="2" string="Produit">

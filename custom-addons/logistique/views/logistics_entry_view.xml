@@ -27,8 +27,8 @@
                 <sheet>
                     <group>
                         <group string="References">
-                            <field name="prov_number"/>
-                            <field name="def_number"/>
+                            <field name="prov_number" readonly="1"/>
+                            <field name="def_number" readonly="1"/>
                             <field name="week"/>
                             <field name="invoice_number"/>
                             <field name="bl_number"/>

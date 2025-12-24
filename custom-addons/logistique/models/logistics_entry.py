@@ -6,7 +6,7 @@ class LogisticsEntry(models.Model):
     _rec_name = 'prov_number'
 
     week = fields.Char(string='Semaine')
-    prov_number = fields.Char(string='N° Prov', required=True)
+    prov_number = fields.Char(string='N° Prov')
     status = fields.Selection([
         ('in_progress', 'In Progress'),
         ('get_out', 'Get Out'),

@@ -3,9 +3,15 @@ from odoo import models, fields, api
 class FinanceLogisticsTracking(models.Model):
     _name = 'finance.logistics.tracking'
     _description = 'Suivi Conteneurs (Finance)'
-    _rec_name = 'entry_id'
+    _rec_name = 'container_display'
 
-    entry_id = fields.Many2one('logistique.entry', string='Conteneur / Entrée', required=True)
+    entry_id = fields.Many2one('logistique.entry', string='Conteneur', required=True)
+    container_display = fields.Char(
+        related='entry_id.container_id.name',
+        string='Container',
+        store=True,
+        readonly=True
+    )
     
     # Related Fields (Read-only for display)
     container_id = fields.Many2one(related='entry_id.container_id', string='Conteneur', readonly=True)

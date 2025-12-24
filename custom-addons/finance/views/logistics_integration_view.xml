@@ -53,8 +53,7 @@
         <field name="model">finance.logistics.tracking</field>
         <field name="arch" type="xml">
             <tree string="Suivi Conteneurs">
-                <field name="entry_id"/>
-                <field name="container_id"/>
+                <field name="container_display"/>
                 <field name="status"/>
                 <field name="ste_id"/>
                 <field name="prov_number"/>

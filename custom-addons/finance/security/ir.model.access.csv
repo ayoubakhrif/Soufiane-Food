@@ -24,4 +24,6 @@ access_finance_edit_request_manager,access.finance.edit.request.manager,model_fi
 access_finance_edit_request_employee,access.finance.edit.request.employee,model_finance_edit_request,group_finance_employee,1,1,1,0
 
 access_finance_cheque_encaisse_manager,access.finance.cheque.encaisse.manager,model_finance_cheque_encaisse,group_finance_user,1,1,1,1
+access_finance_logistics_tracking,access.finance.logistics.tracking,model_finance_logistics_tracking,finance.group_finance_user,1,1,1,1
+access_finance_logistics_tracking,access.finance.logistics.tracking,model_finance_logistics_tracking,finance.group_finance_employee,1,1,1,1
 access_finance_cheque_encaisse_employee,access.finance.cheque.encaisse.employee,model_finance_cheque_encaisse,group_finance_employee,1,1,1,0

@@ -1,90 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <!-- Form View for Finance -->
-        <record id="view_finance_logistics_entry_form" model="ir.ui.view">
-            <field name="name">finance.logistics.entry.form</field>
-            <field name="model">logistique.entry</field>
-            <field name="arch" type="xml">
-                <form string="Suivi Contenaires">
-                    <header>
-                        <field name="status" widget="statusbar" options="{'clickable': '0'}"/>
-                    </header>
-                    <sheet>
+    <!-- Form View -->
+    <record id="view_finance_logistics_tracking_form" model="ir.ui.view">
+        <field name="name">finance.logistics.tracking.form</field>
+        <field name="model">finance.logistics.tracking</field>
+        <field name="arch" type="xml">
+            <form string="Suivi Contenaires">
+                <header>
+                    <field name="status" widget="statusbar" options="{'clickable': '0'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Sélection">
+                            <field name="entry_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="container_id" invisible="1"/> 
+                        </group>
+                        <group string="Données Finance">
+                            <field name="prov_number" readonly="status == 'closed'" required="status in ['in_progress', 'get_out']"/>
+                            <field name="def_number" readonly="status != 'closed'" invisible="status != 'closed'" required="status == 'closed'"/>
+                        </group>
+                    </group>
+                    <group string="Données Logistiques (Read-only)">
                         <group>
-                            <group string="Conteneur">
-                                <field name="container_id" required="1" options="{'no_create': True}"/> 
-                            </group>
-                            <group string="Données Finance">
-                                <field name="prov_number" readonly="status == 'closed'" required="status in ['in_progress', 'get_out']"/>
-                                <field name="def_number" readonly="status != 'closed'" invisible="status != 'closed'" required="status == 'closed'"/>
-                            </group>
+                            <field name="ste_id"/>
+                            <field name="supplier_id"/>
+                            <field name="article_id"/>
+                            <field name="shipping_id"/>
                         </group>
-                        <group string="Données Logistiques (Read-only)">
-                            <group>
-                                <field name="ste_id" readonly="1"/>
-                                <field name="supplier_id" readonly="1"/>
-                                <field name="article_id" readonly="1"/>
-                                <field name="shipping_id" readonly="1"/>
-                            </group>
-                            <group>
-                                <field name="week" readonly="1"/>
-                                <field name="invoice_number" readonly="1"/>
-                                <field name="bl_number" readonly="1"/>
-                            </group>
-                            <group>
-                                <field name="weight" readonly="1"/>
-                                <field name="eta" readonly="1"/>
-                                <field name="free_time" readonly="1"/>
-                                <field name="details" readonly="1"/>
-                            </group>
+                        <group>
+                            <field name="week"/>
+                            <field name="invoice_number"/>
+                            <field name="bl_number"/>
                         </group>
-                        <group string="Remarques">
-                            <field name="remarks" readonly="1"/>
+                        <group>
+                            <field name="weight"/>
+                            <field name="eta"/>
+                            <field name="free_time"/>
+                            <field name="details"/>
                         </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
+                    </group>
+                    <group string="Remarques">
+                        <field name="remarks"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
-        <!-- Action -->
-        <record id="action_finance_logistics_entry" model="ir.actions.act_window">
-            <field name="name">Suivi Conteneurs</field>
-            <field name="res_model">logistique.entry</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="logistique.view_logistique_entry_tree"/> <!-- Reuse Tree from Logistique -->
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
-                    Sélectionnez un conteneur pour le suivi.
-                </p>
-            </field>
-        </record>
-        
-        <!-- Force Form View for this action -->
-        <record id="action_finance_logistics_entry_view_form" model="ir.actions.act_window.view">
-            <field name="sequence" eval="2"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_finance_logistics_entry_form"/>
-            <field name="act_window_id" ref="action_finance_logistics_entry"/>
-        </record>
-        
-        <record id="action_finance_logistics_entry_view_tree" model="ir.actions.act_window.view">
-            <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="logistique.view_logistique_entry_tree"/>
-            <field name="act_window_id" ref="action_finance_logistics_entry"/>
-        </record>
+    <!-- Tree View -->
+    <record id="view_finance_logistics_tracking_tree" model="ir.ui.view">
+        <field name="name">finance.logistics.tracking.tree</field>
+        <field name="model">finance.logistics.tracking</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi Conteneurs">
+                <field name="entry_id"/>
+                <field name="container_id"/>
+                <field name="status"/>
+                <field name="ste_id"/>
+                <field name="prov_number"/>
+                <field name="def_number"/>
+            </tree>
+        </field>
+    </record>
 
-        <!-- Menu -->
-        <menuitem id="menu_finance_logistics_root"
-                  name="Logistique"
-                  parent="finance_root_menu"
-                  sequence="15"/>
+    <!-- Action -->
+    <record id="action_finance_logistics_tracking" model="ir.actions.act_window">
+        <field name="name">Suivi Conteneurs</field>
+        <field name="res_model">finance.logistics.tracking</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez un nouveau suivi pour saisir les champs finance d'un dossier logistique.
+            </p>
+        </field>
+    </record>
 
-        <menuitem id="menu_finance_logistics_container"
-                  name="Suivi Conteneurs"
-                  parent="menu_finance_logistics_root"
-                  action="action_finance_logistics_entry"
-                  sequence="10"/>
-    </data>
+    <!-- Menu -->
+    <menuitem id="menu_finance_logistics_root"
+              name="Logistique"
+              parent="finance_root_menu"
+              sequence="15"/>
+
+    <menuitem id="menu_finance_logistics_tracking"
+              name="Suivi Conteneurs"
+              parent="menu_finance_logistics_root"
+              action="action_finance_logistics_tracking"
+              sequence="10"/>
+
 </odoo>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_entry_tree" model="ir.ui.view">
+        <field name="name">logistique.entry.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Logistics Entries" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'">
+                <field name="week"/>
+                <field name="prov_number"/>
+                <field name="def_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="container_id"/>
+                <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_logistique_entry_form" model="ir.ui.view">
+        <field name="name">logistique.entry.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <form string="Logistics Entry">
+                <header>
+                    <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="References">
+                            <field name="prov_number"/>
+                            <field name="def_number"/>
+                            <field name="week"/>
+                            <field name="invoice_number"/>
+                            <field name="bl_number"/>
+                        </group>
+                        <group string="Entities">
+                            <field name="ste_id"/>
+                            <field name="supplier_id"/>
+                            <field name="shipping_id"/>
+                        </group>
+                        <group string="Logistics">
+                            <field name="container_id"/>
+                            <field name="article_id"/>
+                            <field name="weight"/>
+                            <field name="details"/>
+                        </group>
+                        <group string="Tracking">
+                            <field name="eta"/>
+                            <field name="incoterm"/>
+                            <field name="free_time"/>
+                            <field name="doc_status"/>
+                        </group>
+                    </group>
+                    <group string="Remarks">
+                        <field name="remarks"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_logistique_entry" model="ir.actions.act_window">
+        <field name="name">Logistics Entries</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

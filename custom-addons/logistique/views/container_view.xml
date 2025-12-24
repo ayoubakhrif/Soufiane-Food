@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_container_tree" model="ir.ui.view">
+        <field name="name">logistique.container.tree</field>
+        <field name="model">logistique.container</field>
+        <field name="arch" type="xml">
+            <tree string="Containers">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_logistique_container_form" model="ir.ui.view">
+        <field name="name">logistique.container.form</field>
+        <field name="model">logistique.container</field>
+        <field name="arch" type="xml">
+            <form string="Container">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_logistique_container" model="ir.actions.act_window">
+        <field name="name">Containers</field>
+        <field name="res_model">logistique.container</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

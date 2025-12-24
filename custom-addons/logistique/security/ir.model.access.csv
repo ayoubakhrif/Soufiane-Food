@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_logistique_ste,access.logistique.ste,model_logistique_ste,base.group_user,1,1,1,1
+access_logistique_supplier,access.logistique.supplier,model_logistique_supplier,base.group_user,1,1,1,1
+access_logistique_article,access.logistique.article,model_logistique_article,base.group_user,1,1,1,1
+access_logistique_shipping,access.logistique.shipping,model_logistique_shipping,base.group_user,1,1,1,1
+access_logistique_container,access.logistique.container,model_logistique_container,base.group_user,1,1,1,1
+access_logistique_entry,access.logistique.entry,model_logistique_entry,base.group_user,1,1,1,1

@@ -3,7 +3,7 @@ from odoo import models, fields
 class LogisticsEntry(models.Model):
     _name = 'logistique.entry'
     _description = 'Dossier Logistique'
-    _rec_name = 'prov_number'
+    _rec_name = 'container_id'
 
     week = fields.Char(string='Semaine')
     prov_number = fields.Char(string='N° Prov')

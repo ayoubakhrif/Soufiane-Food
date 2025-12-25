@@ -11,3 +11,5 @@ access_logistique_container_user,access.logistique.container.user,model_logistiq
 access_logistique_container_manager,access.logistique.container.manager,model_logistique_container,group_logistique_manager,1,1,1,1
 access_logistique_entry_user,access.logistique.entry.user,model_logistique_entry,group_logistique_user,1,1,1,0
 access_logistique_entry_manager,access.logistique.entry.manager,model_logistique_entry,group_logistique_manager,1,1,1,1
+access_logistique_dossier_user,access.logistique.dossier.user,model_logistique_dossier,group_logistique_user,1,1,1,0
+access_logistique_dossier_manager,access.logistique.dossier.manager,model_logistique_dossier,group_logistique_manager,1,1,1,1

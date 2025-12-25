@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_dossier_form" model="ir.ui.view">
+        <field name="name">logistique.dossier.form</field>
+        <field name="model">logistique.dossier</field>
+        <field name="arch" type="xml">
+            <form string="Dossier Logistique">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                    <notebook>
+                        <page string="Conteneurs">
+                            <field name="container_ids" widget="one2many_list">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_logistique_dossier_tree" model="ir.ui.view">
+        <field name="name">logistique.dossier.tree</field>
+        <field name="model">logistique.dossier</field>
+        <field name="arch" type="xml">
+            <tree string="Dossiers Logistiques">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_logistique_dossier" model="ir.actions.act_window">
+        <field name="name">Dossiers / BL</field>
+        <field name="res_model">logistique.dossier</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_logistique_dossier"
+              name="Dossiers / BL"
+              parent="menu_logistique_root"
+              action="action_logistique_dossier"
+              sequence="5"/>
+</odoo>

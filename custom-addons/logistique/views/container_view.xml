@@ -18,6 +18,7 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="dossier_id"/>
                     </group>
                 </sheet>
             </form>

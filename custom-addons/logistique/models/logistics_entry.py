@@ -27,7 +27,7 @@ class LogisticsEntry(models.Model):
     
     container_id = fields.Many2one('logistique.container', string='Container')
     
-    bl_number = fields.Char(string='BL Number')
+    bl_number = fields.Char(string='BL Number', related='container_id.dossier_id.name', store=True, readonly=True)
     eta = fields.Date(string='ETA')
     doc_status = fields.Char(string='Document Status')
     remarks = fields.Char(string='Remarks')

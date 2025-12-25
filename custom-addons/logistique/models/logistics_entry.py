@@ -8,9 +8,9 @@ class LogisticsEntry(models.Model):
     week = fields.Char(string='Semaine')
     prov_number = fields.Char(string='N° Prov')
     status = fields.Selection([
-        ('in_progress', 'In Progress'),
+        ('in_progress', 'En cours'),
         ('get_out', 'Get Out'),
-        ('closed', 'Closed'),
+        ('closed', 'Cloturé'),
     ], string='Status', default='in_progress')
     
     def_number = fields.Char(string='N° Def')

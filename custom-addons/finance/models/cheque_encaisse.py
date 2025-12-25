@@ -14,7 +14,7 @@ class FinanceChequeEncaisse(models.Model):
         'datacheque', 
         string='Chèque', 
         required=True,
-        domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id), ('date_encaissement', '=', False)]"
+        domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id)]"
     )
     
     # Editable fields to sync
@@ -42,6 +42,19 @@ class FinanceChequeEncaisse(models.Model):
         if self.cheque_id:
             self.amount = self.cheque_id.amount
             self.original_amount = self.cheque_id.amount
+
+            # Check for duplicates
+            domain = [('cheque_id', '=', self.cheque_id.id)]
+            if self._origin:
+                domain.append(('id', '!=', self._origin.id))
+            
+            if self.search_count(domain) > 0:
+                return {
+                    'warning': {
+                        'title': "Attention",
+                        'message': "Ce chèque a déjà été saisi dans un autre encaissement."
+                    }
+                }
 
     @api.constrains('amount')
     def _check_amount(self):

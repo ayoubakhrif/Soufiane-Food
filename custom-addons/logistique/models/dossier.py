@@ -9,3 +9,5 @@ class LogistiqueDossier(models.Model):
 
     name = fields.Char(string='Numéro BL', required=True)
     container_ids = fields.One2many('logistique.container', 'dossier_id', string='Conteneurs')
+    cheque_ids = fields.One2many('logistique.dossier.cheque', 'dossier_id', string='Chèques')
+

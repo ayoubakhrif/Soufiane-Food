@@ -12,6 +12,7 @@
     'author': 'Ayoub Akhrif',
     'depends': ['base'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/ste_view.xml',
         'views/supplier_view.xml',

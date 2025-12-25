@@ -52,7 +52,7 @@ class FinanceChequeEncaisse(models.Model):
                 return {
                     'warning': {
                         'title': "Attention",
-                        'message': "Ce chèque a déjà été saisi dans un autre encaissement."
+                        'message': "Ce chèque est déja saisi dans 'Chèques encaissés'."
                     }
                 }
 

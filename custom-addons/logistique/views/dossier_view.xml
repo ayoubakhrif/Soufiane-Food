@@ -26,7 +26,6 @@
                                     <field name="type"/>
                                     <field name="amount"/>
                                     <field name="ste_id"/>
-                                    <field name="currency_id" invisible="1"/>
                                 </tree>
                                 <form>
                                     <group>
@@ -35,7 +34,6 @@
                                         <field name="beneficiary_id"/>
                                         <field name="type"/>
                                         <field name="amount"/>
-                                        <field name="currency_id" invisible="1"/>
                                         <field name="ste_id"/>
                                     </group>
                                 </form>
@@ -64,7 +62,7 @@
     </record>
 
     <menuitem id="menu_logistique_dossier"
-              name="Dossiers / BL"
+              name="Dossiers"
               parent="menu_logistique_root"
               action="action_logistique_dossier"
               sequence="5"/>

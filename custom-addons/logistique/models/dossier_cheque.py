@@ -8,8 +8,7 @@ class LogistiqueDossierCheque(models.Model):
     cheque_serie = fields.Char(string='Série Chèque', required=True, size=7)
     date = fields.Date(string='Date')
     beneficiary_id = fields.Many2one('logistique.shipping', string='Bénéficiaire')
-    amount = fields.Monetary(string='Montant', required=True, currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', string='Devise', required=True, default=lambda self: self.env.ref('base.MAD'))
+    amount = fields.Float(string='Montant', required=True)
     ste_id = fields.Many2one('logistique.ste', string='Société', required=True)
     type = fields.Selection([
         ('thc', 'THC'),

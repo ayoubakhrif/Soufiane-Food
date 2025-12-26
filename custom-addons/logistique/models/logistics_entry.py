@@ -15,7 +15,7 @@ class LogisticsEntry(models.Model):
     
     def_number = fields.Char(string='N° Def')
     
-    ste_id = fields.Many2one('logistique.ste', string='Company (Ste)')
+    ste_id = fields.Many2one('logistique.ste', string='Société')
     supplier_id = fields.Many2one('logistique.supplier', string='Supplier')
     invoice_number = fields.Char(string='Invoice Number')
     article_id = fields.Many2one('logistique.article', string='Article')

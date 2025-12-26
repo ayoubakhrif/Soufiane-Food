@@ -7,6 +7,23 @@
         <field name="arch" type="xml">
             <form string="Suivi Contenaires">
                 <header>
+                    <div class="oe_button_box" position="inside">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-hourglass-half" invisible="status != 'in_progress'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text text-warning" style="font-size: 16px; font-weight: bold;">En cours</span>
+                            </div>
+                        </button>
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-truck" invisible="status != 'get_out'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text text-success" style="font-size: 16px; font-weight: bold;">Get Out</span>
+                            </div>
+                        </button>
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive" invisible="status != 'closed'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Cloturé</span>
+                            </div>
+                        </button>
+                    </div>
                     <field name="status" widget="statusbar" options="{'clickable': '0'}"/>
                 </header>
                 <sheet>

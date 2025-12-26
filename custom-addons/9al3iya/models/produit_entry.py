@@ -36,6 +36,7 @@ class ProduitEntry(models.Model):
     client_id = fields.Many2one('cal3iya.client', string='Client', tracking=True)
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
     charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
+    dum_link = fields.Char(string='Lien DUM', readonly=True)
 
 
     state = fields.Selection([

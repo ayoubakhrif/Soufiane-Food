@@ -11,11 +11,10 @@
                 </header>
                 <sheet>
                     <group>
-                        <group string="Sélection">
-                            <field name="entry_id" options="{'no_create': True, 'no_open': True}"/>
-                            <field name="container_id" invisible="1"/> 
-                        </group>
                         <group string="Données Finance">
+                            <field name="entry_id" invisible="1"/>
+                            <field name="container_id" invisible="1"/> 
+                            <field name="container_display" readonly="1"/>
                             <field name="prov_number" readonly="status == 'closed'" required="status in ['in_progress', 'get_out']"/>
                             <field name="def_number" readonly="status != 'closed'" invisible="status != 'closed'" required="status == 'closed'"/>
                         </group>
@@ -69,7 +68,10 @@
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Créez un nouveau suivi pour saisir les champs finance d'un dossier logistique.
+                Les dossiers logistiques apparaissent automatiquement ici.
+            </p>
+            <p>
+                Vous pouvez saisir les champs finance (N° Prov, N° Def) directement.
             </p>
         </field>
     </record>

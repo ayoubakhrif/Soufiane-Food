@@ -5,7 +5,7 @@ class FinanceLogisticsTracking(models.Model):
     _description = 'Suivi Conteneurs (Finance)'
     _rec_name = 'container_display'
 
-    entry_id = fields.Many2one('logistique.entry', string='Conteneur', required=True)
+    entry_id = fields.Many2one('logistique.entry', string='Conteneur', readonly=True)
     container_display = fields.Char(
         related='entry_id.container_id.name',
         string='Container',

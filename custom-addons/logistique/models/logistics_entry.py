@@ -31,3 +31,16 @@ class LogisticsEntry(models.Model):
     eta = fields.Date(string='ETA')
     doc_status = fields.Char(string='Document Status')
     remarks = fields.Char(string='Remarks')
+
+    @api.model
+    def create(self, vals):
+        # Create the logistics entry
+        record = super(LogisticsEntry, self).create(vals)
+        
+        # Automatically create corresponding finance tracking record
+        self.env['finance.logistics.tracking'].sudo().create({
+            'entry_id': record.id,
+        })
+        
+        return record
+

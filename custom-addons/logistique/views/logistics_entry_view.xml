@@ -22,6 +22,13 @@
         <field name="arch" type="xml">
             <form string="Logistics Entry">
                 <header>
+                    <div class="oe_button_box" position="inside">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive" invisible="status != 'closed'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Cloturé</span>
+                            </div>
+                        </button>
+                    </div>
                     <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
@@ -29,13 +36,14 @@
                         <group string="References">
                             <field name="prov_number" readonly="1"/>
                             <field name="def_number" readonly="1"/>
+                            <field name="eta"/>
                             <field name="week"/>
-                            <field name="invoice_number"/>
-                            <field name="bl_number"/>
                         </group>
                         <group string="Entities">
                             <field name="ste_id"/>
+                            <field name="invoice_number"/>
                             <field name="supplier_id"/>
+                            <field name="bl_number"/>
                             <field name="shipping_id"/>
                         </group>
                         <group string="Logistics">
@@ -45,7 +53,6 @@
                             <field name="details"/>
                         </group>
                         <group string="Tracking">
-                            <field name="eta"/>
                             <field name="incoterm"/>
                             <field name="free_time"/>
                             <field name="doc_status"/>

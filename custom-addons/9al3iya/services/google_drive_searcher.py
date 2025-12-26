@@ -18,30 +18,34 @@ DEFAULT_AUTH_DIR = os.path.join(
 DUM_FOLDER_ID = "1i9kzO4Pk7X2hFJG2hyh828Sq5uAbarIA"
 
 
-def get_drive_service(auth_dir=None, port=8081):
-    """Authentifie et retourne un service Google Drive."""
+def get_drive_service(auth_dir=None):
+    """Authentifie et retourne un service Google Drive (server-compatible)."""
     auth_dir = auth_dir or DEFAULT_AUTH_DIR
-    credentials_path = os.path.join(auth_dir, 'credentials.json')
     token_path = os.path.join(auth_dir, 'token.json')
 
-    creds = None
+    if not os.path.exists(token_path):
+        raise FileNotFoundError(
+            f"Token file not found at {token_path}. "
+            "Please authenticate using the upload flow first."
+        )
 
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+    # Load credentials from existing token
+    creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+
+    # Refresh if expired (this works on server)
+    if creds and creds.expired and creds.refresh_token:
+        try:
+            creds.refresh(Request())
+            # Save refreshed token
+            with open(token_path, 'w') as token_file:
+                token_file.write(creds.to_json())
+        except Exception as e:
+            raise Exception(f"Failed to refresh token: {str(e)}")
 
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_path,
-                SCOPES,
-                redirect_uri=f'http://localhost:{port}'
-            )
-            creds = flow.run_local_server(port=port, redirect_uri_trailing_slash=False)
-
-        with open(token_path, 'w') as token_file:
-            token_file.write(creds.to_json())
+        raise Exception(
+            "Invalid credentials. Please re-authenticate using the upload flow."
+        )
 
     return build('drive', 'v3', credentials=creds)
 

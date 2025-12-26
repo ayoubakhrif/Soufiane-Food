@@ -27,33 +27,32 @@ ROOT_FOLDER_ID = "1YVjJOOPHsVwW7TeE6oxQFSna9bEOylXa"
 # ------------------------------------------------------------
 # 🔐 Authentification
 # ------------------------------------------------------------
-def get_drive_servicev2(auth_dir=None, port=8081):
-    """Authentifie l'utilisateur et retourne un service Google Drive."""
+def get_drive_servicev2(auth_dir=None):
+    """Authentifie l'utilisateur et retourne un service Google Drive (server-compatible)."""
     auth_dir = auth_dir or DEFAULT_AUTH_DIR
-    credentials_path = os.path.join(auth_dir, 'credentials.json')
     token_path = os.path.join(auth_dir, 'token.json')
 
-    creds = None
+    if not os.path.exists(token_path):
+        raise FileNotFoundError(
+            f"Token file not found at {token_path}. "
+            "Please authenticate first."
+        )
 
-    # Lecture du token s'il existe déjà
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+    # Load credentials from existing token
+    creds = Credentials.from_authorized_user_file(token_path, SCOPES)
 
-    # Authentification manuelle si le token est invalide ou absent
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+    # Refresh if expired (this works on server)
+    if creds and creds.expired and creds.refresh_token:
+        try:
             creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_path,
-                SCOPES,
-                redirect_uri=f'http://localhost:{port}'
-            )
-            creds = flow.run_local_server(port=port, redirect_uri_trailing_slash=False)
+            # Save refreshed token
+            with open(token_path, 'w') as token_file:
+                token_file.write(creds.to_json())
+        except Exception as e:
+            raise Exception(f"Failed to refresh token: {str(e)}")
 
-        # Sauvegarde du token pour les prochaines utilisations
-        with open(token_path, 'w') as token_file:
-            token_file.write(creds.to_json())
+    if not creds or not creds.valid:
+        raise Exception("Invalid credentials. Please re-authenticate.")
 
     return build('drive', 'v3', credentials=creds)
 

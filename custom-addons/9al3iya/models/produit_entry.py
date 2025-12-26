@@ -130,6 +130,43 @@ class ProduitEntry(models.Model):
             record.charge_transport = record.tonnage * 20 if record.tonnage else 0.0
 
     # ------------------------------------------------------------
+    # GOOGLE DRIVE DUM SEARCH
+    # ------------------------------------------------------------
+    def action_open_dum_drive(self):
+        """Search and open DUM PDF from Google Drive."""
+        self.ensure_one()
+        
+        if not self.dum:
+            raise UserError("Aucune valeur DUM trouvée pour cette entrée.")
+        
+        # If link already cached, open directly
+        if self.dum_link:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.dum_link,
+                'target': 'new',
+            }
+        
+        # Search on Google Drive
+        try:
+            from ..services.google_drive_searcher import search_dum_pdf, DEFAULT_AUTH_DIR
+            
+            web_link = search_dum_pdf(self.dum, auth_dir=DEFAULT_AUTH_DIR)
+            
+            # Cache the link
+            self.write({'dum_link': web_link})
+            
+            return {
+                'type': 'ir.actions.act_url',
+                'url': web_link,
+                'target': 'new',
+            }
+        except FileNotFoundError:
+            raise UserError(f"Aucun PDF trouvé sur Google Drive pour le DUM: {self.dum}")
+        except Exception as e:
+            raise UserError(f"Erreur lors de la recherche sur Drive: {str(e)}")
+
+    # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ
     # ------------------------------------------------------------
     _sql_constraints = [

@@ -51,6 +51,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_open_dum_drive" 
+                            type="object" 
+                            string="Open DUM (Drive)" 
+                            class="btn-primary"
+                            invisible="not dum"/>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
                 </header>
                 <sheet>

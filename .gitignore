@@ -69,3 +69,7 @@ share/
 !.mailmap
 !.weblate.json
 !ir.model.access.csv
+
+# --- Google Drive Credentials (NEVER commit these!) ---
+**/drive_auth/*.json
+!**/drive_auth/credentials.json

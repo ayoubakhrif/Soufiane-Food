@@ -133,11 +133,20 @@ class ProduitEntry(models.Model):
     # GOOGLE DRIVE DUM SEARCH
     # ------------------------------------------------------------
     def action_open_dum_drive(self):
-        """Search and open DUM PDF from Google Drive."""
+        """Search and open DUM PDF from Google Drive (similar to CHQ search)."""
         self.ensure_one()
         
         if not self.dum:
-            raise UserError("Aucune valeur DUM trouvée pour cette entrée.")
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": "DUM manquant",
+                    "message": "Aucune valeur DUM trouvée pour cette entrée.",
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
         
         # If link already cached, open directly
         if self.dum_link:
@@ -147,7 +156,7 @@ class ProduitEntry(models.Model):
                 'target': 'new',
             }
         
-        # Search on Google Drive
+        # Try to search on Google Drive
         try:
             from ..services.google_drive_searcher import search_dum_pdf, DEFAULT_AUTH_DIR
             
@@ -156,15 +165,37 @@ class ProduitEntry(models.Model):
             # Cache the link
             self.write({'dum_link': web_link})
             
+            # Open the PDF
             return {
                 'type': 'ir.actions.act_url',
                 'url': web_link,
                 'target': 'new',
             }
         except FileNotFoundError:
-            raise UserError(f"Aucun PDF trouvé sur Google Drive pour le DUM: {self.dum}")
+            # Show notification instead of raising error
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": "PDF DUM introuvable",
+                    "message": f"Aucun PDF contenant '{self.dum}' n'a été trouvé sur Google Drive.",
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
         except Exception as e:
-            raise UserError(f"Erreur lors de la recherche sur Drive: {str(e)}")
+            # Show error notification
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": "Erreur Drive",
+                    "message": f"Erreur lors de la recherche: {str(e)}",
+                    "type": "danger",
+                    "sticky": False,
+                },
+            }
+
 
     # ------------------------------------------------------------
     # CONTRAINTE D’UNICITÉ

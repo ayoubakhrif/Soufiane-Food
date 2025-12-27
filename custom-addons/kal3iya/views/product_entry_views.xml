@@ -54,12 +54,12 @@
             <form string="Entrée / Retour">
                 <header>
                     <div class="oe_button_box" position="inside">
-                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-sign-in" invisible="state != 'entree'">
+                        <button name="action_view_entries" type="object" class="oe_stat_button" icon="fa-sign-in" invisible="state != 'entree'">
                             <div class="o_stat_info">
                                 <span class="o_stat_text text-success" style="font-size: 16px; font-weight: bold;">Entrée</span>
                             </div>
                         </button>
-                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-undo" invisible="state != 'retour'">
+                        <button name="action_view_returns" type="object" class="oe_stat_button" icon="fa-undo" invisible="state != 'retour'">
                             <div class="o_stat_info">
                                 <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Retour</span>
                             </div>

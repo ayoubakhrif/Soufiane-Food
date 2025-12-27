@@ -228,6 +228,31 @@ class ProductEntry(models.Model):
         return res
 
     # ------------------------------------------------------------
+    # ACTIONS
+    # ------------------------------------------------------------
+    def action_view_entries(self):
+        """Open a view showing only entry records (state='entree')."""
+        return {
+            'name': 'Entrées',
+            'type': 'ir.actions.act_window',
+            'res_model': 'kal3iyaentry',
+            'view_mode': 'tree,form',
+            'domain': [('state', '=', 'entree')],
+            'context': {'default_state': 'entree'},
+        }
+
+    def action_view_returns(self):
+        """Open a view showing only return records (state='retour')."""
+        return {
+            'name': 'Retours',
+            'type': 'ir.actions.act_window',
+            'res_model': 'kal3iyaentry',
+            'view_mode': 'tree,form',
+            'domain': [('state', '=', 'retour')],
+            'context': {'default_state': 'retour'},
+        }
+
+    # ------------------------------------------------------------
     # UNLINK
     # ------------------------------------------------------------
     def unlink(self):

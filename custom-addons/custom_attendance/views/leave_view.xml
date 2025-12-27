@@ -47,7 +47,7 @@
                         <field name="reason" readonly="state != 'draft'"/>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
+                <div class="oe_chatter" groups="custom_attendance.group_custom_attendance_manager,custom_attendance.group_custom_attendance_admin">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>

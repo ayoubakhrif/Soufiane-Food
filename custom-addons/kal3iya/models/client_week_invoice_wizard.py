@@ -11,12 +11,53 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         required=True,
         readonly=True,
     )
-    # on laisse la sélection vide ici, on la remplit dynamiquement
-    week = fields.Selection([], string='Semaine', required=True)
+    week = fields.Selection(selection='_get_selection_weeks', string='Semaine', required=True)
+
+    @api.model
+    def _get_selection_weeks(self):
+        """Return all unique weeks found in the system for validation."""
+        weeks = set()
+        
+        # Helper to format date to week
+        def date_to_week(d):
+            return d.strftime("%Y-W%W") if d else False
+            
+        # Collect weeks from all records
+        # Use sudo to ensure we see all weeks regardless of permissions
+        env = self.env
+        
+        # Sorties
+        sorties = env['kal3iya.sortie'].sudo().search([('week', '!=', False)])
+        weeks.update(sorties.mapped('week'))
+        
+        # Retours
+        retours = env['kal3iya.retour'].sudo().search([('week', '!=', False)])
+        weeks.update(retours.mapped('week'))
+        
+        # Avances
+        avances = env['kal3iya.avance'].sudo().search([('date_paid', '!=', False)])
+        for date in avances.mapped('date_paid'):
+            weeks.add(date_to_week(date))
+            
+        # Sort desc
+        sorted_weeks = sorted(weeks, reverse=True)
+        
+        selection = []
+        for w in sorted_weeks:
+            # "2025-W47" -> "Semaine 47 (2025)"
+            parts = w.split('-W')
+            if len(parts) == 2:
+                year, week_num = parts
+                label = f"Semaine {week_num} ({year})"
+                selection.append((w, label))
+            else:
+                selection.append((w, w))
+                
+        return selection
 
     @api.model
     def default_get(self, fields_list):
-        """Initialise le wizard avec le client actif + remplit la liste des semaines."""
+        """Initialize wizard with default client and most recent week."""
         res = super().default_get(fields_list)
 
         client_id = self.env.context.get('active_id')
@@ -26,42 +67,25 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         res['client_id'] = client_id
         client = self.env['kal3iya.client'].browse(client_id)
 
-        weeks = set()
-
-        # Sorties
+        # Calculate weeks SPECIFIC to this client to set a smart default
+        client_weeks = set()
+        
         for s in client.sortie_ids:
-            if s.week:
-                weeks.add(s.week)
-
-        # Retours
+            if s.week: client_weeks.add(s.week)
+            
         for r in client.retour_ids:
-            if getattr(r, 'week', False):
-                weeks.add(r.week)
-
-        # Avances (date → semaine)
+            if getattr(r, 'week', False): client_weeks.add(r.week)
+            
         for a in client.avances:
             if a.date_paid:
-                weeks.add(a.date_paid.strftime("%Y-W%W"))
+                client_weeks.add(a.date_paid.strftime("%Y-W%W"))
+                
+        sorted_client_weeks = sorted(client_weeks, reverse=True)
 
-        # Tri décroissant
-        sorted_weeks = sorted(weeks, reverse=True)
-
-        selection = []
-        for week in sorted_weeks:
-            # "2025-W47" → "Semaine 47 (2025)"
-            parts = week.split('-W')
-            if len(parts) == 2:
-                year, week_num = parts
-                label = f"Semaine {week_num} ({year})"
-                selection.append((week, label))
-
-        # 👉 IMPORTANT : on injecte la sélection dans le champ AVANT la création du record
-        self._fields['week'].selection = selection
-
-        # optionnel : mettre par défaut la semaine la plus récente
-        if selection:
-            res.setdefault('week', selection[0][0])
-
+        # Set default to the most recent week for this client
+        if sorted_client_weeks:
+            res['week'] = sorted_client_weeks[0]
+            
         return res
 
     def action_print_invoice(self):

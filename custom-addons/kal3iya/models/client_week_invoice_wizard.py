@@ -27,15 +27,15 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         env = self.env
         
         # Sorties
-        sorties = env['kal3iya.sortie'].sudo().search([('week', '!=', False)])
+        sorties = env['kal3iyasortie'].sudo().search([('week', '!=', False)])
         weeks.update(sorties.mapped('week'))
         
         # Retours
-        retours = env['kal3iya.retour'].sudo().search([('week', '!=', False)])
+        retours = env['kal3iyaentry'].sudo().search([('week', '!=', False)])
         weeks.update(retours.mapped('week'))
         
         # Avances
-        avances = env['kal3iya.avance'].sudo().search([('date_paid', '!=', False)])
+        avances = env['kal3iya.advance'].sudo().search([('date_paid', '!=', False)])
         for date in avances.mapped('date_paid'):
             weeks.add(date_to_week(date))
             

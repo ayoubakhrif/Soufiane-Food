@@ -53,6 +53,7 @@
         <field name="arch" type="xml">
             <form string="Entrée / Retour">
                 <header>
+                    <field name="state_badge" widget="html" readonly="1" class="float-end"/>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
                 </header>
 

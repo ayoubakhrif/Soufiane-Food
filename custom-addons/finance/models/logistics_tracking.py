@@ -41,6 +41,11 @@ class FinanceLogisticsTracking(models.Model):
         ('get_out', 'Get Out'),
         ('closed', 'Cloturé'),
     ], string='Status', compute='_compute_entry_data', store=False)
+    
+    # Financial & Audit Fields
+    price_unit = fields.Float(string='P.U', compute='_compute_entry_data', store=False)
+    amount_total = fields.Float(string='Total', compute='_compute_entry_data', store=False)
+    user_id = fields.Many2one('res.users', string='Saisi par', compute='_compute_entry_data', store=False)
 
     @api.depends('dossier_id.entry_ids')
     def _compute_entry_data(self):
@@ -60,6 +65,10 @@ class FinanceLogisticsTracking(models.Model):
                 rec.free_time = first_entry.free_time
                 rec.remarks = first_entry.remarks
                 rec.status = first_entry.status
+                # New fields
+                rec.price_unit = first_entry.price_unit
+                rec.amount_total = first_entry.amount_total
+                rec.user_id = first_entry.user_id
             else:
                 # No entries yet - set defaults
                 rec.ste_id = False
@@ -74,6 +83,10 @@ class FinanceLogisticsTracking(models.Model):
                 rec.free_time = 0
                 rec.remarks = False
                 rec.status = False
+                # New fields
+                rec.price_unit = 0.0
+                rec.amount_total = 0.0
+                rec.user_id = False
 
     # Constraints
     _sql_constraints = [

@@ -19,7 +19,7 @@
         <field name="name">logistique.entry.form</field>
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
-            <form string="Logistics Entry">
+            <form string="Entrées logistique">
                 <header>
                     <div class="oe_button_box" position="inside">
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-hourglass-half" invisible="status != 'in_progress'">
@@ -57,6 +57,7 @@
                             <field name="eta"/>
                             <field name="week"/>
                             <field name="invoice_number"/>
+                            <field name="user_id"/>
                         </group>
                         <group string="Entités">
                             <field name="ste_id"/>
@@ -69,6 +70,8 @@
                         <group string="Logistics">
                             <field name="article_id"/>
                             <field name="weight"/>
+                            <field name="price_unit"/>
+                            <field name="amount_total"/>
                             <field name="details"/>
                         </group>
                         <group string="Tracking">

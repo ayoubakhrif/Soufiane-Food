@@ -36,7 +36,19 @@ class LogisticsEntry(models.Model):
     # Product details
     article_id = fields.Many2one('logistique.article', string='Article')
     details = fields.Char(string='Details')
-    weight = fields.Float(string='Weight')
+    weight = fields.Float(string='Poids')
+    
+    # Financial details
+    price_unit = fields.Float(string='P.U')
+    amount_total = fields.Float(string='Total', compute='_compute_amount_total', store=True)
+    
+    # Audit
+    user_id = fields.Many2one('res.users', string='Saisi par', default=lambda self: self.env.user, readonly=True)
+    
+    @api.depends('price_unit', 'weight')
+    def _compute_amount_total(self):
+        for rec in self:
+            rec.amount_total = rec.price_unit * rec.weight
     
     # Logistics info
     incoterm = fields.Char(string='Incoterm')

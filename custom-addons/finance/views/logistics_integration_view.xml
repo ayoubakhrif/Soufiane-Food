@@ -49,9 +49,12 @@
                             <field name="week"/>
                             <field name="invoice_number"/>
                             <field name="eta"/>
+                            <field name="user_id"/>
                           </group>
                         <group>
                             <field name="weight"/>
+                            <field name="price_unit"/>
+                            <field name="amount_total"/>
                             <field name="free_time"/>
                             <field name="details"/>
                         </group>

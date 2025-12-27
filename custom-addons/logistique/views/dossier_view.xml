@@ -65,5 +65,5 @@
               name="Dossiers"
               parent="menu_logistique_root"
               action="action_logistique_dossier"
-              sequence="5"/>
+              sequence="15"/>
 </odoo>

@@ -11,12 +11,11 @@ class ProductEntry(models.Model):
     # ------------------------------------------------------------
     # CHAMPS
     # ------------------------------------------------------------
-    product_id = fields.Many2one('kal3iya.product', string='Nom du produit', tracking=True)
+    product_id = fields.Many2one('kal3iya.product', string='Nom du produit', tracking=True, required=True)
     quantity = fields.Float(string='Quantité', required=True, tracking=True, group_operator="sum")
     price = fields.Float(string='Prix d’achat', required=True, tracking=True)
     selling_price = fields.Float(string='Prix de vente', required=True, tracking=True)
-    date_entry = fields.Date(string='Date d’entrée', tracking=True)
-
+    date_entry = fields.Date(string='Date d’entrée', tracking=True, required=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)
 

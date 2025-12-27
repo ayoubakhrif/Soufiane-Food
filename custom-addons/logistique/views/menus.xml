@@ -2,12 +2,12 @@
 <odoo>
     <!-- Root Menu -->
     <menuitem id="menu_logistique_root"
-              name="Logistics"
+              name="Logistique"
               sequence="10"/>
 
     <!-- Main Menus -->
     <menuitem id="menu_logistique_entries"
-              name="Logistics Entries"
+              name="Logistique data"
               parent="menu_logistique_root"
               action="action_logistique_entry"
               sequence="10"/>
@@ -20,13 +20,13 @@
 
     <!-- Data Menu -->
     <menuitem id="menu_logistique_data"
-              name="Data"
+              name="Données"
               parent="menu_logistique_root"
               sequence="100"/>
 
     <!-- Submenus Data -->
     <menuitem id="menu_logistique_ste"
-              name="Companies"
+              name="Sociétés"
               parent="menu_logistique_data"
               action="action_logistique_ste"
               sequence="10"/>

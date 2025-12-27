@@ -231,48 +231,79 @@ class ProductEntry(models.Model):
     # UNLINK
     # ------------------------------------------------------------
     def unlink(self):
-        # Separate returns from entries
+        """
+        Delete entry records with proper stock handling.
+        
+        Business rules:
+        - Returns (state='retour'): Can be deleted freely, trigger stock recomputation
+        - Entries (state='entree'): Blocked if related outputs exist, stock deleted first
+        """
+        Stock = self.env['kal3iya.stock'].sudo()
+        Sortie = self.env['kal3iyasortie'].sudo()
+        
+        # Separate records by state
         returns = self.filtered(lambda r: r.state == 'retour')
         entries = self.filtered(lambda r: r.state == 'entree')
         
-        # ✅ Process returns first - they can be deleted freely
+        # ═══════════════════════════════════════════════════════════
+        # 1️⃣ HANDLE RETURNS (state='retour')
+        # ═══════════════════════════════════════════════════════════
         if returns:
-            # Collect stock records that need recomputation
-            stocks_to_recompute = self.env['kal3iya.stock']
+            # Batch search for orphaned stocks (edge case protection)
+            orphaned_stocks = Stock.search([('entry_id', 'in', returns.ids)])
+            if orphaned_stocks:
+                # Returns should NEVER have stocks pointing to them, but clean up if they do
+                orphaned_stocks.unlink()
             
-            # Clean up any orphaned stock records incorrectly pointing to returns
-            for rec in returns:
-                # Returns should NOT have stock records with entry_id pointing to them
-                # but if they do (edge case), we need to delete them first
-                orphaned_stocks = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)])
-                if orphaned_stocks:
-                    orphaned_stocks.unlink()
-                
-                # Collect stocks that need recomputation after return deletion
-                if rec.return_id and rec.return_id.entry_id:
-                    stocks_to_recompute |= rec.return_id.entry_id
+            # Collect unique stock records that need recomputation after return deletion
+            stocks_to_recompute = Stock.browse()
+            for ret in returns:
+                if ret.return_id and ret.return_id.entry_id:
+                    stocks_to_recompute |= ret.return_id.entry_id
             
-            # Delete all returns in batch
+            # Delete all returns in a single batch operation
             super(ProductEntry, returns).unlink()
             
-            # Recompute affected stocks
-            for stock in stocks_to_recompute:
-                stock.recompute_qty()
+            # Recompute affected stock quantities (deduplicated recordset)
+            if stocks_to_recompute:
+                stocks_to_recompute.recompute_qty()
         
-        # ❌ Process entries - block if they have related outputs
+        # ═══════════════════════════════════════════════════════════
+        # 2️⃣ HANDLE ENTRIES (state='entree')
+        # ═══════════════════════════════════════════════════════════
         if entries:
-            for rec in entries:
-                stock = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)], limit=1)
-                if stock:
-                    has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', stock.id)]) > 0
-                    if has_out:
-                        raise UserError("Impossible de supprimer : des sorties existent.")
-                    # Delete the stock record first
-                    stock.unlink()
-                
-                # Delete the entry immediately after deleting its stock
-                super(ProductEntry, rec).unlink()
+            # Batch search for all stock records linked to these entries
+            entry_stocks = Stock.search([('entry_id', 'in', entries.ids)])
             
-            return True
+            # Build mapping: entry_id -> stock_record for fast lookup
+            entry_to_stock = {stock.entry_id.id: stock for stock in entry_stocks}
+            
+            # Collect stocks to delete (those without outputs)
+            stocks_to_delete = Stock.browse()
+            
+            # Validate each entry and collect stocks for deletion
+            for entry in entries:
+                stock = entry_to_stock.get(entry.id)
+                
+                if stock:
+                    # Check if any outputs exist for this stock
+                    has_outputs = Sortie.search_count([('entry_id', '=', stock.id)]) > 0
+                    
+                    if has_outputs:
+                        raise UserError(
+                            f"Impossible de supprimer l'entrée '{entry.product_id.name or entry.id}' : "
+                            f"des sorties existent pour ce stock."
+                        )
+                    
+                    # No outputs: mark stock for deletion
+                    stocks_to_delete |= stock
+            
+            # Delete all stocks first (batch operation, respects FK order)
+            if stocks_to_delete:
+                stocks_to_delete.unlink()
+            
+            # Delete all entries in a single batch operation
+            super(ProductEntry, entries).unlink()
         
         return True
+

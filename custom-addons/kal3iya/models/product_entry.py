@@ -267,10 +267,12 @@ class ProductEntry(models.Model):
                     has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', stock.id)]) > 0
                     if has_out:
                         raise UserError("Impossible de supprimer : des sorties existent.")
-                    # Delete the stock record first to avoid foreign key constraint
+                    # Delete the stock record first
                     stock.unlink()
+                
+                # Delete the entry immediately after deleting its stock
+                super(ProductEntry, rec).unlink()
             
-            # Delete all entries at once
-            return super(ProductEntry, entries).unlink()
+            return True
         
         return True

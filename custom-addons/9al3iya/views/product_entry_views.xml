@@ -86,7 +86,7 @@
                         <field name="selling_price" invisible="state == 'entree'"/>
                     </group>
                     <group string="Documents">
-                        <field name="dum_link_html" widget="html" nolabel="1"/>
+                        <field name="dum_link" widget="url" string="PDF DUM"/>
                     </group>
                 </sheet>
             </form>

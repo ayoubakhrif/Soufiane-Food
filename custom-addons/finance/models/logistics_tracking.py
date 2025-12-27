@@ -5,7 +5,7 @@ class FinanceLogisticsTracking(models.Model):
     _description = 'Suivi Conteneurs (Finance)'
     _rec_name = 'container_display'
 
-    entry_id = fields.Many2one('logistique.entry', string='Conteneur', readonly=True)
+    entry_id = fields.Many2one('logistique.entry', string='Conteneur', required=True, readonly=True, ondelete='cascade')
     container_display = fields.Char(
         related='entry_id.container_id.name',
         string='Container',
@@ -30,5 +30,11 @@ class FinanceLogisticsTracking(models.Model):
     status = fields.Selection(related='entry_id.status', string='Status', readonly=True)
 
     # Writable Fields (Write back to original record)
-    prov_number = fields.Char(related='entry_id.prov_number', string='N° Prov', readonly=False, store=True) # store=True sometimes helps with write-back in some versions but False is standard for proxy. We keep standard behavior first (False). Confirmed: Related fields are writable by default if not readonly=True.
+    prov_number = fields.Char(related='entry_id.prov_number', string='N° Prov', readonly=False, store=True)
     def_number = fields.Char(related='entry_id.def_number', string='N° Def', readonly=False)
+
+    # Constraints
+    _sql_constraints = [
+        ('unique_entry_id', 'unique(entry_id)', 
+         'Un enregistrement de suivi existe déjà pour cette entrée logistique.')
+    ]

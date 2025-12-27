@@ -7,7 +7,13 @@
             <form string="Dossier Logistique">
                 <sheet>
                     <group>
-                        <field name="name"/>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group string="Numéros Finance (Lecture seule)">
+                            <field name="prov_number" readonly="1"/>
+                            <field name="def_number" readonly="1"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Conteneurs">

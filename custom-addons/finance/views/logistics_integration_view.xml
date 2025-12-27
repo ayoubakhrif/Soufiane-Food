@@ -5,7 +5,7 @@
         <field name="name">finance.logistics.tracking.form</field>
         <field name="model">finance.logistics.tracking</field>
         <field name="arch" type="xml">
-            <form string="Suivi Contenaires" create="0">
+            <form string="Suivi Dossiers Logistiques" create="0">
                 <header>
                     <div class="oe_button_box" position="inside">
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-hourglass-half" invisible="status != 'in_progress'">
@@ -24,19 +24,21 @@
                             </div>
                         </button>
                     </div>
-                    <field name="status" widget="statusbar" options="{'clickable': '0'}"/>
+                    <field name="status" widget="statusbar" options="{'clickable': '0' }"/>
                 </header>
                 <sheet>
                     <group>
-                        <group string="Données Finance">
-                            <field name="entry_id" invisible="1"/>
-                            <field name="container_id" invisible="1"/> 
-                            <field name="container_display" readonly="1"/>
+                        <group string="Référence Dossier">
+                            <field name="dossier_id" readonly="1"/>
+                            <field name="bl_number"/>
+                        </group>
+                        <group string="Numéros Finance (Éditable)">
                             <field name="prov_number" readonly="status == 'closed'" required="status in ['in_progress', 'get_out']"/>
                             <field name="def_number" readonly="status != 'closed'" invisible="status != 'closed'" required="status == 'closed'"/>
                         </group>
                     </group>
-                    <group string="Données Logistiques (Read-only)">
+                    
+                    <group string="Données Logistiques (Lecture seule)">
                         <group>
                             <field name="ste_id"/>
                             <field name="supplier_id"/>
@@ -46,18 +48,50 @@
                         <group>
                             <field name="week"/>
                             <field name="invoice_number"/>
-                            <field name="bl_number"/>
-                        </group>
+                            <field name="eta"/>
+                          </group>
                         <group>
                             <field name="weight"/>
-                            <field name="eta"/>
                             <field name="free_time"/>
                             <field name="details"/>
                         </group>
                     </group>
+                    
                     <group string="Remarques">
                         <field name="remarks"/>
                     </group>
+                    
+                    <notebook>
+                        <page string="Conteneurs (Lecture seule)" name="containers">
+                            <field name="container_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Chèques (Lecture seule)" name="cheques">
+                            <field name="cheque_ids" readonly="1">
+                                <tree>
+                                    <field name="cheque_serie"/>
+                                    <field name="date"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="ste_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Entrées Logistiques (Lecture seule)" name="entries">
+                            <field name="entry_ids" readonly="1">
+                                <tree>
+                                    <field name="week"/>
+                                    <field name="container_id"/>
+                                    <field name="article_id"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -68,8 +102,9 @@
         <field name="name">finance.logistics.tracking.tree</field>
         <field name="model">finance.logistics.tracking</field>
         <field name="arch" type="xml">
-            <tree string="Suivi Conteneurs" create="0" delete="0">
-                <field name="container_display"/>
+            <tree string="Suivi Dossiers" create="0" delete="0">
+                <field name="dossier_id"/>
+                <field name="bl_number"/>
                 <field name="status"/>
                 <field name="ste_id"/>
                 <field name="prov_number"/>
@@ -80,7 +115,7 @@
 
     <!-- Action -->
     <record id="action_finance_logistics_tracking" model="ir.actions.act_window">
-        <field name="name">Suivi Conteneurs</field>
+        <field name="name">Suivi Dossiers Logistiques</field>
         <field name="res_model">finance.logistics.tracking</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
@@ -100,7 +135,7 @@
               sequence="15"/>
 
     <menuitem id="menu_finance_logistics_tracking"
-              name="Suivi Conteneurs"
+              name="Suivi Dossiers"
               parent="menu_finance_logistics_root"
               action="action_finance_logistics_tracking"
               sequence="10"/>

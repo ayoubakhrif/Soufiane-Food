@@ -4,13 +4,13 @@
         <field name="name">logistique.entry.tree</field>
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
-            <tree string="Logistics Entries" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'">
+            <tree string="Entrées Logistiques" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'">
+                <field name="dossier_id"/>
+                <field name="bl_number"/>
                 <field name="week"/>
-                <field name="prov_number"/>
-                <field name="def_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="container_id"/>
+                <field name="container_id" optional="hide"/>
                 <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
             </tree>
         </field>
@@ -35,7 +35,7 @@
                         </button>
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive" invisible="status != 'closed'">
                             <div class="o_stat_info">
-                                <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Cloturé</span>
+                                <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Clot uré</span>
                             </div>
                         </button>
                     </div>
@@ -43,20 +43,31 @@
                 </header>
                 <sheet>
                     <group>
-                        <group string="References">
-                            <field name="prov_number" readonly="1"/>
-                            <field name="def_number" readonly="1"/>
+                        <group string="Dossier / BL">
+                            <field name="dossier_id" options="{'no_create': True}"/>
+                            <field name="bl_number"/>
+                            <field name="container_id" domain="[('dossier_id', '=', dossier_id)]"/>
+                        </group>
+                        <group string="Suivi Finance (Lecture seule)">
+                            <field name="dossier_id.prov_number" readonly="1"/>
+                            <field name="dossier_id.def_number" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Dates et Références">
                             <field name="eta"/>
                             <field name="week"/>
-                            <field name="container_id"/>
-                        </group>
-                        <group string="Entities">
-                            <field name="ste_id"/>
                             <field name="invoice_number"/>
+                        </group>
+                        <group string="Entités">
+                            <field name="ste_id"/>
                             <field name="supplier_id"/>
-                            <field name="bl_number"/>
                             <field name="shipping_id"/>
                         </group>
+                    </group>
+                    
+                    <group>
                         <group string="Logistics">
                             <field name="article_id"/>
                             <field name="weight"/>
@@ -68,16 +79,39 @@
                             <field name="doc_status"/>
                         </group>
                     </group>
+                    
                     <group string="Remarks">
                         <field name="remarks"/>
                     </group>
+                    
+                    <notebook>
+                        <page string="Conteneurs (Lecture seule)" name="containers">
+                            <field name="container_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Chèques (Lecture seule)" name="cheques">
+                            <field name="cheque_ids" readonly="1">
+                                <tree>
+                                    <field name="cheque_serie"/>
+                                    <field name="date"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="ste_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
 
     <record id="action_logistique_entry" model="ir.actions.act_window">
-        <field name="name">Logistics Entries</field>
+        <field name="name">Entrées Logistiques</field>
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
     </record>

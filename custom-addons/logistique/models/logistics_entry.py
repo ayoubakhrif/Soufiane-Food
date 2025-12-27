@@ -2,35 +2,47 @@ from odoo import models, fields, api
 
 class LogisticsEntry(models.Model):
     _name = 'logistique.entry'
-    _description = 'Dossier Logistique'
-    _rec_name = 'container_id'
+    _description = 'Entrée Logistique'
+    _rec_name = 'dossier_id'
 
+    # Core reference - Dossier is now the main entity
+    dossier_id = fields.Many2one('logistique.dossier', string='Dossier / BL', required=True, ondelete='cascade')
+    
+    # Automatic display of dossier-related data (read-only)
+    container_ids = fields.One2many(related='dossier_id.container_ids', string='Conteneurs', readonly=True)
+    cheque_ids = fields.One2many(related='dossier_id.cheque_ids', string='Chèques', readonly=True)
+    
+    # Optional container reference (for backward compatibility or specific tracking)
+    container_id = fields.Many2one('logistique.container', string='Container (Optionnel)', domain="[('dossier_id', '=', dossier_id)]")
+    
+    # Week and status
     week = fields.Char(string='Semaine')
-    prov_number = fields.Char(string='N° Prov')
     status = fields.Selection([
         ('in_progress', 'En cours'),
         ('get_out', 'Get Out'),
         ('closed', 'Cloturé'),
     ], string='Status', default='in_progress')
     
-    def_number = fields.Char(string='N° Def')
-    
+    # Company and supplier info
     ste_id = fields.Many2one('logistique.ste', string='Société')
     supplier_id = fields.Many2one('logistique.supplier', string='Supplier')
     invoice_number = fields.Char(string='Invoice Number')
+    
+    # Product details
     article_id = fields.Many2one('logistique.article', string='Article')
     details = fields.Char(string='Details')
     weight = fields.Float(string='Weight')
+    
+    # Logistics info
     incoterm = fields.Char(string='Incoterm')
     free_time = fields.Integer(string='Free Time')
     shipping_id = fields.Many2one('logistique.shipping', string='Shipping Company')
-    
-    container_id = fields.Many2one('logistique.container', string='Container')
-    
-    bl_number = fields.Char(string='BL Number', related='container_id.dossier_id.name', store=True, readonly=True)
     eta = fields.Date(string='ETA')
     doc_status = fields.Char(string='Document Status')
     remarks = fields.Char(string='Remarks')
+    
+    # BL number from dossier
+    bl_number = fields.Char(string='BL Number', related='dossier_id.name', store=True, readonly=True)
 
     @api.model
     def create(self, vals):
@@ -39,7 +51,7 @@ class LogisticsEntry(models.Model):
         
         # Automatically create corresponding finance tracking record
         self.env['finance.logistics.tracking'].sudo().create({
-            'entry_id': record.id,
+            'dossier_id': record.dossier_id.id,
         })
         
         return record

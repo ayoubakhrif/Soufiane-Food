@@ -12,8 +12,13 @@ class LogisticsEntry(models.Model):
     container_ids = fields.One2many(related='dossier_id.container_ids', string='Conteneurs', readonly=True)
     cheque_ids = fields.One2many(related='dossier_id.cheque_ids', string='Chèques', readonly=True)
     
+    # Finance numbers (from dossier, readonly for logistics)
+    prov_number = fields.Char(related='dossier_id.prov_number', string='N° Prov', readonly=True, store=False)
+    def_number = fields.Char(related='dossier_id.def_number', string='N° Def', readonly=True, store=False)
+    
     # Optional container reference (for backward compatibility or specific tracking)
     container_id = fields.Many2one('logistique.container', string='Container (Optionnel)', domain="[('dossier_id', '=', dossier_id)]")
+
     
     # Week and status
     week = fields.Char(string='Semaine')

@@ -158,9 +158,10 @@ class ProduitEntry(models.Model):
         
         # Try to search on Google Drive
         try:
-            from ..services.google_drive_searcher import search_dum_pdf, DEFAULT_AUTH_DIR
-            
-            web_link = search_dum_pdf(self.dum, auth_dir=DEFAULT_AUTH_DIR)
+            from ..services.google_drive_searcher import search_dum_pdf
+
+            web_link = search_dum_pdf(self.dum)
+
             
             # Cache the link
             self.write({'dum_link': web_link})

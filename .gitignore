@@ -73,3 +73,6 @@ share/
 # --- Google Drive Credentials (NEVER commit these!) ---
 **/drive_auth/*.json
 !**/drive_auth/credentials.json
+
+google_credentials/
+custom-addons/9al3iya/static/drive_auth/

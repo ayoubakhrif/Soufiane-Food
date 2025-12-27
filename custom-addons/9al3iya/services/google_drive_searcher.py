@@ -1,85 +1,56 @@
-import sys
-sys.path.insert(0, r'C:\Program Files\Python310\Lib\site-packages')
-
 import os
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
 
-# Utilise la même configuration que google_drive_uploader
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
-DEFAULT_AUTH_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'static', 'drive_auth'
-)
+# Lecture seule suffisante
+SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
-# Dossier où chercher les DUM
+# Folder Drive où chercher les PDFs DUM
 DUM_FOLDER_ID = "1i9kzO4Pk7X2hFJG2hyh828Sq5uAbarIA"
 
+# Chemin dans le conteneur Docker
+SERVICE_ACCOUNT_PATH = "/srv/google_credentials/service_account.json"
 
-def get_drive_service(auth_dir=None):
-    """Authentifie et retourne un service Google Drive (server-compatible)."""
-    auth_dir = auth_dir or DEFAULT_AUTH_DIR
-    token_path = os.path.join(auth_dir, 'token.json')
 
-    if not os.path.exists(token_path):
+def get_drive_service():
+    if not os.path.exists(SERVICE_ACCOUNT_PATH):
         raise FileNotFoundError(
-            f"Token file not found at {token_path}. "
-            "Please authenticate using the upload flow first."
+            f"Service account file not found at {SERVICE_ACCOUNT_PATH}"
         )
 
-    # Load credentials from existing token
-    creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+    creds = Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_PATH,
+        scopes=SCOPES
+    )
 
-    # Refresh if expired (this works on server)
-    if creds and creds.expired and creds.refresh_token:
-        try:
-            creds.refresh(Request())
-            # Save refreshed token
-            with open(token_path, 'w') as token_file:
-                token_file.write(creds.to_json())
-        except Exception as e:
-            raise Exception(f"Failed to refresh token: {str(e)}")
-
-    if not creds or not creds.valid:
-        raise Exception(
-            "Invalid credentials. Please re-authenticate using the upload flow."
-        )
-
-    return build('drive', 'v3', credentials=creds)
+    return build("drive", "v3", credentials=creds)
 
 
-def search_dum_pdf(dum_value, auth_dir=None):
-    """
-    Cherche un PDF dans le dossier DUM dont le nom contient dum_value.
-    Retourne le webViewLink du plus récent en cas de multiples résultats.
-    """
+def search_dum_pdf(dum_value: str):
     if not dum_value:
         raise ValueError("DUM value cannot be empty")
 
-    service = get_drive_service(auth_dir=auth_dir)
+    service = get_drive_service()
 
-    # Recherche: PDF dans le dossier DUM_FOLDER_ID, nom contient dum_value
+    safe_dum = dum_value.replace("'", "\\'")
     query = (
-        f"'{DUM_FOLDER_ID}' in parents "
-        f"and name contains '{dum_value}' "
-        f"and mimeType='application/pdf' "
-        f"and trashed=false"
+        f"'{DUM_FOLDER_ID}' in parents and "
+        f"mimeType='application/pdf' and "
+        f"trashed=false and "
+        f"name contains '{safe_dum}'"
     )
 
     results = service.files().list(
         q=query,
-        spaces='drive',
-        fields='files(id, name, webViewLink, modifiedTime)',
-        orderBy='modifiedTime desc'  # Plus récent en premier
+        fields="files(id,name,webViewLink,modifiedTime)",
+        orderBy="modifiedTime desc",
+        pageSize=10,
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True,
     ).execute()
 
-    files = results.get('files', [])
-
+    files = results.get("files", [])
     if not files:
-        raise FileNotFoundError(f"Aucun PDF trouvé pour DUM: {dum_value}")
+        raise FileNotFoundError(f"No PDF found for DUM: {dum_value}")
 
-    # Retourne le plus récent
-    most_recent = files[0]
-    return most_recent.get('webViewLink')
+    return files[0]["webViewLink"]

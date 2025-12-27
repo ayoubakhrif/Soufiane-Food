@@ -231,21 +231,35 @@ class ProductEntry(models.Model):
     # UNLINK
     # ------------------------------------------------------------
     def unlink(self):
-        for rec in self:
-            if rec.state == 'entree':
+        # Separate returns from entries
+        returns = self.filtered(lambda r: r.state == 'retour')
+        entries = self.filtered(lambda r: r.state == 'entree')
+        
+        # ✅ Process returns first - they can be deleted freely
+        if returns:
+            for rec in returns:
+                # Recompute stock after deletion
+                stock = rec.return_id.entry_id if rec.return_id else None
+                if stock:
+                    # Delete the return first
+                    super(ProductEntry, rec).unlink()
+                    # Then recompute the related stock
+                    stock.recompute_qty()
+                else:
+                    # No stock to recompute, just delete
+                    super(ProductEntry, rec).unlink()
+        
+        # ❌ Process entries - block if they have related outputs
+        if entries:
+            for rec in entries:
                 stock = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)], limit=1)
                 if stock:
                     has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', stock.id)]) > 0
                     if has_out:
                         raise UserError("Impossible de supprimer : des sorties existent.")
                     stock.unlink()
-
-            # Si retour → recalculer le stock origine
-            if rec.state == 'retour' and rec.return_id:
-                stock = rec.return_id.entry_id
-                if stock:
-                    super(ProductEntry, rec).unlink()
-                    stock.recompute_qty()
-                    continue
-
-        return super().unlink()
+            
+            # Delete all entries at once
+            return super(ProductEntry, entries).unlink()
+        
+        return True

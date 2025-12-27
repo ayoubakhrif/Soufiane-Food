@@ -1,96 +1,103 @@
-from odoo import models, fields
-from collections import defaultdict
-import tempfile
 import os
-import logging
-from ..services.google_drive_uploader import upload_to_drivev2, DEFAULT_AUTH_DIR
+import mimetypes
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google.oauth2.service_account import Credentials
 
-_logger = logging.getLogger(__name__)
+# ------------------------------------------------------------
+# ⚙️ Configuration
+# ------------------------------------------------------------
+SCOPES = ["https://www.googleapis.com/auth/drive"]
 
+# Chemin monté dans Docker (volume)
+SERVICE_ACCOUNT_PATH = "/srv/google_credentials/service_account.json"
 
-class BonLivraisonReportv2(models.AbstractModel):
-    _name = 'report.9al3iya.bon_report_templatev2'
-    _description = 'Bon de Livraison Groupé'
-
-    def _get_report_values(self, docids, data=None):
-        """Regroupe les sorties par client/chauffeur/société pour le rendu QWeb."""
-        _logger.info(f"=== 🕵️‍♂️ GENERATING REPORT {self._name} ===")
-        _logger.info(f"DOCIDS: {docids}")
-        
-        docs = self.env['cal3iyasortie'].browse(docids)
-        _logger.info(f"Records found: {len(docs)}")
-
-        grouped = defaultdict(list)
-        for rec in docs:
-            key = (rec.client_id.id or 0, rec.driver_id.id or 0, rec.ste_id.id or 0)
-            grouped[key].append(rec)
-            
-        _logger.info(f"Grouped Keys: {list(grouped.keys())}")
-
-        grouped_bons = []
-        for (client_id, driver_id, ste_id), sorties in grouped.items():
-            client = self.env['cal3iya.client'].browse(client_id)
-            driver = self.env['cal3iya.driver'].browse(driver_id)
-            ste_rec = self.env['cal3iya.ste'].browse(ste_id)
-            date = min((s.date_exit for s in sorties if s.date_exit), default=None)
-
-            grouped_bons.append({
-                'client': client,
-                'driver': driver,
-                'ste': ste_rec.name if ste_rec else '',
-                'ste_rec': ste_rec,
-                'date': date,
-                'lines': sorties,
-            })
-
-        return {'grouped_bons': grouped_bons}
+# ID du dossier racine Drive "Bon"
+ROOT_FOLDER_ID = "1YVjJOOPHsVwW7TeE6oxQFSna9bEOylXa"
 
 
-# -------------------------------------------------------------------------
-# 👇 Extension du moteur PDF Odoo pour inclure l’upload Drive automatiquement
-# -------------------------------------------------------------------------
+# ------------------------------------------------------------
+# 🔐 Authentification (Service Account)
+# ------------------------------------------------------------
+def get_drive_servicev2():
+    if not os.path.exists(SERVICE_ACCOUNT_PATH):
+        raise FileNotFoundError(
+            f"Service account file not found at {SERVICE_ACCOUNT_PATH}"
+        )
 
-class IrActionsReportDrivev2(models.Model):
-    _inherit = 'ir.actions.report'
+    creds = Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_PATH,
+        scopes=SCOPES
+    )
+    return build("drive", "v3", credentials=creds)
 
-    """Extension du rendu PDF pour uploader automatiquement sur Google Drive."""
 
-    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
-        # Appel normal d’Odoo pour générer le PDF
-        pdf_content, content_type = super()._render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
+# ------------------------------------------------------------
+# 📁 Dossiers
+# ------------------------------------------------------------
+def get_or_create_folderv2(service, parent_id, folder_name):
+    results = service.files().list(
+        q=(
+            f"'{parent_id}' in parents and "
+            f"name='{folder_name}' and "
+            f"mimeType='application/vnd.google-apps.folder' and "
+            f"trashed=false"
+        ),
+        fields="files(id, name)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True,
+    ).execute()
 
-        # On ne déclenche l’upload que pour ton rapport
-        if report_ref == '9al3iya.bon_report_templatev2':
-            _logger.info("=== 📄 Début upload automatique Google Drive ===")
+    folders = results.get("files", [])
+    if folders:
+        return folders[0]["id"]
 
-            try:
-                tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
-                tmp.write(pdf_content)
-                tmp.flush()
-                tmp.close()
-                _logger.info(f"📂 Fichier temp créé : {tmp.name}")
+    folder = service.files().create(
+        body={
+            "name": folder_name,
+            "mimeType": "application/vnd.google-apps.folder",
+            "parents": [parent_id],
+        },
+        fields="id",
+        supportsAllDrives=True,
+    ).execute()
 
-                sorties = self.env['cal3iyasortie'].browse(res_ids)
-                client_name = sorties[0].client_id.name or "Client"
-                date_str = (sorties[0].date_exit or fields.Date.today()).strftime("%Y-%m-%d")
-                file_name = f"BL_{client_name}_{date_str}.pdf"
+    return folder["id"]
 
-                # Upload sur Google Drive
-                link, file_id = upload_to_drivev2(tmp.name, file_name, auth_dir=DEFAULT_AUTH_DIR, ste_name=sorties[0].ste_id.name if sorties[0].ste_id else None)
-                _logger.info(f"✅ Upload réussi ! Lien : {link}")
 
-                # Mise à jour des sorties
-                for s in sorties:
-                    s.write({
-                        'drive_file_url': link,
-                        'drive_file_id': file_id,
-                    })
-                    _logger.info(f"🔗 Lien ajouté à la sortie ID {s.id}")
+# ------------------------------------------------------------
+# ☁️ Upload
+# ------------------------------------------------------------
+def upload_to_drivev2(file_path, file_name, ste_name=None):
+    service = get_drive_servicev2()
 
-            except Exception as e:
-                _logger.exception(f"❌ Erreur upload Drive : {e}")
-            finally:
-                if os.path.exists(tmp.name):
-                    os.unlink(tmp.name)
+    parent_folder_id = ROOT_FOLDER_ID
+    if ste_name:
+        parent_folder_id = get_or_create_folderv2(service, ROOT_FOLDER_ID, ste_name)
 
-        return pdf_content, content_type
+    mime_type, _ = mimetypes.guess_type(file_path)
+    mime_type = mime_type or "application/pdf"
+
+    media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
+
+    uploaded = service.files().create(
+        body={
+            "name": file_name,
+            "parents": [parent_folder_id],
+        },
+        media_body=media,
+        fields="id, webViewLink",
+        supportsAllDrives=True,
+    ).execute()
+
+    file_id = uploaded["id"]
+    web_link = uploaded["webViewLink"]
+
+    # Rendre public
+    service.permissions().create(
+        fileId=file_id,
+        body={"role": "reader", "type": "anyone"},
+        supportsAllDrives=True,
+    ).execute()
+
+    return web_link, file_id

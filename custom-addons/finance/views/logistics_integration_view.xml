@@ -102,7 +102,7 @@
         <field name="name">finance.logistics.tracking.tree</field>
         <field name="model">finance.logistics.tracking</field>
         <field name="arch" type="xml">
-            <tree string="Suivi Dossiers" create="0" delete="0">
+            <tree string="Suivi Dossiers" create="0">
                 <field name="dossier_id"/>
                 <field name="bl_number"/>
                 <field name="status"/>

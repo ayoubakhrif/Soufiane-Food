@@ -10,7 +10,6 @@
                 <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="container_id" optional="hide"/>
                 <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
             </tree>
         </field>
@@ -46,7 +45,6 @@
                         <group string="Dossier / BL">
                             <field name="dossier_id" options="{'no_create': True}"/>
                             <field name="bl_number"/>
-                            <field name="container_id" domain="[('dossier_id', '=', dossier_id)]"/>
                         </group>
                         <group string="Suivi Finance (Lecture seule)">
                             <field name="prov_number" readonly="1"/>

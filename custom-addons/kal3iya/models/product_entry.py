@@ -237,17 +237,27 @@ class ProductEntry(models.Model):
         
         # ✅ Process returns first - they can be deleted freely
         if returns:
+            # Collect stock records that need recomputation
+            stocks_to_recompute = self.env['kal3iya.stock']
+            
+            # Clean up any orphaned stock records incorrectly pointing to returns
             for rec in returns:
-                # Recompute stock after deletion
-                stock = rec.return_id.entry_id if rec.return_id else None
-                if stock:
-                    # Delete the return first
-                    super(ProductEntry, rec).unlink()
-                    # Then recompute the related stock
-                    stock.recompute_qty()
-                else:
-                    # No stock to recompute, just delete
-                    super(ProductEntry, rec).unlink()
+                # Returns should NOT have stock records with entry_id pointing to them
+                # but if they do (edge case), we need to delete them first
+                orphaned_stocks = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)])
+                if orphaned_stocks:
+                    orphaned_stocks.unlink()
+                
+                # Collect stocks that need recomputation after return deletion
+                if rec.return_id and rec.return_id.entry_id:
+                    stocks_to_recompute |= rec.return_id.entry_id
+            
+            # Delete all returns in batch
+            super(ProductEntry, returns).unlink()
+            
+            # Recompute affected stocks
+            for stock in stocks_to_recompute:
+                stock.recompute_qty()
         
         # ❌ Process entries - block if they have related outputs
         if entries:
@@ -257,6 +267,7 @@ class ProductEntry(models.Model):
                     has_out = self.env['kal3iyasortie'].sudo().search_count([('entry_id', '=', stock.id)]) > 0
                     if has_out:
                         raise UserError("Impossible de supprimer : des sorties existent.")
+                    # Delete the stock record first to avoid foreign key constraint
                     stock.unlink()
             
             # Delete all entries at once

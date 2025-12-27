@@ -53,8 +53,27 @@ class CustomAttendance(models.Model):
             holidays = config.public_holiday_ids.mapped('date')
 
         for rec in self:
-            # Check if Public Holiday
-            if rec.date in holidays:
+            # 0. Check for Paid Leave
+            leave_domain = [
+                ('employee_id', '=', rec.employee_id.id),
+                ('state', '=', 'approved'),
+                ('date_from', '<=', rec.date),
+                ('date_to', '>=', rec.date),
+            ]
+            is_on_leave = self.env['custom.leave'].search_count(leave_domain) > 0
+            
+            if is_on_leave:
+                # Leave Logic: Treat as fully worked day
+                rec.normal_working_hours = daily_hours
+                rec.missing_hours = 0.0
+                rec.overtime_hours = 0.0
+                rec.holiday_hours = 0.0
+                rec.delay_minutes = 0
+                # Optional: Force state to confirmed to lock it visually?
+                # rec.state = 'confirmed' 
+                
+            # 1. Check if Public Holiday
+            elif rec.date in holidays:
                 # Holiday Logic
                 duration = rec.check_out - rec.check_in
                 rec.holiday_hours = max(0.0, duration)

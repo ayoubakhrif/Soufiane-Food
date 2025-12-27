@@ -2,6 +2,7 @@
     <menuitem id="menu_custom_attendance_root" name="Suivi de présence" sequence="10"/>
     <menuitem id="menu_custom_attendance_daily" name="Présence journalière" parent="menu_custom_attendance_root" sequence="20" action="action_custom_attendance"/>
     <menuitem id="menu_custom_attendance_salary" name="Salaire mensuel" parent="menu_custom_attendance_root" sequence="30" action="action_custom_monthly_salary"/>
+    <menuitem id="menu_custom_leave" name="Demandes de congé" parent="menu_custom_attendance_root" sequence="35" action="action_custom_leave"/>
     <menuitem id="menu_custom_employee" name="Employés" parent="menu_custom_attendance_root" sequence="40" action="action_custom_employee"/>
     <menuitem id="menu_custom_attendance_config" name="Configuration" parent="menu_custom_attendance_root" sequence="50" action="action_custom_attendance_config"/>
 </odoo>

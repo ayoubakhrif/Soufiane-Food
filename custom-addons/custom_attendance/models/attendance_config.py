@@ -12,6 +12,8 @@ class CustomAttendanceConfig(models.Model):
     official_check_in = fields.Float(string='Heure entrée officielle', default=9.5, help="Time format: 9.5 = 09:30", required=True)
     official_check_out = fields.Float(string='Heure de sortie officielle', default=17.5, help="Time format: 17.5 = 17:30", required=True)
     
+    annual_leave_quota = fields.Integer(string='Quota Congé Annuel', required=True, help="Nombre de jours de congé payé par an")
+    
     working_hours_per_day = fields.Float(string='Heures de travaille /heure', default=8.0, required=True)
     overtime_coefficient = fields.Float(string='Coefficient des heures supplémentaires', default=1.0, required=True)
     delay_tolerance = fields.Integer(string='Tolérance de retard (Minutes)', default=0, help="Combien de minutes à tolérer avant de compter le retard")

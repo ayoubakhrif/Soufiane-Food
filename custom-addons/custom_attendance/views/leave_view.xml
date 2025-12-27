@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_custom_leave_tree" model="ir.ui.view">
+        <field name="name">custom.leave.tree</field>
+        <field name="model">custom.leave</field>
+        <field name="arch" type="xml">
+            <tree string="Demandes de Congé" decoration-info="state == 'draft'" decoration-success="state == 'approved'" decoration-danger="state == 'refused'">
+                <field name="employee_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="leave_type"/>
+                <field name="days_count"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_custom_leave_form" model="ir.ui.view">
+        <field name="name">custom.leave.form</field>
+        <field name="model">custom.leave</field>
+        <field name="arch" type="xml">
+            <form string="Demande de Congé">
+                <header>
+                    <button name="action_approve" string="Approuver" type="object" class="oe_highlight" 
+                            invisible="state != 'draft'" groups="custom_attendance.group_custom_attendance_manager"/>
+                    <button name="action_refuse" string="Refuser" type="object" class="btn-danger" 
+                            invisible="state != 'draft'" groups="custom_attendance.group_custom_attendance_manager"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" 
+                            invisible="state == 'draft'" groups="custom_attendance.group_custom_attendance_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id" readonly="state != 'draft'"/>
+                            <field name="leave_type" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="date_from" readonly="state != 'draft'"/>
+                            <field name="date_to" readonly="state != 'draft'"/>
+                            <field name="days_count"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="reason" readonly="state != 'draft'"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Calendar View -->
+    <record id="view_custom_leave_calendar" model="ir.ui.view">
+        <field name="name">custom.leave.calendar</field>
+        <field name="model">custom.leave</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendrier des Congés" date_start="date_from" date_stop="date_to" color="state" mode="month">
+                <field name="employee_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_custom_leave" model="ir.actions.act_window">
+        <field name="name">Demandes de Congé</field>
+        <field name="res_model">custom.leave</field>
+        <field name="view_mode">tree,form,calendar</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle demande de congé
+            </p>
+        </field>
+    </record>
+    
+    <!-- Menu (will be added to attendance_menus.xml later, but defined here for Action reference) -->
+
+</odoo>

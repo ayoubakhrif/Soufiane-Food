@@ -43,6 +43,22 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Congés" groups="custom_attendance.group_custom_attendance_entry_agent,custom_attendance.group_custom_attendance_manager">
+                            <group col="4">
+                                <field name="annual_leave_quota" readonly="1"/>
+                                <field name="leaves_taken" readonly="1"/>
+                                <field name="leaves_remaining" readonly="1" decoration-danger="leaves_remaining &lt; 0"/>
+                            </group>
+                            <field name="leave_ids" readonly="1">
+                                <tree decoration-info="state == 'draft'" decoration-success="state == 'approved'">
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="leave_type"/>
+                                    <field name="days_count"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

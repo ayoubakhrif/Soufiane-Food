@@ -12,3 +12,7 @@ access_custom_config_manager,custom.attendance.config.manager,model_custom_atten
 access_custom_config_admin,custom.attendance.config.admin,model_custom_attendance_config,group_custom_attendance_admin,1,1,1,1
 access_custom_holiday_manager,custom.attendance.public.holiday.manager,model_custom_attendance_public_holiday,group_custom_attendance_manager,1,1,1,1
 access_custom_holiday_admin,custom.attendance.public.holiday.admin,model_custom_attendance_public_holiday,group_custom_attendance_admin,1,1,1,1
+
+access_custom_leave_manager,custom.leave.manager,model_custom_leave,group_custom_attendance_manager,1,1,1,1
+access_custom_leave_admin,custom.leave.admin,model_custom_leave,group_custom_attendance_admin,1,1,1,1
+access_custom_leave_entry_agent,custom.leave.entry.agent,model_custom_leave,group_custom_attendance_entry_agent,1,1,1,0

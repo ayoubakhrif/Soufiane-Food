@@ -20,6 +20,7 @@
                     </group>
                     <group string="Règles de calcul">
                         <group>
+                            <field name="annual_leave_quota"/>
                             <field name="delay_tolerance"/>
                         </group>
                         <group>

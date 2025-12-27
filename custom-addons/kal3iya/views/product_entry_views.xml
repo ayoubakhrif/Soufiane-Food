@@ -53,7 +53,18 @@
         <field name="arch" type="xml">
             <form string="Entrée / Retour">
                 <header>
-                    <field name="state_badge" widget="html" readonly="1" class="float-end"/>
+                    <div class="oe_button_box" position="inside">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-sign-in" invisible="state != 'entree'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text text-success" style="font-size: 16px; font-weight: bold;">Entrée</span>
+                            </div>
+                        </button>
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-undo" invisible="state != 'retour'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Retour</span>
+                            </div>
+                        </button>
+                    </div>
                     <field name="state" widget="statusbar" options="{'clickable': true}"/>
                 </header>
 

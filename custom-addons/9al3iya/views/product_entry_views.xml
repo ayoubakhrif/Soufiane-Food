@@ -85,6 +85,9 @@
                         <field name="image_1920"/>
                         <field name="selling_price" invisible="state == 'entree'"/>
                     </group>
+                    <group string="Documents">
+                        <field name="dum_link_html" widget="html" nolabel="1"/>
+                    </group>
                 </sheet>
             </form>
         </field>

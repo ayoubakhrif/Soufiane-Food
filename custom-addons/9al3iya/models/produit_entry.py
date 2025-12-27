@@ -37,6 +37,7 @@ class ProduitEntry(models.Model):
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
     charge_transport = fields.Integer(string='Main d’oeuvre', compute='_compute_charge_transport', store=True)
     dum_link = fields.Char(string='Lien DUM', readonly=True)
+    dum_link_html = fields.Html(string='Document DUM', compute='_compute_dum_link_html', sanitize=False)
 
 
     state = fields.Selection([
@@ -55,6 +56,29 @@ class ProduitEntry(models.Model):
     stock_id = fields.One2many('cal3iya.stock', 'entry_id', string='Ligne de stock liée', readonly=True)
 
     state_badge = fields.Html(string='État (badge)', compute='_compute_state_badge', sanitize=False)
+
+    # ------------------------------------------------------------
+    # DUM LINK HTML DISPLAY
+    # ------------------------------------------------------------
+    @api.depends('dum_link')
+    def _compute_dum_link_html(self):
+        for rec in self:
+            if rec.dum_link:
+                rec.dum_link_html = (
+                    f"<a href='{rec.dum_link}' target='_blank' "
+                    f"style='color: #007bff; text-decoration: none; font-weight: 500;'>"
+                    f"📄 Ouvrir le PDF DUM sur Google Drive"
+                    f"</a>"
+                )
+            else:
+                rec.dum_link_html = "<span style='color: #999;'>Aucun document trouvé</span>"
+
+    @api.onchange('dum')
+    def _onchange_dum_clear_link(self):
+        """Clear cached DUM link when DUM value changes."""
+        if self.dum_link and self._origin.dum != self.dum:
+            self.dum_link = False
+            self.dum_link_html = False
 
     # ------------------------------------------------------------
     # BADGE VISUEL

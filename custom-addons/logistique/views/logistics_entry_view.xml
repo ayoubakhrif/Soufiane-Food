@@ -49,8 +49,8 @@
                             <field name="container_id" domain="[('dossier_id', '=', dossier_id)]"/>
                         </group>
                         <group string="Suivi Finance (Lecture seule)">
-                            <field name="dossier_id.prov_number" readonly="1"/>
-                            <field name="dossier_id.def_number" readonly="1"/>
+                            <field name="prov_number" readonly="1"/>
+                            <field name="def_number" readonly="1"/>
                         </group>
                     </group>
                     

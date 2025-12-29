@@ -49,7 +49,7 @@
                         <group>
                             <field name="week"/>
                             <field name="eta"/>
-                            <field name="user_id"/>
+                            <field name="saisi_par"/>
                           </group>
                         <group>
                             <field name="weight"/>

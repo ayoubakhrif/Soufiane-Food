@@ -27,7 +27,7 @@ class ProductStock(models.Model):
     quantity = fields.Float(string='Quantité disponible', default=0, store=True)
     price = fields.Float(string='Prix d’achat')
     weight = fields.Float(string='Poids (kg)', required=True)
-    tonnage = fields.Float(string='Tonnage (Kg)', group_operator="sum")
+    tonnage = fields.Float(string='Tonnage (Kg)', compute='_compute_tonnage', store=True, group_operator="sum")
     mt_achat = fields.Float(string='Mt.Achat', compute='_compute_mt_achat', store=True, group_operator="sum")
     calibre = fields.Char(string='Calibre')
     ste_id = fields.Many2one('kal3iya.ste', string='Société', optional=True)
@@ -128,6 +128,11 @@ class ProductStock(models.Model):
         active_stocks = self.search([('quantity', '>', 0), ('active', '=', False)])
         active_stocks.write({'active': True})
 
+    @api.depends('quantity', 'weight')
+    def _compute_tonnage(self):
+        for rec in self:
+            rec.tonnage = rec.quantity * rec.weight if rec.quantity and rec.weight else 0.0
+    
     @api.depends('price', 'tonnage')
     def _compute_mt_achat(self):
         for record in self:

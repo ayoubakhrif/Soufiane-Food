@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Search View -->
+    <record id="view_custom_employee_search" model="ir.ui.view">
+        <field name="name">custom.employee.search</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <search string="Employees">
+                <field name="name"/>
+                <field name="job_title"/>
+                <field name="department"/>
+                <field name="site"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Department" name="group_department" context="{'group_by': 'department'}"/>
+                    <filter string="Job Position" name="group_job" context="{'group_by': 'job_title'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site'}"/>
+                    <filter string="Manager" name="group_manager" context="{'group_by': 'parent_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_custom_employee_tree" model="ir.ui.view">
+        <field name="name">custom.employee.tree</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <tree string="Employees" sample="1">
+                <field name="name"/>
+                <field name="job_title"/>
+                <field name="department"/>
+                <field name="site"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="parent_id"/>
+                <field name="active" widget="boolean_toggle" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_custom_employee_form" model="ir.ui.view">
+        <field name="name">custom.employee.form</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <form string="Employee">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Employee Name"/>
+                        </h1>
+                        <h2>
+                            <field name="job_title" placeholder="Job Position"/>
+                        </h2>
+                    </div>
+                    
+                    <group>
+                        <group string="Personal Information">
+                            <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                            <field name="cin"/>
+                            <field name="phone" widget="phone"/>
+                            <field name="email" widget="email"/>
+                            <field name="rib"/>
+                        </group>
+                        <group string="Organization">
+                            <field name="department"/>
+                            <field name="site"/>
+                            <field name="entry_date"/>
+                            <field name="active"/>
+                            <field name="parent_id"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Signature">
+                         <field name="signature" widget="signature"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Subordinates">
+                            <field name="child_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="job_title"/>
+                                    <field name="email"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+   <!-- Kanban View -->
+    <record id="view_custom_employee_kanban" model="ir.ui.view">
+        <field name="name">custom.employee.kanban</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="job_title"/>
+                <field name="department"/>
+                <field name="image_1920"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
+                            <t t-if="record.image_1920.raw_value">
+                                <div class="o_kanban_image_fill_left d-none d-md-block" t-attf-style="background-image:url('#{kanban_image('custom.employee', 'image_1920', record.id.raw_value)}')"/>
+                            </t>
+                            <t t-else="">
+                                <div class="o_kanban_image_fill_left d-none d-md-block o_kanban_image_full" t-attf-style="background-image: url(#{kanban_image('custom.employee', 'image_1920', record.id.raw_value, placeholder=True)})" role="img"/>
+                            </t>
+                            
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                <div class="o_kanban_tags_section"/>
+                                <ul>
+                                    <li t-if="record.job_title.raw_value"><field name="job_title"/></li>
+                                    <li t-if="record.department.raw_value"><field name="department"/></li>
+                                    <li t-if="record.email.raw_value" class="o_text_overflow"><field name="email"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_custom_employee" model="ir.actions.act_window">
+        <field name="name">Employees</field>
+        <field name="res_model">custom.employee</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create your first employee!
+          </p>
+        </field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_custom_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png"/>
+    <menuitem id="menu_custom_employee_main" name="Employees" parent="menu_custom_employee_root" action="action_custom_employee" sequence="1"/>
+
+</odoo>

@@ -51,7 +51,10 @@ class LogisticsEntry(models.Model):
             rec.amount_total = rec.price_unit * rec.weight
     
     # Logistics info
-    incoterm = fields.Char(string='Incoterm')
+    incoterm = fields.Selection([
+        ('cfr', 'CFR'),
+        ('fob', 'FOB'),
+    ],string='Incoterm')
     free_time = fields.Integer(string='Free Time')
     shipping_id = fields.Many2one('logistique.shipping', string='Shipping Company')
     eta = fields.Date(string='ETA')

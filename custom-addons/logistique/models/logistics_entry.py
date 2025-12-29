@@ -54,7 +54,7 @@ class LogisticsEntry(models.Model):
     incoterm = fields.Selection([
         ('cfr', 'CFR'),
         ('fob', 'FOB'),
-    ],string='Incoterm')
+    ], string='Incoterm')
     free_time = fields.Integer(string='Free Time')
     shipping_id = fields.Many2one('logistique.shipping', string='Shipping Company')
     eta = fields.Date(string='ETA')

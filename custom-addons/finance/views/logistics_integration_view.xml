@@ -41,13 +41,13 @@
                     <group string="Données Logistiques (Lecture seule)">
                         <group>
                             <field name="ste_id"/>
+                            <field name="invoice_number"/>
                             <field name="supplier_id"/>
                             <field name="article_id"/>
                             <field name="shipping_id"/>
                         </group>
                         <group>
                             <field name="week"/>
-                            <field name="invoice_number"/>
                             <field name="eta"/>
                             <field name="user_id"/>
                           </group>

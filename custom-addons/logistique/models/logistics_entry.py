@@ -43,7 +43,7 @@ class LogisticsEntry(models.Model):
     amount_total = fields.Float(string='Total', compute='_compute_amount_total', store=True)
     
     # Audit
-    user_id = fields.Many2one('res.users', string='Saisi par', default=lambda self: self.env.user, readonly=True)
+    saisi_par = fields.Char(string='Saisi par')
     
     @api.depends('price_unit', 'weight')
     def _compute_amount_total(self):

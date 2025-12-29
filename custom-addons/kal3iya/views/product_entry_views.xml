@@ -10,6 +10,7 @@
     <record id="kal3iyaentry_action" model="ir.actions.act_window">
         <field name="name">Entrée</field>
         <field name="res_model">kal3iyaentry</field>
+        <field name="view_mode">tree,form,pivot</field>
     </record>
 
     <menuitem 
@@ -165,6 +166,18 @@
                 <field name="lot"/>
                 <field name="state"/>
             </search>
+        </field>
+    </record>
+
+    <record id="entree_view_pivot" model="ir.ui.view">
+        <field name="name">entree.pivot</field>
+        <field name="model">kal3iyaentry</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Entrée">
+                <field name="product_id" type="row"/>
+                <field name="mt_achat" type="measure"/>
+                <field name="tonnage" type="measure"/>
+            </pivot>
         </field>
     </record>
 

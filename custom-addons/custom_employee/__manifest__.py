@@ -7,7 +7,7 @@
         Does not depend on standard HR module.
     """,
     'category': 'Custom',
-    'author': 'Antigravity',
+    'author': 'Ayoub Akhrif',
     'depends': ['base', 'mail'],
     'data': [
         'security/ir.model.access.csv',

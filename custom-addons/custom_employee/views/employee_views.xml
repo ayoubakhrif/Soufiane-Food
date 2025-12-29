@@ -2,9 +2,9 @@
 <odoo>
 
     <!-- Search View -->
-    <record id="view_custom_employee_search" model="ir.ui.view">
-        <field name="name">custom.employee.search</field>
-        <field name="model">custom.employee</field>
+    <record id="view_core_employee_search" model="ir.ui.view">
+        <field name="name">core.employee.search</field>
+        <field name="model">core.employee</field>
         <field name="arch" type="xml">
             <search string="Employees">
                 <field name="name"/>
@@ -26,9 +26,9 @@
     </record>
 
     <!-- Tree View -->
-    <record id="view_custom_employee_tree" model="ir.ui.view">
-        <field name="name">custom.employee.tree</field>
-        <field name="model">custom.employee</field>
+    <record id="view_core_employee_tree" model="ir.ui.view">
+        <field name="name">core.employee.tree</field>
+        <field name="model">core.employee</field>
         <field name="arch" type="xml">
             <tree string="Employees" sample="1">
                 <field name="name"/>
@@ -44,9 +44,9 @@
     </record>
 
     <!-- Form View -->
-    <record id="view_custom_employee_form" model="ir.ui.view">
-        <field name="name">custom.employee.form</field>
-        <field name="model">custom.employee</field>
+    <record id="view_core_employee_form" model="ir.ui.view">
+        <field name="name">core.employee.form</field>
+        <field name="model">core.employee</field>
         <field name="arch" type="xml">
             <form string="Employee">
                 <sheet>
@@ -105,9 +105,9 @@
     </record>
     
    <!-- Kanban View -->
-    <record id="view_custom_employee_kanban" model="ir.ui.view">
-        <field name="name">custom.employee.kanban</field>
-        <field name="model">custom.employee</field>
+    <record id="view_core_employee_kanban" model="ir.ui.view">
+        <field name="name">core.employee.kanban</field>
+        <field name="model">core.employee</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" sample="1">
                 <field name="id"/>
@@ -119,10 +119,10 @@
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
                             <t t-if="record.image_1920.raw_value">
-                                <div class="o_kanban_image_fill_left d-none d-md-block" t-attf-style="background-image:url('#{kanban_image('custom.employee', 'image_1920', record.id.raw_value)}')"/>
+                                <div class="o_kanban_image_fill_left d-none d-md-block" t-attf-style="background-image:url('#{kanban_image('core.employee', 'image_1920', record.id.raw_value)}')"/>
                             </t>
                             <t t-else="">
-                                <div class="o_kanban_image_fill_left d-none d-md-block o_kanban_image_full" t-attf-style="background-image: url(#{kanban_image('custom.employee', 'image_1920', record.id.raw_value, placeholder=True)})" role="img"/>
+                                <div class="o_kanban_image_fill_left d-none d-md-block o_kanban_image_full" t-attf-style="background-image: url(#{kanban_image('core.employee', 'image_1920', record.id.raw_value, placeholder=True)})" role="img"/>
                             </t>
                             
                             <div class="oe_kanban_details">
@@ -142,9 +142,9 @@
     </record>
 
     <!-- Action -->
-    <record id="action_custom_employee" model="ir.actions.act_window">
+    <record id="action_core_employee" model="ir.actions.act_window">
         <field name="name">Employees</field>
-        <field name="res_model">custom.employee</field>
+        <field name="res_model">core.employee</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
@@ -154,7 +154,7 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="menu_custom_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png"/>
-    <menuitem id="menu_custom_employee_main" name="Employees" parent="menu_custom_employee_root" action="action_custom_employee" sequence="1"/>
+    <menuitem id="menu_core_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png"/>
+    <menuitem id="menu_core_employee_main" name="Employees" parent="menu_core_employee_root" action="action_core_employee" sequence="1"/>
 
 </odoo>

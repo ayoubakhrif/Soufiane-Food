@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_custom_employee_user,custom.employee.user,model_custom_employee,base.group_user,1,1,1,1
+access_core_employee_user,core.employee.user,model_core_employee,base.group_user,1,1,1,1

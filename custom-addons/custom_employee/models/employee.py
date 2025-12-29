@@ -1,7 +1,7 @@
 from odoo import models, fields, api, exceptions
 
-class CustomEmployee(models.Model):
-    _name = 'custom.employee'
+class CoreEmployee(models.Model):
+    _name = 'core.employee'
     _description = 'Employee'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'name'
@@ -24,8 +24,8 @@ class CustomEmployee(models.Model):
     active = fields.Boolean(string='Active', default=True, tracking=True)
 
     # Hierarchy
-    parent_id = fields.Many2one('custom.employee', string='Manager', index=True, tracking=True)
-    child_ids = fields.One2many('custom.employee', 'parent_id', string='Direct Subordinates')
+    parent_id = fields.Many2one('core.employee', string='Manager', index=True, tracking=True)
+    child_ids = fields.One2many('core.employee', 'parent_id', string='Direct Subordinates')
 
     # System Access
     user_id = fields.Many2one('res.users', string='Related User', help='Link this employee to a system user for login access.')

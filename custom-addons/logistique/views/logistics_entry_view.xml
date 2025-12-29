@@ -57,7 +57,7 @@
                             <field name="eta"/>
                             <field name="week"/>
                             <field name="invoice_number"/>
-                            <field name="user_id"/>
+                            <field name="saisi_par"/>
                         </group>
                         <group string="Entités">
                             <field name="ste_id"/>

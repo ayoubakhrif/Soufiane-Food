@@ -39,7 +39,7 @@ class LogisticsEntry(models.Model):
     weight = fields.Float(string='Poids')
     
     # Financial details
-    price_unit = fields.Float(string='P.U')
+    price_unit = fields.Float(string='P.U', digits=(16, 4))
     amount_total = fields.Float(string='Total', compute='_compute_amount_total', store=True)
     
     # Audit

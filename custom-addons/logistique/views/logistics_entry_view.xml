@@ -69,10 +69,10 @@
                     <group>
                         <group string="Logistics">
                             <field name="article_id"/>
+                            <field name="details"/>
                             <field name="weight"/>
                             <field name="price_unit"/>
                             <field name="amount_total"/>
-                            <field name="details"/>
                         </group>
                         <group string="Tracking">
                             <field name="incoterm"/>

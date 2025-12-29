@@ -13,6 +13,7 @@ class CustomEmployee(models.Model):
     phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')
     rib = fields.Char(string='RIB (Bank Account)')
+    monthly_salary = fields.Float(string='Monthly Salary', tracking=True)
     signature = fields.Binary(string='Signature')
 
     # Organizational Information

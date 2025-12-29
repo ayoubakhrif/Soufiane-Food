@@ -67,6 +67,7 @@
                             <field name="phone" widget="phone"/>
                             <field name="email" widget="email"/>
                             <field name="rib"/>
+                            <field name="monthly_salary"/>
                         </group>
                         <group string="Organization">
                             <field name="department"/>

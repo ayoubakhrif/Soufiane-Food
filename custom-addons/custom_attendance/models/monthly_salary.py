@@ -46,7 +46,8 @@ class CustomMonthlySalary(models.Model):
         """
         config = self.env['custom.attendance.config'].get_main_config()
         non_working_day = int(config.non_working_day) if config else 6
-        holiday_dates = config.public_holiday_ids.mapped('date') if config else []
+        # Robust date conversion for holidays
+        holiday_dates = [fields.Date.to_date(d) for d in config.public_holiday_ids.mapped('date')] if config else []
 
         for rec in self:
             if not rec.employee_id or not rec.month or not rec.year:
@@ -67,7 +68,8 @@ class CustomMonthlySalary(models.Model):
                 ('date', '>=', start_date),
                 ('date', '<=', end_date)
             ])
-            attended_dates = set(attendances.mapped('date'))
+            # Robust date conversion for attendances
+            attended_dates = {fields.Date.to_date(d) for d in attendances.mapped('date')}
 
             # 2. Fetch all approved leaves overlapping this month
             leaves = self.env['custom.leave'].search([
@@ -119,6 +121,12 @@ class CustomMonthlySalary(models.Model):
         return record
 
     def write(self, vals):
+        # Allow system updates (superuser) OR Admins to bypass this check
+        if not self.env.su and not self.env.user.has_group('custom_attendance.group_custom_attendance_admin'):
+            for rec in self:
+                if rec.state == 'validated' and 'state' not in vals:
+                     raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
+        
         res = super(CustomMonthlySalary, self).write(vals)
         if 'employee_id' in vals or 'month' in vals or 'year' in vals:
              self._check_attendance_coverage()
@@ -222,13 +230,7 @@ class CustomMonthlySalary(models.Model):
             ])
             attendances.write({'state': 'locked'})
 
-    def write(self, vals):
-        # Allow system updates (superuser) OR Admins to bypass this check
-        if not self.env.su and not self.env.user.has_group('custom_attendance.group_custom_attendance_admin'):
-            for rec in self:
-                if rec.state == 'validated' and 'state' not in vals:
-                     raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
-        return super(CustomMonthlySalary, self).write(vals)
+
 
     def unlink(self):
         # Allow system updates (superuser) OR Admins to bypass this check

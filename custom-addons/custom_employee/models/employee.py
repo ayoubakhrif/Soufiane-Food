@@ -3,12 +3,11 @@ from odoo import models, fields, api, exceptions
 class CoreEmployee(models.Model):
     _name = 'core.employee'
     _description = 'Employee'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin']
     _rec_name = 'name'
 
     # Personal Information
     name = fields.Char(string='Full Name', required=True, tracking=True)
-    image_1920 = fields.Image(string='Photo', max_width=1920, max_height=1920)
     cin = fields.Char(string='CIN (National ID)', tracking=True)
     phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')

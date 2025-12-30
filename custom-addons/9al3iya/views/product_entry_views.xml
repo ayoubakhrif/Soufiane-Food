@@ -46,48 +46,98 @@
     </record>
 
     <record id="entreev2_view_form" model="ir.ui.view">
-        <field name="name">entree form</field>
+        <field name="name">entree.form.improved</field>
         <field name="model">cal3iyaentry</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Entrée de stock">
+
+                <!-- Header -->
                 <header>
-                    <button name="action_open_dum_drive" 
-                            type="object" 
-                            string="Open DUM (Drive)" 
+                    <button name="action_open_dum_drive"
+                            type="object"
+                            string="Open DUM (Drive)"
                             class="btn-primary"
                             invisible="not dum"/>
-                    <field name="state" widget="statusbar" options="{'clickable': true}"/>
+                    <field name="state"
+                        widget="statusbar"
+                        options="{'clickable': true}"/>
                 </header>
+
                 <sheet>
+
+                    <!-- Titre -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <!-- Retour -->
                     <group>
-                        <field name="return_id" invisible="state == 'entree'" domain="[('client_id', '=', client_id)]"/>
+                        <field name="return_id"
+                            invisible="state == 'entree'"
+                            domain="[('client_id', '=', client_id)]"/>
                     </group>
-                    <group>
-                        <field name="client_id" invisible="state == 'entree'"/>
-                        <field name="name"/>
-                        <field name="quantity"/>
-                        <field name="weight"/>
-                        <field name="tonnage"/>
-                        <field name="price" invisible="state == 'retour'"/>
-                        <field name="total_price" invisible="state == 'retour'"/>
-                        <field name="date_entry"/>
-                        <field name="driver_id"/>
-                        <field name="cellphone"/>
+
+                    <!-- Infos principales -->
+                    <group col="2">
+
+                        <group string="Informations générales">
+                            <field name="client_id" invisible="state == 'entree'"/>
+                            <field name="date_entry"/>
+                            <field name="driver_id"/>
+                            <field name="cellphone"/>
+                        </group>
+
+                        <group string="Quantités & Prix">
+                            <field name="quantity"/>
+                            <field name="weight"/>
+                            <field name="tonnage"/>
+                            <field name="price" invisible="state == 'retour'"/>
+                            <field name="total_price" invisible="state == 'retour'"/>
+                            <field name="selling_price" invisible="state == 'entree'"/>
+                        </group>
+
                     </group>
-                    <group>
-                        <field name="garage"/>
-                        <field name="charge_transport"/>
-                        <field name="calibre"/>
-                        <field name="dum"/>
-                        <field name="lot"/>
-                        <field name="ste_id"/>
-                        <field name="provider_id"/>
-                        <field name="image_1920"/>
-                        <field name="selling_price" invisible="state == 'entree'"/>
-                    </group>
-                    <group string="Documents">
-                        <field name="dum_link" widget="url" string="PDF DUM"/>
-                    </group>
+
+                    <notebook>
+
+                        <!-- Produit -->
+                        <page string="Produit">
+                            <group col="2">
+                                <group>
+                                    <field name="calibre"/>
+                                    <field name="lot"/>
+                                    <field name="garage"/>
+                                </group>
+                                <group>
+                                    <field name="provider_id"/>
+                                    <field name="ste_id"/>
+                                    <field name="charge_transport"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Documents -->
+                        <page string="Documents">
+                            <group col="2">
+                                <group>
+                                    <field name="dum"/>
+                                    <field name="dum_link"
+                                        widget="url"
+                                        string="PDF DUM"/>
+                                </group>
+                                <group>
+                                    <field name="image_1920"
+                                        widget="image"
+                                        class="oe_avatar"
+                                        options="{'preview_image': 'image_1920'}"/>
+                                </group>
+                            </group>
+                        </page>
+
+                    </notebook>
+
                 </sheet>
             </form>
         </field>

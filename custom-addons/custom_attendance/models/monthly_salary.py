@@ -39,6 +39,89 @@ class CustomMonthlySalary(models.Model):
          'Un bulletin de salaire existe déjà pour cet employé, ce mois et cette année.')
     ]
 
+    def _check_attendance_coverage(self):
+        """
+        Verify that for every working day in the month,
+        there is either an attendance record or an approved leave.
+        """
+        config = self.env['custom.attendance.config'].get_main_config()
+        non_working_day = int(config.non_working_day) if config else 6
+        holiday_dates = config.public_holiday_ids.mapped('date') if config else []
+
+        for rec in self:
+            if not rec.employee_id or not rec.month or not rec.year:
+                continue
+
+            try:
+                m = int(rec.month)
+                y = rec.year
+                num_days = calendar.monthrange(y, m)[1]
+                start_date = date(y, m, 1)
+                end_date = date(y, m, num_days)
+            except:
+                continue
+
+            # 1. Fetch all attendances for this employee in this month
+            attendances = self.env['custom.attendance'].search([
+                ('employee_id', '=', rec.employee_id.id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date)
+            ])
+            attended_dates = set(attendances.mapped('date'))
+
+            # 2. Fetch all approved leaves overlapping this month
+            leaves = self.env['custom.leave'].search([
+                ('employee_id', '=', rec.employee_id.id),
+                ('state', '=', 'approved'),
+                ('date_from', '<=', end_date),
+                ('date_to', '>=', start_date)
+            ])
+            
+            leave_covered_dates = set()
+            for leave in leaves:
+                # Calculate intersection of leave range and current month
+                l_start = max(leave.date_from, start_date)
+                l_end = min(leave.date_to, end_date)
+                
+                curr = l_start
+                while curr <= l_end:
+                    leave_covered_dates.add(curr)
+                    curr += timedelta(days=1)
+
+            # 3. Iterate over expected working days
+            missing_days = []
+            for day in range(1, num_days + 1):
+                current_date = date(y, m, day)
+                
+                # Skip non-working days (e.g. Sunday)
+                if current_date.weekday() == non_working_day:
+                    continue
+                
+                # Skip public holidays
+                if current_date in holiday_dates:
+                    continue
+                
+                # Check coverage
+                if current_date not in attended_dates and current_date not in leave_covered_dates:
+                    missing_days.append(current_date)
+
+            if missing_days:
+                raise exceptions.ValidationError(
+                    "Attention: il faut remplir la présence de tous les jours avant de calculer le salaire du mois."
+                )
+
+    @api.model
+    def create(self, vals):
+        record = super(CustomMonthlySalary, self).create(vals)
+        record._check_attendance_coverage()
+        return record
+
+    def write(self, vals):
+        res = super(CustomMonthlySalary, self).write(vals)
+        if 'employee_id' in vals or 'month' in vals or 'year' in vals:
+             self._check_attendance_coverage()
+        return res
+
     @api.depends('employee_id', 'month', 'year')
     def _compute_salary_details(self):
         config = self.env['custom.attendance.config'].get_main_config()

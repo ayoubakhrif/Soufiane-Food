@@ -10,6 +10,7 @@
     'author': 'Ayoub Akhrif',
     'depends': ['base', 'mail'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/employee_views.xml',
     ],

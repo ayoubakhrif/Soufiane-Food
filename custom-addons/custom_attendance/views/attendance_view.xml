@@ -23,17 +23,23 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_set_absent" string="Marquer Comme Absent" type="object" class="oe_highlight" attrs="{'invisible': [('is_absent', '=', True)]}"/>
+                    <button name="action_set_present" string="Restaurer Présence" type="object" attrs="{'invisible': [('is_absent', '=', False)]}"/>
                     <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="employee_id"/>
+                            <field name="employee_payroll_site" invisible="1"/>
+                            <field name="site" widget="radio" options="{'horizontal': true}" attrs="{'invisible': [('employee_payroll_site', '=', 'casa')]}"/>
+                            <field name="is_absent" invisible="1"/>
+                            <field name="absence_type" widget="radio" attrs="{'invisible': [('is_absent', '=', False)], 'required': [('is_absent', '=', True)]}"/>
                             <field name="date"/>
                         </group>
                         <group>
-                            <field name="check_in" widget="float_time"/>
-                            <field name="check_out" widget="float_time"/>
+                            <field name="check_in" widget="float_time" attrs="{'readonly': [('is_absent', '=', True)]}"/>
+                            <field name="check_out" widget="float_time" attrs="{'readonly': [('is_absent', '=', True)]}"/>
                         </group>
                     </group>
                     <group string="Calculs">

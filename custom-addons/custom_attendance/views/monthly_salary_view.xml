@@ -50,6 +50,16 @@
                             <field name="total_holiday_hours" decoration-info="total_holiday_hours &gt; 0"/>
                         </group>
                     </group>
+                    <group string="Répartition par site">
+                        <group string="Mediouna">
+                             <field name="hours_mediouna" widget="float_time"/>
+                             <field name="salary_mediouna" widget="monetary"/>
+                        </group>
+                        <group string="Casa">
+                             <field name="hours_casa" widget="float_time"/>
+                             <field name="salary_casa" widget="monetary"/>
+                        </group>
+                    </group>
                     <group string="Calcul final">
                         <group>
                             <field name="deduction_amount" widget="monetary" decoration-danger="1"/>

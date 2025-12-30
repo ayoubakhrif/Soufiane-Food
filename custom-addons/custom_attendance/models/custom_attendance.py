@@ -25,6 +25,40 @@ class CustomAttendance(models.Model):
         ('locked', 'Locked')
     ], default='draft', string='Status', tracking=True)
 
+    # New Fields for Enhancements
+    site = fields.Selection([
+        ('mediouna', 'Mediouna'),
+        ('casa', 'Casa')
+    ], string='Site', compute='_compute_site_default', store=True, readonly=False)
+    
+    is_absent = fields.Boolean(string='Absent', default=False, tracking=True)
+    absence_type = fields.Selection([
+        ('deduction', 'Déduit du salaire'),
+        ('leave', 'Consomme un jour de congé')
+    ], string="Type d'absence")
+    
+    employee_payroll_site = fields.Selection(related='employee_id.payroll_site', string="Site de Paie (Tech)", readonly=True)
+
+    @api.depends('employee_id.payroll_site')
+    def _compute_site_default(self):
+        for rec in self:
+            if rec.employee_id.payroll_site == 'casa':
+                rec.site = 'casa'
+            elif not rec.site and rec.employee_id.payroll_site == 'mediouna':
+                rec.site = 'mediouna'
+
+    def action_set_absent(self):
+        for rec in self:
+            rec.is_absent = True
+            rec.check_in = 0.0
+            rec.check_out = 0.0
+
+    def action_set_present(self):
+        for rec in self:
+            rec.is_absent = False
+            rec.absence_type = False
+
+
     _sql_constraints = [
         ('unique_employee_date', 'unique(employee_id, date)', 'Chaque employé soit avoire une seule fiche de présence par jour!')
     ]
@@ -53,13 +87,25 @@ class CustomAttendance(models.Model):
             holidays = config.public_holiday_ids.mapped('date')
 
         for rec in self:
-            # 0. Check for Paid Leave
+            # 0. Check for Absent
+            if rec.is_absent:
+                rec.normal_working_hours = 0.0
+                rec.missing_hours = daily_hours
+                rec.overtime_hours = 0.0
+                rec.holiday_hours = 0.0
+                rec.delay_minutes = 0
+                continue
+
+            # 0.5 Check for Paid Leave
             leave_domain = [
                 ('employee_id', '=', rec.employee_id.id),
                 ('state', '=', 'approved'),
                 ('date_from', '<=', rec.date),
                 ('date_to', '>=', rec.date),
             ]
+            # Be careful not to count the leave WE just created for this absence if we are in recompute
+            # But here is_absent is False in this branch.
+            
             is_on_leave = self.env['custom.leave'].search_count(leave_domain) > 0
             
             if is_on_leave:
@@ -69,18 +115,27 @@ class CustomAttendance(models.Model):
                 rec.overtime_hours = 0.0
                 rec.holiday_hours = 0.0
                 rec.delay_minutes = 0
-                # Optional: Force state to confirmed to lock it visually?
-                # rec.state = 'confirmed' 
                 
             # 1. Check if Public Holiday
             elif rec.date in holidays:
                 # Holiday Logic
-                duration = rec.check_out - rec.check_in
-                rec.holiday_hours = max(0.0, duration)
-                rec.normal_working_hours = rec.holiday_hours # Count as normal too for stats
-                rec.missing_hours = 0.0 # No penalty
-                rec.overtime_hours = 0.0 # Double pay replaces overtime
-                rec.delay_minutes = 0
+                # Check for Sunday (Index 6)
+                if rec.date.weekday() == 6:
+                     # Sunday Holiday -> Treat as normal non-working day (Ignore)
+                     # But if config.non_working_day is NOT Sunday, this might be tricky. 
+                     # Assuming non_working_day logic handles it or we force 0.
+                     rec.normal_working_hours = 0.0
+                     rec.missing_hours = 0.0
+                     rec.overtime_hours = 0.0
+                     rec.holiday_hours = 0.0
+                     rec.delay_minutes = 0
+                else:
+                    duration = rec.check_out - rec.check_in
+                    rec.holiday_hours = max(0.0, duration)
+                    rec.normal_working_hours = rec.holiday_hours # Count as normal too for stats
+                    rec.missing_hours = 0.0 # No penalty
+                    rec.overtime_hours = 0.0 # Double pay replaces overtime
+                    rec.delay_minutes = 0
             else:
                 # Normal Day Logic
                 rec.holiday_hours = 0.0
@@ -115,3 +170,42 @@ class CustomAttendance(models.Model):
                     rec.overtime_hours = rec.check_out - off_out
                 else:
                     rec.overtime_hours = 0.0
+
+    @api.model
+    def create(self, vals):
+        record = super(CustomAttendance, self).create(vals)
+        record._handle_absence_leave_creation()
+        return record
+
+    def write(self, vals):
+        res = super(CustomAttendance, self).write(vals)
+        if 'is_absent' in vals or 'absence_type' in vals:
+            for rec in self:
+                rec._handle_absence_leave_creation()
+        return res
+
+    def _handle_absence_leave_creation(self):
+        for rec in self:
+            if rec.is_absent and rec.absence_type == 'leave':
+                # Check if leave already exists to avoid duplicates
+                existing_leave = self.env['custom.leave'].search([
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('date_from', '=', rec.date),
+                    ('date_to', '=', rec.date),
+                    ('leave_type', '=', 'paid')
+                ])
+                if not existing_leave:
+                    # Check Balance
+                    if rec.employee_id.leaves_remaining < 1:
+                        # Allow UI but block save (Constraint-like)
+                        raise exceptions.ValidationError("Pas de solde de congé restant")
+                    
+                    # Create Approved Leave
+                    self.env['custom.leave'].create({
+                        'employee_id': rec.employee_id.id,
+                        'date_from': rec.date,
+                        'date_to': rec.date,
+                        'leave_type': 'paid',
+                        'reason': 'Absence marquée depuis la fiche de présence',
+                        'state': 'approved'
+                    })

@@ -28,6 +28,7 @@
                         </group>
                         <group>
                             <field name="monthly_salary" groups="custom_attendance.group_custom_attendance_admin,custom_attendance.group_custom_attendance_manager" widget="monetary"/>
+                            <field name="payroll_site" widget="radio" options="{'horizontal': true}"/>
                         </group>
                     </group>
                     <notebook>

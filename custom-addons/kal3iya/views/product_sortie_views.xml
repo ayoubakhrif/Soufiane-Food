@@ -78,11 +78,13 @@
                         <group>
                             <field name="quantity"/>
                             <field name="selling_price"/>
+                            <field name="price"/>
                             <field name="charge_transport"/>
                             <field name="week"/>
                         </group>
 
                         <group>
+                            <field name="mt_achat" readonly="1"/>
                             <field name="mt_vente" readonly="1"/>
                             <field name="diff" readonly="1"/>
                         </group>

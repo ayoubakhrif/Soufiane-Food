@@ -229,7 +229,8 @@ class ProductExit(models.Model):
             lot = rec.lot or ''
             dum = rec.dum or ''
             qty = rec.quantity or 0
-            rec.display_name = f"{client} - {produit} - Lot {lot} - DUM {dum} - Qté {qty}"
+            prix = rec.price or 0
+            rec.display_name = f"{client} - {produit} - Lot {lot} - DUM {dum} - Qté {qty} - Prix {prix}"
 
     def name_get(self):
         """Personnaliser le nom affiché dans les listes déroulantes"""

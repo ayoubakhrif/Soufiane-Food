@@ -54,7 +54,7 @@ class ProductExit(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Stock', tracking=True, store=True)
+    ], string='Stock', tracking=True, required=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),

@@ -89,7 +89,7 @@
                             <field name="cellphone"/>
                         </group>
 
-                        <group string="Quantités & Prix">
+                        <group string="Quantités &amp; Prix">
                             <field name="quantity"/>
                             <field name="weight"/>
                             <field name="tonnage"/>

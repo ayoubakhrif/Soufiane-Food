@@ -63,7 +63,7 @@
                             <field name="selling_price"/>
                         </group>
 
-                        <group string="Client & Livraison">
+                        <group string="Client &amp; Livraison">
                             <field name="client_id"/>
                             <field name="indirect"/>
                             <field name="client2" invisible="indirect == False"/>

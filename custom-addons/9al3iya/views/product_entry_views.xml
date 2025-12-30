@@ -79,7 +79,7 @@
                             domain="[('client_id', '=', client_id)]"/>
                     </group>
 
-                    <!-- Infos principales -->
+                    <!-- Informations principales -->
                     <group col="2">
 
                         <group string="Informations générales">
@@ -89,7 +89,7 @@
                             <field name="cellphone"/>
                         </group>
 
-                        <group string="Quantités &amp; Prix">
+                        <group string="Quantités & Prix">
                             <field name="quantity"/>
                             <field name="weight"/>
                             <field name="tonnage"/>
@@ -100,48 +100,45 @@
 
                     </group>
 
-                    <notebook>
+                    <!-- Identification produit -->
+                    <group string="Identification produit" col="2">
+                        <group>
+                            <field name="dum"/>
+                            <field name="lot"/>
+                            <field name="calibre"/>
+                        </group>
+                        <group>
+                            <field name="garage"/>
+                            <field name="provider_id"/>
+                            <field name="ste_id"/>
+                        </group>
+                    </group>
 
-                        <!-- Produit -->
-                        <page string="Produit">
-                            <group col="2">
-                                <group>
-                                    <field name="calibre"/>
-                                    <field name="lot"/>
-                                    <field name="garage"/>
-                                </group>
-                                <group>
-                                    <field name="provider_id"/>
-                                    <field name="ste_id"/>
-                                    <field name="charge_transport"/>
-                                </group>
-                            </group>
-                        </page>
+                    <!-- Transport -->
+                    <group string="Transport">
+                        <field name="charge_transport"/>
+                    </group>
 
-                        <!-- Documents -->
-                        <page string="Documents">
-                            <group col="2">
-                                <group>
-                                    <field name="dum"/>
-                                    <field name="dum_link"
-                                        widget="url"
-                                        string="PDF DUM"/>
-                                </group>
-                                <group>
-                                    <field name="image_1920"
-                                        widget="image"
-                                        class="oe_avatar"
-                                        options="{'preview_image': 'image_1920'}"/>
-                                </group>
-                            </group>
-                        </page>
-
-                    </notebook>
+                    <!-- Documents -->
+                    <group string="Documents" col="2">
+                        <group>
+                            <field name="dum_link"
+                                widget="url"
+                                string="PDF DUM"/>
+                        </group>
+                        <group>
+                            <field name="image_1920"
+                                widget="image"
+                                class="oe_avatar"
+                                options="{'preview_image': 'image_1920'}"/>
+                        </group>
+                    </group>
 
                 </sheet>
             </form>
         </field>
     </record>
+
 
     <record id="entreev2_view_search" model="ir.ui.view">
         <field name="name">entree search</field>

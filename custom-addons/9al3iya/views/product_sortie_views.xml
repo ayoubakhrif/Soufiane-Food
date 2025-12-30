@@ -42,42 +42,90 @@
 
     <!-- Vue formulaire -->
     <record id="sortiev2_view_form" model="ir.ui.view">
-        <field name="name">sortie form</field>
+        <field name="name">sortie.form.improved</field>
         <field name="model">cal3iyasortie</field>
         <field name="arch" type="xml">
             <form string="Sortie de stock">
                 <sheet>
-                    <group>
-                        <field name="entry_id" required="1"/>
-                        <field name="date_exit"/>
-                        <field name="quantity"/>
-                        <field name="selling_price"/>
-                        <field name="client_id"/>
-                        <field name="indirect"/>
-                        <field name="client2" invisible="indirect == False"/>
-                        <field name="driver_id"/>
-                        <field name="cellphone"/>
+
+                    <!-- Bandeau principal -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group col="2">
+                        <group string="Informations générales">
+                            <field name="entry_id" required="1"/>
+                            <field name="date_exit"/>
+                            <field name="quantity"/>
+                            <field name="selling_price"/>
+                        </group>
+
+                        <group string="Client & Livraison">
+                            <field name="client_id"/>
+                            <field name="indirect"/>
+                            <field name="client2" invisible="indirect == False"/>
+                            <field name="driver_id"/>
+                            <field name="cellphone"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="name" readonly="1"/>
-                        <field name="weight" readonly="1"/>
-                        <field name="tonnage" readonly="1"/>
-                        <field name="calibre" readonly="1"/>
-                        <field name="garage" readonly="1"/>
-                        <field name="provider_id" readonly="1"/>
-                        <field name="lot" readonly="1"/>
-                        <field name="dum" readonly="1"/>
-                        <field name="charge_transport"/>
-                        <field name="ste_id" readonly="1"/>
-                        <field name="image_1920" widget="image" class="oe_avatar"
-                               options="{'preview_image': 'image_1920'}" readonly="1"/>
-                        <field name="drive_file_url" invisible="1"/>
-                        <field name="drive_file_id" invisible="1"/>
-                    </group>
+
+                    <notebook>
+
+                        <!-- Onglet Produit -->
+                        <page string="Détails du produit">
+                            <group col="2">
+                                <group>
+                                    <field name="weight" readonly="1"/>
+                                    <field name="tonnage" readonly="1"/>
+                                    <field name="calibre" readonly="1"/>
+                                    <field name="lot" readonly="1"/>
+                                </group>
+
+                                <group>
+                                    <field name="garage" readonly="1"/>
+                                    <field name="provider_id" readonly="1"/>
+                                    <field name="dum" readonly="1"/>
+                                    <field name="ste_id" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Onglet Transport -->
+                        <page string="Transport">
+                            <group col="2">
+                                <group>
+                                    <field name="charge_transport"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Onglet Documents -->
+                        <page string="Documents">
+                            <group col="2">
+                                <group>
+                                    <field name="image_1920"
+                                        widget="image"
+                                        class="oe_avatar"
+                                        options="{'preview_image': 'image_1920'}"
+                                        readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="drive_file_url" invisible="1"/>
+                                    <field name="drive_file_id" invisible="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                    </notebook>
+
                 </sheet>
             </form>
         </field>
     </record>
+
 
     <!-- Vue recherche -->
     <record id="sortiev2_view_search" model="ir.ui.view">

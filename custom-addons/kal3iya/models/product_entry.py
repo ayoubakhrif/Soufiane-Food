@@ -22,7 +22,7 @@ class ProductEntry(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Stock', tracking=True, default='casa')
+    ], string='Stock', tracking=True, required=True)
 
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),

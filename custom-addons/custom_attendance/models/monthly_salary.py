@@ -85,8 +85,10 @@ class CustomMonthlySalary(models.Model):
                 
                 curr = l_start
                 while curr <= l_end:
-                    leave_covered_dates.add(curr)
+                    if curr.weekday() != non_working_day and curr not in holiday_dates:
+                        leave_covered_dates.add(curr)
                     curr += timedelta(days=1)
+
 
             # 3. Iterate over expected working days
             missing_days = []

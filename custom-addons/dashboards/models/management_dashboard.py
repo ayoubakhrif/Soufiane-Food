@@ -28,6 +28,11 @@ class ManagementDashboard(models.Model):
                 rec.content_html = "<div class='alert alert-info'>Sélectionnez un type de dashboard.</div>"
 
     def action_reload_dashboard(self):
+        self.ensure_one()
+
+        # 🔥 Vider le cache ORM
+        self.env.invalidate_all()
+
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'management.dashboard',
@@ -35,6 +40,7 @@ class ManagementDashboard(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
 
 
     # --------------------------------------------------------

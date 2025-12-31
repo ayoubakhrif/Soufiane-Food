@@ -13,11 +13,14 @@ class ManagementDashboard(models.Model):
         ('profit_product', 'Profit par Produit'),
     ], string="Type", required=True)
     
+    last_refresh = fields.Datetime(string="Last Refresh", default=fields.Datetime.now)
+    
     content_html = fields.Html(string="Dashboard Content", compute="_compute_content_html", sanitize=False)
     
     # --------------------------------------------------------
     # MAIN COMPUTE
     # --------------------------------------------------------
+    @api.depends('dashboard_type', 'last_refresh')
     def _compute_content_html(self):
         for rec in self:
             if rec.dashboard_type == 'profit_client':
@@ -29,10 +32,8 @@ class ManagementDashboard(models.Model):
 
     def action_reload_dashboard(self):
         self.ensure_one()
-
-        # 🔥 Vider le cache ORM
-        self.env.invalidate_all()
-
+        # Force update of timestamp to trigger recompute
+        self.last_refresh = fields.Datetime.now()
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'management.dashboard',

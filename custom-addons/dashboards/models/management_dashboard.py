@@ -43,7 +43,6 @@ class ManagementDashboard(models.Model):
         }
 
 
-
     # --------------------------------------------------------
     # RENDERERS
     # --------------------------------------------------------
@@ -425,27 +424,48 @@ class DashboardProfitClient(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
         CREATE OR REPLACE VIEW %s AS (
-        SELECT
-        min(s.id) as id,
-        s.client_id,
-        sum(s.tonnage) as tonnage_sold,
-        sum(COALESCE(s.mt_vente_final, s.mt_vente)) as mt_vente,
-        sum(s.mt_achat) as mt_achat,
-        sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit,
-        CASE
-        WHEN sum(COALESCE(s.mt_vente_final, s.mt_vente)) != 0
-        THEN (sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) / sum(COALESCE(s.mt_vente_final, s.mt_vente))) * 100
-        ELSE 0
-        END as profit_margin
-        FROM
-        kal3iyasortie s
-        GROUP BY
-        s.client_id
-        HAVING
-        sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) IS NOT NULL
+            SELECT
+                min(id) as id,
+                client_id,
+                sum(tonnage_sold) as tonnage_sold,
+                sum(mt_vente) as mt_vente,
+                sum(mt_achat) as mt_achat,
+                sum(profit) as profit,
+                CASE
+                    WHEN sum(mt_vente) != 0
+                    THEN (sum(profit) / sum(mt_vente)) * 100
+                    ELSE 0
+                END as profit_margin
+            FROM (
+                -- SALES (Sorties)
+                SELECT
+                    s.id,
+                    s.client_id,
+                    s.tonnage as tonnage_sold,
+                    COALESCE(s.mt_vente_final, s.mt_vente) as mt_vente,
+                    s.mt_achat,
+                    (COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit
+                FROM kal3iyasortie s
+                WHERE s.client_id IS NOT NULL
+
+                UNION ALL
+
+                -- RETURNS (Entrées type 'retour')
+                SELECT
+                    e.id * -1 as id, -- Negative ID to avoid collision
+                    e.client_id,
+                    -e.tonnage as tonnage_sold,
+                    -(e.selling_price * e.tonnage) as mt_vente,
+                    -(e.price * e.tonnage) as mt_achat,
+                    -((e.selling_price * e.tonnage) - (e.price * e.tonnage)) as profit
+                FROM kal3iyaentry e
+                WHERE e.state = 'retour' AND e.client_id IS NOT NULL
+            ) combined
+            GROUP BY client_id
+            HAVING sum(mt_vente) != 0 OR sum(profit) != 0
         )
         """ % self._table)
-    
+
 
 class DashboardProfitProduct(models.Model):
     _name = "dashboard.profit.product"
@@ -465,22 +485,43 @@ class DashboardProfitProduct(models.Model):
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
-                    min(s.id) as id,
-                    s.product_id,
-                    sum(s.tonnage) as tonnage_sold,
-                    sum(COALESCE(s.mt_vente_final, s.mt_vente)) as mt_vente,
-                    sum(s.mt_achat) as mt_achat,
-                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit,
+                    min(id) as id,
+                    product_id,
+                    sum(tonnage_sold) as tonnage_sold,
+                    sum(mt_vente) as mt_vente,
+                    sum(mt_achat) as mt_achat,
+                    sum(profit) as profit,
                     CASE 
-                        WHEN sum(COALESCE(s.mt_vente_final, s.mt_vente)) != 0 
-                        THEN (sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) / sum(COALESCE(s.mt_vente_final, s.mt_vente))) * 100 
+                        WHEN sum(mt_vente) != 0 
+                        THEN (sum(profit) / sum(mt_vente)) * 100 
                         ELSE 0 
                     END as profit_margin
-                FROM
-                    kal3iyasortie s
-                GROUP BY
-                    s.product_id
-                HAVING
-                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) IS NOT NULL
+                FROM (
+                    -- SALES
+                    SELECT
+                        s.id,
+                        s.product_id,
+                        s.tonnage as tonnage_sold,
+                        COALESCE(s.mt_vente_final, s.mt_vente) as mt_vente,
+                        s.mt_achat,
+                        (COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit
+                    FROM kal3iyasortie s
+                    WHERE s.product_id IS NOT NULL
+
+                    UNION ALL
+
+                    -- RETURNS
+                    SELECT
+                        e.id * -1 as id,
+                        e.product_id,
+                        -e.tonnage as tonnage_sold,
+                        -(e.selling_price * e.tonnage) as mt_vente,
+                        -(e.price * e.tonnage) as mt_achat,
+                        -((e.selling_price * e.tonnage) - (e.price * e.tonnage)) as profit
+                    FROM kal3iyaentry e
+                    WHERE e.state = 'retour' AND e.product_id IS NOT NULL
+                ) combined
+                GROUP BY product_id
+                HAVING sum(mt_vente) != 0 OR sum(profit) != 0
             )
         """ % self._table)

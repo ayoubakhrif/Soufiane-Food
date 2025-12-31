@@ -126,9 +126,40 @@
         </field>
     </record>
 
+    <record id="view_logistique_entry_search" model="ir.ui.view">
+        <field name="name">logistique.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Entrées Logistiques">
+
+                <field name="supplier_id"/>
+                <field name="week"/>
+                <field name="dossier_id"/>
+                <field name="status"/>
+                <field name="article_id"/>
+
+                <group expand="0" string="Regrouper par">
+                    <filter string="Supplier"
+                            context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Semaine"
+                            context="{'group_by': 'week'}"/>
+                    <filter string="Status"
+                            context="{'group_by': 'status'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+
     <record id="action_logistique_entry" model="ir.actions.act_window">
         <field name="name">Entrées Logistiques</field>
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">
+            {
+                'group_by': ['supplier_id', 'week']
+            }
+        </field>
     </record>
 </odoo>

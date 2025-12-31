@@ -15,11 +15,21 @@ class ManagementDashboard(models.Model):
     
     last_refresh = fields.Datetime(string="Last Refresh", default=fields.Datetime.now)
     
-    content_html = fields.Html(string="Dashboard Content", compute="_compute_content_html", sanitize=False)
+    content_html = fields.Html(
+        string="Dashboard Content",
+        sanitize=False,
+        readonly=True
+    )
     
     # --------------------------------------------------------
     # MAIN COMPUTE
     # --------------------------------------------------------
+    @api.model
+    def create(self, vals):
+        rec = super().create(vals)
+        rec.action_reload_dashboard()
+        return rec
+
     @api.depends('dashboard_type', 'last_refresh')
     def _compute_content_html(self):
         for rec in self:
@@ -33,21 +43,26 @@ class ManagementDashboard(models.Model):
     def action_reload_dashboard(self):
         self.ensure_one()
 
-        # 1️⃣ Commit pour s'assurer que la DB est à jour
-        self.env.cr.commit()
+        if self.dashboard_type == 'profit_client':
+            html = self._render_profit_client()
+        elif self.dashboard_type == 'profit_product':
+            html = self._render_profit_product()
+        else:
+            html = "<div class='alert alert-info'>Sélectionnez un type de dashboard.</div>"
 
-        # 2️⃣ Invalider le cache ORM
-        self.env.invalidate_all()
+        self.write({
+            'content_html': html,
+            'last_refresh': fields.Datetime.now(),
+        })
 
-        # 3️⃣ Recharger le record avec un nouvel env
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'management.dashboard',
             'res_id': self.id,
             'view_mode': 'form',
             'target': 'current',
-            'context': dict(self.env.context, reload=True),
         }
+
 
 
 

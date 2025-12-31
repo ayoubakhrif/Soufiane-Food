@@ -32,8 +32,8 @@ class ManagementDashboard(models.Model):
 
     def action_reload_dashboard(self):
         self.ensure_one()
-        # Force update of timestamp to trigger recompute
-        self.last_refresh = fields.Datetime.now()
+        # Force update of timestamp to trigger recompute (sudo to bypass read-only ACL)
+        self.sudo().write({'last_refresh': fields.Datetime.now()})
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'management.dashboard',

@@ -1,532 +1,251 @@
-from odoo import models, fields, api
-from odoo.exceptions import UserError
+# -*- coding: utf-8 -*-
 
-class Kal3iyaClient(models.Model):
-    _name = 'kal3iya.client'
-    _description = 'Clients'
+from odoo import models, fields, api, tools
 
-    name = fields.Char(string='Client', required=True)
+class ManagementDashboard(models.Model):
+    _name = "management.dashboard"
+    _description = "Executive Management Dashboard"
 
-    # Lignes de sorties automatiquement calculées
-    sortie_ids = fields.One2many(
-        'kal3iyasortie',
-        'client_id',
-        string='Sorties de ce client',
-    )
-
-    sortie_count = fields.Integer(
-        string="Nombre de commandes",
-        compute='_compute_sortie_count',
-        store=True
-    )
-
-    sorties_grouped_html = fields.Html(
-        string="Sorties groupées",
-        compute="_compute_sorties_grouped_html",
-        sanitize=False,
-    )
-
-    retours_grouped_html = fields.Html(
-        string="Retours groupés",
-        compute="_compute_retours_grouped_html",
-        sanitize=False,
-    )
-
-
-
-    avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
-    compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
-    compte_initial = fields.Float(string='Compte initial')
-
-    @api.depends('sortie_ids')
-    def _compute_sortie_count(self):
-            for rec in self:
-                rec.sortie_count = len(rec.sortie_ids)
-
-
-
-    # Lignes de retours automatiquement calculées
-    retour_ids = fields.One2many(
-        'kal3iyaentry',
-        'client_id',
-        string='Retours de ce client',
-    )
-
-    retour_count = fields.Integer(
-        string="Nombre de retours",
-        compute='_compute_retour_count',
-        store=True
-    )
-
-
-    @api.depends('retour_ids')
-    def _compute_retour_count(self):
+    name = fields.Char(string="Dashboard Name", required=True)
+    dashboard_type = fields.Selection([
+        ('profit_client', 'Profit by Client'),
+        ('profit_product', 'Profit by Product'),
+    ], string="Type", required=True)
+    
+    content_html = fields.Html(string="Dashboard Content", compute="_compute_content_html", sanitize=False)
+    
+    # --------------------------------------------------------
+    # MAIN COMPUTE
+    # --------------------------------------------------------
+    @api.depends('dashboard_type')
+    def _compute_content_html(self):
         for rec in self:
-            rec.retour_count = len(rec.retour_ids)
+            if rec.dashboard_type == 'profit_client':
+                rec.content_html = rec._render_profit_client()
+            elif rec.dashboard_type == 'profit_product':
+                rec.content_html = rec._render_profit_product()
+            else:
+                rec.content_html = "<div class='alert alert-info'>Select a dashboard type.</div>"
 
-    def write(self, vals):
-        for rec in self:
-            # si tentative de modification et non création
-            if 'compte_initial' in vals:
-                if rec.id:
-                    raise UserError("Impossible de modifier le compte initial après création.")
-        return super().write(vals)
+    # --------------------------------------------------------
+    # RENDERERS
+    # --------------------------------------------------------
+    def _render_profit_client(self):
+        # 1. Fetch Data (Already aggregated by SQL View)
+        # Sort by Profit DESC
+        records = self.env['dashboard.profit.client'].search([], order='profit desc')
+        
+        # 2. Calculate KPIs
+        total_profit = sum(r.profit for r in records)
+        total_tonnage = sum(r.tonnage_sold for r in records)
+        
+        best_client = records[0].client_id.name if records else "N/A"
+        worst_client_rec = records[-1] if records else None
+        worst_client = worst_client_rec.client_id.name if worst_client_rec else "N/A"
+        
+        # 3. Build HTML
+        html = f"""
+        <div style="font-family: 'Inter', sans-serif; padding: 20px; background-color: #f9fafb;">
+            
+            <!-- KPIs -->
+            <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+                {self._card("Total Profit", self._format_currency(total_profit), "bg-white border-l-4 border-green-500")}
+                {self._card("Total Tonnage", f"{total_tonnage:,.0f} Kg", "bg-white border-l-4 border-blue-500")}
+                {self._card("Best Client", best_client, "bg-white border-l-4 border-indigo-500")}
+                {self._card("Worst Client", worst_client, "bg-white border-l-4 border-red-500")}
+            </div>
+            
+            <!-- TITLE -->
+            <div style="margin-bottom: 15px; font-size: 18px; font-weight: 600; color: #374151;">
+                Client Profitability Ranking
+            </div>
 
-
-
-    @api.depends(
-        'sortie_ids.mt_vente',
-        'sortie_ids.mt_vente_final',
-        'avances.amount',
-        'retour_ids.selling_price',
-        'retour_ids.tonnage',
-        'retour_ids.state',
-        'compte_initial'
-    )
-    def _compute_compte(self):
-        """Compte = ventes - avances - retours"""
-        for client in self:
-            # 💰 Total des ventes
-            total_ventes = sum(s.mt_vente_final or s.mt_vente for s in client.sortie_ids)
-
-            # 💵 Total des avances
-            total_avances = sum(client.avances.mapped('amount'))
-
-            # 🔄 Total des retours (entrées avec state='retour')
-            retours = client.retour_ids.filtered(lambda r: r.state == 'retour')
-            total_retours = sum(r.selling_price*r.tonnage for r in retours)
-
-            # 🧮 Calcul final
-            client.compte = total_ventes - total_avances - total_retours + client.compte_initial
-
-    @api.depends(
-    'sortie_ids',
-    'sortie_ids.product_id',
-    'sortie_ids.quantity',
-    'sortie_ids.weight',
-    'sortie_ids.tonnage_final',
-    'sortie_ids.selling_price_final',
-    'sortie_ids.date_exit',
-    'sortie_ids.week',
-    'compte'
-    )
-    def _compute_sorties_grouped_html(self):
-        for rec in self:
-            html = """
-                <style>
-                    .sorties-container {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        max-width: 100%;
-                        padding: 10px;
-                    }
-
-                    .week-card {
-                        background: white;
-                        border-radius: 12px;
-                        border: 2px solid #e2e8f0;
-                        padding: 18px;
-                        margin: 22px 0;
-                        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-                    }
-
-                    .week-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 15px;
-                        flex-wrap: wrap;
-                    }
-
-                    .week-title {
-                        font-size: 22px;
-                        font-weight: 700;
-                        color: #4c51bf;
-                    }
-
-                    .week-total {
-                        background: #4c51bf;
-                        color: white;
-                        padding: 8px 18px;
-                        border-radius: 10px;
-                        font-size: 17px;
-                        font-weight: 700;
-                        box-shadow: 0 4px 12px rgba(76,81,191,0.3);
-                    }
-
-                    .table-header {
-                        display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr 0.8fr;
-                        padding: 10px;
-                        background: #e2e8f0;
-                        border-radius: 8px;
-                        font-weight: 700;
-                        color: #2d3748;
-                        margin-bottom: 10px;
-                    }
-
-                    .list-row {
-                        display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr 0.8fr;
-                        padding: 12px 10px;
-                        background: #f7fafc;
-                        border-radius: 8px;
-                        margin-bottom: 8px;
-                        border-left: 4px solid #4c51bf;
-                        transition: 0.2s ease;
-                    }
-                    .list-row:hover {
-                        background: #edf2f7;
-                        transform: translateX(4px);
-                    }
-
-                    .col-label {
-                        font-size: 14px;
-                        color: #2d3748;
-                        font-weight: 600;
-                    }
-                    .col-value {
-                        font-size: 15px;
-                        color: #4a5568;
-                        font-weight: 500;
-                    }
-
-                    .amount {
-                        color: #4c51bf;
-                        font-weight: 700;
-                    }
-
-                    .date {
-                        font-size: 14px;
-                        color: #805ad5;
-                    }
-
-                    .edit-btn {
-                        background: #4c51bf;
-                        color: white !important;
-                        padding: 6px 10px;
-                        border-radius: 6px;
-                        font-weight: 600;
-                        font-size: 13px;
-                        text-decoration: none;
-                        text-align: center;
-                        display: inline-block;
-                    }
-
-                    .edit-btn:hover {
-                        background: #3b42a1;
-                    }
-                </style>
-
-                <div class="sorties-container">
-            """
+            <!-- TABLE -->
+            <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead style="background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb;">
+                        <tr>
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: #4b5563;">Client</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Tonnage (Kg)</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Sales</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Cost</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Margin %</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        """
+        
+        for rec in records:
+            profit_color = "#16a34a" if rec.profit >= 0 else "#dc2626" # Green or Red
+            
             html += f"""
-                <div style="width:100%; text-align:center; margin-bottom:25px;">
-                    <div style="
-                        font-size:26px;
-                        font-weight:800;
-                        color:#4c51bf;
-                        padding: 14px 28px;
-                        display:inline-block;
-                        background:#ebf4ff;
-                        border:2px solid #4c51bf;
-                        border-radius:14px;
-                        box-shadow:0 4px 14px rgba(76,81,191,0.25);
-                    ">
-                        💰 Total Compte : {rec.compte:,.2f} Dh
-                    </div>
-                </div>
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 12px 16px; color: #111827;">{rec.client_id.name or 'Unknown'}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{rec.tonnage_sold:,.0f}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{self._format_currency(rec.mt_vente)}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{self._format_currency(rec.mt_achat)}</td>
+                             <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{rec.profit_margin:.1f}%</td>
+                            <td style="padding: 12px 16px; text-align: right; font-weight: 600; color: {profit_color};">
+                                {self._format_currency(rec.profit)}
+                            </td>
+                        </tr>
             """
+            
+        html += """
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        """
+        return html
 
+    def _render_profit_product(self):
+        # 1. Fetch Data
+        records = self.env['dashboard.profit.product'].search([], order='profit desc')
+        
+        # 2. KPIs
+        total_profit = sum(r.profit for r in records)
+        total_tonnage = sum(r.tonnage_sold for r in records)
+        best_product = records[0].product_id.name if records else "N/A"
+        
+        # 3. HTML
+        html = f"""
+        <div style="font-family: 'Inter', sans-serif; padding: 20px; background-color: #f9fafb;">
+             <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+                {self._card("Total Profit", self._format_currency(total_profit), "bg-white border-l-4 border-green-500")}
+                {self._card("Total Tonnage", f"{total_tonnage:,.0f} Kg", "bg-white border-l-4 border-blue-500")}
+                {self._card("Best Product", best_product, "bg-white border-l-4 border-indigo-500")}
+            </div>
+            
+             <!-- TITLE -->
+            <div style="margin-bottom: 15px; font-size: 18px; font-weight: 600; color: #374151;">
+                Product Profitability Ranking
+            </div>
 
-
-            sorties = rec.sortie_ids.sorted(lambda s: s.date_exit or "")
-
-            groups = {}
-            for s in sorties:
-                w = s.week or "Sans semaine"
-                groups.setdefault(w, []).append(s)
-
-            wizard_action = self.env.ref('kal3iya.action_kal3iya_week_update_wizard')
-            wizard_action_id = wizard_action.id if wizard_action else False
-
-            for week, records in groups.items():
-                total_week = sum(
-                    r.mt_vente_final or r.mt_vente
-                    for r in records
-                )
-
-                # URL du wizard (on utilise le premier record comme contexte pour récupérer la semaine)
-                wizard_url = "#"
-                if records and wizard_action_id:
-                    first_id = records[0].id
-                    wizard_url = f"/web#action={wizard_action_id}&active_id={first_id}&model=kal3iyasortie&view_type=form"
-
-                html += f"""
-                    <div class="week-card">
-                        <div class="week-header">
-                            <div class="week-title">
-                                📅 Semaine {week}
-                                <a href="{wizard_url}" 
-                                   class="edit-btn oe_kanban_action oe_kanban_global_click"
-                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea;">
-                                   ✏️ Modifier la semaine
-                                </a>
-                            </div>
-                            <div class="week-total">{total_week:,.2f} Dh</div>
-                        </div>
-
-                        <div class="table-header" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
-                            <div>Produit</div>
-                            <div>Qté</div>
-                            <div>Poids(Kg)</div>
-                            <div>Tonnage final</div>
-                            <div>Prix final</div>
-                            <div>Montant final</div>
-                            <div>Date</div>
-                        </div>
-                """
-
-                for s in records:
-                    html += f"""
-                        <div class="list-row" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
-                            <div class="col-label">{s.product_id.name}</div>
-                            <div class="col-value">{s.quantity}</div>
-                            <div class="col-value">{s.weight}</div>
-                            <div class="col-value">{s.tonnage_final or s.tonnage}</div>
-                            <div class="col-value">{(s.selling_price_final or s.selling_price)} Dh</div>
-                            <div class="col-value amount">{s.mt_vente_final or s.mt_vente} Dh</div>
-                            <div class="col-value date">{s.date_exit}</div>
-                        </div>
-                    """
-
-                html += "</div>"
-
-            html += "</div>"
-            rec.sorties_grouped_html = html
-
-    @api.depends(
-        'retour_ids',
-        'retour_ids.product_id',
-        'retour_ids.quantity',
-        'retour_ids.weight',
-        'retour_ids.tonnage',
-        'retour_ids.selling_price',
-        'retour_ids.date_entry',
-    )
-    def _compute_retours_grouped_html(self):
-        for rec in self:
-            html = """
-                <style>
-                    .retours-container {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        max-width: 100%;
-                        padding: 10px;
-                    }
-
-                    .retour-card {
-                        background: white;
-                        border-radius: 12px;
-                        border: 2px solid #feb2b2;
-                        padding: 18px;
-                        margin: 22px 0;
-                        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-                    }
-
-                    .retour-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 15px;
-                        flex-wrap: wrap;
-                    }
-
-                    .retour-title {
-                        font-size: 22px;
-                        font-weight: 700;
-                        color: #e53e3e;
-                    }
-
-                    .retour-total {
-                        background: #e53e3e;
-                        color: white;
-                        padding: 8px 18px;
-                        border-radius: 10px;
-                        font-size: 17px;
-                        font-weight: 700;
-                        box-shadow: 0 4px 12px rgba(229,62,62,0.3);
-                    }
-
-                    .table-header {
-                        display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.8fr 0.8fr;
-                        padding: 10px;
-                        background: #fed7d7;
-                        border-radius: 8px;
-                        font-weight: 700;
-                        color: #2d3748;
-                        margin-bottom: 10px;
-                    }
-
-                    .list-row {
-                        display: grid;
-                        grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.8fr 0.8fr;
-                        padding: 12px 10px;
-                        background: #fff5f5;
-                        border-radius: 8px;
-                        margin-bottom: 8px;
-                        border-left: 4px solid #e53e3e;
-                        transition: 0.2s ease;
-                    }
-                    .list-row:hover {
-                        background: #fed7d7;
-                        transform: translateX(4px);
-                    }
-
-                    .col-label {
-                        font-size: 14px;
-                        color: #2d3748;
-                        font-weight: 600;
-                    }
-                    .col-value {
-                        font-size: 15px;
-                        color: #4a5568;
-                        font-weight: 500;
-                    }
-
-                    .amount {
-                        color: #e53e3e;
-                        font-weight: 700;
-                    }
-
-                    .date {
-                        font-size: 14px;
-                        color: #c53030;
-                    }
-
-                </style>
-
-                <div class="retours-container">
+            <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead style="background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb;">
+                         <tr>
+                            <th style="text-align: left; padding: 12px 16px; font-weight: 600; color: #4b5563;">Product</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Tonnage (Kg)</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Sales</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Cost</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Margin %</th>
+                            <th style="text-align: right; padding: 12px 16px; font-weight: 600; color: #4b5563;">Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        """
+        for rec in records:
+            profit_color = "#16a34a" if rec.profit >= 0 else "#dc2626"
+            html += f"""
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 12px 16px; color: #111827;">{rec.product_id.name}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{rec.tonnage_sold:,.0f}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{self._format_currency(rec.mt_vente)}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{self._format_currency(rec.mt_achat)}</td>
+                             <td style="padding: 12px 16px; text-align: right; color: #6b7280;">{rec.profit_margin:.1f}%</td>
+                            <td style="padding: 12px 16px; text-align: right; font-weight: 600; color: {profit_color};">
+                                {self._format_currency(rec.profit)}
+                            </td>
+                        </tr>
             """
+        html += "</tbody></table></div></div>"
+        return html
 
-            # Trier par date
-            retours = rec.retour_ids.sorted(lambda r: r.date_entry or "")
-
-            # Regroupement par semaine
-            groups = {}
-            for r in retours:
-                week = r.week if hasattr(r, 'week') and r.week else "Sans semaine"
-                groups.setdefault(week, []).append(r)
-
-            # Construire les cartes
-            for week, records in groups.items():
-
-                total_week = sum(r.selling_price * r.tonnage for r in records)
-
-                html += f"""
-                    <div class="retour-card">
-                        <div class="retour-header">
-                            <div class="retour-title">🔄 Retours – Semaine {week}</div>
-                            <div class="retour-total">{total_week:,.2f} Dh</div>
-                        </div>
-
-                        <div class="table-header">
-                            <div>Produit</div>
-                            <div>Qté</div>
-                            <div>Poids(Kg)</div>
-                            <div>Tonnage</div>
-                            <div>Prix</div>
-                            <div>Montant</div>
-                        </div>
-                """
-
-                for r in records:
-                    mt_total = r.selling_price * r.tonnage
-
-                    html += f"""
-                        <div class="list-row">
-                            <div class="col-label">{r.product_id.name}</div>
-                            <div class="col-value">{r.quantity}</div>
-                            <div class="col-value">{r.weight}</div>
-                            <div class="col-value">{r.tonnage}</div>
-                            <div class="col-value">{r.selling_price} Dh</div>
-                            <div class="col-value amount">{mt_total} Dh</div>
-                        </div>
-                    """
-
-                html += "</div>"
-
-            html += "</div>"
-            rec.retours_grouped_html = html
-
-    # ==============================
-    #  🧮 Utilitaire pour le rapport
-    # ==============================
-
-    def _get_week_data(self, week):
+    # --------------------------------------------------------
+    # HELPERS
+    # --------------------------------------------------------
+    def _card(self, title, value, classes):
+        return f"""
+        <div class="{classes}" style="flex: 1; min-width: 200px; padding: 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            <div style="font-size: 13px; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 8px;">{title}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #111827;">{value}</div>
+        </div>
         """
-        Retourne un dict avec tous les totaux pour une semaine donnée.
-        week : string au format 'YYYY-Www' (ex: '2025-W48')
-        Utilisé par le rapport (QWeb).
-        """
-        from datetime import datetime, timedelta
-        
-        self.ensure_one()
 
-        # 1️⃣ Filtrer sorties de la semaine
-        sorties = self.sortie_ids.filtered(lambda s: s.week == week)
-        total_sorties = sum((s.mt_vente_final or s.mt_vente or 0.0) for s in sorties)
+    def _format_currency(self, amount):
+        return f"{amount:,.2f}"
 
-        # 2️⃣ Filtrer retours de la semaine (state = 'retour')
-        retours = self.retour_ids.filtered(
-            lambda r: r.week == week and r.state == 'retour'
-        )
-        total_retours = sum((r.selling_price or 0.0) * (r.tonnage or 0.0) for r in retours)
 
-        # 3️⃣ Filtrer avances de la semaine (en se basant sur la date)
-        avances = self.avances.filtered(
-            lambda a: a.date_paid and a.date_paid.strftime("%Y-W%W") == week
-        )
-        total_avances = sum(avances.mapped('amount'))
+# -------------------------------------------------------------------------
+#  RESTORED SQL VIEW MODELS (Required for data access/security)
+# -------------------------------------------------------------------------
 
-        # 4️⃣ Compte de la semaine
-        compte_semaine = total_sorties - total_retours - total_avances
+class DashboardProfitClient(models.Model):
+    _name = "dashboard.profit.client"
+    _description = "Profitability by Client"
+    _auto = False
+    _order = 'profit desc'
 
-        # 5️⃣ Calculer les dates de début et fin de semaine
-        start_date = None
-        end_date = None
-        
-        try:
-            # Parser le format 'YYYY-Www' (ex: '2025-W48')
-            year, week_num = week.split('-W')
-            year = int(year)
-            week_num = int(week_num)
-            
-            # Trouver le premier jour de la semaine (Lundi)
-            # ISO: semaine commence le lundi
-            jan_4 = datetime(year, 1, 4)
-            week_1_monday = jan_4 - timedelta(days=jan_4.weekday())
-            start_date_obj = week_1_monday + timedelta(weeks=week_num - 1)
-            
-            # Calculer le dernier jour (Dimanche)
-            end_date_obj = start_date_obj + timedelta(days=6)
-            
-            # Formater les dates
-            start_date = start_date_obj.strftime('%d/%m/%Y')
-            end_date = end_date_obj.strftime('%d/%m/%Y')
-        except:
-            # En cas d'erreur, laisser vide
-            pass
+    client_id = fields.Many2one('kal3iya.client', string='Client', readonly=True)
+    tonnage_sold = fields.Float(string='Tonnage Vendu (Kg)', readonly=True)
+    mt_vente = fields.Float(string='Total Ventes', readonly=True)
+    mt_achat = fields.Float(string='Total Achat', readonly=True)
+    profit = fields.Float(string='Marge (Profit)', readonly=True)
+    profit_margin = fields.Float(string='Marge (%)', readonly=True, group_operator="avg")
 
-        return {
-            'week': week,
-            'start_date': start_date,
-            'end_date': end_date,
-            'sorties': sorties,
-            'retours': retours,
-            'avances': avances,
-            'total_sorties': total_sorties,
-            'total_retours': total_retours,
-            'total_avances': total_avances,
-            'compte_semaine': compte_semaine,
-            'compte_total': self.compte,
-        }
+    def init(self):
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
+            CREATE OR REPLACE VIEW %s AS (
+                SELECT
+                    min(s.id) as id,
+                    s.client_id,
+                    sum(s.tonnage) as tonnage_sold,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente)) as mt_vente,
+                    sum(s.mt_achat) as mt_achat,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit,
+                    CASE 
+                        WHEN sum(COALESCE(s.mt_vente_final, s.mt_vente)) != 0 
+                        THEN (sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) / sum(COALESCE(s.mt_vente_final, s.mt_vente))) * 100 
+                        ELSE 0 
+                    END as profit_margin
+                FROM
+                    kal3iyasortie s
+                GROUP BY
+                    s.client_id
+                HAVING
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) IS NOT NULL
+            )
+        """ % self._table)
+
+
+class DashboardProfitProduct(models.Model):
+    _name = "dashboard.profit.product"
+    _description = "Profitability by Product"
+    _auto = False
+    _order = 'profit desc'
+
+    product_id = fields.Many2one('kal3iya.product', string='Produit', readonly=True)
+    tonnage_sold = fields.Float(string='Tonnage Vendu (Kg)', readonly=True)
+    mt_vente = fields.Float(string='Total Ventes', readonly=True)
+    mt_achat = fields.Float(string='Total Achat', readonly=True)
+    profit = fields.Float(string='Marge (Profit)', readonly=True)
+    profit_margin = fields.Float(string='Marge (%)', readonly=True, group_operator="avg")
+
+    def init(self):
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
+            CREATE OR REPLACE VIEW %s AS (
+                SELECT
+                    min(s.id) as id,
+                    s.product_id,
+                    sum(s.tonnage) as tonnage_sold,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente)) as mt_vente,
+                    sum(s.mt_achat) as mt_achat,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit,
+                    CASE 
+                        WHEN sum(COALESCE(s.mt_vente_final, s.mt_vente)) != 0 
+                        THEN (sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) / sum(COALESCE(s.mt_vente_final, s.mt_vente))) * 100 
+                        ELSE 0 
+                    END as profit_margin
+                FROM
+                    kal3iyasortie s
+                GROUP BY
+                    s.product_id
+                HAVING
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) IS NOT NULL
+            )
+        """ % self._table)

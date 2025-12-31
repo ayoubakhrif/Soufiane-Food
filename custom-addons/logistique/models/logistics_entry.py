@@ -63,6 +63,20 @@ class LogisticsEntry(models.Model):
     
     # BL number from dossier
     bl_number = fields.Char(string='BL Number', related='dossier_id.name', store=True, readonly=True)
+    container_count = fields.Integer(
+        string="Nb Conteneurs",
+        related="dossier_id.container_count",
+        readonly=True,
+        store=False
+    )
+
+    cheque_count = fields.Integer(
+        string="Nb Chèques",
+        related="dossier_id.cheque_count",
+        readonly=True,
+        store=False
+    )
+
 
     @api.model
     def create(self, vals):

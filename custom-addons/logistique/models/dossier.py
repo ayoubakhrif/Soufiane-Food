@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class LogistiqueDossier(models.Model):
     _name = 'logistique.dossier'
@@ -18,3 +18,20 @@ class LogistiqueDossier(models.Model):
     cheque_ids = fields.One2many('logistique.dossier.cheque', 'dossier_id', string='Chèques')
     entry_ids = fields.One2many('logistique.entry', 'dossier_id', string='Entrées Logistiques')
 
+    container_count = fields.Integer(
+        string="Nb Conteneurs",
+        compute="_compute_counts",
+        store=True
+    )
+
+    cheque_count = fields.Integer(
+        string="Nb Chèques",
+        compute="_compute_counts",
+        store=True
+    )
+
+    @api.depends('container_ids', 'cheque_ids')
+    def _compute_counts(self):
+        for dossier in self:
+            dossier.container_count = len(dossier.container_ids)
+            dossier.cheque_count = len(dossier.cheque_ids)

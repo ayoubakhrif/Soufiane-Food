@@ -55,9 +55,15 @@
         </field>
     </record>
 
+    <!-- ROOT MENU (Moved here since legacy file was deleted) -->
+    <menuitem id="menu_dashboards_root"
+              name="Dashboards"
+              web_icon="dashboards,static/description/icon.png"
+              sequence="1"/>
+
     <!-- MENU -->
     <menuitem id="menu_management_dashboard_root"
-              name="Overview"
+              name="Analyses"
               parent="menu_dashboards_root"
               action="action_management_dashboard"
               sequence="0"/>

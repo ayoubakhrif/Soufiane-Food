@@ -156,4 +156,19 @@
     <menuitem id="menu_kal3iya_stock" name="Stock"
               parent="Kal3iya_root_menu"
               action="action_kal3iya_stock"/>
+
+    <record id="action_server_recalculate_stock" model="ir.actions.server">
+        <field name="name">Recalculer tout le stock</field>
+        <field name="model_id" ref="model_kal3iya_stock"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_recalculate_all_stock()
+        </field>
+    </record>
+
+    <menuitem id="menu_recalculate_stock"
+              name="Recalculer tout le stock"
+              parent="Kal3iya_root_menu"
+              action="action_server_recalculate_stock"
+              sequence="100"/>
 </odoo>

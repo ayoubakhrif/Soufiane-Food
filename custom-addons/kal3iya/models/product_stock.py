@@ -162,3 +162,25 @@ class ProductStock(models.Model):
         stocks = self.search(args, limit=limit)
         
         return stocks.name_get()
+
+    @api.model
+    def action_recalculate_all_stock(self):
+        """Action serveur : Recalculer tout le stock (même les archivés)"""
+        # 1. Rechercher TOUS les stocks (actifs et archivés)
+        all_stocks = self.with_context(active_test=False).search([])
+        
+        # 2. Lancer le re-calcul
+        # (recompute_qty boucle déjà sur self, donc c'est optimisé)
+        all_stocks.recompute_qty()
+        
+        # 3. Notification UI
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Succès',
+                'message': f"Le stock a été recalculé pour {len(all_stocks)} enregistrements.",
+                'type': 'success',
+                'sticky': False,
+            }
+        }

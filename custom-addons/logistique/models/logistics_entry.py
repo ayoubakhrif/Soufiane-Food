@@ -62,7 +62,7 @@ class LogisticsEntry(models.Model):
         ('fob', 'FOB'),
     ], string='Incoterm')
     free_time = fields.Integer(string='Free Time')
-    shipping_id = fields.Many2one('logistique.shipping', string='Shipping Company')
+    shipping_id = fields.Many2one('logistique.shipping', string='Company')
     eta = fields.Date(string='ETA')
     doc_status = fields.Char(string='Document Status')
     remarks = fields.Char(string='Remarks')

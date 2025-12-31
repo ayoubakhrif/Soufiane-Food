@@ -32,15 +32,23 @@ class ManagementDashboard(models.Model):
 
     def action_reload_dashboard(self):
         self.ensure_one()
-        # Force update of timestamp to trigger recompute (sudo to bypass read-only ACL)
-        self.sudo().write({'last_refresh': fields.Datetime.now()})
+
+        # 1️⃣ Commit pour s'assurer que la DB est à jour
+        self.env.cr.commit()
+
+        # 2️⃣ Invalider le cache ORM
+        self.env.invalidate_all()
+
+        # 3️⃣ Recharger le record avec un nouvel env
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'management.dashboard',
             'res_id': self.id,
             'view_mode': 'form',
             'target': 'current',
+            'context': dict(self.env.context, reload=True),
         }
+
 
 
     # --------------------------------------------------------
@@ -49,7 +57,8 @@ class ManagementDashboard(models.Model):
     def _render_profit_client(self):
         """Render Client Profitability Dashboard"""
         # 1. Fetch Data from SQL View
-        records = self.env['dashboard.profit.client'].search([], order='profit desc')
+        records = self.env['dashboard.profit.client'].sudo().with_context(prefetch_fields=False).search([], order='profit desc')
+
         
         if not records:
             return self._render_empty_state("clients")

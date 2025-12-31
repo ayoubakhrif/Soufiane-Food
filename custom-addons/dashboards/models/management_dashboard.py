@@ -30,6 +30,7 @@ class ManagementDashboard(models.Model):
         rec.action_reload_dashboard()
         return rec
 
+
     @api.depends('dashboard_type', 'last_refresh')
     def _compute_content_html(self):
         for rec in self:

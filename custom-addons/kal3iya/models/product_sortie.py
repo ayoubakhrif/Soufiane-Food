@@ -181,7 +181,7 @@ class ProductExit(models.Model):
     @api.depends('mt_achat', 'mt_vente')
     def _compute_diff(self):
         for record in self:
-            record.diff = record.mt_vente - record.mt_achat
+            record.diff = record.mt_vente_final - record.mt_achat
 
     @api.depends('date_exit')
     def _compute_week(self):

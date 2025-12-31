@@ -1,6 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_dashboard_kal3iya_inventory,dashboard.kal3iya.inventory,model_dashboard_kal3iya_inventory,dashboards.group_dashboard_manager,1,0,0,0
-access_dashboard_kal3iya_performance,dashboard.kal3iya.performance,model_dashboard_kal3iya_performance,dashboards.group_dashboard_manager,1,0,0,0
 access_dashboard_profit_client,dashboard.profit.client,model_dashboard_profit_client,dashboards.group_dashboard_manager,1,0,0,0
 access_dashboard_profit_product,dashboard.profit.product,model_dashboard_profit_product,dashboards.group_dashboard_manager,1,0,0,0
 access_management_dashboard,management.dashboard,model_management_dashboard,dashboards.group_dashboard_manager,1,0,0,0

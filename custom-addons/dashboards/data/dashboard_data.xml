@@ -6,11 +6,9 @@
             <field name="dashboard_type">profit_client</field>
         </record>
         <!-- Placeholder for future dashboards -->
-        <!--
         <record id="dashboard_profit_product" model="management.dashboard">
             <field name="name">Bénéfice/Perte par Produit</field>
             <field name="dashboard_type">profit_product</field>
         </record>
-        -->
     </data>
 </odoo>

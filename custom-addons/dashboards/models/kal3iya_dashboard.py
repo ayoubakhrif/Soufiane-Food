@@ -86,3 +86,81 @@ class DashboardKal3iyaPerformance(models.Model):
                     kal3iyasortie s
             )
         """ % self._table)
+
+
+class DashboardProfitClient(models.Model):
+    _name = "dashboard.profit.client"
+    _description = "Profitability by Client"
+    _auto = False
+    _order = 'profit desc'
+
+    client_id = fields.Many2one('kal3iya.client', string='Client', readonly=True)
+    tonnage_sold = fields.Float(string='Tonnage Vendu (Kg)', readonly=True)
+    mt_vente = fields.Float(string='Total Ventes', readonly=True)
+    mt_achat = fields.Float(string='Total Achat', readonly=True)
+    profit = fields.Float(string='Marge (Profit)', readonly=True)
+    profit_margin = fields.Float(string='Marge (%)', readonly=True, group_operator="avg")
+
+    def init(self):
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
+            CREATE OR REPLACE VIEW %s AS (
+                SELECT
+                    min(s.id) as id,
+                    s.client_id,
+                    sum(s.tonnage) as tonnage_sold,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente)) as mt_vente,
+                    sum(s.mt_achat) as mt_achat,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit,
+                    CASE 
+                        WHEN sum(COALESCE(s.mt_vente_final, s.mt_vente)) != 0 
+                        THEN (sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) / sum(COALESCE(s.mt_vente_final, s.mt_vente))) * 100 
+                        ELSE 0 
+                    END as profit_margin
+                FROM
+                    kal3iyasortie s
+                GROUP BY
+                    s.client_id
+                HAVING
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) IS NOT NULL
+            )
+        """ % self._table)
+
+
+class DashboardProfitProduct(models.Model):
+    _name = "dashboard.profit.product"
+    _description = "Profitability by Product"
+    _auto = False
+    _order = 'profit desc'
+
+    product_id = fields.Many2one('kal3iya.product', string='Produit', readonly=True)
+    tonnage_sold = fields.Float(string='Tonnage Vendu (Kg)', readonly=True)
+    mt_vente = fields.Float(string='Total Ventes', readonly=True)
+    mt_achat = fields.Float(string='Total Achat', readonly=True)
+    profit = fields.Float(string='Marge (Profit)', readonly=True)
+    profit_margin = fields.Float(string='Marge (%)', readonly=True, group_operator="avg")
+
+    def init(self):
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
+            CREATE OR REPLACE VIEW %s AS (
+                SELECT
+                    min(s.id) as id,
+                    s.product_id,
+                    sum(s.tonnage) as tonnage_sold,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente)) as mt_vente,
+                    sum(s.mt_achat) as mt_achat,
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) as profit,
+                    CASE 
+                        WHEN sum(COALESCE(s.mt_vente_final, s.mt_vente)) != 0 
+                        THEN (sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) / sum(COALESCE(s.mt_vente_final, s.mt_vente))) * 100 
+                        ELSE 0 
+                    END as profit_margin
+                FROM
+                    kal3iyasortie s
+                GROUP BY
+                    s.product_id
+                HAVING
+                    sum(COALESCE(s.mt_vente_final, s.mt_vente) - s.mt_achat) IS NOT NULL
+            )
+        """ % self._table)

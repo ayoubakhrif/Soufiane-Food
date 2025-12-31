@@ -104,4 +104,96 @@
               action="action_dashboard_kal3iya_performance"
               sequence="2"/>
 
+    <!-- ============================================== -->
+    <!--  PROFITABILITY BY CLIENT -->
+    <!-- ============================================== -->
+    <record id="view_dashboard_profit_client_tree" model="ir.ui.view">
+        <field name="name">dashboard.profit.client.tree</field>
+        <field name="model">dashboard.profit.client</field>
+        <field name="arch" type="xml">
+            <tree string="Profit by Client" default_order="profit desc">
+                <field name="client_id"/>
+                <field name="tonnage_sold" sum="Total Tonnage"/>
+                <field name="mt_vente" sum="Total Sales"/>
+                <field name="mt_achat" sum="Total Cost"/>
+                <field name="profit" sum="Total Profit"/>
+                <field name="profit_margin" widget="percentage" avg="Avg Margin"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dashboard_profit_client_graph" model="ir.ui.view">
+        <field name="name">dashboard.profit.client.graph</field>
+        <field name="model">dashboard.profit.client</field>
+        <field name="arch" type="xml">
+            <graph string="Profit by Client" type="bar" sample="1">
+                <field name="client_id"/>
+                <field name="profit" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_dashboard_profit_client" model="ir.actions.act_window">
+        <field name="name">Rentabilité par Client</field>
+        <field name="res_model">dashboard.profit.client</field>
+        <field name="view_mode">tree,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune donnée de rentabilité trouvée.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dashboard_profit_client"
+              name="Profit by Client"
+              parent="menu_dashboard_kal3iya"
+              action="action_dashboard_profit_client"
+              sequence="3"/>
+
+    <!-- ============================================== -->
+    <!--  PROFITABILITY BY PRODUCT -->
+    <!-- ============================================== -->
+    <record id="view_dashboard_profit_product_tree" model="ir.ui.view">
+        <field name="name">dashboard.profit.product.tree</field>
+        <field name="model">dashboard.profit.product</field>
+        <field name="arch" type="xml">
+            <tree string="Profit by Product" default_order="profit desc">
+                <field name="product_id"/>
+                <field name="tonnage_sold" sum="Total Tonnage"/>
+                <field name="mt_vente" sum="Total Sales"/>
+                <field name="mt_achat" sum="Total Cost"/>
+                <field name="profit" sum="Total Profit"/>
+                <field name="profit_margin" widget="percentage" avg="Avg Margin"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dashboard_profit_product_graph" model="ir.ui.view">
+        <field name="name">dashboard.profit.product.graph</field>
+        <field name="model">dashboard.profit.product</field>
+        <field name="arch" type="xml">
+            <graph string="Profit by Product" type="bar" sample="1">
+                <field name="product_id"/>
+                <field name="profit" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_dashboard_profit_product" model="ir.actions.act_window">
+        <field name="name">Rentabilité par Produit</field>
+        <field name="res_model">dashboard.profit.product</field>
+        <field name="view_mode">tree,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune donnée de rentabilité trouvée.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dashboard_profit_product"
+              name="Profit by Product"
+              parent="menu_dashboard_kal3iya"
+              action="action_dashboard_profit_product"
+              sequence="4"/>
+
 </odoo>

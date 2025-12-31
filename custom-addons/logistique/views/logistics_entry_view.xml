@@ -138,13 +138,18 @@
                 <field name="status"/>
                 <field name="article_id"/>
 
-                <group expand="0" string="Regrouper par">
-                    <filter string="Supplier"
-                            context="{'group_by': 'supplier_id'}"/>
-                    <filter string="Semaine"
-                            context="{'group_by': 'week'}"/>
-                    <filter string="Status"
-                            context="{'group_by': 'status'}"/>
+                <group string="Regrouper par">
+                    <filter name="group_supplier"
+                            string="Supplier"
+                            context="{'group_by': ['supplier_id']}"/>
+
+                    <filter name="group_week"
+                            string="Semaine"
+                            context="{'group_by': ['week']}"/>
+
+                    <filter name="group_status"
+                            string="Status"
+                            context="{'group_by': ['status']}"/>
                 </group>
 
             </search>
@@ -152,14 +157,15 @@
     </record>
 
 
+
     <record id="action_logistique_entry" model="ir.actions.act_window">
         <field name="name">Entrées Logistiques</field>
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_logistique_entry_search"/>
         <field name="context">
-            {
-                'group_by': ['supplier_id', 'week']
-            }
+            {'group_by': ['supplier_id', 'week']}
         </field>
     </record>
+
 </odoo>

@@ -25,7 +25,8 @@ class LogisticsEntry(models.Model):
     # Week and status
     week = fields.Char(
         string="Semaine",
-        help="Format : W01 à W52 (ex: W12)"
+        help="Format : W01 à W52 (ex: W12)",
+        store=True
     )
     status = fields.Selection([
         ('in_progress', 'En cours'),

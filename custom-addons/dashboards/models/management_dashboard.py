@@ -18,7 +18,6 @@ class ManagementDashboard(models.Model):
     # --------------------------------------------------------
     # MAIN COMPUTE
     # --------------------------------------------------------
-    @api.depends('dashboard_type')
     def _compute_content_html(self):
         for rec in self:
             if rec.dashboard_type == 'profit_client':

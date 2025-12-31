@@ -117,6 +117,8 @@
                 <field name="product_id" string="Nom du produit"/>
                 <field name="mt_achat" sum="Total Mt. Achat"/>
                 <field name="tonnage" sum="Total tonnage(Kg)"/>
+                <field name="price"/>
+                <field name="quantity" sum="Quantité totale"/>
             </tree>
         </field>
     </record>

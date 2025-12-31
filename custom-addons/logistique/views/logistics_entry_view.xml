@@ -17,7 +17,7 @@
                 <field name="details"/>
                 <field name="weight"/>
                 <field name="price_unit"/>
-                <field name="amount_total"/>
+                <field name="amount_total" sum="Total"/>
                 <field name="incoterm"/>
                 <field name="free_time"/>
                 <field name="shipping_id"/>

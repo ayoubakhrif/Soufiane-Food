@@ -43,6 +43,9 @@ class ManagementDashboard(models.Model):
     def action_reload_dashboard(self):
         self.ensure_one()
 
+        # 🔥 OBLIGATOIRE : synchroniser ORM → PostgreSQL
+        self.env.cr.flush()
+
         if self.dashboard_type == 'profit_client':
             html = self._render_profit_client()
         elif self.dashboard_type == 'profit_product':
@@ -62,6 +65,7 @@ class ManagementDashboard(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
 
 
 

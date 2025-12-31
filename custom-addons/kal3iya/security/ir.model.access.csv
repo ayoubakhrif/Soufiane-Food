@@ -7,6 +7,7 @@ access_kal3iya_driver,access_kal3iya_driver,model_kal3iya_driver,kal3iya.group_k
 access_kal3iya_driver,access_kal3iya_driver,model_kal3iya_driver,kal3iya.group_kal3iya_responsible,1,1,1,1
 access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_user,1,1,1,1
 access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_responsible,1,1,1,1
+access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_viewer,1,0,0,0
 access_kal3iya_provider,access_kal3iya_provider,model_kal3iya_provider,kal3iya.group_kal3iya_user,1,1,1,1
 access_kal3iya_provider,access_kal3iya_provider,model_kal3iya_provider,kal3iya.group_kal3iya_responsible,1,1,1,1
 access_kal3iya_ste,access_kal3iya_ste,model_kal3iya_ste,kal3iya.group_kal3iya_user,1,1,1,1

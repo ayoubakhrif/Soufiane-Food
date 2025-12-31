@@ -116,8 +116,9 @@ class CustomMonthlySalary(models.Model):
                     missing_days.append(current_date)
 
             if missing_days:
+                days_str = ", ".join([d.strftime('%Y-%m-%d') for d in missing_days])
                 raise exceptions.ValidationError(
-                    "Attention: il faut remplir la présence de tous les jours avant de calculer le salaire du mois."
+                    f"La présence de ces jours là n'est pas rentré: {days_str}"
                 )
 
     @api.model

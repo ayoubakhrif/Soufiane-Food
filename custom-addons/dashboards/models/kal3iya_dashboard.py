@@ -88,6 +88,7 @@ class DashboardKal3iyaPerformance(models.Model):
         """ % self._table)
 
 
+
 class DashboardProfitClient(models.Model):
     _name = "dashboard.profit.client"
     _description = "Profitability by Client"

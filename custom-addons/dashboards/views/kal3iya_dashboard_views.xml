@@ -8,10 +8,12 @@
               sequence="1"/>
 
     <!-- KAL3IYA MENU -->
+    <!-- KAL3IYA MENU
     <menuitem id="menu_dashboard_kal3iya"
               name="Kal3iya"
               parent="menu_dashboards_root"
               sequence="10"/>
+     -->
 
     <!-- ============================================== -->
     <!--  INVENTORY DASHBOARD -->

@@ -17,6 +17,8 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/dashboard_data.xml',
+        'views/management_dashboard_views.xml',
         'views/kal3iya_dashboard_views.xml',
     ],
     'demo': [],

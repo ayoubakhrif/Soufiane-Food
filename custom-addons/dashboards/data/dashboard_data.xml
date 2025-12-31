@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="dashboard_profit_client" model="management.dashboard">
+            <field name="name">Bénéfice/Perte par Client</field>
+            <field name="dashboard_type">profit_client</field>
+        </record>
+        <!-- Placeholder for future dashboards -->
+        <!--
+        <record id="dashboard_profit_product" model="management.dashboard">
+            <field name="name">Bénéfice/Perte par Produit</field>
+            <field name="dashboard_type">profit_product</field>
+        </record>
+        -->
+    </data>
+</odoo>

@@ -141,22 +141,20 @@
                 <group string="Regrouper par">
                     <filter name="group_supplier"
                             string="Supplier"
-                            context="{'group_by': ['supplier_id']}"/>
+                            context="{'group_by': 'supplier_id'}"/>
 
                     <filter name="group_week"
                             string="Semaine"
-                            context="{'group_by': ['week']}"/>
+                            context="{'group_by': 'week'}"/>
 
                     <filter name="group_status"
                             string="Status"
-                            context="{'group_by': ['status']}"/>
+                            context="{'group_by': 'status'}"/>
                 </group>
 
             </search>
         </field>
     </record>
-
-
 
     <record id="action_logistique_entry" model="ir.actions.act_window">
         <field name="name">Entrées Logistiques</field>

@@ -87,29 +87,25 @@ class ProductStock(models.Model):
     # MISE À JOUR AUTOMATIQUE DE LA QUANTITÉ
     # ------------------------------------------------------------
     def recompute_qty(self):
-        """
-        Recalcule la quantité disponible :
-        Quantité stock = Entrée réelle + Retours - Sorties
-        """
         for stock in self:
-            # 🔹 Entrée d’origine (state='entree')
-            origin_entry = stock.entry_id
-            origin_qty = origin_entry.quantity if origin_entry and origin_entry.state == 'entree' else 0.0
+            # Entrée d'origine
+            origin_qty = stock.entry_id.quantity if stock.entry_id else 0.0
 
-            # 🔹 Retours sur la même combinaison
-            returns = self.env['kal3iyaentry'].sudo().search([
+            # Retours DIRECTEMENT liés au stock
+            returns = self.env['kal3iyaentry'].search([
                 ('state', '=', 'retour'),
-                ('return_id.entry_id', '=', stock.id),
+                ('stock_id', '=', stock.id),
             ])
-            qty_returns = sum(r.quantity for r in returns)
+            qty_returns = sum(returns.mapped('quantity'))
 
+            # Sorties liées
+            sorties = self.env['kal3iyasortie'].search([
+                ('entry_id', '=', stock.id)
+            ])
+            qty_sorties = sum(sorties.mapped('quantity'))
 
-            # 🔹 Sorties liées à cette ligne
-            sorties = self.env['kal3iyasortie'].sudo().search([('entry_id', '=', stock.id)])
-            qty_sorties = sum(s.quantity for s in sorties)
-
-            # 🔹 Quantité finale
             stock.quantity = origin_qty + qty_returns - qty_sorties
+
 
             # 🔹 Archivage automatique
             if stock.quantity <= 0 and stock.active:

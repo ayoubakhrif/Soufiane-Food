@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- TOP MENU -->
+    <menuitem id="menu_dashboards_root"
+              name="Dashboards"
+              web_icon="dashboards,static/description/icon.png"
+              sequence="1"/>
+
+    <!-- KAL3IYA MENU -->
+    <menuitem id="menu_dashboard_kal3iya"
+              name="Kal3iya"
+              parent="menu_dashboards_root"
+              sequence="10"/>
+
+    <!-- ============================================== -->
+    <!--  INVENTORY DASHBOARD -->
+    <!-- ============================================== -->
+    <record id="view_dashboard_kal3iya_inventory_pivot" model="ir.ui.view">
+        <field name="name">dashboard.kal3iya.inventory.pivot</field>
+        <field name="model">dashboard.kal3iya.inventory</field>
+        <field name="arch" type="xml">
+            <pivot string="Stock Inventory" display_quantity="true" sample="1">
+                <field name="ville" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="quantity" type="measure"/>
+                <field name="tonnage" type="measure"/>
+                <field name="mt_achat" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_dashboard_kal3iya_inventory_graph" model="ir.ui.view">
+        <field name="name">dashboard.kal3iya.inventory.graph</field>
+        <field name="model">dashboard.kal3iya.inventory</field>
+        <field name="arch" type="xml">
+            <graph string="Stock Inventory" sample="1" type="bar">
+                <field name="product_id"/>
+                <field name="mt_achat" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_dashboard_kal3iya_inventory" model="ir.actions.act_window">
+        <field name="name">Vue globale Stock</field>
+        <field name="res_model">dashboard.kal3iya.inventory</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune donnée de stock trouvée.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dashboard_kal3iya_inventory"
+              name="Inventory Overview"
+              parent="menu_dashboard_kal3iya"
+              action="action_dashboard_kal3iya_inventory"
+              sequence="1"/>
+
+
+    <!-- ============================================== -->
+    <!--  PERFORMANCE DASHBOARD -->
+    <!-- ============================================== -->
+    <record id="view_dashboard_kal3iya_performance_pivot" model="ir.ui.view">
+        <field name="name">dashboard.kal3iya.performance.pivot</field>
+        <field name="model">dashboard.kal3iya.performance</field>
+        <field name="arch" type="xml">
+            <pivot string="Sales Performance" display_quantity="true" sample="1">
+                <field name="date_exit" interval="month" type="row"/>
+                <field name="client_id" type="row"/>
+                <field name="mt_vente" type="measure"/>
+                <field name="mt_achat" type="measure"/>
+                <field name="diff" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_dashboard_kal3iya_performance_graph" model="ir.ui.view">
+        <field name="name">dashboard.kal3iya.performance.graph</field>
+        <field name="model">dashboard.kal3iya.performance</field>
+        <field name="arch" type="xml">
+            <graph string="Sales Performance" sample="1" type="line">
+                <field name="date_exit" interval="month"/>
+                <field name="diff" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_dashboard_kal3iya_performance" model="ir.actions.act_window">
+        <field name="name">Performance Ventes</field>
+        <field name="res_model">dashboard.kal3iya.performance</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune vente trouvée.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dashboard_kal3iya_performance"
+              name="Sales Performance"
+              parent="menu_dashboard_kal3iya"
+              action="action_dashboard_kal3iya_performance"
+              sequence="2"/>
+
+</odoo>

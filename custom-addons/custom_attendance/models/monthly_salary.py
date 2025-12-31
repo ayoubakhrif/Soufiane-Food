@@ -202,7 +202,8 @@ class CustomMonthlySalary(models.Model):
             groups = self.env['custom.attendance'].read_group(
                 domain,
                 ['site', 'is_absent', 'absence_type', 'normal_working_hours', 'missing_hours', 'overtime_hours', 'holiday_hours'],
-                ['site', 'is_absent', 'absence_type']
+                ['site', 'is_absent', 'absence_type'],
+                lazy=False
             )
 
             t_normal = 0.0

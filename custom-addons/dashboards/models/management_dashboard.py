@@ -50,7 +50,7 @@ class ManagementDashboard(models.Model):
         else:
             html = "<div class='alert alert-info'>Sélectionnez un type de dashboard.</div>"
 
-        self.write({
+        self.sudo().write({
             'content_html': html,
             'last_refresh': fields.Datetime.now(),
         })
@@ -62,6 +62,7 @@ class ManagementDashboard(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
 
 
 

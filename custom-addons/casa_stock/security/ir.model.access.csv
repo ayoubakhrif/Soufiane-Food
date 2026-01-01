@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_casa_product,casa.product,model_casa_product,base.group_user,1,1,1,1
+access_casa_provider,casa.provider,model_casa_provider,base.group_user,1,1,1,1
+access_casa_client,casa.client,model_casa_client,base.group_user,1,1,1,1
+access_casa_driver,casa.driver,model_casa_driver,base.group_user,1,1,1,1
+access_casa_stock_move,casa.stock.move,model_casa_stock_move,base.group_user,1,1,1,0
+access_casa_stock_entry,casa.stock.entry,model_casa_stock_entry,base.group_user,1,1,1,1
+access_casa_stock_exit,casa.stock.exit,model_casa_stock_exit,base.group_user,1,1,1,1
+access_casa_stock_stock,casa.stock.stock,model_casa_stock_stock,base.group_user,1,0,0,0

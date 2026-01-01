@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_casa_stock_root"
+              name="Stock Casa"
+              web_icon="casa_stock,static/description/icon.png"
+              sequence="2"/>
+
+    <menuitem id="menu_casa_stock_stock"
+              name="Stock"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_stock"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_entry"
+              name="Entrées"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_entry"
+              sequence="20"/>
+
+    <menuitem id="menu_casa_stock_exit"
+              name="Sorties"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_exit"
+              sequence="30"/>
+
+    <menuitem id="menu_casa_stock_audit"
+              name="Audit Ledger"
+              parent="menu_casa_stock_root"
+              groups="base.group_erp_manager"
+              sequence="100"/>
+
+    <menuitem id="menu_casa_stock_move"
+              name="Mouvements"
+              parent="menu_casa_stock_audit"
+              action="action_casa_stock_move"
+              sequence="10"/>
+</odoo>

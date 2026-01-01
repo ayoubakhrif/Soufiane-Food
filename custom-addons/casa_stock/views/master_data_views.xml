@@ -27,4 +27,11 @@
         <field name="res_model">casa.driver</field>
         <field name="view_mode">tree,form</field>
     </record>
+
+    <!-- Société Action -->
+    <record id="action_casa_stock_ste" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">casa.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
 </odoo>

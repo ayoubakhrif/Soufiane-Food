@@ -33,6 +33,7 @@ class CasaStockEntry(models.Model):
     
     provider_id = fields.Many2one('casa.provider', string='Fournisseur')
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
+    ste_id = fields.Many2one('casa.ste', string='Société')
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
     
     state = fields.Selection([
@@ -60,7 +61,7 @@ class CasaStockEntry(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_purchase', 'price_sale',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id'
+                    'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
@@ -89,6 +90,7 @@ class CasaStockEntry(models.Model):
                 'calibre': rec.calibre,
                 'provider_id': rec.provider_id.id,
                 'driver_id': rec.driver_id.id,
+                'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.entry',
                 'res_id': rec.id,
             })

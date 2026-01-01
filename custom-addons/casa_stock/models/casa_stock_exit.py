@@ -32,6 +32,7 @@ class CasaStockExit(models.Model):
     
     client_id = fields.Many2one('casa.client', string='Client')
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
+    ste_id = fields.Many2one('casa.ste', string='Société')
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -58,7 +59,7 @@ class CasaStockExit(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id'
+                    'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
@@ -101,6 +102,7 @@ class CasaStockExit(models.Model):
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
+                'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.exit',
                 'res_id': rec.id,
             })

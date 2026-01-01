@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="reference"/>
                 <field name="product_id"/>
+                <field name="ste_id"/>
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>
@@ -28,6 +29,7 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="reference"/>
+                <field name="ste_id"/>
                 <filter string="Entrées" name="entry" domain="[('move_type', '=', 'entry')]"/>
                 <filter string="Sorties" name="exit" domain="[('move_type', '=', 'exit')]"/>
                 <filter string="Annulations" name="cancel" domain="[('move_type', 'in', ('cancel_entry', 'cancel_exit'))]"/>

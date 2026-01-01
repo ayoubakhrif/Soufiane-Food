@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="product_id"/>
+                <field name="ste_id"/>
                 <field name="qty"/>
                 <field name="weight"/>
                 <field name="tonnage"/>
@@ -60,6 +61,7 @@
                         <group>
                             <field name="ville"/>
                             <field name="frigo"/>
+                            <field name="ste_id" options="{'no_create_edit': True}"/>
                             <field name="lot"/>
                             <field name="dum"/>
                         </group>

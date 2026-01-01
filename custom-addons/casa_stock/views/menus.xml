@@ -64,4 +64,10 @@
               parent="menu_casa_stock_data"
               action="action_casa_stock_driver"
               sequence="40"/>
+
+    <menuitem id="menu_casa_stock_ste"
+              name="Sociétés"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_ste"
+              sequence="50"/>
 </odoo>

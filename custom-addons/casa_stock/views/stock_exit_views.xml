@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="product_id"/>
+                <field name="ste_id"/>
                 <field name="qty"/>
                 <field name="client_id"/>
                 <field name="price_sale"/>
@@ -47,6 +48,7 @@
                             <field name="dum"/>
                             <field name="ville"/>
                             <field name="frigo"/>
+                            <field name="ste_id" options="{'no_create_edit': True}"/>
                         </group>
                         <group string="Quantités &amp; Prix">
                             <field name="qty"/>

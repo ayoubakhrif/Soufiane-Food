@@ -4,6 +4,7 @@ class CasaStockStock(models.Model):
     _name = 'casa.stock.stock'
     _description = 'Stock Casa (Aggregation)'
     _auto = False
+    _log_access = False
     _order = 'product_id'
 
     product_id = fields.Many2one('casa.product', string='Produit', readonly=True)
@@ -25,6 +26,8 @@ class CasaStockStock(models.Model):
     price = fields.Float(string='Dernier Prix (Achat)', readonly=True)
     mt_achat = fields.Float(string='Montant achat estimé', readonly=True)
     image_1920 = fields.Image(related='product_id.image_1920', readonly=True)
+    write_date = fields.Datetime(string='Last Update', readonly=True)
+    create_date = fields.Datetime(string='Creation Date', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -41,7 +44,9 @@ class CasaStockStock(models.Model):
                     max(m.weight) as weight,
                     max(m.calibre) as calibre,
                     max(m.price_purchase) as price,
-                    sum(m.qty * m.price_purchase) as mt_achat
+                    sum(m.qty * m.price_purchase) as mt_achat,
+                    max(m.date) as write_date,
+                    min(m.date) as create_date
                 FROM
                     casa_stock_move m
                 WHERE

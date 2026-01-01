@@ -1,5 +1,6 @@
 from odoo import models, fields, api, exceptions
 import math
+import pytz
 from datetime import datetime, timedelta, time
 
 
@@ -73,15 +74,15 @@ class CustomAttendance(models.Model):
 
     @api.depends('check_in', 'check_out', 'employee_id', 'date')
     def _compute_hours(self):
+        # 1. Get Configuration
         config = self.env['custom.attendance.config'].get_main_config()
         if not config:
-            # Fallback defaults if no config exists
-            off_in_float = 9.5
-            off_out_float = 17.5
+            off_in_float = 9.5  # 09:30
+            off_out_float = 17.5 # 17:30
             daily_hours = 8.0
             tolerance = 0
             holidays = []
-            non_working_day = 6 # Default Sunday
+            non_working_day = 6 # Sunday
         else:
             off_in_float = config.official_check_in
             off_out_float = config.official_check_out
@@ -90,106 +91,120 @@ class CustomAttendance(models.Model):
             holidays = config.public_holiday_ids.mapped('date')
             non_working_day = int(config.non_working_day)
 
+        # 2. Prepare Timezone
+        # Use user's TZ or default to Morocco often used in this project context
+        tz_name = self.env.user.tz or 'Africa/Casablanca'
+        try:
+            user_tz = pytz.timezone(tz_name)
+        except:
+            user_tz = pytz.utc
+
         for rec in self:
-            # 0. Check for Absent
+            # Init fields
+            rec.normal_working_hours = 0.0
+            rec.missing_hours = 0.0
+            rec.overtime_hours = 0.0
+            rec.holiday_hours = 0.0
+            rec.delay_minutes = 0
+
+            # ---------------------------
+            # A. EXEMPTION CHECKS
+            # ---------------------------
+            
+            # A1. Absent
             if rec.is_absent:
-                rec.normal_working_hours = 0.0
+                # If marked absent, fully missing unless it's a holiday/weekend?
+                # Usually absent means "should have worked but didn't".
                 rec.missing_hours = daily_hours
-                rec.overtime_hours = 0.0
-                rec.holiday_hours = 0.0
-                rec.delay_minutes = 0
                 continue
 
-            # 0.5 Check for Paid Leave
+            # A2. Paid Leave
             leave_domain = [
                 ('employee_id', '=', rec.employee_id.id),
                 ('state', '=', 'approved'),
                 ('date_from', '<=', rec.date),
                 ('date_to', '>=', rec.date),
             ]
-            
-            is_on_leave = self.env['custom.leave'].search_count(leave_domain) > 0
-            
-            if is_on_leave:
-                # Leave Logic: Treat as fully worked day
-                rec.normal_working_hours = daily_hours
-                rec.missing_hours = 0.0
-                rec.overtime_hours = 0.0
-                rec.holiday_hours = 0.0
-                rec.delay_minutes = 0
+            if self.env['custom.leave'].search_count(leave_domain) > 0:
+                rec.normal_working_hours = daily_hours # Count as worked
                 continue
-                
-            # Helper to convert float time to datetime on the current record date
-            def float_to_dt(float_time):
-                hours = int(float_time)
-                minutes = int((float_time - hours) * 60)
-                return datetime.combine(rec.date, time(hours, minutes))
 
-            # 1. Check if Public Holiday OR Non-Working Day (e.g. Sunday)
-            # If Sunday/Rest Day -> Ignore hours completely (Not counted as Work, Not counted as Missing)
+            # A3. Rest Day (e.g. Sunday)
             if rec.date.weekday() == non_working_day:
-                 rec.normal_working_hours = 0.0
-                 rec.missing_hours = 0.0
-                 rec.overtime_hours = 0.0
-                 rec.holiday_hours = 0.0
-                 rec.delay_minutes = 0
+                # If they worked on Sunday, maybe count as Overtime?
+                # For now, following previous logic: ignored.
+                continue
+
+            # A4. Public Holiday
+            if rec.date in holidays:
+                if rec.check_in and rec.check_out:
+                    duration = (rec.check_out - rec.check_in).total_seconds() / 3600.0
+                    rec.holiday_hours = max(0.0, duration)
+                    rec.normal_working_hours = rec.holiday_hours # Counted for stats
+                continue
+
+            # ---------------------------
+            # B. CALCULATION LOGIC (TZ AWARE)
+            # ---------------------------
+            if not rec.check_in or not rec.check_out:
+                # No data entered yet
+                rec.missing_hours = daily_hours
+                continue
+
+            # 1. Localize Database Times (UTC -> Local)
+            # Odoo datetimes are naive UTC. We localize them to UTC, then convert to User TZ.
+            c_in_utc = pytz.utc.localize(rec.check_in)
+            c_out_utc = pytz.utc.localize(rec.check_out)
             
-            # If Public Holiday (and NOT rest day, handled above)
-            elif rec.date in holidays:
-                # Holiday Logic -> Count duration as specific Holiday Hours
-                duration = (rec.check_out - rec.check_in).total_seconds() / 3600.0
-                rec.holiday_hours = max(0.0, duration)
-                rec.normal_working_hours = rec.holiday_hours # Count as normal too for stats (Requested behavior?)
-                rec.missing_hours = 0.0 # No penalty
-                rec.overtime_hours = 0.0 # Double pay replaces overtime
-                rec.delay_minutes = 0
+            c_in_local = c_in_utc.astimezone(user_tz)
+            c_out_local = c_out_utc.astimezone(user_tz)
 
+            # 2. Construct Official Times in Local TZ
+            # We use rec.date combined with configured float hours
+            def get_dt(target_date, float_hour):
+                hours = int(float_hour)
+                minutes = int((float_hour - hours) * 60)
+                # create naive local datetime
+                naive_dt = datetime.combine(target_date, time(hours, minutes))
+                # localize it (assume it represents local wall clock time)
+                return user_tz.localize(naive_dt)
+
+            off_in_local = get_dt(rec.date, off_in_float)
+            off_out_local = get_dt(rec.date, off_out_float)
+
+            # 3. Calculate Delay
+            # Actual In > Official In + Tolerance
+            # Note: We compare localized datetimes directly
+            
+            # Guard: ensure we are comparing same day or handling night shift
+            # Assuming day shift for now based on context
+            
+            if c_in_local > off_in_local:
+                diff = (c_in_local - off_in_local).total_seconds() / 60.0
+                if diff > tolerance:
+                    rec.delay_minutes = int(diff)
+            
+            # 4. Calculate Worked Hours within Schedule
+            # Effective In = max(Actual In, Official In)
+            # Effective Out = min(Actual Out, Official Out)
+            
+            eff_in = max(c_in_local, off_in_local)
+            eff_out = min(c_out_local, off_out_local)
+
+            if eff_out > eff_in:
+                w_sec = (eff_out - eff_in).total_seconds()
+                rec.normal_working_hours = w_sec / 3600.0
             else:
-                # Normal Day Logic
-                rec.holiday_hours = 0.0
-                
-                # Construct Official Datetimes
-                try:
-                    off_in_dt = float_to_dt(off_in_float)
-                    off_out_dt = float_to_dt(off_out_float)
-                except:
-                    # Fallback if conversion fails
-                    off_in_dt = rec.check_in
-                    off_out_dt = rec.check_out
+                rec.normal_working_hours = 0.0
 
-                # Delay Calculation
-                # Late Arrival: check_in > off_in
-                if rec.check_in > off_in_dt:
-                    diff_seconds = (rec.check_in - off_in_dt).total_seconds()
-                    delay_min = int(diff_seconds / 60)
-                    rec.delay_minutes = delay_min if delay_min > tolerance else 0
-                else:
-                    rec.delay_minutes = 0
-    
-                # Core Logic: Hours within [Official_In, Official_Out]
-                # Effective In: max of Actual In vs Official In
-                eff_in = max(rec.check_in, off_in_dt)
-                # Effective Out (for normal hours): min of Actual Out vs Official Out
-                eff_out = min(rec.check_out, off_out_dt)
-                
-                # Normal Worked duration
-                if eff_out > eff_in:
-                    worked_seconds = (eff_out - eff_in).total_seconds()
-                    worked_hours = worked_seconds / 3600.0
-                else:
-                    worked_hours = 0.0
-                
-                rec.normal_working_hours = min(worked_hours, daily_hours)
-                
-                # Missing Hours: Daily Target - Normal Worked
-                rec.missing_hours = max(0.0, daily_hours - rec.normal_working_hours)
-                
-                # Overtime: Strictly time after Official Out
-                if rec.check_out > off_out_dt:
-                    over_seconds = (rec.check_out - off_out_dt).total_seconds()
-                    rec.overtime_hours = over_seconds / 3600.0
-                else:
-                    rec.overtime_hours = 0.0
+            # 5. Missing Hours
+            rec.missing_hours = max(0.0, daily_hours - rec.normal_working_hours)
+
+            # 6. Overtime
+            # User wants: Strictly time AFTER Official Out
+            if c_out_local > off_out_local:
+                o_sec = (c_out_local - off_out_local).total_seconds()
+                rec.overtime_hours = o_sec / 3600.0
 
     @api.model
     def create(self, vals):

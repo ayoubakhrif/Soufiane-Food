@@ -16,11 +16,22 @@ class ManagementDashboard(models.Model):
     last_refresh = fields.Datetime(string="Last Refresh", default=fields.Datetime.now)
     
     content_html = fields.Html(
-        string="Dashboard Content",
+        compute="_compute_content_html",
         sanitize=False,
         readonly=True
     )
-    
+
+    @api.depends('dashboard_type')
+    def _compute_content_html(self):
+        for rec in self:
+            if rec.dashboard_type == 'profit_client':
+                rec.content_html = rec._render_profit_client()
+            elif rec.dashboard_type == 'profit_product':
+                rec.content_html = rec._render_profit_product()
+            else:
+                rec.content_html = ""
+
+
     @api.model
     def create(self, vals):
         rec = super().create(vals)

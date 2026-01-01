@@ -138,3 +138,5 @@ class CasaStockExit(models.Model):
                 'state': 'cancel',
                 'cancel_move_id': cancel_move.id
             })
+
+        return super(CasaStockExit, self).write(vals)

@@ -55,6 +55,17 @@ class CasaStockEntry(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.entry') or '/'
         return super(CasaStockEntry, self).create(vals)
 
+    def write(self, vals):
+        for rec in self:
+            if rec.state == 'done':
+                forbidden_fields = [
+                    'product_id', 'qty', 'weight', 'price_purchase', 'price_sale',
+                    'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id'
+                ]
+                if any(f in vals for f in forbidden_fields):
+                    raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
+        return super(CasaStockEntry, self).write(vals)
+
     def action_confirm(self):
         for rec in self:
             if rec.state != 'draft':
@@ -78,6 +89,8 @@ class CasaStockEntry(models.Model):
                 'calibre': rec.calibre,
                 'provider_id': rec.provider_id.id,
                 'driver_id': rec.driver_id.id,
+                'res_model': 'casa.stock.entry',
+                'res_id': rec.id,
             })
             rec.write({
                 'state': 'done',
@@ -107,6 +120,8 @@ class CasaStockEntry(models.Model):
                 'calibre': rec.calibre,
                 'provider_id': rec.provider_id.id,
                 'driver_id': rec.driver_id.id,
+                'res_model': 'casa.stock.entry',
+                'res_id': rec.id,
             })
             rec.write({
                 'state': 'cancel',

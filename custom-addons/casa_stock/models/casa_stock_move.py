@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
+
 
 class CasaStockMove(models.Model):
     _name = 'casa.stock.move'
@@ -36,6 +38,10 @@ class CasaStockMove(models.Model):
     reference = fields.Char(string='Référence')
     user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user)
 
+    # Origin Tracking
+    res_model = fields.Char(string='Modèle d\'Origine', readonly=True)
+    res_id = fields.Integer(string='ID d\'Origine', readonly=True)
+
     # Optional fields for reporting
     price_purchase = fields.Float(string='Prix Achat')
     price_sale = fields.Float(string='Prix Vente')
@@ -47,7 +53,5 @@ class CasaStockMove(models.Model):
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
 
     def unlink(self):
-        # Prevent deletion of done moves (standard business rule for this module)
-        # Note: Admin can still do it via technical tools if absolutely needed, 
-        # but business flow is blocked.
-        return super(CasaStockMove, self).unlink()
+        raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
+

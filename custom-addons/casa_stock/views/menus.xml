@@ -34,4 +34,34 @@
               parent="menu_casa_stock_audit"
               action="action_casa_stock_move"
               sequence="10"/>
+
+    <!-- Restructuring Master Data under "Données" -->
+    <menuitem id="menu_casa_stock_data"
+              name="Données"
+              parent="menu_casa_stock_root"
+              sequence="50"/>
+
+    <menuitem id="menu_casa_stock_product"
+              name="Produits"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_product"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_client"
+              name="Clients"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_client"
+              sequence="20"/>
+
+    <menuitem id="menu_casa_stock_provider"
+              name="Fournisseurs"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_provider"
+              sequence="30"/>
+
+    <menuitem id="menu_casa_stock_driver"
+              name="Chauffeurs"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_driver"
+              sequence="40"/>
 </odoo>

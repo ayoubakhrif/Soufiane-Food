@@ -29,6 +29,10 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
                 </header>
                 <sheet>
+                    <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
+                        <i class="fa fa-info-circle me-2"/>
+                        <strong>Attention:</strong> Les opérations confirmées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et créez une nouvelle opération.
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>

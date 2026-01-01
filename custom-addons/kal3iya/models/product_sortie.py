@@ -178,10 +178,12 @@ class ProductExit(models.Model):
         for record in self:
             record.mt_vente = record.selling_price * record.tonnage if record.selling_price and record.tonnage else 0.0
 
-    @api.depends('mt_achat', 'mt_vente')
+    @api.depends('mt_achat', 'mt_vente', 'mt_vente_final')
     def _compute_diff(self):
-        for record in self:
-            record.diff = record.mt_vente_final - record.mt_achat
+        for rec in self:
+            vente = rec.mt_vente_final if rec.mt_vente_final not in (False, None) else rec.mt_vente
+            rec.diff = (vente or 0.0) - (rec.mt_achat or 0.0)
+
 
     @api.depends('date_exit')
     def _compute_week(self):
@@ -200,15 +202,24 @@ class ProductExit(models.Model):
     @api.depends('selling_price', 'selling_price_final', 'tonnage', 'tonnage_final')
     def _compute_mt_vente_final(self):
         for rec in self:
-            # Si aucun changement → garder la valeur originale
-            if not rec.selling_price_final and not rec.tonnage_final:
-                rec.mt_vente_final = rec.mt_vente
-                continue
+            base_price = rec.selling_price or 0.0
+            base_tonnage = rec.tonnage or 0.0
 
-            price = rec.selling_price_final or rec.selling_price
-            tonnage = rec.tonnage_final or rec.tonnage
+            final_price = rec.selling_price_final
+            final_tonnage = rec.tonnage_final
 
-            rec.mt_vente_final = price * tonnage
+            # Si le final n'est pas renseigné → considérer "pas de correction"
+            if final_price in (False, None):
+                final_price = base_price
+            if final_tonnage in (False, None):
+                final_tonnage = base_tonnage
+
+            # ✅ Si final == base → on stocke NULL pour que COALESCE prenne mt_vente
+            if (final_price == base_price) and (final_tonnage == base_tonnage):
+                rec.mt_vente_final = False
+            else:
+                rec.mt_vente_final = final_price * final_tonnage
+
 
 
     # ------------------------------------------------------------

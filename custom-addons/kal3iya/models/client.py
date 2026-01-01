@@ -35,6 +35,7 @@ class Kal3iyaClient(models.Model):
 
 
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
+    unpaid_ids = fields.One2many('kal3iya.unpaid', 'client_id', string='Impayés')
     compte = fields.Float(readonly=True, compute='_compute_compte', store=True)
     compte_initial = fields.Float(string='Compte initial')
 
@@ -80,11 +81,12 @@ class Kal3iyaClient(models.Model):
         'avances.amount',
         'retour_ids.selling_price',
         'retour_ids.tonnage',
+        'unpaid_ids.amount',  # 🔥 Dépendance ajoutée
         'retour_ids.state',
         'compte_initial'
     )
     def _compute_compte(self):
-        """Compte = ventes - avances - retours"""
+        """Compte = ventes + impayés - avances - retours + initial"""
         for client in self:
             # 💰 Total des ventes
             total_ventes = sum(s.mt_vente_final or s.mt_vente for s in client.sortie_ids)
@@ -92,12 +94,15 @@ class Kal3iyaClient(models.Model):
             # 💵 Total des avances
             total_avances = sum(client.avances.mapped('amount'))
 
+            # 🚨 Total des impayés
+            total_impayes = sum(client.unpaid_ids.mapped('amount'))
+
             # 🔄 Total des retours (entrées avec state='retour')
             retours = client.retour_ids.filtered(lambda r: r.state == 'retour')
             total_retours = sum(r.selling_price*r.tonnage for r in retours)
 
-            # 🧮 Calcul final
-            client.compte = total_ventes - total_avances - total_retours + client.compte_initial
+            # 🧮 Calcul final (Ajout des impayés au dû client)
+            client.compte = total_ventes + total_impayes - total_avances - total_retours + client.compte_initial
 
     @api.depends(
     'sortie_ids',

@@ -94,6 +94,16 @@
                             </field>
                         </page>
 
+                        <page string="Impayés">
+                            <field name="unpaid_ids" nolabel="1" context="{'default_client_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+
                     </notebook>
                 </sheet>
             </form>

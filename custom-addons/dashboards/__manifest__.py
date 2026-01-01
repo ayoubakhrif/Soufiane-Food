@@ -9,7 +9,7 @@
         - Kal3iya Inventory (Stock Value, Tonnage)
         - Kal3iya Performance (Sales, Margins)
     """,
-    'author': "Your Company",
+    'author': "Ayoub Akhrif",
     'website': "http://www.yourcompany.com",
     'category': 'Reporting',
     'version': '0.1',
@@ -19,6 +19,7 @@
         'security/ir.model.access.csv',
         'data/dashboard_data.xml',
         'views/management_dashboard_views.xml',
+        'views/kal3iya_dashboard_views.xml',
     ],
     'demo': [],
     'installable': True,

@@ -1,8 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_kal3iyaentry,access.kal3iyaentry,model_kal3iyaentry,kal3iya.group_kal3iya_user,1,0,1,1
 access_kal3iyaentry,access.kal3iyaentry,model_kal3iyaentry,kal3iya.group_kal3iya_responsible,1,0,1,1
-access_kal3iyasortie,access_kal3iyasortie,model_kal3iyasortie,kal3iya.group_kal3iya_user,1,1,1,1
-access_kal3iyasortie,access_kal3iyasortie,model_kal3iyasortie,kal3iya.group_kal3iya_responsible,1,1,1,1
+access_kal3iyasortie,access_kal3iyasortie,model_kal3iyasortie,kal3iya.group_kal3iya_user,1,0,1,1
+access_kal3iyasortie,access_kal3iyasortie,model_kal3iyasortie,kal3iya.group_kal3iya_responsible,1,0,1,1
 access_kal3iya_driver,access_kal3iya_driver,model_kal3iya_driver,kal3iya.group_kal3iya_user,1,1,1,1
 access_kal3iya_driver,access_kal3iya_driver,model_kal3iya_driver,kal3iya.group_kal3iya_responsible,1,1,1,1
 access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_user,1,1,1,1

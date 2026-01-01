@@ -69,8 +69,9 @@ class Kal3iyaClient(models.Model):
         for rec in self:
             # si tentative de modification et non création
             if 'compte_initial' in vals:
-                if rec.id:
-                    raise UserError("Impossible de modifier le compte initial après création.")
+                # Seul le responsable peut modifier le compte initial
+                if rec.id and not self.env.user.has_group('kal3iya.group_kal3iya_responsible'):
+                    raise UserError("Impossible de modifier le compte initial après création. Contactez un responsable.")
         return super().write(vals)
 
 

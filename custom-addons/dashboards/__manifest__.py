@@ -10,7 +10,6 @@
         - Kal3iya Performance (Sales, Margins)
     """,
     'author': "Ayoub Akhrif",
-    'website': "http://www.yourcompany.com",
     'category': 'Reporting',
     'version': '0.1',
     'depends': ['base', 'kal3iya'],

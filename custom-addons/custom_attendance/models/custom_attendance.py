@@ -1,6 +1,7 @@
 from odoo import models, fields, api, exceptions
 import math
 import pytz
+import re
 from datetime import datetime, timedelta, time
 
 
@@ -29,6 +30,9 @@ class CustomAttendance(models.Model):
     
     check_in = fields.Datetime(string='Heure entrée', required=True, default=fields.Datetime.now)
     check_out = fields.Datetime(string='Heure de sortie', required=True, default=fields.Datetime.now)
+    
+    check_in_time = fields.Char(string='H.entrée', compute='_compute_times', inverse='_inverse_times', tracking=True)
+    check_out_time = fields.Char(string='H.sortie', compute='_compute_times', inverse='_inverse_times', tracking=True)
     
     delay_minutes = fields.Integer(string='Delay (Minutes)', compute='_compute_hours', store=True)
     missing_hours = fields.Float(string='Heures manquantes', compute='_compute_hours', store=True)
@@ -79,6 +83,73 @@ class CustomAttendance(models.Model):
     _sql_constraints = [
         ('unique_employee_date', 'unique(employee_id, date)', 'Chaque employé soit avoire une seule fiche de présence par jour!')
     ]
+
+    @api.constrains('check_in_time', 'check_out_time')
+    def _check_time_format(self):
+        pattern = re.compile(r'^([01]\d|2[0-3]):([0-5]\d)$')
+        for rec in self:
+            if rec.check_in_time and not pattern.match(rec.check_in_time):
+                raise exceptions.ValidationError("Format d'heure d'entrée invalide (HH:MM attendu).")
+            if rec.check_out_time and not pattern.match(rec.check_out_time):
+                raise exceptions.ValidationError("Format d'heure de sortie invalide (HH:MM attendu).")
+
+    @api.depends('check_in', 'check_out', 'date')
+    def _compute_times(self):
+        tz_name = self.env.user.tz or 'Africa/Casablanca'
+        try:
+            user_tz = pytz.timezone(tz_name)
+        except:
+            user_tz = pytz.utc
+        for rec in self:
+            if rec.check_in:
+                dt_local = pytz.utc.localize(rec.check_in).astimezone(user_tz)
+                rec.check_in_time = dt_local.strftime('%H:%M')
+            else:
+                rec.check_in_time = False
+            
+            if rec.check_out:
+                dt_local = pytz.utc.localize(rec.check_out).astimezone(user_tz)
+                rec.check_out_time = dt_local.strftime('%H:%M')
+            else:
+                rec.check_out_time = False
+
+    def _inverse_times(self):
+        tz_name = self.env.user.tz or 'Africa/Casablanca'
+        try:
+            user_tz = pytz.timezone(tz_name)
+        except:
+            user_tz = pytz.utc
+        for rec in self:
+            if not rec.date:
+                continue
+            
+            if rec.check_in_time:
+                rec.check_in = self._get_utc_from_time(rec.date, rec.check_in_time, user_tz)
+            
+            if rec.check_out_time:
+                rec.check_out = self._get_utc_from_time(rec.date, rec.check_out_time, user_tz)
+
+    def _get_utc_from_time(self, date_val, time_str, user_tz):
+        try:
+            h, m = map(int, time_str.split(':'))
+            naive_dt = datetime.combine(date_val, time(h, m))
+            local_dt = user_tz.localize(naive_dt)
+            return local_dt.astimezone(pytz.utc).replace(tzinfo=None)
+        except:
+            return False
+
+    @api.onchange('date')
+    def _onchange_date_sync_times(self):
+        tz_name = self.env.user.tz or 'Africa/Casablanca'
+        try:
+            user_tz = pytz.timezone(tz_name)
+        except:
+            user_tz = pytz.utc
+        if self.date:
+            if self.check_in_time:
+                self.check_in = self._get_utc_from_time(self.date, self.check_in_time, user_tz)
+            if self.check_out_time:
+                self.check_out = self._get_utc_from_time(self.date, self.check_out_time, user_tz)
 
     @api.constrains('check_in', 'check_out')
     def _check_validity(self):

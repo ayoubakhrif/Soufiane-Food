@@ -6,8 +6,8 @@
             <tree decoration-danger="delay_minutes &gt; 0 or missing_hours &gt; 0" decoration-success="overtime_hours &gt; 0" decoration-muted="state == 'locked'">
                 <field name="date"/>
                 <field name="employee_id"/>
-                <field name="check_in"/>
-                <field name="check_out"/>
+                <field name="check_in_time"/>
+                <field name="check_out_time"/>
                 <field name="normal_working_hours" sum="Total Normal"/>
                 <field name="delay_minutes" sum="Total Delay"/>
                 <field name="missing_hours" sum="Total Missing"/>
@@ -39,8 +39,10 @@
                         </group>
                         <group>
                         <group>
-                            <field name="check_in" readonly="is_absent"/>
-                            <field name="check_out" readonly="is_absent"/>
+                            <field name="check_in_time" readonly="is_absent"/>
+                            <field name="check_out_time" readonly="is_absent"/>
+                            <field name="check_in" invisible="1"/>
+                            <field name="check_out" invisible="1"/>
                         </group>
                         </group>
                     </group>
@@ -70,8 +72,8 @@
         <field name="arch" type="xml">
             <calendar string="Présence" date_start="date" color="state" mode="month">
                 <field name="employee_id"/>
-                <field name="check_in"/>
-                <field name="check_out"/>
+                <field name="check_in_time"/>
+                <field name="check_out_time"/>
                 <field name="delay_minutes"/>
                 <field name="missing_hours"/>
             </calendar>

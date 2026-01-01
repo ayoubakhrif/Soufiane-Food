@@ -11,6 +11,20 @@ class CustomAttendance(models.Model):
     _rec_name = 'employee_id'
 
     employee_id = fields.Many2one('custom.employee', string='Employés', required=True, tracking=True)
+
+    def _auto_init(self):
+        # 🛠️ Fix: Handle conversion from Float to Datetime manually
+        # If check_in is double precision, drop it to let Odoo recreate it as Datetime
+        # This prevents "psycopg2.errors.CannotCoerce"
+        cr = self.env.cr
+        cr.execute("SELECT data_type FROM information_schema.columns WHERE table_name = 'custom_attendance' AND column_name = 'check_in'")
+        res = cr.fetchone()
+        if res and res[0] == 'double precision':
+            cr.execute("ALTER TABLE custom_attendance DROP COLUMN check_in CASCADE")
+            cr.execute("ALTER TABLE custom_attendance DROP COLUMN check_out CASCADE")
+            
+        super()._auto_init()
+
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     
     check_in = fields.Datetime(string='Heure entrée', required=True, default=fields.Datetime.now)

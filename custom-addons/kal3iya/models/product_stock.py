@@ -88,30 +88,28 @@ class ProductStock(models.Model):
     # ------------------------------------------------------------
     def recompute_qty(self):
         for stock in self:
-            # Entrée d'origine
-            origin_qty = stock.entry_id.quantity if stock.entry_id else 0.0
+            # 1️⃣ Quantité entrée (ENTRÉE ORIGINALE)
+            entry_qty = 0.0
+            if stock.entry_id and stock.entry_id.state == 'entree':
+                entry_qty = stock.entry_id.quantity
 
-            # Retours DIRECTEMENT liés au stock
-            returns = self.env['kal3iyaentry'].search([
+            # 2️⃣ Retours liés à ce stock
+            returns_qty = sum(self.env['kal3iyaentry'].search([
                 ('state', '=', 'retour'),
-                ('stock_id', '=', stock.id),
-            ])
-            qty_returns = sum(returns.mapped('quantity'))
+                ('return_id.entry_id', '=', stock.id)
+            ]).mapped('quantity'))
 
-            # Sorties liées
-            sorties = self.env['kal3iyasortie'].search([
+            # 3️⃣ Sorties existantes
+            sorties_qty = sum(self.env['kal3iyasortie'].search([
                 ('entry_id', '=', stock.id)
-            ])
-            qty_sorties = sum(sorties.mapped('quantity'))
+            ]).mapped('quantity'))
 
-            stock.quantity = origin_qty + qty_returns - qty_sorties
+            # 4️⃣ Calcul FINAL
+            stock.quantity = entry_qty + returns_qty - sorties_qty
 
+            # 5️⃣ Archivage automatique
+            stock.active = stock.quantity > 0
 
-            # 🔹 Archivage automatique
-            if stock.quantity <= 0 and stock.active:
-                stock.active = False
-            elif stock.quantity > 0 and not stock.active:
-                stock.active = True
 
     @api.model
     def update_stock_archive_status(self):

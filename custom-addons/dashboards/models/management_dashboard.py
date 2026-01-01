@@ -13,7 +13,6 @@ class ManagementDashboard(models.Model):
         ('profit_product', 'Profit par Produit'),
     ], string="Type", required=True)
     
-    last_refresh = fields.Datetime(string="Last Refresh", default=fields.Datetime.now)
     
     content_html = fields.Html(
         compute="_compute_content_html",
@@ -31,46 +30,9 @@ class ManagementDashboard(models.Model):
             else:
                 rec.content_html = ""
 
-
-    @api.model
-    def create(self, vals):
-        rec = super().create(vals)
-        # Compute content on creation
-        rec.action_reload_dashboard()
-        return rec
-
     # --------------------------------------------------------
     # MAIN ACTIONS
     # --------------------------------------------------------
-    def action_reload_dashboard(self):
-        self.ensure_one()
-        
-        # 1. Flush to ensure we have latest DB state
-        self.env.cr.flush()
-
-        # 2. Compute HTML content dynamically based on type
-        html_content = ""
-        if self.dashboard_type == 'profit_client':
-            html_content = self._render_profit_client()
-        elif self.dashboard_type == 'profit_product':
-            html_content = self._render_profit_product()
-        else:
-            html_content = "<div class='alert alert-info'>Sélectionnez un type de dashboard.</div>"
-
-        # 3. Write updates (sudo to bypass any readonly restrictions if needed, 
-        # though this is a computed-like behavior, we store it for the view)
-        self.sudo().write({
-            'content_html': html_content,
-            'last_refresh': fields.Datetime.now()
-        })
-
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'management.dashboard',
-            'res_id': self.id,
-            'view_mode': 'form',
-            'target': 'current',
-        }
 
     # --------------------------------------------------------
     # PYTHON AGGREGATION LOGIC

@@ -147,6 +147,7 @@
                 <field name="client_id"/>
                 <field name="ville"/>
                 <field name="frigo"/>
+                <field name="date_exit"/>
             </search>
         </field>
     </record>

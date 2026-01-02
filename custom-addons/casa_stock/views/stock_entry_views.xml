@@ -51,7 +51,6 @@
                         </group>
                         <group>
                             <field name="price_purchase"/>
-                            <field name="price_sale"/>
                             <field name="date"/>
                         </group>
                     </group>

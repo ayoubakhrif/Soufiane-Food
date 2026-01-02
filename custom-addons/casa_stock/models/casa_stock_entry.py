@@ -13,9 +13,8 @@ class CasaStockEntry(models.Model):
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
     price_purchase = fields.Float(string='Prix Achat')
-    price_sale = fields.Float(string='Prix Vente')
     
-    date = fields.Datetime(string='Date', default=fields.Datetime.now, required=True)
+    date = fields.Date(string='Date', required=True)
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
@@ -60,7 +59,7 @@ class CasaStockEntry(models.Model):
         for rec in self:
             if rec.state == 'done':
                 forbidden_fields = [
-                    'product_id', 'qty', 'weight', 'price_purchase', 'price_sale',
+                    'product_id', 'qty', 'weight', 'price_purchase',
                     'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
@@ -85,7 +84,6 @@ class CasaStockEntry(models.Model):
                 'date': rec.date,
                 'reference': rec.name,
                 'price_purchase': rec.price_purchase,
-                'price_sale': rec.price_sale,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'provider_id': rec.provider_id.id,
@@ -117,7 +115,6 @@ class CasaStockEntry(models.Model):
                 'date': fields.Datetime.now(),
                 'reference': rec.name,
                 'price_purchase': rec.price_purchase,
-                'price_sale': rec.price_sale,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'provider_id': rec.provider_id.id,

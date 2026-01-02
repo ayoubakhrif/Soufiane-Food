@@ -19,6 +19,7 @@ class CasaStockStock(models.Model):
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo', readonly=True)
+    ste_id = fields.Many2one('casa.ste', string='Société', readonly=True)
     
     quantity = fields.Float(string='Quantité', readonly=True)
     weight = fields.Float(string='Poids (Kg)', readonly=True)
@@ -40,6 +41,7 @@ class CasaStockStock(models.Model):
                     m.dum,
                     m.ville,
                     m.frigo,
+                    m.ste_id,
                     sum(m.qty) as quantity,
                     max(m.weight) as weight,
                     max(m.calibre) as calibre,
@@ -52,7 +54,7 @@ class CasaStockStock(models.Model):
                 WHERE
                     m.state = 'done'
                 GROUP BY
-                    m.product_id, m.lot, m.dum, m.ville, m.frigo
+                    m.product_id, m.lot, m.dum, m.ville, m.frigo, m.ste_id
                 HAVING
                     sum(m.qty) != 0
             )
@@ -74,5 +76,6 @@ class CasaStockStock(models.Model):
                 'default_frigo': self.frigo,
                 'default_weight': self.weight,
                 'default_calibre': self.calibre,
+                'default_ste_id': self.ste_id.id, 
             }
         }

@@ -14,7 +14,7 @@ class CasaStockExit(models.Model):
     
     price_sale = fields.Float(string='Prix Vente')
     
-    date = fields.Datetime(string='Date', default=fields.Datetime.now, required=True)
+    date = fields.Date(string='Date', required=True)
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')

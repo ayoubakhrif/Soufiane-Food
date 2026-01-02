@@ -191,37 +191,16 @@
         </field>
     </record>
 
-    <!-- Server Action for "New Entry" directly from the view -->
-    <record id="action_server_new_entry" model="ir.actions.server">
-        <field name="name">New Entry</field>
-        <field name="model_id" ref="model_casa_stock_stock"/>
-        <field name="state">code</field>
-        <field name="code">
-            action = {
-                'name': 'Nouvelle Entrée',
-                'type': 'ir.actions.act_window',
-                'res_model': 'casa.stock.entry',
-                'view_mode': 'form',
-                'target': 'current',
-            }
-        </field>
-    </record>
-
-    <!-- Adding "New Entry" to the Action menu of the Stock view -->
-    <record id="action_new_entry_binding" model="ir.actions.server">
-        <field name="name">New Entry</field>
+    <!-- Adding "New Exit" to the Action menu of the Stock view -->
+    <record id="action_new_exit_binding" model="ir.actions.server">
+        <field name="name">Nouvelle Sortie</field>
         <field name="model_id" ref="model_casa_stock_stock"/>
         <field name="binding_model_id" ref="model_casa_stock_stock"/>
         <field name="binding_view_types">kanban,list</field>
         <field name="state">code</field>
         <field name="code">
-            action = {
-                'name': 'Nouvelle Entrée',
-                'type': 'ir.actions.act_window',
-                'res_model': 'casa.stock.entry',
-                'view_mode': 'form',
-                'target': 'current',
-            }
+            if records:
+                action = records[0].action_new_exit()
         </field>
     </record>
 

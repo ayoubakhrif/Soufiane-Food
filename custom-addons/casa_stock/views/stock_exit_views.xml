@@ -4,10 +4,6 @@
         <field name="name">casa.stock.exit.tree</field>
         <field name="model">casa.stock.exit</field>
         <field name="arch" type="xml">
-    <record id="view_casa_stock_exit_tree" model="ir.ui.view">
-        <field name="name">casa.stock.exit.tree</field>
-        <field name="model">casa.stock.exit</field>
-        <field name="arch" type="xml">
             <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
                 <field name="name"/>

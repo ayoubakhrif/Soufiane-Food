@@ -1,4 +1,3 @@
-```
 from odoo import models, fields, api
 
 class CasaClient(models.Model):
@@ -147,4 +146,3 @@ class CasaClient(models.Model):
             
             html += "</div>"
             rec.retours_grouped_html = html
-```

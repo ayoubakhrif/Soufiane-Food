@@ -85,26 +85,44 @@ class CasaStockExit(models.Model):
             if rec.qty > total_available:
                 raise UserError(_("Stock insuffisant ! Disponible : %s, Demandé : %s") % (total_available, rec.qty))
             
-            # Create Move
+            # 4. Create Ledger Move
             move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
                 'frigo': rec.frigo,
-                'qty': -rec.qty,
-                'move_type': 'exit',
-                'state': 'done',
-                'date': rec.date,
-                'reference': rec.name,
-                'price_sale': rec.price_sale,
-                'weight': rec.weight,
-                'calibre': rec.calibre,
-                'client_id': rec.client_id.id,
-                'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
+                'qty': -rec.qty,  # Negative for exit
+                'weight': -rec.weight,
+                'tonnage': -rec.tonnage,
+                'calibre': rec.calibre,
+                'move_type': 'exit',
+                'date': rec.date,
+                'reference': rec.name, # Changed 'ref' to 'reference' to match existing field
+                'price_sale': rec.price_sale, # Added price_sale
+                'client_id': rec.client_id.id, # Added client_id
+                'driver_id': rec.driver_id.id, # Added driver_id
                 'res_model': 'casa.stock.exit',
                 'res_id': rec.id,
+            })
+
+            # 5. [NEW] Create Commercial Sale Record
+            self.env['casa.sale'].create({
+                'stock_exit_id': rec.id,
+                'client_id': rec.client_id.id,
+                'product_id': rec.product_id.id,
+                'ste_id': rec.ste_id.id,
+                'lot': rec.lot,
+                'dum': rec.dum,
+                'ville': rec.ville,
+                'frigo': rec.frigo,
+                'quantity': rec.qty,
+                'weight': rec.weight,
+                'tonnage': rec.tonnage,
+                'selling_price': rec.price_sale,
+                'mt_vente': rec.price_sale * rec.tonnage,
+                'date': rec.date,
             })
             rec.write({
                 'state': 'done',

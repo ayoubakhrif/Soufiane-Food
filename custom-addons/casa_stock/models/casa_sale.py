@@ -57,3 +57,13 @@ class CasaSale(models.Model):
             # If nothing changed, we can either set it to initial or handle logic
             # Here we follow Kal3iya logic: mt_final is the effective amount due
             rec.mt_vente_final = price * tonnage
+
+    def open_record(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'casa.sale',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'target': 'current',
+        }

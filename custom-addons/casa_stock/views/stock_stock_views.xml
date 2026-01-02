@@ -199,9 +199,10 @@
         <field name="binding_view_types">kanban,list</field>
         <field name="state">code</field>
         <field name="code">
-            if records:
-                return records[0].action_new_exit()
+    if records:
+        action = records[0].action_new_exit()
         </field>
     </record>
+
 
 </odoo>

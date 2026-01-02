@@ -60,7 +60,7 @@
                         <group>
                             <field name="date"/>
                             <field name="is_return"/>
-                            <field name="client_id" attrs="{'invisible': [('is_return', '=', False)], 'required': [('is_return', '=', True)]}"/>
+                            <field name="client_id" invisible="not is_return" required="is_return"/>
                             <field name="qty"/>
                             <field name="weight"/>
                             <field name="ville"/>

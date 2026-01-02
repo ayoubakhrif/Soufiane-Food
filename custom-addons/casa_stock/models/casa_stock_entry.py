@@ -34,6 +34,7 @@ class CasaStockEntry(models.Model):
     client_id = fields.Many2one('casa.client', string='Client (Retour)')
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
     ste_id = fields.Many2one('casa.ste', string='Société')
+    is_return = fields.Boolean(string="Est un Retour Client", default=False)
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
     
     state = fields.Selection([

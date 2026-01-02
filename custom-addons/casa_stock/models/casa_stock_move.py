@@ -46,6 +46,7 @@ class CasaStockMove(models.Model):
     price_purchase = fields.Float(string='Prix Achat')
     price_sale = fields.Float(string='Prix Vente')
     weight = fields.Float(string='Poids (Kg)')
+    tonnage = fields.Float(string='Tonnage')
     calibre = fields.Char(string='Calibre')
     
     client_id = fields.Many2one('casa.client', string='Client')

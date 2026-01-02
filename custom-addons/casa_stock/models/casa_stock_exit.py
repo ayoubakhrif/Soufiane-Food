@@ -141,4 +141,8 @@ class CasaStockExit(models.Model):
                 'cancel_move_id': cancel_move.id
             })
 
-        return super(CasaStockExit, self).write(vals)
+    @api.constrains('qty')
+    def _check_qty_positive(self):
+        for rec in self:
+            if rec.qty <= 0:
+                raise UserError(_("La quantité doit être strictement positive."))

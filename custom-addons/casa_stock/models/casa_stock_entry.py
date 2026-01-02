@@ -124,8 +124,16 @@ class CasaStockEntry(models.Model):
                 'driver_id': rec.driver_id.id,
                 'res_model': 'casa.stock.entry',
                 'res_id': rec.id,
+                'ste_id': rec.ste_id.id,
             })
             rec.write({
                 'state': 'cancel',
                 'cancel_move_id': cancel_move.id
             })
+
+    @api.constrains('qty')
+    def _check_qty_positive(self):
+        for rec in self:
+            if rec.qty <= 0:
+                raise UserError(_("La quantité doit être strictement positive."))
+

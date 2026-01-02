@@ -4,7 +4,7 @@
         <field name="name">casa.stock.stock.kanban</field>
         <field name="model">casa.stock.stock</field>
         <field name="arch" type="xml">
-            <kanban create="false" delete="false">
+            <kanban create="false" delete="false" class="o_kanban_clickable">
                 <field name="product_id"/>
                 <field name="quantity"/>
                 <field name="calibre"/>
@@ -30,7 +30,7 @@
                                 display:flex;
                                 gap:14px;
                             "
-                            type="open">
+                            >
 
                             <!-- 🖼️ Image -->
                             <aside style="width:90px; height:90px; flex-shrink:0;">
@@ -200,7 +200,7 @@
         <field name="state">code</field>
         <field name="code">
             if records:
-                action = records[0].action_new_exit()
+                return records[0].action_new_exit()
         </field>
     </record>
 

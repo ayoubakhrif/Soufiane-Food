@@ -34,19 +34,7 @@
                         </group>
                     </group>
 
-                    <notebook>
-                        <page string="Sorties">
-                            <field name="exit_ids" domain="[('state', '!=', 'cancel')]" readonly="1">
-                                <tree>
-                                    <field name="name"/>
-                                    <field name="date"/>
-                                    <field name="product_id"/>
-                                    <field name="qty"/>
-                                    <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
+                    
                 </sheet>
             </form>
         </field>

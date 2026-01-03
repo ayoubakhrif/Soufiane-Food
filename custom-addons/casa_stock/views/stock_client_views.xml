@@ -14,7 +14,7 @@
                     <!-- ✅ SMART BUTTONS AU BON ENDROIT -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_exits"
-                                type="object"
+                                type="action"
                                 class="oe_stat_button"
                                 icon="fa-truck">
                             <field name="exit_count"

@@ -107,10 +107,6 @@
     <!-- ========================= -->
     <!-- 📁 MENU ITEM -->
     <!-- ========================= -->
-    <menuitem id="menu_casa_stock_client"
-              name="Clients"
-              parent="your_parent_menu_id"
-              action="action_casa_stock_client"
-              sequence="30"/>
+
 
 </odoo>

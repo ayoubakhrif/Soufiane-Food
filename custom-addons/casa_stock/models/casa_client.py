@@ -6,6 +6,10 @@ class CasaClient(models.Model):
     _description = 'Clients Casa'
 
     name = fields.Char(string='Nom', required=True)
+    compte_initial = fields.Float(
+        string='Compte initial',
+        help="Solde du client avant l'utilisation du système"
+    )
 
     # Champ computed pour le nombre de commandes
     exit_count = fields.Integer(
@@ -20,6 +24,18 @@ class CasaClient(models.Model):
         string='Sorties de ce client',
     )
 
+    total_commandes = fields.Float(
+        string='Total commandes',
+        compute='_compute_totals',
+        store=True
+    )
+
+    compte_total = fields.Float(
+        string='Compte total',
+        compute='_compute_totals',
+        store=True
+    )
+
     sorties_grouped_html = fields.Html(
         string="Historique des commandes",
         compute="_compute_sorties_grouped_html",
@@ -31,6 +47,16 @@ class CasaClient(models.Model):
         """Compte uniquement les sorties confirmées (done)"""
         for rec in self:
             rec.exit_count = len(rec.exit_ids.filtered(lambda s: s.state == 'done'))
+
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'compte_initial')
+    def _compute_totals(self):
+        for client in self:
+            commandes = client.exit_ids.filtered(lambda s: s.state == 'done')
+            total_ventes = sum(commandes.mapped('mt_vente'))
+
+            client.total_commandes = total_ventes
+            client.compte_total = (client.compte_initial or 0.0) + total_ventes
+
 
     @api.depends('name')
     def _compute_sorties_grouped_html(self):

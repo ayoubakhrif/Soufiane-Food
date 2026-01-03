@@ -13,7 +13,7 @@ class CasaClient(models.Model):
     )
 
     exit_ids = fields.One2many(
-        'casa_stock_exit',
+        'casa.stock.exit',
         'client_id',
         string='Sorties de ce client',
     )

@@ -9,17 +9,25 @@
         <field name="model">casa.client</field>
         <field name="arch" type="xml">
             <form string="Client Casa">
-                <header>
-                    <!-- 🔘 Smart Button : Sorties -->
+
+                <!-- 🔹 SMART BUTTONS BAR -->
+                <div class="oe_button_box" name="button_box">
+
+                    <!-- 🚚 Sorties -->
                     <button name="action_view_exits"
                             type="object"
                             class="oe_stat_button"
-                            icon="fa-sign-out">
+                            icon="fa-truck">
                         <field name="exit_count"
-                               widget="statinfo"
-                               string="Nombre des commandes"/>
+                            widget="statinfo"
+                            string="Sorties"/>
                     </button>
-                </header>
+
+                    <!-- (Plus tard) ↩️ Retours -->
+                    <!--
+                    <button ...>
+                    -->
+                </div>
 
                 <sheet>
                     <div class="oe_title">
@@ -33,9 +41,8 @@
                             <field name="name"/>
                         </group>
                     </group>
-
-                    
                 </sheet>
+
             </form>
         </field>
     </record>

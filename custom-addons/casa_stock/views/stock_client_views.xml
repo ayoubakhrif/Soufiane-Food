@@ -43,17 +43,17 @@
                             <field name="name"/>
                         </group>
                     </group>
-                </sheet>
-                <notebook>
-                    <!-- 👁️ Lecture -->
-                    <page string="Historique des commandes">
-                        <field name="sorties_grouped_html"
-                            nolabel="1"
-                            readonly="1"/>
-                    </page>
+                    <notebook>
+                        <!-- 👁️ Lecture -->
+                        <page string="Historique des commandes">
+                            <field name="sorties_grouped_html"
+                                nolabel="1"
+                                readonly="1"/>
+                        </page>
 
-                    <!-- ✏️ (optionnel) saisie ailleurs -->
-                </notebook>
+                        <!-- ✏️ (optionnel) saisie ailleurs -->
+                    </notebook>
+                </sheet>
             </form>
         </field>
     </record>

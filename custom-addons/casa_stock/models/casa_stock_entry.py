@@ -31,10 +31,8 @@ class CasaStockEntry(models.Model):
     ], string='Frigo', default='stock_casa')
     
     provider_id = fields.Many2one('casa.provider', string='Fournisseur')
-    client_id = fields.Many2one('casa.client', string='Client (Retour)')
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
     ste_id = fields.Many2one('casa.ste', string='Société')
-    is_return = fields.Boolean(string="Est un Retour Client", default=False)
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
     
     state = fields.Selection([
@@ -73,46 +71,27 @@ class CasaStockEntry(models.Model):
             if rec.state != 'draft':
                 continue
             
-            # 1. Update quantities (if applicable, though computed from moves usually)
-            # ... (existing logic)
-
-            # 2. PROPOSE: Create Ledger Move
+            # Create Move
             move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
                 'frigo': rec.frigo,
-                'ste_id': rec.ste_id.id,
                 'qty': rec.qty,
-                'weight': rec.weight,
-                'tonnage': rec.tonnage,
-                'calibre': rec.calibre,
                 'move_type': 'entry',
+                'state': 'done',
                 'date': rec.date,
-                'reference': rec.name, # Changed 'ref' to 'reference' to match existing field
-                'price_purchase': rec.price_purchase, # Added this field
-                'provider_id': rec.provider_id.id, # Added this field
-                'driver_id': rec.driver_id.id, # Added this field
-                'state': 'done', # Added this field
+                'reference': rec.name,
+                'price_purchase': rec.price_purchase,
+                'weight': rec.weight,
+                'calibre': rec.calibre,
+                'provider_id': rec.provider_id.id,
+                'driver_id': rec.driver_id.id,
+                'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.entry',
                 'res_id': rec.id,
             })
-
-            # 3. [NEW] Create Commercial Return if applicable
-            if rec.is_return and rec.client_id: # client_id field is not defined in the original document, assuming it exists or will be added.
-               self.env['casa.sale.return'].create({
-                   'stock_entry_id': rec.id,
-                   'client_id': rec.client_id.id,
-                   'product_id': rec.product_id.id,
-                   'ste_id': rec.ste_id.id,
-                   'date': rec.date,
-                   'quantity': rec.qty,
-                   'weight': rec.weight,
-                   'tonnage': rec.tonnage,
-                   'price_unit': rec.price_purchase, # Using purchase price as return unit price initially
-               })
-
             rec.write({
                 'state': 'done',
                 'move_id': move.id

@@ -181,7 +181,7 @@ class ProductExit(models.Model):
     @api.depends('mt_achat', 'mt_vente', 'mt_vente_final')
     def _compute_diff(self):
         for rec in self:
-            vente = rec.mt_vente_final if rec.mt_vente_final not in (False, None) else rec.mt_vente
+            vente = rec.mt_vente
             rec.diff = (vente or 0.0) - (rec.mt_achat or 0.0)
 
 

@@ -7,9 +7,4 @@ access_casa_ste,casa.ste,model_casa_ste,base.group_user,1,1,1,1
 access_casa_stock_move,casa.stock.move,model_casa_stock_move,base.group_user,1,1,1,0
 access_casa_stock_entry,casa.stock.entry,model_casa_stock_entry,base.group_user,1,1,1,1
 access_casa_stock_exit,casa.stock.exit,model_casa_stock_exit,base.group_user,1,1,1,1
-access_casa_stock_stock,casa.stock.stock,model_casa_stock_stock,base.group_user,1,1,1,1
-access_casa_sale,casa.sale,model_casa_sale,base.group_user,1,1,1,1
-access_casa_sale_return,casa.sale.return,model_casa_sale_return,base.group_user,1,1,1,1
-access_casa_advance,casa.advance,model_casa_advance,base.group_user,1,1,1,1
-access_casa_unpaid,casa.unpaid,model_casa_unpaid,base.group_user,1,1,1,1
-access_casa_sale_supp,casa.sale.supp,model_casa_sale_supp,base.group_user,1,1,1,1
+access_casa_stock_stock,casa.stock.stock,model_casa_stock_stock,base.group_user,1,1,1,0

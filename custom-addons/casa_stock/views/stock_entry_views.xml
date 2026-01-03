@@ -58,11 +58,6 @@
                     <separator string="Logistique &amp; Traçabilité"/>
                     <group>
                         <group>
-                            <field name="date"/>
-                            <field name="is_return"/>
-                            <field name="client_id" invisible="not is_return" required="is_return"/>
-                            <field name="qty"/>
-                            <field name="weight"/>
                             <field name="ville"/>
                             <field name="frigo"/>
                             <field name="ste_id" options="{'no_create_edit': True}"/>

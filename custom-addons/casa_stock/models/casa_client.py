@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class CasaClient(models.Model):
     _name = 'casa.client'
@@ -29,6 +29,7 @@ class CasaClient(models.Model):
             }
         }
     
+    @api.depends('name')
     def _compute_exit_count(self):
         for client in self:
             client.exit_count = self.env['casa.stock.exit'].search_count([

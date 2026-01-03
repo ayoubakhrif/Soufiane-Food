@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Action -->
+    <record id="action_kal3iya_stock_product" model="ir.actions.act_window">
+        <field name="name">Produits</field>
+        <field name="res_model">kal3iya.stock.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Client Action -->
+    <record id="action_kal3iya_stock_client" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">kal3iya.stock.client</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Provider Action -->
+    <record id="action_kal3iya_stock_provider" model="ir.actions.act_window">
+        <field name="name">Fournisseurs</field>
+        <field name="res_model">kal3iya.stock.provider</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Driver Action -->
+    <record id="action_kal3iya_stock_driver" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">kal3iya.stock.driver</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Société Action -->
+    <record id="action_kal3iya_stock_ste" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">kal3iya.stock.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

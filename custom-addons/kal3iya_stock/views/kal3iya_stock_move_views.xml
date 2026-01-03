@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kal3iya_stock_move_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.move.tree</field>
+        <field name="model">kal3iya.stock.move</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false" edit="false">
+                <field name="date"/>
+                <field name="reference"/>
+                <field name="product_id"/>
+                <field name="ste_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="ville"/>
+                <field name="frigo"/>
+                <field name="qty" sum="Total Quantité"/>
+                <field name="move_type"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_move_search" model="ir.ui.view">
+        <field name="name">kal3iya.stock.move.search</field>
+        <field name="model">kal3iya.stock.move</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="reference"/>
+                <field name="ste_id"/>
+                <filter string="Entrées" name="entry" domain="[('move_type', '=', 'entry')]"/>
+                <filter string="Sorties" name="exit" domain="[('move_type', '=', 'exit')]"/>
+                <filter string="Annulations" name="cancel" domain="[('move_type', 'in', ('cancel_entry', 'cancel_exit'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Produit" name="group_by_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Ville" name="group_by_ville" context="{'group_by': 'ville'}"/>
+                    <filter string="Frigo" name="group_by_frigo" context="{'group_by': 'frigo'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_kal3iya_stock_move" model="ir.actions.act_window">
+        <field name="name">Journal des Mouvements</field>
+        <field name="res_model">kal3iya.stock.move</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="view_kal3iya_stock_move_search"/>
+    </record>
+</odoo>

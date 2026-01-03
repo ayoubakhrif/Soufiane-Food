@@ -13,8 +13,9 @@ This module provides a robust stock management system based on an immutable move
 - Reversal moves for cancellations.
     """,
     'author': 'Soufiane-Food',
-    'depends': ['base', 'web'],
+    'depends': ['base', 'web', 'mail'],
     'data': [
+        'security/groups.xml',
         'security/ir.model.access.csv',
         'data/data.xml',
         'views/kal3iya_stock_move_views.xml',

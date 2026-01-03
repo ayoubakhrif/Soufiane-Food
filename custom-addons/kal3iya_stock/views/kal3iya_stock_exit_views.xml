@@ -76,6 +76,11 @@
                         <field name="cancel_move_id" invisible="not cancel_move_id"/>
                     </group>
                 </sheet>
+                <div class="oe_chatter" groups="kal3iya_stock.group_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

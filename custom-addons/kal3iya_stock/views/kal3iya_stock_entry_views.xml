@@ -82,6 +82,11 @@
                         <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_1920'}"/>
                     </group>
                 </sheet>
+                <div class="oe_chatter" groups="kal3iya_stock.group_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

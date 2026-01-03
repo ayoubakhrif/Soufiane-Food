@@ -26,7 +26,7 @@
     <menuitem id="menu_kal3iya_stock_audit"
               name="Audit Ledger"
               parent="menu_kal3iya_stock_root"
-              groups="base.group_erp_manager"
+              groups="kal3iya_stock.group_manager"
               sequence="100"/>
 
     <menuitem id="menu_kal3iya_stock_move"

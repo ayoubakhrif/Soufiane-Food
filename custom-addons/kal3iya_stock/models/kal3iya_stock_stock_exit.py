@@ -3,6 +3,7 @@ from odoo.exceptions import UserError
 
 class Kal3iyaStockExit(models.Model):
     _name = 'kal3iya.stock.exit'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Sortie Stock Kal3iya'
     _order = 'date desc, id desc'
 

@@ -4,6 +4,13 @@
     <!-- ========================= -->
     <!-- 📋 FORM VIEW : Casa Client -->
     <!-- ========================= -->
+    <record id="filtered_exit_action" model="ir.actions.act_window">
+        <field name="name">Sorties du client</field>
+        <field name="res_model">casa.stock.exit</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('client_id', '=', active_id), ('state', '!=', 'cancel')]</field>
+    </record>
+    
     <record id="view_casa_client_form" model="ir.ui.view">
         <field name="name">casa.client.form</field>
         <field name="model">casa.client</field>
@@ -13,8 +20,8 @@
 
                     <!-- ✅ SMART BUTTON EN HAUT À DROITE -->
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_exits"
-                                type="object"
+                        <button name="%(filtered_exit_action)d"
+                                type="action"
                                 class="oe_stat_button"
                                 icon="fa-truck">
                             <field name="exit_count" 
@@ -36,10 +43,6 @@
                             <field name="name"/>
                         </group>
                     </group>
-
-                    <!-- ⚠️ PAS DE NOTEBOOK, PAS DE PAGE, PAS DE FIELD ONE2MANY -->
-                    <!-- C'est ça qui crée la vue inline ! -->
-
                 </sheet>
             </form>
         </field>

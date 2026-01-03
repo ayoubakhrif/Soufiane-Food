@@ -23,21 +23,3 @@ class CasaClient(models.Model):
                 ('client_id', '=', rec.id),
                 ('state', '=', 'done')
             ])
-
-    def action_view_exits(self):
-        """Action pour afficher les sorties du client"""
-        self.ensure_one()
-        return {
-            'name': f'Commandes de {self.name}',
-            'type': 'ir.actions.act_window',
-            'res_model': 'casa.stock.exit',
-            'view_mode': 'tree,form',
-            'domain': [
-                ('client_id', '=', self.id),
-                ('state', '!=', 'cancel'),
-            ],
-            'context': {
-                'default_client_id': self.id,
-                'search_default_group_by_date': 1,
-            },
-        }

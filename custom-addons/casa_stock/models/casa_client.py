@@ -6,6 +6,12 @@ class CasaClient(models.Model):
 
     name = fields.Char(string='Nom', required=True)
 
+    exit_ids = fields.One2many(
+        'casa.stock.exit',
+        'client_id',
+        string='Sorties'
+    )
+
     exit_count = fields.Integer(
         string='Commandes',
         compute='_compute_exit_count'

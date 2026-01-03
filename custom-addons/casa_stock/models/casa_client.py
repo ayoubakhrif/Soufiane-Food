@@ -9,7 +9,6 @@ class CasaClient(models.Model):
     exit_count = fields.Integer(
         string='Commandes',
         compute='_compute_exit_count',
-        store=True
     )
 
     exit_ids = fields.One2many(

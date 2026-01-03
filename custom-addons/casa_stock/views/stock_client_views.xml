@@ -40,6 +40,17 @@
         </field>
     </record>
 
+    <record id="view_casa_client_form_cleanup" model="ir.ui.view">
+        <field name="name">casa.client.form.cleanup</field>
+        <field name="model">casa.client</field>
+        <field name="inherit_id" ref="view_casa_client_form"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='exit_ids']" position="replace"/>
+        </field>
+    </record>
+
+
     <!-- ========================= -->
     <!-- 🌳 TREE VIEW : Casa Client -->
     <!-- ========================= -->

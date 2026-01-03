@@ -11,45 +11,39 @@
             <form string="Client Casa">
                 <sheet>
 
-                    <!-- ✅ SMART BUTTONS AU BON ENDROIT -->
+                    <!-- ✅ SMART BUTTON EN HAUT À DROITE -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_exits"
-                                type="action"
+                                type="object"
                                 class="oe_stat_button"
                                 icon="fa-truck">
-                            <field name="exit_count"
-                                widget="statinfo"
-                                string="Commandes"/>
+                            <field name="exit_count" 
+                                   widget="statinfo" 
+                                   string="Commandes"/>
                         </button>
                     </div>
 
+                    <!-- TITRE -->
                     <div class="oe_title">
                         <h1>
-                            <field name="name"/>
+                            <field name="name" placeholder="Nom du client..."/>
                         </h1>
                     </div>
 
+                    <!-- INFORMATIONS SIMPLES -->
                     <group>
                         <group string="Informations Client">
                             <field name="name"/>
                         </group>
                     </group>
 
+                    <!-- ⚠️ PAS DE NOTEBOOK, PAS DE PAGE, PAS DE FIELD ONE2MANY -->
+                    <!-- C'est ça qui crée la vue inline ! -->
+
                 </sheet>
             </form>
         </field>
     </record>
-
-    <record id="view_casa_client_form_cleanup" model="ir.ui.view">
-        <field name="name">casa.client.form.cleanup</field>
-        <field name="model">casa.client</field>
-        <field name="inherit_id" ref="view_casa_client_form"/>
-        <field name="priority" eval="99"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='exit_ids']" position="replace"/>
-        </field>
-    </record>
-
 
     <!-- ========================= -->
     <!-- 🌳 TREE VIEW : Casa Client -->
@@ -60,8 +54,33 @@
         <field name="arch" type="xml">
             <tree string="Clients Casa">
                 <field name="name"/>
-                <field name="exit_count" string="Nombre de commandes"/>
+                <field name="exit_count" string="Nb. Commandes"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🔍 SEARCH VIEW -->
+    <!-- ========================= -->
+    <record id="view_casa_client_search" model="ir.ui.view">
+        <field name="name">casa.client.search</field>
+        <field name="model">casa.client</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Client">
+                <field name="name" 
+                       string="Client" 
+                       filter_domain="[('name','ilike',self)]"/>
+                
+                <separator/>
+                
+                <filter string="Avec commandes" 
+                        name="with_orders" 
+                        domain="[('exit_count','>',0)]"/>
+                
+                <filter string="Sans commandes" 
+                        name="without_orders" 
+                        domain="[('exit_count','=',0)]"/>
+            </search>
         </field>
     </record>
 
@@ -74,8 +93,21 @@
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Créez votre premier client.
+                Créez votre premier client Casa
+            </p>
+            <p>
+                Les clients sont liés aux sorties de stock.
             </p>
         </field>
     </record>
+
+    <!-- ========================= -->
+    <!-- 📁 MENU ITEM -->
+    <!-- ========================= -->
+    <menuitem id="menu_casa_stock_client"
+              name="Clients"
+              parent="your_parent_menu_id"
+              action="action_casa_stock_client"
+              sequence="30"/>
+
 </odoo>

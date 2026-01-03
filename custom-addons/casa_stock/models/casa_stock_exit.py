@@ -116,23 +116,27 @@ class CasaStockExit(models.Model):
             if rec.state != 'done':
                 raise UserError(_("Vous ne pouvez annuler que des sorties confirmées."))
             
-            # Create Reversal Move
+            # Vérifier si déjà annulé
+            if rec.cancel_move_id:
+                raise UserError(_("Cette sortie a déjà été annulée."))
+            
+            # Créer le mouvement d'annulation avec la date actuelle
             cancel_move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
                 'frigo': rec.frigo,
-                'qty': rec.qty,
+                'qty': rec.qty,  # Quantité positive pour reverser
                 'move_type': 'cancel_exit',
                 'state': 'done',
-                'date': fields.Datetime.now(),
-                'reference': rec.name,
+                'date': fields.Date.today(),  # Utiliser Date.today() au lieu de Datetime.now()
+                'reference': _('Annulation %s') % rec.name,
                 'price_sale': rec.price_sale,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
-                'client_id': rec.client_id.id,
-                'driver_id': rec.driver_id.id,
+                'client_id': rec.client_id.id if rec.client_id else False,
+                'driver_id': rec.driver_id.id if rec.driver_id else False,
                 'res_model': 'casa.stock.exit',
                 'res_id': rec.id,
             })

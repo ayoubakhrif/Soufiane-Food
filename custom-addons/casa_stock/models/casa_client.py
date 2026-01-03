@@ -11,10 +11,6 @@ class CasaClient(models.Model):
         'client_id',
         string='Sorties'
     )
-    exit_count = fields.Integer(
-        string='Sorties',
-        compute='_compute_exit_count'
-    )
 
     def action_view_exits(self):
         self.ensure_one()
@@ -29,10 +25,14 @@ class CasaClient(models.Model):
             }
         }
     
-    @api.depends('name')
+    exit_count = fields.Integer(
+        string='Sorties',
+        compute='_compute_exit_count'
+    )
+
+    @api.depends('exit_ids.state')
     def _compute_exit_count(self):
         for client in self:
-            client.exit_count = self.env['casa.stock.exit'].search_count([
-                ('client_id', '=', client.id),
-                ('state', '=', 'done'),
-            ])
+            client.exit_count = len(
+                client.exit_ids.filtered(lambda e: e.state == 'done')
+            )

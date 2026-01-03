@@ -35,6 +35,22 @@
                         <h1>
                             <field name="name" placeholder="Nom du client..."/>
                         </h1>
+                        
+                        <div style="margin-top:10px;">
+                            <span style="
+                                font-size:22px;
+                                font-weight:700;
+                                color:#4c51bf;
+                                background:#ebf4ff;
+                                padding:10px 20px;
+                                border-radius:12px;
+                                border:2px solid #4c51bf;
+                            ">
+                                💰 Compte total :
+                                <field name="compte_total" widget="monetary"
+                                    options="{'currency_field': 'company_currency_id'}"/>
+                            </span>
+                        </div>
                     </div>
 
                     <!-- INFORMATIONS SIMPLES -->

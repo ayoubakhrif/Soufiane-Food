@@ -17,7 +17,7 @@
                             icon="fa-sign-out">
                         <field name="exit_count"
                                widget="statinfo"
-                               string="Sorties"/>
+                               string="Nombre des commandes"/>
                     </button>
                 </header>
 
@@ -47,7 +47,7 @@
         <field name="arch" type="xml">
             <tree string="Clients Casa">
                 <field name="name"/>
-                <field name="exit_count" string="Sorties"/>
+                <field name="exit_count" string="Nombre de commandes"/>
             </tree>
         </field>
     </record>

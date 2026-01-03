@@ -33,9 +33,10 @@ class CasaClient(models.Model):
         compute='_compute_exit_count'
     )
 
-    @api.depends('exit_ids.state')
+    @api.depends('name')
     def _compute_exit_count(self):
         for client in self:
-            client.exit_count = len(
-                client.exit_ids.filtered(lambda e: e.state == 'done')
-            )
+            client.exit_count = self.env['casa.stock.exit'].search_count([
+                ('client_id', '=', client.id),
+                ('state', '=', 'done'),
+            ])

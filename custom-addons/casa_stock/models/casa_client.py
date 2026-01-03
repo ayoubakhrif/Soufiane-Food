@@ -19,12 +19,15 @@ class CasaClient(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'casa.stock.exit',
             'view_mode': 'tree,form',
-            'domain': [('client_id', '=', self.id), ('state', '=', 'done'),],
+            'domain': [
+                ('client_id', '=', self.id),
+                ('state', '!=', 'cancel'),
+            ],
             'context': {
                 'default_client_id': self.id,
             }
         }
-    
+
     exit_count = fields.Integer(
         string='Sorties',
         compute='_compute_exit_count'

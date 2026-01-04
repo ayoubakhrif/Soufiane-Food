@@ -10,6 +10,7 @@ access_casa_driver,casa.driver,model_casa_driver,group_manager,1,1,1,1
 access_casa_ste,casa.ste,model_casa_ste,group_user,1,1,1,1
 access_casa_ste,casa.ste,model_casa_ste,group_manager,1,1,1,1
 access_casa_stock_move_manager,casa.stock.move,model_casa_stock_move,group_manager,1,0,0,0
+access_casa_stock_move_manager,casa.stock.move,model_casa_stock_move,group_user,0,0,1,0
 access_casa_stock_entry_user,casa.stock.entry,model_casa_stock_entry,group_user,1,1,1,0
 access_casa_stock_entry_manager,casa.stock.entry,model_casa_stock_entry,group_manager,1,1,1,0
 access_casa_stock_exit_user,casa.stock.exit,model_casa_stock_exit,group_user,1,1,1,0

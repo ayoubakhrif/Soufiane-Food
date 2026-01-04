@@ -88,12 +88,6 @@
                                 decoration-danger="margin &lt; 0"/>
                         </group>
                     </group>
-
-                    <separator string="Mouvements Liés"/>
-                    <group>
-                        <field name="move_id"/>
-                        <field name="cancel_move_id" invisible="not cancel_move_id"/>
-                    </group>
                 </sheet>
             </form>
         </field>

@@ -28,8 +28,8 @@ class CustomAttendance(models.Model):
 
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     
-    check_in = fields.Datetime(string='Heure entrée', required=True, default=fields.Datetime.now)
-    check_out = fields.Datetime(string='Heure de sortie', required=True, default=fields.Datetime.now)
+    check_in = fields.Datetime(string='Heure entrée', required=True)
+    check_out = fields.Datetime(string='Heure de sortie', required=True)
     
     check_in_time = fields.Char(string='H.entrée', compute='_compute_times', inverse='_inverse_times', tracking=True)
     check_out_time = fields.Char(string='H.sortie', compute='_compute_times', inverse='_inverse_times', tracking=True)

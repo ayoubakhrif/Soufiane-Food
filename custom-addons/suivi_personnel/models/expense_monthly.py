@@ -5,11 +5,9 @@ class ExpenseMonthly(models.Model):
     _description = 'Dépense Mensuelle'
     _order = 'category_id'
 
-    category_id = fields.Many2one(
-        'suivi.expense.category',
+    category = fields.Char(
         string='Catégorie',
         required=True,
-        ondelete='restrict'
     )
     amount = fields.Float(string='Montant', required=True)
     description = fields.Text(string='Description')
@@ -20,7 +18,7 @@ class ExpenseMonthly(models.Model):
         store=True
     )
 
-    @api.depends('category_id')
+    @api.depends('category')
     def _compute_name(self):
         for rec in self:
-            rec.name = rec.category_id.name if rec.category_id else 'Dépense'
+            rec.name = rec.category if rec.category else 'Dépense'

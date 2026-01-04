@@ -15,6 +15,14 @@
                                    options="{'terminology': 'archive'}"/>
                         </button>
                     </div>
+                    <group string="Suivi du mois">
+                        <field name="monthly_limit"/>
+                        <field name="is_daily"/>
+                        <field name="current_balance"
+                            attrs="{'invisible': [('monthly_limit', '=', 0)]}"/>
+                        <field name="limit_exceeded" readonly="1"/>
+                    </group>
+
                     <div class="oe_title">
                         <h1>
                             <field name="name" placeholder="Nom de la catégorie..."/>

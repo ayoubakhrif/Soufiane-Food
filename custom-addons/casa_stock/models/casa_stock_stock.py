@@ -46,7 +46,7 @@ class CasaStockStock(models.Model):
                     max(m.weight) as weight,
                     max(m.calibre) as calibre,
                     max(m.price_purchase) as price,
-                    sum(m.qty * m.price_purchase) as mt_achat,
+                    sum(CASE WHEN m.qty > 0 THEN m.qty * COALESCE(m.price_purchase,0) ELSE 0 END) as mt_achat,
                     max(m.date) as write_date,
                     min(m.date) as create_date
                 FROM

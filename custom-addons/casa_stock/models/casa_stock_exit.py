@@ -94,6 +94,7 @@ class CasaStockExit(models.Model):
                 ('dum', '=', rec.dum),
                 ('ville', '=', rec.ville),
                 ('frigo', '=', rec.frigo),
+                ('ste_id', '=', rec.ste_id.id),
                 ('state', '=', 'done')
             ]
             res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
@@ -150,6 +151,7 @@ class CasaStockExit(models.Model):
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
+                'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.exit',
                 'res_id': rec.id,
             })

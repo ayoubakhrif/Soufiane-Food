@@ -26,7 +26,7 @@
     <menuitem id="menu_casa_stock_audit"
               name="Audit Ledger"
               parent="menu_casa_stock_root"
-              groups="base.group_erp_manager"
+              groups="casa_stock.group_manager"
               sequence="100"/>
 
     <menuitem id="menu_casa_stock_move"

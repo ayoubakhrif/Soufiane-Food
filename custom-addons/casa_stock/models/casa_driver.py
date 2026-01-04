@@ -5,3 +5,4 @@ class CasaDriver(models.Model):
     _description = 'Chauffeurs Casa'
 
     name = fields.Char(string='Nom', required=True)
+    phone = fields.Char(string='Téléphone')

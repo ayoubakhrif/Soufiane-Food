@@ -53,4 +53,6 @@ class CasaStockMove(models.Model):
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
     ste_id = fields.Many2one('casa.ste', string='Société')
 
+    def unlink(self):
+        raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
 

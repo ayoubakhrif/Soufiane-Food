@@ -12,6 +12,11 @@
                 <field name="qty"/>
                 <field name="client_id"/>
                 <field name="price_sale"/>
+                <field name="mt_vente"/>
+                <field name="mt_achat"/>
+                <field name="margin"
+                    decoration-success="margin &gt; 0"
+                    decoration-danger="margin &lt; 0"/>
                 <field name="ville"/>
                 <field name="frigo"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
@@ -67,6 +72,21 @@
                         </group>
                         <group>
                             <field name="calibre" readonly="1" force_save="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Résultat financier"/>
+                    <group>
+                        <group>
+                            <field name="price_purchase" readonly="1"/>
+                            <field name="mt_achat" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="price_sale"/>
+                            <field name="mt_vente" readonly="1"/>
+                            <field name="margin" readonly="1"
+                                decoration-success="margin &gt; 0"
+                                decoration-danger="margin &lt; 0"/>
                         </group>
                     </group>
 

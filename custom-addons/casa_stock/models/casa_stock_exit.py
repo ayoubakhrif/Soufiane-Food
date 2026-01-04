@@ -50,6 +50,11 @@ class CasaStockExit(models.Model):
         compute='_compute_amounts',
         store=True
     )
+    margin = fields.Float(
+        string='Résultat (Gain / Perte)',
+        compute='_compute_amounts',
+        store=True
+    )
 
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
@@ -62,8 +67,12 @@ class CasaStockExit(models.Model):
     @api.depends('tonnage', 'price_purchase', 'price_sale')
     def _compute_amounts(self):
         for rec in self:
-            rec.mt_achat = (rec.price_purchase or 0.0) * (rec.tonnage or 0.0)
-            rec.mt_vente = (rec.price_sale or 0.0) * (rec.tonnage or 0.0)
+            mt_achat = (rec.price_purchase or 0.0) * (rec.tonnage or 0.0)
+            mt_vente = (rec.price_sale or 0.0) * (rec.tonnage or 0.0)
+
+            rec.mt_achat = mt_achat
+            rec.mt_vente = mt_vente
+            rec.margin = mt_vente - mt_achat
 
     @api.model
     def create(self, vals):

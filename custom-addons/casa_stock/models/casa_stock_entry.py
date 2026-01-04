@@ -13,6 +13,11 @@ class CasaStockEntry(models.Model):
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
     price_purchase = fields.Float(string='Prix Achat')
+    mt_achat = fields.Float(
+        string='Montant Achat',
+        compute='_compute_amounts',
+        store=True
+    )
     
     date = fields.Date(string='Date', required=True)
     lot = fields.Char(string='Lot')
@@ -29,6 +34,11 @@ class CasaStockEntry(models.Model):
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo', default='stock_casa')
+    charge_transport = fields.Float(
+        string='Charge transport',
+        compute='_compute_charge_transport',
+        store=True
+    )
     
     provider_id = fields.Many2one('casa.provider', string='Fournisseur')
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
@@ -40,6 +50,11 @@ class CasaStockEntry(models.Model):
         ('done', 'Confirmé'),
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
+    driver_phone = fields.Char(
+        string='Téléphone chauffeur',
+        related='driver_id.phone',
+        readonly=True
+    )
 
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
@@ -48,6 +63,16 @@ class CasaStockEntry(models.Model):
     def _compute_tonnage(self):
         for rec in self:
             rec.tonnage = rec.qty * rec.weight
+
+    @api.depends('tonnage', 'price_purchase')
+    def _compute_amounts(self):
+        for rec in self:
+            rec.mt_achat = (rec.price_purchase or 0.0) * (rec.tonnage or 0.0)
+    
+    @api.depends('tonnage')
+    def _compute_charge_transport(self):
+        for rec in self:
+            rec.charge_transport = (rec.tonnage or 0.0) * 0.02
 
     @api.model
     def create(self, vals):

@@ -15,6 +15,7 @@ This module provides a robust stock management system based on an immutable move
     'author': 'Soufiane-Food',
     'depends': ['base', 'web'],
     'data': [
+        'security/groups.xml',
         'security/ir.model.access.csv',
         'data/data.xml',
         'views/stock_move_views.xml',

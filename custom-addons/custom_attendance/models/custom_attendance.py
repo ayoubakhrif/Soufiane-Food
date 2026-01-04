@@ -317,6 +317,19 @@ class CustomAttendance(models.Model):
             elif not rec.site and rec.employee_id.payroll_site == 'mediouna':
                 rec.site = 'mediouna'
 
+    def action_set_absent(self):
+        for rec in self:
+            rec.is_absent = True
+            rec.check_in_minutes = 0
+            rec.check_out_minutes = 0
+            rec.check_in = False
+            rec.check_out = False
+
+    def action_set_present(self):
+        for rec in self:
+            rec.is_absent = False
+            rec.absence_type = False
+
     def _handle_absence_leave_creation(self):
         for rec in self:
             if rec.is_absent and rec.absence_type == 'leave':

@@ -15,44 +15,33 @@
                                    options="{'terminology': 'archive'}"/>
                         </button>
                     </div>
-                    <group string="Suivi du mois" col="4">
-                        <div class="oe_stat_box" style="margin-top:10px;">
+                    <group string="Suivi du mois" col="2">
+                        <group>
+                            <label string="Limite mensuelle"/>
+                            <field name="monthly_limit"/>
 
-                            <!-- Limite mensuelle -->
-                            <div class="oe_stat_button">
-                                <span class="o_stat_value">
-                                    <field name="monthly_limit" nolabel="1"/>
-                                    <field name="is_daily" widget="boolean_toggle"
-                                        options="{'terminology': 'Daily / Monthly'}"/>
-                                </span>
-                                <span class="o_stat_text">Monthly Limit</span>
-                            </div>
+                            <label string="Category Type"/>
+                            <field name="is_daily" widget="boolean_toggle"
+                                options="{'terminology': 'Daily / Monthly'}"/>
+                        </group>
 
+                        <group>
+                            <label string="Current Situation"/>
 
-                            <!-- Situation actuelle -->
-                            <div class="oe_stat_button">
-                                <span class="o_stat_value">
-                                    <field name="current_balance" nolabel="1" 
-                                           decoration-danger="limit_exceeded == True"
-                                           decoration-success="limit_exceeded == False"/>
-                                </span>
-                                <span class="o_stat_text">Current Situation</span>
-                            </div>
+                            <field name="current_balance"
+                                nolabel="1"
+                                decoration-success="limit_exceeded == False"
+                                decoration-danger="limit_exceeded == True"/>
 
+                            <separator/>
 
-                            <!-- Statut -->
-                            <div class="oe_stat_button">
-                                <span class="o_stat_value">
-                                    <field name="limit_exceeded"
-                                        widget="boolean"
-                                        options="{'terminology': 'exceeded'}"
-                                        nolabel="1"/>
-                                </span>
-                                <span class="o_stat_text">Status</span>
-                            </div>
-
-                        </div>
+                            <label string="Status"/>
+                            <field name="limit_exceeded"
+                                widget="boolean"
+                                options="{'terminology': 'exceeded'}"/>
+                        </group>
                     </group>
+
                     <div class="oe_title">
                         <h1>
                             <field name="name" placeholder="Nom de la catégorie..."/>

@@ -15,12 +15,41 @@
                                    options="{'terminology': 'archive'}"/>
                         </button>
                     </div>
-                    <group string="Suivi du mois">
-                        <field name="monthly_limit"/>
-                        <field name="is_daily"/>
-                        <field name="current_balance"
-                            invisible="monthly_limit == 0"/>
-                        <field name="limit_exceeded" readonly="1"/>
+                    <group string="Suivi du mois" col="4">
+                        <div class="oe_stat_box" style="margin-top:10px;">
+
+                            <!-- Limite mensuelle -->
+                            <div class="oe_stat_button">
+                                <span class="o_stat_value">
+                                    <field name="monthly_limit" nolabel="1"/>
+                                    <field name="is_daily" widget="boolean_toggle"
+                                        options="{'terminology': 'Daily / Monthly'}"/>
+                                </span>
+                                <span class="o_stat_text">Monthly Limit</span>
+                            </div>
+
+                            <!-- Situation actuelle -->
+                            <div class="oe_stat_button"
+                                attrs="{'class': [('limit_exceeded','=',True,'text-danger'),
+                                                ('limit_exceeded','=',False,'text-success')]}">
+                                <span class="o_stat_value">
+                                    <field name="current_balance" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Current Situation</span>
+                            </div>
+
+                            <!-- Statut -->
+                            <div class="oe_stat_button">
+                                <span class="o_stat_value">
+                                    <field name="limit_exceeded"
+                                        widget="boolean"
+                                        options="{'terminology': 'exceeded'}"
+                                        nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Status</span>
+                            </div>
+
+                        </div>
                     </group>
                     <div class="oe_title">
                         <h1>

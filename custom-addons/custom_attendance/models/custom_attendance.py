@@ -343,6 +343,25 @@ class CustomAttendance(models.Model):
         """
         Force real-time recomputation when user edits HH:MM fields.
         """
+        tz_name = 'Africa/Casablanca'
+        try:
+            user_tz = pytz.timezone(tz_name)
+        except:
+            user_tz = pytz.utc
+            
         for rec in self:
-            if rec.check_in_time or rec.check_out_time:
+            # 1. Force Sync check_in_time -> check_in
+            if rec.date and rec.check_in_time:
+                rec.check_in = self._get_utc_from_time(rec.date, rec.check_in_time, user_tz)
+            else:
+                 rec.check_in = False
+                 
+            # 2. Force Sync check_out_time -> check_out
+            if rec.date and rec.check_out_time:
+                rec.check_out = self._get_utc_from_time(rec.date, rec.check_out_time, user_tz)
+            else:
+                rec.check_out = False
+            
+            # 3. Now compute hours with fresh data
+            if rec.check_in or rec.check_out:
                 rec._compute_hours()

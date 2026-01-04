@@ -128,6 +128,10 @@ class CustomAttendance(models.Model):
             
             if rec.check_out_time:
                 rec.check_out = self._get_utc_from_time(rec.date, rec.check_out_time, user_tz)
+            if rec.check_in_time and rec.check_out_time:
+                if rec.check_out_time < rec.check_in_time:
+                    raise exceptions.ValidationError("Heure de sortie invalide.")
+
 
     def _get_utc_from_time(self, date_val, time_str, user_tz):
         try:
@@ -333,3 +337,12 @@ class CustomAttendance(models.Model):
                         'reason': 'Absence marquée depuis la fiche de présence',
                         'state': 'approved'
                     })
+
+    @api.onchange('check_in_time', 'check_out_time', 'date')
+    def _onchange_recompute_hours(self):
+        """
+        Force real-time recomputation when user edits HH:MM fields.
+        """
+        for rec in self:
+            if rec.check_in_time or rec.check_out_time:
+                rec._compute_hours()

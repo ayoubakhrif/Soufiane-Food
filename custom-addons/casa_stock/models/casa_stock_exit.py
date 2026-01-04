@@ -13,6 +13,12 @@ class CasaStockExit(models.Model):
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
     price_sale = fields.Float(string='Prix Vente')
+    price_purchase = fields.Float(string='Prix Achat')
+    mt_achat = fields.Float(
+        string='Montant Achat',
+        compute='_compute_amounts',
+        store=True
+    )
     
     date = fields.Date(string='Date', required=True)
     lot = fields.Char(string='Lot')

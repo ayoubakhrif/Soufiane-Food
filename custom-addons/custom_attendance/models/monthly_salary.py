@@ -229,7 +229,7 @@ class CustomMonthlySalary(models.Model):
                 g_miss = g['missing_hours']
                 g_over = g['overtime_hours']
                 g_holi = g['holiday_hours']
-                count = g['site_count'] # record count
+                count = g['__count'] # record count
                 
                 t_normal += g_norm
                 t_missing += g_miss

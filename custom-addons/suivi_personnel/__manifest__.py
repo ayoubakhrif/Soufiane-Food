@@ -18,6 +18,7 @@ Features:
     'author': 'Ayoub Akhrif',
     'depends': ['base', 'web'],
     'data': [
+        'security/groups.xml',
         'security/ir.model.access.csv',
         'views/suivi_config_views.xml',
         'views/expense_category_views.xml',

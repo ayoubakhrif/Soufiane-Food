@@ -20,12 +20,14 @@ class ExpenseCategory(models.Model):
     )
     current_balance = fields.Float(
         string='Situation actuelle',
-        compute='_compute_current_situation'
+        compute='_compute_current_situation',
+        store=True
     )
 
     limit_exceeded = fields.Boolean(
         string='Limite dépassée',
-        compute='_compute_current_situation'
+        compute='_compute_current_situation',
+        store=True
     )
 
     def _get_month_period(self):

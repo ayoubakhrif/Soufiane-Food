@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_suivi_config,suivi.config,model_suivi_config,base.group_user,1,1,1,0
+access_expense_category,suivi.expense.category,model_suivi_expense_category,base.group_user,1,1,1,1
+access_income_monthly,suivi.income.monthly,model_suivi_income_monthly,base.group_user,1,1,1,1
+access_income_daily,suivi.income.daily,model_suivi_income_daily,base.group_user,1,1,1,1
+access_expense_monthly,suivi.expense.monthly,model_suivi_expense_monthly,base.group_user,1,1,1,1
+access_expense_daily,suivi.expense.daily,model_suivi_expense_daily,base.group_user,1,1,1,1

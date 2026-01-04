@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================= -->
+    <!-- 📋 Form View -->
+    <!-- ========================= -->
+    <record id="view_expense_category_form" model="ir.ui.view">
+        <field name="name">suivi.expense.category.form</field>
+        <field name="model">suivi.expense.category</field>
+        <field name="arch" type="xml">
+            <form string="Catégorie de Dépense">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                   options="{'terminology': 'archive'}"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom de la catégorie..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="description" placeholder="Description optionnelle..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🌳 Tree View -->
+    <!-- ========================= -->
+    <record id="view_expense_category_tree" model="ir.ui.view">
+        <field name="name">suivi.expense.category.tree</field>
+        <field name="model">suivi.expense.category</field>
+        <field name="arch" type="xml">
+            <tree string="Catégories de Dépenses">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🚀 Action -->
+    <!-- ========================= -->
+    <record id="action_expense_category" model="ir.actions.act_window">
+        <field name="name">Catégories de Dépenses</field>
+        <field name="res_model">suivi.expense.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

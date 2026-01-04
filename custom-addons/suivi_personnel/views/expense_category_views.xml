@@ -28,15 +28,17 @@
                                 <span class="o_stat_text">Monthly Limit</span>
                             </div>
 
+
                             <!-- Situation actuelle -->
-                            <div class="oe_stat_button"
-                                attrs="{'class': [('limit_exceeded','=',True,'text-danger'),
-                                                ('limit_exceeded','=',False,'text-success')]}">
+                            <div class="oe_stat_button">
                                 <span class="o_stat_value">
-                                    <field name="current_balance" nolabel="1"/>
+                                    <field name="current_balance" nolabel="1" 
+                                           decoration-danger="limit_exceeded == True"
+                                           decoration-success="limit_exceeded == False"/>
                                 </span>
                                 <span class="o_stat_text">Current Situation</span>
                             </div>
+
 
                             <!-- Statut -->
                             <div class="oe_stat_button">

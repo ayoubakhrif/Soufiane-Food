@@ -82,7 +82,6 @@
                             <field name="mt_achat" readonly="1"/>
                         </group>
                         <group>
-                            <field name="price_sale"/>
                             <field name="mt_vente" readonly="1"/>
                             <field name="margin" readonly="1"
                                 decoration-success="margin &gt; 0"

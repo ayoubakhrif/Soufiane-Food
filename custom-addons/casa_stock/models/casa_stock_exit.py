@@ -13,7 +13,11 @@ class CasaStockExit(models.Model):
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
     price_sale = fields.Float(string='Prix Vente')
-    price_purchase = fields.Float(string='Prix Achat')
+    price_purchase = fields.Float(
+        string='Prix Achat',
+        compute='_compute_price_purchase',
+        store=True
+    )
     mt_achat = fields.Float(
         string='Montant Achat',
         compute='_compute_amounts',
@@ -69,10 +73,27 @@ class CasaStockExit(models.Model):
         for rec in self:
             mt_achat = (rec.price_purchase or 0.0) * (rec.tonnage or 0.0)
             mt_vente = (rec.price_sale or 0.0) * (rec.tonnage or 0.0)
-
             rec.mt_achat = mt_achat
             rec.mt_vente = mt_vente
             rec.margin = mt_vente - mt_achat
+
+    @api.depends('product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id')
+    def _compute_price_purchase(self):
+        Stock = self.env['casa.stock.stock']
+        for rec in self:
+            price = 0.0
+            if rec.product_id:
+                stock = Stock.search([
+                    ('product_id', '=', rec.product_id.id),
+                    ('lot', '=', rec.lot),
+                    ('dum', '=', rec.dum),
+                    ('ville', '=', rec.ville),
+                    ('frigo', '=', rec.frigo),
+                    ('ste_id', '=', rec.ste_id.id),
+                ], limit=1)
+                price = stock.price if stock else 0.0
+            rec.price_purchase = price
+
 
     @api.model
     def create(self, vals):

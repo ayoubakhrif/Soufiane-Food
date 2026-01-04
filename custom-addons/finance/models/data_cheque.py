@@ -46,6 +46,11 @@ class DataCheque(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
     ], store=True, string='Type', tracking=True)
+    
+    # New Fields
+    bl = fields.Char(string='BL', tracking=True)
+    encours = fields.Boolean(string='En cours', compute='_compute_encours', store=True)
+
     benif_type = fields.Selection(related="benif_id.type", store=True)
     chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)
     dem_pdf_url = fields.Char("Lien PDF DEM", readonly=True)
@@ -270,6 +275,11 @@ class DataCheque(models.Model):
                 rec.date_echeance = rec.date_emission + timedelta(days=rec.benif_id.days)
             else:
                 rec.date_echeance = rec.date_emission
+
+    @api.depends('date_encaissement')
+    def _compute_encours(self):
+        for rec in self:
+            rec.encours = not bool(rec.date_encaissement)
 
     # ------------------------------------------------------------
     # CONTRAINTES

@@ -15,8 +15,8 @@ class CustomAttendance(models.Model):
     # ==================================================================================
     # 1. USER INPUT (Interface Only)
     # ==================================================================================
-    check_in_time = fields.Char(string='H.entrée (HH:MM)', tracking=True)
-    check_out_time = fields.Char(string='H.sortie (HH:MM)', tracking=True)
+    check_in_time = fields.Char(string='H.entrée', tracking=True)
+    check_out_time = fields.Char(string='H.sortie', tracking=True)
 
     # ==================================================================================
     # 2. SOURCE OF TRUTH (Minutes - Integer)

@@ -129,6 +129,7 @@
                         <group>
                             <field name="talon_id" readonly="1"/>
                             <field name="benif_id"/>
+                            <field name="bl" invisible="benif_type != 'import'"/>
                             <field name="perso_id" readonly="state == 'annule'"/>
                         </group>
                         <group>
@@ -185,6 +186,7 @@
                 <field name="week"/>
                 <field name="facture"/>
                 <field name="talon_id"/>
+                <filter name="encours" string="Cheques in progress" domain="[('encours', '=', True)]"/>
                 <filter name="no_pdf" string="Liens inexistants" domain="['|', '|', ('chq_pdf_url', '=', False), ('dem_pdf_url', '=', False), ('doc_pdf_url', '=', False)]"/>
             </search>
         </field>

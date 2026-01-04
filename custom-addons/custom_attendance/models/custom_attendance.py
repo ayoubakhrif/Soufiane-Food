@@ -177,8 +177,8 @@ class CustomAttendance(models.Model):
             non_working_day = int(config.non_working_day)
 
         # 2. Prepare Timezone
-        # Use user's TZ or default to Morocco often used in this project context
-        tz_name = self.env.user.tz or 'Africa/Casablanca'
+        # Force Africa/Casablanca as standard for this project to avoid user-tz inconsistencies
+        tz_name = 'Africa/Casablanca'
         try:
             user_tz = pytz.timezone(tz_name)
         except:
@@ -259,10 +259,6 @@ class CustomAttendance(models.Model):
 
             # 3. Calculate Delay
             # Actual In > Official In + Tolerance
-            # Note: We compare localized datetimes directly
-            
-            # Guard: ensure we are comparing same day or handling night shift
-            # Assuming day shift for now based on context
             
             if c_in_local > off_in_local:
                 diff = (c_in_local - off_in_local).total_seconds() / 60.0
@@ -286,10 +282,18 @@ class CustomAttendance(models.Model):
             rec.missing_hours = max(0.0, daily_hours - rec.normal_working_hours)
 
             # 6. Overtime
-            # User wants: Strictly time AFTER Official Out
+            # Includes time BEFORE Official In AND time AFTER Official Out
+            extra_morning = 0.0
+            extra_evening = 0.0
+
+            if c_in_local < off_in_local:
+                 extra_morning = (off_in_local - c_in_local).total_seconds() / 3600.0
+            
             if c_out_local > off_out_local:
-                o_sec = (c_out_local - off_out_local).total_seconds()
-                rec.overtime_hours = o_sec / 3600.0
+                extra_evening = (c_out_local - off_out_local).total_seconds() / 3600.0
+            
+            # User Feedback: Only count hours passed AFTER the quitting hour (extra_evening)
+            rec.overtime_hours = extra_evening
 
     @api.model
     def create(self, vals):

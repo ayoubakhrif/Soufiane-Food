@@ -124,7 +124,7 @@ class CustomMonthlySalary(models.Model):
     @api.model
     def create(self, vals):
         record = super(CustomMonthlySalary, self).create(vals)
-        record._check_attendance_coverage()
+        # record._check_attendance_coverage() # Defer to validate
         return record
 
     def write(self, vals):
@@ -135,8 +135,8 @@ class CustomMonthlySalary(models.Model):
                      raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
         
         res = super(CustomMonthlySalary, self).write(vals)
-        if 'employee_id' in vals or 'month' in vals or 'year' in vals:
-             self._check_attendance_coverage()
+        # if 'employee_id' in vals or 'month' in vals or 'year' in vals:
+        #      self._check_attendance_coverage() # Defer to validate
         return res
 
     @api.depends('employee_id', 'month', 'year')
@@ -319,6 +319,8 @@ class CustomMonthlySalary(models.Model):
                 ('date', '>=', start_date),
                 ('date', '<=', end_date)
             ])
+            # Check coverage now
+            rec._check_attendance_coverage()
             attendances.write({'state': 'locked'})
 
     def unlink(self):

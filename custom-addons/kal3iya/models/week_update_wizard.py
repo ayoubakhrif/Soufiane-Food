@@ -26,7 +26,10 @@ class WeekUpdateWizard(models.TransientModel):
             return res
 
         # Find all records for the same week
-        domain = [('week', '=', record.week)]
+        domain = [
+            ('week', '=', record.week),
+            ('client_id', '=', record.client_id.id)
+        ]
         # Optional: Add other filters like same client if needed, but request implied "all orders of the week"
         # Assuming we want to filter by the same strict criterion as the view, but "all orders of the week" is broad.
         # Let's start with all orders of that week mostly likely. 

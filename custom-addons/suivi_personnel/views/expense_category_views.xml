@@ -17,28 +17,18 @@
                     </div>
                     <group string="Suivi du mois" col="2">
                         <group>
-                            <label string="Limite mensuelle"/>
-                            <field name="monthly_limit"/>
-
-                            <label string="Category Type"/>
-                            <field name="is_daily" widget="boolean_toggle"
-                                options="{'terminology': 'Daily / Monthly'}"/>
+                            <field name="monthly_limit" string="Limite mensuelle"/>
+                            <field name="is_daily" string="Type de catégorie" widget="boolean_toggle"
+                                options="{'terminology': 'Journalière'}"/>
                         </group>
 
                         <group>
-                            <label string="Current Situation"/>
-
-                            <field name="current_balance"
-                                nolabel="1"
+                            <field name="current_balance" string="Situation actuelle"
                                 decoration-success="limit_exceeded == False"
                                 decoration-danger="limit_exceeded == True"/>
-
-                            <separator/>
-
-                            <label string="Status"/>
-                            <field name="limit_exceeded"
+                            <field name="limit_exceeded" string="Limite dépassée"
                                 widget="boolean"
-                                options="{'terminology': 'exceeded'}"/>
+                                options="{'terminology': 'Dépassée'}"/>
                         </group>
                     </group>
 

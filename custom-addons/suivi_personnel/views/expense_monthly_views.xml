@@ -11,7 +11,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="category_id"/>
+                            <field name="category"/>
                             <field name="amount"/>
                         </group>
                     </group>
@@ -31,7 +31,7 @@
         <field name="model">suivi.expense.monthly</field>
         <field name="arch" type="xml">
             <tree string="Dépenses Mensuelles" editable="bottom">
-                <field name="category_id"/>
+                <field name="category"/>
                 <field name="amount" sum="Total"/>
                 <field name="description"/>
             </tree>

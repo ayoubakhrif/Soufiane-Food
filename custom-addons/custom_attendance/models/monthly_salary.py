@@ -1,333 +1,344 @@
 from odoo import models, fields, api, exceptions
-import math
-import pytz
-import re
-from datetime import datetime, timedelta, time
+from datetime import date, timedelta
+import calendar
 
-
-class CustomAttendance(models.Model):
-    _name = 'custom.attendance'
-    _description = 'Daily Attendance'
+class CustomMonthlySalary(models.Model):
+    _name = 'custom.monthly.salary'
+    _description = 'Monthly Salary Calculation'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _rec_name = 'employee_id'
 
-    employee_id = fields.Many2one('custom.employee', string='Employés', required=True, tracking=True)
+    employee_id = fields.Many2one('custom.employee', string='Employee', required=True)
+    month = fields.Selection([
+        ('1', 'Janvier'), ('2', 'Février'), ('3', 'Mars'), ('4', 'Avril'),
+        ('5', 'Mai'), ('6', 'Juin'), ('7', 'Juillet'), ('8', 'Aout'),
+        ('9', 'Septembre'), ('10', 'Octobre'), ('11', 'Novembre'), ('12', 'Décembre')
+    ], string='Month', required=True, default=lambda self: str(date.today().month))
+    year = fields.Integer(string='Année', required=True, default=lambda self: date.today().year)
+    
+    base_salary = fields.Float(string='Salaire de base', readonly=True)
+    working_days_count = fields.Integer(string='Jours de travaille', compute='_compute_salary_details', store=True)
+    hourly_salary = fields.Float(string='Salaire par heure', compute='_compute_salary_details', store=True)
+    
+    total_normal_hours = fields.Float(string='Total des heures normaux', compute='_compute_salary_details', store=True)
+    total_missing_hours = fields.Float(string='Total des heures manquantes', compute='_compute_salary_details', store=True)
+    total_overtime_hours = fields.Float(string='Total des heures supplémentaires', compute='_compute_salary_details', store=True)
+    total_holiday_hours = fields.Float(string='Total des heures fériés', compute='_compute_salary_details', store=True)
+    
+    # New Site Fields
+    hours_mediouna = fields.Float(string='Heures Mediouna', compute='_compute_salary_details', store=True)
+    salary_mediouna = fields.Float(string='Salaire Mediouna', compute='_compute_salary_details', store=True)
+    hours_casa = fields.Float(string='Heures Casa', compute='_compute_salary_details', store=True)
+    salary_casa = fields.Float(string='Salaire Casa', compute='_compute_salary_details', store=True)
 
-    def _auto_init(self):
-        cr = self.env.cr
-        cr.execute("SELECT data_type FROM information_schema.columns WHERE table_name = 'custom_attendance' AND column_name = 'check_in'")
-        res = cr.fetchone()
-        if res and res[0] == 'double precision':
-            cr.execute("ALTER TABLE custom_attendance DROP COLUMN check_in CASCADE")
-            cr.execute("ALTER TABLE custom_attendance DROP COLUMN check_out CASCADE")
-            
-        super()._auto_init()
-
-    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
-    
-    check_in = fields.Datetime(string='Heure entrée', required=False)
-    check_out = fields.Datetime(string='Heure de sortie', required=False)
-    
-    check_in_time = fields.Char(string='H.entrée', compute='_compute_times', inverse='_inverse_times', tracking=True)
-    check_out_time = fields.Char(string='H.sortie', compute='_compute_times', inverse='_inverse_times', tracking=True)
-    
-    delay_minutes = fields.Integer(string='Retard (Minutes)', compute='_compute_hours', store=True)
-    missing_hours = fields.Float(string='Heures manquantes', compute='_compute_hours', store=True)
-    overtime_hours = fields.Float(string='Heures supplémentaires', compute='_compute_hours', store=True)
-    holiday_hours = fields.Float(string='Heures Fériés', compute='_compute_hours', store=True)
-    normal_working_hours = fields.Float(string='Heures normales', compute='_compute_hours', store=True)
+    overtime_amount = fields.Float(string='Montant supplémentaire', compute='_compute_final_salary', store=True)
+    holiday_amount = fields.Float(string='Montant Fériés', compute='_compute_final_salary', store=True)
+    deduction_amount = fields.Float(string='Montant déduit', compute='_compute_final_salary', store=True)
+    final_salary = fields.Float(string='Salaire final', compute='_compute_final_salary', store=True)
     
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('confirmed', 'Confirmed'),
-        ('locked', 'Locked')
+        ('draft', 'Non payé'),
+        ('validated', 'Payé')
     ], default='draft', string='Status', tracking=True)
 
-    site = fields.Selection([
-        ('mediouna', 'Mediouna'),
-        ('casa', 'Casa')
-    ], string='Site', compute='_compute_site_default', store=True, readonly=False)
-    
-    is_absent = fields.Boolean(string='Absent', default=False, tracking=True)
-    absence_type = fields.Selection([
-        ('deduction', 'Déduit du salaire'),
-        ('leave', 'Consomme un jour de congé')
-    ], string="Type d'absence")
-    
-    employee_payroll_site = fields.Selection(related='employee_id.payroll_site', string="Site de Paie (Tech)", readonly=True)
-
-    @api.depends('employee_id.payroll_site')
-    def _compute_site_default(self):
-        for rec in self:
-            if rec.employee_id.payroll_site == 'casa':
-                rec.site = 'casa'
-            elif not rec.site and rec.employee_id.payroll_site == 'mediouna':
-                rec.site = 'mediouna'
-
-    def action_set_absent(self):
-        for rec in self:
-            rec.is_absent = True
-            rec.check_in = False
-            rec.check_out = False
-
-    def action_set_present(self):
-        for rec in self:
-            rec.is_absent = False
-            rec.absence_type = False
-
     _sql_constraints = [
-        ('unique_employee_date', 'unique(employee_id, date)', 'Chaque employé soit avoire une seule fiche de présence par jour!')
+        ('unique_employee_month_year', 'unique(employee_id, month, year)', 
+         'Un bulletin de salaire existe déjà pour cet employé, ce mois et cette année.')
     ]
 
-    @api.constrains('check_in_time', 'check_out_time')
-    def _check_time_format(self):
-        pattern = re.compile(r'^([01]\d|2[0-3]):([0-5]\d)$')
-        for rec in self:
-            if rec.check_in_time and not pattern.match(rec.check_in_time):
-                raise exceptions.ValidationError("Format d'heure d'entrée invalide (HH:MM attendu).")
-            if rec.check_out_time and not pattern.match(rec.check_out_time):
-                raise exceptions.ValidationError("Format d'heure de sortie invalide (HH:MM attendu).")
-
-    @api.depends('check_in', 'check_out', 'date')
-    def _compute_times(self):
-        tz_name = self.env.user.tz or 'Africa/Casablanca'
-        try:
-            user_tz = pytz.timezone(tz_name)
-        except:
-            user_tz = pytz.utc
-        for rec in self:
-            if rec.check_in:
-                dt_local = pytz.utc.localize(rec.check_in).astimezone(user_tz)
-                rec.check_in_time = dt_local.strftime('%H:%M')
-            else:
-                rec.check_in_time = False
-            
-            if rec.check_out:
-                dt_local = pytz.utc.localize(rec.check_out).astimezone(user_tz)
-                rec.check_out_time = dt_local.strftime('%H:%M')
-            else:
-                rec.check_out_time = False
-
-    def _inverse_times(self):
-        tz_name = self.env.user.tz or 'Africa/Casablanca'
-        try:
-            user_tz = pytz.timezone(tz_name)
-        except:
-            user_tz = pytz.utc
-        for rec in self:
-            if not rec.date:
-                continue
-            
-            if rec.check_in_time:
-                rec.check_in = self._get_utc_from_time(rec.date, rec.check_in_time, user_tz)
-            
-            if rec.check_out_time:
-                rec.check_out = self._get_utc_from_time(rec.date, rec.check_out_time, user_tz)
-            if rec.check_in_time and rec.check_out_time:
-                if rec.check_out_time < rec.check_in_time:
-                    raise exceptions.ValidationError("Heure de sortie invalide.")
-
-    def _get_utc_from_time(self, date_val, time_str, user_tz):
-        try:
-            h, m = map(int, time_str.split(':'))
-            naive_dt = datetime.combine(date_val, time(h, m))
-            local_dt = user_tz.localize(naive_dt)
-            return local_dt.astimezone(pytz.utc).replace(tzinfo=None)
-        except:
-            return False
-
-    @api.onchange('date')
-    def _onchange_date_sync_times(self):
-        tz_name = self.env.user.tz or 'Africa/Casablanca'
-        try:
-            user_tz = pytz.timezone(tz_name)
-        except:
-            user_tz = pytz.utc
-        if self.date:
-            if self.check_in_time:
-                self.check_in = self._get_utc_from_time(self.date, self.check_in_time, user_tz)
-            if self.check_out_time:
-                self.check_out = self._get_utc_from_time(self.date, self.check_out_time, user_tz)
-
-    @api.constrains('check_in', 'check_out')
-    def _check_validity(self):
-        for rec in self:
-            if rec.check_in and rec.check_out and rec.check_out < rec.check_in:
-                raise exceptions.ValidationError("Heure d'entrée ne peut pas etre supérieure à l'heure de sortie.")
-
-    @api.depends('check_in', 'check_out', 'employee_id', 'date', 'is_absent')
-    def _compute_hours(self):
+    def _check_attendance_coverage(self):
         """
-        PROBLÈMES RÉSOLUS:
-        1. Le retard n'était pas calculé correctement (condition inversée)
-        2. Les heures supplémentaires ne comptaient que le soir
-        3. La logique de comparaison des heures locales était incorrecte
+        Verify that for every working day in the month,
+        there is either an attendance record or an approved leave.
         """
         config = self.env['custom.attendance.config'].get_main_config()
-        if not config:
-            off_in_float = 9.5
-            off_out_float = 17.5
-            daily_hours = 8.0
-            tolerance = 0
-            holidays = []
-            non_working_day = 6
-        else:
-            off_in_float = config.official_check_in
-            off_out_float = config.official_check_out
-            daily_hours = config.working_hours_per_day
-            tolerance = config.delay_tolerance
-            holidays = config.public_holiday_ids.mapped('date')
-            non_working_day = int(config.non_working_day)
-
-        tz_name = 'Africa/Casablanca'
-        try:
-            user_tz = pytz.timezone(tz_name)
-        except:
-            user_tz = pytz.utc
+        non_working_day = int(config.non_working_day) if config else 6
+        # Robust date conversion for holidays
+        holiday_dates = [fields.Date.to_date(d) for d in config.public_holiday_ids.mapped('date')] if config else []
 
         for rec in self:
-            # Initialisation
-            rec.normal_working_hours = 0.0
-            rec.missing_hours = 0.0
-            rec.overtime_hours = 0.0
-            rec.holiday_hours = 0.0
-            rec.delay_minutes = 0
-
-            # A. VÉRIFICATIONS D'EXEMPTION
-            if rec.is_absent:
-                rec.missing_hours = daily_hours
+            if not rec.employee_id or not rec.month or not rec.year:
                 continue
 
-            # Congé payé approuvé
-            leave_domain = [
+            try:
+                m = int(rec.month)
+                y = rec.year
+                num_days = calendar.monthrange(y, m)[1]
+                start_date = date(y, m, 1)
+                end_date = date(y, m, num_days)
+            except:
+                continue
+
+            # 1. Fetch all attendances for this employee in this month
+            attendances = self.env['custom.attendance.search']([
+                ('employee_id', '=', rec.employee_id.id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date)
+            ]) if hasattr(self.env['custom.attendance'], 'search') else self.env['custom.attendance'].search([
+                ('employee_id', '=', rec.employee_id.id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date)
+            ])
+            # Note: The search call above is standard. Just keeping it simple.
+            
+            attendances = self.env['custom.attendance'].search([
+                ('employee_id', '=', rec.employee_id.id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date)
+            ])
+
+            # Robust date conversion for attendances
+            attended_dates = {fields.Date.to_date(d) for d in attendances.mapped('date')}
+
+            # 2. Fetch all approved leaves overlapping this month
+            leaves = self.env['custom.leave'].search([
                 ('employee_id', '=', rec.employee_id.id),
                 ('state', '=', 'approved'),
-                ('date_from', '<=', rec.date),
-                ('date_to', '>=', rec.date),
-            ]
-            if self.env['custom.leave'].search_count(leave_domain) > 0:
-                rec.normal_working_hours = daily_hours
-                continue
-
-            # Jour de repos
-            if rec.date.weekday() == non_working_day:
-                continue
-
-            # Jour férié
-            if rec.date in holidays:
-                if rec.check_in and rec.check_out:
-                    duration = (rec.check_out - rec.check_in).total_seconds() / 3600.0
-                    rec.holiday_hours = max(0.0, duration)
-                    rec.normal_working_hours = rec.holiday_hours
-                continue
-
-            # B. CALCUL AVEC DONNÉES DE PRÉSENCE
-            if not rec.check_in or not rec.check_out:
-                rec.missing_hours = daily_hours
-                continue
-
-            # Conversion en temps local
-            c_in_utc = pytz.utc.localize(rec.check_in)
-            c_out_utc = pytz.utc.localize(rec.check_out)
+                ('date_from', '<=', end_date),
+                ('date_to', '>=', start_date)
+            ])
             
-            c_in_local = c_in_utc.astimezone(user_tz)
-            c_out_local = c_out_utc.astimezone(user_tz)
+            leave_covered_dates = set()
+            for leave in leaves:
+                # Calculate intersection of leave range and current month
+                l_start = max(leave.date_from, start_date)
+                l_end = min(leave.date_to, end_date)
+                
+                curr = l_start
+                while curr <= l_end:
+                    if curr.weekday() != non_working_day and curr not in holiday_dates:
+                        leave_covered_dates.add(curr)
+                    curr += timedelta(days=1)
 
-            # Construction des heures officielles
-            def get_dt(target_date, float_hour):
-                hours = int(float_hour)
-                minutes = int((float_hour - hours) * 60)
-                naive_dt = datetime.combine(target_date, time(hours, minutes))
-                return user_tz.localize(naive_dt)
 
-            off_in_local = get_dt(rec.date, off_in_float)
-            off_out_local = get_dt(rec.date, off_out_float)
+            # 3. Iterate over expected working days
+            missing_days = []
+            for day in range(1, num_days + 1):
+                current_date = date(y, m, day)
+                
+                # Skip non-working days (e.g. Sunday)
+                if current_date.weekday() == non_working_day:
+                    continue
+                
+                # Skip public holidays
+                if current_date in holiday_dates:
+                    continue
+                
+                # Check coverage
+                if current_date not in attended_dates and current_date not in leave_covered_dates:
+                    missing_days.append(current_date)
 
-            # ====== FIX 1: CALCUL DU RETARD ======
-            # Le retard se calcule quand l'employé arrive APRÈS l'heure officielle
-            if c_in_local > off_in_local:
-                diff_minutes = (c_in_local - off_in_local).total_seconds() / 60.0
-                if diff_minutes > tolerance:
-                    rec.delay_minutes = int(diff_minutes)
-            else:
-                rec.delay_minutes = 0
-
-            # ====== FIX 2: HEURES NORMALES ======
-            # Heures travaillées dans la plage officielle
-            eff_in = max(c_in_local, off_in_local)
-            eff_out = min(c_out_local, off_out_local)
-
-            if eff_out > eff_in:
-                w_sec = (eff_out - eff_in).total_seconds()
-                rec.normal_working_hours = w_sec / 3600.0
-            else:
-                rec.normal_working_hours = 0.0
-
-            # Heures manquantes
-            rec.missing_hours = max(0.0, daily_hours - rec.normal_working_hours)
-
-            # ====== FIX 3: HEURES SUPPLÉMENTAIRES ======
-            # SEULEMENT le temps travaillé APRÈS l'heure officielle de sortie
-            
-            # Départ après l'heure officielle = Overtime
-            if c_out_local > off_out_local:
-                rec.overtime_hours = (c_out_local - off_out_local).total_seconds() / 3600.0
-            else:
-                rec.overtime_hours = 0.0
+            if missing_days:
+                days_str = ", ".join([d.strftime('%Y-%m-%d') for d in missing_days])
+                raise exceptions.ValidationError(
+                    f"La présence de ces jours là n'est pas rentré: {days_str}"
+                )
 
     @api.model
     def create(self, vals):
-        rec = super(CustomAttendance, self).create(vals)
-        rec._handle_absence_leave_creation()
-        return rec
+        record = super(CustomMonthlySalary, self).create(vals)
+        # record._check_attendance_coverage() # Defer to validate
+        return record
 
     def write(self, vals):
-        res = super(CustomAttendance, self).write(vals)
-        for rec in self:
-            if 'is_absent' in vals or 'absence_type' in vals:
-                rec._handle_absence_leave_creation()
+        # Allow system updates (superuser) OR Admins to bypass this check
+        if not self.env.su and not self.env.user.has_group('custom_attendance.group_custom_attendance_admin'):
+            for rec in self:
+                if rec.state == 'validated' and 'state' not in vals:
+                     raise exceptions.UserError("Impossible de modifier un bulletin de salaire validé.")
+        
+        res = super(CustomMonthlySalary, self).write(vals)
+        # if 'employee_id' in vals or 'month' in vals or 'year' in vals:
+        #      self._check_attendance_coverage() # Defer to validate
         return res
 
-    def _handle_absence_leave_creation(self):
+    @api.depends('employee_id', 'month', 'year')
+    def _compute_salary_details(self):
+        config = self.env['custom.attendance.config'].get_main_config()
+        non_working_day = int(config.non_working_day) if config else 6
+        daily_hours = config.working_hours_per_day if config else 8.0
+        ot_coeff = config.overtime_coefficient if config else 1.0
+        
+        # Robust date conversion for holidays
+        holiday_dates = [fields.Date.to_date(d) for d in config.public_holiday_ids.mapped('date')] if config else []
+
         for rec in self:
-            if rec.is_absent and rec.absence_type == 'leave':
-                existing_leave = self.env['custom.leave'].search([
-                    ('employee_id', '=', rec.employee_id.id),
-                    ('date_from', '=', rec.date),
-                    ('date_to', '=', rec.date),
-                    ('leave_type', '=', 'paid')
-                ])
-                if not existing_leave:
-                    if rec.employee_id.leaves_remaining < 1:
-                        raise exceptions.ValidationError("Pas de solde de congé restant")
+            if not rec.employee_id or not rec.month or not rec.year:
+                rec.working_days_count = 0
+                rec.hourly_salary = 0.0
+                rec.total_normal_hours = 0.0
+                rec.total_missing_hours = 0.0
+                rec.total_overtime_hours = 0.0
+                rec.total_holiday_hours = 0.0
+                rec.hours_mediouna = 0.0
+                rec.salary_mediouna = 0.0
+                rec.hours_casa = 0.0
+                rec.salary_casa = 0.0
+                continue
+
+            # Snap base salary
+            rec.base_salary = rec.employee_id.monthly_salary
+            
+            # Calculate Working Days in Month
+            try:
+                m = int(rec.month)
+                y = rec.year
+                num_days = calendar.monthrange(y, m)[1]
+                working_days = 0
+                for day in range(1, num_days + 1):
+                    current_date = date(y, m, day)
+                    wd = current_date.weekday()
                     
-                    self.env['custom.leave'].create({
-                        'employee_id': rec.employee_id.id,
-                        'date_from': rec.date,
-                        'date_to': rec.date,
-                        'leave_type': 'paid',
-                        'reason': 'Absence marquée depuis la fiche de présence',
-                        'state': 'approved'
-                    })
+                    if wd != non_working_day and current_date not in holiday_dates:
+                        working_days += 1
+                        
+                rec.working_days_count = working_days
+            except:
+                rec.working_days_count = 0
+            
+            # Hourly Rate
+            total_expected_hours = rec.working_days_count * daily_hours
+            rec.hourly_salary = (rec.base_salary / total_expected_hours) if total_expected_hours else 0.0
+            rate = rec.hourly_salary
 
-    @api.onchange('check_in_time', 'check_out_time', 'date')
-    def _onchange_recompute_hours(self):
-        tz_name = 'Africa/Casablanca'
-        try:
-            user_tz = pytz.timezone(tz_name)
-        except:
-            user_tz = pytz.utc
+            # --- Data Fetching & Site Split ---
+            start_date = date(y, m, 1)
+            end_date = date(y, m, num_days)
+            
+            domain = [
+                ('employee_id', '=', rec.employee_id.id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date)
+            ]
+            
+            # Group By Site, IsAbsent, AbsenceType
+            groups = self.env['custom.attendance'].read_group(
+                domain,
+                ['site', 'is_absent', 'absence_type', 'normal_working_hours', 'missing_hours', 'overtime_hours', 'holiday_hours'],
+                ['site', 'is_absent', 'absence_type'],
+                lazy=False
+            )
 
+            t_normal = 0.0
+            t_missing = 0.0
+            t_overtime = 0.0
+            t_holiday = 0.0
+            
+            # Site accumulators
+            h_med = 0.0
+            s_med = 0.0
+            h_casa = 0.0
+            s_casa = 0.0
+            
+            payroll_site = rec.employee_id.payroll_site # mediouna or casa
+
+            for g in groups:
+                site = g['site']
+                is_absent = g['is_absent']
+                abs_type = g['absence_type']
+                
+                # Raw sums from attendance
+                g_norm = g['normal_working_hours']
+                g_miss = g['missing_hours']
+                g_over = g['overtime_hours']
+                g_holi = g['holiday_hours']
+                count = g['__count'] # record count - FIXED from site_count
+                
+                t_normal += g_norm
+                t_missing += g_miss
+                t_overtime += g_over
+                t_holiday += g_holi
+                
+                # Allocation Logic
+                target_site = site
+                cost = 0.0
+                hours_to_add = 0.0
+                
+                if not is_absent:
+                    # Normal Day
+                    # Hours = Normal + Overtime + Holiday
+                    hours_to_add = g_norm + g_over + g_holi
+                    # Cost = Normal*1 + Overtime*Coeff + Holiday*2
+                    cost = (g_norm * 1) + (g_over * ot_coeff) + (g_holi * 2)
+                    cost *= rate
+                    
+                else:
+                    # Absent Day
+                    target_site = payroll_site # Force correct site
+                    if abs_type == 'leave':
+                        # Consumed Leave -> 8 hours paid
+                        added_h = daily_hours * count
+                        hours_to_add = added_h
+                        cost = added_h * rate
+                        
+                    elif abs_type == 'deduction':
+                        # Deduction -> Reduce salary
+                        deduction = g_miss * rate
+                        cost = -deduction
+                        hours_to_add = 0.0
+                
+                # Accumulate
+                if target_site == 'mediouna':
+                    h_med += hours_to_add
+                    s_med += cost
+                elif target_site == 'casa':
+                    h_casa += hours_to_add
+                    s_casa += cost
+                elif not target_site and not is_absent:
+                     if payroll_site == 'mediouna':
+                         h_med += hours_to_add
+                         s_med += cost
+                     else:
+                         h_casa += hours_to_add
+                         s_casa += cost
+
+            rec.total_normal_hours = t_normal
+            rec.total_missing_hours = t_missing
+            rec.total_overtime_hours = t_overtime
+            rec.total_holiday_hours = t_holiday
+            
+            rec.hours_mediouna = h_med
+            rec.salary_mediouna = s_med
+            rec.hours_casa = h_casa
+            rec.salary_casa = s_casa
+
+    @api.depends('salary_mediouna', 'salary_casa')
+    def _compute_final_salary(self):
+        config = self.env['custom.attendance.config'].get_main_config()
+        ot_coeff = config.overtime_coefficient if config else 1.0
+        
         for rec in self:
-            if rec.date and rec.check_in_time:
-                rec.check_in = self._get_utc_from_time(
-                    rec.date, rec.check_in_time, user_tz
-                )
+            rec.salary_mediouna = round(rec.salary_mediouna, 2)
+            rec.salary_casa = round(rec.salary_casa, 2)
+            
+            rec.final_salary = rec.salary_mediouna + rec.salary_casa
+            
+            # Update legacy fields for display consistency
+            rec.deduction_amount = rec.total_missing_hours * rec.hourly_salary
+            rec.overtime_amount = rec.total_overtime_hours * rec.hourly_salary * ot_coeff
+            rec.holiday_amount = rec.total_holiday_hours * rec.hourly_salary * 2
 
-            if rec.date and rec.check_out_time:
-                rec.check_out = self._get_utc_from_time(
-                    rec.date, rec.check_out_time, user_tz
-                )
+    def action_validate(self):
+        for rec in self:
+            rec.state = 'validated'
+            # Lock attendances
+            m = int(rec.month)
+            y = rec.year
+            num_days = calendar.monthrange(y, m)[1]
+            start_date = date(y, m, 1)
+            end_date = date(y, m, num_days)
+            attendances = self.env['custom.attendance'].search([
+                ('employee_id', '=', rec.employee_id.id),
+                ('date', '>=', start_date),
+                ('date', '<=', end_date)
+            ])
+            # Check coverage now
+            rec._check_attendance_coverage()
+            attendances.write({'state': 'locked'})
 
-            if rec.check_in and rec.check_out:
-                rec._compute_hours()
+    def unlink(self):
+        # Allow system updates (superuser) OR Admins to bypass this check
+        if not self.env.su and not self.env.user.has_group('custom_attendance.group_custom_attendance_admin'):
+            for rec in self:
+                if rec.state == 'validated':
+                    raise exceptions.UserError("Impossible de supprimer un bulletin de salaire validé.")
+        return super(CustomMonthlySalary, self).unlink()

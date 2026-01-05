@@ -1,21 +1,44 @@
-/* Finance module ONLY - Navbar color */
-.o_app_finance .o_main_navbar {
+/* 
+   Sky Blue Navbar - Scoped strictly to Finance Module 
+   Uses :has() selector (Modern Browsers) to detect active Finance context.
+*/
+
+/* 
+   Selector logic:
+   1. The Navbar contains a brand element corresponding to Finance Root.
+   2. OR The Navbar contains an active menu item belonging to the Finance module.
+   3. OR The Navbar contains a link pointing to a finance/datacheque model.
+*/
+.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]),
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]),
+.o_main_navbar:has(a[href*="model=finance."]),
+.o_main_navbar:has(a[href*="model=datacheque"]) {
     background-color: #87CEEB !important;
     border-bottom: 1px solid #5F9EA0 !important;
 }
 
-/* Text color */
-.o_app_finance .o_main_navbar .o_menu_brand,
-.o_app_finance .o_main_navbar .o_menu_sections > li > a,
-.o_app_finance .o_main_navbar .o_menu_systray > li > a {
+/* Force text color to White within the scoped Blue Navbar */
+.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_brand,
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_brand,
+.o_main_navbar:has(a[href*="model=finance."]) .o_menu_brand,
+.o_main_navbar:has(a[href*="model=datacheque"]) .o_menu_brand,
+
+.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_sections>li>a,
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_sections>li>a,
+.o_main_navbar:has(a[href*="model=finance."]) .o_menu_sections>li>a,
+.o_main_navbar:has(a[href*="model=datacheque"]) .o_menu_sections>li>a,
+
+.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_systray>li>a,
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_systray>li>a,
+.o_main_navbar:has(a[href*="model=finance."]) .o_menu_systray>li>a,
+.o_main_navbar:has(a[href*="model=datacheque"]) .o_menu_systray>li>a {
     color: #ffffff !important;
-    font-weight: 500;
 }
 
-/* Hover effects */
-.o_app_finance .o_main_navbar .o_menu_sections > li > a:hover,
-.o_app_finance .o_main_navbar .o_menu_sections > li.show > a,
-.o_app_finance .o_main_navbar .o_menu_systray > li > a:hover,
-.o_app_finance .o_main_navbar .o_menu_systray > li.show > a {
+/* Hover effects for scoped Blue Navbar */
+.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_sections>li>a:hover,
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_sections>li>a:hover,
+.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_systray>li>a:hover,
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_systray>li>a:hover {
     background-color: rgba(255, 255, 255, 0.2) !important;
 }

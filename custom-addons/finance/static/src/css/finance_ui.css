@@ -1,21 +1,21 @@
-/* Sky Blue Navbar for Finance Module */
-.o_main_navbar {
+/* Finance module ONLY - Navbar color */
+.o_app_finance .o_main_navbar {
     background-color: #87CEEB !important;
     border-bottom: 1px solid #5F9EA0 !important;
 }
 
-/* Ensure text remains readable (White or Dark Blue depending on preference, usually White) */
-.o_main_navbar .o_menu_brand,
-.o_main_navbar .o_menu_sections > li > a,
-.o_main_navbar .o_menu_systray > li > a {
+/* Text color */
+.o_app_finance .o_main_navbar .o_menu_brand,
+.o_app_finance .o_main_navbar .o_menu_sections > li > a,
+.o_app_finance .o_main_navbar .o_menu_systray > li > a {
     color: #ffffff !important;
     font-weight: 500;
 }
 
 /* Hover effects */
-.o_main_navbar .o_menu_sections > li > a:hover,
-.o_main_navbar .o_menu_sections > li.show > a,
-.o_main_navbar .o_menu_systray > li > a:hover,
-.o_main_navbar .o_menu_systray > li.show > a {
+.o_app_finance .o_main_navbar .o_menu_sections > li > a:hover,
+.o_app_finance .o_main_navbar .o_menu_sections > li.show > a,
+.o_app_finance .o_main_navbar .o_menu_systray > li > a:hover,
+.o_app_finance .o_main_navbar .o_menu_systray > li.show > a {
     background-color: rgba(255, 255, 255, 0.2) !important;
 }

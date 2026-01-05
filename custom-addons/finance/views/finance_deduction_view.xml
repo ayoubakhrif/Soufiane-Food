@@ -113,23 +113,35 @@
                     <!-- Workflow buttons could go here (Draft -> Posted) if needed later -->
                 </header>
                 <sheet>
-                    <group>
+                    <div class="oe_title">
+                        <h1 class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                            <span class="text-muted" style="font-size:14px;">Société</span>
+                            <field name="ste_id" class="oe_inline" placeholder="Choisir une société"/>
+                        </h1>
+                    </div>
+
+                    <group string="Informations">
                         <group>
-                            <field name="ste_id"/>
                             <field name="benif_id"/>
                             <field name="account_id"/>
                         </group>
                         <group>
                             <field name="date"/>
                             <field name="operation_ref"/>
-                            <field name="amount"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="note"/>
+
+                    <group string="Montant">
+                        <group>
+                             <field name="amount" style="font-size: 16px; font-weight: bold;"/>
+                        </group>
+                    </group>
+
+                    <group string="Note">
+                        <field name="note" nolabel="1" placeholder="Ajouter une note..."/>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
+                <div class="oe_chatter" groups="finance.group_finance_user">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
@@ -158,12 +170,7 @@
     <!-- ========================================================= -->
     # MENUS
     <!-- ========================================================= -->
-    <menuitem 
-        id="menu_finance_deduction_root"
-        name="Déduction"
-        parent="finance_root_menu"
-        sequence="15"
-    />
+
 
     <menuitem 
         id="menu_finance_deduction_payment"
@@ -175,10 +182,10 @@
 
     <menuitem 
         id="menu_finance_deduction_account"
-        name="Comptes"
-        parent="menu_finance_deduction_root"
+        name="Comptes de déduction"
+        parent="finance.data_finance_menu"
         action="action_finance_deduction_account"
-        sequence="10"
+        sequence="50"
         groups="finance.group_finance_user"
     />
 

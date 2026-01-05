@@ -9,48 +9,47 @@
         <field name="priority">15</field>
         <field name="arch" type="xml">
             
-            <!-- ACHAT FIELDS: Make readonly ONLY for Logistics users -->
-            <!-- Using groups attribute to restrict these modifications to Logistics group only -->
-            <xpath expr="//field[@name='eta']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <!-- ACHAT FIELDS: Make readonly for Logistics users -->
+            <xpath expr="//field[@name='eta']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='week']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='week']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='invoice_number']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='invoice_number']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='ste_id']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='ste_id']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='supplier_id']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='supplier_id']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='shipping_id']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='shipping_id']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='article_id']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='article_id']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='details']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='details']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='weight']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='weight']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='price_unit']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='amount_total']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='amount_total']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='incoterm']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='incoterm']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='free_time']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='free_time']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='doc_status']" position="attributes" groups="logistique.group_logistique_user,logistique.group_logistique_manager">
+            <xpath expr="//field[@name='doc_status']" position="attributes">
                  <attribute name="readonly">1</attribute>
             </xpath>
 

@@ -9,71 +9,70 @@
         <field name="priority">20</field>
         <field name="arch" type="xml">
             
-            <!-- HEADER: Add Workflow - visible only to Achat users -->
-            <xpath expr="//header" position="inside" groups="achat.group_achat_user,achat.group_achat_manager">
+            <!-- HEADER: Add Workflow -->
+            <xpath expr="//header" position="inside">
                 <button name="action_validate_achat" string="Valider Achat" type="object" class="oe_highlight" 
                         invisible="state != 'draft'"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,validated,in_progress,closed"/>
             </xpath>
 
-            <!-- ACHAT FIELDS: Editable for Achat users, with workflow protection -->
-            <!-- These xpaths apply ONLY to Achat users via groups attribute -->
-            <xpath expr="//field[@name='eta']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <!-- ACHAT FIELDS: Editable in Draft, readonly after validation -->
+            <xpath expr="//field[@name='eta']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='week']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='week']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='invoice_number']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='invoice_number']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='ste_id']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='ste_id']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='supplier_id']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='supplier_id']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='shipping_id']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='shipping_id']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='article_id']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='article_id']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='details']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='details']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='weight']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='weight']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='price_unit']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='incoterm']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='incoterm']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='free_time']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='free_time']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
-            <xpath expr="//field[@name='doc_status']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='doc_status']" position="attributes">
                  <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
 
             <!-- LOGISTICS FIELDS: Make INVISIBLE for Achat users -->
-            <xpath expr="//field[@name='status']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='status']" position="attributes">
                  <attribute name="invisible">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='remarks']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='remarks']" position="attributes">
                  <attribute name="invisible">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='saisi_par']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='saisi_par']" position="attributes">
                  <attribute name="invisible">1</attribute>
             </xpath>
 
             <!-- FINANCE FIELDS: Make INVISIBLE for Achat users -->
-            <xpath expr="//field[@name='prov_number']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='prov_number']" position="attributes">
                  <attribute name="invisible">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='def_number']" position="attributes" groups="achat.group_achat_user,achat.group_achat_manager">
+            <xpath expr="//field[@name='def_number']" position="attributes">
                  <attribute name="invisible">1</attribute>
             </xpath>
 

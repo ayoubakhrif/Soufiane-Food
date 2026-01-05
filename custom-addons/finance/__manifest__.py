@@ -24,6 +24,7 @@
     'assets': {
         'web.assets_backend': [
             'finance/static/src/css/finance_ui.css',
+            'finance/static/src/js/finance_loader.js',
         ],
     },
     'images': ['static/description/icon.svg'],

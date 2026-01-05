@@ -16,8 +16,15 @@
         id="data_cheque_menu"
         name="Saisie"
         parent="finance_root_menu"
-        action="data_cheque_action"
         sequence="10"
+    />
+
+    <menuitem 
+        id="data_cheque_list_menu"
+        name="Par chèque"
+        parent="data_cheque_menu"
+        action="data_cheque_action"
+        sequence="1"
     />
 
     <record id="datachq_view_tree" model="ir.ui.view">

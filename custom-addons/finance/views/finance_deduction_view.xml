@@ -167,10 +167,10 @@
 
     <menuitem 
         id="menu_finance_deduction_payment"
-        name="Paiements"
-        parent="menu_finance_deduction_root"
+        name="Par déduction"
+        parent="finance.data_cheque_menu"
         action="action_finance_deduction_payment"
-        sequence="1"
+        sequence="2"
     />
 
     <menuitem 

@@ -69,30 +69,31 @@
                     
                     <group>
                         <group string="Dates et Références">
-                            <field name="eta"/>
-                            <field name="week"/>
-                            <field name="invoice_number"/>
+                        <group string="Dates et Références">
+                            <field name="eta" readonly="1"/>
+                            <field name="week" readonly="1"/>
+                            <field name="invoice_number" readonly="1"/>
                             <field name="saisi_par"/>
                         </group>
                         <group string="Entités">
-                            <field name="ste_id"/>
-                            <field name="supplier_id"/>
-                            <field name="shipping_id"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="supplier_id" readonly="1"/>
+                            <field name="shipping_id" readonly="1"/>
                         </group>
                     </group>
                     
                     <group>
                         <group string="Logistics">
-                            <field name="article_id"/>
-                            <field name="details"/>
-                            <field name="weight"/>
-                            <field name="price_unit"/>
-                            <field name="amount_total"/>
+                            <field name="article_id" readonly="1"/>
+                            <field name="details" readonly="1"/>
+                            <field name="weight" readonly="1"/>
+                            <field name="price_unit" readonly="1"/>
+                            <field name="amount_total" readonly="1"/>
                         </group>
                         <group string="Tracking">
-                            <field name="incoterm"/>
-                            <field name="free_time"/>
-                            <field name="doc_status"/>
+                            <field name="incoterm" readonly="1"/>
+                            <field name="free_time" readonly="1"/>
+                            <field name="doc_status" readonly="1"/>
                         </group>
                     </group>
                     

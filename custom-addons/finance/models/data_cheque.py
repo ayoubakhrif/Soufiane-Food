@@ -3,6 +3,7 @@ from odoo.exceptions import UserError, ValidationError
 from datetime import timedelta
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from markupsafe import Markup
 
 class DataCheque(models.Model):
     _name = 'datacheque'
@@ -509,13 +510,15 @@ class DataCheque(models.Model):
         expected_num = last_num + 1
 
         if chq_num != expected_num:
-             raise ValidationError(
-                 f"Dernier chèque saisi : {last_num}\n"
-                 f"Attention🚫 Chèque attendu : {expected_num}\n"
-                 f"Chèque saisie actuelle : {chq_num}\n\n"
-                 f"Veuillez sasir d'abord CHQ : {expected_num}\n\n"
-                 "Veuillez saisir les chèques dans l'ordre strict, sans saut numéro."
-             )
+            raise ValidationError(Markup(
+                f"Dernier chèque saisi : {last_num}<br/>"
+                f"Attention 🚫 Chèque attendu : "
+                f"<span style='color:red; font-weight:bold;'>{expected_num}</span><br/>"
+                f"Chèque saisi actuel : {chq_num}<br/><br/>"
+                f"Veuillez saisir d'abord CHQ : "
+                f"<span style='color:red; font-weight:bold;'>{expected_num}</span><br/><br/>"
+                "Veuillez saisir les chèques dans l'ordre strict, sans saut de numéro."
+            ))
 
     # ------------------------------------------------------------
     # RECHERCHE DE CHQ

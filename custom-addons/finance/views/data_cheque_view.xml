@@ -3,6 +3,8 @@
         id="finance_root_menu"
         name="Finance"
         sequence="1"
+        web_icon="finance,static/description/icon.svg"
+        action="data_cheque_action"
         groups="finance.group_finance_employee"
     />
 

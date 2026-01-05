@@ -1,84 +1,48 @@
-/* 
-   Sky Blue Navbar - Scoped strictly to Finance Module 
-   Uses :has() selector (Modern Browsers) to detect active Finance context.
-*/
+/* =========================================
+   FINANCE APP – CUSTOM NAVBAR (BLUE)
+   Scoped using the .o_app_finance context class
+   ========================================= */
 
-/* 
-   Selector logic:
-   1. The Navbar contains a brand element corresponding to Finance Root.
-   2. OR The Navbar contains an active menu item belonging to the Finance module.
-   3. OR The Navbar contains a link pointing to a finance/datacheque model.
-*/
-.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]),
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]),
-.o_main_navbar:has(a[href*="model=finance."]),
-.o_main_navbar:has(a[href*="model=datacheque"]) {
+/* Top Navbar Background */
+.o_app_finance .o_main_navbar {
     background-color: #87CEEB !important;
     border-bottom: 1px solid #5F9EA0 !important;
 }
 
-/* Force text color to White within the scoped Blue Navbar */
-.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_brand,
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_brand,
-.o_main_navbar:has(a[href*="model=finance."]) .o_menu_brand,
-.o_main_navbar:has(a[href*="model=datacheque"]) .o_menu_brand,
-
-.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_sections>li>a,
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_sections>li>a,
-.o_main_navbar:has(a[href*="model=finance."]) .o_menu_sections>li>a,
-.o_main_navbar:has(a[href*="model=datacheque"]) .o_menu_sections>li>a,
-
-.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_systray>li>a,
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_systray>li>a,
-.o_main_navbar:has(a[href*="model=finance."]) .o_menu_systray>li>a,
-.o_main_navbar:has(a[href*="model=datacheque"]) .o_menu_systray>li>a {
+/* Navbar Text Color */
+.o_app_finance .o_main_navbar .o_menu_brand,
+.o_app_finance .o_main_navbar .o_menu_sections>li>a,
+.o_app_finance .o_main_navbar .o_menu_systray>li>a {
     color: #ffffff !important;
 }
 
-/* Hover effects for scoped Blue Navbar */
-.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_sections>li>a:hover,
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_sections>li>a:hover,
-.o_main_navbar:has(.o_menu_brand[data-menu-xmlid="finance.finance_root_menu"]) .o_menu_systray>li>a:hover,
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_systray>li>a:hover {
+/* Navbar Hover Effects */
+.o_app_finance .o_main_navbar .o_menu_sections>li>a:hover,
+.o_app_finance .o_main_navbar .o_menu_sections>li.show>a,
+.o_app_finance .o_main_navbar .o_menu_systray>li>a:hover,
+.o_app_finance .o_main_navbar .o_menu_systray>li.show>a {
     background-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* =========================================
-   FINANCE MENU – FORCE MENU COLOR (ODOO 17)
+   FINANCE MENU – FORCE MENU TRANSPARENCY
    ========================================= */
 
 /* Force menu item container */
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li {
+.o_app_finance .o_main_navbar .o_menu_sections>li {
     background-color: transparent !important;
 }
 
-/* Force menu links */
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li > a {
-    color: #ffffff !important;
-    background-color: transparent !important;
-}
-
-/* Remove Odoo pseudo background */
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li::before,
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li > a::before {
-    background: none !important;
-    box-shadow: none !important;
-}
-
-/* Active menu item */
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li.active > a {
+/* Force active link style */
+.o_app_finance .o_main_navbar .o_menu_sections>li.active>a {
     background-color: rgba(255, 255, 255, 0.25) !important;
     border-radius: 6px;
+    color: #ffffff !important;
 }
 
-/* Hover menu item */
-.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li > a:hover {
-    background-color: rgba(255, 255, 255, 0.18) !important;
-    color: #ffffff !important;
+/* Odoo Link Pseudo-elements cleanup */
+.o_app_finance .o_main_navbar .o_menu_sections>li::before,
+.o_app_finance .o_main_navbar .o_menu_sections>li>a::before {
+    background: none !important;
+    box-shadow: none !important;
 }

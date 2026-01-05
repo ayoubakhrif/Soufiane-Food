@@ -42,3 +42,28 @@
 .o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."]) .o_menu_systray>li>a:hover {
     background-color: rgba(255, 255, 255, 0.2) !important;
 }
+
+/* ================================
+   FINANCE MENU - Menu Items Color
+   ================================ */
+
+/* Menu items background (Finance context) */
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
+.o_menu_sections > li > a {
+    background-color: transparent !important;
+    color: #ffffff !important;
+}
+
+/* Active menu item (Finance) */
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
+.o_menu_sections > li.active > a {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 6px;
+}
+
+/* Hover effect for menu items (Finance) */
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
+.o_menu_sections > li > a:hover {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+}

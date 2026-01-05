@@ -456,6 +456,67 @@ class DataCheque(models.Model):
             if found and rec.talon_id != found:
                 rec.talon_id = found
 
+    # -------------------------------------------------------------------
+    # SEQUENCE INTEGRITY CHECK
+    # -------------------------------------------------------------------
+    def _check_sequence_integrity(self, vals):
+        """
+        Ensures that cheques are created in strict sequence (N+1).
+        Blocks creation if there is a gap or backward numbering.
+        """
+        # 1. Logic to identify Talon (matches _find_talon_logic)
+        chq_str = vals.get('chq')
+        ste_id = vals.get('ste_id')
+
+        if not chq_str or not ste_id or not str(chq_str).isdigit():
+            return # Skip check if data is invalid (constraints will handle it)
+
+        chq_num = int(chq_str)
+
+        # We must find the talon that WOULD be assigned.
+        # Can't rely on 'talon_id' in vals because it might be computed later.
+        # We assume the standard logic applies.
+        
+        # Reuse logic logic but optimized for 'vals' context
+        talons = self.env['finance.talon'].search([
+            ('ste_id', '=', ste_id),
+            ('num_chq', '>', 0),
+            ('name', '!=', False),
+        ])
+        
+        target_talon = False
+        for talon in talons:
+            if not talon.name.isdigit(): continue
+            start = int(talon.name)
+            end = start + talon.num_chq - 1
+            if start <= chq_num <= end:
+                target_talon = talon
+                break
+        
+        if not target_talon:
+             return # No talon found -> standard creation (or error elsewhere)
+
+        # 2. Find LAST EXISTING cheque for this talon
+        last_cheque = self.search([
+            ('talon_id', '=', target_talon.id),
+            ('chq', '!=', False)
+        ], order='chq desc', limit=1)
+
+        if not last_cheque:
+            return # First cheque of the talon -> Allowed
+
+        last_num = int(last_cheque.chq)
+        expected_num = last_num + 1
+
+        if chq_num != expected_num:
+             raise ValidationError(
+                 f"🚫 Erreur de séquence pour le talon {target_talon.name_shown}\n\n"
+                 f"Dernier chèque enregistré : {last_num}\n"
+                 f"Chèque attendu (Séquence) : {expected_num}\n"
+                 f"Votre saisie : {chq_num}\n\n"
+                 "Veuillez saisir les chèques dans l'ordre strict, sans saut numéro."
+             )
+
     # ------------------------------------------------------------
     # RECHERCHE DE CHQ
     # ------------------------------------------------------------
@@ -671,6 +732,10 @@ class DataCheque(models.Model):
     def create(self, vals):
         # Apply backend logic for relations before super().create validates required constraints
         self._force_state_logic(vals)
+        
+        # STRICT SEQUENCE CHECK
+        # Must be done BEFORE creation to block gaps
+        self._check_sequence_integrity(vals)
         
         rec = super().create(vals)
         rec._onchange_find_talon()

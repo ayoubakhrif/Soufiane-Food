@@ -21,6 +21,11 @@
         'reports/cheque_request_report.xml',
         'data/cron.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'finance/static/src/css/finance_ui.css',
+        ],
+    },
     'images': ['static/description/icon.svg'],
     'installable': True,
     'application': True,

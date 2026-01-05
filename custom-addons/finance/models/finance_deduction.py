@@ -78,6 +78,25 @@ class FinanceDeductionPayment(models.Model):
     operation_ref = fields.Char(string='Référence Opération / Facture', required=True, tracking=True)
     note = fields.Text(string='Note')
 
+    type = fields.Selection([
+        ('magasinage', 'Magasinage'),
+        ('surestarie', 'Surestarie'),
+        ('change', 'Change'),
+    ], string='Type', required=True, tracking=True)
+
+    bl_id = fields.Many2one(
+        'logistique.dossier', 
+        string='BL',
+        required=True,
+        tracking=True
+    )
+
+    container_ids = fields.One2many(
+        related='bl_id.container_ids',
+        string='Conteneurs',
+        readonly=True
+    )
+
     @api.depends('ste_id', 'benif_id')
     def _compute_account_id(self):
         for rec in self:

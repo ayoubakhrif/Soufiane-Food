@@ -123,11 +123,13 @@
                     <group string="Informations">
                         <group>
                             <field name="benif_id"/>
+                            <field name="type"/>
                             <field name="account_id"/>
                         </group>
                         <group>
                             <field name="date"/>
                             <field name="operation_ref"/>
+                            <field name="bl_id"/>
                         </group>
                     </group>
 
@@ -140,6 +142,16 @@
                     <group string="Note">
                         <field name="note" nolabel="1" placeholder="Ajouter une note..."/>
                     </group>
+
+                    <notebook>
+                        <page string="BL Containers">
+                            <field name="container_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="oe_chatter" groups="finance.group_finance_user">
                     <field name="message_follower_ids"/>

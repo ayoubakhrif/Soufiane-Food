@@ -1,5 +1,5 @@
 {
-    'name': 'Achat Module',
+    'name': 'Achat',
     'version': '1.0',
     'summary': 'Module Achat partageant les données avec Logistique',
     'description': """

@@ -1,12 +1,12 @@
 <odoo>
     <!-- VIEW FOR LOGISTICS USERS: Make Achat fields readonly -->
     <!-- This view inherits the base Logistics form and protects Achat fields -->
+    <!-- The Achat view (priority 20) will override these for Achat users -->
     <record id="view_entry_form_logistics_readonly" model="ir.ui.view">
         <field name="name">logistique.entry.form.logistics.readonly</field>
         <field name="model">logistique.entry</field>
         <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
         <field name="priority">10</field> <!-- Lower priority than Achat view -->
-        <field name="groups_id" eval="[(6, 0, [ref('logistique.group_logistique_user'), ref('logistique.group_logistique_manager')])]"/>
         <field name="arch" type="xml">
             
             <!-- ACHAT FIELDS: Make readonly for Logistics users -->

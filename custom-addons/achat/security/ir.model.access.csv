@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_achat_logistique_entry_user,access.achat.logistique.entry.user,logistique.model_logistique_entry,group_achat_user,1,1,1,1
+access_achat_logistique_entry_manager,access.achat.logistique.entry.manager,logistique.model_logistique_entry,group_achat_manager,1,1,1,1

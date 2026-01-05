@@ -1,0 +1,59 @@
+<odoo>
+    <!-- VIEW FOR LOGISTICS USERS: Make Achat fields readonly -->
+    <!-- This view inherits the base Logistics form and protects Achat fields -->
+    <record id="view_entry_form_logistics_readonly" model="ir.ui.view">
+        <field name="name">logistique.entry.form.logistics.readonly</field>
+        <field name="model">logistique.entry</field>
+        <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
+        <field name="priority">10</field> <!-- Lower priority than Achat view -->
+        <field name="groups_id" eval="[(6, 0, [ref('logistique.group_logistique_user'), ref('logistique.group_logistique_manager')])]"/>
+        <field name="arch" type="xml">
+            
+            <!-- ACHAT FIELDS: Make readonly for Logistics users -->
+            <xpath expr="//field[@name='eta']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='week']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_number']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='ste_id']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='supplier_id']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='shipping_id']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='article_id']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='details']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='weight']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='incoterm']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='free_time']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='doc_status']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

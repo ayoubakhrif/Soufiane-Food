@@ -1,0 +1,89 @@
+<odoo>
+    <!-- ACHAT FORM VIEW -->
+    <!-- This view is specific for Achat Users. It inherits the base Logistique view but flips editability. -->
+    <record id="view_entry_form_achat" model="ir.ui.view">
+        <field name="name">logistique.entry.form.achat</field>
+        <field name="model">logistique.entry</field>
+        <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
+        <field name="priority">20</field> <!-- Higher priority so it's not default unless asked -->
+        <field name="arch" type="xml">
+            
+            <!-- HEADER: Add Workflow -->
+            <xpath expr="//header" position="inside">
+                <button name="action_validate_achat" string="Valider Achat" type="object" class="oe_highlight" 
+                        invisible="state != 'draft'" groups="achat.group_achat_user"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,validated,in_progress,closed"/>
+            </xpath>
+
+            <!-- ACHAT FIELDS: Make Editable for Achat Users (They might be readonly in base view) -->
+            <xpath expr="//field[@name='eta']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='week']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_number']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='ste_id']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='supplier_id']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='shipping_id']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='article_id']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='details']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='weight']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='incoterm']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='free_time']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='doc_status']" position="attributes">
+                 <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+
+            <!-- LOGISTIQUE FIELDS: Make Readonly for Achat Users -->
+            <xpath expr="//field[@name='status']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='remarks']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='saisi_par']" position="attributes">
+                 <attribute name="readonly">1</attribute>
+            </xpath>
+
+            <!-- HIDE LOGISTICS INFO IF NOT RELEVANT? User said readonly, so keep visible -->
+        </field>
+    </record>
+
+    <!-- ACTION ACHAT -->
+    <record id="action_achat_entry" model="ir.actions.act_window">
+        <field name="name">Entrées Achat</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('logistique.view_logistique_entry_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_entry_form_achat')})]"/>
+        <field name="search_view_id" ref="logistique.view_logistique_entry_search"/>
+        <field name="context">{'default_state': 'draft'}</field>
+    </record>
+
+    <menuitem id="menu_achat_root" name="Achat" sequence="10" web_icon="achat,static/description/icon.png"/>
+    <menuitem id="menu_achat_entry" name="Dossiers Achat" parent="menu_achat_root" action="action_achat_entry"/>
+
+</odoo>

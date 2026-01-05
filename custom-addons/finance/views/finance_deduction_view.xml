@@ -179,7 +179,7 @@
         parent="menu_finance_deduction_root"
         action="action_finance_deduction_account"
         sequence="10"
-        groups="finance.group_finance_manager"
+        groups="finance.group_finance_user"
     />
 
 </odoo>

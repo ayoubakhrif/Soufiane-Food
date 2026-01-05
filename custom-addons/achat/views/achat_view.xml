@@ -1,10 +1,11 @@
 <odoo>
     <!-- ACHAT FORM VIEW -->
-    <!-- This view is for Achat Users - uses groups attribute to apply only to them -->
+    <!-- This view is restricted to Achat user groups via groups_id -->
     <record id="view_entry_form_achat" model="ir.ui.view">
         <field name="name">logistique.entry.form.achat</field>
         <field name="model">logistique.entry</field>
         <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
+        <field name="groups_id" eval="[(6, 0, [ref('achat.group_achat_user'), ref('achat.group_achat_manager')])]"/>
         <field name="priority">20</field>
         <field name="arch" type="xml">
             

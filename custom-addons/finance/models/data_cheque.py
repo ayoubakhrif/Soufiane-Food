@@ -50,7 +50,10 @@ class DataCheque(models.Model):
     
     # New Fields
     bl = fields.Char(string='BL', tracking=True)
-    encours = fields.Boolean(string='En cours', compute='_compute_encours', store=True)
+    encours = fields.Selection([
+        ('encaisse', 'Encaissé'),
+        ('non_encaisse', 'Non encaissé'),
+    ], string='Status Encaissement', compute='_compute_encours', store=True)
 
     benif_type = fields.Selection(related="benif_id.type", store=True)
     chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)
@@ -277,10 +280,12 @@ class DataCheque(models.Model):
             else:
                 rec.date_echeance = rec.date_emission
 
-    @api.depends('date_encaissement')
     def _compute_encours(self):
         for rec in self:
-            rec.encours = not bool(rec.date_encaissement)
+            if rec.date_encaissement:
+                rec.encours = 'encaisse'
+            else:
+                rec.encours = 'non_encaisse'
 
     # ------------------------------------------------------------
     # CONTRAINTES

@@ -510,10 +510,10 @@ class DataCheque(models.Model):
 
         if chq_num != expected_num:
              raise ValidationError(
-                 f"🚫 Erreur de séquence pour le talon {target_talon.name_shown}\n\n"
-                 f"Dernier chèque enregistré : {last_num}\n"
-                 f"Chèque attendu (Séquence) : {expected_num}\n"
-                 f"Votre saisie : {chq_num}\n\n"
+                 f"Dernier chèque saisi : {last_num}\n"
+                 f"Attention🚫 Chèque attendu : {expected_num}\n"
+                 f"Chèque saisie actuelle : {chq_num}\n\n"
+                 f"Veuillez sasir d'abord CHQ : {expected_num}\n\n"
                  "Veuillez saisir les chèques dans l'ordre strict, sans saut numéro."
              )
 

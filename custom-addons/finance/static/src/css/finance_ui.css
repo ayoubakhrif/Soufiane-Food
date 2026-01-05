@@ -43,25 +43,40 @@
     background-color: rgba(255, 255, 255, 0.2) !important;
 }
 
-/* ================================
-   FINANCE MENU - Menu Items Color
-   ================================ */
+/* =========================================
+   FINANCE MENU – FORCE MENU COLOR (ODOO 17)
+   ========================================= */
 
-/* Menu items background (Finance context) */
+/* Force menu item container */
 .o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
-.o_menu_sections > li > a {
+.o_menu_sections > li {
     background-color: transparent !important;
-    color: #ffffff !important;
 }
 
-/* Active menu item (Finance) */
+/* Force menu links */
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
+.o_menu_sections > li > a {
+    color: #ffffff !important;
+    background-color: transparent !important;
+}
+
+/* Remove Odoo pseudo background */
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
+.o_menu_sections > li::before,
+.o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
+.o_menu_sections > li > a::before {
+    background: none !important;
+    box-shadow: none !important;
+}
+
+/* Active menu item */
 .o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
 .o_menu_sections > li.active > a {
     background-color: rgba(255, 255, 255, 0.25) !important;
     border-radius: 6px;
 }
 
-/* Hover effect for menu items (Finance) */
+/* Hover menu item */
 .o_main_navbar:has(.o_menu_sections .active > a[data-menu-xmlid^="finance."])
 .o_menu_sections > li > a:hover {
     background-color: rgba(255, 255, 255, 0.18) !important;

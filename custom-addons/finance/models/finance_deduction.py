@@ -47,7 +47,11 @@ class FinanceDeductionDeposit(models.Model):
     account_id = fields.Many2one('finance.deduction.account', string='Compte', required=True, ondelete='cascade')
     date = fields.Date(string='Date', default=fields.Date.context_today, required=True)
     amount = fields.Float(string='Montant', required=True)
-    reference = fields.Char(string='Référence')
+    reference = fields.Selection([
+        ('virement', 'Virement'),
+        ('cash', 'Espèce'),
+        ('chq', 'Chèque'),
+    ], string='Référence', required=True)
     comment = fields.Text(string='Commentaire')
 
     @api.constrains('amount')

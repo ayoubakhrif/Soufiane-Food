@@ -40,6 +40,11 @@ class FinanceTalon(models.Model):
         string="Chèques absents",
         compute="_compute_missing_chqs"
     )
+    last_used_chq = fields.Char(
+        string="Dernier chèque utilisé",
+        compute="_compute_last_used_chq",
+        store=True
+    )
 
     # -------------------------------------------------------------------
     # Bouton vers chqs du talon
@@ -75,10 +80,24 @@ class FinanceTalon(models.Model):
             else:
                 rec.etat = 'actif'
 
+    @api.depends('cheque_ids.chq')
+    def _compute_last_used_chq(self):
+        for rec in self:
+            numeric_chqs = []
+            for chq in rec.cheque_ids:
+                raw = (chq.chq or "").strip()
+                if raw.isdigit():
+                    numeric_chqs.append(int(raw))
+
+            if numeric_chqs:
+                rec.last_used_chq = str(max(numeric_chqs)).zfill(7)
+            else:
+                rec.last_used_chq = False
+
     # -------------------------------------------------------------------
     # Résumé stylé (carte HTML moderne - centrée)
     # -------------------------------------------------------------------
-    @api.depends('used_chqs', 'unused_chqs', 'num_chq')
+    @api.depends('used_chqs', 'unused_chqs', 'num_chq', 'last_used_chq')
     def _compute_card(self):
         for rec in self:
             rec.summary_card = f"""
@@ -174,6 +193,25 @@ class FinanceTalon(models.Model):
                             <div style="font-size: 24px; font-weight: 700;">
                                 {rec.unused_chqs}
                             </div>
+                        </div>
+                    </div>
+
+                    <div style="
+                        margin-top: 12px;
+                        background: rgba(255, 255, 255, 0.15);
+                        backdrop-filter: blur(10px);
+                        border-radius: 12px;
+                        padding: 12px 16px;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    ">
+                        <div style="font-size: 13px; font-weight: 600; opacity: 0.9;">
+                             🏷️ Dernier chèque utilisé
+                        </div>
+                        <div style="font-size: 16px; font-weight: 700; letter-spacing: 0.5px;">
+                             {rec.last_used_chq if rec.last_used_chq else "Aucun chèque utilisé"}
                         </div>
                     </div>
                 </div>

@@ -16,8 +16,9 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="type"/>
                         <field name="days"/>
+                        <field name="type"/>
+                        <field name="benif_deduction"/>
                     </group>
                 </sheet>
             </form>

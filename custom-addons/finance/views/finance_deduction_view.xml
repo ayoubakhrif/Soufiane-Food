@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    # ACTIONS
+    <!-- ========================================================= -->
+    
+    <!-- Account Action -->
+    <record id="action_finance_deduction_account" model="ir.actions.act_window">
+        <field name="name">Comptes de Déduction</field>
+        <field name="res_model">finance.deduction.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Payment Action -->
+    <record id="action_finance_deduction_payment" model="ir.actions.act_window">
+        <field name="name">Paiements par Déduction</field>
+        <field name="res_model">finance.deduction.payment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ========================================================= -->
+    # ACCOUNT VIEWS
+    <!-- ========================================================= -->
+
+    <record id="view_finance_deduction_account_tree" model="ir.ui.view">
+        <field name="name">finance.deduction.account.tree</field>
+        <field name="model">finance.deduction.account</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="balance &lt; 0" decoration-warning="balance == 0">
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="total_deposited" sum="Total Déposé"/>
+                <field name="total_deducted" sum="Total Déduit"/>
+                <field name="balance" sum="Solde"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_deduction_account_form" model="ir.ui.view">
+        <field name="name">finance.deduction.account.form</field>
+        <field name="model">finance.deduction.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ste_id"/>
+                            <field name="benif_id"/>
+                        </group>
+                        <group>
+                            <field name="balance" style="font-size: 20px; font-weight: bold; color: green;"/>
+                            <field name="total_deposited"/>
+                            <field name="total_deducted"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Dépôts (Avances)">
+                            <field name="deposit_ids">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="reference"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Historique des Paiements">
+                            <field name="payment_ids" readonly="1">
+                                <tree decoration-info="True">
+                                    <field name="date"/>
+                                    <field name="operation_ref"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="note"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    # PAYMENT VIEWS
+    <!-- ========================================================= -->
+    <record id="view_finance_deduction_payment_tree" model="ir.ui.view">
+        <field name="name">finance.deduction.payment.tree</field>
+        <field name="model">finance.deduction.payment</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="date"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="operation_ref"/>
+                <field name="amount" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_deduction_payment_form" model="ir.ui.view">
+        <field name="name">finance.deduction.payment.form</field>
+        <field name="model">finance.deduction.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <!-- Workflow buttons could go here (Draft -> Posted) if needed later -->
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="ste_id"/>
+                            <field name="benif_id"/>
+                            <field name="account_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="operation_ref"/>
+                            <field name="amount"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_finance_deduction_payment_search" model="ir.ui.view">
+        <field name="name">finance.deduction.payment.search</field>
+        <field name="model">finance.deduction.payment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="operation_ref"/>
+                <group expand="0" string="Group By">
+                    <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
+                    <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by':'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    # MENUS
+    <!-- ========================================================= -->
+    <menuitem 
+        id="menu_finance_deduction_root"
+        name="Déduction"
+        parent="finance_root_menu"
+        sequence="15"
+    />
+
+    <menuitem 
+        id="menu_finance_deduction_payment"
+        name="Paiements"
+        parent="menu_finance_deduction_root"
+        action="action_finance_deduction_payment"
+        sequence="1"
+    />
+
+    <menuitem 
+        id="menu_finance_deduction_account"
+        name="Comptes"
+        parent="menu_finance_deduction_root"
+        action="action_finance_deduction_account"
+        sequence="10"
+        groups="finance.group_finance_manager"
+    />
+
+</odoo>

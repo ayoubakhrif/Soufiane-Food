@@ -27,3 +27,12 @@ access_finance_cheque_encaisse_manager,access.finance.cheque.encaisse.manager,mo
 access_finance_logistics_tracking,access.finance.logistics.tracking,model_finance_logistics_tracking,finance.group_finance_user,1,1,1,1
 access_finance_logistics_tracking,access.finance.logistics.tracking,model_finance_logistics_tracking,finance.group_finance_employee,1,1,1,1
 access_finance_cheque_encaisse_employee,access.finance.cheque.encaisse.employee,model_finance_cheque_encaisse,group_finance_employee,1,1,1,0
+
+access_finance_deduction_account_manager,access.finance.deduction.account.manager,model_finance_deduction_account,group_finance_user,1,1,1,1
+access_finance_deduction_account_employee,access.finance.deduction.account.employee,model_finance_deduction_account,group_finance_employee,1,0,0,0
+
+access_finance_deduction_deposit_manager,access.finance.deduction.deposit.manager,model_finance_deduction_deposit,group_finance_user,1,1,1,1
+access_finance_deduction_deposit_employee,access.finance.deduction.deposit.employee,model_finance_deduction_deposit,group_finance_employee,1,0,0,0
+
+access_finance_deduction_payment_manager,access.finance.deduction.payment.manager,model_finance_deduction_payment,group_finance_user,1,1,1,1
+access_finance_deduction_payment_employee,access.finance.deduction.payment.employee,model_finance_deduction_payment,group_finance_employee,1,1,1,0

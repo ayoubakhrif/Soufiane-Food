@@ -12,3 +12,5 @@ class Cal3iyaClient(models.Model):
         ('bureau', 'Bureau'),
         ('annule', 'Annulé'),
         ], string='Imp/Div', required=True, store=True)
+
+    benif_deduction = fields.Boolean(string="Autorise Paiement par Déduction", default=False)

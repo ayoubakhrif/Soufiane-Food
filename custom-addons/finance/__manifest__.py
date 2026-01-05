@@ -17,6 +17,7 @@
         'views/edit_request_view.xml',
         'views/cheque_encaisse_view.xml',
         'views/logistics_integration_view.xml',
+        'views/finance_deduction_view.xml',
         'reports/cheque_request_report.xml',
         'data/cron.xml',
     ],

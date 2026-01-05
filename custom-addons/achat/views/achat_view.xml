@@ -75,11 +75,6 @@
             <xpath expr="//field[@name='def_number']" position="attributes">
                  <attribute name="invisible">1</attribute>
             </xpath>
-            
-            <!-- Hide Finance group in form if it exists -->
-            <xpath expr="//group[@string='Suivi Finance (Lecture seule)']" position="attributes">
-                 <attribute name="invisible">1</attribute>
-            </xpath>
 
         </field>
     </record>

@@ -106,7 +106,9 @@
                 <field name="date"/>
                 <field name="ste_id"/>
                 <field name="benif_id"/>
+                <field name="type"/>
                 <field name="operation_ref"/>
+                <field name="bl_id"/>
                 <field name="amount" sum="Total"/>
             </tree>
         </field>

@@ -525,6 +525,9 @@ class DataCheque(models.Model):
         last_num = int(last_cheque.chq)
         expected_num = last_num + 1
 
+        if chq_num <= last_num:
+            return
+        
         if chq_num != expected_num:
              raise ValidationError(
                  f"Dernier chèque saisi : {last_num}\n"

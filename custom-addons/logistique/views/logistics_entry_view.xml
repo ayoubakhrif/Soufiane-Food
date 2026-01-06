@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Entrées Logistiques" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'" create="false" delete="false">
                 <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
-                <field name="week"/>
+
                 <field name="saisi_par"/>
                 <field name="prov_number"/>
                 <field name="dossier_id"/>
@@ -71,7 +71,7 @@
                         <group string="Dates et Références">
 
                             <field name="eta" readonly="1"/>
-                            <field name="week" readonly="1"/>
+
                             <field name="invoice_number" readonly="1"/>
                             <field name="saisi_par" readonly="1"/> <!-- Likely readonly too -->
                         </group>
@@ -87,8 +87,6 @@
                             <field name="article_id" readonly="1"/>
                             <field name="details" readonly="1"/>
                             <field name="weight" readonly="1"/>
-                            <field name="price_unit" readonly="1"/>
-                            <field name="amount_total" readonly="1"/>
                         </group>
                         <group string="Tracking">
                             <field name="incoterm" readonly="1"/>
@@ -134,7 +132,7 @@
             <search string="Recherche Entrées Logistiques">
 
                 <field name="supplier_id"/>
-                <field name="week"/>
+
                 <field name="dossier_id"/>
                 <field name="status"/>
                 <field name="article_id"/>
@@ -144,9 +142,7 @@
                             string="Supplier"
                             context="{'group_by': 'supplier_id'}"/>
 
-                    <filter name="group_week"
-                            string="Semaine"
-                            context="{'group_by': 'week'}"/>
+
 
                     <filter name="group_status"
                             string="Status"

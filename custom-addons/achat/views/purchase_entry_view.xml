@@ -38,23 +38,24 @@
                     <group>
                         <group string="Informations Générales">
 
-                            <field name="week"/>
-
                             <field name="eta"/>
+                            <field name="eta_dhl"/> <!-- New Field -->
                             <field name="ste_id"/>
                             <field name="supplier_id"/>
                             <field name="shipping_id"/>
+                            <field name="origin"/> <!-- New Field -->
                             <field name="incoterm"/>
                         </group>
                         <group string="Détails Marchandise">
                             <field name="article_id"/>
+                            <field name="lot"/> <!-- New Field -->
                             <field name="details"/>
                             <field name="invoice_number"/>
                             <field name="weight"/>
                             <field name="price_unit"/>
                             <field name="amount_total"/>
                             <field name="free_time"/>
-                            <field name="doc_status"/>
+                            <field name="dhl_number"/> <!-- Replaces doc_status -->
                         </group>
                     </group>
                     

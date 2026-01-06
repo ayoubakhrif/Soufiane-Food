@@ -64,8 +64,15 @@ class LogisticsEntry(models.Model):
     free_time = fields.Integer(string='Free Time')
     shipping_id = fields.Many2one('logistique.shipping', string='Company')
     eta = fields.Date(string='ETA')
+
     doc_status = fields.Char(string='Document Status')
     remarks = fields.Char(string='Remarks')
+    
+    # Purchase Specific Fields (Hidden in Logistics View)
+    lot = fields.Char(string='Lot')
+    dhl_number = fields.Char(string='DHL Number')
+    eta_dhl = fields.Date(string='ETA DHL')
+    origin = fields.Char(string='Origin')
     
     # BL number from dossier
     bl_number = fields.Char(string='BL Number', store=True)

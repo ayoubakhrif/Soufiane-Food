@@ -87,10 +87,8 @@ class FinanceDeductionAccount(models.Model):
         sheet.set_column(2, 2, 18)  # Reference/Type
         sheet.set_column(3, 3, 22)  # Operation Ref / BL
         sheet.set_column(4, 4, 28)  # Beneficiary / Containers
-        sheet.set_column(5, 5, 40)  # Comment / Note
-
         # Title
-        sheet.merge_range('A1:F1', 'Deduction Account Details', title_style)
+        sheet.merge_range('A1:E1', 'Deduction Account Details', title_style)
 
         row = 2
 
@@ -151,7 +149,7 @@ class FinanceDeductionAccount(models.Model):
         sheet.merge_range(row, 0, row, 5, 'Deductions (Payments)', section_style)
         row += 1
 
-        pay_headers = ["Date", "Amount", "Type", "Operation Ref", "BL", "Note"]
+        pay_headers = ["Date", "Amount", "Type", "Operation Ref", "BL"]
         sheet.write_row(row, 0, pay_headers, header_style)
         row += 1
 
@@ -169,10 +167,6 @@ class FinanceDeductionAccount(models.Model):
 
             sheet.write(row, 3, pay.operation_ref or "", cell_style)
             sheet.write(row, 4, pay.bl_id.name if pay.bl_id else "", cell_style)
-
-            # ✅ keep empty instead of FALSE
-            sheet.write(row, 5, pay.note or "", cell_style)
-
             row += 1
 
         workbook.close()

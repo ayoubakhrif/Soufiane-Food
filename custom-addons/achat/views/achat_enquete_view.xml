@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_achat_article_price_tree" model="ir.ui.view">
+        <field name="name">achat.article.price.tree</field>
+        <field name="model">achat.article.price</field>
+        <field name="arch" type="xml">
+            <tree string="Supplier Prices">
+                <field name="date"/>
+                <field name="article_id"/>
+                <field name="supplier_id"/>
+                <field name="price"/>
+                <field name="currency_id"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_achat_article_price_form" model="ir.ui.view">
+        <field name="name">achat.article.price.form</field>
+        <field name="model">achat.article.price</field>
+        <field name="arch" type="xml">
+            <form string="Supplier Price">
+                <sheet>
+                    <group>
+                        <group string="Price Information">
+                            <field name="article_id"/>
+                            <field name="supplier_id"/>
+                            <field name="price"/>
+                            <field name="currency_id"/>
+                            <field name="date"/>
+                        </group>
+                        <group string="Audit">
+                            <field name="user_id" readonly="1"/>
+                            <field name="remarks"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_achat_article_price" model="ir.actions.act_window">
+        <field name="name">Supplier Prices</field>
+        <field name="res_model">achat.article.price</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

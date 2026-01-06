@@ -13,3 +13,5 @@ access_logistique_article_purchase_user,logistique.article.purchase.user,logisti
 access_logistique_article_purchase_manager,logistique.article.purchase.manager,logistique.model_logistique_article,group_purchase_manager,1,1,1,1
 access_logistique_shipping_purchase_user,logistique.shipping.purchase.user,logistique.model_logistique_shipping,group_purchase_user,1,1,1,0
 access_logistique_shipping_purchase_manager,logistique.shipping.purchase.manager,logistique.model_logistique_shipping,group_purchase_manager,1,1,1,1
+access_achat_article_price_user,achat.article.price user,model_achat_article_price,achat.group_purchase_user,1,1,1,0
+access_achat_article_price_user,achat.article.price user,model_achat_article_price,achat.group_purchase_manager,1,1,1,0

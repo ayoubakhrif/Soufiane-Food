@@ -60,6 +60,7 @@ class LogisticsEntry(models.Model):
     incoterm = fields.Selection([
         ('cfr', 'CFR'),
         ('fob', 'FOB'),
+        ('emirate', 'EMIRATE'),
     ], string='Incoterm')
     free_time = fields.Integer(string='Free Time')
     shipping_id = fields.Many2one('logistique.shipping', string='Company')
@@ -134,3 +135,16 @@ class LogisticsEntry(models.Model):
                     "Format de semaine invalide.\n"
                     "Utilisez : W01 à W52 (ex: W12)"
                 )
+
+    @api.constrains('incoterm', 'free_time')
+    def _check_free_time_by_incoterm(self):
+        for rec in self:
+            if rec.incoterm in ('fob', 'cfr'):
+                if not rec.free_time:
+                    raise ValidationError(
+                        "Free Time is required when Incoterm is FOB or CFR."
+                    )
+                if rec.free_time < 14:
+                    raise ValidationError(
+                        "Free Time must be at least 14 days when Incoterm is FOB or CFR."
+                    )

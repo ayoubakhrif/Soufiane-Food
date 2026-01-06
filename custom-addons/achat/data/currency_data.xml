@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Activate USD -->
+        <record id="base.USD" model="res.currency">
+            <field name="active">True</field>
+        </record>
+
+        <!-- Activate EUR -->
+        <record id="base.EUR" model="res.currency">
+            <field name="active">True</field>
+        </record>
+
+        <!-- Activate MAD (usually active by default in Moroccan install, but enforcing it) -->
+        <record id="base.MAD" model="res.currency">
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

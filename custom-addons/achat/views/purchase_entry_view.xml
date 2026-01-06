@@ -54,10 +54,8 @@
                             <field name="price_unit"/>
                             <field name="amount_total"/>
                             <field name="free_time"
-                                attrs="{
-                                    'required': [('incoterm', 'in', ('fob','cfr'))],
-                                    'invisible': [('incoterm', '=', 'emirate')]
-                                }"/>
+                                invisible="incoterm == 'emirate'"
+                                required="incoterm in ['fob', 'cfr']"/>
                             <field name="dhl_number"/> <!-- Replaces doc_status -->
                             <field name="eta_dhl"/> <!-- New Field -->
                         </group>

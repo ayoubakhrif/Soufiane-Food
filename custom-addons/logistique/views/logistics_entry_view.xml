@@ -4,7 +4,7 @@
         <field name="name">logistique.entry.tree</field>
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
-            <tree string="Entrées Logistiques" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'">
+            <tree string="Entrées Logistiques" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'" create="false" delete="false">
                 <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
                 <field name="week"/>
                 <field name="saisi_par"/>
@@ -34,7 +34,7 @@
         <field name="name">logistique.entry.form</field>
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
-            <form string="Entrées logistique">
+            <form string="Entrées logistique" create="false" delete="false">
                 <header>
                     <div class="oe_button_box" position="inside">
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-hourglass-half" invisible="status != 'in_progress'">
@@ -58,8 +58,8 @@
                 <sheet>
                     <group>
                         <group string="Dossier / BL">
-                            <field name="dossier_id" options="{'no_create': True}"/>
-                            <field name="bl_number"/>
+                            <field name="dossier_id" options="{'no_create': True}" readonly="1"/> <!-- Readonly for Logistics -->
+                            <field name="bl_number" readonly="1"/> <!-- Readonly for Logistics -->
                         </group>
                         <group string="Suivi Finance (Lecture seule)">
                             <field name="prov_number" readonly="1"/>
@@ -73,7 +73,7 @@
                             <field name="eta" readonly="1"/>
                             <field name="week" readonly="1"/>
                             <field name="invoice_number" readonly="1"/>
-                            <field name="saisi_par"/>
+                            <field name="saisi_par" readonly="1"/> <!-- Likely readonly too -->
                         </group>
                         <group string="Entités">
                             <field name="ste_id" readonly="1"/>
@@ -109,8 +109,8 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Chèques (Lecture seule)" name="cheques">
-                            <field name="cheque_ids" readonly="1">
+                        <page string="Chèques" name="cheques">
+                            <field name="cheque_ids">
                                 <tree>
                                     <field name="cheque_serie"/>
                                     <field name="date"/>

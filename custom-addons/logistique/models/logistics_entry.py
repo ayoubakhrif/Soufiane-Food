@@ -8,11 +8,11 @@ class LogisticsEntry(models.Model):
     _rec_name = 'dossier_id'
 
     # Core reference - Dossier is now the main entity
-    dossier_id = fields.Many2one('logistique.dossier', string='Dossier / BL', required=True, ondelete='cascade')
+    dossier_id = fields.Many2one('logistique.dossier', string='Dossier / BL', required=False, ondelete='cascade')
     
     # Automatic display of dossier-related data (read-only)
-    container_ids = fields.One2many(related='dossier_id.container_ids', string='Conteneurs', readonly=True)
-    cheque_ids = fields.One2many(related='dossier_id.cheque_ids', string='Chèques', readonly=True)
+    container_ids = fields.One2many('logistique.container', 'entry_id', string='Conteneurs')
+    cheque_ids = fields.One2many(related='dossier_id.cheque_ids', string='Chèques', readonly=False)
     
     # Finance numbers (from dossier, readonly for logistics)
     prov_number = fields.Char(related='dossier_id.prov_number', string='N° Prov', readonly=True, store=False)
@@ -68,7 +68,7 @@ class LogisticsEntry(models.Model):
     remarks = fields.Char(string='Remarks')
     
     # BL number from dossier
-    bl_number = fields.Char(string='BL Number', related='dossier_id.name', store=True, readonly=True)
+    bl_number = fields.Char(string='BL Number', store=True)
     container_count = fields.Integer(
         string="Nb Conteneurs",
         related="dossier_id.container_count",
@@ -86,15 +86,39 @@ class LogisticsEntry(models.Model):
 
     @api.model
     def create(self, vals):
+        # Create dossier if bl_number is present and dossier_id is missing
+        if vals.get('bl_number') and not vals.get('dossier_id'):
+            dossier = self.env['logistique.dossier'].create({
+                'name': vals.get('bl_number')
+            })
+            vals['dossier_id'] = dossier.id
+
         # Create the logistics entry
         record = super(LogisticsEntry, self).create(vals)
         
+        # Sync containers with dossier
+        if record.dossier_id and record.container_ids:
+            record.container_ids.write({'dossier_id': record.dossier_id.id})
+
         # Automatically create corresponding finance tracking record
         self.env['finance.logistics.tracking'].sudo().create({
             'dossier_id': record.dossier_id.id,
         })
         
         return record
+
+    def write(self, vals):
+        res = super(LogisticsEntry, self).write(vals)
+        for rec in self:
+            # Sync BL Number to Dossier Name
+            if 'bl_number' in vals and rec.dossier_id:
+                rec.dossier_id.name = vals['bl_number']
+            
+            # Sync Containers to Dossier (if added/changed)
+            if 'container_ids' in vals and rec.dossier_id:
+                rec.container_ids.write({'dossier_id': rec.dossier_id.id})
+                
+        return res
     @api.constrains('week')
     def _check_week_format(self):
         for rec in self:

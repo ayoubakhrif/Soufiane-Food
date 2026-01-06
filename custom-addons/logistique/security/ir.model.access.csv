@@ -7,11 +7,11 @@ access_logistique_article_user,access.logistique.article.user,model_logistique_a
 access_logistique_article_manager,access.logistique.article.manager,model_logistique_article,group_logistique_manager,1,1,1,1
 access_logistique_shipping_user,access.logistique.shipping.user,model_logistique_shipping,group_logistique_user,1,1,1,0
 access_logistique_shipping_manager,access.logistique.shipping.manager,model_logistique_shipping,group_logistique_manager,1,1,1,1
-access_logistique_container_user,access.logistique.container.user,model_logistique_container,group_logistique_user,1,1,1,0
+access_logistique_container_user,access.logistique.container.user,model_logistique_container,group_logistique_user,1,0,0,0
 access_logistique_container_manager,access.logistique.container.manager,model_logistique_container,group_logistique_manager,1,1,1,1
-access_logistique_entry_user,access.logistique.entry.user,model_logistique_entry,group_logistique_user,1,1,1,0
+access_logistique_entry_user,access.logistique.entry.user,model_logistique_entry,group_logistique_user,1,1,0,0
 access_logistique_entry_manager,access.logistique.entry.manager,model_logistique_entry,group_logistique_manager,1,1,1,1
-access_logistique_dossier_user,access.logistique.dossier.user,model_logistique_dossier,group_logistique_user,1,1,1,0
+access_logistique_dossier_user,access.logistique.dossier.user,model_logistique_dossier,group_logistique_user,1,0,0,0
 access_logistique_dossier_manager,access.logistique.dossier.manager,model_logistique_dossier,group_logistique_manager,1,1,1,1
 access_logistique_dossier_cheque_user,access.logistique.dossier.cheque.user,model_logistique_dossier_cheque,group_logistique_user,1,1,1,0
 access_logistique_dossier_cheque_manager,access.logistique.dossier.cheque.manager,model_logistique_dossier_cheque,group_logistique_manager,1,1,1,1

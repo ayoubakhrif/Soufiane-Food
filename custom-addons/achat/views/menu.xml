@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Top Level Menu (If generic Purchase module usually exists, we might need a parent. 
+         But since this is custom, we'll create a Root or attach to existing Purchase? 
+         User didn't specify, but "New Purchase Module" suggests a new root or Main Menu item.) -->
+    
+    <menuitem id="menu_achat_root"
+              name="Achat"
+              web_icon="achat,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_achat_dossiers"
+              name="Dossiers"
+              parent="menu_achat_root"
+              action="action_purchase_entry"
+              sequence="1"/>
+</odoo>

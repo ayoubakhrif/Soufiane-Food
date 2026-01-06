@@ -1,23 +1,22 @@
 {
-    'name': 'Achat',
+    'name': 'Achat Management',
     'version': '1.0',
-    'summary': 'Module Achat partageant les données avec Logistique',
-    'description': """
-        Module Achat pour gérer les entrées logistiques du point de vue Achats.
-        - Partage le modèle logistique.entry
-        - Champs spécifiques Achat (Prix, Factures, etc.)
-        - Gestion des droits d'accès
-    """,
     'category': 'Purchase',
+    'summary': 'Gestion des Achats et Dossiers Logistiques',
+    'description': """
+        Module Achat pour gérer la création des dossiers logistiques.
+        - Création des BL
+        - Gestion des Conteneurs
+        - Vue dédiée pour les Acheteurs
+    """,
     'author': 'Ayoub Akhrif',
     'depends': ['base', 'logistique'],
     'data': [
-        'security/groups.xml',
+        'security/security.xml',
         'security/ir.model.access.csv',
-        'views/achat_readonly_for_logistics.xml',
-        'views/achat_view.xml',
+        'views/purchase_entry_view.xml',
+        'views/menu.xml',
     ],
     'installable': True,
     'application': True,
-    'license': 'LGPL-3',
 }

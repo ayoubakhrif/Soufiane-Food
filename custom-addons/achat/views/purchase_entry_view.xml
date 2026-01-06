@@ -37,9 +37,9 @@
                     </div>
                     <group>
                         <group string="Informations Générales">
-                            <field name="entry_id" invisible="1"/> <!-- Technical linkage if needed, but we are ON the entry -->
+
                             <field name="week"/>
-                            <field name="formatted_date" invisible="1"/>
+
                             <field name="eta"/>
                             <field name="ste_id"/>
                             <field name="supplier_id"/>

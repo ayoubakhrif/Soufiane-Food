@@ -82,6 +82,8 @@
                             <field name="payment_ids" readonly="1">
                                 <tree decoration-info="True">
                                     <field name="date"/>
+                                    <field name="type"/>
+                                    <field name="bl_id"/>
                                     <field name="operation_ref"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="note"/>

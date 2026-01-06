@@ -18,34 +18,5 @@
               action="action_logistique_container"
               sequence="20"/>
 
-    <!-- Data Menu -->
-    <menuitem id="menu_logistique_data"
-              name="Données"
-              parent="menu_logistique_root"
-              sequence="100"/>
 
-    <!-- Submenus Data -->
-    <menuitem id="menu_logistique_ste"
-              name="Sociétés"
-              parent="menu_logistique_data"
-              action="action_logistique_ste"
-              sequence="10"/>
-
-    <menuitem id="menu_logistique_supplier"
-              name="Suppliers"
-              parent="menu_logistique_data"
-              action="action_logistique_supplier"
-              sequence="20"/>
-
-    <menuitem id="menu_logistique_article"
-              name="Articles"
-              parent="menu_logistique_data"
-              action="action_logistique_article"
-              sequence="30"/>
-
-    <menuitem id="menu_logistique_shipping"
-              name="Shipping Companies"
-              parent="menu_logistique_data"
-              action="action_logistique_shipping"
-              sequence="40"/>
 </odoo>

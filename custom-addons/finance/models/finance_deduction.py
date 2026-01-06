@@ -1,5 +1,12 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+import base64
+import io
+try:
+    import xlsxwriter
+except ImportError:
+    xlsxwriter = None
+
 
 class FinanceDeductionAccount(models.Model):
     _name = 'finance.deduction.account'
@@ -147,3 +154,113 @@ class FinanceDeductionPayment(models.Model):
             )
 
         return super().create(vals)
+
+    def action_export_deduction_excel(self):
+        self.ensure_one()
+
+        if not xlsxwriter:
+            raise ValidationError("The library xlsxwriter is not installed.")
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+
+        # =========================
+        # Styles
+        # =========================
+        title_style = workbook.add_format({
+            'bold': True, 'font_size': 14, 'align': 'center'
+        })
+        header_style = workbook.add_format({
+            'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'
+        })
+        cell_style = workbook.add_format({
+            'border': 1
+        })
+        money_style = workbook.add_format({
+            'border': 1, 'num_format': '#,##0.00'
+        })
+
+        # =========================
+        # Sheet 1 — Summary
+        # =========================
+        sheet_summary = workbook.add_worksheet("Summary")
+        sheet_summary.set_column(0, 1, 30)
+
+        sheet_summary.merge_range('A1:B1', 'Deduction Account Summary', title_style)
+
+        data = [
+            ("Company", self.ste_id.name),
+            ("Beneficiary", self.benif_id.name),
+            ("Total Deposited", self.total_deposited),
+            ("Total Deducted", self.total_deducted),
+            ("Remaining Balance", self.balance),
+        ]
+
+        row = 2
+        for label, value in data:
+            sheet_summary.write(row, 0, label, header_style)
+            sheet_summary.write(row, 1, value, money_style if isinstance(value, float) else cell_style)
+            row += 1
+
+        # =========================
+        # Sheet 2 — Deposits
+        # =========================
+        sheet_dep = workbook.add_worksheet("Deposits")
+        sheet_dep.set_column(0, 4, 20)
+
+        headers = ["Date", "Amount", "Reference", "Comment"]
+        sheet_dep.write_row(0, 0, headers, header_style)
+
+        row = 1
+        for dep in self.deposit_ids.sorted(key=lambda x: x.date):
+            sheet_dep.write(row, 0, dep.date or '', cell_style)
+            sheet_dep.write(row, 1, dep.amount, money_style)
+            sheet_dep.write(row, 2, dep.reference, cell_style)
+            sheet_dep.write(row, 3, dep.comment or '', cell_style)
+            row += 1
+
+        # =========================
+        # Sheet 3 — Payments
+        # =========================
+        sheet_pay = workbook.add_worksheet("Deductions")
+        sheet_pay.set_column(0, 6, 22)
+
+        headers = [
+            "Date", "Amount", "Type", "Operation Ref",
+            "BL", "Containers", "Note"
+        ]
+        sheet_pay.write_row(0, 0, headers, header_style)
+
+        row = 1
+        for pay in self.payment_ids.sorted(key=lambda x: x.date):
+            sheet_pay.write(row, 0, pay.date or '', cell_style)
+            sheet_pay.write(row, 1, pay.amount, money_style)
+            sheet_pay.write(row, 2, pay.type, cell_style)
+            sheet_pay.write(row, 3, pay.operation_ref, cell_style)
+            sheet_pay.write(row, 4, pay.bl_id.name if pay.bl_id else '', cell_style)
+            sheet_pay.write(row, 5, ', '.join(pay.container_ids.mapped('name')), cell_style)
+            sheet_pay.write(row, 6, pay.note or '', cell_style)
+            row += 1
+
+        workbook.close()
+        output.seek(0)
+
+        file_data = base64.b64encode(output.read())
+        output.close()
+
+        filename = f"Deduction_{self.ste_id.name}_{self.benif_id.name}.xlsx"
+
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': file_data,
+            'type': 'binary',
+            'res_model': self._name,
+            'res_id': self.id,
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }

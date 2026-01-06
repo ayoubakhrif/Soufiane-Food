@@ -14,4 +14,34 @@
               parent="menu_achat_root"
               action="action_purchase_entry"
               sequence="1"/>
+
+    <!-- Data Menu (Moved from Logistique) -->
+    <menuitem id="menu_achat_data"
+              name="Données"
+              parent="menu_achat_root"
+              sequence="100"/>
+
+    <menuitem id="menu_achat_ste"
+              name="Sociétés"
+              parent="menu_achat_data"
+              action="logistique.action_logistique_ste"
+              sequence="10"/>
+
+    <menuitem id="menu_achat_supplier"
+              name="Suppliers"
+              parent="menu_achat_data"
+              action="logistique.action_logistique_supplier"
+              sequence="20"/>
+
+    <menuitem id="menu_achat_article"
+              name="Articles"
+              parent="menu_achat_data"
+              action="logistique.action_logistique_article"
+              sequence="30"/>
+
+    <menuitem id="menu_achat_shipping"
+              name="Shipping Companies"
+              parent="menu_achat_data"
+              action="logistique.action_logistique_shipping"
+              sequence="40"/>
 </odoo>

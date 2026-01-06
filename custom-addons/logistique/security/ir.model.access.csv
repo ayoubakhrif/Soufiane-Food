@@ -1,11 +1,11 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_logistique_ste_user,access.logistique.ste.user,model_logistique_ste,group_logistique_user,1,1,1,0
+access_logistique_ste_user,access.logistique.ste.user,model_logistique_ste,group_logistique_user,1,0,0,0
 access_logistique_ste_manager,access.logistique.ste.manager,model_logistique_ste,group_logistique_manager,1,1,1,1
-access_logistique_supplier_user,access.logistique.supplier.user,model_logistique_supplier,group_logistique_user,1,1,1,0
+access_logistique_supplier_user,access.logistique.supplier.user,model_logistique_supplier,group_logistique_user,1,0,0,0
 access_logistique_supplier_manager,access.logistique.supplier.manager,model_logistique_supplier,group_logistique_manager,1,1,1,1
-access_logistique_article_user,access.logistique.article.user,model_logistique_article,group_logistique_user,1,1,1,0
+access_logistique_article_user,access.logistique.article.user,model_logistique_article,group_logistique_user,1,0,0,0
 access_logistique_article_manager,access.logistique.article.manager,model_logistique_article,group_logistique_manager,1,1,1,1
-access_logistique_shipping_user,access.logistique.shipping.user,model_logistique_shipping,group_logistique_user,1,1,1,0
+access_logistique_shipping_user,access.logistique.shipping.user,model_logistique_shipping,group_logistique_user,1,0,0,0
 access_logistique_shipping_manager,access.logistique.shipping.manager,model_logistique_shipping,group_logistique_manager,1,1,1,1
 access_logistique_container_user,access.logistique.container.user,model_logistique_container,group_logistique_user,1,0,0,0
 access_logistique_container_manager,access.logistique.container.manager,model_logistique_container,group_logistique_manager,1,1,1,1

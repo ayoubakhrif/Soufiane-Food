@@ -15,6 +15,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/purchase_entry_view.xml',
+        'views/achat_enquete_views.xml',
         'views/menu.xml',
     ],
     'installable': True,

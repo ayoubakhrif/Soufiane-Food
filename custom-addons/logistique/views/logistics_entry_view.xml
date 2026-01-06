@@ -69,7 +69,7 @@
                     
                     <group>
                         <group string="Dates et Références">
-                        <group string="Dates et Références">
+
                             <field name="eta" readonly="1"/>
                             <field name="week" readonly="1"/>
                             <field name="invoice_number" readonly="1"/>

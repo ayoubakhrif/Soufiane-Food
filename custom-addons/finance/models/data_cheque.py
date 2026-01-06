@@ -290,7 +290,7 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # CONTRAINTES
     # ------------------------------------------------------------
-    @api.onchange('chq')
+    @api.onchange('chq', 'ste_id', 'benif_id', 'type')
     def _onchange_chq_checks(self):
         for rec in self:
 
@@ -298,23 +298,59 @@ class DataCheque(models.Model):
             if rec.chq and len(rec.chq) != 7:
                 raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")
 
-            # 2️⃣ Unicité
+            # 2️⃣ Unicité (Custom Logic)
             if rec.chq and rec.ste_id:
                 domain = [
                     ('chq', '=', rec.chq),
                     ('ste_id', '=', rec.ste_id.id),
                 ]
-
                 if rec.id:
                     domain.append(('id', '!=', rec.id))
+                
+                # Search ALL clashes
+                existing_records = self.env['datacheque'].search(domain)
 
-                existing = self.env['datacheque'].search(domain, limit=1)
-                if existing:
+                for ex in existing_records:
+                    # Check "Import" Exception
+                    current_is_import = (rec.benif_id.type == 'import')
+                    ex_is_import = (ex.benif_id.type == 'import')
+
+                    # If BOTH are Import AND Types are different (and set) -> ALLOW
+                    if current_is_import and ex_is_import:
+                        if rec.type and ex.type and rec.type != ex.type:
+                            continue # Safe, skip this conflict
+                    
+                    # Otherwise -> BLOCK
                     raise ValidationError("⚠️ Ce numéro du chèque existe déja pour cette société.")
 
     _sql_constraints = [
-        ('unique_chq_ste', 'unique(chq, ste_id)', '⚠️ Ce numéro du chèque existe déja pour cette société.')
+        ('unique_chq_ste', 'unique(chq, ste_id, type)', '⚠️ Ce numéro du chèque existe déja pour cette société pour ce type.')
     ]
+
+    @api.constrains('chq', 'ste_id', 'benif_id', 'type')
+    def _check_custom_uniqueness(self):
+        """Enforces strict uniqueness rules backend-side."""
+        for rec in self:
+            if not rec.chq or not rec.ste_id:
+                continue
+
+            domain = [
+                ('chq', '=', rec.chq),
+                ('ste_id', '=', rec.ste_id.id),
+                ('id', '!=', rec.id)
+            ]
+            existing_records = self.search(domain)
+
+            for ex in existing_records:
+                # Same logic as Onchange
+                current_is_import = (rec.benif_id.type == 'import')
+                ex_is_import = (ex.benif_id.type == 'import')
+
+                if current_is_import and ex_is_import:
+                    if rec.type and ex.type and rec.type != ex.type:
+                        continue 
+                
+                raise ValidationError(f"Le chèque {rec.chq} existe déjà pour la société {rec.ste_id.name} (Doublon non autorisé).")
 
     @api.constrains('state')
     def _check_state_annule(self):

@@ -39,7 +39,6 @@
                         <group string="Informations Générales">
 
                             <field name="eta"/>
-                            <field name="eta_dhl"/> <!-- New Field -->
                             <field name="ste_id"/>
                             <field name="supplier_id"/>
                             <field name="shipping_id"/>
@@ -56,6 +55,7 @@
                             <field name="amount_total"/>
                             <field name="free_time"/>
                             <field name="dhl_number"/> <!-- Replaces doc_status -->
+                            <field name="eta_dhl"/> <!-- New Field -->
                         </group>
                     </group>
                     

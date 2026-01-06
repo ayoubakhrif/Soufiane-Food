@@ -298,31 +298,6 @@ class DataCheque(models.Model):
             if rec.chq and len(rec.chq) != 7:
                 raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")
 
-            # 2️⃣ Unicité (Custom Logic)
-            if rec.chq and rec.ste_id:
-                domain = [
-                    ('chq', '=', rec.chq),
-                    ('ste_id', '=', rec.ste_id.id),
-                ]
-                if rec.id:
-                    domain.append(('id', '!=', rec.id))
-                
-                # Search ALL clashes
-                existing_records = self.env['datacheque'].search(domain)
-
-                for ex in existing_records:
-                    # Check "Import" Exception
-                    current_is_import = (rec.benif_id.type == 'import')
-                    ex_is_import = (ex.benif_id.type == 'import')
-
-                    # If BOTH are Import AND Types are different (and set) -> ALLOW
-                    if current_is_import and ex_is_import:
-                        if rec.type and ex.type and rec.type != ex.type:
-                            continue # Safe, skip this conflict
-                    
-                    # Otherwise -> BLOCK
-                    raise ValidationError("⚠️ Ce numéro du chèque existe déja pour cette société.")
-
     _sql_constraints = [
         ('unique_chq_ste', 'unique(chq, ste_id, type)', '⚠️ Ce numéro du chèque existe déja pour cette société pour ce type.')
     ]

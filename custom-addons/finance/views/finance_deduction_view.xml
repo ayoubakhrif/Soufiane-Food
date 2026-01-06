@@ -30,7 +30,6 @@
             <tree decoration-danger="balance &lt; 0" decoration-warning="balance == 0">
                 <field name="ste_id"/>
                 <field name="benif_id"/>
-                <field name="bl_id"/>
                 <field name="total_deposited" sum="Total Déposé"/>
                 <field name="total_deducted" sum="Total Déduit"/>
                 <field name="balance" sum="Solde"/>

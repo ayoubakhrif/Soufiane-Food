@@ -70,10 +70,31 @@ class LogisticsEntry(models.Model):
     remarks = fields.Char(string='Remarks')
     
     # Purchase Specific Fields (Hidden in Logistics View)
+    purchase_state = fields.Selection([
+        ('initial', 'Initial'),
+        ('draft', 'Draft'),
+        ('confirmed', 'Confirmed'),
+    ], string='Purchase Purchase', default='initial', required=True, tracking=True)
+
+    contract_num = fields.Char(string='Contract Number')
+
+    # Documents
+    doc_invoice = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Commercial Invoice', default='absent')
+    doc_packing = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Packing List', default='absent')
+    doc_bl = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Bill of Lading', default='absent')
+    doc_quality = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Quality Certificate', default='absent')
+    doc_origin = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Certificate of Origin', default='absent')
+
     lot = fields.Char(string='Lot')
     dhl_number = fields.Char(string='DHL Number')
     eta_dhl = fields.Date(string='ETA DHL')
     origin = fields.Char(string='Origin')
+    
+    def action_move_to_draft(self):
+        self.write({'purchase_state': 'draft'})
+
+    def action_confirm_purchase(self):
+        self.write({'purchase_state': 'confirmed'})
     
     # BL number from dossier
     bl_number = fields.Char(string='BL Number', store=True)

@@ -25,7 +25,9 @@
         <field name="arch" type="xml">
             <form string="Dossier Achat">
                 <header>
-                    <field name="status" widget="statusbar" clickable="1"/>
+                    <button name="action_move_to_draft" string="Move to Draft" type="object" class="oe_highlight" invisible="purchase_state != 'initial'"/>
+                    <button name="action_confirm_purchase" string="Confirm" type="object" class="oe_highlight" invisible="purchase_state != 'draft'"/>
+                    <field name="purchase_state" widget="statusbar" statusbar_visible="initial,draft,confirmed"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -36,31 +38,48 @@
                     </div>
                     <group>
                         <group string="Informations Générales">
-
+                            <field name="purchase_state" invisible="1"/>
                             <field name="eta"/>
                             <field name="ste_id"/>
                             <field name="supplier_id"/>
-                            <field name="shipping_id"/>
-                            <field name="origin"/> <!-- New Field -->
+                            <!-- Show shipping/origin only if NOT initial (or always? Request said Initial=Minimal) -->
+                            <field name="shipping_id" invisible="purchase_state == 'initial'"/>
+                            <field name="origin" invisible="purchase_state == 'initial'"/>
                             <field name="incoterm"/>
+                            <field name="contract_num"/>
                         </group>
                         <group string="Détails Marchandise">
                             <field name="article_id"/>
-                            <field name="lot"/> <!-- New Field -->
                             <field name="details"/>
-                            <field name="invoice_number"/>
-                            <field name="weight"/>
-                            <field name="price_unit"/>
-                            <field name="amount_total"/>
+                            
+                            <!-- Hidden in Initial -->
+                            <field name="lot" invisible="purchase_state == 'initial'"/>
+                            <field name="invoice_number" invisible="purchase_state == 'initial'"/>
+                            <field name="weight" invisible="purchase_state == 'initial'"/>
+                            <field name="price_unit" invisible="purchase_state == 'initial'"/>
+                            <field name="amount_total" invisible="purchase_state == 'initial'"/>
                             <field name="free_time"
-                                invisible="incoterm == 'emirate'"
+                                invisible="incoterm == 'emirate' or purchase_state == 'initial'"
                                 required="incoterm in ['fob', 'cfr']"/>
-                            <field name="dhl_number"/> <!-- Replaces doc_status -->
-                            <field name="eta_dhl"/> <!-- New Field -->
+                            <field name="dhl_number" invisible="purchase_state == 'initial'"/>
+                            <field name="eta_dhl" invisible="purchase_state == 'initial'"/>
                         </group>
                     </group>
                     
-                    <notebook>
+                    <notebook invisible="purchase_state == 'initial'">
+                        <page string="Documents" name="documents">
+                            <group>
+                                <group>
+                                    <field name="doc_invoice" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_packing" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_bl" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                                <group>
+                                    <field name="doc_quality" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                            </group>
+                        </page>
                         <page string="Conteneurs" name="containers">
                             <field name="container_ids">
                                 <tree editable="bottom">

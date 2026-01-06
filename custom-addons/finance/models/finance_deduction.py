@@ -53,85 +53,126 @@ class FinanceDeductionAccount(models.Model):
         if not xlsxwriter:
             raise ValidationError("The library xlsxwriter is not installed.")
 
+        from datetime import datetime, time
+
+        def to_xlsx_date(d):
+            """Convert Odoo Date (date) to datetime for xlsxwriter; return None if empty."""
+            if not d:
+                return None
+            # d is a python date object (fields.Date)
+            return datetime.combine(d, time.min)
+
+        # Selection label helper (avoid FALSE for empty selection)
+        type_label = dict(self.env['finance.deduction.payment']._fields['type'].selection)
+
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
 
         # =========================
         # Styles
         # =========================
-        title_style = workbook.add_format({
-            'bold': True, 'font_size': 14, 'align': 'center'
-        })
-        header_style = workbook.add_format({
-            'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'
-        })
-        cell_style = workbook.add_format({
-            'border': 1
-        })
-        money_style = workbook.add_format({
-            'border': 1, 'num_format': '#,##0.00'
-        })
+        title_style = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center'})
+        section_style = workbook.add_format({'bold': True, 'font_size': 12, 'bg_color': '#f2f2f2', 'border': 1})
+        header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'})
+        cell_style = workbook.add_format({'border': 1})
+        money_style = workbook.add_format({'border': 1, 'num_format': '#,##0.00'})
+        date_style = workbook.add_format({'border': 1, 'num_format': 'dd/mm/yyyy'})
 
         # =========================
-        # Sheet 1 — Summary
+        # Single Sheet
         # =========================
-        sheet_summary = workbook.add_worksheet("Summary")
-        sheet_summary.set_column(0, 1, 30)
+        sheet = workbook.add_worksheet("Deduction Details")
+        sheet.set_column(0, 0, 18)  # Date
+        sheet.set_column(1, 1, 16)  # Amount
+        sheet.set_column(2, 2, 18)  # Reference/Type
+        sheet.set_column(3, 3, 22)  # Operation Ref / BL
+        sheet.set_column(4, 4, 28)  # Beneficiary / Containers
+        sheet.set_column(5, 5, 40)  # Comment / Note
 
-        sheet_summary.merge_range('A1:B1', 'Deduction Account Summary', title_style)
-
-        data = [
-            ("Company", self.ste_id.name),
-            ("Beneficiary", self.benif_id.name),
-            ("Total Deposited", self.total_deposited),
-            ("Total Deducted", self.total_deducted),
-            ("Remaining Balance", self.balance),
-        ]
+        # Title
+        sheet.merge_range('A1:F1', 'Deduction Account Details', title_style)
 
         row = 2
-        for label, value in data:
-            sheet_summary.write(row, 0, label, header_style)
-            sheet_summary.write(row, 1, value, money_style if isinstance(value, float) else cell_style)
-            row += 1
 
         # =========================
-        # Sheet 2 — Deposits
+        # Summary block
         # =========================
-        sheet_dep = workbook.add_worksheet("Deposits")
-        sheet_dep.set_column(0, 4, 20)
+        sheet.merge_range(row, 0, row, 5, 'Summary', section_style)
+        row += 1
 
-        headers = ["Date", "Amount", "Reference", "Comment"]
-        sheet_dep.write_row(0, 0, headers, header_style)
-
-        row = 1
-        for dep in self.deposit_ids.sorted(key=lambda x: x.date):
-            sheet_dep.write(row, 0, dep.date or '', cell_style)
-            sheet_dep.write(row, 1, dep.amount, money_style)
-            sheet_dep.write(row, 2, dep.reference, cell_style)
-            sheet_dep.write(row, 3, dep.comment or '', cell_style)
-            row += 1
-
-        # =========================
-        # Sheet 3 — Payments
-        # =========================
-        sheet_pay = workbook.add_worksheet("Deductions")
-        sheet_pay.set_column(0, 6, 22)
-
-        headers = [
-            "Date", "Amount", "Type", "Operation Ref",
-            "BL", "Containers", "Note"
+        summary = [
+            ("Company", self.ste_id.name or ""),
+            ("Beneficiary", self.benif_id.name or ""),
+            ("Total Deposited", self.total_deposited or 0.0),
+            ("Total Deducted", self.total_deducted or 0.0),
+            ("Remaining Balance", self.balance or 0.0),
         ]
-        sheet_pay.write_row(0, 0, headers, header_style)
 
-        row = 1
-        for pay in self.payment_ids.sorted(key=lambda x: x.date):
-            sheet_pay.write(row, 0, pay.date or '', cell_style)
-            sheet_pay.write(row, 1, pay.amount, money_style)
-            sheet_pay.write(row, 2, pay.type, cell_style)
-            sheet_pay.write(row, 3, pay.operation_ref, cell_style)
-            sheet_pay.write(row, 4, pay.bl_id.name if pay.bl_id else '', cell_style)
-            sheet_pay.write(row, 5, ', '.join(pay.container_ids.mapped('name')), cell_style)
-            sheet_pay.write(row, 6, pay.note or '', cell_style)
+        for label, value in summary:
+            sheet.write(row, 0, label, header_style)
+            if isinstance(value, (int, float)):
+                sheet.write_number(row, 1, float(value), money_style)
+            else:
+                sheet.write(row, 1, value or "", cell_style)
+            row += 1
+
+        row += 2  # blank lines
+
+        # =========================
+        # Deposits section
+        # =========================
+        sheet.merge_range(row, 0, row, 5, 'Deposits', section_style)
+        row += 1
+
+        dep_headers = ["Date", "Amount", "Reference", "Comment", "", ""]
+        sheet.write_row(row, 0, dep_headers, header_style)
+        row += 1
+
+        for dep in self.deposit_ids.sorted(key=lambda x: (x.date or fields.Date.today())):
+            dt = to_xlsx_date(dep.date)
+            if dt:
+                sheet.write_datetime(row, 0, dt, date_style)
+            else:
+                sheet.write(row, 0, "", cell_style)
+
+            sheet.write_number(row, 1, float(dep.amount or 0.0), money_style)
+            sheet.write(row, 2, dep.reference or "", cell_style)
+            sheet.write(row, 3, dep.comment or "", cell_style)
+            # keep remaining columns empty
+            sheet.write(row, 4, "", cell_style)
+            sheet.write(row, 5, "", cell_style)
+            row += 1
+
+        row += 2  # blank lines
+
+        # =========================
+        # Deductions / Payments section
+        # =========================
+        sheet.merge_range(row, 0, row, 5, 'Deductions (Payments)', section_style)
+        row += 1
+
+        pay_headers = ["Date", "Amount", "Type", "Operation Ref", "BL", "Note"]
+        sheet.write_row(row, 0, pay_headers, header_style)
+        row += 1
+
+        for pay in self.payment_ids.sorted(key=lambda x: (x.date or fields.Date.today())):
+            dt = to_xlsx_date(pay.date)
+            if dt:
+                sheet.write_datetime(row, 0, dt, date_style)
+            else:
+                sheet.write(row, 0, "", cell_style)
+
+            sheet.write_number(row, 1, float(pay.amount or 0.0), money_style)
+
+            # ✅ show label instead of technical value; keep empty instead of FALSE
+            sheet.write(row, 2, type_label.get(pay.type, "") if pay.type else "", cell_style)
+
+            sheet.write(row, 3, pay.operation_ref or "", cell_style)
+            sheet.write(row, 4, pay.bl_id.name if pay.bl_id else "", cell_style)
+
+            # ✅ keep empty instead of FALSE
+            sheet.write(row, 5, pay.note or "", cell_style)
+
             row += 1
 
         workbook.close()
@@ -140,7 +181,7 @@ class FinanceDeductionAccount(models.Model):
         file_data = base64.b64encode(output.read())
         output.close()
 
-        filename = f"Deduction_{self.ste_id.name}_{self.benif_id.name}.xlsx"
+        filename = f"Deduction_{(self.ste_id.name or '').strip()}_{(self.benif_id.name or '').strip()}.xlsx"
 
         attachment = self.env['ir.attachment'].create({
             'name': filename,
@@ -156,6 +197,7 @@ class FinanceDeductionAccount(models.Model):
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'self',
         }
+
 
 
 class FinanceDeductionDeposit(models.Model):

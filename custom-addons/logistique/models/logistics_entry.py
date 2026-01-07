@@ -165,15 +165,15 @@ class LogisticsEntry(models.Model):
                     "Utilisez : W01 à W52 (ex: W12)"
                 )
 
-    @api.constrains('incoterm', 'free_time')
-    def _check_free_time_by_incoterm(self):
-        for rec in self:
-            if rec.incoterm in ('fob', 'cfr'):
-                if not rec.free_time:
-                    raise ValidationError(
-                        "Free Time is required when Incoterm is FOB or CFR."
-                    )
-                if rec.free_time < 7:
-                    raise ValidationError(
-                        "Free Time must be at least 14 days when Incoterm is FOB or CFR."
-                    )
+    #@api.constrains('incoterm', 'free_time')
+    #def _check_free_time_by_incoterm(self):
+     #   for rec in self:
+      #      if rec.incoterm in ('fob', 'cfr'):
+       #         if not rec.free_time:
+        #            raise ValidationError(
+         #               "Free Time is required when Incoterm is FOB or CFR."
+          #          )
+           #     if rec.free_time < 7:
+            #        raise ValidationError(
+             #           "Free Time must be at least 14 days when Incoterm is FOB or CFR."
+              #      )

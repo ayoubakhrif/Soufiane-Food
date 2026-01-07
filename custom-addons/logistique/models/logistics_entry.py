@@ -117,10 +117,18 @@ class LogisticsEntry(models.Model):
     def create(self, vals):
         # Create dossier if bl_number is present and dossier_id is missing
         if vals.get('bl_number') and not vals.get('dossier_id'):
-            dossier = self.env['logistique.dossier'].create({
-                'name': vals.get('bl_number')
-            })
-            vals['dossier_id'] = dossier.id
+            # Check if dossier exists first to avoid unique constraint error
+            existing_dossier = self.env['logistique.dossier'].search([
+                ('name', '=', vals.get('bl_number'))
+            ], limit=1)
+            
+            if existing_dossier:
+                vals['dossier_id'] = existing_dossier.id
+            else:
+                dossier = self.env['logistique.dossier'].create({
+                    'name': vals.get('bl_number')
+                })
+                vals['dossier_id'] = dossier.id
 
         # Create the logistics entry
         record = super(LogisticsEntry, self).create(vals)

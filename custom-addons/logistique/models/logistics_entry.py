@@ -4,6 +4,7 @@ from odoo.exceptions import ValidationError
 
 class LogisticsEntry(models.Model):
     _name = 'logistique.entry'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Entrée Logistique'
     _rec_name = 'dossier_id'
 
@@ -117,6 +118,27 @@ class LogisticsEntry(models.Model):
         store=False
     )
 
+
+    # Computed field to expose standard attachments in a form view field
+    attachment_ids = fields.Many2many(
+        'ir.attachment', 
+        string='Documents',
+        compute='_compute_attachment_ids',
+        inverse='_inverse_attachment_ids',
+        help='Dedicated documents upload area'
+    )
+
+    def _compute_attachment_ids(self):
+        for rec in self:
+            rec.attachment_ids = self.env['ir.attachment'].search([
+                ('res_model', '=', 'logistique.entry'),
+                ('res_id', '=', rec.id)
+            ])
+
+    def _inverse_attachment_ids(self):
+        for rec in self:
+            for attachment in rec.attachment_ids:
+                attachment.write({'res_model': 'logistique.entry', 'res_id': rec.id})
 
     @api.model
     def create(self, vals):

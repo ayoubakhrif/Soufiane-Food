@@ -31,10 +31,10 @@
                 </header>
                 <sheet>
                     <div class="oe_title">
-                        <label for="bl_number" string="Contract / BL Number" class="oe_edit_only"/>
+                        <label for="bl_number" string="BL Number" class="oe_edit_only"/>
+                        <label for="contract_num" placeholder="Contract No." readonly="1" class="oe_inline"/>
                         <h1>
                             <div class="o_row">
-                                <field name="contract_num" placeholder="Contract No." readonly="1" class="oe_inline"/>
                                 <span invisible="not contract_num"> / </span>
                                 <field name="bl_number" placeholder="BL Number" readonly="purchase_state != 'initial'" class="oe_inline"/>
                             </div>
@@ -96,6 +96,18 @@
                         </page>
                     </notebook>
                 </sheet>
+                        <page string="Attached Files" name="attached_files">
+                            <group>
+                                <field name="attachment_ids" widget="many2many_binary" string="Upload Documents" nolabel="1" readonly="purchase_state == 'confirmed'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>

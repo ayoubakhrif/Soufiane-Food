@@ -2,3 +2,4 @@
 # Models are inherited from logistique to avoid duplication
 from . import achat_enquete
 from . import achat_contract
+from . import purchase_entry_ext

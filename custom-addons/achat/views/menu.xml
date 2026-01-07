@@ -15,6 +15,12 @@
               action="action_purchase_entry"
               sequence="1"/>
 
+    <menuitem id="menu_achat_contracts"
+              name="Contrats"
+              parent="menu_achat_root"
+              action="action_achat_contract"
+              sequence="5"/>
+
     <!-- Data Menu (Moved from Logistique) -->
     <menuitem id="menu_achat_data"
               name="Données"

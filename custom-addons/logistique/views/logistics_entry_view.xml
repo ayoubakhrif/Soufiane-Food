@@ -161,7 +161,4 @@
         <field name="context">
             {'group_by': ['supplier_id', 'week']}
         </field>
-        <field name="domain">[('purchase_state', '=', 'confirmed')]</field>
-    </record>
-
 </odoo>

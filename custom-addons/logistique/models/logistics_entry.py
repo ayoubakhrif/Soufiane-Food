@@ -61,6 +61,7 @@ class LogisticsEntry(models.Model):
         ('cfr', 'CFR'),
         ('fob', 'FOB'),
         ('emirate', 'EMIRATE'),
+        ('exw', 'EXW'),
     ], string='Incoterm')
     free_time = fields.Integer(string='Free Time')
     shipping_id = fields.Many2one('logistique.shipping', string='Company')

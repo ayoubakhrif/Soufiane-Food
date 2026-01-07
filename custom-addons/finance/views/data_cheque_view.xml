@@ -132,7 +132,7 @@
                     <div class="oe_title">
                         <h1 class="d-flex flex-wrap align-items-center" style="gap:10px;">
                             <span class="text-muted" style="font-size:14px;">Société</span>
-                            <field name="ste_id" class="oe_inline" placeholder="Choisir une société"/>
+                            <field name="ste_id" class="oe_inline" placeholder="Choisir une société" options="{'no_create': True}"/>
 
                             <span class="text-muted" style="font-size:14px;">Chèque</span>
                             <field name="chq" class="oe_inline" placeholder="Numéro de chèque"/>
@@ -143,9 +143,9 @@
                     <group string="Informations">
                         <group>
                             <field name="talon_id" readonly="1"/>
-                            <field name="benif_id"/>
+                            <field name="benif_id" options="{'no_create': True}"/>
                             <field name="bl" invisible="benif_type != 'import'"/>
-                            <field name="perso_id" readonly="state == 'annule'"/>
+                            <field name="perso_id" readonly="state == 'annule'" options="{'no_create': True}"/>
                         </group>
                         <group>
                             <field name="date_emission" readonly="state in ['bureau','annule']" required="state not in ['bureau', 'annule']"/>

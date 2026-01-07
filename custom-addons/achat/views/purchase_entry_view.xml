@@ -31,64 +31,64 @@
                 </header>
                 <sheet>
                     <div class="oe_title">
-                        <label for="bl_number" class="oe_edit_only"/>
+                        <label for="bl_number" string="Contract / BL Number" class="oe_edit_only"/>
                         <h1>
-                            <field name="bl_number" placeholder="Ex: BL-123456"/>
+                            <div class="o_row">
+                                <field name="contract_num" placeholder="Contract No." readonly="1" class="oe_inline"/>
+                                <span invisible="not contract_num"> / </span>
+                                <field name="bl_number" placeholder="BL Number" readonly="purchase_state != 'initial'" class="oe_inline"/>
+                            </div>
                         </h1>
                     </div>
                     <group>
                         <group string="Informations Générales">
                             <field name="purchase_state" invisible="1"/>
-                            <field name="eta"/>
-                            <field name="contract_id" options="{'no_create': True}"/> 
-                            <!-- contract_num is auto-filled but kept for display/search -->
-                            <field name="contract_num" invisible="1"/> 
+                            <field name="eta" readonly="purchase_state != 'initial'"/>
+                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'"/> 
                             
-                            <field name="ste_id"/>
-                            <field name="supplier_id"/>
-                            <!-- Show shipping/origin only if NOT initial (or always? Request said Initial=Minimal) -->
-                            <field name="shipping_id" invisible="purchase_state == 'initial'"/>
-                            <field name="origin" invisible="purchase_state == 'initial'"/>
-                            <field name="incoterm"/>
+                            <field name="ste_id" readonly="purchase_state != 'initial'"/>
+                            <field name="supplier_id" readonly="purchase_state != 'initial'"/>
+                            <field name="shipping_id" readonly="purchase_state != 'initial'"/>
+                            <field name="origin" readonly="purchase_state != 'initial'"/>
+                            <field name="incoterm" readonly="purchase_state != 'initial'"/>
                         </group>
                         <group string="Détails Marchandise">
-                            <field name="article_id"/>
-                            <field name="details"/>
+                            <field name="article_id" readonly="purchase_state != 'initial'"/>
+                            <field name="details" readonly="purchase_state != 'initial'"/>
                             
-                            <!-- Hidden in Initial -->
-                            <field name="lot" invisible="purchase_state == 'initial'"/>
-                            <field name="invoice_number" invisible="purchase_state == 'initial'"/>
-                            <field name="weight" invisible="purchase_state == 'initial'"/>
-                            <field name="price_unit" invisible="purchase_state == 'initial'"/>
-                            <field name="amount_total" invisible="purchase_state == 'initial'"/>
+                            <field name="lot" readonly="purchase_state != 'initial'"/>
+                            <field name="invoice_number" readonly="purchase_state != 'initial'"/>
+                            <field name="weight" readonly="purchase_state != 'initial'"/>
+                            <field name="price_unit" readonly="purchase_state != 'initial'"/>
+                            <field name="amount_total" readonly="purchase_state != 'initial'"/>
                             
-                            <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate' or purchase_state == 'initial'"/>
-                            <div class="o_row" invisible="incoterm == 'emirate' or purchase_state == 'initial'">
+                            <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate'"/>
+                            <div class="o_row" invisible="incoterm == 'emirate'">
                                 <field name="free_time_negotiated" readonly="1" force_save="1" class="oe_inline"/> / 
-                                <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
+                                <field name="free_time" required="incoterm in ['fob', 'cfr']" readonly="purchase_state != 'initial'" class="oe_inline"/>
                             </div>
 
-                            <field name="dhl_number" invisible="purchase_state == 'initial'"/>
-                            <field name="eta_dhl" invisible="purchase_state == 'initial'"/>
+                            <field name="dhl_number" readonly="purchase_state != 'initial'"/>
+                            <field name="eta_dhl" readonly="purchase_state != 'initial'"/>
                         </group>
                     </group>
                     
-                    <notebook invisible="purchase_state == 'initial'">
+                    <notebook>
                         <page string="Documents" name="documents">
                             <group>
                                 <group>
-                                    <field name="doc_invoice" widget="radio" options="{'horizontal': true}"/>
-                                    <field name="doc_packing" widget="radio" options="{'horizontal': true}"/>
-                                    <field name="doc_bl" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_invoice" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="doc_packing" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="doc_bl" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
                                 </group>
                                 <group>
-                                    <field name="doc_quality" widget="radio" options="{'horizontal': true}"/>
-                                    <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_quality" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="doc_origin" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
                                 </group>
                             </group>
                         </page>
                         <page string="Conteneurs" name="containers">
-                            <field name="container_ids">
+                            <field name="container_ids" readonly="purchase_state != 'initial'">
                                 <tree editable="bottom">
                                     <field name="name"/>
                                 </tree>

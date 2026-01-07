@@ -94,8 +94,6 @@
                                 </tree>
                             </field>
                         </page>
-                    </notebook>
-                </sheet>
                         <page string="Attached Files" name="attached_files">
                             <group>
                                 <field name="attachment_ids" widget="many2many_binary" string="Upload Documents" nolabel="1" readonly="purchase_state == 'confirmed'"/>

@@ -12,7 +12,7 @@
                 <field name="supplier_id"/>
                 <field name="article_id"/>
                 <field name="eta"/>
-                <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'"/>
+                <field name="purchase_state " widget="badge" decoration-info="purchase_state == 'initial'" decoration-success="purchase_state == 'confirmed'"/>
             </tree>
         </field>
     </record>

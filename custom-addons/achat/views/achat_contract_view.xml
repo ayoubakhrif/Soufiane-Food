@@ -14,7 +14,7 @@
                 <field name="quantity_negotiated" sum="Total Negotiated"/>
                 <field name="quantity_consumed" sum="Total Consumed"/>
                 <field name="quantity_remaining" sum="Total Remaining"/>
-                <field name="purchase_state" widget="badge" decoration-success="purchase_state == 'open'" decoration-muted="purchase_state == 'closed'"/>
+                <field name="state" widget="badge" decoration-success="state == 'open'" decoration-muted="state == 'closed'"/>
             </tree>
         </field>
     </record>

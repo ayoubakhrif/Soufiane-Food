@@ -76,7 +76,9 @@ class LogisticsEntry(models.Model):
         ('confirmed', 'Confirmed'),
     ], string='Purchase Purchase', default='initial', required=True, tracking=True)
 
-    contract_num = fields.Char(string='Contract Number')
+    contract_num = fields.Char(string='Contract Number') # Keep for legacy/manual if needed? Or replace with related?
+    contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]")
+    free_time_negotiated = fields.Integer(string='Negotiated Free Time')
 
     # Documents
     doc_invoice = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Commercial Invoice', default='absent')
@@ -95,6 +97,21 @@ class LogisticsEntry(models.Model):
 
     def action_confirm_purchase(self):
         self.write({'purchase_state': 'confirmed'})
+
+    @api.onchange('contract_id')
+    def _onchange_contract_id(self):
+        if self.contract_id:
+            self.contract_num = self.contract_id.name
+            self.supplier_id = self.contract_id.supplier_id
+            self.ste_id = self.contract_id.ste_id
+            self.article_id = self.contract_id.article_id
+            self.incoterm = self.contract_id.incoterm
+            self.origin = self.contract_id.origin
+            self.free_time_negotiated = self.contract_id.free_time_negotiated
+            # Pre-fill actual free time with negotiated value
+            self.free_time = self.contract_id.free_time_negotiated
+            if self.contract_id.weight_total:
+                self.weight = self.contract_id.weight_total # Optional sync, user might update per shipment
     
     # BL number from dossier
     bl_number = fields.Char(string='BL Number', store=True)

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TREE VIEW -->
+    <record id="view_achat_contract_tree" model="ir.ui.view">
+        <field name="name">achat.contract.tree</field>
+        <field name="model">achat.contract</field>
+        <field name="arch" type="xml">
+            <tree string="Purchase Contracts" decoration-muted="state == 'closed'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <field name="article_id"/>
+                <field name="quantity_negotiated" sum="Total Negotiated"/>
+                <field name="quantity_consumed" sum="Total Consumed"/>
+                <field name="quantity_remaining" sum="Total Remaining"/>
+                <field name="state" widget="badge" decoration-success="state == 'open'" decoration-muted="state == 'closed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_achat_contract_form" model="ir.ui.view">
+        <field name="name">achat.contract.form</field>
+        <field name="model">achat.contract</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Contract">
+                <header>
+                    <field name="state" widget="statusbar" clickable="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Contract No. (e.g. CTR-2024-001)"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Agreement Terms">
+                            <field name="date"/>
+                            <field name="supplier_id"/>
+                            <field name="ste_id"/>
+                            <field name="article_id"/>
+                            <field name="incoterm"/>
+                            <field name="origin"/>
+                        </group>
+                        <group string="Quantities &amp; Conditions">
+                            <field name="quantity_negotiated"/>
+                            <field name="weight_total"/>
+                            <field name="free_time_negotiated"/>
+                            
+                            <separator string="Consumption"/>
+                            <field name="quantity_consumed" readonly="1"/>
+                            <field name="quantity_remaining" readonly="1" decoration-danger="quantity_remaining &lt;= 0"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Related Dossiers">
+                            <field name="dossier_ids" readonly="1">
+                                <tree>
+                                    <field name="bl_number"/>
+                                    <field name="date"/> <!-- Dossier Date if exists, or create_date? 'date' field not in entry, using eta or eta_dhl? -->
+                                    <field name="container_count"/>
+                                    <field name="purchase_state"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_achat_contract" model="ir.actions.act_window">
+        <field name="name">Purchase Contracts</field>
+        <field name="res_model">achat.contract</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Purchase Contract
+            </p>
+        </field>
+    </record>
+</odoo>

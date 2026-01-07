@@ -40,13 +40,16 @@
                         <group string="Informations Générales">
                             <field name="purchase_state" invisible="1"/>
                             <field name="eta"/>
+                            <field name="contract_id" options="{'no_create': True}"/> 
+                            <!-- contract_num is auto-filled but kept for display/search -->
+                            <field name="contract_num" invisible="1"/> 
+                            
                             <field name="ste_id"/>
                             <field name="supplier_id"/>
                             <!-- Show shipping/origin only if NOT initial (or always? Request said Initial=Minimal) -->
                             <field name="shipping_id" invisible="purchase_state == 'initial'"/>
                             <field name="origin" invisible="purchase_state == 'initial'"/>
                             <field name="incoterm"/>
-                            <field name="contract_num"/>
                         </group>
                         <group string="Détails Marchandise">
                             <field name="article_id"/>
@@ -58,9 +61,13 @@
                             <field name="weight" invisible="purchase_state == 'initial'"/>
                             <field name="price_unit" invisible="purchase_state == 'initial'"/>
                             <field name="amount_total" invisible="purchase_state == 'initial'"/>
-                            <field name="free_time"
-                                invisible="incoterm == 'emirate' or purchase_state == 'initial'"
-                                required="incoterm in ['fob', 'cfr']"/>
+                            
+                            <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate' or purchase_state == 'initial'"/>
+                            <div class="o_row" invisible="incoterm == 'emirate' or purchase_state == 'initial'">
+                                <field name="free_time_negotiated" readonly="1" force_save="1" class="oe_inline"/> / 
+                                <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
+                            </div>
+
                             <field name="dhl_number" invisible="purchase_state == 'initial'"/>
                             <field name="eta_dhl" invisible="purchase_state == 'initial'"/>
                         </group>

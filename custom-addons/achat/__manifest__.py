@@ -16,6 +16,7 @@
         'security/ir.model.access.csv',
         'data/currency_data.xml',
         'views/purchase_entry_view.xml',
+        'views/achat_contract_view.xml',
         'views/achat_enquete_view.xml',
         'views/menu.xml',
     ],

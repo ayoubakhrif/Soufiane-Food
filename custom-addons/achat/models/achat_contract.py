@@ -18,6 +18,7 @@ class AchatContract(models.Model):
         ('cfr', 'CFR'),
         ('fob', 'FOB'),
         ('emirate', 'EMIRATE'),
+        ('exw', 'EXW'),
     ], string='Incoterm', required=True)
     origin = fields.Char(string='Origin')
     details = fields.Char(string='Details')

@@ -14,6 +14,7 @@ class LogisticsEntry(models.Model):
             self.ste_id = self.contract_id.ste_id
             self.article_id = self.contract_id.article_id
             self.incoterm = self.contract_id.incoterm
+            self.details = self.contract_id.details
             self.origin = self.contract_id.origin
             self.free_time_negotiated = self.contract_id.free_time_negotiated
             # Pre-fill actual free time with negotiated value

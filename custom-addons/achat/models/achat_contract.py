@@ -20,6 +20,7 @@ class AchatContract(models.Model):
         ('emirate', 'EMIRATE'),
     ], string='Incoterm', required=True)
     origin = fields.Char(string='Origin')
+    details = fields.Char(string='Details')
     
     # Quantitative Terms
     quantity_negotiated = fields.Integer(string='Total Containers', required=True, default=1)

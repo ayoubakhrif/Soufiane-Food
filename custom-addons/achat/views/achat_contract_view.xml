@@ -41,6 +41,7 @@
                             <field name="supplier_id"/>
                             <field name="ste_id"/>
                             <field name="article_id"/>
+                            <field name="details"/>
                             <field name="incoterm"/>
                             <field name="origin"/>
                         </group>

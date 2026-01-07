@@ -59,7 +59,7 @@
                             <field name="dossier_ids" readonly="1">
                                 <tree>
                                     <field name="bl_number"/>
-                                    <field name="date"/> <!-- Dossier Date if exists, or create_date? 'date' field not in entry, using eta or eta_dhl? -->
+                                    <field name="eta"/> <!-- Dossier ETA -->
                                     <field name="container_count"/>
                                     <field name="purchase_state"/>
                                 </tree>

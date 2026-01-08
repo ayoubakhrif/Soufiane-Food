@@ -7,7 +7,7 @@ class TransportTrip(models.Model):
 
     date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
     driver = fields.Char(string='Chauffeur', required=True, tracking=True)
-    client = fields.Many2one(string='Client', required=True, tracking=True)
+    client = fields.char(string='Client', required=True, tracking=True)
     
     trip_type = fields.Selection([
         ('tanger_med', 'Tanger Med'),

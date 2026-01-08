@@ -5,7 +5,7 @@ class TransportTrip(models.Model):
     _description = 'Transport Trip'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    date = fields.Date(string='Trip Date', required=True, default=fields.Date.context_today)
+    date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
     driver = fields.Char(string='Chauffeur', required=True, tracking=True)
     client = fields.Many2one(string='Client', required=True, tracking=True)
     
@@ -19,8 +19,7 @@ class TransportTrip(models.Model):
     
     movement = fields.Selection([
         ('return', 'Retour'),
-        ('departure', 'Departure'),
-        ('entry', 'Entry'),
+        ('entry', 'Entrée'),
     ], string='Movement', tracking=True)
     
     charge_type = fields.Selection([
@@ -30,10 +29,10 @@ class TransportTrip(models.Model):
         ('mixed', 'Mixte'),
     ], string='Charge Type', tracking=True)
     
-    amount = fields.Float(string='Amount', tracking=True)
+    amount = fields.Float(string='Montant', tracking=True)
     note = fields.Text(string='Note')
     
-    is_paid = fields.Boolean(string='Paid', default=False, tracking=True)
+    is_paid = fields.Boolean(string='Payé', default=False, tracking=True)
 
     def action_confirm_paid(self):
         for record in self:

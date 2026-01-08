@@ -6,6 +6,10 @@ class LogisticsEntry(models.Model):
     contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]")
     free_time_negotiated = fields.Integer(string='Negotiated Free Time')
 
+    
+    # Document Link
+    document_ids = fields.One2many('logistique.entry.document', 'entry_id', string='Documents')
+
     @api.onchange('contract_id')
     def _onchange_contract_id(self):
         if self.contract_id:

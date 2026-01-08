@@ -119,7 +119,7 @@ class LogisticsEntry(models.Model):
     )
 
 
-    document_ids = fields.One2many('logistique.entry.document', 'entry_id', string='Documents')
+
 
     @api.model
     def create(self, vals):

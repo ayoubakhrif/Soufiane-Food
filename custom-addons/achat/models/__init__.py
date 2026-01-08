@@ -3,3 +3,4 @@
 from . import achat_enquete
 from . import achat_contract
 from . import purchase_entry_ext
+from . import purchase_document

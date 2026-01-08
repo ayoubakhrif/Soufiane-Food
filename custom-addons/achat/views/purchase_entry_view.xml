@@ -37,7 +37,8 @@
                             <div class="o_row">
                                 <field name="contract_num" placeholder="Contract No." readonly="1" class="oe_inline"/>
                                 <span invisible="not contract_num"> / </span>
-                                <field name="bl_number" placeholder="BL Number" readonly="purchase_state != 'initial'" class="oe_inline"/>
+                                <field name="bl_number" placeholder="BL Number" class="oe_inline"/>
+                                <!--readonly="purchase_state != 'initial'"-->
                             </div>
                         </h1>
                     </div>

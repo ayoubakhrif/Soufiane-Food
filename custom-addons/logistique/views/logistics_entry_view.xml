@@ -8,7 +8,6 @@
                 <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
 
                 <field name="saisi_par"/>
-                <field name="prov_number"/>
                 <field name="dossier_id"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
@@ -22,13 +21,14 @@
                 <field name="free_time"/>
                 <field name="shipping_id"/>
                 <field name="eta"/>
-                <field name="remarks"/>
                 <field name="container_count"/>
                 <field name="cheque_count"/>
                 <field name="def_number"/>
                 <field name="surestarie_amount" sum="Surestarie"/>
                 <field name="thc_amount" sum="THC"/>
                 <field name="magasinage_amount" sum="Magasinage"/>
+                <field name="entry_date"/>
+                <field name="exit_date"/>
             </tree>
         </field>
     </record>
@@ -171,11 +171,6 @@
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_logistique_entry_search"/>
-        <field name="context">
-            {'group_by': ['supplier_id']}
-        </field>
-
         <field name="domain">[('purchase_state', 'in', ('draft', 'confirmed'))]</field>
     </record>
-
 </odoo>

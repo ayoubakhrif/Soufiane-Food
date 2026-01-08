@@ -179,6 +179,10 @@ class LogisticsEntry(models.Model):
         return record
 
     def write(self, vals):
+        # If status is being changed, set saisi_par to current user's name
+        if 'status' in vals:
+            vals['saisi_par'] = self.env.user.name
+        
         res = super(LogisticsEntry, self).write(vals)
         for rec in self:
             # Sync BL Number to Dossier Name

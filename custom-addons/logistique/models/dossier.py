@@ -30,8 +30,37 @@ class LogistiqueDossier(models.Model):
         store=True
     )
 
+    surestarie_amount = fields.Float(
+        string="Surestarie",
+        compute="_compute_charges",
+        store=True
+    )
+    thc_amount = fields.Float(
+        string="THC",
+        compute="_compute_charges",
+        store=True
+    )
+    magasinage_amount = fields.Float(
+        string="Magasinage",
+        compute="_compute_charges",
+        store=True
+    )
+
     @api.depends('container_ids', 'cheque_ids')
     def _compute_counts(self):
         for dossier in self:
             dossier.container_count = len(dossier.container_ids)
             dossier.cheque_count = len(dossier.cheque_ids)
+
+    @api.depends('cheque_ids.amount', 'cheque_ids.type')
+    def _compute_charges(self):
+        for rec in self:
+            rec.surestarie_amount = sum(
+                c.amount for c in rec.cheque_ids if c.type == 'surestarie'
+            )
+            rec.thc_amount = sum(
+                c.amount for c in rec.cheque_ids if c.type == 'thc'
+            )
+            rec.magasinage_amount = sum(
+                c.amount for c in rec.cheque_ids if c.type == 'magasinage'
+            )

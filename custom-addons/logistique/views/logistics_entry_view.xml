@@ -159,7 +159,7 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_logistique_entry_search"/>
         <field name="context">
-            {'group_by': ['supplier_id', 'week']}
+            {'group_by': ['supplier_id', 'status']}
         </field>
 
         <field name="domain">[('purchase_state', 'in', ('draft', 'confirmed'))]</field>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_transport_trip_form" model="ir.ui.view">
+        <field name="name">transport.trip.form</field>
+        <field name="model">transport.trip</field>
+        <field name="arch" type="xml">
+            <form string="Transport Trip">
+                <header>
+                    <button name="action_confirm_paid" string="Confirm Paid" type="object" class="oe_highlight" invisible="is_paid"/>
+                    <button name="action_set_unpaid" string="Set Unpaid" type="object" invisible="not is_paid"/>
+                    <field name="is_paid" invisible="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="date"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="driver"/>
+                            <field name="client"/>
+                            <field name="trip_type"/>
+                        </group>
+                        <group>
+                            <field name="movement"/>
+                            <field name="charge_type"/>
+                            <field name="amount"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_transport_trip_tree" model="ir.ui.view">
+        <field name="name">transport.trip.tree</field>
+        <field name="model">transport.trip</field>
+        <field name="arch" type="xml">
+            <tree string="Transport Trips" decoration-success="is_paid" decoration-info="not is_paid">
+                <field name="date"/>
+                <field name="driver"/>
+                <field name="client"/>
+                <field name="trip_type"/>
+                <field name="movement"/>
+                <field name="charge_type"/>
+                <field name="amount" sum="Total Amount"/>
+                <field name="is_paid" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_transport_trip_search" model="ir.ui.view">
+        <field name="name">transport.trip.search</field>
+        <field name="model">transport.trip</field>
+        <field name="arch" type="xml">
+            <search string="Search Transport Trips">
+                <field name="driver"/>
+                <field name="client"/>
+                <field name="trip_type"/>
+                <field name="date"/>
+                
+                <filter string="Paid" name="paid" domain="[('is_paid', '=', True)]"/>
+                <filter string="Unpaid" name="unpaid" domain="[('is_paid', '=', False)]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Driver" name="group_driver" domain="[]" context="{'group_by': 'driver'}"/>
+                    <filter string="Client" name="group_client" domain="[]" context="{'group_by': 'client'}"/>
+                    <filter string="Trip Type" name="group_type" domain="[]" context="{'group_by': 'trip_type'}"/>
+                    <filter string="Date" name="group_date" domain="[]" context="{'group_by': 'date'}"/>
+                    <filter string="Movement" name="group_movement" domain="[]" context="{'group_by': 'movement'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_transport_trip_pivot" model="ir.ui.view">
+        <field name="name">transport.trip.pivot</field>
+        <field name="model">transport.trip</field>
+        <field name="arch" type="xml">
+            <pivot string="Transport Analysis">
+                <field name="date" type="row" interval="month"/>
+                <field name="client" type="row"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_transport_trip_graph" model="ir.ui.view">
+        <field name="name">transport.trip.graph</field>
+        <field name="model">transport.trip</field>
+        <field name="arch" type="xml">
+            <graph string="Transport Analysis" type="bar">
+                <field name="date" type="row" interval="month"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_transport_trip" model="ir.actions.act_window">
+        <field name="name">Transport Trips</field>
+        <field name="res_model">transport.trip</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new transport trip!
+            </p>
+        </field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_transport_root" name="Transport" sequence="10"/>
+    <menuitem id="menu_transport_operations" name="Operations" parent="menu_transport_root" sequence="1"/>
+    <menuitem id="menu_transport_trip" name="Trips" parent="menu_transport_operations" action="action_transport_trip" sequence="1"/>
+
+</odoo>

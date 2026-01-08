@@ -16,7 +16,13 @@ class FinanceChequeEncaisse(models.Model):
         required=True,
         domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id)]"
     )
-    
+    type = fields.Selection([
+        ('magasinage', 'Magasinage'),
+        ('surestarie', 'Surestarie'),
+        ('change', 'Change'),
+        ('divers', 'Divers'),
+    ], store=True, string='Type', tracking=True)
+
     # Editable fields to sync
     amount = fields.Float(string='Montant', required=True, tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', required=True, tracking=True)

@@ -13,6 +13,7 @@
                     <field name="amount" sum="Total"/>
                     <field name="date_encaissement"/>
                     <field name="create_uid" string="Saisi par"/>
+                    <field name="type"/>
                 </tree>
             </field>
         </record>
@@ -36,6 +37,7 @@
                                 <field name="benif_id" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="cheque_id" options="{'no_create': True, 'no_open': True}" 
                                        invisible="not ste_id or not benif_id"/>
+                                <field name="type"/>
                             </group>
                             <group string="Action" invisible="not cheque_id">
                                 <field name="amount" widget="monetary"/>

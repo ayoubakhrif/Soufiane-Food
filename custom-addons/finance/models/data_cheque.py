@@ -46,6 +46,7 @@ class DataCheque(models.Model):
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
+        ('divers', 'Divers'),
     ], store=True, string='Type', tracking=True)
     
     # New Fields

@@ -15,7 +15,8 @@ class LogisticsEntryDocument(models.Model):
         ('fito', 'Fito sanitaire'),
     ], string='Document Type', required=True)
     
-    attachment_id = fields.Many2one('ir.attachment', string='Fichier', required=True, domain="[('res_model', '=', 'logistique.entry.document')]")
+    file = fields.Binary(string='Fichier', required=True, attachment=True)
+    file_name = fields.Char(string='Nom du fichier')
 
     @api.model
     def create(self, vals):

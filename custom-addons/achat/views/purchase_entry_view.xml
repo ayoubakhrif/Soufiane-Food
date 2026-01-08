@@ -99,7 +99,8 @@
                             <field name="document_ids" readonly="purchase_state == 'confirmed'">
                                 <tree editable="bottom">
                                     <field name="document_type"/>
-                                    <field name="attachment_id" widget="binary" filename="attachment_id"/>
+                                    <field name="file_name" invisible="1"/>
+                                    <field name="file" widget="binary" filename="file_name"/>
                                 </tree>
                             </field>
                         </page>

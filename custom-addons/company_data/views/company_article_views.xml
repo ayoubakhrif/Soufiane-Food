@@ -30,11 +30,41 @@
         </field>
     </record>
 
+    <!-- KANBAN VIEW -->
+    <record id="view_company_article_kanban" model="ir.ui.view">
+        <field name="name">company.article.kanban</field>
+        <field name="model">company.article</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <field name="display_name"/>
+                <field name="image"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_card">
+                            <div class="o_kanban_image">
+                                <img t-if="record.image.raw_value"
+                                    t-att-src="kanban_image('company.article', 'image', record.id)"
+                                    class="o_kanban_avatar"/>
+                            </div>
+
+                            <div class="o_kanban_details">
+                                <strong>
+                                    <field name="display_name"/>
+                                </strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <!-- ACTION -->
     <record id="action_company_article" model="ir.actions.act_window">
         <field name="name">Articles</field>
         <field name="res_model">company.article</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">kanban,form,tree</field>
     </record>
 
     <!-- MENU -->

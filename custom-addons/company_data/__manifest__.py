@@ -6,6 +6,7 @@
     'author': 'Ayoub Akhrif',
     'depends': ['base'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/company_article_views.xml',
     ],

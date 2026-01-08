@@ -100,9 +100,9 @@
         <field name="model">transport.trip</field>
         <field name="arch" type="xml">
             <pivot string="Transport Analysis">
-                <field name="date" type="row" interval="month"/>
+                <field name="date" type="row" interval="day"/>
                 <field name="client" type="row"/>
-                <field name="amount" type="measure"/>
+                <field name="total_amount" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -113,8 +113,8 @@
         <field name="model">transport.trip</field>
         <field name="arch" type="xml">
             <graph string="Transport Analysis" type="bar">
-                <field name="date" type="row" interval="month"/>
-                <field name="amount" type="measure"/>
+                <field name="date" type="row" interval="day"/>
+                <field name="total_amount" type="measure"/>
             </graph>
         </field>
     </record>

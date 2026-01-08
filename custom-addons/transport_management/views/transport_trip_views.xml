@@ -30,6 +30,7 @@
                         </group>
                     </group>
                     <group>
+                        <field name="total_amount"/>
                         <field name="note"/>
                     </group>
                 </sheet>
@@ -53,8 +54,11 @@
                 <field name="client"/>
                 <field name="trip_type"/>
                 <field name="movement"/>
-                <field name="charge_type"/>
-                <field name="amount" sum="Total Amount"/>
+                <field name="charge_fuel"/>
+                <field name="charge_driver"/>
+                <field name="charge_adblue"/>
+                <field name="charge_mixed"/>
+                <field name="total_amount" sum="Total charges"/>
                 <field name="is_paid" widget="boolean_toggle"/>
             </tree>
         </field>

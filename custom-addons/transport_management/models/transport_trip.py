@@ -21,18 +21,19 @@ class TransportTrip(models.Model):
         ('return', 'Retour'),
         ('entry', 'Entrée'),
     ], string='Movement', tracking=True)
-    
-    charge_type = fields.Selection([
-        ('fuel', 'Gasoil'),
-        ('driver_allowance', 'Déplacement chauffeur'),
-        ('adblue', 'AdBlue'),
-        ('mixed', 'Mixte'),
-    ], string='Charge Type', tracking=True)
-    
-    amount = fields.Float(string='Montant', tracking=True)
-    note = fields.Text(string='Note')
+    charge_fuel = fields.Float(string='Gazoil', tracking=True)
+    charge_driver = fields.Float(string='Déplacement Chauffeur', tracking=True)
+    charge_adblue = fields.Float(string='AdBlue', tracking=True)
+    charge_mixed = fields.Float(string='Mixe (A préciser sur commentaire)', tracking=True)
+    note = fields.Text(string='Commentaire (Mixe)')
     
     is_paid = fields.Boolean(string='Payé', default=False, tracking=True)
+    total_amount = fields.Float(
+        string='Montant total',
+        compute='_compute_total_amount',
+        store=True,
+        tracking=True
+    )
 
     def action_confirm_paid(self):
         for record in self:
@@ -41,3 +42,18 @@ class TransportTrip(models.Model):
     def action_set_unpaid(self):
         for record in self:
             record.is_paid = False
+
+    @api.depends(
+        'charge_fuel',
+        'charge_driver',
+        'charge_adblue',
+        'charge_mixed'
+    )
+    def _compute_total_amount(self):
+        for record in self:
+            record.total_amount = (
+                (record.charge_fuel or 0.0) +
+                (record.charge_driver or 0.0) +
+                (record.charge_adblue or 0.0) +
+                (record.charge_mixed or 0.0)
+            )

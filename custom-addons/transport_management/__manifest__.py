@@ -9,7 +9,7 @@
     """,
     'category': 'Logistics',
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'hr', 'contacts', 'mail'],
+    'depends': ['base', 'mail'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

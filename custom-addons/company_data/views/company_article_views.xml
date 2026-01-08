@@ -121,7 +121,7 @@
                 .o_kanban_image_hover:hover {
                     transform: scale(1.05) !important;
                 }
-                
+            
                 .o_kanban_image_wrapper {
                     transition: all 0.3s ease;
                 }

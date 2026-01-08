@@ -42,7 +42,7 @@
     <menuitem id="menu_achat_article"
               name="Articles"
               parent="menu_achat_data"
-              action="logistique.action_logistique_article"
+              action="achat.action_achat_article"
               sequence="30"/>
 
     <menuitem id="menu_achat_shipping"

@@ -23,7 +23,7 @@
         <field name="model">logistique.entry</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <form string="Dossier Achat">
+            <form string="Dossier Achat" chatter_position="bottom">
                 <header>
                     <button name="action_move_to_draft" string="Move to Draft" type="object" class="oe_highlight" invisible="purchase_state != 'initial'"/>
                     <button name="action_confirm_purchase" string="Confirm" type="object" class="oe_highlight" invisible="purchase_state != 'draft'"/>
@@ -99,7 +99,6 @@
                             <field name="document_ids" readonly="purchase_state == 'confirmed'">
                                 <tree editable="bottom">
                                     <field name="document_type"/>
-                                    <field name="file_name" invisible="1"/>
                                     <field name="file" widget="binary" filename="file_name"/>
                                 </tree>
                             </field>

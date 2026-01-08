@@ -10,7 +10,7 @@
                 <!-- ================= HEADER ================= -->
                 <header>
                     <button name="action_confirm_paid"
-                            string="Confirmer"
+                            string="Payer"
                             type="object"
                             class="oe_highlight"
                             invisible="is_paid"/>

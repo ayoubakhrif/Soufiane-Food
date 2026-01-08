@@ -6,3 +6,4 @@ from . import container
 from . import dossier
 from . import dossier_cheque
 from . import logistics_entry
+from . import consolidator

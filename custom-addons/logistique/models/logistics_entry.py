@@ -96,7 +96,30 @@ class LogisticsEntry(models.Model):
     dhl_number = fields.Char(string='DHL Number')
     eta_dhl = fields.Date(string='ETA DHL')
     origin = fields.Char(string='Origin')
-    
+    entry_date = fields.Date(string='Date of entry')
+    exit_date = fields.Date(string='Date of exit')
+    consolidator = fields.Many2one('logistique.consolidator', string='Consolidator')
+    surestarie_amount = fields.Float(
+        string="Surestarie",
+        related="dossier_id.surestarie_amount",
+        readonly=True,
+        store=False
+    )
+
+    thc_amount = fields.Float(
+        string="THC",
+        related="dossier_id.thc_amount",
+        readonly=True,
+        store=False
+    )
+
+    magasinage_amount = fields.Float(
+        string="Magasinage",
+        related="dossier_id.magasinage_amount",
+        readonly=True,
+        store=False
+    )
+
     def action_move_to_draft(self):
         self.write({'purchase_state': 'draft'})
 

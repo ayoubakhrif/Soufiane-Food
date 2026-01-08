@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- TREE VIEW -->
+    <record id="view_company_article_tree" model="ir.ui.view">
+        <field name="name">company.article.tree</field>
+        <field name="model">company.article</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="display_name"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_company_article_form" model="ir.ui.view">
+        <field name="name">company.article.form</field>
+        <field name="model">company.article</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="image" widget="image"/>
+                        <field name="display_name"/>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_company_article" model="ir.actions.act_window">
+        <field name="name">Articles</field>
+        <field name="res_model">company.article</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_company_data_root" name="Données de société"/>
+    <menuitem id="menu_company_article"
+              name="Articles"
+              parent="menu_company_data_root"
+              action="action_company_article"/>
+
+</odoo>

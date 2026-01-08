@@ -31,8 +31,8 @@ class LogisticsEntry(models.Model):
     )
     status = fields.Selection([
         ('in_progress', 'En cours'),
-        ('get_out', 'Get Out'),
-        ('closed', 'Cloturé'),
+        ('get_out', 'Gate Out'),
+        ('closed', 'Clotured'),
     ], string='Status', default='in_progress')
     
     # Company and supplier info

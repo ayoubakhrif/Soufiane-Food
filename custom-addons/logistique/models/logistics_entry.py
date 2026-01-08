@@ -86,7 +86,7 @@ class LogisticsEntry(models.Model):
     doc_invoice = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Commercial Invoice', default='absent')
     doc_packing = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Packing List', default='absent')
     doc_bl = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Bill of Lading', default='absent')
-    doc_quality = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Quality Certificate', default='absent')
+    doc_fito = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Fito sanitaire', default='absent')
     doc_origin = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Certificate of Origin', default='absent')
 
     lot = fields.Char(string='Lot')
@@ -119,26 +119,7 @@ class LogisticsEntry(models.Model):
     )
 
 
-    # Computed field to expose standard attachments in a form view field
-    attachment_ids = fields.Many2many(
-        'ir.attachment', 
-        string='Documents',
-        compute='_compute_attachment_ids',
-        inverse='_inverse_attachment_ids',
-        help='Dedicated documents upload area'
-    )
-
-    def _compute_attachment_ids(self):
-        for rec in self:
-            rec.attachment_ids = self.env['ir.attachment'].search([
-                ('res_model', '=', 'logistique.entry'),
-                ('res_id', '=', rec.id)
-            ])
-
-    def _inverse_attachment_ids(self):
-        for rec in self:
-            for attachment in rec.attachment_ids:
-                attachment.write({'res_model': 'logistique.entry', 'res_id': rec.id})
+    document_ids = fields.One2many('logistique.entry.document', 'entry_id', string='Documents')
 
     @api.model
     def create(self, vals):

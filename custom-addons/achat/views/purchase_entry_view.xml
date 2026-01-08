@@ -83,7 +83,7 @@
                                     <field name="doc_bl" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
                                 </group>
                                 <group>
-                                    <field name="doc_quality" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="doc_fito" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
                                     <field name="doc_origin" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
                                 </group>
                             </group>
@@ -95,10 +95,13 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Attached Files" name="attached_files">
-                            <group>
-                                <field name="attachment_ids" widget="many2many_binary" string="Upload Documents" nolabel="1" readonly="purchase_state == 'confirmed'"/>
-                            </group>
+                        <page string="Documents (Files)" name="attached_files">
+                            <field name="document_ids" readonly="purchase_state == 'confirmed'">
+                                <tree editable="bottom">
+                                    <field name="document_type"/>
+                                    <field name="attachment_id" widget="binary" filename="attachment_id"/>
+                                </tree>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>

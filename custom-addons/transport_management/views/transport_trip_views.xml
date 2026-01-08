@@ -6,44 +6,81 @@
         <field name="model">transport.trip</field>
         <field name="arch" type="xml">
             <form string="Transport Trip">
+
+                <!-- ================= HEADER ================= -->
                 <header>
-                    <button name="action_confirm_paid" string="Confirm Paid" type="object" class="oe_highlight" invisible="is_paid"/>
-                    <button name="action_set_unpaid" string="Set Unpaid" type="object" invisible="not is_paid"/>
-                    <field name="is_paid" invisible="1"/>
+                    <button name="action_confirm_paid"
+                            string="Confirmer"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="is_paid"/>
+
+                    <button name="action_set_unpaid"
+                            string="Non payé"
+                            type="object"
+                            invisible="not is_paid"/>
+
+                    <field name="is_paid" widget="boolean_button"
+                        options="{'terminology': 'paid'}"
+                        invisible="1"/>
                 </header>
+
                 <sheet>
+
+                    <!-- ================= TITLE ================= -->
                     <div class="oe_title">
                         <h1>
-                            <field name="date"/>
+                            <field name="date" class="oe_inline"/>
                         </h1>
                     </div>
-                    <group>
+
+                    <!-- ================= GENERAL INFO ================= -->
+                    <group string="Trip Information">
                         <group>
                             <field name="driver"/>
                             <field name="client"/>
-                            <field name="trip_type"/>
                         </group>
                         <group>
+                            <field name="trip_type"/>
                             <field name="movement"/>
+                        </group>
+                    </group>
+
+                    <!-- ================= CHARGES ================= -->
+                    <group string="Charges">
+                        <group>
                             <field name="charge_fuel"/>
-                            <field name="charge_driver"/>
                             <field name="charge_adblue"/>
+                        </group>
+                        <group>
+                            <field name="charge_driver"/>
                             <field name="charge_mixed"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="total_amount"/>
-                        <field name="note"/>
+
+                    <!-- ================= TOTAL ================= -->
+                    <group string="Summary">
+                        <group>
+                            <field name="total_amount"
+                                readonly="1"
+                                class="oe_inline"
+                                widget="monetary"/>
+                        </group>
                     </group>
+
+                    <!-- ================= COMMENTS ================= -->
+                    <group string="Comment">
+                        <field name="note" placeholder="Spécifier les détailles des charges mixes"/>
+                    </group>
+
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+
+                <chatter/>
+
             </form>
         </field>
     </record>
+
 
     <!-- Tree View -->
     <record id="view_transport_trip_tree" model="ir.ui.view">

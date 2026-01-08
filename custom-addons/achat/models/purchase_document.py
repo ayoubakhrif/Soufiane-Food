@@ -13,6 +13,8 @@ class PurchaseEntryDocument(models.Model):
         ('bl', 'Bill of Lading'),
         ('origin', 'Certificate of Origin'),
         ('fito', 'Fito sanitaire'),
+        ('health', 'Health Certificate'),
+        ('fumigation', 'Fumigation Certificate'),
     ], string='Document Type', required=True)
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)
@@ -53,6 +55,8 @@ class PurchaseEntryDocument(models.Model):
             'bl': 'doc_bl',
             'origin': 'doc_origin',
             'fito': 'doc_fito',
+            'health': 'doc_health',
+            'fumigation': 'doc_fumigation',
         }
         
         # Check existing documents for this entry

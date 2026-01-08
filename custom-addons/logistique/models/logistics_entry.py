@@ -88,6 +88,9 @@ class LogisticsEntry(models.Model):
     doc_bl = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Bill of Lading', default='absent')
     doc_fito = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Fito sanitaire', default='absent')
     doc_origin = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Certificate of Origin', default='absent')
+    doc_health = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Health Certificate', default='absent')
+    doc_fumigation = fields.Selection([('present', 'Present'), ('absent', 'Absent'), ('confirmed', 'Confirmed')], string='Fumigation Certificate', default='absent')
+
 
     lot = fields.Char(string='Lot')
     dhl_number = fields.Char(string='DHL Number')

@@ -29,7 +29,6 @@
                             <field name="charge_driver"/>
                             <field name="charge_adblue"/>
                             <field name="charge_mixed"/>
-                            <field name="amount"/>
                         </group>
                     </group>
                     <group>

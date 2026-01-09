@@ -21,6 +21,7 @@
         'views/container_view.xml',
         'views/logistics_entry_view.xml',
         'views/dossier_view.xml',
+        'views/dossier_cheque_view.xml',
         'views/menus.xml',
     ],
     'installable': True,

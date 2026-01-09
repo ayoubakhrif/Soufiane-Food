@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_dossier_cheque_form" model="ir.ui.view">
+        <field name="name">logistique.dossier.cheque.form</field>
+        <field name="model">logistique.dossier.cheque</field>
+        <field name="arch" type="xml">
+            <form string="Chèque Dossier Logistique">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="cheque_serie"/>
+                            <field name="date"/>
+                            <field name="beneficiary_id"/>
+                        </group>
+                        <group>
+                            <field name="type"/>
+                            <field name="amount"/>
+                            <field name="ste_id" readonly="1" force_save="1"/>
+                            <field name="dossier_id" readonly="1" force_save="1"/>
+                            <!-- Technical field hidden -->
+                            <field name="entry_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_logistique_dossier_cheque_tree" model="ir.ui.view">
+        <field name="name">logistique.dossier.cheque.tree</field>
+        <field name="model">logistique.dossier.cheque</field>
+        <field name="arch" type="xml">
+            <tree string="Chèques Dossier Logistique">
+                <field name="cheque_serie"/>
+                <field name="date"/>
+                <field name="beneficiary_id"/>
+                <field name="type"/>
+                <field name="amount"/>
+                <field name="ste_id" readonly="1"/>
+                <field name="dossier_id" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

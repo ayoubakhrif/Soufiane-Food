@@ -21,6 +21,8 @@ class CoreEmployee(models.Model):
     site = fields.Char(string='Site / Location')
     entry_date = fields.Date(string='Entry Date', default=fields.Date.context_today)
     active = fields.Boolean(string='Active', default=True, tracking=True)
+    matriculation_cnss = fields.Char(string='Matriculation CNSS', tracking=True)
+    matriculation = fields.Char(string='Matriculation', tracking=True)
 
     # Hierarchy
     parent_id = fields.Many2one('core.employee', string='Manager', index=True, tracking=True)

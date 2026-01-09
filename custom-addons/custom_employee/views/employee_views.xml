@@ -37,6 +37,8 @@
                 <field name="site"/>
                 <field name="phone"/>
                 <field name="email"/>
+                <field name="matriculation_cnss"/>
+                <field name="matriculation"/>
                 <field name="parent_id"/>
                 <field name="active" widget="boolean_toggle" optional="show"/>
             </tree>
@@ -68,6 +70,8 @@
                             <field name="email" widget="email"/>
                             <field name="rib"/>
                             <field name="monthly_salary"/>
+                            <field name="matriculation_cnss"/>
+                            <field name="matriculation"/>
                         </group>
                         <group string="Organization">
                             <field name="department"/>

@@ -73,7 +73,7 @@
                             <field name="matriculation_cnss"/>
                             <field name="matriculation"/>
                         </group>
-                        <group string="Organization">
+                        <group string="Organisation">
                             <field name="department"/>
                             <field name="site"/>
                             <field name="entry_date"/>

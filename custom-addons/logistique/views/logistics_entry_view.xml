@@ -120,14 +120,14 @@
                             </field>
                         </page>
                         <page string="Chèques" name="cheques">
-                            <field name="cheque_ids">
+                            <field name="cheque_ids" context="{'default_dossier_id': id}">
                                 <tree>
                                     <field name="cheque_serie"/>
                                     <field name="date"/>
-                                    <field name="beneficiary_id"/>
+                                    <field name="beneficiary_id" readonly="1"/>
                                     <field name="type"/>
                                     <field name="amount"/>
-                                    <field name="ste_id"/>
+                                    <field name="ste_id" readonly="1"/>
                                 </tree>
                             </field>
                         </page>

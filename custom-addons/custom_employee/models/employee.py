@@ -8,18 +8,21 @@ class CoreEmployee(models.Model):
 
     # Personal Information
     name = fields.Char(string='Full Name', required=True, tracking=True)
-    cin = fields.Char(string='CIN (National ID)', tracking=True)
+    cin = fields.Char(string='CIN (Carte national)', tracking=True)
     phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')
-    rib = fields.Char(string='RIB (Bank Account)')
-    monthly_salary = fields.Float(string='Monthly Salary', tracking=True)
+    rib = fields.Char(string='RIB (Bank Account)', tracking=True)
+    monthly_salary = fields.Float(string='Salaire banque', tracking=True)
+    cnss_salary = fields.Float(string='Salaire CNSS', tracking=True)
+    declared_days = fields.Integer(string='Jours déclarés', tracking=True)
     signature = fields.Binary(string='Signature')
 
     # Organizational Information
     job_title = fields.Char(string='Job Position', tracking=True)
     department = fields.Char(string='Department', tracking=True)
-    site = fields.Char(string='Site / Location')
-    entry_date = fields.Date(string='Entry Date', default=fields.Date.context_today)
+    site = fields.Char(string='Site')
+    entry_date = fields.Date(string='Date entrée', tracking=True)
+    contract_date = fields.Date(string='Date de contrat', tracking=True)
     active = fields.Boolean(string='Active', default=True, tracking=True)
     matriculation_cnss = fields.Char(string='Matriculation CNSS', tracking=True)
     matriculation = fields.Char(string='Matriculation', tracking=True)
@@ -39,7 +42,7 @@ class CoreEmployee(models.Model):
             
             # Check for self-reference
             if employee.parent_id == employee:
-                raise exceptions.ValidationError("An employee cannot be their own manager!")
+                raise exceptions.ValidationError("Un employée ne peut pas etre le manager de lui meme!")
             
             # Check for circular dependency
             level = 100

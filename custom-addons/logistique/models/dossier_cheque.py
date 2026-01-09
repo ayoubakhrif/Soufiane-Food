@@ -17,3 +17,15 @@ class LogistiqueDossierCheque(models.Model):
         ('surestarie', 'Surestarie'),
     ], string='Type')
 
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+
+        dossier_id = self.env.context.get('default_dossier_id')
+        if dossier_id:
+            dossier = self.env['logistique.dossier'].browse(dossier_id)
+            res.update({
+                'beneficiary_id': dossier.shipping_id.id,
+                'ste_id': dossier.ste_id.id,
+            })
+        return res

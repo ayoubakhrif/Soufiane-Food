@@ -15,6 +15,7 @@ class PurchaseEntryDocument(models.Model):
         ('fito', 'Fito sanitaire'),
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
+        ('other', 'Other certificates'),
     ], string='Document Type', required=True)
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)

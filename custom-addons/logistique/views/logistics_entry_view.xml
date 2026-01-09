@@ -20,6 +20,7 @@
                 <field name="incoterm"/>
                 <field name="free_time"/>
                 <field name="shipping_id"/>
+                <field name="consolidator_id"/>
                 <field name="eta"/>
                 <field name="container_count"/>
                 <field name="cheque_count"/>
@@ -100,7 +101,7 @@
                     <group>
                         <group string="Infos logistiques">
                             <field name="week"/>
-                            <field name="consolidator" invisible="incoterm != 'fob'"/>
+                            <field name="consolidator_id" invisible="incoterm != 'fob'"/>
                             <field name="entry_date"/>
                             <field name="exit_date"/>
                             <field name="remarks"/>

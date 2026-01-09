@@ -16,17 +16,28 @@ class LogistiqueDossierCheque(models.Model):
         ('fret', 'FRET'),
         ('surestarie', 'Surestarie'),
     ], string='Type')
+    entry_id = fields.Many2one(
+        'logistique.entry',
+        string='Entrée Logistique',
+        ondelete='cascade'
+    )
 
     @api.model
     def default_get(self, fields_list):
-        res = super(LogistiqueDossierCheque, self).default_get(fields_list)
+        res = super().default_get(fields_list)
 
-        dossier_id = self.env.context.get('default_dossier_id')
-        if dossier_id:
-            dossier = self.env['logistique.dossier'].browse(dossier_id)
-            # Find the ste_id from the first linked logistique.entry
-            if dossier.entry_ids:
-                res.update({
-                    'ste_id': dossier.entry_ids[0].ste_id.id,
-                })
+        entry_id = self.env.context.get('default_entry_id')
+        if entry_id:
+            entry = self.env['logistique.entry'].browse(entry_id)
+            res.update({
+                'ste_id': entry.ste_id.id if entry.ste_id else False,
+                'dossier_id': entry.dossier_id.id if entry.dossier_id else False,
+            })
         return res
+
+    @api.onchange('entry_id')
+    def _onchange_entry_id(self):
+        for rec in self:
+            if rec.entry_id:
+                rec.ste_id = rec.entry_id.ste_id
+                rec.dossier_id = rec.entry_id.dossier_id

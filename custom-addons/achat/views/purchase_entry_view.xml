@@ -70,8 +70,8 @@
                                 <field name="free_time" required="incoterm in ['fob', 'cfr']" readonly="purchase_state != 'initial'" class="oe_inline"/>
                             </div>
 
-                            <field name="dhl_number" readonly="purchase_state != 'initial'"/>
-                            <field name="eta_dhl" readonly="purchase_state != 'initial'"/>
+                            <field name="dhl_number"/>
+                            <field name="eta_dhl"/>
                         </group>
                     </group>
                     
@@ -79,13 +79,14 @@
                         <page string="Documents" name="documents">
                             <group>
                                 <group>
-                                    <field name="doc_invoice" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
-                                    <field name="doc_packing" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
-                                    <field name="doc_bl" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="doc_invoice" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_packing" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_bl" widget="radio" options="{'horizontal': true}"/>
                                 </group>
                                 <group>
-                                    <field name="doc_fito" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
-                                    <field name="doc_origin" widget="radio" options="{'horizontal': true}" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="doc_fito" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
+                                    <<!-- readonly="purchase_state == 'confirmed'"-->
                                 </group>
                             </group>
                         </page>

@@ -73,6 +73,9 @@
                             <field name="dhl_number"/>
                             <field name="eta_dhl"/>
                         </group>
+                        <group string="Document's comments">
+                            <field name="comment"/>
+                        </group>
                     </group>
                     
                     <notebook>

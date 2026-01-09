@@ -18,6 +18,7 @@ class PurchaseEntryDocument(models.Model):
         ('other', 'Other certificates'),
     ], string='Document Type', required=True)
     
+    
     file = fields.Binary(string='Fichier', required=True, attachment=True)
     file_name = fields.Char(string='Nom du fichier')
 

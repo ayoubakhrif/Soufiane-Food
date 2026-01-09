@@ -86,7 +86,7 @@
                                 <group>
                                     <field name="doc_fito" widget="radio" options="{'horizontal': true}"/>
                                     <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
-                                    <<!-- readonly="purchase_state == 'confirmed'"-->
+                                    <!-- readonly="purchase_state == 'confirmed'"-->
                                 </group>
                             </group>
                         </page>

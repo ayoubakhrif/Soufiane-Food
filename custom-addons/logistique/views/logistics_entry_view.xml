@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Entrées Logistiques" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'" create="false" delete="false">
                 <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
-
+                <field name="week"/>
                 <field name="saisi_par"/>
                 <field name="dossier_id"/>
                 <field name="ste_id"/>
@@ -99,6 +99,7 @@
                     </group>
                     <group>
                         <group string="Infos logistiques">
+                            <field name="week"/>
                             <field name="consolidator" invisible="incoterm != 'fob'"/>
                             <field name="entry_date"/>
                             <field name="exit_date"/>

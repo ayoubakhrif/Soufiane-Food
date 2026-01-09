@@ -67,7 +67,7 @@
                             <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate'"/>
                             <div class="o_row" invisible="incoterm == 'emirate'">
                                 <field name="free_time_negotiated" readonly="1" force_save="1" class="oe_inline"/> / 
-                                <field name="free_time" required="incoterm in ['fob', 'cfr']" readonly="purchase_state != 'initial'" class="oe_inline"/>
+                                <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
                             </div>
 
                             <field name="dhl_number"/>

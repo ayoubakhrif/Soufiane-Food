@@ -25,7 +25,6 @@ class LogistiqueDossierCheque(models.Model):
         if dossier_id:
             dossier = self.env['logistique.dossier'].browse(dossier_id)
             res.update({
-                'beneficiary_id': dossier.shipping_id.id,
                 'ste_id': dossier.ste_id.id,
             })
         return res

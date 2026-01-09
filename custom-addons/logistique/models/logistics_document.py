@@ -13,6 +13,7 @@ class LogisticsEntryDocument(models.Model):
         ('bl', 'Bill of Lading'),
         ('origin', 'Certificate of Origin'),
         ('fito', 'Fito sanitaire'),
+        ('other', 'Other documents')
     ], string='Document Type', required=True)
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)

@@ -105,7 +105,7 @@ class LogisticsEntry(models.Model):
         readonly=True,
         store=False
     )
-
+    comment = fields.Char(string='Comments')
     thc_amount = fields.Float(
         string="THC",
         related="dossier_id.thc_amount",

@@ -10,7 +10,7 @@
         - Vue dédiée pour les Acheteurs
     """,
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'logistique'],
+    'depends': ['base', 'logistique', 'company_data'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

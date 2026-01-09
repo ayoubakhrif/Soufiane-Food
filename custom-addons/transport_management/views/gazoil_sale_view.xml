@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_gasoil_sale_tree" model="ir.ui.view">
+        <field name="name">gasoil.sale.tree</field>
+        <field name="model">gasoil.sale</field>
+        <field name="arch" type="xml">
+            <tree string="Ventes Gazoil">
+                <field name="date"/>
+                <field name="driver_id"/>
+                <field name="client"/>
+                <field name="amount" sum="Montant"/>
+                <field name="liters" sum="Litres"/>
+                <field name="profit" sum="Bénéfice"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_gasoil_sale_form" model="ir.ui.view">
+        <field name="name">gasoil.sale.form</field>
+        <field name="model">gasoil.sale</field>
+        <field name="arch" type="xml">
+            <form string="Vente Gazoil">
+                <sheet>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="date"/>
+                        </h1>
+                    </div>
+
+                    <!-- ================= INFO ================= -->
+                    <group string="Informations">
+                        <group>
+                            <field name="driver_id"/>
+                            <field name="client"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="sale_price"/>
+                        </group>
+                    </group>
+
+                    <!-- ================= CALCUL ================= -->
+                    <group string="Calculs">
+                        <group>
+                            <field name="purchase_price" readonly="1"/>
+                            <field name="liters" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="profit" readonly="1"/>
+                        </group>
+                    </group>
+
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_gasoil_sale" model="ir.actions.act_window">
+        <field name="name">Ventes Gazoil</field>
+        <field name="res_model">gasoil.sale</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

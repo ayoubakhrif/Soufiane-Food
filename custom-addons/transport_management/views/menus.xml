@@ -1,0 +1,11 @@
+<menuitem id="menu_gasoil_root" name="Suivi Gazoil" sequence="30"/>
+
+<menuitem id="menu_gasoil_refill"
+          name="Remplissages Gazoil"
+          parent="menu_gasoil_root"
+          action="action_gasoil_refill"/>
+
+<menuitem id="menu_gasoil_sale"
+          name="Ventes Gazoil"
+          parent="menu_gasoil_root"
+          action="action_gasoil_sale"/>

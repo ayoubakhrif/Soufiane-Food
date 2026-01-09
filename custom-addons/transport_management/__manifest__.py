@@ -14,6 +14,8 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/transport_trip_views.xml',
+        'views/gazoil_refill_view.xml',
+        'views/gazoil_sale_view.xml',
     ],
     'installable': True,
     'application': True,

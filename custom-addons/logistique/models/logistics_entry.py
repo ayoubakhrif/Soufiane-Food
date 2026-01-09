@@ -98,7 +98,7 @@ class LogisticsEntry(models.Model):
     origin = fields.Char(string='Origin')
     entry_date = fields.Date(string='Date of entry')
     exit_date = fields.Date(string='Date of exit')
-    consolidator = fields.Many2one('logistique.consolidator', string='Consolidator')
+    consolidator_id = fields.Many2one('logistique.consolidator', string='Consolidator')
     surestarie_amount = fields.Float(
         string="Surestarie",
         related="dossier_id.surestarie_amount",

@@ -37,7 +37,7 @@
                                 <field name="benif_id" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="type"/>
                                 <field name="cheque_id" options="{'no_create': True, 'no_open': True}" 
-                                       invisible="not ste_id or not benif_id"/>
+                                       invisible="not ste_id or not benif_id or not type"/>
                             </group>
                             <group string="Action" invisible="not cheque_id">
                                 <field name="amount" widget="monetary"/>

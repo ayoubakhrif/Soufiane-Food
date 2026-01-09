@@ -14,7 +14,7 @@ class FinanceChequeEncaisse(models.Model):
         'datacheque', 
         string='Chèque', 
         required=True,
-        domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id)]"
+        domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id), ('type', '=', type)]"
     )
     type = fields.Selection([
         ('magasinage', 'Magasinage'),
@@ -35,7 +35,7 @@ class FinanceChequeEncaisse(models.Model):
     date_emission = fields.Date(related='cheque_id.date_emission', string='Date d’émission', readonly=True)
     date_echeance = fields.Date(related='cheque_id.date_echeance', string='Date d’échéance', readonly=True)
 
-    @api.onchange('ste_id', 'benif_id')
+    @api.onchange('ste_id', 'benif_id', 'type')
     def _onchange_filter_reset(self):
         """Reset cheque selection if filters change"""
         self.cheque_id = False

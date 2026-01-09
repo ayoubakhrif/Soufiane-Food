@@ -49,7 +49,7 @@
                 <field name="journal"/>
                 <field name="date_echeance"/>
                 <field name="date_encaissement"/>
-                <field name="amount"/>
+                <field name="amount" sum="Total"/>
                 <field name="type"/>
                 <field name="state" optional="1"/>
                 <field name="facture_tag" widget="html" readonly="1" optional="1"/>

@@ -12,11 +12,7 @@ class GasoilSale(models.Model):
         tracking=True
     )
 
-    driver_id = fields.Many2one(
-        'hr.employee',
-        string='Chauffeur',
-        tracking=True
-    )
+    driver = fields.Char(string='Chauffeur', required=True, tracking=True)
 
     client = fields.Selection([
         ('chair', 'Chair'),

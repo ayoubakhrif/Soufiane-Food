@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Ventes Gazoil">
                 <field name="date"/>
-                <field name="driver_id"/>
+                <field name="driver"/>
                 <field name="client"/>
                 <field name="amount" sum="Montant"/>
                 <field name="liters" sum="Litres"/>
@@ -33,7 +33,7 @@
                     <!-- ================= INFO ================= -->
                     <group string="Informations">
                         <group>
-                            <field name="driver_id"/>
+                            <field name="driver"/>
                             <field name="client"/>
                         </group>
                         <group>

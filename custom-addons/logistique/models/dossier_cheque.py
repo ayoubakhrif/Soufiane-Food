@@ -19,12 +19,14 @@ class LogistiqueDossierCheque(models.Model):
 
     @api.model
     def default_get(self, fields_list):
-        res = super().default_get(fields_list)
+        res = super(LogistiqueDossierCheque, self).default_get(fields_list)
 
         dossier_id = self.env.context.get('default_dossier_id')
         if dossier_id:
             dossier = self.env['logistique.dossier'].browse(dossier_id)
-            res.update({
-                'ste_id': dossier.ste_id.id,
-            })
+            # Find the ste_id from the first linked logistique.entry
+            if dossier.entry_ids:
+                res.update({
+                    'ste_id': dossier.entry_ids[0].ste_id.id,
+                })
         return res

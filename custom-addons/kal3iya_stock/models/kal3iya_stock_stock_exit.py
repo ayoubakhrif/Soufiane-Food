@@ -20,10 +20,17 @@ class Kal3iyaStockExit(models.Model):
     dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
     
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Ville', required=True)
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Garage', required=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
@@ -60,7 +67,7 @@ class Kal3iyaStockExit(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
@@ -76,7 +83,7 @@ class Kal3iyaStockExit(models.Model):
                 ('product_id', '=', rec.product_id.id),
                 ('lot', '=', rec.lot),
                 ('dum', '=', rec.dum),
-                ('ville', '=', rec.ville),
+                ('garage', '=', rec.garage),
                 ('frigo', '=', rec.frigo),
                 ('state', '=', 'done')
             ]
@@ -91,7 +98,7 @@ class Kal3iyaStockExit(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'ville': rec.ville,
+                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'exit',
@@ -122,7 +129,7 @@ class Kal3iyaStockExit(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'ville': rec.ville,
+                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'cancel_exit',

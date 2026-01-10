@@ -12,7 +12,7 @@
                 <field name="qty"/>
                 <field name="client_id"/>
                 <field name="price_sale"/>
-                <field name="ville"/>
+                <field name="garage"/>
                 <field name="frigo"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
@@ -46,7 +46,7 @@
                             <field name="product_id" readonly="1" force_save="1"/>
                             <field name="lot" readonly="1" force_save="1"/>
                             <field name="dum" readonly="1" force_save="1"/>
-                            <field name="ville" readonly="1" force_save="1"/>
+                            <field name="garage" readonly="1" force_save="1"/>
                             <field name="frigo" readonly="1" force_save="1"/>
                             <field name="ste_id" readonly="1" force_save="1" options="{'no_create_edit': True}"/>
                         </group>

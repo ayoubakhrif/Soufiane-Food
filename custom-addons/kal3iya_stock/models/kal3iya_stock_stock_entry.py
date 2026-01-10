@@ -17,14 +17,21 @@ class Kal3iyaStockEntry(models.Model):
     price_purchase = fields.Float(string='Prix Achat')
     
     date = fields.Date(string='Date', required=True)
-    lot = fields.Char(string='Lot')
-    dum = fields.Char(string='DUM')
+    lot = fields.Char(string='Lot', required=True)
+    dum = fields.Char(string='DUM', required=True)
     calibre = fields.Char(string='Calibre')
     
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Ville', required=True, default='casa')
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Garage', required=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),

@@ -14,7 +14,7 @@
                 <field name="weight"/>
                 <field name="tonnage"/>
                 <field name="price_purchase"/>
-                <field name="ville"/>
+                <field name="garage"/>
                 <field name="frigo"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
@@ -59,7 +59,7 @@
                     <separator string="Logistique &amp; Traçabilité"/>
                     <group>
                         <group>
-                            <field name="ville"/>
+                            <field name="garage"/>
                             <field name="frigo"/>
                             <field name="ste_id" options="{'no_create_edit': True}"/>
                             <field name="lot"/>

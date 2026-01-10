@@ -11,7 +11,7 @@
                 <field name="price"/>
                 <field name="mt_achat"/>
                 <field name="lot"/>
-                <field name="ville"/>
+                <field name="garage"/>
                 <field name="image_1920"/>
                 <field name="weight"/>
                 <field name="dum"/>
@@ -59,7 +59,7 @@
                                         border-radius:999px;
                                         font-size:12px;
                                         margin-right:6px;">
-                                        <field name="ville"/>
+                                        <field name="garage"/>
                                     </span>
 
                                     <span style="
@@ -134,7 +134,7 @@
                 <field name="product_id"/>
                 <field name="lot"/>
                 <field name="dum"/>
-                <field name="ville"/>
+                <field name="garage"/>
                 <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
@@ -168,7 +168,7 @@
                             <field name="dum"/>
                         </group>
                         <group string="Localisation &amp; Finance">
-                            <field name="ville"/>
+                            <field name="garage"/>
                             <field name="frigo"/>
                             <field name="ste_id"/>
                             <field name="price"/>

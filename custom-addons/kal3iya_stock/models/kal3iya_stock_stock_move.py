@@ -10,10 +10,17 @@ class Kal3iyaStockMove(models.Model):
     product_id = fields.Many2one('kal3iya.stock.product', string='Produit', required=True, ondelete='restrict')
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Ville', required=True)
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Garage', required=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),

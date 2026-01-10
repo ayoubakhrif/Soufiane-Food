@@ -10,10 +10,17 @@ class Kal3iyaStockStock(models.Model):
     product_id = fields.Many2one('kal3iya.stock.product', string='Produit', readonly=True)
     lot = fields.Char(string='Lot', readonly=True)
     dum = fields.Char(string='DUM', readonly=True)
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Ville', readonly=True)
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+    ], string='Garage', required=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
@@ -39,7 +46,7 @@ class Kal3iyaStockStock(models.Model):
                     m.product_id,
                     m.lot,
                     m.dum,
-                    m.ville,
+                    m.garage,
                     m.frigo,
                     m.ste_id,
                     sum(m.qty) as quantity,
@@ -54,7 +61,7 @@ class Kal3iyaStockStock(models.Model):
                 WHERE
                     m.state = 'done'
                 GROUP BY
-                    m.product_id, m.lot, m.dum, m.ville, m.frigo, m.ste_id
+                    m.product_id, m.lot, m.dum, m.garage, m.frigo, m.ste_id
                 HAVING
                     sum(m.qty) != 0
             )
@@ -72,7 +79,7 @@ class Kal3iyaStockStock(models.Model):
                 'default_product_id': self.product_id.id,
                 'default_lot': self.lot,
                 'default_dum': self.dum,
-                'default_ville': self.ville,
+                'default_garage': self.garage,
                 'default_frigo': self.frigo,
                 'default_weight': self.weight,
                 'default_calibre': self.calibre,

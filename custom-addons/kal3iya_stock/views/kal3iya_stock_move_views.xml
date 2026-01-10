@@ -11,7 +11,7 @@
                 <field name="ste_id"/>
                 <field name="lot"/>
                 <field name="dum"/>
-                <field name="ville"/>
+                <field name="garage"/>
                 <field name="frigo"/>
                 <field name="qty" sum="Total Quantité"/>
                 <field name="move_type"/>
@@ -35,7 +35,7 @@
                 <filter string="Annulations" name="cancel" domain="[('move_type', 'in', ('cancel_entry', 'cancel_exit'))]"/>
                 <group expand="0" string="Group By">
                     <filter string="Produit" name="group_by_product" context="{'group_by': 'product_id'}"/>
-                    <filter string="Ville" name="group_by_ville" context="{'group_by': 'ville'}"/>
+                    <filter string="garage" name="group_by_garage" context="{'group_by': 'garage'}"/>
                     <filter string="Frigo" name="group_by_frigo" context="{'group_by': 'frigo'}"/>
                 </group>
             </search>

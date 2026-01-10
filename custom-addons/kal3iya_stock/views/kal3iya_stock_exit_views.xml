@@ -26,10 +26,19 @@
             <form string="Sortie Stock Kal3iya">
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state != 'done'"/>
                     <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state != 'done'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="%(action_kal3iya_stock_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="returned_qty"/></span>
+                                <span class="o_stat_text">Retourné</span>
+                            </div>
+                        </button>
+                    </div>
                     <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
                         <i class="fa fa-info-circle me-2"/>
                         <strong>Attention:</strong> Les opérations confirmées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et créez une nouvelle opération.

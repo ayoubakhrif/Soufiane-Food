@@ -11,6 +11,12 @@ class Kal3iyaStockClient(models.Model):
         'client_id',
         string='Sorties'
     )
+    
+    return_ids = fields.One2many(
+        'kal3iya.stock.return',
+        'client_id',
+        string='Retours'
+    )
 
     def action_view_exits(self):
         self.ensure_one()

@@ -12,3 +12,5 @@ access_kal3iya_stock_stock_exit_user,kal3iya.stock.exit,model_kal3iya_stock_exit
 access_kal3iya_stock_stock_exit_manager,kal3iya.stock.exit,model_kal3iya_stock_exit,group_manager,1,1,1,0
 access_kal3iya_stock_stock_stock_user,kal3iya.stock.stock,model_kal3iya_stock_stock,group_user,1,0,0,0
 access_kal3iya_stock_stock_stock_manager,kal3iya.stock.stock,model_kal3iya_stock_stock,group_manager,1,0,0,0
+access_kal3iya_stock_return_user,kal3iya.stock.return,model_kal3iya_stock_return,group_user,1,1,1,0
+access_kal3iya_stock_return_manager,kal3iya.stock.return,model_kal3iya_stock_return,group_manager,1,1,1,0

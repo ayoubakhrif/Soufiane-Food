@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kal3iya_stock_return_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.return.tree</field>
+        <field name="model">kal3iya.stock.return</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="exit_id"/>
+                <field name="product_id"/>
+                <field name="client_id"/>
+                <field name="qty"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
+                <field name="garage"/>
+                <field name="frigo"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_return_form" model="ir.ui.view">
+        <field name="name">kal3iya.stock.return.form</field>
+        <field name="model">kal3iya.stock.return</field>
+        <field name="arch" type="xml">
+            <form string="Retour Stock Kal3iya">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="exit_id"/>
+                            <field name="date"/>
+                            <field name="qty"/>
+                            <field name="weight"/>
+                            <field name="tonnage"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="client_id"/>
+                            <field name="driver_id"/>
+                        </group>
+                    </group>
+                    <group string="Traçabilité">
+                        <group>
+                            <field name="lot"/>
+                            <field name="dum"/>
+                            <field name="garage"/>
+                            <field name="frigo"/>
+                            <field name="calibre"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter" groups="kal3iya_stock.group_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_kal3iya_stock_return" model="ir.actions.act_window">
+        <field name="name">Retours Clients</field>
+        <field name="res_model">kal3iya.stock.return</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_kal3iya_stock_return"
+        name="Retours Clients"
+        parent="menu_kal3iya_stock_root"
+        action="action_kal3iya_stock_return"
+        sequence="25"
+    />
+</odoo>

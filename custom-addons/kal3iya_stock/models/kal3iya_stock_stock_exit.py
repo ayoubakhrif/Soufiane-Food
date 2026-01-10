@@ -51,6 +51,28 @@ class Kal3iyaStockExit(models.Model):
     move_id = fields.Many2one('kal3iya.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('kal3iya.stock.move', string='Mouvement d\'Annulation', readonly=True)
 
+    return_ids = fields.One2many('kal3iya.stock.return', 'exit_id', string='Retours')
+    returned_qty = fields.Float(string='Quantité Retournée', compute='_compute_returned_qty', store=True)
+
+    @api.depends('return_ids.qty', 'return_ids.state')
+    def _compute_returned_qty(self):
+        for rec in self:
+            rec.returned_qty = sum(rec.return_ids.filtered(lambda r: r.state == 'done').mapped('qty'))
+
+    def action_new_return(self):
+        self.ensure_one()
+        return {
+            'name': 'Nouveau Retour',
+            'type': 'ir.actions.act_window',
+            'res_model': 'kal3iya.stock.return',
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {
+                'default_exit_id': self.id,
+                'default_driver_id': self.driver_id.id,
+            }
+        }
+
     @api.depends('qty', 'weight')
     def _compute_tonnage(self):
         for rec in self:

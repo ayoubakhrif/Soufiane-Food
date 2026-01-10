@@ -32,6 +32,7 @@ class Kal3iyaStockMove(models.Model):
     move_type = fields.Selection([
         ('entry', 'Entrée'),
         ('exit', 'Sortie'),
+        ('return', 'Retour Client'),
         ('cancel_entry', 'Annulation Entrée'),
         ('cancel_exit', 'Annulation Sortie'),
         ('adjustment', 'Ajustement'),

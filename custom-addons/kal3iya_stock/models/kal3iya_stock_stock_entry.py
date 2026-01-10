@@ -69,7 +69,7 @@ class Kal3iyaStockEntry(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_purchase',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'garage', 'frigo', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
@@ -85,7 +85,7 @@ class Kal3iyaStockEntry(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'ville': rec.ville,
+                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'entry',
@@ -116,7 +116,7 @@ class Kal3iyaStockEntry(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'ville': rec.ville,
+                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'cancel_entry',

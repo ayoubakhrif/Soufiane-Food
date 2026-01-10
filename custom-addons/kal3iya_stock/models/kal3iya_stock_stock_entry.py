@@ -34,7 +34,7 @@ class Kal3iyaStockEntry(models.Model):
     provider_id = fields.Many2one('kal3iya.stock.provider', string='Fournisseur')
     driver_id = fields.Many2one('kal3iya.stock.driver', string='Chauffeur')
     ste_id = fields.Many2one('kal3iya.stock.ste', string='Société')
-    image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
+    image_1920 = fields.Image(related='product_id.company_article_image', readonly=False)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),

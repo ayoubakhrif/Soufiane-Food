@@ -26,7 +26,7 @@ class Kal3iyaStockStock(models.Model):
     calibre = fields.Char(string='Calibre', readonly=True)
     price = fields.Float(string='Dernier Prix (Achat)', readonly=True)
     mt_achat = fields.Float(string='Montant achat estimé', readonly=True)
-    image_1920 = fields.Image(related='product_id.image_1920', readonly=True)
+    image_1920 = fields.Image(related='product_id.company_article_image', readonly=True)
     write_date = fields.Datetime(string='Last Update', readonly=True)
     create_date = fields.Datetime(string='Creation Date', readonly=True)
 

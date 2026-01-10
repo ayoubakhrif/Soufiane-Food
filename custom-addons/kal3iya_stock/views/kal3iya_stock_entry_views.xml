@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="company_article_id"/>
+                <field name="product_id"/>
                 <field name="ste_id"/>
                 <field name="qty"/>
                 <field name="weight"/>
@@ -44,7 +45,7 @@
                     <separator string="Produit &amp; Quantités"/>
                     <group>
                         <group>
-                            <field name="company_article_id" options="{'no_create_edit': True}"/>
+                            <field name="product_id" options="{'no_create_edit': True}"/>
                             <field name="qty"/>
                             <field name="weight"/>
                             <field name="tonnage"/>
@@ -73,7 +74,7 @@
 
                     <separator string="Image"/>
                     <group>
-                        <field name="company_article_image" widget="image" class="oe_avatar" options="{'preview_image': 'company_article_image'}"/>
+                        <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_1920'}"/>
                     </group>
                 </sheet>
                 <div class="oe_chatter" groups="kal3iya_stock.group_manager">

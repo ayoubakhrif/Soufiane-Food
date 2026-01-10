@@ -9,6 +9,7 @@ class Kal3iyaStockEntry(models.Model):
 
     name = fields.Char(string='Référence', readonly=True, default='/')
     product_id = fields.Many2one('kal3iya.stock.product', string='Produit', required=True)
+    company_article_id = fields.Many2one('company.article', string='Article Société', related='product_id.company_article_id', store=True)
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids (Kg)')
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)

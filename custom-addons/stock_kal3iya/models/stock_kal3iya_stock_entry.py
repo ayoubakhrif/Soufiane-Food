@@ -8,7 +8,7 @@ class StockKal3iyaEntry(models.Model):
     _order = 'date desc, id desc'
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    product_id = fields.Many2one('stock.kal3iya.product', string='Produit', required=True)
+    product_id = fields.Many2one('stock.kal3iya.product', string='Produit')
     company_article_id = fields.Many2one('company.article', string='Article Société', related='product_id.company_article_id', store=True)
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids (Kg)')

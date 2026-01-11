@@ -137,11 +137,11 @@ class StockKal3iyaEntry(models.Model):
                 'cancel_move_id': cancel_move.id
             })
 
-    @api.constrains('qty')
-    def _check_qty_positive(self):
-        for rec in self:
-            if rec.qty <= 0:
-                raise UserError(_("La quantité doit être strictement positive."))
+    #@api.constrains('qty')
+    #def _check_qty_positive(self):
+     #   for rec in self:
+      #      if rec.qty <= 0:
+       #         raise UserError(_("La quantité doit être strictement positive."))
 
 
 

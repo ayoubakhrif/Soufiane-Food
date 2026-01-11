@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_stock_kal3iya_root"
-              name="Stock Kal3iya"
-              web_icon="stock_kal3iya,static/description/icon.png"
-              sequence="2"/>
+
 
     <menuitem id="menu_stock_kal3iya_stock"
               name="Stock"

@@ -18,6 +18,7 @@ This module provides a robust stock management system based on an immutable move
         'security/groups.xml',
         'security/ir.model.access.csv',
         'data/data.xml',
+        'views/stock_kal3iya_root_menu.xml',
         'views/stock_kal3iya_move_views.xml',
         'views/stock_kal3iya_entry_views.xml',
         'views/stock_kal3iya_return_views.xml',

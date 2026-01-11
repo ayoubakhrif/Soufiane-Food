@@ -39,10 +39,12 @@
                         <group>
                             <field name="driver"/>
                             <field name="client"/>
+                            <field name="going_price"/>
                         </group>
                         <group>
                             <field name="trip_type"/>
                             <field name="movement"/>
+                            <field name="returning_price"/>
                         </group>
                     </group>
 
@@ -65,6 +67,7 @@
                                 readonly="1"
                                 class="oe_inline"
                                 widget="monetary"/>
+                            <field name="profit"/>
                         </group>
                     </group>
 
@@ -93,11 +96,14 @@
                 <field name="client"/>
                 <field name="trip_type"/>
                 <field name="movement"/>
+                <field name="going_price"/>
+                <field name="returning_price"/>
                 <field name="charge_fuel"/>
                 <field name="charge_driver"/>
                 <field name="charge_adblue"/>
                 <field name="charge_mixed"/>
                 <field name="total_amount" sum="Total charges"/>
+                <field name="profit" sum="Bénéfice"/>
                 <field name="is_paid" widget="boolean_toggle" decoration-success="is_paid" decoration-danger="not is_paid"/>
             </tree>
         </field>

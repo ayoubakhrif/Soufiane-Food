@@ -26,7 +26,14 @@ class TransportTrip(models.Model):
     charge_adblue = fields.Float(string='AdBlue', tracking=True)
     charge_mixed = fields.Float(string='Mixe (A préciser sur commentaire)', tracking=True)
     note = fields.Text(string='Commentaire (Mixe)')
-    
+    going_price = fields.Float(string='Prix allée', tracking=True)
+    returning_price = fields.Float(string='Prix de retour', tracking=True)
+    profit = fields.Float(
+        string='Bénéfice',
+        compute='_compute_profit',
+        store=True,
+        tracking=True
+    )
     is_paid = fields.Boolean(string='Payé', default=False, tracking=True)
     total_amount = fields.Float(
         string='Montant total',
@@ -57,3 +64,8 @@ class TransportTrip(models.Model):
                 (record.charge_adblue or 0.0) +
                 (record.charge_mixed or 0.0)
             )
+
+    @api.depends('going_price', 'returning_price', 'total_amount')
+    def _compute_profit(self):
+        for rec in self:
+            rec.profit = rec.going_price + rec.returning_price - rec.total_amount

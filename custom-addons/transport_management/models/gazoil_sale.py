@@ -27,7 +27,7 @@ class GasoilSale(models.Model):
     )
 
     purchase_price = fields.Float(
-        string="Prix d’achat / Litre",
+        string="Prix de vente / Litre",
         readonly=True,
         tracking=True
     )
@@ -62,8 +62,8 @@ class GasoilSale(models.Model):
     @api.depends('amount', 'purchase_price')
     def _compute_liters(self):
         for rec in self:
-            if rec.purchase_price:
-                rec.liters = rec.amount / rec.purchase_price
+            if rec.sale_price:
+                rec.liters = rec.amount / rec.sale_price
             else:
                 rec.liters = 0.0
 

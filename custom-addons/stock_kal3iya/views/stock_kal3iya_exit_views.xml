@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_kal3iya_exit_tree" model="ir.ui.view">
+        <field name="name">stock.kal3iya.exit.tree</field>
+        <field name="model">stock.kal3iya.exit</field>
+        <field name="arch" type="xml">
+            <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="ste_id"/>
+                <field name="qty"/>
+                <field name="client_id"/>
+                <field name="price_sale"/>
+                <field name="garage"/>
+                <field name="frigo"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_stock_kal3iya_exit_form" model="ir.ui.view">
+        <field name="name">stock.kal3iya.exit.form</field>
+        <field name="model">stock.kal3iya.exit</field>
+        <field name="arch" type="xml">
+            <form string="Sortie Stock Kal3iya">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state != 'done'"/>
+                    <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="%(action_stock_kal3iya_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="returned_qty"/></span>
+                                <span class="o_stat_text">Retourné</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
+                        <i class="fa fa-info-circle me-2"/>
+                        <strong>Attention:</strong> Les opérations confirmées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et créez une nouvelle opération.
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    
+                    <separator string="Détails Sortie"/>
+                    <group>
+                        <group string="Selection Stock">
+                            <field name="product_id" readonly="1" force_save="1"/>
+                            <field name="lot" readonly="1" force_save="1"/>
+                            <field name="dum" readonly="1" force_save="1"/>
+                            <field name="garage" readonly="1" force_save="1"/>
+                            <field name="frigo" readonly="1" force_save="1"/>
+                            <field name="ste_id" readonly="1" force_save="1" options="{'no_create_edit': True}"/>
+                        </group>
+                        <group string="Quantités &amp; Prix">
+                            <field name="qty"/>
+                            <field name="weight" readonly="1" force_save="1"/>
+                            <field name="tonnage"/>
+                            <field name="price_sale"/>
+                            <field name="date"/>
+                        </group>
+                    </group>
+
+                    <separator string="Informations Complémentaires"/>
+                    <group>
+                        <group>
+                            <field name="client_id" options="{'no_create_edit': True}"/>
+                            <field name="driver_id" options="{'no_create_edit': True}"/>
+                        </group>
+                        <group>
+                            <field name="calibre" readonly="1" force_save="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Mouvements Liés"/>
+                    <group>
+                        <field name="move_id"/>
+                        <field name="cancel_move_id" invisible="not cancel_move_id"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter" groups="stock_kal3iya.group_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_kal3iya_exit" model="ir.actions.act_window">
+        <field name="name">Sorties Stock Kal3iya</field>
+        <field name="res_model">stock.kal3iya.exit</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
+
+
+

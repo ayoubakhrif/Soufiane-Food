@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_kal3iya_stock_kanban" model="ir.ui.view">
+        <field name="name">stock.kal3iya.stock.kanban</field>
+        <field name="model">stock.kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <kanban create="false" delete="false" class="o_kanban_clickable">
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="calibre"/>
+                <field name="price"/>
+                <field name="mt_achat"/>
+                <field name="lot"/>
+                <field name="garage"/>
+                <field name="image_1920"/>
+                <field name="weight"/>
+                <field name="dum"/>
+                <field name="frigo"/>
+                <field name="ste_id"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_record oe_kanban_global_click"
+                            style="
+                                border-radius:12px;
+                                border:1px solid #e5e7eb;
+                                box-shadow:0 4px 14px rgba(0,0,0,0.08);
+                                background:#ffffff;
+                                padding:12px;
+                                display:flex;
+                                gap:14px;
+                            "
+                            >
+
+                            <!-- 🖼️ Image -->
+                            <aside style="width:90px; height:90px; flex-shrink:0;">
+                                <div class="o_kanban_image_fill w-100 h-100">
+                                    <field name="image_1920"
+                                        widget="image"
+                                        class="w-100 h-100 rounded"
+                                        options="{'img_class': 'object-fit-cover'}"/>
+                                </div>
+                            </aside>
+
+                            <!-- 📋 Infos -->
+                            <div class="flex-grow-1">
+
+                                <!-- Produit -->
+                                <div style="font-weight:700; font-size:15px; color:#111827; margin-bottom:6px;">
+                                    <field name="product_id"/>
+                                </div>
+
+                                <!-- Badges -->
+                                <div style="margin-bottom:8px;">
+                                    <span style="
+                                        background:#e0f2fe;
+                                        color:#0369a1;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;
+                                        margin-right:6px;">
+                                        <field name="garage"/>
+                                    </span>
+
+                                    <span style="
+                                        background:#f0fdf4;
+                                        color:#166534;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;
+                                        margin-right:6px;">
+                                        <field name="ste_id"/>
+                                    </span>
+
+                                    <span style="
+                                        background:#f3f4f6;
+                                        color:#374151;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;">
+                                        Calibre <field name="calibre"/>
+                                    </span>
+                                </div>
+
+                                <!-- Stock -->
+                                <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                    <div>
+                                        📦 <b>Quantité :</b>
+                                        <span style="color:#059669;">
+                                            <field name="quantity"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <t t-esc="record.quantity.raw_value * record.weight.raw_value"/> Kg)
+                                    </div>
+                                    <div>
+                                        📍 <b>Frigo :</b> <field name="frigo"/>
+                                    </div>
+                                </div>
+
+                                <hr style="margin:8px 0; border:none; border-top:1px dashed #e5e7eb;"/>
+
+                                <!-- Financier -->
+                                <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                    <div>
+                                        💰 <b>Dernier Prix :</b>
+                                        <span style="color:#1d4ed8;">
+                                            <field name="price"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        🧾 <b>Mt Achat Tot :</b>
+                                        <span style="color:#7c2d12;">
+                                            <field name="mt_achat"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        🏷️ <b>Lot :</b> <field name="lot"/> | <b>DUM :</b> <field name="dum"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_stock_kal3iya_stock_tree" model="ir.ui.view">
+        <field name="name">stock.kal3iya.stock.tree</field>
+        <field name="model">stock.kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false">
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="garage"/>
+                <field name="frigo"/>
+                <field name="ste_id"/>
+                <field name="quantity" sum="Total Quantité"/>
+                <field name="weight"/>
+                <field name="price"/>
+                <field name="mt_achat" sum="Total Mt Achat"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_stock_kal3iya_stock_form" model="ir.ui.view">
+        <field name="name">stock.kal3iya.stock.form</field>
+        <field name="model">stock.kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <form string="Ligne de Stock" create="false" edit="false">
+                <header>
+                    <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="product_id"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Détails Stock">
+                            <field name="quantity"/>
+                            <field name="weight"/>
+                            <field name="calibre"/>
+                            <field name="lot"/>
+                            <field name="dum"/>
+                        </group>
+                        <group string="Localisation &amp; Finance">
+                            <field name="garage"/>
+                            <field name="frigo"/>
+                            <field name="ste_id"/>
+                            <field name="price"/>
+                            <field name="mt_achat"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_kal3iya_stock" model="ir.actions.act_window">
+        <field name="name">Stock Kal3iya</field>
+        <field name="res_model">stock.kal3iya.stock</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun stock disponible.
+            </p>
+        </field>
+    </record>
+
+    <!-- Adding "New Exit" to the Action menu of the Stock view -->
+    <record id="action_new_exit_binding" model="ir.actions.server">
+        <field name="name">Nouvelle Sortie</field>
+        <field name="model_id" ref="model_stock_kal3iya_stock"/>
+        <field name="binding_model_id" ref="model_stock_kal3iya_stock"/>
+        <field name="binding_view_types">kanban,list</field>
+        <field name="state">code</field>
+        <field name="code">
+        if records:
+            action = records[0].action_new_exit()
+        </field>
+    </record>
+
+</odoo>
+
+
+

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_stock_kal3iya_root"
+              name="Stock Kal3iya"
+              web_icon="stock_kal3iya,static/description/icon.png"
+              sequence="2"/>
+
+    <menuitem id="menu_stock_kal3iya_stock"
+              name="Stock"
+              parent="menu_stock_kal3iya_root"
+              action="action_stock_kal3iya_stock"
+              sequence="10"/>
+
+    <menuitem id="menu_stock_kal3iya_entry"
+              name="Entrées"
+              parent="menu_stock_kal3iya_root"
+              action="action_stock_kal3iya_entry"
+              sequence="20"/>
+
+    <menuitem id="menu_stock_kal3iya_exit"
+              name="Sorties"
+              parent="menu_stock_kal3iya_root"
+              action="action_stock_kal3iya_exit"
+              sequence="30"/>
+
+    <menuitem id="menu_stock_kal3iya_audit"
+              name="Audit Ledger"
+              parent="menu_stock_kal3iya_root"
+              groups="stock_kal3iya.group_manager"
+              sequence="100"/>
+
+    <menuitem id="menu_stock_kal3iya_move"
+              name="Mouvements"
+              parent="menu_stock_kal3iya_audit"
+              action="action_stock_kal3iya_move"
+              sequence="10"/>
+
+    <!-- Restructuring Master Data under "Données" -->
+    <menuitem id="menu_stock_kal3iya_data"
+              name="Données"
+              parent="menu_stock_kal3iya_root"
+              sequence="50"/>
+
+    <menuitem id="menu_stock_kal3iya_product"
+              name="Produits"
+              parent="menu_stock_kal3iya_data"
+              action="action_stock_kal3iya_product"
+              sequence="10"/>
+
+    <menuitem id="menu_stock_kal3iya_client"
+              name="Clients"
+              parent="menu_stock_kal3iya_data"
+              action="action_stock_kal3iya_client"
+              sequence="20"/>
+
+    <menuitem id="menu_stock_kal3iya_provider"
+              name="Fournisseurs"
+              parent="menu_stock_kal3iya_data"
+              action="action_stock_kal3iya_provider"
+              sequence="30"/>
+
+    <menuitem id="menu_stock_kal3iya_driver"
+              name="Chauffeurs"
+              parent="menu_stock_kal3iya_data"
+              action="action_stock_kal3iya_driver"
+              sequence="40"/>
+
+    <menuitem id="menu_stock_kal3iya_ste"
+              name="Sociétés"
+              parent="menu_stock_kal3iya_data"
+              action="action_stock_kal3iya_ste"
+              sequence="50"/>
+</odoo>
+
+
+

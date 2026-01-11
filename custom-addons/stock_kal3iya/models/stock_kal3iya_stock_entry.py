@@ -16,9 +16,9 @@ class StockKal3iyaEntry(models.Model):
     
     price_purchase = fields.Float(string='Prix Achat')
     
-    date = fields.Date(string='Date', required=True)
-    lot = fields.Char(string='Lot', required=True)
-    dum = fields.Char(string='DUM', required=True)
+    date = fields.Date(string='Date')
+    lot = fields.Char(string='Lot')
+    dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
     
     garage = fields.Selection([

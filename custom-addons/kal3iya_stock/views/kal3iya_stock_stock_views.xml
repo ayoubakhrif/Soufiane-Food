@@ -180,10 +180,35 @@
         </field>
     </record>
 
+    <record id="view_kal3iya_stock_stock_graph" model="ir.ui.view">
+        <field name="name">kal3iya.stock.stock.graph</field>
+        <field name="model">kal3iya.stock.stock</field>
+        <field name="arch" type="xml">
+            <graph string="Stock Analysis" type="bar">
+                <field name="product_id" type="row"/>
+                <field name="quantity" type="measure"/>
+                <field name="weight" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_stock_pivot" model="ir.ui.view">
+        <field name="name">kal3iya.stock.stock.pivot</field>
+        <field name="model">kal3iya.stock.stock</field>
+        <field name="arch" type="xml">
+            <pivot string="Stock Analysis">
+                <field name="garage" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="quantity" type="measure"/>
+                <field name="weight" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_kal3iya_stock_stock" model="ir.actions.act_window">
         <field name="name">Stock Kal3iya</field>
         <field name="res_model">kal3iya.stock.stock</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,tree,form,graph,pivot</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucun stock disponible.

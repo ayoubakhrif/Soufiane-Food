@@ -70,8 +70,8 @@
                                 <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
                             </div>
 
-                            <field name="dhl_number"/>
-                            <field name="eta_dhl"/>
+                            <field name="dhl_number" readonly="purchase_state != 'initial'"/>
+                            <field name="eta_dhl" readonly="purchase_state != 'initial'"/>
                         </group>
                         <group string="Document's comments">
                             <field name="comment"/>

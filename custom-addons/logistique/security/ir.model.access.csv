@@ -17,4 +17,3 @@ access_logistique_dossier_cheque_user,access.logistique.dossier.cheque.user,mode
 access_logistique_dossier_cheque_manager,access.logistique.dossier.cheque.manager,model_logistique_dossier_cheque,group_logistique_manager,1,1,1,1
 access_logistique_dossier_deduction_user,access.logistique.dossier.deduction.user,model_logistique_dossier_deduction,group_logistique_user,1,1,1,0
 access_logistique_dossier_deduction_manager,access.logistique.dossier.deduction.manager,model_logistique_dossier_deduction,group_logistique_manager,1,1,1,1
-    

@@ -2,5 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_company_article_viewer,company.article.viewer,model_company_article,group_company_data_viewer,1,0,0,0
 access_company_article_user,company.article.user,model_company_article,group_company_data_user,1,0,1,0
 access_company_article_manager,company.article.manager,model_company_article,group_company_data_manager,1,1,1,1
-access_company_article_categorie_user,company.article.categorie.user,model_company_article_categorie,group_company_data_user,1,0,1,0
-access_company_article_categorie_manager,company.article.categorie.manager,model_company_article_categorie,group_company_data_manager,1,1,1,1
+access_company_article_categorie_user,company.article.categorie.user,model_company_article_category,group_company_data_user,1,0,1,0
+access_company_article_categorie_manager,company.article.categorie.manager,model_company_article_category,group_company_data_manager,1,1,1,1

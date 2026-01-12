@@ -28,6 +28,12 @@ class TransportTrip(models.Model):
     note = fields.Text(string='Commentaire (Mixe)')
     going_price = fields.Float(string='Prix allée', tracking=True)
     returning_price = fields.Float(string='Prix de retour', tracking=True)
+    total_price = fields.Float(
+        string='Prix total',
+        compute='_compute_total_price',
+        store=True,
+        tracking=True
+    )
     profit = fields.Float(
         string='Bénéfice',
         compute='_compute_profit',
@@ -69,3 +75,8 @@ class TransportTrip(models.Model):
     def _compute_profit(self):
         for rec in self:
             rec.profit = rec.going_price + rec.returning_price - rec.total_amount
+
+    @api.depends('going_price', 'returning_price')
+    def _compute_total_price(self):
+        for rec in self:
+            rec.profit = rec.going_price + rec.returning_price

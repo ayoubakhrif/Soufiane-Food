@@ -67,6 +67,7 @@
                                 readonly="1"
                                 class="oe_inline"
                                 widget="monetary"/>
+                            <field name="total_price"/>
                             <field name="profit"/>
                         </group>
                     </group>
@@ -77,8 +78,6 @@
                     </group>
 
                 </sheet>
-
-                <chatter/>
 
             </form>
         </field>
@@ -98,6 +97,7 @@
                 <field name="movement"/>
                 <field name="going_price"/>
                 <field name="returning_price"/>
+                <field name="total_price"/>
                 <field name="charge_fuel"/>
                 <field name="charge_driver"/>
                 <field name="charge_adblue"/>

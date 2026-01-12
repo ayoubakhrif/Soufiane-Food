@@ -34,7 +34,7 @@
 
     <menuitem id="menu_company_article_category"
             name="Catégories"
-            parent="menu_company_article"
+            parent="menu_company_data_root"
             action="action_company_article_category"/>
 
 </odoo>

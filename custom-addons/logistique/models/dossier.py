@@ -13,6 +13,15 @@ class LogistiqueDossier(models.Model):
     prov_number = fields.Char(string='N° Prov', help="Numéro provisoire géré par Finance")
     def_number = fields.Char(string='N° Def', help="Numéro définitif géré par Finance")
     
+    # Common Info (Lifted from Entries)
+    ste_id = fields.Many2one('logistique.ste', string='Société')
+    supplier_id = fields.Many2one('logistique.supplier', string='Fournisseur')
+    eta = fields.Date(string='ETA')
+
+    # DHL Info
+    dhl_number = fields.Char(string='Numéro DHL')
+    eta_dhl = fields.Date(string='ETA DHL')
+    
     # One2many relationships
     container_ids = fields.One2many('logistique.container', 'dossier_id', string='Conteneurs')
     cheque_ids = fields.One2many('logistique.dossier.cheque', 'dossier_id', string='Chèques')

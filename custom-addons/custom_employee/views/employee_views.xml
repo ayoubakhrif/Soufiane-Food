@@ -70,6 +70,7 @@
                             <field name="email" widget="email"/>
                             <field name="rib"/>
                             <field name="monthly_salary"/>
+                            <field name="cnss_salary"/>
                             <field name="matriculation_cnss"/>
                             <field name="matriculation"/>
                         </group>
@@ -77,9 +78,11 @@
                             <field name="department"/>
                             <field name="site"/>
                             <field name="entry_date"/>
+                            <field name="contract_date"/>
                             <field name="active"/>
                             <field name="parent_id"/>
                             <field name="user_id"/>
+                            <field name="declared_days"/>
                         </group>
                     </group>
                     

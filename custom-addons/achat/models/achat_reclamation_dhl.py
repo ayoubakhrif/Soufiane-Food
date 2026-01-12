@@ -68,8 +68,16 @@ class AchatReclamationDHL(models.Model):
             if not rec.dossier_id:
                 raise ValidationError("Aucun dossier lié.")
 
-            # 🔁 Mise à jour directe du dossier / entry
-            rec.dossier_id.write({
+            # Récupérer les entries liées à ce dossier
+            entries = self.env['logistique.entry'].search([
+                ('dossier_id', '=', rec.dossier_id.id)
+            ])
+
+            if not entries:
+                raise ValidationError("Aucune entrée logistique liée à ce dossier.")
+
+            # Mise à jour DHL sur les entries
+            entries.write({
                 'dhl_number': rec.dhl_number,
                 'eta_dhl': rec.eta_dhl,
             })

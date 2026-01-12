@@ -25,6 +25,7 @@ class LogistiqueDossierDeduction(models.Model):
         ('thc', 'THC'),
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
+        ('fret', 'FRET'),
     ], string='Type', required=True)
 
 

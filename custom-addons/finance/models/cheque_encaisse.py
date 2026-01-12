@@ -99,3 +99,23 @@ class FinanceChequeEncaisse(models.Model):
                 })
         
         return super(FinanceChequeEncaisse, self).unlink()
+
+    def write(self, vals):
+        res = super(FinanceChequeEncaisse, self).write(vals)
+
+        for rec in self:
+            if rec.cheque_id:
+                updates = {}
+
+                # Sync amount if modified
+                if 'amount' in vals:
+                    updates['amount'] = rec.amount
+
+                # Sync encaissement date if modified
+                if 'date_encaissement' in vals:
+                    updates['date_encaissement'] = rec.date_encaissement
+
+                if updates:
+                    rec.cheque_id.sudo().write(updates)
+
+        return res

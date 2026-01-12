@@ -26,7 +26,11 @@ class LogistiqueDossier(models.Model):
     container_ids = fields.One2many('logistique.container', 'dossier_id', string='Conteneurs')
     cheque_ids = fields.One2many('logistique.dossier.cheque', 'dossier_id', string='Chèques')
     entry_ids = fields.One2many('logistique.entry', 'dossier_id', string='Entrées Logistiques')
-
+    deduction_ids = fields.One2many(
+        'logistique.dossier.deduction',
+        'dossier_id',
+        string='Déductions'
+    )
     container_count = fields.Integer(
         string="Nb Conteneurs",
         compute="_compute_counts",
@@ -61,15 +65,36 @@ class LogistiqueDossier(models.Model):
             dossier.container_count = len(dossier.container_ids)
             dossier.cheque_count = len(dossier.cheque_ids)
 
-    @api.depends('cheque_ids.amount', 'cheque_ids.type')
+    @api.depends(
+        'cheque_ids.amount',
+        'cheque_ids.type',
+        'deduction_ids.amount',
+        'deduction_ids.type',
+    )
     def _compute_charges(self):
         for rec in self:
-            rec.surestarie_amount = sum(
+            # --- Chèques ---
+            surestarie_cheques = sum(
                 c.amount for c in rec.cheque_ids if c.type == 'surestarie'
             )
-            rec.thc_amount = sum(
+            thc_cheques = sum(
                 c.amount for c in rec.cheque_ids if c.type == 'thc'
             )
-            rec.magasinage_amount = sum(
+            magasinage_cheques = sum(
                 c.amount for c in rec.cheque_ids if c.type == 'magasinage'
             )
+
+            surestarie_deductions = sum(
+                d.amount for d in rec.deduction_ids if d.type == 'surestarie'
+            )
+            thc_deductions = sum(
+                d.amount for d in rec.deduction_ids if d.type == 'thc'
+            )
+            magasinage_deductions = sum(
+                d.amount for d in rec.deduction_ids if d.type == 'magasinage'
+            )
+
+            # --- Totaux finaux ---
+            rec.surestarie_amount = surestarie_cheques + surestarie_deductions
+            rec.thc_amount = thc_cheques + thc_deductions
+            rec.magasinage_amount = magasinage_cheques + magasinage_deductions

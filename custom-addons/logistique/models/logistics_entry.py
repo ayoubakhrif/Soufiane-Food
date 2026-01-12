@@ -143,8 +143,11 @@ class LogisticsEntry(models.Model):
         readonly=True,
         store=False
     )
-
-
+    deduction_ids = fields.One2many(
+        'logistique.dossier.deduction',
+        'entry_id',
+        string='Déductions'
+    )
 
 
     @api.model

@@ -37,9 +37,16 @@ class LogistiqueDossierDeduction(models.Model):
     ste_id = fields.Many2one(
         'logistique.ste',
         string='Société',
-        required=True,
-        readonly=True
+        compute='_compute_ste_id',
+        store=True,
+        readonly=False
     )
+    
+    @api.depends('dossier_id')
+    def _compute_ste_id(self):
+        for rec in self:
+            if rec.dossier_id:
+                rec.ste_id = rec.dossier_id.ste_id
 
     # ---------- Auto-fill ----------
     @api.model

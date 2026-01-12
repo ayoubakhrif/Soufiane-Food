@@ -38,11 +38,12 @@
                         <page string="Déductions">
                             <field name="deduction_ids">
                                 <tree editable="bottom">
+                                    <field name="dossier_id" column_invisible="1"/>
                                     <field name="date"/>
                                     <field name="beneficiary_id"/>
                                     <field name="type"/>
                                     <field name="amount"/>
-                                    <field name="ste_id" readonly="1"/>
+                                    <field name="ste_id"/>
                                 </tree>
                             </field>
                         </page>

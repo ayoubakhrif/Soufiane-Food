@@ -205,6 +205,32 @@
         </field>
     </record>
 
+    <record id="view_kal3iya_stock_stock_search" model="ir.ui.view">
+        <field name="name">kal3iya.stock.stock.search</field>
+        <field name="model">kal3iya.stock.stock</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Stock">
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="garage"/>
+                <field name="frigo"/>
+                <field name="ste_id"/>
+                <field name="calibre"/>
+                
+                <filter string="En Stock" name="in_stock" domain="[('quantity', '>', 0)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Produit" name="group_product" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Garage" name="group_garage" domain="[]" context="{'group_by': 'garage'}"/>
+                    <filter string="Frigo" name="group_frigo" domain="[]" context="{'group_by': 'frigo'}"/>
+                    <filter string="Société" name="group_ste" domain="[]" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Calibre" name="group_calibre" domain="[]" context="{'group_by': 'calibre'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_kal3iya_stock_stock" model="ir.actions.act_window">
         <field name="name">Stock Kal3iya</field>
         <field name="res_model">kal3iya.stock.stock</field>

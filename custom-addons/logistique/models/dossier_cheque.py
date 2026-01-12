@@ -9,7 +9,13 @@ class LogistiqueDossierCheque(models.Model):
     date = fields.Date(string='Date')
     beneficiary_id = fields.Many2one('logistique.shipping', string='Bénéficiaire')
     amount = fields.Float(string='Montant', required=True)
-    ste_id = fields.Many2one('logistique.ste', string='Société', required=True, readonly=True)
+    ste_id = fields.Many2one(
+        'logistique.ste',
+        string='Société',
+        related='dossier_id.ste_id',
+        store=True,
+        readonly=True
+    )
     type = fields.Selection([
         ('thc', 'THC'),
         ('magasinage', 'Magasinage'),

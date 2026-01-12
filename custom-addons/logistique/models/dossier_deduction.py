@@ -8,8 +8,7 @@ class LogistiqueDossierDeduction(models.Model):
         'logistique.dossier',
         string='Dossier',
         required=True,
-        ondelete='cascade',
-        readonly=True
+        ondelete='cascade'
     )
 
     entry_id = fields.Many2one(

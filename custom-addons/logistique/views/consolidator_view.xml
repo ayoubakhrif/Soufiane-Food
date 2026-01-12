@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_consolidator_tree" model="ir.ui.view">
+        <field name="name">logistique.consolidator.tree</field>
+        <field name="model">logistique.consolidator</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_logistique_consolidator_form" model="ir.ui.view">
+        <field name="name">logistique.consolidator.form</field>
+        <field name="model">logistique.consolidator</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_logistique_consolidator" model="ir.actions.act_window">
+        <field name="name">Consolidators</field>
+        <field name="res_model">logistique.consolidator</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -4,13 +4,6 @@ class LogistiqueDossierDeduction(models.Model):
     _name = 'logistique.dossier.deduction'
     _description = 'Déduction Dossier Logistique'
 
-    dossier_id = fields.Many2one(
-        'logistique.dossier',
-        string='Dossier',
-        required=True,
-        ondelete='cascade'
-    )
-
     entry_id = fields.Many2one(
         'logistique.entry',
         string='Entrée Logistique',
@@ -41,6 +34,19 @@ class LogistiqueDossierDeduction(models.Model):
         store=True,
         readonly=False
     )
+
+    dossier_id = fields.Many2one(
+        'logistique.dossier',
+        string='Dossier',
+        compute='_compute_dossier_id',
+        store=True
+    )
+
+    @api.depends('entry_id')
+    def _compute_dossier_id(self):
+        for rec in self:
+            rec.dossier_id = rec.entry_id.dossier_id if rec.entry_id else False
+
     
     @api.depends('dossier_id')
     def _compute_ste_id(self):

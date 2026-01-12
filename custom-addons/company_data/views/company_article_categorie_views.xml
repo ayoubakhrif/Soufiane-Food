@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_article_category_tree" model="ir.ui.view">
+        <field name="name">company.article.category.tree</field>
+        <field name="model">company.article.category</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="vat_rate"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_company_article_category_form" model="ir.ui.view">
+        <field name="name">company.article.category.form</field>
+        <field name="model">company.article.category</field>
+        <field name="arch" type="xml">
+            <form string="Catégorie Article">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="vat_rate"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_company_article_category" model="ir.actions.act_window">
+        <field name="name">Catégories</field>
+        <field name="res_model">company.article.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_company_article_category"
+            name="Catégories"
+            parent="menu_company_data_root"
+            action="action_company_article_category"/>
+
+</odoo>

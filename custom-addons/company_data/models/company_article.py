@@ -20,3 +20,9 @@ class CompanyArticle(models.Model):
         max_width=1024,
         max_height=1024
     )
+
+    category_id = fields.Many2one(
+        'company.article.category',
+        string='Catégorie',
+        required=True
+    )

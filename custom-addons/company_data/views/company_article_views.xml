@@ -25,6 +25,9 @@
                         <field name="display_name"/>
                         <field name="name"/>
                     </group>
+                    <group string="Classification">
+                        <field name="category_id"/>
+                    </group>
                 </sheet>
             </form>
         </field>

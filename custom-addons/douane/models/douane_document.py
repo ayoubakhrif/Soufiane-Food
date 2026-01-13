@@ -11,6 +11,8 @@ class DouaneDocument(models.Model):
         ('invoice_prelevement', 'Facture prélévement'),
         ('analyse', 'Analyse'),
         ('bs', 'Bulletin de sortie'),
+        ('dum', 'DUM'),
+        ('estimation', 'Estimation'),
     ], string='Type de document', required=True)
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)

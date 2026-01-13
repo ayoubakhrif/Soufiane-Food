@@ -71,10 +71,12 @@ class TransportTrip(models.Model):
                 (record.charge_mixed or 0.0)
             )
 
-    @api.depends('going_price', 'returning_price', 'total_amount')
+    @api.depends('going_price', 'returning_price')
     def _compute_total_price(self):
         for rec in self:
             rec.total_price = rec.going_price + rec.returning_price
+
+    @api.depends('total_price', 'total_amount')
     def _compute_profit(self):
         for rec in self:
             rec.profit = rec.total_price - rec.total_amount

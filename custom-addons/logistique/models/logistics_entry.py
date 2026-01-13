@@ -76,7 +76,7 @@ class LogisticsEntry(models.Model):
         ('initial', 'Initial'),
         ('draft', 'Draft'),
         ('confirmed', 'Confirmed'),
-    ], string='Purchase Purchase', default='initial', required=True, tracking=True)
+    ], string='Purchase state', default='initial', required=True, tracking=True)
 
     contract_num = fields.Char(string='Contract Number') # Keep for legacy/manual if needed? Or replace with related?
     # contract_id moved to achat module to avoid dependency cycle

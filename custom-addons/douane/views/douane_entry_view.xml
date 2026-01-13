@@ -55,7 +55,6 @@
                             <field name="container_ids" readonly="1">
                                 <tree>
                                     <field name="name"/>
-                                    <field name="type"/>
                                 </tree>
                             </field>
                         </page>

@@ -29,7 +29,7 @@ class TransportTrip(models.Model):
     going_price = fields.Float(string='Prix allée', tracking=True)
     returning_price = fields.Float(string='Prix de retour', tracking=True)
     total_price = fields.Float(
-        string='Prix total',
+        string='Prix allée retour',
         compute='_compute_total_price',
         store=True,
         tracking=True
@@ -42,7 +42,7 @@ class TransportTrip(models.Model):
     )
     is_paid = fields.Boolean(string='Payé', default=False, tracking=True)
     total_amount = fields.Float(
-        string='Montant total',
+        string='Montant des charges',
         compute='_compute_total_amount',
         store=True,
         tracking=True
@@ -72,9 +72,10 @@ class TransportTrip(models.Model):
             )
 
     @api.depends('going_price', 'returning_price', 'total_amount')
-    def _compute_profit(self):
-        for rec in self:
-            rec.profit = rec.going_price + rec.returning_price - rec.total_amount
     def _compute_total_price(self):
         for rec in self:
             rec.total_price = rec.going_price + rec.returning_price
+    def _compute_profit(self):
+        for rec in self:
+            rec.profit = rec.total_price - rec.total_amount
+    

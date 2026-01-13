@@ -77,4 +77,4 @@ class TransportTrip(models.Model):
             rec.profit = rec.going_price + rec.returning_price - rec.total_amount
     def _compute_total_price(self):
         for rec in self:
-            rec.profit = rec.going_price + rec.returning_price
+            rec.total_price = rec.going_price + rec.returning_price

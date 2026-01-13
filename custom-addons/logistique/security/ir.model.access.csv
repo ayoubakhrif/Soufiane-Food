@@ -19,3 +19,6 @@ access_logistique_dossier_deduction_user,access.logistique.dossier.deduction.use
 access_logistique_dossier_deduction_manager,access.logistique.dossier.deduction.manager,model_logistique_dossier_deduction,group_logistique_manager,1,1,1,1
 access_logistique_consolidator_user,access.logistique.consolidator.user,model_logistique_consolidator,group_logistique_user,1,1,1,0
 access_logistique_consolidator_manager,access.logistique.consolidator.manager,model_logistique_consolidator,group_logistique_manager,1,1,1,1
+access_logistique_entry_purchase_user,access.logistique.entry.purchase.user,model_logistique_entry,achat.group_purchase_user,1,1,1,0
+access_logistique_entry_purchase_manager,access.logistique.entry.purchase.manager,model_logistique_entry,achat.group_purchase_manager,1,1,1,1
+access_logistique_entry_purchase_admin,access.logistique.entry.purchase.admin,model_logistique_entry,achat.group_purchase_admin,1,1,1,1

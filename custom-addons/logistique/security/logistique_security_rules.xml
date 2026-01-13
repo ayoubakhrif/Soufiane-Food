@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Rule for Purchase User: Can only write if purchase_state != 'confirmed' -->
+        <record id="rule_logistique_entry_purchase_user" model="ir.rule">
+            <field name="name">Logistique Entry Purchase User Modification Restriction</field>
+            <field name="model_id" ref="model_logistique_entry"/>
+            <field name="groups" eval="[(4, ref('achat.group_purchase_user'))]"/>
+            <field name="domain_force">[('purchase_state', '!=', 'confirmed')]</field>
+            <field name="perm_read" eval="0"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+        <!-- Rule for Purchase Manager: Full access (always true) - Override mainly if needed, 
+             but typically no restriction implies full access if ACL allows. 
+             However, to be explicit or if we had a global restriction, we might add this. 
+             Since the User rule restricts based on domain, Managers (who don't have that rule applied if we structure it right, or we need to ensure they can bypass)
+             actually, record rules are additive (UNION). 
+             BUT, if a user belongs to both groups, rules are combined with OR.
+             Wait. 
+             If Purchase User has a rule `[('purchase_state', '!=', 'confirmed')]` for WRITE.
+             And Purchase Manager has NO rule (meaning access to all), then standard Odoo behavior:
+             "If there are no rules for a model, user can access everything." -> This is ONLY if NO rules exist for ANY group the user belongs to.
+             "If a user belongs to several groups, each group's rules are combined with an OR operator."
+             
+             So:
+             User A is in 'Purchase User'. Rule says: limit to not confirmed.
+             User B is in 'Purchase Manager' (implies Purchase User). 
+             So User B has "limit to not confirmed" OR "some other rule".
+             To allow User B to write on confirmed records, User B needs a rule that allows it.
+             So we MUST provide a rule for Manager that allows ALL, to OR with the restricted rule.
+        -->
+        
+        <record id="rule_logistique_entry_purchase_manager" model="ir.rule">
+            <field name="name">Logistique Entry Purchase Manager Full Access</field>
+            <field name="model_id" ref="model_logistique_entry"/>
+            <field name="groups" eval="[(4, ref('achat.group_purchase_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="0"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+    </data>
+</odoo>

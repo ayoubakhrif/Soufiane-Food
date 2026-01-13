@@ -10,10 +10,11 @@
     """,
     'category': 'Operations',
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'achat'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'security/logistique_security_rules.xml',
         'views/ste_view.xml',
         'views/supplier_view.xml',
         'views/article_view.xml',

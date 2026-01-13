@@ -75,8 +75,6 @@ class TransportTrip(models.Model):
     def _compute_profit(self):
         for rec in self:
             rec.profit = rec.going_price + rec.returning_price - rec.total_amount
-
-    @api.depends('going_price', 'returning_price')
     def _compute_total_price(self):
         for rec in self:
             rec.profit = rec.going_price + rec.returning_price

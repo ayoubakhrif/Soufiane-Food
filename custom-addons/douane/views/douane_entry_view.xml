@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- FORM VIEW -->
+    <record id="view_douane_entry_form" model="ir.ui.view">
+        <field name="name">douane.entry.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <form string="Suivi Douane">
+                <header>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="dossier_id" readonly="1" options="{'no_open': True}"/>
+                        </h1>
+                    </div>
+                
+                    <!-- SECTION A: Read-Only Info -->
+                    <group string="Informations Dossier (Lecture Seule)">
+                        <group>
+                            <field name="bl_number" readonly="1"/>
+                            <field name="supplier_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="article_id" readonly="1" options="{'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="eta" readonly="1"/>
+                            <field name="amount_total" readonly="1" widget="monetary"/>
+                            <field name="purchase_state" readonly="1" widget="badge" decoration-success="purchase_state == 'confirmed'"/>
+                        </group>
+                    </group>
+
+                    <!-- SECTION B: Customs Tracking -->
+                    <group string="Suivi Douane / Transit">
+                        <group>
+                            <field name="dum"/>
+                            <field name="dum_date"/>
+                            <field name="exchange_rate"/>
+                            <field name="amount_mad"/>
+                            <field name="analysis_result" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        <group>
+                            <field name="vat"/>
+                            <field name="customs_duty"/>
+                            <field name="customs_total" class="oe_subtotal_footer_separator"/>
+                            <field name="transit_fees"/>
+                            <field name="temsa"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Page 1: Conteneurs (Read Only) -->
+                        <page string="Conteneurs">
+                            <field name="container_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="type"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Page 2: Documents Douane -->
+                        <page string="Documents Douane">
+                            <field name="douane_document_ids">
+                                <tree editable="bottom">
+                                    <field name="type"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                    <field name="file" filename="file_name"/>
+                                    <field name="note"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Page 3: Autres Documents (Read Only from Logistics) -->
+                        <page string="Documents Logistique">
+                            <group string="Documents attachés">
+                                <field name="logistique_document_ids" readonly="1">
+                                    <tree>
+                                        <field name="document_type"/>
+                                        <field name="file_name"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <group string="Statut Documents">
+                                    <field name="doc_invoice" readonly="1"/>
+                                    <field name="doc_packing" readonly="1"/>
+                                    <field name="doc_bl" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="doc_origin" readonly="1"/>
+                                    <field name="doc_fito" readonly="1"/>
+                                    <field name="doc_health" readonly="1"/>
+                                    <field name="doc_fumigation" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_douane_entry_search" model="ir.ui.view">
+        <field name="name">douane.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="dossier_id"/>
+                <field name="dum"/>
+                <field name="supplier_id"/>
+                <field name="article_id"/>
+                <filter string="En cours" name="status_in_progress" domain="[('status', '=', 'in_progress')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Fournisseur" name="group_supplier" domain="[]" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Article" name="group_article" domain="[]" context="{'group_by': 'article_id'}"/>
+                    <filter string="Résultat Analyse" name="group_analysis" domain="[]" context="{'group_by': 'analysis_result'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_douane_tracking" model="ir.actions.act_window">
+        <field name="name">Suivi Dossiers</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_douane_entry_search"/>
+        <!-- Reuse existing tree view from Logistics but force our Form View -->
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('logistique.view_logistique_entry_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_douane_entry_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Suivi des dossiers Douane / Transit
+            </p>
+        </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_douane_root" name="Douane" web_icon="douane,static/description/icon.png" sequence="25"/>
+    <menuitem id="menu_douane_tracking" name="Suivi Dossiers" parent="menu_douane_root" action="action_douane_tracking" sequence="10"/>
+
+</odoo>

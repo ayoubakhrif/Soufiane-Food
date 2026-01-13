@@ -4,7 +4,6 @@ class LogistiqueDossierCheque(models.Model):
     _name = 'logistique.dossier.cheque'
     _description = 'Chèque Dossier Logistique'
 
-    dossier_id = fields.Many2one('logistique.dossier', string='Dossier', required=True, ondelete='cascade', readonly=True)
     cheque_serie = fields.Char(string='Série Chèque', required=True, size=7)
     date = fields.Date(string='Date')
     beneficiary_id = fields.Many2one('logistique.shipping', string='Bénéficiaire')
@@ -25,8 +24,22 @@ class LogistiqueDossierCheque(models.Model):
     entry_id = fields.Many2one(
         'logistique.entry',
         string='Entrée Logistique',
+        required=True,
         ondelete='cascade'
     )
+    dossier_id = fields.Many2one(
+        'logistique.dossier',
+        string='Dossier',
+        compute='_compute_dossier_id',
+        store=True,
+        readonly=True
+    )
+
+    @api.depends('entry_id')
+    def _compute_dossier_id(self):
+        for rec in self:
+            rec.dossier_id = rec.entry_id.dossier_id if rec.entry_id else False
+
 
     @api.model
     def default_get(self, fields_list):

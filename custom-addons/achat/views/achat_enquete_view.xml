@@ -4,7 +4,7 @@
         <field name="name">achat.article.price.tree</field>
         <field name="model">achat.article.price</field>
         <field name="arch" type="xml">
-            <tree string="Supplier Prices">
+            <tree string="Market update">
                 <field name="date"/>
                 <field name="article_id"/>
                 <field name="supplier_id"/>

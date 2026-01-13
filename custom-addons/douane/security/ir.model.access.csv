@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_douane_document_user,douane.document.user,model_douane_document,group_douane_user,1,1,1,1
 access_logistique_entry_douane,logistique.entry.douane,logistique.model_logistique_entry,group_douane_user,1,1,0,0
+access_douane_document_internal,douane.document.internal,model_douane_document,base.group_user,1,0,0,0

@@ -124,8 +124,6 @@ class LogisticsEntry(models.Model):
         self.write({'purchase_state': 'draft'})
 
     def action_confirm_purchase(self):
-        if not self.env.user.has_group('achat.group_purchase_manager'):
-            raise ValidationError("Seul le responsable Achat (ou Admin) peut confirmer un dossier.")
         self.write({'purchase_state': 'confirmed'})
 
     # _onchange_contract_id moved to achat module

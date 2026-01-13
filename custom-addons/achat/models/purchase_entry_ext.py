@@ -10,6 +10,14 @@ class LogisticsEntry(models.Model):
     # Document Link
     document_ids = fields.One2many('logistique.entry.document', 'entry_id', string='Documents')
 
+    display_name = fields.Char(compute='_compute_display_name') # Just to ensure we have it if needed
+
+    def action_confirm_purchase(self):
+        # Security Check: Only Purchase Managers can confirm
+        if not self.env.user.has_group('achat.group_purchase_manager'):
+            raise ValidationError("Seul le responsable Achat (ou Admin) peut confirmer un dossier.")
+        return super(LogisticsEntry, self).action_confirm_purchase()
+
     @api.onchange('contract_id')
     def _onchange_contract_id(self):
         if self.contract_id:

@@ -4,7 +4,7 @@ access_stock_kal3iya_provider,stock.kal3iya.provider,model_stock_kal3iya_provide
 access_stock_kal3iya_client,stock.kal3iya.client,model_stock_kal3iya_client,base.group_user,1,1,1,1
 access_stock_kal3iya_driver,stock.kal3iya.driver,model_stock_kal3iya_driver,base.group_user,1,1,1,1
 access_stock_kal3iya_ste,stock.kal3iya.ste,model_stock_kal3iya_ste,base.group_user,1,1,1,1
-access_stock_kal3iya_stock_move_user,stock.kal3iya.move,model_stock_kal3iya_move,group_user,1,0,1,0
+access_stock_kal3iya_stock_move_user,stock.kal3iya.move,model_stock_kal3iya_move,group_user,1,1,1,0
 access_stock_kal3iya_stock_move_manager,stock.kal3iya.move,model_stock_kal3iya_move,group_manager,1,1,1,0
 access_stock_kal3iya_stock_entry_user,stock.kal3iya.entry,model_stock_kal3iya_entry,group_user,1,1,1,0
 access_stock_kal3iya_stock_entry_manager,stock.kal3iya.entry,model_stock_kal3iya_entry,group_manager,1,1,1,1

@@ -33,6 +33,7 @@
               name="Mouvements"
               parent="menu_kal3iya_stock_audit"
               action="action_kal3iya_stock_move"
+              groups="kal3iya_stock.group_manager"
               sequence="10"/>
 
     <!-- Restructuring Master Data under "Données" -->

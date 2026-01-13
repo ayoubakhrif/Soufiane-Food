@@ -15,7 +15,7 @@ access_logistique_shipping_purchase_user,logistique.shipping.purchase.user,logis
 access_logistique_shipping_purchase_manager,logistique.shipping.purchase.manager,logistique.model_logistique_shipping,group_purchase_manager,1,1,1,1
 access_achat_article_price_user,achat.article.price user,model_achat_article_price,achat.group_purchase_user,1,1,1,0
 access_achat_article_price_manager,achat.article.price user,model_achat_article_price,achat.group_purchase_manager,1,1,1,1
-access_achat_contract_user,achat.contract user,model_achat_contract,achat.group_purchase_user,0,0,0,0
+access_achat_contract_user,achat.contract user,model_achat_contract,achat.group_purchase_user,1,0,0,0
 access_achat_contract_manager,achat.contract manager,model_achat_contract,achat.group_purchase_manager,1,1,1,1
 access_logistique_entry_document_purchase_user,logistique.entry.document.purchase.user,model_logistique_entry_document,group_purchase_user,1,1,1,0
 access_logistique_entry_document_purchase_manager,logistique.entry.document.purchase.manager,model_logistique_entry_document,group_purchase_manager,1,1,1,1

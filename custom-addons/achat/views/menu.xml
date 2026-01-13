@@ -19,6 +19,7 @@
               name="Contrats"
               parent="menu_achat_root"
               action="action_achat_contract"
+              groups="achat.group_purchase_manager,achat.group_purchase_admin"
               sequence="5"/>
 
     <!-- Data Menu (Moved from Logistique) -->

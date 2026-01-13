@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, re
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -156,6 +156,18 @@ class ProductEntry(models.Model):
          'unique(lot, dum, ville, frigo, state)',
          'Cette entrée existe déjà. Modifiez la quantité.')
     ]
+
+    @api.constrains('lot', 'dum')
+    def _check_lot_dum_format(self):
+        for rec in self:
+            # LOT : doit contenir au moins un chiffre
+            if rec.lot and not re.search(r'\d', rec.lot):
+                raise ValidationError("LOT erroné.")
+
+            # DUM : doit commencer par un chiffre
+            if rec.dum and not re.match(r'^\d', rec.dum):
+                raise ValidationError("DUM erroné.")
+
 
     # ------------------------------------------------------------
     # CREATE

@@ -96,7 +96,7 @@
                             <field name="child_ids" readonly="1">
                                 <tree>
                                     <field name="name"/>
-                                    <field name="job_position_id"/>
+                                    <field name="job_title"/>
                                     <field name="email"/>
                                 </tree>
                             </field>
@@ -149,7 +149,7 @@
         </field>
     </record>
     
-    <!-- Kanban View -->
+   <!-- Kanban View -->
     <record id="view_core_employee_kanban" model="ir.ui.view">
         <field name="name">core.employee.kanban</field>
         <field name="model">core.employee</field>
@@ -186,80 +186,7 @@
         </field>
     </record>
 
-    <!-- Kanban View pour Organization Chart -->
-    <record id="view_core_employee_org_chart_kanban" model="ir.ui.view">
-        <field name="name">core.employee.org.chart.kanban</field>
-        <field name="model">core.employee</field>
-        <field name="arch" type="xml">
-            <kanban class="o_employee_org_chart_kanban" create="false" sample="1">
-                <field name="id"/>
-                <field name="name"/>
-                <field name="job_position_id"/>
-                <field name="department_id"/>
-                <field name="parent_id"/>
-                <field name="child_ids"/>
-                <field name="image_1920"/>
-                <field name="email"/>
-                <field name="phone"/>
-                <templates>
-                    <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click o_org_chart_card">
-                            <div class="o_org_chart_card_header text-center">
-                                <div class="o_org_chart_image">
-                                    <img t-att-src="kanban_image('core.employee', 'image_1920', record.id.raw_value)" 
-                                         alt="Employee Photo"
-                                         class="rounded-circle"
-                                         style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #007bff; margin: 10px auto; display: block;"/>
-                                </div>
-                                <div class="o_org_chart_info" style="padding: 10px;">
-                                    <strong class="o_kanban_record_title" style="font-size: 16px; color: #2c3e50;">
-                                        <field name="name"/>
-                                    </strong>
-                                    <div t-if="record.job_position_id.raw_value" style="color: #7f8c8d; font-size: 14px; margin-top: 5px;">
-                                        <i class="fa fa-briefcase" style="margin-right: 5px;"/>
-                                        <field name="job_position_id"/>
-                                    </div>
-                                    <div t-if="record.department_id.raw_value" style="color: #95a5a6; font-size: 13px; margin-top: 3px;">
-                                        <i class="fa fa-building" style="margin-right: 5px;"/>
-                                        <field name="department_id"/>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="o_org_chart_card_body" style="padding: 10px; border-top: 1px solid #ecf0f1;">
-                                <div t-if="record.email.raw_value" style="font-size: 12px; color: #34495e; margin-bottom: 5px;">
-                                    <i class="fa fa-envelope" style="margin-right: 5px; color: #3498db;"/>
-                                    <field name="email"/>
-                                </div>
-                                <div t-if="record.phone.raw_value" style="font-size: 12px; color: #34495e; margin-bottom: 5px;">
-                                    <i class="fa fa-phone" style="margin-right: 5px; color: #27ae60;"/>
-                                    <field name="phone"/>
-                                </div>
-                                
-                                <div class="o_org_chart_relationships" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ecf0f1;">
-                                    <div t-if="record.parent_id.raw_value" style="font-size: 12px; color: #7f8c8d; margin-bottom: 5px;">
-                                        <i class="fa fa-user-circle" style="margin-right: 5px; color: #e67e22;"/>
-                                        <strong>Manager:</strong> 
-                                        <field name="parent_id"/>
-                                    </div>
-                                    <div t-if="record.child_ids.raw_value.length > 0" style="font-size: 12px; color: #7f8c8d;">
-                                        <i class="fa fa-users" style="margin-right: 5px; color: #9b59b6;"/>
-                                        <strong>
-                                            <t t-esc="record.child_ids.raw_value.length"/> 
-                                            <t t-if="record.child_ids.raw_value.length == 1">subordinate</t>
-                                            <t t-else="">subordinates</t>
-                                        </strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </t>
-                </templates>
-            </kanban>
-        </field>
-    </record>
-
-    <!-- Action Principal -->
+    <!-- Action -->
     <record id="action_core_employee" model="ir.actions.act_window">
         <field name="name">Employees</field>
         <field name="res_model">core.employee</field>
@@ -271,52 +198,10 @@
         </field>
     </record>
 
-    <!-- Action pour Organization Chart -->
-    <record id="action_core_employee_org_chart" model="ir.actions.act_window">
-        <field name="name">Organization Chart</field>
-        <field name="res_model">core.employee</field>
-        <field name="view_mode">kanban,tree,form</field>
-        <field name="view_id" ref="view_core_employee_org_chart_kanban"/>
-        <field name="domain">[('parent_id', '=', False)]</field>
-        <field name="context">{'default_active': True}</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No top-level employees found!
-            </p>
-            <p>
-                Start by creating employees without a manager to see them here.
-            </p>
-        </field>
-    </record>
-
     <!-- Menus -->
-    <menuitem id="menu_core_employee_root" 
-              name="Employees" 
-              sequence="10" 
-              web_icon="custom_employee,static/description/icon.png"/>
-    
-    <menuitem id="menu_core_employee_main" 
-              name="Employees" 
-              parent="menu_core_employee_root" 
-              action="action_core_employee" 
-              sequence="1"/>
-    
-    <menuitem id="menu_core_employee_org_chart" 
-              name="Organization Chart" 
-              parent="menu_core_employee_root" 
-              action="action_core_employee_org_chart" 
-              sequence="5"/>
-    
-    <menuitem id="menu_core_department" 
-              name="Departments" 
-              parent="menu_core_employee_root" 
-              action="action_core_department" 
-              sequence="10"/>
-    
-    <menuitem id="menu_core_job_position" 
-              name="Job Positions" 
-              parent="menu_core_employee_root" 
-              action="action_core_job_position" 
-              sequence="20"/>
+    <menuitem id="menu_core_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png"/>
+    <menuitem id="menu_core_employee_main" name="Employees" parent="menu_core_employee_root" action="action_core_employee" sequence="1"/>
+    <menuitem id="menu_core_department" name="Departments" parent="menu_core_employee_root" action="action_core_department" sequence="10"/>
+    <menuitem id="menu_core_job_position" name="Job Positions" parent="menu_core_employee_root" action="action_core_job_position" sequence="20"/>
 
 </odoo>

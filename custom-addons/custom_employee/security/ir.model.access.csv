@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_core_employee_user,core.employee.user,model_core_employee,group_core_employee_user,1,0,0,0
 access_core_employee_manager,core.employee.manager,model_core_employee,group_core_employee_manager,1,1,1,1
+access_core_employee_document_user,core.employee.document.user,model_core_employee_document,group_core_employee_user,1,0,0,0
+access_core_employee_document_manager,core.employee.document.manager,model_core_employee_document,group_core_employee_manager,1,1,1,1

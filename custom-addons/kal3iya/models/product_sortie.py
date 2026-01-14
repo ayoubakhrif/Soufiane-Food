@@ -279,10 +279,6 @@ class ProductExit(models.Model):
         # 3️⃣ Recalcul du stock une seule fois par entrée
         self.mapped('entry_id').recompute_qty()
 
-        clients = self.mapped('client_id')
-        if clients:
-            clients.invalidate_cache()
-
         return res
 
 

@@ -32,7 +32,7 @@ class StockKal3iyaEntry(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
-    ], string='Garage', required=True)
+    ], string='Garage')
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),

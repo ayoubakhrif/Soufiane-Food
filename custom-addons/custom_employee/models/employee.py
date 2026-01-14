@@ -48,11 +48,11 @@ class CoreEmployee(models.Model):
     )
     
     # History Tracking
-    # job_history_ids = fields.One2many(
-    #     'core.employee.job.history',
-    #     'employee_id',
-    #     string='Job History'
-    # )
+    job_history_ids = fields.One2many(
+        'core.employee.job.history',
+        'employee_id',
+        string='Job History'
+    )
     # salary_history_ids = fields.One2many(
     #     'core.employee.salary.history',
     #     'employee_id',

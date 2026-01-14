@@ -8,7 +8,7 @@
     """,
     'category': 'Custom',
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'hr_org_chart'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

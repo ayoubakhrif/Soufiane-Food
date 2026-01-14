@@ -3,3 +3,11 @@ access_core_employee_user,core.employee.user,model_core_employee,group_core_empl
 access_core_employee_manager,core.employee.manager,model_core_employee,group_core_employee_manager,1,1,1,1
 access_core_employee_document_user,core.employee.document.user,model_core_employee_document,group_core_employee_user,1,0,0,0
 access_core_employee_document_manager,core.employee.document.manager,model_core_employee_document,group_core_employee_manager,1,1,1,1
+access_core_department_user,core.department.user,model_core_department,group_core_employee_user,1,0,0,0
+access_core_department_manager,core.department.manager,model_core_department,group_core_employee_manager,1,1,1,1
+access_core_job_position_user,core.job.position.user,model_core_job_position,group_core_employee_user,1,0,0,0
+access_core_job_position_manager,core.job.position.manager,model_core_job_position,group_core_employee_manager,1,1,1,1
+access_core_employee_job_history_user,core.employee.job.history.user,model_core_employee_job_history,group_core_employee_user,1,0,0,0
+access_core_employee_job_history_manager,core.employee.job.history.manager,model_core_employee_job_history,group_core_employee_manager,1,1,1,1
+access_core_employee_salary_history_user,core.employee.salary.history.user,model_core_employee_salary_history,group_core_employee_user,1,0,0,0
+access_core_employee_salary_history_manager,core.employee.salary.history.manager,model_core_employee_salary_history,group_core_employee_manager,1,1,1,1

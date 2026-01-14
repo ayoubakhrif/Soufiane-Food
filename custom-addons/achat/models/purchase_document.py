@@ -1,4 +1,6 @@
+import base64
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class PurchaseEntryDocument(models.Model):
     _name = 'logistique.entry.document'
@@ -21,6 +23,19 @@ class PurchaseEntryDocument(models.Model):
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)
     file_name = fields.Char(string='Nom du fichier')
+
+    @api.constrains('file')
+    def _check_file_size(self):
+        """Limit file size to 5MB"""
+        MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
+        for rec in self:
+            if rec.file:
+                # Binary field is stored as base64, decode to get actual size
+                file_size = len(base64.b64decode(rec.file))
+                if file_size > MAX_FILE_SIZE:
+                    raise ValidationError(
+                        f"La taille du fichier ({file_size / (1024*1024):.2f} MB) dépasse la limite autorisée de 5 MB."
+                    )
 
     @api.model
     def create(self, vals):

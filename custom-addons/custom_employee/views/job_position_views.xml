@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Job Position Tree View -->
+    <record id="view_core_job_position_tree" model="ir.ui.view">
+        <field name="name">core.job.position.tree</field>
+        <field name="model">core.job.position</field>
+        <field name="arch" type="xml">
+            <tree string="Job Positions">
+                <field name="name"/>
+                <field name="department_id"/>
+                <field name="parent_id"/>
+                <field name="level"/>
+                <field name="employee_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Job Position Form View -->
+    <record id="view_core_job_position_form" model="ir.ui.view">
+        <field name="name">core.job.position.form</field>
+        <field name="model">core.job.position</field>
+        <field name="arch" type="xml">
+            <form string="Job Position">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_core_employee)d" type="action"
+                                class="oe_stat_button" icon="fa-users"
+                                context="{'default_job_position_id': active_id, 'search_default_job_position_id': active_id}">
+                            <field name="employee_count" widget="statinfo" string="Employees"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Job Title"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="department_id"/>
+                            <field name="parent_id"/>
+                        </group>
+                        <group>
+                            <field name="level"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Child Positions">
+                            <field name="child_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="department_id"/>
+                                    <field name="level"/>
+                                    <field name="employee_count"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Job Position Action -->
+    <record id="action_core_job_position" model="ir.actions.act_window">
+        <field name="name">Job Positions</field>
+        <field name="res_model">core.job.position</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

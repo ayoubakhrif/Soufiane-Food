@@ -12,6 +12,8 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'views/department_views.xml',
+        'views/job_position_views.xml',
         'views/employee_views.xml',
     ],
     'installable': True,

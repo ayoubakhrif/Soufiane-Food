@@ -53,11 +53,11 @@ class CoreEmployee(models.Model):
         'employee_id',
         string='Job History'
     )
-    # salary_history_ids = fields.One2many(
-    #     'core.employee.salary.history',
-    #     'employee_id',
-    #     string='Salary History'
-    # )
+    salary_history_ids = fields.One2many(
+        'core.employee.salary.history',
+        'employee_id',
+        string='Salary History'
+    )
     current_job_history_id = fields.Many2one(
         'core.employee.job.history',
         string='Current Job History',

@@ -12,7 +12,7 @@
                 <field name="date"/>
                 <field name="expiration_date"/>
                 <field name="state" widget="badge" decoration-danger="state == 'pending'" decoration-success="state == 'treated'"/>
-                <button name="action_mark_treated" string="Marquer comme traité" type="object" icon="fa-check" attrs="{'invisible': [('state', '=', 'treated')]}"/>
+                <button name="action_mark_treated" string="Marquer comme traité" type="object" icon="fa-check" invisible="state == 'treated'"/>
             </tree>
         </field>
     </record>
@@ -24,7 +24,7 @@
         <field name="arch" type="xml">
             <form string="Notification" create="false" edit="false">
                 <header>
-                    <button name="action_mark_treated" string="Marquer comme traité" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'treated')]}"/>
+                    <button name="action_mark_treated" string="Marquer comme traité" type="object" class="oe_highlight" invisible="state == 'treated'"/>
                     <field name="state" widget="statusbar" statusbar_visible="pending,treated"/>
                 </header>
                 <sheet>

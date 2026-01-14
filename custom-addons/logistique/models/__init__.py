@@ -8,3 +8,5 @@ from . import dossier_cheque
 from . import logistics_entry
 from . import consolidator
 from . import dossier_deduction
+from . import surest_mag_config
+from . import surest_mag_simulation

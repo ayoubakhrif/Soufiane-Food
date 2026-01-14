@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Configuration Tree View -->
+    <record id="view_surest_mag_config_tree" model="ir.ui.view">
+        <field name="name">logistique.surest_mag.config.tree</field>
+        <field name="model">logistique.surest_mag.config</field>
+        <field name="arch" type="xml">
+            <tree string="Configuration Tarifs">
+                <field name="shipping_id"/>
+                <field name="container_type"/>
+                <field name="container_size"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Configuration Form View -->
+    <record id="view_surest_mag_config_form" model="ir.ui.view">
+        <field name="name">logistique.surest_mag.config.form</field>
+        <field name="model">logistique.surest_mag.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuration Tariff">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="shipping_id" class="oe_edit_only"/>
+                        <h1><field name="shipping_id" placeholder="Shipping Company"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="container_type"/>
+                            <field name="container_size"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Phases Tarifaires">
+                            <field name="phase_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="days"/>
+                                    <field name="surestarie_rate"/>
+                                    <field name="magasinage_rate"/>
+                                    <field name="is_beyond"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Simulation Tree View -->
+    <record id="view_surest_mag_simulation_tree" model="ir.ui.view">
+        <field name="name">logistique.surest_mag.simulation.tree</field>
+        <field name="model">logistique.surest_mag.simulation</field>
+        <field name="arch" type="xml">
+            <tree string="Simulations">
+                <field name="create_date"/>
+                <field name="shipping_id"/>
+                <field name="container_type"/>
+                <field name="container_size"/>
+                <field name="total_days"/>
+                <field name="total_surestarie" sum="Total Surestarie"/>
+                <field name="total_magasinage" sum="Total Magasinage"/>
+                <field name="grand_total" sum="Grand Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Simulation Form View -->
+    <record id="view_surest_mag_simulation_form" model="ir.ui.view">
+        <field name="name">logistique.surest_mag.simulation.form</field>
+        <field name="model">logistique.surest_mag.simulation</field>
+        <field name="arch" type="xml">
+            <form string="Simulation">
+                <header>
+                    <button name="action_simulate" string="Calculer" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="shipping_id"/>
+                            <field name="container_type"/>
+                            <field name="container_size"/>
+                        </group>
+                        <group>
+                            <field name="entry_date"/>
+                            <field name="exit_date"/>
+                            <field name="total_days"/>
+                        </group>
+                    </group>
+                    <group string="Totals" class="oe_subtotal_footer oe_right">
+                        <field name="total_surestarie" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="total_magasinage" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <div class="oe_subtotal_footer_separator oe_inline">
+                            <label for="grand_total"/>
+                        </div>
+                        <field name="grand_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    </group>
+                    <notebook>
+                        <page string="Détails (Breakdown)">
+                            <field name="line_ids" readonly="1">
+                                <tree>
+                                    <field name="phase_name"/>
+                                    <field name="days_spent"/>
+                                    <field name="surestarie_rate"/>
+                                    <field name="magasinage_rate"/>
+                                    <field name="surestarie_subtotal"/>
+                                    <field name="magasinage_subtotal"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="config_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

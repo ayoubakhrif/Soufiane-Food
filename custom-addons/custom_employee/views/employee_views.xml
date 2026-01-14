@@ -186,32 +186,17 @@
         </field>
     </record>
 
-    <!-- Org Chart View -->
-    <record id="view_core_employee_org_chart" model="ir.ui.view">
-        <field name="name">core.employee.org.chart</field>
+    <!-- Org Chart (Hierarchy Graph) View -->
+    <record id="view_core_employee_graph" model="ir.ui.view">
+        <field name="name">core.employee.graph</field>
         <field name="model">core.employee</field>
         <field name="arch" type="xml">
-            <org_chart>
+            <graph string="Employee Hierarchy" type="hierarchy">
                 <field name="parent_id"/>
                 <field name="name"/>
                 <field name="job_position_id"/>
-                <field name="image_1920"/>
-                <templates>
-                    <t t-name="org_chart_employee_node">
-                        <div class="o_org_chart_node">
-                            <div class="o_org_chart_node_image">
-                                <img t-att-src="kanban_image('core.employee', 'image_1920', record.id.raw_value)"/>
-                            </div>
-                            <div class="o_org_chart_node_content">
-                                <strong><field name="name"/></strong>
-                                <div t-if="record.job_position_id.raw_value">
-                                    <field name="job_position_id"/>
-                                </div>
-                            </div>
-                        </div>
-                    </t>
-                </templates>
-            </org_chart>
+                <field name="department_id"/>
+            </graph>
         </field>
     </record>
 
@@ -219,7 +204,7 @@
     <record id="action_core_employee" model="ir.actions.act_window">
         <field name="name">Employees</field>
         <field name="res_model">core.employee</field>
-        <field name="view_mode">kanban,tree,form,org_chart</field>
+        <field name="view_mode">kanban,tree,form,graph</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             Create your first employee!
@@ -232,5 +217,19 @@
     <menuitem id="menu_core_employee_main" name="Employees" parent="menu_core_employee_root" action="action_core_employee" sequence="1"/>
     <menuitem id="menu_core_department" name="Departments" parent="menu_core_employee_root" action="action_core_department" sequence="10"/>
     <menuitem id="menu_core_job_position" name="Job Positions" parent="menu_core_employee_root" action="action_core_job_position" sequence="20"/>
+
+    <!-- Org Chart Action and Menu -->
+    <record id="action_core_employee_org_chart" model="ir.actions.act_window">
+        <field name="name">Organization Chart</field>
+        <field name="res_model">core.employee</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_core_employee_graph"/>
+    </record>
+
+    <menuitem id="menu_core_employee_org_chart" 
+              name="Organization Chart" 
+              parent="menu_core_employee_root" 
+              action="action_core_employee_org_chart" 
+              sequence="30"/>
 
 </odoo>

@@ -26,6 +26,11 @@ class CoreEmployee(models.Model):
     active = fields.Boolean(string='Active', default=True, tracking=True)
     matriculation_cnss = fields.Char(string='Matriculation CNSS', tracking=True)
     matriculation = fields.Char(string='Matriculation', tracking=True)
+    document_ids = fields.One2many(
+        'core.employee.document',
+        'employee_id',
+        string='Documents'
+    )
 
     # Hierarchy
     parent_id = fields.Many2one('core.employee', string='Manager', index=True, tracking=True)

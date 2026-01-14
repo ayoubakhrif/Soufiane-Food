@@ -14,6 +14,7 @@
                 <field name="weight"/>
                 <field name="tonnage"/>
                 <field name="price_purchase"/>
+                <field name="driver_id"/>
                 <field name="garage"/>
                 <field name="frigo"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>

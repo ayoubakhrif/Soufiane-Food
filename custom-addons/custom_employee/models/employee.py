@@ -48,16 +48,16 @@ class CoreEmployee(models.Model):
     )
     
     # History Tracking
-    job_history_ids = fields.One2many(
-        'core.employee.job.history',
-        'employee_id',
-        string='Job History'
-    )
-    salary_history_ids = fields.One2many(
-        'core.employee.salary.history',
-        'employee_id',
-        string='Salary History'
-    )
+    # job_history_ids = fields.One2many(
+    #     'core.employee.job.history',
+    #     'employee_id',
+    #     string='Job History'
+    # )
+    # salary_history_ids = fields.One2many(
+    #     'core.employee.salary.history',
+    #     'employee_id',
+    #     string='Salary History'
+    # )
     current_job_history_id = fields.Many2one(
         'core.employee.job.history',
         string='Current Job History',
@@ -72,15 +72,15 @@ class CoreEmployee(models.Model):
     )
     
     # Notifications
-    notification_ids = fields.One2many(
-        'core.employee.notification',
-        'employee_id',
-        string='Notifications'
-    )
-    pending_notification_count = fields.Integer(
-        string='Pending Notifications',
-        compute='_compute_pending_notifications'
-    )
+    # notification_ids = fields.One2many(
+    #     'core.employee.notification',
+    #     'employee_id',
+    #     string='Notifications'
+    # )
+    # pending_notification_count = fields.Integer(
+    #     string='Pending Notifications',
+    #     compute='_compute_pending_notifications'
+    # )
     
     # Document expiration cards (HTML rendering)
     document_expiration_cards_html = fields.Html(
@@ -128,12 +128,12 @@ class CoreEmployee(models.Model):
             employee.current_job_history_id = current_job
             employee.current_salary_history_id = current_salary
     
-    @api.depends('notification_ids.state')
-    def _compute_pending_notifications(self):
-        for employee in self:
-            employee.pending_notification_count = len(
-                employee.notification_ids.filtered(lambda n: n.state == 'pending')
-            )
+    # @api.depends('notification_ids.state')
+    # def _compute_pending_notifications(self):
+    #     for employee in self:
+    #         employee.pending_notification_count = len(
+    #             employee.notification_ids.filtered(lambda n: n.state == 'pending')
+    #         )
     
     @api.depends('document_ids.issue_date', 'document_ids.days_remaining')
     def _compute_document_cards(self):

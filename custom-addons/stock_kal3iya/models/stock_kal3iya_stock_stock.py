@@ -7,9 +7,9 @@ class StockKal3iyaStock(models.Model):
     _log_access = False
     _order = 'product_id'
 
-    product_id = fields.Many2one('stock.kal3iya.product', string='Produit', readonly=True)
-    lot = fields.Char(string='Lot', readonly=True)
-    dum = fields.Char(string='DUM', readonly=True)
+    product_id = fields.Many2one('stock.kal3iya.product', string='Produit', readonly=True, required=True)
+    lot = fields.Char(string='Lot', readonly=True, required=True)
+    dum = fields.Char(string='DUM', readonly=True, required=True)
     garage = fields.Selection([
         ('garage1', 'Garage 1'),
         ('garage2', 'Garage 2'),
@@ -21,7 +21,7 @@ class StockKal3iyaStock(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
-    ], string='Garage', required=True)
+    ], string='Garage')
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),

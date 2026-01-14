@@ -186,11 +186,40 @@
         </field>
     </record>
 
+    <!-- Org Chart View -->
+    <record id="view_core_employee_org_chart" model="ir.ui.view">
+        <field name="name">core.employee.org.chart</field>
+        <field name="model">core.employee</field>
+        <field name="arch" type="xml">
+            <org_chart>
+                <field name="parent_id"/>
+                <field name="name"/>
+                <field name="job_position_id"/>
+                <field name="image_1920"/>
+                <templates>
+                    <t t-name="org_chart_employee_node">
+                        <div class="o_org_chart_node">
+                            <div class="o_org_chart_node_image">
+                                <img t-att-src="kanban_image('core.employee', 'image_1920', record.id.raw_value)"/>
+                            </div>
+                            <div class="o_org_chart_node_content">
+                                <strong><field name="name"/></strong>
+                                <div t-if="record.job_position_id.raw_value">
+                                    <field name="job_position_id"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </org_chart>
+        </field>
+    </record>
+
     <!-- Action -->
     <record id="action_core_employee" model="ir.actions.act_window">
         <field name="name">Employees</field>
         <field name="res_model">core.employee</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,tree,form,org_chart</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             Create your first employee!

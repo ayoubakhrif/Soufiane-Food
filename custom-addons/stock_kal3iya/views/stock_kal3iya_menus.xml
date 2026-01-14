@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-
     <menuitem id="menu_stock_kal3iya_stock"
               name="Stock"
               parent="menu_stock_kal3iya_root"
@@ -69,6 +67,3 @@
               action="action_stock_kal3iya_ste"
               sequence="50"/>
 </odoo>
-
-
-

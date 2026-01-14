@@ -31,6 +31,30 @@ class CoreEmployeeDocument(models.Model):
 
     issue_date = fields.Date(string='Date d’éxpiration')
     note = fields.Text(string='Remarque')
+    
+    # Computed fields for expiration tracking
+    days_remaining = fields.Integer(
+        string='Days Remaining',
+        compute='_compute_expiration_info',
+        store=False
+    )
+    is_expired = fields.Boolean(
+        string='Is Expired',
+        compute='_compute_expiration_info',
+        store=False
+    )
+    
+    @api.depends('issue_date')
+    def _compute_expiration_info(self):
+        today = fields.Date.today()
+        for doc in self:
+            if doc.issue_date:
+                delta = (doc.issue_date - today).days
+                doc.days_remaining = delta
+                doc.is_expired = delta < 0
+            else:
+                doc.days_remaining = 0
+                doc.is_expired = False
 
     @api.constrains('employee_id', 'doc_type')
     def _check_unique_document(self):

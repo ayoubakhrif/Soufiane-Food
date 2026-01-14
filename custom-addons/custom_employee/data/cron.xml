@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cron_check_document_expiration" model="ir.cron">
+        <field name="name">Employee Document: Check Expirations</field>
+        <field name="model_id" ref="model_core_employee_notification"/>
+        <field name="state">code</field>
+        <field name="code">model._check_all_document_expirations()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+        <field name="nextcall" eval="(datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:00:01')"/>
+    </record>
+</odoo>

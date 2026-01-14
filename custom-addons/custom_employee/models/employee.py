@@ -70,6 +70,24 @@ class CoreEmployee(models.Model):
         compute='_compute_current_histories',
         store=False
     )
+    
+    # Notifications
+    notification_ids = fields.One2many(
+        'core.employee.notification',
+        'employee_id',
+        string='Notifications'
+    )
+    pending_notification_count = fields.Integer(
+        string='Pending Notifications',
+        compute='_compute_pending_notifications'
+    )
+    
+    # Document expiration cards (HTML rendering)
+    document_expiration_cards_html = fields.Html(
+        string='Document Expiration Cards',
+        compute='_compute_document_cards',
+        sanitize=False
+    )
 
     # Hierarchy
     parent_id = fields.Many2one('core.employee', string='Manager', index=True, tracking=True)
@@ -109,6 +127,71 @@ class CoreEmployee(models.Model):
             ], limit=1)
             employee.current_job_history_id = current_job
             employee.current_salary_history_id = current_salary
+    
+    @api.depends('notification_ids.state')
+    def _compute_pending_notifications(self):
+        for employee in self:
+            employee.pending_notification_count = len(
+                employee.notification_ids.filtered(lambda n: n.state == 'pending')
+            )
+    
+    @api.depends('document_ids.issue_date', 'document_ids.days_remaining')
+    def _compute_document_cards(self):
+        """Generate HTML cards for documents with expiration dates"""
+        for employee in self:
+            # Filter documents with issue_date set
+            docs_with_expiry = employee.document_ids.filtered(lambda d: d.issue_date)
+            
+            if not docs_with_expiry:
+                employee.document_expiration_cards_html = '<p class="text-muted">Aucun document avec date d\'expiration</p>'
+                continue
+            
+            html = '<div class="row">'
+            for doc in docs_with_expiry:
+                # Determine card styling based on expiration status
+                if doc.is_expired:
+                    border_class = 'border-danger'
+                    header_bg = '#f8d7da'
+                    icon_class = 'fa-exclamation-triangle'
+                    text_class = 'text-danger'
+                    status_text = f'Expiré il y a {abs(doc.days_remaining)} jours'
+                elif doc.days_remaining <= 7:
+                    border_class = 'border-warning'
+                    header_bg = '#fff3cd'
+                    icon_class = 'fa-clock-o'
+                    text_class = 'text-warning'
+                    status_text = f'Expire dans {doc.days_remaining} jours'
+                else:
+                    border_class = 'border-info'
+                    header_bg = '#d1ecf1'
+                    icon_class = 'fa-check-circle'
+                    text_class = 'text-info'
+                    status_text = f'Expire dans {doc.days_remaining} jours'
+                
+                # Get document type label
+                doc_type_dict = dict(doc._fields['doc_type'].selection)
+                doc_type_label = doc_type_dict.get(doc.doc_type, doc.doc_type)
+                
+                html += f'''
+                <div class="col-md-4 mb-3">
+                    <div class="card {border_class}">
+                        <div class="card-header" style="background-color: {header_bg};">
+                            <strong>{doc_type_label}</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                <i class="fa fa-calendar"></i> Expiration: {doc.issue_date.strftime('%d/%m/%Y')}
+                            </p>
+                            <p class="{text_class}">
+                                <i class="fa {icon_class}"></i> {status_text}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                '''
+            
+            html += '</div>'
+            employee.document_expiration_cards_html = html
 
     def write(self, vals):
         """Override write to auto-create history records when job or salary changes"""

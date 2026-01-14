@@ -120,6 +120,9 @@
                                 </form>
                             </field>
                         </page>
+                        <page string="Days Remaining">
+                            <field name="document_expiration_cards_html" widget="html" readonly="1" nolabel="1"/>
+                        </page>
                         <page string="Job History">
                             <field name="job_history_ids" readonly="1">
                                 <tree>

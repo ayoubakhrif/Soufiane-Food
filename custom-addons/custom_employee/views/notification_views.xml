@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Notification Tree View -->
+    <record id="view_core_employee_notification_tree" model="ir.ui.view">
+        <field name="name">core.employee.notification.tree</field>
+        <field name="model">core.employee.notification</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="state == 'pending'" decoration-muted="state == 'treated'" create="false" edit="false">
+                <field name="employee_id"/>
+                <field name="notification_type"/>
+                <field name="document_type"/>
+                <field name="date"/>
+                <field name="expiration_date"/>
+                <field name="state" widget="badge" decoration-danger="state == 'pending'" decoration-success="state == 'treated'"/>
+                <button name="action_mark_treated" string="Marquer comme traité" type="object" icon="fa-check" attrs="{'invisible': [('state', '=', 'treated')]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Notification Form View -->
+    <record id="view_core_employee_notification_form" model="ir.ui.view">
+        <field name="name">core.employee.notification.form</field>
+        <field name="model">core.employee.notification</field>
+        <field name="arch" type="xml">
+            <form string="Notification" create="false" edit="false">
+                <header>
+                    <button name="action_mark_treated" string="Marquer comme traité" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'treated')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,treated"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="notification_type" readonly="1"/>
+                            <field name="document_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="1"/>
+                            <field name="expiration_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Message">
+                        <field name="message" readonly="1" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Notification Action -->
+    <record id="action_core_employee_notification" model="ir.actions.act_window">
+        <field name="name">Notifications des employés</field>
+        <field name="res_model">core.employee.notification</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_core_employee_notification_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune notification en attente.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menus for Notifications -->
+    <menuitem id="menu_notifications_root" name="Notifications" parent="menu_core_employee_root" sequence="50"/>
+    <menuitem id="menu_employee_notifications" name="Notifications des employés" parent="menu_notifications_root" action="action_core_employee_notification" sequence="10"/>
+
+</odoo>

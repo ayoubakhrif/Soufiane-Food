@@ -103,7 +103,7 @@
                         </page>
                         <page string="Documents">
                             <field name="document_ids" context="{'default_employee_id': active_id}">
-                                <tree editable="bottom">
+                                <tree>
                                     <field name="doc_type"/>
                                     <field name="issue_date"/>
                                     <field name="filename"/>

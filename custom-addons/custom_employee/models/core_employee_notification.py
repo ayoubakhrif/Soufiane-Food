@@ -70,16 +70,20 @@ class CoreEmployeeNotification(models.Model):
     def _create_deadline_activity(self, notification):
         """Create a persistent activity visible in the clock icon"""
 
-        # Determine responsible user
+        # Responsible user
         responsible_user = self.env.user
         if notification.employee_id.parent_id and notification.employee_id.parent_id.user_id:
             responsible_user = notification.employee_id.parent_id.user_id
 
         deadline = notification.document_id.issue_date or fields.Date.today()
 
+        # Get model ID properly (INTEGER)
+        model = self.env['ir.model']._get('core.employee.notification')
+
         self.env['mail.activity'].create({
-            'res_model': 'core.employee.notification',   # ✅ STRING UNIQUEMENT
-            'res_id': notification.id,                   # ✅ INTEGER
+            'res_model_id': model.id,                 # ✅ REQUIRED in your Odoo
+            'res_model': 'core.employee.notification',# ✅ for systray navigation
+            'res_id': notification.id,
             'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
             'summary': 'Document Expiration',
             'note': notification.message or 'Please check the document.',

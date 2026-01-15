@@ -68,19 +68,18 @@ class CoreEmployeeNotification(models.Model):
         return notification
 
     def _create_deadline_activity(self, notification):
-        """Create a persistent activity in the clock icon using explicit create"""
-        # Determine responsible user (Manager -> Coach -> Current)
+        """Create a persistent activity visible in the clock icon"""
+
+        # Determine responsible user
         responsible_user = self.env.user
         if notification.employee_id.parent_id and notification.employee_id.parent_id.user_id:
-             responsible_user = notification.employee_id.parent_id.user_id
-        
-        # Determine deadline (Document Expiry)
-        deadline = notification.document_id.issue_date if notification.document_id else fields.Date.today()
-                
-        # Schedule Activity explicitly
+            responsible_user = notification.employee_id.parent_id.user_id
+
+        deadline = notification.document_id.issue_date or fields.Date.today()
+
         self.env['mail.activity'].create({
-            'res_model_id': 'core.employee.notification',
-            'res_id': notification.id,
+            'res_model': 'core.employee.notification',   # ✅ STRING UNIQUEMENT
+            'res_id': notification.id,                   # ✅ INTEGER
             'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
             'summary': 'Document Expiration',
             'note': notification.message or 'Please check the document.',

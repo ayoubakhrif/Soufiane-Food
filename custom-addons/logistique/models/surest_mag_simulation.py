@@ -9,7 +9,7 @@ class SurestMagSimulation(models.Model):
 
     shipping_id = fields.Many2one('logistique.shipping', string='Shipping Company', required=True)
     container_type = fields.Selection([
-        ('generals', 'Generals'),
+        ('generals', 'Dry'),
         ('reefers', 'Reefers'),
     ], string='Container Type', required=True, default='generals')
     container_size = fields.Selection([
@@ -17,8 +17,9 @@ class SurestMagSimulation(models.Model):
         ('40', "40'"),
     ], string='Container Size', required=True, default='20')
     
-    entry_date = fields.Date(string='Entry Date', required=True, default=fields.Date.context_today)
-    exit_date = fields.Date(string='Exit Date', required=True, default=fields.Date.context_today)
+    entry_date = fields.Date(string='ETA', required=True, default=fields.Date.context_today)
+    exit_date = fields.Date(string='Sortie Plein', required=True, default=fields.Date.context_today)
+    returning_date = fields.Date(string='Entrée vide', required=True, default=fields.Date.context_today)
     
     total_days = fields.Integer(string='Total Days', compute='_compute_days', store=True)
     

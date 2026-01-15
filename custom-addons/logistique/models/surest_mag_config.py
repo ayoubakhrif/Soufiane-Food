@@ -8,7 +8,7 @@ class SurestMagConfig(models.Model):
 
     shipping_id = fields.Many2one('logistique.shipping', string='Shipping Company', required=True)
     container_type = fields.Selection([
-        ('generals', 'Generals'),
+        ('generals', 'Dry'),
         ('reefers', 'Reefers'),
     ], string='Container Type', required=True, default='generals')
     container_size = fields.Selection([

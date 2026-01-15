@@ -89,6 +89,7 @@
                         <group>
                             <field name="entry_date"/>
                             <field name="exit_date"/>
+                            <field name="returning_date"/>
                             <field name="total_days"/>
                         </group>
                     </group>

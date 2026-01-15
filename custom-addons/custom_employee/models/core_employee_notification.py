@@ -76,13 +76,10 @@ class CoreEmployeeNotification(models.Model):
         
         # Determine deadline (Document Expiry)
         deadline = notification.document_id.issue_date if notification.document_id else fields.Date.today()
-        
-        # Determine Model ID
-        model_id = self.env['ir.model']._get_id('core.employee.notification')
-        
+                
         # Schedule Activity explicitly
         self.env['mail.activity'].create({
-            'res_model_id': model_id,
+            'res_model_id': 'core.employee.notification',
             'res_id': notification.id,
             'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
             'summary': 'Document Expiration',

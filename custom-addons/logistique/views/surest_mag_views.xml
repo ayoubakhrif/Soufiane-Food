@@ -62,10 +62,9 @@
                 <field name="shipping_id"/>
                 <field name="container_type"/>
                 <field name="container_size"/>
-                <field name="total_days"/>
-                <field name="total_surestarie" sum="Total Surestarie"/>
-                <field name="total_magasinage" sum="Total Magasinage"/>
-                <field name="grand_total" sum="Grand Total"/>
+                <field name="days_magasinage"/>
+                <field name="days_surestarie"/>
+                <field name="grand_total_ttc" sum="Grand Total TTC"/>
             </tree>
         </field>
     </record>
@@ -81,36 +80,50 @@
                 </header>
                 <sheet>
                     <group>
-                        <group>
+                        <group string="Paramètres">
                             <field name="shipping_id"/>
                             <field name="container_type"/>
                             <field name="container_size"/>
+                            <field name="container_count"/>
+                            <field name="free_surestarie_days"/>
                         </group>
-                        <group>
+                        <group string="Dates">
                             <field name="entry_date"/>
                             <field name="exit_date"/>
                             <field name="returning_date"/>
-                            <field name="total_days"/>
+                            <separator string="Résultat Jours"/>
+                            <field name="days_magasinage" readonly="1"/>
+                            <field name="days_surestarie" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Totals" class="oe_subtotal_footer oe_right">
-                        <field name="total_surestarie" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                        <field name="total_magasinage" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <group string="Détails Financiers" class="oe_subtotal_footer oe_right">
+                        <!-- Surestarie Section -->
+                        <field name="total_surestarie_ht" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="total_surestarie_vat" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="total_surestarie_ttc" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        
+                        <!-- Magasinage Section -->
+                        <field name="total_magasinage_ht" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="total_magasinage_vat" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="total_magasinage_ttc" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        
+                        <!-- Grand Total -->
                         <div class="oe_subtotal_footer_separator oe_inline">
-                            <label for="grand_total"/>
+                            <label for="grand_total_ttc" string="Total Général TTC"/>
                         </div>
-                        <field name="grand_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="grand_total_ttc" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                     </group>
                     <notebook>
                         <page string="Détails (Breakdown)">
                             <field name="line_ids" readonly="1">
                                 <tree>
                                     <field name="phase_name"/>
-                                    <field name="days_spent"/>
+                                    <field name="days_magasinage" string="J. Mag"/>
+                                    <field name="days_surestarie_billed" string="J. Sur"/>
                                     <field name="surestarie_rate"/>
                                     <field name="magasinage_rate"/>
-                                    <field name="surestarie_subtotal"/>
-                                    <field name="magasinage_subtotal"/>
+                                    <field name="surestarie_subtotal" sum="Total Sur."/>
+                                    <field name="magasinage_subtotal" sum="Total Mag."/>
                                 </tree>
                             </field>
                             <group>

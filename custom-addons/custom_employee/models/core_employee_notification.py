@@ -38,7 +38,7 @@ class CoreEmployeeNotification(models.Model):
     state = fields.Selection([
         ('pending', 'En attente'),
         ('treated', 'Traité'),
-    ], string='État', default='pending', required=True, index=True, tracking=True)
+    ], string='État', default='pending', required=True, index=True)
     
     message = fields.Text(string='Message')
     
@@ -78,26 +78,28 @@ class CoreEmployeeNotification(models.Model):
 
         activity_type_id = self.env.ref('mail.mail_activity_data_todo').id
         
-        # Identify Target Users: All users in "Custom Employee / User" group
-        # (This includes Managers via inheritance)
-        group = self.env.ref('custom_employee.group_core_employee_user')
-        target_users = group.users
+        # Identify Target Users: Users in "User" group AND "Manager" group
+        # (group.users only returns explicit members, so we must include managers explicitly)
+        group_user = self.env.ref('custom_employee.group_core_employee_user')
+        group_manager = self.env.ref('custom_employee.group_core_employee_manager')
+        
+        # Union of users (avoid duplicates)
+        target_users = group_user.users | group_manager.users
         
         # Batch Create Activities
-        # Although create() supports batch, we need distinct user_id per record, 
-        # so looping or constructing a list is needed.
         activity_vals_list = []
         for user in target_users:
-            activity_vals_list.append({
-                'res_model_id': model.id,
-                'res_model': 'core.employee.notification',
-                'res_id': notification.id,
-                'activity_type_id': activity_type_id,
-                'summary': 'Document Expiration',
-                'note': notification.message or 'Please check the document.',
-                'date_deadline': deadline,
-                'user_id': user.id,
-            })
+            if not user.share: # Exclude portal/public users if any slipped in
+                activity_vals_list.append({
+                    'res_model_id': model.id,
+                    'res_model': 'core.employee.notification',
+                    'res_id': notification.id,
+                    'activity_type_id': activity_type_id,
+                    'summary': 'Document Expiration',
+                    'note': notification.message or 'Please check the document.',
+                    'date_deadline': deadline,
+                    'user_id': user.id,
+                })
             
         if activity_vals_list:
             self.env['mail.activity'].create(activity_vals_list)

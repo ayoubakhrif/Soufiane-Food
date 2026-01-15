@@ -68,7 +68,7 @@ class CoreEmployeeNotification(models.Model):
         return notification
 
     def _create_deadline_activity(self, notification):
-        """Create a persistent activity in the clock icon"""
+        """Create a persistent activity in the clock icon using explicit create"""
         # Determine responsible user (Manager -> Coach -> Current)
         responsible_user = self.env.user
         if notification.employee_id.parent_id and notification.employee_id.parent_id.user_id:
@@ -77,19 +77,19 @@ class CoreEmployeeNotification(models.Model):
         # Determine deadline (Document Expiry)
         deadline = notification.document_id.issue_date if notification.document_id else fields.Date.today()
         
-        # Schedule Activity
-        # using 'mail.mail_activity_data_todo' (default ID usually loaded for 'To Do')
-        # We search for it to be safe
-        activity_type = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
-        activity_type_id = activity_type.id if activity_type else False
+        # Determine Model ID
+        model_id = self.env['ir.model']._get_id('core.employee.notification')
         
-        notification.activity_schedule(
-            'mail.mail_activity_data_todo',
-            user_id=responsible_user.id,
-            date_deadline=deadline,
-            summary='Document Expiration',
-            note=notification.message or 'Please check the document.'
-        )
+        # Schedule Activity explicitly
+        self.env['mail.activity'].create({
+            'res_model_id': model_id,
+            'res_id': notification.id,
+            'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+            'summary': 'Document Expiration',
+            'note': notification.message or 'Please check the document.',
+            'date_deadline': deadline,
+            'user_id': responsible_user.id,
+        })
 
     @api.constrains('employee_id', 'document_id', 'notification_type', 'state')
     def _check_unique_pending(self):
@@ -112,9 +112,8 @@ class CoreEmployeeNotification(models.Model):
         """Mark notification as treated and complete related activity"""
         for record in self:
             record.write({'state': 'treated'})
-            # Complete activities
-            activities = record.activity_ids.filtered(lambda a: a.activity_type_id.category == 'default') # Filter if needed, or just all
-            activities.action_done()
+            # Complete ALL activities
+            record.activity_ids.action_done()
 
     @api.model
     def _check_all_document_expirations(self):

@@ -23,3 +23,7 @@ access_achat_article_user,achat.article.user,model_achat_article,group_purchase_
 access_achat_article_manager,achat.article.manager,model_achat_article,group_purchase_manager,1,1,1,1
 access_achat_reclamation_dhl_user,achat.reclamation.dhl.user,model_achat_reclamation_dhl,group_purchase_user,1,1,1,0
 access_achat_reclamation_dhl_manager,achat.reclamation.dhl.manager,model_achat_reclamation_dhl,group_purchase_manager,1,1,1,1
+access_achat_entry_viewer,achat.entry.viewer,logistique.model_logistique_entry,group_purchase_viewer,1,0,0,0
+access_achat_contract_viewer,achat.contract.viewer,model_achat_contract,group_purchase_viewer,1,0,0,0
+access_achat_article_viewer,achat.article.viewer,model_achat_article,group_purchase_viewer,1,0,0,0
+access_achat_reclamation_viewer,achat.reclamation.viewer,model_achat_reclamation_dhl,group_purchase_viewer,1,0,0,0

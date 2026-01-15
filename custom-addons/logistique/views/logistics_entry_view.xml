@@ -182,6 +182,9 @@
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_logistique_entry_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_logistique_entry_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_logistique_entry_form')})]"/>
         <field name="domain">[('purchase_state', 'in', ('draft', 'confirmed'))]</field>
     </record>
 </odoo>

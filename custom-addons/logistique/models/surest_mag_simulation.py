@@ -50,6 +50,18 @@ class SurestMagSimulation(models.Model):
     grand_total_vat = fields.Float(string='Total Général TVA', compute='_compute_totals', store=True)
     grand_total_ttc = fields.Float(string='Total Général TTC', compute='_compute_totals', store=True)
 
+    # Deprecated fields for backward compatibility (View Crash Fix)
+    total_surestarie = fields.Float(string='Total Surestarie', compute='_compute_deprecated_totals')
+    total_magasinage = fields.Float(string='Total Magasinage', compute='_compute_deprecated_totals')
+    grand_total = fields.Float(string='Grand Total', compute='_compute_deprecated_totals')
+
+    @api.depends('total_surestarie_ttc', 'total_magasinage_ttc', 'grand_total_ttc')
+    def _compute_deprecated_totals(self):
+         for rec in self:
+             rec.total_surestarie = rec.total_surestarie_ttc
+             rec.total_magasinage = rec.total_magasinage_ttc
+             rec.grand_total = rec.grand_total_ttc
+
     @api.depends('entry_date', 'exit_date', 'returning_date')
     def _compute_days(self):
         for rec in self:

@@ -68,32 +68,39 @@ class CoreEmployeeNotification(models.Model):
         return notification
 
     def _create_deadline_activity(self, notification):
-        """Create a persistent activity visible in the clock icon (Odoo 17 compatible)"""
-
-        # Responsible user
-        responsible_user = self.env.user
-        if notification.employee_id.parent_id and notification.employee_id.parent_id.user_id:
-            responsible_user = notification.employee_id.parent_id.user_id
-
+        """Create a persistent activity visible in the clock icon for ALL module users"""
         deadline = notification.document_id.issue_date or fields.Date.today()
 
         # Get model safely (REQUIRED)
         model = self.env['ir.model']._get('core.employee.notification')
         if not model:
-            return  # safety guard, should never happen
+            return
 
-        self.env['mail.activity'].create({
-            'res_model_id': model.id,                      # ✅ REQUIRED by DB
-            'res_model': 'core.employee.notification',     # ✅ REQUIRED by UI
-            'res_id': notification.id,
-            'activity_type_id': self.env.ref(
-                'mail.mail_activity_data_todo'
-            ).id,
-            'summary': 'Document Expiration',
-            'note': notification.message or 'Please check the document.',
-            'date_deadline': deadline,
-            'user_id': responsible_user.id,
-        })
+        activity_type_id = self.env.ref('mail.mail_activity_data_todo').id
+        
+        # Identify Target Users: All users in "Custom Employee / User" group
+        # (This includes Managers via inheritance)
+        group = self.env.ref('custom_employee.group_core_employee_user')
+        target_users = group.users
+        
+        # Batch Create Activities
+        # Although create() supports batch, we need distinct user_id per record, 
+        # so looping or constructing a list is needed.
+        activity_vals_list = []
+        for user in target_users:
+            activity_vals_list.append({
+                'res_model_id': model.id,
+                'res_model': 'core.employee.notification',
+                'res_id': notification.id,
+                'activity_type_id': activity_type_id,
+                'summary': 'Document Expiration',
+                'note': notification.message or 'Please check the document.',
+                'date_deadline': deadline,
+                'user_id': user.id,
+            })
+            
+        if activity_vals_list:
+            self.env['mail.activity'].create(activity_vals_list)
 
     @api.constrains('employee_id', 'document_id', 'notification_type', 'state')
     def _check_unique_pending(self):

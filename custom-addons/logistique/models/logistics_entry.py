@@ -155,6 +155,11 @@ class LogisticsEntry(models.Model):
     )
 
 
+    @api.onchange('contract_id')
+    def _onchange_contract_id_origin(self):
+        if self.contract_id:
+            self.origin_id = self.contract_id.origin_id
+
     @api.model
     def create(self, vals):
         # Create dossier if bl_number is present and dossier_id is missing

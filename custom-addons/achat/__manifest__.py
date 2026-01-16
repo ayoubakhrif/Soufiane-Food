@@ -20,6 +20,7 @@
         'views/achat_enquete_view.xml',
         'views/achat_article_view.xml',
         'views/achat_reclamation_dhl_view.xml',
+        'views/achat_origin_view.xml',
         'views/menu.xml',
     ],
     'installable': True,

@@ -52,6 +52,12 @@
               action="logistique.action_logistique_shipping"
               sequence="40"/>
 
+    <menuitem id="menu_achat_origin"
+              name="Origins"
+              parent="menu_achat_data"
+              action="action_achat_origin"
+              sequence="50"/>
+
      <menuitem id="menu_achat_prices"
           name="Supplier Prices"
           parent="menu_achat_root"

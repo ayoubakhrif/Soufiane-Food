@@ -6,3 +6,4 @@ from . import purchase_entry_ext
 from . import purchase_document
 from . import achat_article
 from . import achat_reclamation_dhl
+from . import achat_origin

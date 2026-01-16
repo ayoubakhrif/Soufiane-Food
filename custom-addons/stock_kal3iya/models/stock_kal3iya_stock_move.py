@@ -51,7 +51,9 @@ class StockKal3iyaMove(models.Model):
     price_sale = fields.Float(string='Prix Vente')
     weight = fields.Float(string='Poids (Kg)')
     calibre = fields.Char(string='Calibre')
-    
+    soufiane_client = fields.Selection([
+        ('soufiane', 'Soufiane'),
+    ], string='Soufiane?')
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')
     provider_id = fields.Many2one('stock.kal3iya.provider', string='Fournisseur')
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')

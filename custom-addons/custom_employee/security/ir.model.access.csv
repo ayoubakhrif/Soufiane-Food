@@ -13,3 +13,5 @@ access_core_employee_salary_history_user,core.employee.salary.history.user,model
 access_core_employee_salary_history_manager,core.employee.salary.history.manager,model_core_employee_salary_history,group_core_employee_manager,1,1,1,1
 access_core_employee_notification_user,core.employee.notification.user,model_core_employee_notification,group_core_employee_user,1,0,0,0
 access_core_employee_notification_manager,core.employee.notification.manager,model_core_employee_notification,group_core_employee_manager,1,1,1,1
+access_core_ste_user,core.ste.user,model_core_ste,group_core_employee_user,1,0,0,0
+access_core_ste_manager,core.ste.manager,model_core_ste,group_core_employee_manager,1,1,1,1

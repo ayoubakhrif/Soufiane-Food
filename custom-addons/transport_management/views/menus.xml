@@ -10,7 +10,7 @@
     <menuitem id="menu_gazoil_sale"
             name="Vente Gazoil"
             parent="menu_transport_root"
-            action="action_gazoil_sale"
+            action="action_gasoil_sale"
             sequence="30"/>
             
     <!-- Master Data -->

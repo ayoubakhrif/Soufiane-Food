@@ -54,8 +54,8 @@
                             <field name="ste_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="supplier_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="shipping_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="origin" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="origin_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="origin" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="incoterm" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             
                             <!-- For admins: always editable -->
@@ -63,8 +63,8 @@
                             <field name="ste_id" groups="achat.group_purchase_admin"/>
                             <field name="supplier_id" groups="achat.group_purchase_admin"/>
                             <field name="shipping_id" groups="achat.group_purchase_admin"/>
-                            <field name="origin" groups="achat.group_purchase_admin"/>
                             <field name="origin_id" groups="achat.group_purchase_admin"/>
+                            <field name="origin" groups="achat.group_purchase_admin"/>
                             <field name="incoterm" groups="achat.group_purchase_admin"/>
                         </group>
                         <group string="Détails Marchandise">

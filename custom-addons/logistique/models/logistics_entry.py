@@ -98,8 +98,7 @@ class LogisticsEntry(models.Model):
     origin = fields.Char(string='Origin')
     origin_id = fields.Many2one(
         'achat.origin',
-        string='Origin',
-        required=True
+        string='Origin'
     )
     entry_date = fields.Date(string='Date of entry')
     exit_date = fields.Date(string='Date of exit')

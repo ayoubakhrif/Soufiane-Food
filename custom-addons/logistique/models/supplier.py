@@ -5,3 +5,4 @@ class LogistiqueSupplier(models.Model):
     _description = 'Fournisseur'
 
     name = fields.Char(string='Nom', required=True)
+    email = fields.Char(string='Email')

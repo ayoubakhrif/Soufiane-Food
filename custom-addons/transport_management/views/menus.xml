@@ -4,7 +4,7 @@
 
     <menuitem id="menu_gasoil_refill"
             name="Remplissages Gazoil"
-            parent="menu_gasoil_root"
+            parent="menu_transport_root"
             action="action_gasoil_refill"/>
 
     <menuitem id="menu_gazoil_sale"

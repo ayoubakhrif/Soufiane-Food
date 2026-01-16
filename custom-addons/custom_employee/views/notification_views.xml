@@ -60,8 +60,4 @@
         </field>
     </record>
 
-    <!-- Menus for Notifications -->
-    <menuitem id="menu_notifications_root" name="Notifications" parent="menu_core_employee_root" sequence="50"/>
-    <menuitem id="menu_employee_notifications" name="Notifications des employés" parent="menu_notifications_root" action="action_core_employee_notification" sequence="10"/>
-
 </odoo>

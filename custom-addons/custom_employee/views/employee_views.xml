@@ -206,10 +206,4 @@
         </field>
     </record>
 
-    <!-- Menus -->
-    <menuitem id="menu_core_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png"/>
-    <menuitem id="menu_core_employee_main" name="Employees" parent="menu_core_employee_root" action="action_core_employee" sequence="1"/>
-    <menuitem id="menu_core_department" name="Departments" parent="menu_core_employee_root" action="action_core_department" sequence="10"/>
-    <menuitem id="menu_core_job_position" name="Job Positions" parent="menu_core_employee_root" action="action_core_job_position" sequence="20"/>
-
 </odoo>

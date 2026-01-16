@@ -12,10 +12,11 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'views/employee_views.xml',
         'views/department_views.xml',
         'views/job_position_views.xml',
         'views/notification_views.xml',
-        'views/employee_views.xml',
+        'views/menus.xml',
         'data/cron.xml',
     ],
     'installable': True,

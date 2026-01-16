@@ -61,7 +61,6 @@
                             <field name="ste_id" groups="achat.group_purchase_admin"/>
                             <field name="supplier_id" groups="achat.group_purchase_admin"/>
                             <field name="shipping_id" groups="achat.group_purchase_admin"/>
-                            <field name="origin_id" groups="achat.group_purchase_admin"/>
                             <field name="origin" groups="achat.group_purchase_admin"/>
                             <field name="incoterm" groups="achat.group_purchase_admin"/>
                         </group>

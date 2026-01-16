@@ -46,21 +46,21 @@
                         <group string="Informations Générales">
                             <field name="purchase_state" invisible="1"/>
                             <field name="eta"/>
-                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'"/> 
+                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/> 
                             
-                            <field name="ste_id" readonly="purchase_state != 'initial'"/>
-                            <field name="supplier_id" readonly="purchase_state != 'initial'"/>
-                            <field name="shipping_id" readonly="purchase_state != 'initial'"/>
-                            <field name="origin" readonly="purchase_state != 'initial'"/>
-                            <field name="incoterm" readonly="purchase_state != 'initial'"/>
+                            <field name="ste_id" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="supplier_id" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="shipping_id" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="origin" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="incoterm" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
                         </group>
                         <group string="Détails Marchandise">
-                            <field name="article_id" readonly="purchase_state != 'initial'"/>
-                            <field name="details" readonly="purchase_state != 'initial'"/>
+                            <field name="article_id" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="details" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
                             
-                            <field name="lot" readonly="purchase_state != 'initial'"/>
-                            <field name="invoice_number" readonly="purchase_state != 'initial'"/>
-                            <field name="weight" readonly="purchase_state != 'initial'"/>
+                            <field name="lot" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="invoice_number" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="weight" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
                             <field name="price_unit" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
                             <field name="amount_total" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
                             

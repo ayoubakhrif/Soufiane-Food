@@ -7,7 +7,7 @@ access_kal3iya_driver,access_kal3iya_driver,model_kal3iya_driver,kal3iya.group_k
 access_kal3iya_driver,access_kal3iya_driver,model_kal3iya_driver,kal3iya.group_kal3iya_responsible,1,1,1,1
 access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_user,1,1,1,1
 access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_responsible,1,1,1,1
-access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_viewer,1,0,0,0
+access_kal3iya_client,access_kal3iya_client,model_kal3iya_client,kal3iya.group_kal3iya_viewer,0,0,0,0
 access_kal3iya_provider,access_kal3iya_provider,model_kal3iya_provider,kal3iya.group_kal3iya_user,1,1,1,1
 access_kal3iya_provider,access_kal3iya_provider,model_kal3iya_provider,kal3iya.group_kal3iya_responsible,1,1,1,1
 access_kal3iya_ste,access_kal3iya_ste,model_kal3iya_ste,kal3iya.group_kal3iya_user,1,1,1,1
@@ -28,4 +28,8 @@ access_kal3iya_unpaid,access_kal3iya_unpaid,model_kal3iya_unpaid,kal3iya.group_k
 access_kal3iya_unpaid,access_kal3iya_unpaid,model_kal3iya_unpaid,kal3iya.group_kal3iya_responsible,1,1,1,1
 access_kal3iya_sortie_supp,access.kal3iya_sortie_supp,model_kal3iya_sortie_supp,kal3iya.group_kal3iya_user,1,1,1,1
 access_kal3iya_sortie_supp,access.kal3iya_sortie_supp,model_kal3iya_sortie_supp,kal3iya.group_kal3iya_responsible,1,1,1,1
+access_kal3iya_stock_viewer,access_kal3iya_stock_viewer,model_kal3iya_stock,kal3iya.group_kal3iya_viewer,1,0,0,0
+access_kal3iya_product_viewer,access_kal3iya_product_viewer,model_kal3iya_product,kal3iya.group_kal3iya_viewer,1,0,0,0
+access_kal3iya_ste_viewer,access_kal3iya_ste_viewer,model_kal3iya_ste,kal3iya.group_kal3iya_viewer,1,0,0,0
+access_kal3iya_provider_viewer,access_kal3iya_provider_viewer,model_kal3iya_provider,kal3iya.group_kal3iya_viewer,1,0,0,0
 

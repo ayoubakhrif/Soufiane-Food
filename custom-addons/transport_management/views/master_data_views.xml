@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Driver Views -->
+    <record id="view_transport_driver_tree" model="ir.ui.view">
+        <field name="name">transport.driver.tree</field>
+        <field name="model">transport.driver</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="employee_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_transport_driver_form" model="ir.ui.view">
+        <field name="name">transport.driver.form</field>
+        <field name="model">transport.driver</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="employee_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Client Views -->
+    <record id="view_transport_client_tree" model="ir.ui.view">
+        <field name="name">transport.client.tree</field>
+        <field name="model">transport.client</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Driver Action -->
+    <record id="action_transport_driver" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">transport.driver</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Client Action -->
+    <record id="action_transport_client" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">transport.client</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

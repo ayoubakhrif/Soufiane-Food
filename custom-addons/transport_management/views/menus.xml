@@ -5,7 +5,26 @@
           parent="menu_gasoil_root"
           action="action_gasoil_refill"/>
 
-<menuitem id="menu_gasoil_sale"
-          name="Ventes Gazoil"
-          parent="menu_gasoil_root"
-          action="action_gasoil_sale"/>
+    <menuitem id="menu_gazoil_sale"
+            name="Vente Gazoil"
+            parent="menu_transport_management_root"
+            action="action_gazoil_sale"
+            sequence="30"/>
+            
+    <!-- Master Data -->
+    <menuitem id="menu_transport_data"
+              name="Données"
+              parent="menu_transport_management_root"
+              sequence="50"/>
+              
+    <menuitem id="menu_transport_driver"
+              name="Chauffeurs"
+              parent="menu_transport_data"
+              action="action_transport_driver"
+              sequence="10"/>
+              
+    <menuitem id="menu_transport_client"
+              name="Clients"
+              parent="menu_transport_data"
+              action="action_transport_client"
+              sequence="20"/>

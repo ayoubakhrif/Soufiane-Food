@@ -6,8 +6,12 @@ class TransportTrip(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
-    driver = fields.Char(string='Chauffeur', required=True, tracking=True)
-    client = fields.Char(string='Client', required=True, tracking=True)
+    driver_id = fields.Many2one('transport.driver', string='Chauffeur', required=True, tracking=True)
+    client_id = fields.Many2one('transport.client', string='Client', required=True, tracking=True)
+    
+    # Deprecated fields (kept for data safety, but hidden in views)
+    driver = fields.Char(string='Chauffeur (Legacy)')
+    client = fields.Char(string='Client (Legacy)')
     
     trip_type = fields.Selection([
         ('tanger_med', 'Tanger Med'),

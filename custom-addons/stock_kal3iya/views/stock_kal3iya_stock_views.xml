@@ -214,6 +214,7 @@
                 
                 <group expand="0" string="Group By">
                     <filter string="Produit" name="group_product" domain="[]" context="{'group_by': 'product_id'}"/>
+
                     <filter string="Garage" name="group_garage" domain="[]" context="{'group_by': 'garage'}"/>
                     <filter string="Société" name="group_ste" domain="[]" context="{'group_by': 'ste_id'}"/>
                     <filter string="Calibre" name="group_calibre" domain="[]" context="{'group_by': 'calibre'}"/>

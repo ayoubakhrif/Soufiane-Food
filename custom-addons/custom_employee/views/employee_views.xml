@@ -75,7 +75,8 @@
                             <field name="matriculation"/>
                         </group>
                         <group string="Organisation">
-                            <field name="job_position_id"/>
+                            <field name="job_position_id" options="{'no_create': True}"/>
+                            <field name="ste_id" options="{'no_create': True}"/>
                             <field name="department_id"/>
                             <field name="site"/>
                             <field name="entry_date"/>

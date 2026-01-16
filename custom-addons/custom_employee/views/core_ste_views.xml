@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SEARCH VIEW -->
+    <record id="view_core_ste_search" model="ir.ui.view">
+        <field name="name">core.ste.search</field>
+        <field name="model">core.ste</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="manager_name"/>
+                <field name="ice"/>
+                <field name="rc"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- TREE VIEW -->
+    <record id="view_core_ste_tree" model="ir.ui.view">
+        <field name="name">core.ste.tree</field>
+        <field name="model">core.ste</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="manager_name"/>
+                <field name="rc"/>
+                <field name="ice"/>
+                <field name="if_field"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_core_ste_form" model="ir.ui.view">
+        <field name="name">core.ste.form</field>
+        <field name="model">core.ste</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Raison Sociale"/>
+                        </h1>
+                        <h3>
+                            <field name="code" placeholder="Code"/>
+                        </h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="manager_name"/>
+                            <field name="address"/>
+                        </group>
+                        <group>
+                            <field name="ice"/>
+                            <field name="rc"/>
+                            <field name="if_field"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_core_ste" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">core.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

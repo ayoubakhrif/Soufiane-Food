@@ -16,6 +16,7 @@
         'views/department_views.xml',
         'views/job_position_views.xml',
         'views/notification_views.xml',
+        'views/core_ste_views.xml',
         'views/menus.xml',
         'data/cron.xml',
     ],

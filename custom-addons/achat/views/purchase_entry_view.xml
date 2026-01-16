@@ -61,8 +61,8 @@
                             <field name="lot" readonly="purchase_state != 'initial'"/>
                             <field name="invoice_number" readonly="purchase_state != 'initial'"/>
                             <field name="weight" readonly="purchase_state != 'initial'"/>
-                            <field name="price_unit" readonly="purchase_state != 'initial'"/>
-                            <field name="amount_total" readonly="purchase_state != 'initial'"/>
+                            <field name="price_unit" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
+                            <field name="amount_total" readonly="purchase_state != 'initial' and not user_has_groups('achat.group_purchase_admin')"/>
                             
                             <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate'"/>
                             <div class="o_row" invisible="incoterm == 'emirate'">

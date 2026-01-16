@@ -68,28 +68,29 @@ class CoreEmployeeNotification(models.Model):
         return notification
 
     def _create_deadline_activity(self, notification):
-        """Create a persistent activity visible in the clock icon for ALL module users"""
-        deadline = notification.document_id.issue_date or fields.Date.today()
+        """Create persistent To-Do activities visible in the clock icon"""
 
-        # Get model safely (REQUIRED)
+        today = fields.Date.today()
+        expiry = notification.document_id.issue_date
+        days_until_expiration = (expiry - today).days if expiry else 0
+
+        # 🔴 Force visibility in clock if <= 7 days
+        deadline = today if days_until_expiration <= 7 else expiry
+
         model = self.env['ir.model']._get('core.employee.notification')
         if not model:
             return
 
         activity_type_id = self.env.ref('mail.mail_activity_data_todo').id
-        
-        # Identify Target Users: Users in "User" group AND "Manager" group
-        # (group.users only returns explicit members, so we must include managers explicitly)
+
         group_user = self.env.ref('custom_employee.group_core_employee_user')
         group_manager = self.env.ref('custom_employee.group_core_employee_manager')
-        
-        # Union of users (avoid duplicates)
+
         target_users = group_user.users | group_manager.users
-        
-        # Batch Create Activities
+
         activity_vals_list = []
         for user in target_users:
-            if not user.share: # Exclude portal/public users if any slipped in
+            if not user.share:
                 activity_vals_list.append({
                     'res_model_id': model.id,
                     'res_model': 'core.employee.notification',
@@ -100,7 +101,7 @@ class CoreEmployeeNotification(models.Model):
                     'date_deadline': deadline,
                     'user_id': user.id,
                 })
-            
+
         if activity_vals_list:
             self.env['mail.activity'].create(activity_vals_list)
 

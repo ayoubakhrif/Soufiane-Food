@@ -1,4 +1,5 @@
 from odoo import models, fields, api, exceptions
+from dateutil.relativedelta import relativedelta
 
 class CoreEmployeeNotification(models.Model):
     _name = 'core.employee.notification'
@@ -68,14 +69,17 @@ class CoreEmployeeNotification(models.Model):
         return notification
 
     def _create_deadline_activity(self, notification):
-        """Create persistent To-Do activities visible in the clock icon"""
+        """Create RH alert 7 days BEFORE document expiration"""
+
+        expiry = notification.document_id.issue_date
+        if not expiry:
+            return
 
         today = fields.Date.today()
-        expiry = notification.document_id.issue_date
-        days_until_expiration = (expiry - today).days if expiry else 0
+        alert_date = expiry - relativedelta(days=7)
 
-        # 🔴 Force visibility in clock if <= 7 days
-        deadline = today if days_until_expiration <= 7 else expiry
+        # From J-7 onward, force activity into clock
+        deadline = today if today >= alert_date else alert_date
 
         model = self.env['ir.model']._get('core.employee.notification')
         if not model:
@@ -85,25 +89,24 @@ class CoreEmployeeNotification(models.Model):
 
         group_user = self.env.ref('custom_employee.group_core_employee_user')
         group_manager = self.env.ref('custom_employee.group_core_employee_manager')
-
         target_users = group_user.users | group_manager.users
 
-        activity_vals_list = []
+        activities = []
         for user in target_users:
             if not user.share:
-                activity_vals_list.append({
+                activities.append({
                     'res_model_id': model.id,
                     'res_model': 'core.employee.notification',
                     'res_id': notification.id,
                     'activity_type_id': activity_type_id,
-                    'summary': 'Document Expiration',
-                    'note': notification.message or 'Please check the document.',
+                    'summary': 'Document expiring soon',
+                    'note': notification.message or 'Document must be renewed before expiration.',
                     'date_deadline': deadline,
                     'user_id': user.id,
                 })
 
-        if activity_vals_list:
-            self.env['mail.activity'].create(activity_vals_list)
+        if activities:
+            self.env['mail.activity'].create(activities)
 
     @api.constrains('employee_id', 'document_id', 'notification_type', 'state')
     def _check_unique_pending(self):
@@ -158,7 +161,7 @@ class CoreEmployeeNotification(models.Model):
                 if not existing:
                     # Generic message (does not include dynamic "X days")
                     doc_type_label = dict(doc._fields['doc_type'].selection).get(doc.doc_type, doc.doc_type)
-                    message = f"Document {doc_type_label} nécessite votre attention"
+                    message = f"Le document {doc_type_label} expire le {doc.issue_date.strftime('%d/%m/%Y')} (J-7)"
                     
                     self.create({
                         'employee_id': doc.employee_id.id,

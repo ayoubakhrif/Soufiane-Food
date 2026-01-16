@@ -1,9 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_transport_trip_user,transport.trip.user,model_transport_trip,group_transport_user,1,1,1,0
 access_transport_trip,transport.trip,model_transport_trip,base.group_user,1,1,1,1
-access_gazoil_refill,gazoil.refill,model_gazoil_refill,base.group_user,1,1,1,1
-access_gazoil_sale,gazoil.sale,model_gazoil_sale,base.group_user,1,1,1,1
+access_gasoil_refill,gasoil.refill,model_gasoil_refill,base.group_user,1,1,1,1
+access_gasoil_sale,gasoil.sale,model_gasoil_sale,base.group_user,1,1,1,1
 access_transport_driver,transport.driver,model_transport_driver,base.group_user,1,1,1,1
-access_transport_client,transport.client,model_transport_client,base.group_user,1,1,1,1model_gasoil_refill,group_transport_manager,1,1,1,1
+access_transport_client,transport.client,model_transport_client,base.group_user,1,1,1,1
 access_gasoil_sale_user,gasoil.sale.user,model_gasoil_sale,group_transport_user,1,1,1,0
 access_gasoil_sale_manager,gasoil.sale.manager,model_gasoil_sale,group_transport_manager,1,1,1,1

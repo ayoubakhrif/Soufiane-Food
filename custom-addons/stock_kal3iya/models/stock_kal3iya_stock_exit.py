@@ -33,13 +33,10 @@ class StockKal3iyaExit(models.Model):
         ('fenidek', 'Fenidek'),
     ], string='Garage', required=True)
     
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_kal3iya', 'Stock Kal3iya'),
-    ], string='Frigo')
-    
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')
+    soufiane_client = fields.Selection([
+        ('soufiane', 'Soufiane'),
+    ], string='Soufiane?')
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
     
@@ -90,7 +87,7 @@ class StockKal3iyaExit(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
-                    'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'garage', 'client_id', 'soufiane_client', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
@@ -107,7 +104,6 @@ class StockKal3iyaExit(models.Model):
                 ('lot', '=', rec.lot),
                 ('dum', '=', rec.dum),
                 ('garage', '=', rec.garage),
-                ('frigo', '=', rec.frigo),
                 ('state', '=', 'done')
             ]
             res = self.env['stock.kal3iya.move'].read_group(domain, ['qty'], [])
@@ -122,7 +118,6 @@ class StockKal3iyaExit(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'garage': rec.garage,
-                'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'exit',
                 'state': 'done',
@@ -132,6 +127,7 @@ class StockKal3iyaExit(models.Model):
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
+                'soufiane_client': rec.soufiane_client,
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
                 'res_model': 'stock.kal3iya.exit',
@@ -153,7 +149,6 @@ class StockKal3iyaExit(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'garage': rec.garage,
-                'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'cancel_exit',
                 'state': 'done',
@@ -163,6 +158,7 @@ class StockKal3iyaExit(models.Model):
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
+                'soufiane_client': rec.soufiane_client,
                 'driver_id': rec.driver_id.id,
                 'res_model': 'stock.kal3iya.exit',
                 'res_id': rec.id,

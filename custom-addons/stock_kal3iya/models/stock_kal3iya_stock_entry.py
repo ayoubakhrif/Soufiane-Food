@@ -34,12 +34,6 @@ class StockKal3iyaEntry(models.Model):
         ('fenidek', 'Fenidek'),
     ], string='Garage')
     
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_kal3iya', 'Stock Kal3iya'),
-    ], string='Frigo', default='stock_kal3iya')
-    
     provider_id = fields.Many2one('stock.kal3iya.provider', string='Fournisseur')
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
@@ -70,7 +64,7 @@ class StockKal3iyaEntry(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_purchase',
-                    'date', 'lot', 'dum', 'garage', 'frigo', 'provider_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'garage', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
@@ -87,7 +81,6 @@ class StockKal3iyaEntry(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'garage': rec.garage,
-                'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'entry',
                 'state': 'done',
@@ -118,7 +111,6 @@ class StockKal3iyaEntry(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'garage': rec.garage,
-                'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'cancel_entry',
                 'state': 'done',

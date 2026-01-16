@@ -76,7 +76,6 @@ class StockKal3iyaReturn(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'garage': rec.garage,
-                'frigo': rec.frigo,
                 'qty': rec.qty,  # Positive quantity adds to stock
                 'move_type': 'return',
                 'state': 'done',
@@ -107,7 +106,6 @@ class StockKal3iyaReturn(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'garage': rec.garage,
-                'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'adjustment', # Using adjustment to cancel out return
                 'state': 'done',
@@ -116,6 +114,7 @@ class StockKal3iyaReturn(models.Model):
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
+                'soufiane_client': rec.soufiane_client,
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
                 'res_model': 'stock.kal3iya.return',

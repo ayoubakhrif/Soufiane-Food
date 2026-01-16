@@ -15,9 +15,7 @@
                 <field name="image_1920"/>
                 <field name="weight"/>
                 <field name="dum"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
-
                 <templates>
                     <t t-name="kanban-box">
                         <div class="o_kanban_record oe_kanban_global_click"
@@ -93,9 +91,6 @@
                                     <div>
                                         ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <t t-esc="record.quantity.raw_value * record.weight.raw_value"/> Kg)
                                     </div>
-                                    <div>
-                                        📍 <b>Frigo :</b> <field name="frigo"/>
-                                    </div>
                                 </div>
 
                                 <hr style="margin:8px 0; border:none; border-top:1px dashed #e5e7eb;"/>
@@ -135,7 +130,6 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="garage"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
                 <field name="weight"/>
@@ -169,7 +163,6 @@
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="garage"/>
-                            <field name="frigo"/>
                             <field name="ste_id"/>
                             <field name="price"/>
                             <field name="mt_achat"/>
@@ -214,7 +207,6 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="garage"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="calibre"/>
                 
@@ -223,7 +215,6 @@
                 <group expand="0" string="Group By">
                     <filter string="Produit" name="group_product" domain="[]" context="{'group_by': 'product_id'}"/>
                     <filter string="Garage" name="group_garage" domain="[]" context="{'group_by': 'garage'}"/>
-                    <filter string="Frigo" name="group_frigo" domain="[]" context="{'group_by': 'frigo'}"/>
                     <filter string="Société" name="group_ste" domain="[]" context="{'group_by': 'ste_id'}"/>
                     <filter string="Calibre" name="group_calibre" domain="[]" context="{'group_by': 'calibre'}"/>
                 </group>

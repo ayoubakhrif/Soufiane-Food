@@ -12,7 +12,6 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="garage"/>
-                <field name="frigo"/>
                 <field name="qty" sum="Total Quantité"/>
                 <field name="move_type"/>
                 <field name="user_id"/>
@@ -36,7 +35,6 @@
                 <group expand="0" string="Group By">
                     <filter string="Produit" name="group_by_product" context="{'group_by': 'product_id'}"/>
                     <filter string="garage" name="group_by_garage" context="{'group_by': 'garage'}"/>
-                    <filter string="Frigo" name="group_by_frigo" context="{'group_by': 'frigo'}"/>
                 </group>
             </search>
         </field>

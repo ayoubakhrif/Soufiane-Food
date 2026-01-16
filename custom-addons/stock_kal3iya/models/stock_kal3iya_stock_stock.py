@@ -22,11 +22,6 @@ class StockKal3iyaStock(models.Model):
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
     ], string='Garage')
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_kal3iya', 'Stock Kal3iya'),
-    ], string='Frigo', readonly=True)
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société', readonly=True)
     
     quantity = fields.Float(string='Quantité', readonly=True)
@@ -48,7 +43,6 @@ class StockKal3iyaStock(models.Model):
                     m.lot,
                     m.dum,
                     m.garage,
-                    m.frigo,
                     m.ste_id,
                     sum(m.qty) as quantity,
                     max(m.weight) as weight,
@@ -62,7 +56,7 @@ class StockKal3iyaStock(models.Model):
                 WHERE
                     m.state = 'done'
                 GROUP BY
-                    m.product_id, m.lot, m.dum, m.garage, m.frigo, m.ste_id
+                    m.product_id, m.lot, m.dum, m.garage, m.ste_id
                 HAVING
                     sum(m.qty) != 0
             )
@@ -81,7 +75,6 @@ class StockKal3iyaStock(models.Model):
                 'default_lot': self.lot,
                 'default_dum': self.dum,
                 'default_garage': self.garage,
-                'default_frigo': self.frigo,
                 'default_weight': self.weight,
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 

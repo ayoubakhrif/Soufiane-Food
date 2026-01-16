@@ -22,11 +22,6 @@ class StockKal3iyaMove(models.Model):
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
     ], string='Garage')
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_kal3iya', 'Stock Kal3iya'),
-    ], string='Frigo')
     
     qty = fields.Float(string='Quantité', required=True)
     

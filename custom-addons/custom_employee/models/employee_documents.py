@@ -17,9 +17,10 @@ class CoreEmployeeDocument(models.Model):
     doc_type = fields.Selection([
         ('cdd', 'Contrat CDD'),
         ('cdi', 'Contrat CDI'),
-        ('procuration', 'Procuration engagement'),
+        ('procuration', 'Procuration'),
         ('cin', 'CIN'),
         ('diplome', 'Diplôme'),
+        ('engagement', 'Engagement'),
     ], string='Type de document', required=True, tracking=True)
 
     document_file = fields.Binary(

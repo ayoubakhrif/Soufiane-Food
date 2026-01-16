@@ -183,5 +183,21 @@
     <menuitem id="menu_transport_gasoil" name="Gazoil" parent="menu_transport_root" sequence="2"/>
     <menuitem id="menu_gasoil_refill" name="Remplissages" parent="menu_transport_gasoil" action="action_gasoil_refill" sequence="1"/>
     <menuitem id="menu_gasoil_sale" name="Ventes" parent="menu_transport_gasoil" action="action_gasoil_sale" sequence="2"/>
+    <menuitem id="menu_transport_data"
+            name="Données"
+            parent="menu_transport_root"
+            sequence="50"/>
+            
+    <menuitem id="menu_transport_driver"
+            name="Chauffeurs"
+            parent="menu_transport_data"
+            action="action_transport_driver"
+            sequence="10"/>
+            
+    <menuitem id="menu_transport_client"
+            name="Clients"
+            parent="menu_transport_data"
+            action="action_transport_client"
+            sequence="20"/>
 
 </odoo>

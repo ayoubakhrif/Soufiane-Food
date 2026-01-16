@@ -37,8 +37,8 @@
                     <!-- ================= GENERAL INFO ================= -->
                     <group string="Trip Information">
                         <group>
-                            <field name="driver"/>
-                            <field name="client"/>
+                            <field name="driver_id"/>
+                            <field name="client_id"/>
                             <field name="going_price"/>
                         </group>
                         <group>

@@ -30,6 +30,12 @@ class CoreEmployee(models.Model):
         tracking=True,
         index=True
     )
+    ste_id = fields.Many2one(
+        'core.ste',
+        string='Ste',
+        tracking=True,
+        index=True
+    )
     
     # Legacy fields (for gradual migration)
     job_title = fields.Char(string='Job Position (Legacy)', tracking=True, help='DEPRECATED: Use job_position_id')

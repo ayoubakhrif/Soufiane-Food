@@ -104,7 +104,6 @@
                     <separator string="Traçabilité"/>
 
                     <group>
-                        <field name="message_follower_ids" widget="mail_followers"/>
                         <field name="message_ids" widget="mail_thread"/>
                     </group>
 

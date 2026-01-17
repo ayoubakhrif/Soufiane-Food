@@ -70,11 +70,10 @@ class DrivePicker extends Component {
         if (!accessToken) return this.showError("No access token");
 
         const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
-        // Include folders in mime types so they are visible!
-        view.setMimeTypes("application/pdf,image/png,image/jpeg,image/jpg,application/vnd.google-apps.folder");
+        // Removed setMimeTypes to prevent "Search Mode" (flattened view)
         view.setIncludeFolders(true);
-        // Allow navigating properly
-        view.setSelectFolderEnabled(false); // Can't select folders, only open them
+        // Allow navigating explicitly
+        view.setSelectFolderEnabled(false);
 
         // Restrict to specific folder if configured
         if (this.config.folder_id) {
@@ -89,11 +88,6 @@ class DrivePicker extends Component {
             .setDeveloperKey(this.config.api_key)
             .setCallback(this.pickerCallback.bind(this));
 
-        // Disable multi-select explicitly (it is disabled by default usually but good to be sure)
-        // To disable it, we just DON'T enable it. 
-        // But the user requested "Disable Multi-Select".
-        // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED) <-- WAS HERE, REMOVING IT.
-
         pickerBuilder.build().setVisible(true);
     }
 
@@ -101,11 +95,24 @@ class DrivePicker extends Component {
         if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
             const doc = data[google.picker.Response.DOCUMENTS][0];
 
+            // Validate MimeType manually to preserve Hierarchy View
+            const mimeType = doc[google.picker.Document.MIME_TYPE];
+            const allowedTypes = [
+                "application/pdf",
+                "image/png",
+                "image/jpeg",
+                "image/jpg"
+            ];
+
+            if (!allowedTypes.includes(mimeType)) {
+                this.showError("Format invalide. Veuillez choisir un PDF, PNG ou JPG.");
+                return;
+            }
+
             const fileData = {
                 drive_file_id: doc[google.picker.Document.ID],
                 file_name: doc[google.picker.Document.NAME],
                 drive_url: doc[google.picker.Document.URL],
-                // Add explicit view mode to URL if missing? Usually URL is fine.
             };
 
             await this.processSelection(fileData);

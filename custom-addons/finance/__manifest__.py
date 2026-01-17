@@ -18,6 +18,9 @@
         'views/cheque_encaisse_view.xml',
         'views/logistics_integration_view.xml',
         'views/finance_deduction_view.xml',
+        'views/datacheque_document_views.xml',
+        'views/drive_document_wizard_views.xml',
+        'views/res_config_settings_views.xml',
         'reports/cheque_request_report.xml',
         'data/cron.xml',
     ],
@@ -25,6 +28,8 @@
         'web.assets_backend': [
             'finance/static/src/css/finance_ui.css',
             'finance/static/src/js/finance_loader.js',
+            'finance/static/src/xml/drive_picker.xml',
+            'finance/static/src/js/drive_picker.js',
         ],
     },
     'images': ['static/description/icon.svg'],

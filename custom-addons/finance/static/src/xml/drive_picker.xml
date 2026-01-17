@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="finance.DrivePicker" owl="1">
+        <div class="o_finance_drive_picker d-flex align-items-center justify-content-center h-100 bg-100">
+            <div class="text-center">
+                <i class="fa fa-circle-o-notch fa-spin fa-3x text-primary mb-3"/>
+                <h3 class="mt-2 text-muted">Opening Google Drive Picker...</h3>
+                <p>Please allow popups if the window does not appear.</p>
+            </div>
+        </div>
+    </t>
+</templates>

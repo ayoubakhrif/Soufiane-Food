@@ -42,3 +42,5 @@ access_finance_logistique_container_employee,access.finance.logistique.container
 
 access_datacheque_document_manager,access.datacheque.document.manager,model_datacheque_document,group_finance_user,1,1,1,1
 access_datacheque_document_employee,access.datacheque.document.employee,model_datacheque_document,group_finance_employee,1,1,1,0
+access_finance_add_drive_document_wizard_manager,access.finance.add.drive.document.wizard.manager,model_finance_add_drive_document_wizard,group_finance_user,1,1,1,1
+access_finance_add_drive_document_wizard_employee,access.finance.add.drive.document.wizard.employee,model_finance_add_drive_document_wizard,group_finance_employee,1,1,1,1

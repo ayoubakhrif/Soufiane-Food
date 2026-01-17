@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_finance_drive" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.finance.drive</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='settings']" position="inside">
+                <div class="app_settings_block" data-string="Finance Drive" string="Finance Google Drive" data-key="finance">
+                    <h2>Configuration Google Drive (Finance)</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="google_drive_api_key"/>
+                                <div class="text-muted">
+                                    Clé API Google Cloud (doit avoir accès à Google Picker API).
+                                </div>
+                                <field name="google_drive_api_key"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="google_oauth_client_id"/>
+                                <div class="text-muted">
+                                    Client ID OAuth 2.0 (Application Web).
+                                </div>
+                                <field name="google_oauth_client_id"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="google_app_id"/>
+                                <div class="text-muted">
+                                    Project Number (e.g., 1234567890).
+                                </div>
+                                <field name="google_app_id"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

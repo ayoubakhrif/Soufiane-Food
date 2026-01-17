@@ -91,42 +91,41 @@ class Kal3iyaStockTransfer(models.Model):
                 )
 
     def action_confirm(self):
+        Sortie = self.env['kal3iyasortie'].sudo()
+        Entry = self.env['kal3iyaentry'].sudo()
+
         for rec in self:
             if rec.source_ville == rec.dest_ville:
                 raise UserError("Le stock source et destination doivent être différents.")
 
             stock_src = rec.stock_id
 
-            # 1️⃣ Soustraction du stock source
-            stock_src.quantity -= rec.quantity
+            # 1️⃣ SORTIE INTERNE (source)
+            Sortie.create({
+                'entry_id': stock_src.id,
+                'quantity': rec.quantity,
+                'selling_price': stock_src.price,
+                'date_exit': rec.date,
+                'client_id': False,
+                'ville': rec.source_ville,
+            })
 
-            # 2️⃣ Chercher stock destination (même produit / lot / dum / prix)
-            Stock = self.env['kal3iya.stock']
-            stock_dest = Stock.search([
-                ('product_id', '=', stock_src.product_id.id),
-                ('lot', '=', stock_src.lot),
-                ('dum', '=', stock_src.dum),
-                ('price', '=', stock_src.price),
-                ('ville', '=', rec.dest_ville),
-                ('frigo', '=', stock_src.frigo),
-            ], limit=1)
-
-            if stock_dest:
-                stock_dest.quantity += rec.quantity
-            else:
-                Stock.create({
-                    'product_id': stock_src.product_id.id,
-                    'lot': stock_src.lot,
-                    'dum': stock_src.dum,
-                    'price': stock_src.price,
-                    'weight': stock_src.weight,
-                    'calibre': stock_src.calibre,
-                    'quantity': rec.quantity,
-                    'ville': rec.dest_ville,
-                    'frigo': stock_src.frigo,
-                    'ste_id': stock_src.ste_id.id,
-                    'provider_id': stock_src.provider_id.id,
-                    'image_1920': stock_src.image_1920,
-                })
+            # 2️⃣ ENTRÉE INTERNE (destination)
+            Entry.create({
+                'product_id': stock_src.product_id.id,
+                'quantity': rec.quantity,
+                'price': stock_src.price,
+                'selling_price': stock_src.price,
+                'date_entry': rec.date,
+                'lot': stock_src.lot,
+                'dum': stock_src.dum,
+                'ville': rec.dest_ville,
+                'frigo': stock_src.frigo,
+                'weight': stock_src.weight,
+                'calibre': stock_src.calibre,
+                'ste_id': stock_src.ste_id.id,
+                'provider_id': stock_src.provider_id.id,
+                'state': 'entree',
+            })
 
             rec.state = 'done'

@@ -18,9 +18,10 @@ class DrivePickerController(http.Controller):
             'api_key': icp.get_param('finance.google_drive_api_key', ''),
             'client_id': icp.get_param('finance.google_oauth_client_id', ''),
             'app_id': icp.get_param('finance.google_app_id', ''),
+            'folder_id': icp.get_param('finance.google_drive_folder_id', ''),
         }
         
-        # Check if configuration is complete
+        # Check if configuration is complete (folder_id is optional but recommended)
         if not all([config['api_key'], config['client_id'], config['app_id']]):
             return {
                 'error': True,

@@ -22,3 +22,9 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='finance.google_app_id',
         help='Google Cloud Project Number (not Project ID)'
     )
+
+    google_drive_folder_id = fields.Char(
+        string='Google Drive Folder ID',
+        config_parameter='finance.google_drive_folder_id',
+        help='ID of the specific Google Drive folder to open'
+    )

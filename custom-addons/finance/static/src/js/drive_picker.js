@@ -60,12 +60,8 @@ class DrivePicker extends Component {
             },
         });
 
-        // Trigger auth flow (popup)
-        if (gapi.client.getToken() === null) {
-            this.tokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-            this.tokenClient.requestAccessToken({ prompt: '' });
-        }
+        // Always try silent auth first, or use '' to avoid consent screen if possible
+        this.tokenClient.requestAccessToken({ prompt: '' });
     }
 
     createPicker(accessToken) {
@@ -74,21 +70,28 @@ class DrivePicker extends Component {
             return;
         }
 
-        const view = new google.picker.View(google.picker.ViewId.DOCS);
+        const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
         view.setMimeTypes("application/pdf,image/png,image/jpeg,image/jpg");
 
-        const picker = new google.picker.PickerBuilder()
+        // Restrict to specific folder if configured
+        if (this.config.folder_id) {
+            view.setParent(this.config.folder_id);
+        }
+
+        const pickerBuilder = new google.picker.PickerBuilder()
             .enableFeature(google.picker.Feature.NAV_HIDDEN)
-            .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
             .setAppId(this.config.app_id)
             .setOAuthToken(accessToken)
             .addView(view)
-            .addView(new google.picker.DocsUploadView())
             .setDeveloperKey(this.config.api_key)
-            .setCallback(this.pickerCallback.bind(this))
-            .build();
+            .setCallback(this.pickerCallback.bind(this));
 
-        picker.setVisible(true);
+        // Disable multi-select explicitly (it is disabled by default usually but good to be sure)
+        // To disable it, we just DON'T enable it. 
+        // But the user requested "Disable Multi-Select".
+        // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED) <-- WAS HERE, REMOVING IT.
+
+        pickerBuilder.build().setVisible(true);
     }
 
     async pickerCallback(data) {

@@ -36,6 +36,15 @@
                                 <field name="google_app_id"/>
                             </div>
                         </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="google_drive_folder_id"/>
+                                <div class="text-muted">
+                                    Dossier spécifique pour les chèques (ID).
+                                </div>
+                                <field name="google_drive_folder_id"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </xpath>

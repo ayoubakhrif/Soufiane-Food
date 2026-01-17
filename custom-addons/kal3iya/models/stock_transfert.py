@@ -99,18 +99,19 @@ class Kal3iyaStockTransfer(models.Model):
                 raise UserError("Le stock source et destination doivent être différents.")
 
             stock_src = rec.stock_id
+            internal_client = rec._get_internal_client()
 
-            # 1️⃣ SORTIE INTERNE (source)
+            # 1️⃣ SORTIE INTERNE
             Sortie.create({
                 'entry_id': stock_src.id,
                 'quantity': rec.quantity,
                 'selling_price': stock_src.price,
                 'date_exit': rec.date,
-                'client_id': False,
+                'client_id': internal_client.id,  # ✅ OBLIGATOIRE
                 'ville': rec.source_ville,
             })
 
-            # 2️⃣ ENTRÉE INTERNE (destination)
+            # 2️⃣ ENTRÉE INTERNE
             Entry.create({
                 'product_id': stock_src.product_id.id,
                 'quantity': rec.quantity,
@@ -129,3 +130,11 @@ class Kal3iyaStockTransfer(models.Model):
             })
 
             rec.state = 'done'
+
+
+    def _get_internal_client(self):
+        Client = self.env['kal3iya.client'].sudo()
+        client = Client.search([('name', '=', 'Transfert interne')], limit=1)
+        if not client:
+            client = Client.create({'name': 'Transfert interne'})
+        return client

@@ -76,7 +76,11 @@ class DataCheque(models.Model):
     existing_dem_tag = fields.Html(string='Présence DEM', compute='_compute_existance_dem_tag', sanitize=False, optional=True, store=True)
     existing_doc_tag = fields.Html(string='Présence DOC', compute='_compute_existance_doc_tag', sanitize=False, optional=True, store=True)
     talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, domain="[('ste_id', '=', ste_id)]")
-    
+    document_ids = fields.One2many(
+        'datacheque.document',
+        'cheque_id',
+        string='Documents'
+    )
     # Edit Lock Fields
     unlock_until = fields.Datetime(string="Déverrouillé jusqu'à", help="Si défini, le chèque peut être modifié jusqu'à cette date", tracking=True)
     unlock_until_label = fields.Char(compute='_compute_unlock_until_label', string="Label date déverrouillage")

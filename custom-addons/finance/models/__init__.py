@@ -9,3 +9,4 @@ from . import edit_request
 from . import cheque_encaisse
 from . import logistics_tracking
 from . import finance_deduction
+from . import datacheque_document

@@ -183,6 +183,18 @@
                     </group>
 
                 </sheet>
+                <notebook>
+                    <page string="Documents">
+                        <field name="document_ids">
+                            <tree editable="bottom">
+                                <field name="doc_type"/>
+                                <field name="attachment_id" widget="many2one_binary"/>
+                                <field name="uploaded_by"/>
+                                <field name="upload_date"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
                 <div class="oe_chatter" groups="finance.group_finance_user">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>

@@ -136,5 +136,5 @@ class Kal3iyaStockTransfer(models.Model):
         Client = self.env['kal3iya.client'].sudo()
         client = Client.search([('name', '=', 'Transfert interne')], limit=1)
         if not client:
-            client = Client.create({'name': 'Transfert interne'})
+            client = Client.create({'name': 'Transfert interne', 'is_internal': True,})
         return client

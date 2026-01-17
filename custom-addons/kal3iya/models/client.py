@@ -33,7 +33,7 @@ class Kal3iyaClient(models.Model):
     )
 
 
-
+    is_internal = fields.Boolean(default=False)
     avances = fields.One2many('kal3iya.advance', 'client_id', string='Avances')
     unpaid_ids = fields.One2many('kal3iya.unpaid', 'client_id', string='Impayés')
     sortie_supp_ids = fields.One2many('kal3iya.sortie.supp', 'client_id', string='Sorties supp')

@@ -3,9 +3,6 @@ from odoo import models, fields, api
 class LogistiqueDossier(models.Model):
     _name = 'logistique.dossier'
     _description = 'Dossier Logistique'
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', "Le numéro de BL doit être unique !"),
-    ]
 
     name = fields.Char(string='Numéro BL', required=True)
     

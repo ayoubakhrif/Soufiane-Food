@@ -181,11 +181,13 @@
                             <field name="doc_pdf_url" widget="url" string="PDF DOC"/>
                         </group>
                     </group>
-                    <div class="oe_chatter" groups="finance.group_finance_user">
-                        <field name="message_follower_ids"/>
-                        <field name="activity_ids"/>
-                        <field name="message_ids"/>
-                    </div>
+                    <group string="Historique">
+                        <div class="oe_chatter" groups="finance.group_finance_user">
+                            <field name="message_follower_ids"/>
+                            <field name="activity_ids"/>
+                            <field name="message_ids"/>
+                        </div>
+                    </group>
                 </sheet>
             </form>
         </field>

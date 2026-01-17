@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- INLINE TREE VIEW FOR TRANSFERS -->
+    <record id="view_dossier_transfer_tree" model="ir.ui.view">
+        <field name="name">logistique.dossier.transfer.tree</field>
+        <field name="model">logistique.dossier.transfer</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date"/>
+                <field name="type"/>
+                <field name="amount"/>
+                <field name="beneficiary_id"/>
+                <field name="ste_id" readonly="1"/>
+                <field name="entry_id" column_invisible="1"/>
+                <field name="dossier_id" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

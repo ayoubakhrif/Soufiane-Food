@@ -131,9 +131,21 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Déduction" name="deductions">
+                        <page string="Déductions" name="deductions">
                             <field name="deduction_ids"
-                                context="{'default_entry_id': id}">
+                                   context="{'default_entry_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="ste_id" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Virements" name="transfers">
+                            <field name="transfer_ids"
+                                   context="{'default_entry_id': active_id}">
                                 <tree editable="bottom">
                                     <field name="date"/>
                                     <field name="type"/>

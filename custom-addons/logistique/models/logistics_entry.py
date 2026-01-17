@@ -152,6 +152,11 @@ class LogisticsEntry(models.Model):
         'entry_id',
         string='Déductions'
     )
+    transfer_ids = fields.One2many(
+        'logistique.dossier.transfer',
+        'entry_id',
+        string='Virements'
+    )
 
 
     @api.onchange('contract_id')

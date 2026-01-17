@@ -22,6 +22,7 @@
         'views/logistics_entry_view.xml',
         'views/dossier_view.xml',
         'views/dossier_cheque_view.xml',
+        'views/dossier_transfer_view.xml',
         'views/consolidator_view.xml',
         'views/surest_mag_views.xml',
         'views/surest_mag_menus.xml',

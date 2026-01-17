@@ -31,6 +31,11 @@ class LogistiqueDossier(models.Model):
         'dossier_id',
         string='Déductions'
     )
+    transfer_ids = fields.One2many(
+        'logistique.dossier.transfer',
+        'dossier_id',
+        string='Virements'
+    )
     container_count = fields.Integer(
         string="Nb Conteneurs",
         compute="_compute_counts",
@@ -70,6 +75,8 @@ class LogistiqueDossier(models.Model):
         'cheque_ids.type',
         'deduction_ids.amount',
         'deduction_ids.type',
+        'transfer_ids.amount',
+        'transfer_ids.type',
     )
     def _compute_charges(self):
         for rec in self:
@@ -94,7 +101,18 @@ class LogistiqueDossier(models.Model):
                 d.amount for d in rec.deduction_ids if d.type == 'magasinage'
             )
 
+            # --- Virements ---
+            surestarie_transfers = sum(
+                t.amount for t in rec.transfer_ids if t.type == 'surestarie'
+            )
+            thc_transfers = sum(
+                t.amount for t in rec.transfer_ids if t.type == 'thc'
+            )
+            magasinage_transfers = sum(
+                t.amount for t in rec.transfer_ids if t.type == 'magasinage'
+            )
+
             # --- Totaux finaux ---
-            rec.surestarie_amount = surestarie_cheques + surestarie_deductions
-            rec.thc_amount = thc_cheques + thc_deductions
-            rec.magasinage_amount = magasinage_cheques + magasinage_deductions
+            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers
+            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers
+            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers

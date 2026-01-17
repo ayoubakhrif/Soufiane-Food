@@ -120,7 +120,7 @@
     <!-- Menu principal Stock (si déjà existant, adapte l'id parent) -->
     <menuitem id="menu_kal3iya_stock_root"
               name="Stock"
-              parent="kal3iya.menu_kal3iya_root"
+              parent="menu_kal3iya_root"
               sequence="40"/>
 
     <!-- Sous-menu Transferts -->

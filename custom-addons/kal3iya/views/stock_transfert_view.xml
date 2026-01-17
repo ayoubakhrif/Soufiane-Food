@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================================================= -->
+    <!-- 1️⃣ SÉQUENCE -->
+    <!-- ========================================================= -->
+    <record id="seq_kal3iya_stock_transfer" model="ir.sequence">
+        <field name="name">Transfert Stock Kal3iya</field>
+        <field name="code">kal3iya.stock.transfer</field>
+        <field name="prefix">TRF/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- 2️⃣ ACTION -->
+    <!-- ========================================================= -->
+    <record id="action_kal3iya_stock_transfer" model="ir.actions.act_window">
+        <field name="name">Transferts de stock</field>
+        <field name="res_model">kal3iya.stock.transfer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez un transfert pour déplacer des produits d’un stock à un autre.
+            </p>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- 3️⃣ VUE TREE -->
+    <!-- ========================================================= -->
+    <record id="view_kal3iya_stock_transfer_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.transfer.tree</field>
+        <field name="model">kal3iya.stock.transfer</field>
+        <field name="arch" type="xml">
+            <tree string="Transferts de stock">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="source_ville"/>
+                <field name="dest_ville"/>
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="quantity" sum="Total transféré"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- 4️⃣ VUE FORM -->
+    <!-- ========================================================= -->
+    <record id="view_kal3iya_stock_transfer_form" model="ir.ui.view">
+        <field name="name">kal3iya.stock.transfer.form</field>
+        <field name="model">kal3iya.stock.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Transfert de stock">
+                <header>
+                    <button name="action_confirm"
+                            type="object"
+                            string="Confirmer le transfert"
+                            class="oe_highlight"
+                            states="draft"/>
+
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,done"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="source_ville"/>
+                            <field name="dest_ville"/>
+                        </group>
+                    </group>
+
+                    <separator string="Produit à transférer"/>
+
+                    <group>
+                        <group>
+                            <field name="stock_id"
+                                   options="{'no_create': True}"
+                                   context="{'ville_filter': source_ville}"/>
+                            <field name="quantity"/>
+                        </group>
+
+                        <group string="Détails produit">
+                            <field name="product_id" readonly="1"/>
+                            <field name="lot" readonly="1"/>
+                            <field name="dum" readonly="1"/>
+                            <field name="price" readonly="1"/>
+                            <field name="weight" readonly="1"/>
+                            <field name="calibre" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Traçabilité"/>
+
+                    <group>
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================= -->
+    <!-- 5️⃣ MENUS -->
+    <!-- ========================================================= -->
+
+    <!-- Menu principal Stock (si déjà existant, adapte l'id parent) -->
+    <menuitem id="menu_kal3iya_stock_root"
+              name="Stock"
+              parent="kal3iya.menu_kal3iya_root"
+              sequence="40"/>
+
+    <!-- Sous-menu Transferts -->
+    <menuitem id="menu_kal3iya_stock_transfer"
+              name="Transferts de stock"
+              parent="menu_kal3iya_stock_root"
+              action="action_kal3iya_stock_transfer"
+              sequence="30"/>
+
+</odoo>

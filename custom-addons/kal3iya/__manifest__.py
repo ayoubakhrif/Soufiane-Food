@@ -19,6 +19,7 @@
         'views/driver_view.xml',
         'views/popup_sortie_view.xml',
         'views/week_update_wizard_view.xml',
+        'views/stock_transfert_view.xml',
     ],
     'images': ['static/description/icon.svg'],
     'installable': True,

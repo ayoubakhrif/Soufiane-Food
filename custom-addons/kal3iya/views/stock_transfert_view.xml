@@ -117,16 +117,10 @@
     <!-- 5️⃣ MENUS -->
     <!-- ========================================================= -->
 
-    <!-- Menu principal Stock (si déjà existant, adapte l'id parent) -->
-    <menuitem id="menu_kal3iya_stock_root"
-              name="Stock"
-              parent="menu_kal3iya_root"
-              sequence="40"/>
-
     <!-- Sous-menu Transferts -->
     <menuitem id="menu_kal3iya_stock_transfer"
               name="Transferts de stock"
-              parent="menu_kal3iya_stock_root"
+              parent="menu_kal3iya_root"
               action="action_kal3iya_stock_transfer"
               sequence="30"/>
 

@@ -183,7 +183,7 @@
                     </group>
                     <notebook>
                         <page string="Documents">
-                            <button name="%(finance.view_finance_add_drive_document_wizard_form)d"
+                            <button name="%(finance.action_finance_add_drive_document_wizard)d"
                                     type="action"
                                     string="Ajouter un document"
                                     icon="fa-plus-circle"

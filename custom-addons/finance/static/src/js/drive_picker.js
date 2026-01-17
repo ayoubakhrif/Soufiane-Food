@@ -1,10 +1,6 @@
-/** @odoo-module **/
-
-import { registry } from "@web/core/registry";
-import { Component, onWillStart, onMounted } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
-import { loadJS } from "@web/core/assets";
-import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+let cachedToken = null;
+let tokenExpiry = 0;
 
 class DrivePicker extends Component {
     static template = "finance.DrivePicker";
@@ -14,64 +10,63 @@ class DrivePicker extends Component {
         this.rpc = useService("rpc");
         this.action = useService("action");
         this.notification = useService("notification");
-
-        // Data from the wizard action
         this.wizardDetails = this.props.action.context || {};
 
         onWillStart(async () => {
-            // Load Google APIs
             await loadJS("https://apis.google.com/js/api.js");
             await loadJS("https://accounts.google.com/gsi/client");
         });
 
         onMounted(async () => {
             try {
-                // Fetch config
                 const result = await this.rpc("/finance/drive/config");
-                if (result.error) {
-                    this.showError(result.message);
-                    return;
-                }
+                if (result.error) return this.showError(result.message);
                 this.config = result.config;
-
-                // Initialize Google API
                 await this.loadGoogleApi();
-
             } catch (e) {
-                this.showError("Failed to initialize Google Drive: " + e.message);
+                this.showError("Init Error: " + e.message);
             }
         });
     }
 
     async loadGoogleApi() {
-        // Initialize gapi client
         await new Promise((resolve) => gapi.load('client:picker', resolve));
 
-        // Initialize Identity Services
+        // Check cache first
+        if (cachedToken && Date.now() < tokenExpiry) {
+            this.createPicker(cachedToken);
+            return;
+        }
+
         this.tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: this.config.client_id,
-            scope: 'https://www.googleapis.com/auth/drive.readonly',
+            scope: SCOPES,
             callback: (response) => {
-                if (response.error !== undefined) {
-                    this.showError("Auth Error: " + response.error);
-                    return;
-                }
+                if (response.error) return this.showError("Auth Error: " + response.error);
+
+                // Cache token (expires_in is in seconds, usually 3600)
+                cachedToken = response.access_token;
+                // Set safe expiry (e.g. 50 mins instead of 60)
+                tokenExpiry = Date.now() + (parseInt(response.expires_in) * 1000) - 300000;
+
                 this.createPicker(response.access_token);
             },
         });
 
-        // Always try silent auth first, or use '' to avoid consent screen if possible
+        // Skip prompt if we have a hint? We don't.
+        // But prompt:'' usually attempts silent.
         this.tokenClient.requestAccessToken({ prompt: '' });
     }
 
     createPicker(accessToken) {
-        if (!accessToken) {
-            this.showError("No access token available");
-            return;
-        }
+        if (!accessToken) return this.showError("No access token");
 
         const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
-        view.setMimeTypes("application/pdf,image/png,image/jpeg,image/jpg");
+        // Include folders in mime types so they are visible!
+        view.setMimeTypes("application/pdf,image/png,image/jpeg,image/jpg,application/vnd.google-apps.folder");
+        view.setIncludeFolders(true);
+        // Allow navigating properly
+        view.setSelectFolderEnabled(false); // Can't select folders, only open them
 
         // Restrict to specific folder if configured
         if (this.config.folder_id) {

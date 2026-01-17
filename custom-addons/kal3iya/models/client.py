@@ -92,6 +92,9 @@ class Kal3iyaClient(models.Model):
         """Compte = ventes + impayés - avances - retours + initial"""
         for client in self:
             # 💰 Total des ventes
+            sorties = client.sortie_ids.filtered(
+                lambda s: s.client_id.name != 'Transfert interne'
+            )            
             total_ventes = sum(s.mt_vente_final or s.mt_vente for s in client.sortie_ids)
 
             # 💵 Total des avances

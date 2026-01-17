@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_gasoil_root" name="Suivi Gazoil" sequence="30"/>
+
+    <menuitem id="menu_gasoil_refill"
+            name="Remplissages Gazoil"
+            parent="menu_transport_root"
+            action="action_gasoil_refill"/>
+
+    <menuitem id="menu_gazoil_sale"
+            name="Vente Gazoil"
+            parent="menu_transport_root"
+            action="action_gasoil_sale"
+            sequence="30"/>
+            
+    <!-- Master Data -->
+    <menuitem id="menu_transport_data"
+            name="Données"
+            parent="menu_transport_root"
+            sequence="50"/>
+            
+    <menuitem id="menu_transport_driver"
+            name="Chauffeurs"
+            parent="menu_transport_data"
+            action="action_transport_driver"
+            sequence="10"/>
+            
+    <menuitem id="menu_transport_client"
+            name="Clients"
+            parent="menu_transport_data"
+            action="action_transport_client"
+            sequence="20"/>
+</odoo>

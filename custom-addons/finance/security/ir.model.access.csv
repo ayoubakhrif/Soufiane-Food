@@ -39,3 +39,6 @@ access_finance_deduction_payment_employee,access.finance.deduction.payment.emplo
 
 access_finance_logistique_dossier_employee,access.finance.logistique.dossier.employee,logistique.model_logistique_dossier,group_finance_employee,1,0,0,0
 access_finance_logistique_container_employee,access.finance.logistique.container.employee,logistique.model_logistique_container,group_finance_employee,1,0,0,0
+
+access_datacheque_document_manager,access.datacheque.document.manager,model_datacheque_document,group_finance_user,1,1,1,1
+access_datacheque_document_employee,access.datacheque.document.employee,model_datacheque_document,group_finance_employee,1,1,1,0

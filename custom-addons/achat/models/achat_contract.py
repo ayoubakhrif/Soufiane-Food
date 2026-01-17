@@ -20,7 +20,8 @@ class AchatContract(models.Model):
         ('emirate', 'EMIRATE'),
         ('exw', 'EXW'),
     ], string='Incoterm', required=True)
-    origin = fields.Char(string='Origin')
+    origin_id = fields.Many2one('achat.origin', string='Origin (New)')
+    origin = fields.Char(string='Origin (Legacy)')
     details = fields.Char(string='Details')
     
     # Quantitative Terms

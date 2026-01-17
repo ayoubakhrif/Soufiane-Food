@@ -177,7 +177,6 @@
                     <group string="Documents">
                         <group>
                             <field name="chq_pdf_url" widget="url" string="PDF CHQ"/>
-                            <field name="dem_pdf_url" widget="url" string="PDF DEM"/>
                             <field name="doc_pdf_url" widget="url" string="PDF DOC"/>
                         </group>
                     </group>

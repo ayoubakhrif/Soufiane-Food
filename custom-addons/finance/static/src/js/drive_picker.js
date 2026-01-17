@@ -1,3 +1,11 @@
+/** @odoo-module **/
+
+import { registry } from "@web/core/registry";
+import { Component, onWillStart, onMounted } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { loadJS } from "@web/core/assets";
+import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+
 const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
 let cachedToken = null;
 let tokenExpiry = 0;

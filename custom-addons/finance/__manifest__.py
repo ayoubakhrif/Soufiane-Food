@@ -4,13 +4,10 @@
     'author': 'Ayoub Akhrif',
     'category': 'Accounting',
     'version': '1.0',
-    'depends': ['base', 'base_setup', 'mail', 'logistique'],
+    'depends': ['base', 'mail', 'logistique'],
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
-        'views/drive_document_wizard_views.xml',
-        'views/datacheque_document_views.xml',
-        'views/res_config_settings_views.xml',
         'views/data_cheque_view.xml',
         'views/data_views.xml',
         'views/benif_view.xml',
@@ -28,8 +25,6 @@
         'web.assets_backend': [
             'finance/static/src/css/finance_ui.css',
             'finance/static/src/js/finance_loader.js',
-            'finance/static/src/xml/drive_picker.xml',
-            'finance/static/src/js/drive_picker.js',
         ],
     },
     'images': ['static/description/icon.svg'],

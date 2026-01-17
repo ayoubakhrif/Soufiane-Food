@@ -1,5 +1,4 @@
 from odoo import models, fields, api
-from markupsafe import Markup
 
 class DataChequeDocument(models.Model):
     _name = 'datacheque.document'
@@ -14,55 +13,26 @@ class DataChequeDocument(models.Model):
     )
 
     doc_type = fields.Selection([
-        ('copie_chq', 'Copie du chèque'),
-        ('documentation', 'Documentation'),
+        ('copy_chq', 'Copie du chèque'),
+        ('payment_doc', 'Documentation'),
+        # ➕ plus tard tu ajoutes ici sans toucher aux vues
     ], string='Type de document', required=True)
 
-    # Google Drive fields (no binary storage)
-    drive_file_id = fields.Char(
-        string='Google Drive File ID',
-        required=True,
-        help='ID du fichier dans Google Drive'
-    )
-    
-    file_name = fields.Char(
-        string='Nom du fichier',
+    attachment_id = fields.Many2one(
+        'ir.attachment',
+        string='Fichier',
         required=True
     )
-    
-    drive_url = fields.Char(
-        string='Lien Google Drive',
-        required=True,
-        help='URL de visualisation du fichier'
-    )
-    
-    drive_url_html = fields.Html(
-        string='Lien',
-        compute='_compute_drive_url_html',
-        sanitize=False
-    )
 
-    create_uid = fields.Many2one(
+    uploaded_by = fields.Many2one(
         'res.users',
         string='Ajouté par',
+        default=lambda self: self.env.user,
         readonly=True
     )
 
-    create_date = fields.Datetime(
+    upload_date = fields.Datetime(
         string='Date',
+        default=fields.Datetime.now,
         readonly=True
     )
-
-    @api.depends('drive_url', 'file_name')
-    def _compute_drive_url_html(self):
-        """Generate clickable link to Google Drive"""
-        for rec in self:
-            if rec.drive_url and rec.file_name:
-                rec.drive_url_html = Markup(
-                    f'<a href="{rec.drive_url}" target="_blank" '
-                    f'style="color:#007bff;text-decoration:none;">'
-                    f'<i class="fa fa-external-link"/> {rec.file_name}'
-                    f'</a>'
-                )
-            else:
-                rec.drive_url_html = ''

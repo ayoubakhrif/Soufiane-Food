@@ -62,7 +62,7 @@
                             type="object"
                             string="Confirmer le transfert"
                             class="oe_highlight"
-                            invisible="state != 'draft'"/>
+                            states="draft"/>
 
                     <field name="state"
                            widget="statusbar"
@@ -104,6 +104,7 @@
                     <separator string="Traçabilité"/>
 
                     <group>
+                        <field name="message_follower_ids" widget="mail_followers"/>
                         <field name="message_ids" widget="mail_thread"/>
                     </group>
 
@@ -115,11 +116,9 @@
     <!-- ========================================================= -->
     <!-- 5️⃣ MENUS -->
     <!-- ========================================================= -->
-
-    <!-- Sous-menu Transferts -->
     <menuitem id="menu_kal3iya_stock_transfer"
               name="Transferts de stock"
-              parent="Kal3iya_root_menu"
+              parent="kal3iya_menu_root"
               action="action_kal3iya_stock_transfer"
               sequence="30"/>
 

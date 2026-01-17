@@ -37,6 +37,11 @@
                         </h1>
                     </div>
                     <group>
+                        <group string="A remplir">
+                            <field name="qty" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="driver_id" readonly="state != 'draft'"/>
+                        </group>
                         <group>
                             <field name="ste_id" options="{'no_create_edit': True}"/>
                             <field name="garage"/>
@@ -47,7 +52,6 @@
                             <field name="product_id"/>
                             <field name="soufiane_client"/>
                             <field name="client_id"/>
-                            <field name="driver_id"/>
                         </group>
                     </group>
                     <group string="Traçabilité">

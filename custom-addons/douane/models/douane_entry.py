@@ -55,11 +55,4 @@ class LogisticsEntry(models.Model):
         for rec in self:
             rec.customs_total = rec.vat + rec.customs_duty
 
-    def name_get(self):
-        result = []
-        for record in self:
-            name = record.dossier_id.name or 'No BL'
-            if self.env.context.get('show_dum') and record.dum:
-                name = record.dum
-            result.append((record.id, name))
-        return result
+

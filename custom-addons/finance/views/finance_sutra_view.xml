@@ -33,7 +33,7 @@
                     
                     <group>
                         <group string="Informations Douane (Source: Logistique/Douane)">
-                            <field name="douane_id" options="{'no_create': True, 'no_edit': True}" context="{'show_dum': True}"/>
+                            <field name="douane_id" options="{'no_create': True, 'no_edit': True}"/>
                             <field name="ste_id"/>
                             <field name="supplier_id"/>
                             <field name="dum"/>

@@ -1,6 +1,6 @@
 from odoo import models, fields, api
 
-class LogisticsDossier(models.Model):
+class LogistiqueDossier(models.Model):
     _inherit = 'logistique.dossier'
 
     # DUM Info (Added in Douane module)
@@ -21,24 +21,46 @@ class LogisticsDossier(models.Model):
     def _compute_dum(self):
         """Récupère le premier DUM trouvé dans les entries liées"""
         for record in self:
-            # We can safely access .dum here because we are in the douane module
-            # and logic is running on records where the field exists
-            try:
-                # Use filtered to find entries with a truthy dum
-                entry_with_dum = record.entry_ids.filtered(lambda e: e.dum)
-                if entry_with_dum:
-                    record.dum = entry_with_dum[0].dum
-                else:
-                    record.dum = False
-            except Exception:
-                record.dum = False
+            entry_with_dum = record.entry_ids.filtered(lambda e: e.dum)
+            record.dum = entry_with_dum[0].dum if entry_with_dum else False
 
     @api.depends('entry_ids.dum')
     def _compute_dum_ids(self):
         """Liste tous les DUMs liés au dossier (séparés par virgule)"""
         for record in self:
-            try:
-                dums = record.entry_ids.filtered(lambda e: e.dum).mapped('dum')
-                record.dum_ids = ', '.join(dums) if dums else False
-            except Exception:
-                record.dum_ids = False
+            dums = record.entry_ids.filtered(lambda e: e.dum).mapped('dum')
+            record.dum_ids = ', '.join(dums) if dums else False
+
+    def name_get(self):
+        """
+        Affiche le DUM en priorité, puis le BL
+        Format: "DUM123456" ou "BL789"
+        """
+        result = []
+        for record in self:
+            # Priorité d'affichage: DUM > BL > ID
+            if record.dum:
+                name = record.dum
+            elif record.name:
+                name = record.name
+            else:
+                name = f"Dossier #{record.id}"
+            
+            result.append((record.id, name))
+        return result
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+        """
+        Permet de rechercher un dossier par DUM ou par BL
+        """
+        args = args or []
+        if name:
+            domain = [
+                '|', '|',
+                ('dum', operator, name),
+                ('name', operator, name),
+                ('id', '=', int(name) if name.isdigit() else 0)
+            ]
+            return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return super()._name_search(name, args, operator, limit, name_get_uid)

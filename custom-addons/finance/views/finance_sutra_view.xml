@@ -107,7 +107,7 @@
         </field>
     </record>
 
-    </record>
+
 
     <!-- SERVER ACTION -->
     <record id="action_finance_sutra_sync" model="ir.actions.server">

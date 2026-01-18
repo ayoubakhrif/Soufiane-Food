@@ -14,5 +14,8 @@ class LogistiqueEntry(models.Model):
         self.env['finance.sutra'].create({
             'douane_id': record.id,
         })
+        self.env['finance.marglory'].create({
+            'douane_id': record.id,
+        })
         
         return record

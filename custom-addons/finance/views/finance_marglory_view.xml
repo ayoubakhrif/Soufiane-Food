@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- TREE VIEW -->
-    <record id="view_finance_sutra_tree" model="ir.ui.view">
-        <field name="name">finance.sutra.tree</field>
-        <field name="model">finance.sutra</field>
+    <record id="view_finance_marglory_tree" model="ir.ui.view">
+        <field name="name">finance.marglory.tree</field>
+        <field name="model">finance.marglory</field>
         <field name="arch" type="xml">
-            <tree string="Sutra Dossiers" create="0">
+            <tree string="Marglory Dossiers" create="0">
                 <field name="dossier_num" optional="show"/>
                 <field name="bl_number" />
                 <field name="dum"/>
@@ -19,11 +19,11 @@
     </record>
 
     <!-- FORM VIEW -->
-    <record id="view_finance_sutra_form" model="ir.ui.view">
-        <field name="name">finance.sutra.form</field>
-        <field name="model">finance.sutra</field>
+    <record id="view_finance_marglory_form" model="ir.ui.view">
+        <field name="name">finance.marglory.form</field>
+        <field name="model">finance.marglory</field>
         <field name="arch" type="xml">
-            <form string="Sutra Dossier" create="0">
+            <form string="Marglory Dossier" create="0">
                 <sheet>
                     <div class="oe_title">
                         <h1>
@@ -81,11 +81,11 @@
     </record>
 
     <!-- SEARCH VIEW -->
-    <record id="view_finance_sutra_search" model="ir.ui.view">
-        <field name="name">finance.sutra.search</field>
-        <field name="model">finance.sutra</field>
+    <record id="view_finance_marglory_search" model="ir.ui.view">
+        <field name="name">finance.marglory.search</field>
+        <field name="model">finance.marglory</field>
         <field name="arch" type="xml">
-            <search string="Search Sutra">
+            <search string="Search Marglory">
                 <field name="bl_number"/>
                 <field name="dossier_num"/>
                 <field name="dum"/>
@@ -96,33 +96,41 @@
     </record>
 
     <!-- ACTION -->
-    <record id="action_finance_sutra" model="ir.actions.act_window">
-        <field name="name">Sutra</field>
-        <field name="res_model">finance.sutra</field>
+    <record id="action_finance_marglory" model="ir.actions.act_window">
+        <field name="name">Marglory</field>
+        <field name="res_model">finance.marglory</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Les dossiers Sutra sont créés automatiquement depuis la Douane.
+                Les dossiers Marglory sont créés automatiquement depuis la Douane.
             </p>
         </field>
     </record>
+
+    <!-- SERVER ACTION -->
+    <record id="action_finance_marglory_sync" model="ir.actions.server">
+        <field name="name">Synchronize from Douane</field>
+        <field name="model_id" ref="model_finance_marglory"/>
+        <field name="binding_model_id" ref="model_finance_marglory"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_sync_from_douane()
+        </field>
+    </record>
+
     <!-- MENUS -->
-    <menuitem id="menu_finance_sutra_marglory_root"
-              name="Sutra / Marglory"
-              parent="finance_root_menu"
-              sequence="40"/>
-
-    <menuitem id="menu_finance_sutra"
-              name="Sutra"
+     <menuitem id="menu_finance_marglory"
+              name="Marglory"
               parent="menu_finance_sutra_marglory_root"
-              action="action_finance_sutra"
-              sequence="10"/>
+              action="action_finance_marglory"
+              sequence="20"/>
 
-    <menuitem id="menu_finance_sutra_sync"
+    <menuitem id="menu_finance_marglory_sync"
               name="Synchroniser"
               parent="menu_finance_sutra_marglory_root"
-              action="action_finance_sutra_sync"
-              sequence="20"
+              action="action_finance_marglory_sync"
+              sequence="30"
               groups="finance.group_finance_user"/>
 
 </odoo>

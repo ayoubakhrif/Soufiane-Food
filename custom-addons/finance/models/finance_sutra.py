@@ -3,7 +3,6 @@ from odoo import models, fields, api
 class FinanceSutra(models.Model):
     _name = 'finance.sutra'
     _description = 'Finance Sutra'
-    _rec_name = 'bl_number'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     # -------------------------------------------------------------------------
@@ -77,13 +76,6 @@ class FinanceSutra(models.Model):
     _sql_constraints = [
         ('douane_id_uniq', 'unique (douane_id)', 'Un dossier Sutra existe déjà pour ce dossier Douane !')
     ]
-
-    def name_get(self):
-        result = []
-        for rec in self:
-            name = f"{rec.bl_number or 'N/A'} - {rec.dossier_num or 'No Dossier'}"
-            result.append((rec.id, name))
-        return result
 
     @api.model
     def action_sync_from_douane(self):

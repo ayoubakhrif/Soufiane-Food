@@ -55,19 +55,11 @@ class LogisticsEntry(models.Model):
         for rec in self:
             rec.customs_total = rec.vat + rec.customs_duty
 
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
-        if name and self.env.context.get('show_dum'):
-             args = args or []
-             domain = [('dum', operator, name)]
-             return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
-        return super(LogisticsEntry, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid, order=order)
-
     def name_get(self):
         result = []
         for record in self:
             name = record.dossier_id.name or 'No BL'
             if self.env.context.get('show_dum') and record.dum:
-                name =  f"{record.dum}"
+                name = record.dum
             result.append((record.id, name))
         return result

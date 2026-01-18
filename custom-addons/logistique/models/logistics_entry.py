@@ -232,21 +232,4 @@ class LogisticsEntry(models.Model):
             #        raise ValidationError(
              #           "Free Time must be at least 14 days when Incoterm is FOB or CFR."
               #      )
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
-        args = args or []
-        domain = []
 
-        if name:
-            domain = [('dossier_id.name', operator, name)]
-
-        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
-
-
-    def name_get(self):
-        result = []
-        for record in self:
-            name = record.dossier_id.name or 'No BL'
-            
-            result.append((record.id, name))
-        return result

@@ -14,7 +14,7 @@
                 <field name="message"/>
                 <field name="state" widget="badge" decoration-danger="state == 'pending'" decoration-success="state == 'treated'"/>
                 <button name="action_mark_treated" string="Marquer comme traité" type="object" icon="fa-check" 
-                        attrs="{'invisible': [('state', '=', 'treated')]}" class="btn-primary"/>
+                        invisible="state == 'treated'" class="btn-primary"/>
             </tree>
         </field>
     </record>
@@ -27,7 +27,7 @@
             <form string="Notification Véhicule">
                 <header>
                     <button name="action_mark_treated" string="Marquer comme traité" type="object" class="oe_highlight"
-                            attrs="{'invisible': [('state', '=', 'treated')]}"/>
+                            invisible="state == 'treated'"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>

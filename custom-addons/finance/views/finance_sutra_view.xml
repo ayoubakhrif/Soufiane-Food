@@ -119,7 +119,7 @@
         <field name="code">
             action = model.action_sync_from_douane()
         </field>
-        <field name="groups_id" eval="[(4, ref('finance.group_finance_user'))]"/>
+
     </record>
 
     <!-- MENUS -->

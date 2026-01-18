@@ -233,7 +233,7 @@ class LogisticsEntry(models.Model):
              #           "Free Time must be at least 14 days when Incoterm is FOB or CFR."
               #      )
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
         args = args or []
         domain = []
         if name:

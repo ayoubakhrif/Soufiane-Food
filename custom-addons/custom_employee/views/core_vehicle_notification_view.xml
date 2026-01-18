@@ -24,7 +24,7 @@
         <field name="name">core.vehicle.notification.form</field>
         <field name="model">core.vehicle.notification</field>
         <field name="arch" type="xml">
-            <form string="Notification Véhicule">
+            <form string="Notification Véhicule" create="false" edit="false">
                 <header>
                     <button name="action_mark_treated" string="Marquer comme traité" type="object" class="oe_highlight"
                             invisible="state == 'treated'"/>

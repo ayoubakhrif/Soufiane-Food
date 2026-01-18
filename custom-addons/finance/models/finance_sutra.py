@@ -11,9 +11,9 @@ class FinanceSutra(models.Model):
     # -------------------------------------------------------------------------
     douane_id = fields.Many2one(
         'logistique.entry',
-        string='Dossier Douane',
+        string='Dossier Douane / DUM',
         required=True,
-        ondelete='restrict',
+        domain="[('dum', '!=', False)]",
         tracking=True,
         index=True
     )
@@ -34,7 +34,7 @@ class FinanceSutra(models.Model):
     container_ids = fields.One2many(related='douane_id.container_ids', string='Conteneurs', readonly=True)
     eta = fields.Date(related='douane_id.eta', string='ETA', store=True, readonly=True)
     
-    # Amounts (if needed from Douane)
+    # Amounts
     amount_mad = fields.Float(related='douane_id.amount_mad', string='Montant (MAD)', readonly=True)
     customs_total = fields.Float(related='douane_id.customs_total', string='Total Douane', readonly=True)
 
@@ -45,10 +45,34 @@ class FinanceSutra(models.Model):
     honoraires = fields.Float(string='Honoraires', tracking=True)
     temsa = fields.Float(string='TEMSA', tracking=True)
     
+    regime = fields.Selection([
+        ('855', '855'),
+        ('50', '50'),
+        ('10', '10')
+    ], string='Régime', tracking=True)
+    
+    facture_sutra = fields.Char(string='Facture Sutra', tracking=True)
+    scan_facture = fields.Char(string='Scan Facture (Drive)', help="Lien vers le scan de la facture", tracking=True)
+    
     # -------------------------------------------------------------------------
-    # CHEQUES MANAGEMENT
+    # CHEQUE MANAGEMENT (Linked to DataCheque)
     # -------------------------------------------------------------------------
-    cheque_ids = fields.One2many('finance.sutra.cheque', 'sutra_id', string='Chèques')
+    cheque_id = fields.Many2one(
+        'datacheque', 
+        string='Chèque', 
+        required=True, 
+        domain="[('benif_id.name', 'ilike', 'SUTRA')]",
+        tracking=True
+    )
+    
+    # Related Cheque Info (Read-Only)
+    date_emission = fields.Date(related='cheque_id.date_emission', string="Date d'émission", readonly=True)
+    date_echeance = fields.Date(related='cheque_id.date_echeance', string="Date d'échéance", readonly=True)
+    
+    # Manual Cheque Info
+    amount = fields.Float(string='Montant', tracking=True)
+    date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)
+    encaisse = fields.Boolean(string='Encaissé', default=False, tracking=True)
 
     _sql_constraints = [
         ('douane_id_uniq', 'unique (douane_id)', 'Un dossier Sutra existe déjà pour ce dossier Douane !')
@@ -64,10 +88,10 @@ class FinanceSutra(models.Model):
     @api.model
     def action_sync_from_douane(self):
         """
-        Create Sutra records for any Douane dossiers that don't have one yet.
-        Safe to run multiple times.
+        Create Sutra records for existing Douane dossiers (Manual Sync Action).
+        Filtered by existing DUM.
         """
-        douane_records = self.env['logistique.entry'].search([])
+        douane_records = self.env['logistique.entry'].search([('dum', '!=', False)])
         existing_douane_ids = self.search([]).mapped('douane_id').ids
 
         to_create = douane_records.filtered(
@@ -91,36 +115,3 @@ class FinanceSutra(models.Model):
                 'next': {'type': 'ir.actions.act_window_close'},
             }
         }
-
-
-class FinanceSutraCheque(models.Model):
-    _name = 'finance.sutra.cheque'
-    _description = 'Chèque Sutra'
-
-    sutra_id = fields.Many2one('finance.sutra', string='Dossier Sutra', required=True, ondelete='cascade')
-    
-    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
-    amount = fields.Float(string='Montant', required=True)
-    type = fields.Selection([
-        ('avance', 'Avance'),
-        ('solde', 'Solde'),
-        ('autre', 'Autre')
-    ], string='Type', default='autre')
-    
-    cheque_number = fields.Char(string='N° Chèque')
-    bank = fields.Char(string='Banque')
-    
-    # Beneficiary: In Logistique it's often free text or linked. 
-    # Request says: "Benificiaire chosen automatically SUTRA from benif model"
-    # This likely implies we might default it, but user can change? 
-    # Or maybe it's just a Many2one to finance.benif with a default.
-    beneficiary_id = fields.Many2one('finance.benif', string='Bénéficiaire')
-
-    @api.model
-    def default_get(self, fields_list):
-        res = super().default_get(fields_list)
-        # Try to find 'SUTRA' beneficiary
-        sutra_benif = self.env['finance.benif'].search([('name', 'ilike', 'Sutra')], limit=1)
-        if sutra_benif:
-            res['beneficiary_id'] = sutra_benif.id
-        return res

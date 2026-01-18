@@ -232,3 +232,16 @@ class LogisticsEntry(models.Model):
             #        raise ValidationError(
              #           "Free Time must be at least 14 days when Incoterm is FOB or CFR."
               #      )
+    def name_get(self):
+        result = []
+        for record in self:
+            if self.env.context.get('show_dum'):
+                # Check if 'dum' field exists (added by douane module)
+                if hasattr(record, 'dum') and record.dum:
+                    name = record.dum
+                else:
+                    name = f"{record.dossier_id.name or 'No BL'} (No DUM)"
+            else:
+                name = record.dossier_id.name or 'No BL'
+            result.append((record.id, name))
+        return result

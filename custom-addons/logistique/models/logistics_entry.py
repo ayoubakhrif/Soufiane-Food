@@ -233,32 +233,18 @@ class LogisticsEntry(models.Model):
              #           "Free Time must be at least 14 days when Incoterm is FOB or CFR."
               #      )
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         domain = []
-        if name:
-            domain = ['|', ('dossier_id.name', operator, name)]
-            # Check if 'dum' field exists (added by douane module) or just try searching
-            # Using try-except or check fields_get is safer if dependency is weak
-            if 'dum' in self._fields:
-                 domain.append(('dum', operator, name))
-            else:
-                 # Fallback/Empty OR branch if dum doesn't exist to prevent error
-                 pass
-                 
-            # If we had 2 criteria, use OR operator
-            if len(domain) > 2:
-                domain = ['|'] + domain[1:]
-            elif len(domain) == 1: # Should not happen with name provided
-                domain = [] # reset if only name provided but logic failed (unlikely)
 
-            # Simplified logic:
-            if 'dum' in self._fields:
-                domain = ['|', ('dossier_id.name', operator, name), ('dum', operator, name)]
+        if name:
+            if self.env.context.get('show_dum') and 'dum' in self._fields:
+                domain = [('dum', operator, name)]
             else:
                 domain = [('dossier_id.name', operator, name)]
-                
+
         return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+
 
     def name_get(self):
         result = []
@@ -268,7 +254,7 @@ class LogisticsEntry(models.Model):
             # Show DUM / BL if context requests it
             if self.env.context.get('show_dum'):
                 if hasattr(record, 'dum') and record.dum:
-                    name = f"{record.dum} / {name}"
+                    name = f"{record.dum}"
             
             result.append((record.id, name))
         return result

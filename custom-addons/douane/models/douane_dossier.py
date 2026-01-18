@@ -5,19 +5,23 @@ class LogistiqueDossier(models.Model):
 
     def name_get(self):
         """
-        Affiche le DUM en priorité, puis le BL
-        Cherche le DUM directement dans les entries sans champ stocké
+        Affiche le DUM si disponible et si le contexte 'show_dum' est True
+        Sinon affiche le BL
         """
         result = []
+        show_dum = self.env.context.get('show_dum', True)  # True par défaut = toujours afficher DUM
+        
         for record in self:
-            # Chercher un DUM dans les entries liées
             dum = False
-            for entry in record.entry_ids:
-                if hasattr(entry, 'dum') and entry.dum:
-                    dum = entry.dum
-                    break
             
-            # Afficher DUM > BL > ID
+            # Chercher le DUM dans les entries
+            if show_dum and record.entry_ids:
+                for entry in record.entry_ids:
+                    if hasattr(entry, 'dum') and entry.dum:
+                        dum = entry.dum
+                        break
+            
+            # Construire le nom
             if dum:
                 name = dum
             elif record.name:
@@ -26,6 +30,7 @@ class LogistiqueDossier(models.Model):
                 name = f"Dossier #{record.id}"
             
             result.append((record.id, name))
+        
         return result
 
     @api.model
@@ -35,15 +40,14 @@ class LogistiqueDossier(models.Model):
         """
         args = args or []
         if name:
-            # Rechercher dans les entries qui ont un DUM
-            entry_ids = self.env['logistique.entry'].search([
+            entries = self.env['logistique.entry'].search([
                 ('dum', operator, name)
-            ]).mapped('dossier_id').ids
+            ])
+            entry_dossier_ids = entries.mapped('dossier_id').ids
             
-            # Combiner avec recherche sur BL
             domain = [
                 '|', '|',
-                ('id', 'in', entry_ids),
+                ('id', 'in', entry_dossier_ids),
                 ('name', operator, name),
                 ('id', '=', int(name) if name.isdigit() else 0)
             ]

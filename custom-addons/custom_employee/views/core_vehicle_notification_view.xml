@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TREE VIEW -->
+    <record id="view_core_vehicle_notification_tree" model="ir.ui.view">
+        <field name="name">core.vehicle.notification.tree</field>
+        <field name="model">core.vehicle.notification</field>
+        <field name="arch" type="xml">
+            <tree string="Notifications Véhicules" decoration-danger="state=='pending'" decoration-muted="state=='treated'">
+                <field name="date"/>
+                <field name="vehicle_id"/>
+                <field name="notification_type"/>
+                <field name="document_type"/>
+                <field name="expiration_date"/>
+                <field name="message"/>
+                <field name="state" widget="badge" decoration-danger="state == 'pending'" decoration-success="state == 'treated'"/>
+                <button name="action_mark_treated" string="Marquer comme traité" type="object" icon="fa-check" 
+                        attrs="{'invisible': [('state', '=', 'treated')]}" class="btn-primary"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_core_vehicle_notification_form" model="ir.ui.view">
+        <field name="name">core.vehicle.notification.form</field>
+        <field name="model">core.vehicle.notification</field>
+        <field name="arch" type="xml">
+            <form string="Notification Véhicule">
+                <header>
+                    <button name="action_mark_treated" string="Marquer comme traité" type="object" class="oe_highlight"
+                            attrs="{'invisible': [('state', '=', 'treated')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="vehicle_id"/>
+                            <field name="notification_type"/>
+                            <field name="document_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="expiration_date"/>
+                        </group>
+                    </group>
+                    <field name="message" placeholder="Message de la notification..."/>
+                </sheet>
+                 <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_core_vehicle_notification" model="ir.actions.act_window">
+        <field name="name">Notifications Véhicules</field>
+        <field name="res_model">core.vehicle.notification</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+
+    <!-- SEARCH VIEW - FILTER PENDING -->
+    <record id="view_core_vehicle_notification_search" model="ir.ui.view">
+        <field name="name">core.vehicle.notification.search</field>
+        <field name="model">core.vehicle.notification</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_id"/>
+                <field name="notification_type"/>
+                <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Traitées" name="treated" domain="[('state', '=', 'treated')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_core_vehicle_notification"
+              name="Notifications Véhicules"
+              parent="menu_notifications_root" 
+              action="action_core_vehicle_notification"
+              sequence="20"/>
+
+</odoo>

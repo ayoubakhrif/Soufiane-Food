@@ -11,4 +11,15 @@
         <field name="active">True</field>
         <field name="nextcall" eval="(datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:00:01')"/>
     </record>
+
+    <record id="ir_cron_check_vehicle_document_expiration" model="ir.cron">
+        <field name="name">Véhicules: Vérification des expirations de documents</field>
+        <field name="model_id" ref="model_core_vehicle_notification"/>
+        <field name="state">code</field>
+        <field name="code">model._check_all_vehicle_document_expirations()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
 </odoo>

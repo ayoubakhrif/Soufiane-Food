@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SEARCH VIEW -->
+    <record id="view_core_vehicle_search" model="ir.ui.view">
+        <field name="name">core.vehicle.search</field>
+        <field name="model">core.vehicle</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Véhicule">
+                <field name="matricule"/>
+                <field name="driver_id"/>
+                <field name="marque"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_core_vehicle_form" model="ir.ui.view">
+        <field name="name">core.vehicle.form</field>
+        <field name="model">core.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="Véhicule">
+                <sheet>
+                    <field name="photo" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="matricule" placeholder="Matricule ex: 12345-A-1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="marque"/>
+                            <field name="driver_id"/>
+                            <field name="site"/>
+                        </group>
+                        <group>
+                            <field name="p_achat"/>
+                            <field name="gps"/>
+                            <field name="registration_card_number"/>
+                            <field name="in_repair"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Documents" name="documents">
+                            <field name="document_ids">
+                                <tree editable="bottom">
+                                    <field name="doc_type"/>
+                                    <field name="expiration_date"/>
+                                    <field name="drive_url" widget="url"/>
+                                    <field name="note"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Jours Restants" name="days_remaining">
+                            <field name="document_ids" mode="kanban">
+                                <kanban>
+                                    <field name="doc_type"/>
+                                    <field name="expiration_date"/>
+                                    <field name="days_remaining"/>
+                                    <field name="is_expired"/>
+                                    <templates>
+                                        <t t-name="kanban-box">
+                                            <div t-attf-class="oe_kanban_global_click oe_kanban_card">
+                                                <div t-attf-style="background-color: #{record.is_expired.raw_value ? '#ffcccc' : (record.days_remaining.raw_value &lt;= 7 ? '#ffebcc' : '#e6f2ff')}; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                                    <strong><field name="doc_type"/></strong><br/>
+                                                    <span>Expire le: <field name="expiration_date"/></span><br/>
+                                                    <span t-if="record.is_expired.raw_value" style="color: red; font-weight: bold;">EXPIRÉ</span>
+                                                    <span t-elif="record.days_remaining.raw_value &lt;= 7" style="color: orange; font-weight: bold;">J-<field name="days_remaining"/></span>
+                                                    <span t-else="" style="color: blue;">J-<field name="days_remaining"/></span>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- TREE VIEW -->
+    <record id="view_core_vehicle_tree" model="ir.ui.view">
+        <field name="name">core.vehicle.tree</field>
+        <field name="model">core.vehicle</field>
+        <field name="arch" type="xml">
+            <tree string="Véhicules">
+                <field name="matricule"/>
+                <field name="marque"/>
+                <field name="driver_id"/>
+                <field name="site"/>
+                <field name="in_repair"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_core_vehicle" model="ir.actions.act_window">
+        <field name="name">Véhicules</field>
+        <field name="res_model">core.vehicle</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier véhicule ici.
+            </p>
+        </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_core_vehicle_root"
+              name="Véhicules"
+              parent="menu_core_employee_root"
+              action="action_core_vehicle"
+              sequence="20"/>
+
+</odoo>

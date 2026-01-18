@@ -7,3 +7,5 @@ from . import core_salary_history
 from . import core_ste
 from . import employee_documents
 from . import core_employee_notification
+from . import core_vehicle
+from . import core_vehicle_notification

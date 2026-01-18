@@ -157,11 +157,6 @@ class LogisticsEntry(models.Model):
         'entry_id',
         string='Virements'
     )
-    dum = fields.Char(
-        related='dum',  # le champ ajouté par douane
-        store=True,
-        readonly=True
-    )
 
 
     @api.onchange('contract_id')
@@ -243,10 +238,7 @@ class LogisticsEntry(models.Model):
         domain = []
 
         if name:
-            if self.env.context.get('show_dum') and 'dum' in self._fields:
-                domain = [('dum', operator, name)]
-            else:
-                domain = [('dossier_id.name', operator, name)]
+            domain = [('dossier_id.name', operator, name)]
 
         return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
 
@@ -255,11 +247,6 @@ class LogisticsEntry(models.Model):
         result = []
         for record in self:
             name = record.dossier_id.name or 'No BL'
-            
-            # Show DUM / BL if context requests it
-            if self.env.context.get('show_dum'):
-                if hasattr(record, 'dum') and record.dum:
-                    name = f"{record.dum}"
             
             result.append((record.id, name))
         return result

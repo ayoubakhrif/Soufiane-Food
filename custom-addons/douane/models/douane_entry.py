@@ -54,3 +54,28 @@ class LogisticsEntry(models.Model):
     def _compute_customs_total(self):
         for rec in self:
             rec.customs_total = rec.vat + rec.customs_duty
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
+        """Allow searching by DUM via context or direct override"""
+        if name and self.env.context.get('show_dum'):
+             args = args or []
+             domain = [('dum', operator, name)]
+             return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return super(LogisticsEntry, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid, order=order)
+
+    def name_get(self):
+        """Show DUM or DUM / BL when requested"""
+        result = []
+        for record in self:
+            if self.env.context.get('show_dum') and record.dum:
+                name = list(super(LogisticsEntry, record).name_get()[0])
+                # name[1] is the original name (BL)
+                # We want DUM only or DUM / BL? User asked: "If not possible show DUM/BL". 
+                # Let's show DUM only as primary request, or DUM / BL as fallback/preference.
+                # Format: "{DUM}" or "{DUM} / {BL}"
+                name[1] = f"{record.dum}" 
+                result.append(tuple(name))
+            else:
+                result.append(super(LogisticsEntry, record).name_get()[0])
+        return result

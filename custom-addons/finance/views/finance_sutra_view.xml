@@ -129,12 +129,12 @@
               parent="menu_finance_sutra_marglory_root"
               action="action_finance_sutra"
               sequence="10"/>
-
+<!--
     <menuitem id="menu_finance_sutra_sync"
               name="Synchroniser"
               parent="menu_finance_sutra_marglory_root"
               action="action_finance_sutra_sync"
               sequence="20"
               groups="finance.group_finance_user"/>
-
+-->
 </odoo>

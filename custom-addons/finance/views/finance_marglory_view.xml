@@ -125,12 +125,12 @@
               parent="menu_finance_sutra_marglory_root"
               action="action_finance_marglory"
               sequence="20"/>
-
+<!--
     <menuitem id="menu_finance_marglory_sync"
               name="Synchroniser"
               parent="menu_finance_sutra_marglory_root"
               action="action_finance_marglory_sync"
               sequence="30"
               groups="finance.group_finance_user"/>
-
+-->
 </odoo>

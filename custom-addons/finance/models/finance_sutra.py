@@ -61,6 +61,37 @@ class FinanceSutra(models.Model):
             result.append((rec.id, name))
         return result
 
+    @api.model
+    def action_sync_from_douane(self):
+        """
+        Create Sutra records for any Douane dossiers that don't have one yet.
+        Safe to run multiple times.
+        """
+        douane_records = self.env['logistique.entry'].search([])
+        existing_douane_ids = self.search([]).mapped('douane_id').ids
+
+        to_create = douane_records.filtered(
+            lambda d: d.id not in existing_douane_ids
+        )
+
+        for douane in to_create:
+            self.create({
+                'douane_id': douane.id,
+            })
+
+        message = f"{len(to_create)} dossiers Sutra ont été synchronisés depuis la Douane."
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Synchronisation Terminée',
+                'message': message,
+                'sticky': False,
+                'type': 'success', 
+                'next': {'type': 'ir.actions.act_window_close'},
+            }
+        }
+
 
 class FinanceSutraCheque(models.Model):
     _name = 'finance.sutra.cheque'

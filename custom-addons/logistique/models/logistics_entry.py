@@ -265,10 +265,10 @@ class LogisticsEntry(models.Model):
         for record in self:
             name = record.dossier_id.name or 'No BL'
             
-            # Prioritize DUM if context requests it
+            # Show DUM / BL if context requests it
             if self.env.context.get('show_dum'):
                 if hasattr(record, 'dum') and record.dum:
-                    name = record.dum
+                    name = f"{record.dum} / {name}"
             
             result.append((record.id, name))
         return result

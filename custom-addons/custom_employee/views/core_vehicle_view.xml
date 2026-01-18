@@ -52,7 +52,7 @@
                         </page>
                         <page string="Jours Restants" name="days_remaining">
                             <field name="document_ids" mode="kanban">
-                                <kanban>
+                                <kanban create="0">
                                     <field name="doc_type"/>
                                     <field name="expiration_date"/>
                                     <field name="days_remaining"/>
@@ -74,12 +74,12 @@
                             </field>
                         </page>
                     </notebook>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                    </div>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
-                    <field name="activity_ids" widget="mail_activity"/>
-                </div>
             </form>
         </field>
     </record>

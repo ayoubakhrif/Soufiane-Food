@@ -157,6 +157,11 @@ class LogisticsEntry(models.Model):
         'entry_id',
         string='Virements'
     )
+    dum = fields.Char(
+        related='dum',  # le champ ajouté par douane
+        store=True,
+        readonly=True
+    )
 
 
     @api.onchange('contract_id')

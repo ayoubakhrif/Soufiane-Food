@@ -19,7 +19,19 @@ class LogistiqueDossier(models.Model):
     dhl_number = fields.Char(string='Numéro DHL')
     eta_dhl = fields.Date(string='ETA DHL')
     
-
+    # DUM Info (NOUVEAU)
+    dum = fields.Char(
+        string='N° DUM',
+        compute='_compute_dum',
+        store=True,
+        help="Numéro DUM principal du dossier (récupéré depuis les entries)"
+    )
+    
+    dum_ids = fields.Char(
+        string='Tous les DUMs',
+        compute='_compute_dum_ids',
+        help="Liste de tous les DUMs liés à ce dossier"
+    )
     
     # One2many relationships
     container_ids = fields.One2many('logistique.container', 'dossier_id', string='Conteneurs')

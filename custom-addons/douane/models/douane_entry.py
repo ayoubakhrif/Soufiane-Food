@@ -57,7 +57,6 @@ class LogisticsEntry(models.Model):
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
-        """Allow searching by DUM via context or direct override"""
         if name and self.env.context.get('show_dum'):
              args = args or []
              domain = [('dum', operator, name)]
@@ -65,17 +64,10 @@ class LogisticsEntry(models.Model):
         return super(LogisticsEntry, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid, order=order)
 
     def name_get(self):
-        """Show DUM or DUM / BL when requested"""
         result = []
         for record in self:
+            name = record.dossier_id.name or 'No BL'
             if self.env.context.get('show_dum') and record.dum:
-                name = list(super(LogisticsEntry, record).name_get()[0])
-                # name[1] is the original name (BL)
-                # We want DUM only or DUM / BL? User asked: "If not possible show DUM/BL". 
-                # Let's show DUM only as primary request, or DUM / BL as fallback/preference.
-                # Format: "{DUM}" or "{DUM} / {BL}"
-                name[1] = f"{record.dum}" 
-                result.append(tuple(name))
-            else:
-                result.append(super(LogisticsEntry, record).name_get()[0])
+                name =  f"{record.dum}"
+            result.append((record.id, name))
         return result

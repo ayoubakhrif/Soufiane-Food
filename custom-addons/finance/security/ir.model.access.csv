@@ -37,10 +37,8 @@ access_finance_deduction_deposit_employee,access.finance.deduction.deposit.emplo
 access_finance_deduction_payment_manager,access.finance.deduction.payment.manager,model_finance_deduction_payment,group_finance_user,1,1,1,1
 access_finance_deduction_payment_employee,access.finance.deduction.payment.employee,model_finance_deduction_payment,group_finance_employee,1,1,1,0
 
-access_finance_sutra_manager,access.finance.sutra.manager,model_finance_sutra,group_finance_user,1,1,1,0
+access_finance_sutra_manager,access.finance.sutra.manager,model_finance_sutra,group_finance_user,1,1,1,1
 access_finance_sutra_employee,access.finance.sutra.employee,model_finance_sutra,group_finance_employee,1,1,1,1
-access_finance_sutra_cheque_manager,access.finance.sutra.cheque.manager,model_finance_sutra_cheque,group_finance_user,1,1,1,0
-access_finance_sutra_cheque_employee,access.finance.sutra.cheque.employee,model_finance_sutra_cheque,group_finance_employee,1,1,1,1
 
 access_finance_marglory_manager,access.finance.marglory.manager,model_finance_marglory,group_finance_user,1,1,1,0
 access_finance_marglory_employee,access.finance.marglory.employee,model_finance_marglory,group_finance_employee,1,1,1,1

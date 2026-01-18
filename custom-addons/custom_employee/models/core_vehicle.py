@@ -15,7 +15,7 @@ class CoreVehicle(models.Model):
     driver_id = fields.Many2one(
         'core.employee', 
         string='Chauffeur', 
-        domain="[('job_id.name', '=', 'Driver')]",
+        domain="[('job_position_id.name', '=', 'Chauffeur')]",
         tracking=True
     )
     

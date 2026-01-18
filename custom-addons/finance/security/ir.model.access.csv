@@ -37,6 +37,11 @@ access_finance_deduction_deposit_employee,access.finance.deduction.deposit.emplo
 access_finance_deduction_payment_manager,access.finance.deduction.payment.manager,model_finance_deduction_payment,group_finance_user,1,1,1,1
 access_finance_deduction_payment_employee,access.finance.deduction.payment.employee,model_finance_deduction_payment,group_finance_employee,1,1,1,0
 
+access_finance_sutra_manager,access.finance.sutra.manager,model_finance_sutra,group_finance_user,1,1,1,0
+access_finance_sutra_employee,access.finance.sutra.employee,model_finance_sutra,group_finance_employee,1,1,1,1
+access_finance_sutra_cheque_manager,access.finance.sutra.cheque.manager,model_finance_sutra_cheque,group_finance_user,1,1,1,0
+access_finance_sutra_cheque_employee,access.finance.sutra.cheque.employee,model_finance_sutra_cheque,group_finance_employee,1,1,1,1
+
 access_finance_logistique_dossier_employee,access.finance.logistique.dossier.employee,logistique.model_logistique_dossier,group_finance_employee,1,0,0,0
 access_finance_logistique_container_employee,access.finance.logistique.container.employee,logistique.model_logistique_container,group_finance_employee,1,0,0,0
 

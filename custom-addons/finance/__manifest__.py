@@ -4,7 +4,7 @@
     'author': 'Ayoub Akhrif',
     'category': 'Accounting',
     'version': '1.0',
-    'depends': ['base', 'mail', 'logistique'],
+    'depends': ['base', 'mail', 'logistique', 'douane'],
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
@@ -18,6 +18,7 @@
         'views/cheque_encaisse_view.xml',
         'views/logistics_integration_view.xml',
         'views/finance_deduction_view.xml',
+        'views/finance_sutra_view.xml',
         'reports/cheque_request_report.xml',
         'data/cron.xml',
     ],

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TREE VIEW -->
+    <record id="view_finance_sutra_tree" model="ir.ui.view">
+        <field name="name">finance.sutra.tree</field>
+        <field name="model">finance.sutra</field>
+        <field name="arch" type="xml">
+            <tree string="Sutra Dossiers" create="0">
+                <field name="dossier_num" optional="show"/>
+                <field name="bl_number" />
+                <field name="dum"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="eta"/>
+                <field name="honoraires" sum="Total Honoraires"/>
+                <field name="temsa" sum="Total TEMSA"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_finance_sutra_form" model="ir.ui.view">
+        <field name="name">finance.sutra.form</field>
+        <field name="model">finance.sutra</field>
+        <field name="arch" type="xml">
+            <form string="Sutra Dossier" create="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Informations Douane (Source: Logistique/Douane)">
+                            <field name="douane_id" readonly="1"/>
+                            <field name="ste_id"/>
+                            <field name="supplier_id"/>
+                            <field name="dum"/>
+                            <field name="dum_date"/>
+                            <field name="eta"/>
+                            <field name="amount_mad"/>
+                            <field name="customs_total"/>
+                        </group>
+                        
+                        <group string="Informations Finance (Editable)">
+                            <field name="dossier_num"/>
+                            <field name="honoraires"/>
+                            <field name="temsa"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Chèques" name="cheques">
+                            <field name="cheque_ids">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="cheque_number"/>
+                                    <field name="bank"/>
+                                    <field name="type"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="amount" sum="Total"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Conteneurs" name="containers">
+                            <field name="container_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="type"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_finance_sutra_search" model="ir.ui.view">
+        <field name="name">finance.sutra.search</field>
+        <field name="model">finance.sutra</field>
+        <field name="arch" type="xml">
+            <search string="Search Sutra">
+                <field name="bl_number"/>
+                <field name="dossier_num"/>
+                <field name="dum"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_finance_sutra" model="ir.actions.act_window">
+        <field name="name">Sutra</field>
+        <field name="res_model">finance.sutra</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Les dossiers Sutra sont créés automatiquement depuis la Douane.
+            </p>
+        </field>
+    </record>
+
+    <!-- MENUS -->
+    <menuitem id="menu_finance_sutra_marglory_root"
+              name="Sutra / Marglory"
+              parent="finance_root_menu"
+              sequence="40"/>
+
+    <menuitem id="menu_finance_sutra"
+              name="Sutra"
+              parent="menu_finance_sutra_marglory_root"
+              action="action_finance_sutra"
+              sequence="10"/>
+</odoo>

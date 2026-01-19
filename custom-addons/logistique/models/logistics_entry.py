@@ -232,4 +232,3 @@ class LogisticsEntry(models.Model):
             #        raise ValidationError(
              #           "Free Time must be at least 14 days when Incoterm is FOB or CFR."
               #      )
-

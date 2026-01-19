@@ -54,5 +54,3 @@ class LogisticsEntry(models.Model):
     def _compute_customs_total(self):
         for rec in self:
             rec.customs_total = rec.vat + rec.customs_duty
-
-

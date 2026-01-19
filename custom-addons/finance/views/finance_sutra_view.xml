@@ -11,9 +11,9 @@
                 <field name="dum"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="cheque_id"/>
-                <field name="amount" sum="Total Montant"/>
-                <field name="encaisse" widget="boolean_toggle"/>
+                <field name="eta"/>
+                <field name="regime" optional="hide"/>
+                <field name="total" sum="Total"/>
             </tree>
         </field>
     </record>
@@ -32,6 +32,7 @@
                     </div>
                     
                     <group>
+                        <!-- DOUANE INFO -->
                         <group string="Informations Douane (Source: Logistique/Douane)">
                             <field name="douane_id" options="{'no_create': True, 'no_edit': True}"/>
                             <field name="ste_id"/>
@@ -39,42 +40,38 @@
                             <field name="dum"/>
                             <field name="dum_date"/>
                             <field name="eta"/>
-                            <field name="amount_mad"/>
-                            <field name="customs_total"/>
+                            <field name="container_ids" widget="many2many_tags" readonly="1"/>
                         </group>
                         
+                        <!-- FINANCE INFO -->
                         <group string="Informations Finance (Editable)">
                             <field name="dossier_num"/>
                             <field name="regime"/>
                             <field name="facture_sutra"/>
-                            <field name="scan_facture" widget="url"/>
+                            <separator string="Charges"/>
                             <field name="honoraires"/>
                             <field name="temsa"/>
+                            <field name="autres"/>
+                            <field name="total" class="oe_subtotal_footer oe_right"/>
                         </group>
                     </group>
-
-                    <group string="Information Chèque">
-                        <group>
-                            <field name="cheque_id" options="{'no_create': True, 'no_edit': True}"/>
-                            <field name="date_emission"/>
-                            <field name="date_echeance"/>
+                    
+                    <group>
+                        <!-- PAIEMENT VIA DATACHEQUE -->
+                        <group string="Paiement Chèque (Source: DataCheque)">
+                            <field name="cheque_id" options="{'no_create': True}"/>
+                            <field name="cheque_number"/>
+                            <field name="cheque_bank"/>
+                            <field name="cheque_date_emission"/>
+                            <field name="cheque_date_echeance"/>
                         </group>
-                        <group>
+                        <group string="Encaissement (Manuel)">
                             <field name="amount"/>
                             <field name="date_encaissement"/>
-                            <field name="encaisse" widget="boolean_toggle"/>
+                            <field name="encaisse"/>
                         </group>
                     </group>
 
-                    <notebook>
-                        <page string="Conteneurs" name="containers">
-                            <field name="container_ids" readonly="1">
-                                <tree>
-                                    <field name="name"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
@@ -95,10 +92,7 @@
                 <field name="dum"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="facture_sutra"/>
-                <field name="cheque_id"/>
-                <filter string="Encaissé" name="encaisse" domain="[('encaisse', '=', True)]"/>
-                <filter string="Non Encaissé" name="non_encaisse" domain="[('encaisse', '=', False)]"/>
+                <field name="cheque_number"/>
             </search>
         </field>
     </record>
@@ -110,24 +104,12 @@
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Créez un nouveau dossier Sutra manuellement.
+                Créez un nouveau dossier en sélectionnant un BL.
             </p>
         </field>
     </record>
 
-    <!-- SERVER ACTION -->
-    <record id="action_finance_sutra_sync" model="ir.actions.server">
-        <field name="name">Synchronize from Douane</field>
-        <field name="model_id" ref="model_finance_sutra"/>
-        <field name="binding_model_id" ref="model_finance_sutra"/>
-        <field name="binding_view_types">list</field>
-        <field name="state">code</field>
-        <field name="code">
-            action = model.action_sync_from_douane()
-        </field>
-    </record>
-
-    <!-- MENUS -->
+    <!-- MENUS (Parent IDs assumed from context) -->
     <menuitem id="menu_finance_sutra_marglory_root"
               name="Sutra / Marglory"
               parent="finance_root_menu"
@@ -138,12 +120,5 @@
               parent="menu_finance_sutra_marglory_root"
               action="action_finance_sutra"
               sequence="10"/>
-
-    <menuitem id="menu_finance_sutra_sync"
-              name="Synchroniser"
-              parent="menu_finance_sutra_marglory_root"
-              action="action_finance_sutra_sync"
-              sequence="20"
-              groups="finance.group_finance_user"/>
 
 </odoo>

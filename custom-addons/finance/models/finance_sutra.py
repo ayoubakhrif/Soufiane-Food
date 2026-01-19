@@ -40,9 +40,7 @@ class FinanceSutra(models.Model):
 
     # -------------------------------------------------------------------------
     # FINANCE FIELDS (Editable)
-    # -------------------------------------------------------------------------
-    dossier_num = fields.Char(string='N° Dossier', tracking=True)
-    
+    # -------------------------------------------------------------------------    
     regime = fields.Selection([
         ('10', '10'),
         ('50', '50'),
@@ -50,6 +48,7 @@ class FinanceSutra(models.Model):
     ], string='Régime', tracking=True)
     
     facture_sutra = fields.Char(string='Facture Sutra', tracking=True)
+    scan_sutra = fields.Char(string='Scan Facture (Drive)', help="Poser le lien vers le scan de la facture")
 
     # Charges
     honoraires = fields.Float(string='Honoraires', tracking=True)
@@ -78,6 +77,22 @@ class FinanceSutra(models.Model):
     amount = fields.Float(string='Montant', tracking=True)
     encaisse = fields.Boolean(string='Encaissé', default=False, tracking=True)
 
+    scan_sutra_url = fields.Char(
+        string="Scan Facture",
+        compute="_compute_scan_url"
+    )
+
+    @api.depends('scan_sutra')
+    def _compute_scan_url(self):
+        for rec in self:
+            if rec.scan_sutra:
+                if rec.scan_sutra.startswith('http'):
+                    rec.scan_sutra_url = rec.scan_sutra
+                else:
+                    rec.scan_sutra_url = 'https://' + rec.scan_sutra
+            else:
+                rec.scan_sutra_url = False
+
     _sql_constraints = [
         ('douane_id_uniq', 'unique (douane_id)', 'Un dossier Sutra existe déjà pour ce dossier Douane !')
     ]
@@ -90,6 +105,6 @@ class FinanceSutra(models.Model):
     def name_get(self):
         result = []
         for rec in self:
-            name = f"{rec.bl_number or 'N/A'} - {rec.dossier_num or 'No Dossier'}"
+            name = f"{rec.bl_number or 'N/A'} - {rec.facture_sutra or 'No Facture'}"
             result.append((rec.id, name))
         return result

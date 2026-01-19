@@ -55,7 +55,7 @@ class LogistiqueDossier(models.Model):
         return result
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
         """
         Permet de rechercher un dossier par DUM ou par BL
         Exemple: Rechercher "123" trouvera DUM123 ou BL123
@@ -69,5 +69,5 @@ class LogistiqueDossier(models.Model):
                 ('name', operator, name),
                 ('id', '=', name if name.isdigit() else 0)
             ]
-            return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
-        return super()._name_search(name, args, operator, limit, name_get_uid)
+            return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid, order=order)
+        return super()._name_search(name, args, operator, limit, name_get_uid, order=order)

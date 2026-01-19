@@ -61,6 +61,3 @@ class StockKal3iyaMove(models.Model):
 
     def unlink(self):
         raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
-
-
-

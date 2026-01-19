@@ -36,7 +36,7 @@ class StockKal3iyaStock(models.Model):
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
-            CREATE OR REPLACE VIEW %s AS (
+            CREATE OR REPLACE VIEW stock_kal3iya_stock AS (
                 SELECT
                     min(m.id) as id,
                     m.product_id,
@@ -45,9 +45,11 @@ class StockKal3iyaStock(models.Model):
                     m.garage,
                     m.ste_id,
                     sum(m.qty) as quantity,
-                    max(m.weight) as weight,
-                    max(m.calibre) as calibre,
-                    max(m.price_purchase) as price,
+
+                    max(CASE WHEN m.qty > 0 THEN m.weight END) as weight,
+                    max(CASE WHEN m.qty > 0 THEN m.calibre END) as calibre,
+                    max(CASE WHEN m.qty > 0 THEN m.price_purchase END) as price,
+
                     sum(m.qty * m.price_purchase) as mt_achat,
                     max(m.date) as write_date,
                     min(m.date) as create_date
@@ -80,6 +82,3 @@ class StockKal3iyaStock(models.Model):
                 'default_ste_id': self.ste_id.id, 
             }
         }
-
-
-

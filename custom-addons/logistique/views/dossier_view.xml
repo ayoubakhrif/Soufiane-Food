@@ -63,6 +63,18 @@
         </field>
     </record>
 
+    <record id="view_logistique_dossier_search" model="ir.ui.view">
+        <field name="name">logistique.dossier.search</field>
+        <field name="model">logistique.dossier</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Dossiers">
+                <field name="name"/>
+                <field name="prov_number"/>
+                <field name="def_number"/>
+            </search>
+        </field>
+    </record>
+
     <record id="action_logistique_dossier" model="ir.actions.act_window">
         <field name="name">Dossiers / BL</field>
         <field name="res_model">logistique.dossier</field>

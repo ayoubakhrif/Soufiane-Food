@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Dossier Form View to show DUM -->
+    <record id="view_logistique_dossier_form_douane" model="ir.ui.view">
+        <field name="name">logistique.dossier.form.douane</field>
+        <field name="model">logistique.dossier</field>
+        <field name="inherit_id" ref="logistique.view_logistique_dossier_form"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="dum"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Extend Dossier Tree View to show DUM -->
+    <record id="view_logistique_dossier_tree_douane" model="ir.ui.view">
+        <field name="name">logistique.dossier.tree.douane</field>
+        <field name="model">logistique.dossier</field>
+        <field name="inherit_id" ref="logistique.view_logistique_dossier_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="dum" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Extend Dossier Search View to allow search by DUM -->
+    <record id="view_logistique_dossier_search_douane" model="ir.ui.view">
+        <field name="name">logistique.dossier.search.douane</field>
+        <field name="model">logistique.dossier</field>
+        <field name="inherit_id" ref="logistique.view_logistique_dossier_search"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                 <field name="dum"/>
+            </field>
+        </field>
+    </record>
+</odoo>

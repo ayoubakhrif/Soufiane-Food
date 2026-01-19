@@ -14,6 +14,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/douane_entry_view.xml',
+        'views/dossier_view.xml',
     ],
     'installable': True,
     'application': True,

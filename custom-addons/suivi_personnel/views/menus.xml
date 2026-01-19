@@ -13,7 +13,7 @@
     <menuitem id="menu_suivi_incomes"
               name="Revenus"
               parent="menu_suivi_root"
-              sequence="10"/>
+              sequence="20"/>
 
     <menuitem id="menu_income_daily"
               name="Revenus Quotidiens"
@@ -33,7 +33,7 @@
     <menuitem id="menu_suivi_expenses"
               name="Dépenses"
               parent="menu_suivi_root"
-              sequence="20"/>
+              sequence="10"/>
 
     <menuitem id="menu_expense_daily"
               name="Dépenses Quotidiennes"

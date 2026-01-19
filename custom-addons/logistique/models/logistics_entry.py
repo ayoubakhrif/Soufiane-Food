@@ -22,9 +22,6 @@ class LogisticsEntry(models.Model):
     # Optional container reference (for backward compatibility or specific tracking)
     container_id = fields.Many2one('logistique.container', string='Container (Optionnel)', domain="[('dossier_id', '=', dossier_id)]")
 
-    # New flat input field for Achat users
-    container_number_input = fields.Char(string='Conteneurs (Saisie)', help="Saisir les numéros de conteneurs séparés par des virgules")
-    
     # Computed field for Tree/Search (combines new input and legacy One2many)
     container_search_computed = fields.Char(
         string='Conteneurs',
@@ -33,13 +30,10 @@ class LogisticsEntry(models.Model):
         help="Champ affiché pour la recherche et la vue liste"
     )
 
-    @api.depends('container_number_input', 'container_ids.name')
+    @api.depends('container_ids.name')
     def _compute_container_search(self):
         for rec in self:
-            if rec.container_number_input:
-                rec.container_search_computed = rec.container_number_input
-            else:
-                rec.container_search_computed = ', '.join(rec.container_ids.mapped('name'))
+            rec.container_search_computed = ', '.join(rec.container_ids.mapped('name'))
 
     
     # Week and status

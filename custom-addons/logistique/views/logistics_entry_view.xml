@@ -190,10 +190,37 @@
         </field>
     </record>
 
+    <record id="view_logistique_entry_pivot" model="ir.ui.view">
+        <field name="name">logistique.entry.pivot</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <pivot string="Entrées Logistiques">
+                <field name="ste_id" type="row"/>
+                <field name="entry_date" interval="month" type="col"/>
+                <field name="container_count" type="measure"/>
+                <field name="weight" type="measure"/>
+                <field name="thc_amount" type="measure"/>
+                <field name="surestarie_amount" type="measure"/>
+                <field name="magasinage_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_logistique_entry_graph" model="ir.ui.view">
+        <field name="name">logistique.entry.graph</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <graph string="Entrées Logistiques">
+                <field name="ste_id"/>
+                <field name="container_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="action_logistique_entry" model="ir.actions.act_window">
         <field name="name">Entrées Logistiques</field>
         <field name="res_model">logistique.entry</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
         <field name="search_view_id" ref="view_logistique_entry_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_logistique_entry_tree')}),

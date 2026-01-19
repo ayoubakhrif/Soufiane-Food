@@ -94,8 +94,8 @@
 
                             <field name="dhl_number"/>
                             <field name="eta_dhl"/>
-                            <!-- Containers as Tags -->
-                            <field name="container_ids" widget="many2many_tags" options="{'no_create_edit': True}" placeholder="Saisir conteneurs..."/>
+                            <!-- New container input for Achat -->
+                            <field name="container_number_input"/>
                         </group>
                         <group string="Document's comments">
                             <field name="comment"/>

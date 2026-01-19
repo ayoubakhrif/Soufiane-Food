@@ -134,3 +134,17 @@ class FinanceSutra(models.Model):
                 raise ValidationError(
                     "Merci de scanner la facture avant d'enregistrer."
                 )
+            
+    @api.constrains('payment_id')
+    def _check_single_payment(self):
+        for rec in self:
+            if rec.payment_id:
+                other = self.search([
+                    ('id', '!=', rec.id),
+                    ('douane_id', '=', rec.douane_id.id),
+                    ('payment_id', '!=', False),
+                ], limit=1)
+                if other:
+                    raise ValidationError(
+                        "Cette facture Sutra est déjà payée par un autre chq."
+                    )

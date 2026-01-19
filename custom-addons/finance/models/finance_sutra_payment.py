@@ -17,11 +17,16 @@ class FinanceSutraPayment(models.Model):
         tracking=True
     )
     
-    sutra_ids = fields.One2many(
+    sutra_ids = fields.Many2many(
         'finance.sutra',
+        'finance_sutra_payment_rel',
         'payment_id',
-        string='Factures Sutra'
+        'sutra_id',
+        string='Factures Sutra',
+        domain="[('payment_id','=',False)]",
+        tracking=True
     )
+
     
     amount_total = fields.Float(
         string='Total Factures',
@@ -43,8 +48,13 @@ class FinanceSutraPayment(models.Model):
     def action_confirm(self):
         for rec in self:
             if not rec.sutra_ids:
-                raise ValidationError("Veuillez sélectionner au moins une facture Sutra à payer.")
+                raise ValidationError("Veuillez sélectionner au moins une facture Sutra.")
+
+            # Lier les factures au paiement
+            rec.sutra_ids.write({'payment_id': rec.id})
+
             rec.state = 'confirmed'
+
 
     def action_draft(self):
         self.write({'state': 'draft'})

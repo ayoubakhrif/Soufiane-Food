@@ -39,6 +39,12 @@ class FinanceSutraPayment(models.Model):
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmé'),
     ], string='Status', default='draft', tracking=True)
+    cheque_amount = fields.Float(
+        related='cheque_id.amount',
+        string='Montant du chèque',
+        readonly=True,
+        store=True
+    )
 
     @api.depends('sutra_ids.total')
     def _compute_amount_total(self):
@@ -50,11 +56,28 @@ class FinanceSutraPayment(models.Model):
             if not rec.sutra_ids:
                 raise ValidationError("Veuillez sélectionner au moins une facture Sutra.")
 
+            # Sécurité : montant chèque obligatoire
+            if not rec.cheque_amount:
+                raise ValidationError("Le montant du chèque est vide.")
+
+            # Comparaison montants
+            if abs(rec.amount_total - rec.cheque_amount) > 0.01:
+                raise ValidationError(
+                    _(
+                        "Montant incohérent ❌\n\n"
+                        "Montant du chèque : %(chq)s MAD\n"
+                        "Total des factures : %(inv)s MAD\n\n"
+                        "Veuillez corriger avant de confirmer."
+                    ) % {
+                        'chq': rec.cheque_amount,
+                        'inv': rec.amount_total,
+                    }
+                )
+
             # Lier les factures au paiement
             rec.sutra_ids.write({'payment_id': rec.id})
 
             rec.state = 'confirmed'
-
 
     def action_draft(self):
         self.write({'state': 'draft'})

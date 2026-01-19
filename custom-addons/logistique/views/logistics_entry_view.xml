@@ -18,6 +18,7 @@
                 <field name="free_time"/>
                 <field name="shipping_id"/>
                 <field name="consolidator_id"/>
+                <field name="amount_total"/>
                 <field name="eta"/>
                 <field name="container_count"/>
                 <field name="container_names" string="Conteneur" optional="show"/>

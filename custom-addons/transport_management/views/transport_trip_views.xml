@@ -91,8 +91,8 @@
         <field name="arch" type="xml">
             <tree string="Transport Trips" decoration-success="is_paid" decoration-info="not is_paid">
                 <field name="date"/>
-                <field name="driver"/>
-                <field name="client"/>
+                <field name="driver_id"/>
+                <field name="client_id"/>
                 <field name="trip_type"/>
                 <field name="movement"/>
                 <field name="going_price"/>
@@ -115,8 +115,8 @@
         <field name="model">transport.trip</field>
         <field name="arch" type="xml">
             <search string="Search Transport Trips">
-                <field name="driver"/>
-                <field name="client"/>
+                <field name="driver_id"/>
+                <field name="client_id"/>
                 <field name="trip_type"/>
                 <field name="date"/>
                 
@@ -127,8 +127,8 @@
                 <filter string="This Month" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
 
                 <group expand="0" string="Group By">
-                    <filter string="Driver" name="group_driver" domain="[]" context="{'group_by': 'driver'}"/>
-                    <filter string="Client" name="group_client" domain="[]" context="{'group_by': 'client'}"/>
+                    <filter string="Driver" name="group_driver" domain="[]" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Client" name="group_client" domain="[]" context="{'group_by': 'client_id'}"/>
                     <filter string="Trip Type" name="group_type" domain="[]" context="{'group_by': 'trip_type'}"/>
                     <filter string="Date" name="group_date" domain="[]" context="{'group_by': 'date'}"/>
                     <filter string="Movement" name="group_movement" domain="[]" context="{'group_by': 'movement'}"/>
@@ -144,7 +144,7 @@
         <field name="arch" type="xml">
             <pivot string="Transport Analysis">
                 <field name="date" type="row" interval="day"/>
-                <field name="client" type="row"/>
+                <field name="client_id" type="row"/>
                 <field name="total_amount" type="measure"/>
             </pivot>
         </field>

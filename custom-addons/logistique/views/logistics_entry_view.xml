@@ -9,7 +9,6 @@
                 <field name="week"/>
                 <field name="saisi_par"/>
                 <field name="dossier_id"/>
-                <field name="container_search_computed" string="Conteneurs" optional="show"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
@@ -21,6 +20,7 @@
                 <field name="consolidator_id"/>
                 <field name="eta"/>
                 <field name="container_count"/>
+                <field name="container_names" string="Conteneur" optional="show"/>
                 <field name="cheque_count"/>
                 <field name="def_number"/>
                 <field name="surestarie_amount" sum="Surestarie"/>
@@ -171,7 +171,7 @@
                 <field name="supplier_id"/>
 
                 <field name="dossier_id"/>
-                <field name="container_search_computed" string="Conteneur"/>
+                <field name="container_names" string="Conteneur"/>
                 <field name="status"/>
                 <field name="article_id"/>
 

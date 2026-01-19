@@ -81,6 +81,11 @@ class FinanceSutra(models.Model):
         string="Scan Facture",
         compute="_compute_scan_url"
     )
+    container_names = fields.Char(
+        string="Conteneurs",
+        compute="_compute_container_names",
+        store=True
+    )
 
     @api.depends('scan_sutra')
     def _compute_scan_url(self):
@@ -108,3 +113,9 @@ class FinanceSutra(models.Model):
             name = f"{rec.bl_number or 'N/A'} - {rec.facture_sutra or 'No Facture'}"
             result.append((rec.id, name))
         return result
+    @api.depends('douane_id.container_ids.name')
+    def _compute_container_names(self):
+        for rec in self:
+            rec.container_names = ', '.join(
+                rec.douane_id.container_ids.mapped('name')
+            )

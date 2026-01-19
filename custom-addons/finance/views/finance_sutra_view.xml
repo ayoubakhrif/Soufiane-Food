@@ -8,6 +8,7 @@
             <tree string="Sutra Dossiers">
                 <field name="bl_number" />
                 <field name="dum"/>
+                <field name="container_names" string="Conteneur"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="eta"/>
@@ -88,6 +89,7 @@
         <field name="arch" type="xml">
             <search string="Search Sutra">
                 <field name="bl_number"/>
+                <field name="container_names" string="Conteneur"/>
                 <field name="dum"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>

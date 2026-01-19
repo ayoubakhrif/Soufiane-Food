@@ -92,9 +92,7 @@
             <tree string="Transport Trips" decoration-success="is_paid" decoration-info="not is_paid">
                 <field name="date"/>
                 <field name="driver_id"/>
-                <field name="driver"/>
                 <field name="client_id"/>
-                <field name="client"/>
                 <field name="trip_type"/>
                 <field name="movement"/>
                 <field name="going_price"/>

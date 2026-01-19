@@ -71,8 +71,7 @@ class FinanceSutra(models.Model):
     # Read-only from Cheque
     cheque_date_emission = fields.Date(related='cheque_id.date_emission', string="Date d'émission", readonly=True)
     cheque_date_echeance = fields.Date(related='cheque_id.date_echeance', string="Date d'échéance", readonly=True)
-    cheque_number = fields.Char(related='cheque_id.cheque_number', string="N° Chèque", readonly=True)
-    cheque_bank = fields.Char(related='cheque_id.bank', string="Banque", readonly=True)
+    cheque_number = fields.Char(related='cheque_id.chq', string="N° Chèque", readonly=True)
 
     # Manual Fields for Processing
     date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)

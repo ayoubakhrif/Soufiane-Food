@@ -61,7 +61,7 @@
                         <group string="Paiement Chèque (Source: DataCheque)">
                             <field name="cheque_id" options="{'no_create': True}"/>
                             <field name="cheque_number"/>
-                            <field name="cheque_bank"/>
+
                             <field name="cheque_date_emission"/>
                             <field name="cheque_date_echeance"/>
                         </group>

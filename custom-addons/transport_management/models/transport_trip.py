@@ -23,6 +23,7 @@ class TransportTrip(models.Model):
     charge_fuel = fields.Float(string='Gazoil', tracking=True)
     charge_driver = fields.Float(string='Déplacement Chauffeur', tracking=True)
     charge_adblue = fields.Float(string='AdBlue', tracking=True)
+    charge_salary = fields.Float(string='Salaire', tracking=True)
     charge_mixed = fields.Float(string='Mixe (A préciser sur commentaire)', tracking=True)
     note = fields.Text(string='Commentaire (Mixe)')
     going_price = fields.Float(string='Prix allée', tracking=True)

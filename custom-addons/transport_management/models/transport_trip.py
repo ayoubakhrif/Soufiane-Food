@@ -20,11 +20,6 @@ class TransportTrip(models.Model):
         ('client', 'Client'),
         ('mestapha', 'Mestapha'),
     ], string='Type de voyage', tracking=True)
-    
-    movement = fields.Selection([
-        ('return', 'Retour'),
-        ('entry', 'Entrée'),
-    ], string='Movement', tracking=True)
     charge_fuel = fields.Float(string='Gazoil', tracking=True)
     charge_driver = fields.Float(string='Déplacement Chauffeur', tracking=True)
     charge_adblue = fields.Float(string='AdBlue', tracking=True)

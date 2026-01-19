@@ -43,7 +43,6 @@
                         </group>
                         <group>
                             <field name="trip_type"/>
-                            <field name="movement"/>
                             <field name="returning_price"/>
                         </group>
                     </group>
@@ -94,7 +93,6 @@
                 <field name="driver_id"/>
                 <field name="client_id"/>
                 <field name="trip_type"/>
-                <field name="movement"/>
                 <field name="going_price"/>
                 <field name="returning_price"/>
                 <field name="total_price"/>
@@ -131,7 +129,6 @@
                     <filter string="Client" name="group_client" domain="[]" context="{'group_by': 'client_id'}"/>
                     <filter string="Trip Type" name="group_type" domain="[]" context="{'group_by': 'trip_type'}"/>
                     <filter string="Date" name="group_date" domain="[]" context="{'group_by': 'date'}"/>
-                    <filter string="Movement" name="group_movement" domain="[]" context="{'group_by': 'movement'}"/>
                 </group>
             </search>
         </field>

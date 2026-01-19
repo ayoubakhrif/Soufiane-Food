@@ -6,7 +6,7 @@ class LogisticsEntry(models.Model):
     _name = 'logistique.entry'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Entrée Logistique'
-    _rec_name = 'dossier_id'
+    _rec_name = 'bl_number'
 
     # Core reference - Dossier is now the main entity
     dossier_id = fields.Many2one('logistique.dossier', string='Dossier / BL', required=False, ondelete='cascade')

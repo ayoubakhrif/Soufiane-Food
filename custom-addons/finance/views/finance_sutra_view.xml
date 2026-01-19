@@ -58,18 +58,18 @@
                     </group>
                     
                     <group>
-                        <!-- PAIEMENT VIA DATACHEQUE -->
-                        <group string="Paiement Chèque (Source: DataCheque)">
-                            <field name="cheque_id" options="{'no_create': True}"/>
+                        <!-- PAIEMENT LINK (Source: Finance Sutra Payment) -->
+                        <group string="Paiement">
+                            <field name="payment_id"/>
+                            <field name="is_encaisse" widget="boolean_toggle"/>
+                        </group>
+                        
+                        <!-- CHEQUE INFO (Read Only) -->
+                        <group string="Détails du Chèque (Lecture Seule)">
+                            <field name="cheque_id"/>
                             <field name="cheque_number"/>
-
                             <field name="cheque_date_emission"/>
                             <field name="cheque_date_echeance"/>
-                        </group>
-                        <group string="Encaissement (Manuel)">
-                            <field name="amount"/>
-                            <field name="date_encaissement"/>
-                            <field name="encaisse"/>
                         </group>
                     </group>
                     <separator string="Historique"/>

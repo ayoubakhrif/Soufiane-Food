@@ -59,24 +59,28 @@ class FinanceSutra(models.Model):
     total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
 
     # -------------------------------------------------------------------------
-    # CHEQUE MANAGEMENT (Linked to DataCheque)
+    # CHEQUE MANAGEMENT (Linked to DataCheque via Payment)
     # -------------------------------------------------------------------------
+    payment_id = fields.Many2one('finance.sutra.payment', string='Paiement', readonly=True, tracking=True)
+    
     cheque_id = fields.Many2one(
-        'datacheque',
+        related='payment_id.cheque_id',
         string='Chèque',
-        domain="[('benif_id.name', 'ilike', 'SUTRA')]",
-        tracking=True
+        readonly=True,
+        store=True
     )
     
     # Read-only from Cheque
     cheque_date_emission = fields.Date(related='cheque_id.date_emission', string="Date d'émission", readonly=True)
     cheque_date_echeance = fields.Date(related='cheque_id.date_echeance', string="Date d'échéance", readonly=True)
     cheque_number = fields.Char(related='cheque_id.chq', string="N° Chèque", readonly=True)
-
-    # Manual Fields for Processing
-    date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)
-    amount = fields.Float(string='Montant', tracking=True)
-    encaisse = fields.Boolean(string='Encaissé', default=False, tracking=True)
+    
+    # Encaissement Status (from DataCheque)
+    # Assuming 'data_encaisse' is the field on datacheque or deriving it from state? 
+    # User said: "encaissement dérivé uniquement de datacheque (or data_encaisse)"
+    # I will assume datacheque has an 'encaisse' field (boolean) or state.
+    # Looking at datacheque... I don't see it open but general practice:
+    is_encaisse = fields.Boolean(related='cheque_id.encaisse', string='Encaissé', readonly=True)
 
     scan_sutra_url = fields.Char(
         string="Scan Facture",

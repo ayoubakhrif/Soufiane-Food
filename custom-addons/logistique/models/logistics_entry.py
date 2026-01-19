@@ -113,7 +113,8 @@ class LogisticsEntry(models.Model):
     # origin_id = fields.Many2one('achat.origin', string='Origin')
     entry_date = fields.Date(string='Date of entry')
     exit_date = fields.Date(string='Date of exit')
-    consolidator_id = fields.Many2one('logistique.consolidator', string='Consolidator')
+    bad_date = fields.Date(string='Date of BAD')
+    consolidator_id = fields.Many2one('logistique.consolidator', string='FFW')
     surestarie_amount = fields.Float(
         string="Surestarie",
         related="dossier_id.surestarie_amount",

@@ -1,8 +1,9 @@
 <odoo>
-    <record id="finance_app_action" model="ir.actions.client">
-        <field name="name">Finance</field>
-        <field name="tag">finance.app_entry</field>
-        <field name="target">current</field>
+    <!-- Window Action (Moved to top) -->
+    <record id="data_cheque_action" model="ir.actions.act_window">
+        <field name="name">Saisie</field>
+        <field name="res_model">datacheque</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
     </record>
 
     <menuitem 
@@ -10,15 +11,9 @@
         name="Finance"
         sequence="1"
         web_icon="finance,static/description/icon.svg"
-        action="finance_app_action"
+        action="data_cheque_action"
         groups="finance.group_finance_employee"
     />
-
-    <record id="data_cheque_action" model="ir.actions.act_window">
-        <field name="name">Saisie</field>
-        <field name="res_model">datacheque</field>
-        <field name="view_mode">tree,form,pivot,graph</field>
-    </record>
 
     <menuitem 
         id="data_cheque_menu"

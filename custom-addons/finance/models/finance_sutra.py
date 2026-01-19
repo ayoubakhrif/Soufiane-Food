@@ -76,11 +76,13 @@ class FinanceSutra(models.Model):
     cheque_number = fields.Char(related='cheque_id.chq', string="N° Chèque", readonly=True)
     
     # Encaissement Status (from DataCheque)
-    # Assuming 'data_encaisse' is the field on datacheque or deriving it from state? 
-    # User said: "encaissement dérivé uniquement de datacheque (or data_encaisse)"
-    # I will assume datacheque has an 'encaisse' field (boolean) or state.
-    # Looking at datacheque... I don't see it open but general practice:
-    is_encaisse = fields.Boolean(related='cheque_id.encaisse', string='Encaissé', readonly=True)
+    # datacheque has 'encours' selection field, not 'encaisse' boolean
+    is_encaisse = fields.Boolean(string='Encaissé', compute='_compute_is_encaisse', store=True)
+
+    @api.depends('cheque_id.encours')
+    def _compute_is_encaisse(self):
+        for rec in self:
+            rec.is_encaisse = (rec.cheque_id.encours == 'encaisse')
 
     scan_sutra_url = fields.Char(
         string="Scan Facture",

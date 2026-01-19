@@ -1,5 +1,5 @@
 {
-    'name': 'Kal3iya Stock',
+    'name': 'Kal3iya (Rami)',
     'version': '1.0',
     'category': 'Inventory',
     'summary': 'Pilot Stock Management Module based on Movement Ledger (Kal3iya)',

@@ -62,7 +62,7 @@ class StockKal3iyaStock(models.Model):
                 HAVING
                     sum(m.qty) != 0
             )
-        """ % self._table)
+        """)
 
     def action_new_exit(self):
         self.ensure_one()

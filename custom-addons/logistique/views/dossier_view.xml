@@ -59,6 +59,7 @@
         <field name="arch" type="xml">
             <tree string="Dossiers Logistiques">
                 <field name="name"/>
+                <field name="container_names" string="Conteneur" optional="show"/>
             </tree>
         </field>
     </record>
@@ -69,6 +70,7 @@
         <field name="arch" type="xml">
             <search string="Recherche Dossiers">
                 <field name="name"/>
+                <field name="container_names" string="Conteneur"/>
                 <field name="prov_number"/>
                 <field name="def_number"/>
             </search>

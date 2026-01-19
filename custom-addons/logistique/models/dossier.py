@@ -18,6 +18,19 @@ class LogistiqueDossier(models.Model):
     # DHL Info
     dhl_number = fields.Char(string='Numéro DHL')
     eta_dhl = fields.Date(string='ETA DHL')
+
+    container_names = fields.Char(
+        string="Conteneurs",
+        compute="_compute_container_names",
+        store=True,
+    )
+
+    @api.depends('container_ids.name')
+    def _compute_container_names(self):
+        for rec in self:
+            rec.container_names = ', '.join(
+                rec.container_ids.mapped('name')
+            )
     
     # DUM Info (Refactored to douane module)
     # dum = fields.Char...

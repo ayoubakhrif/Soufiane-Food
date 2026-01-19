@@ -88,7 +88,6 @@
         <field name="arch" type="xml">
             <search string="Search Sutra">
                 <field name="bl_number"/>
-                <field name="dossier_num"/>
                 <field name="dum"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>

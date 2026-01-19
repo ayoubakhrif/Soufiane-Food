@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class FinanceSutra(models.Model):
     _name = 'finance.sutra'
@@ -119,3 +120,11 @@ class FinanceSutra(models.Model):
             rec.container_names = ', '.join(
                 rec.douane_id.container_ids.mapped('name')
             )
+
+    @api.constrains('scan_sutra')
+    def _check_scan_sutra_required(self):
+        for rec in self:
+            if not rec.scan_sutra:
+                raise ValidationError(
+                    "Merci de scanner la facture avant d'enregistrer."
+                )

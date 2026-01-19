@@ -25,6 +25,8 @@
     </record>
 
     <!-- Extend Dossier Search View to allow search by DUM -->
+    <!-- Temporarily disabled to allow base view to load -->
+    <!--
     <record id="view_logistique_dossier_search_douane" model="ir.ui.view">
         <field name="name">logistique.dossier.search.douane</field>
         <field name="model">logistique.dossier</field>
@@ -35,4 +37,5 @@
             </field>
         </field>
     </record>
+    -->
 </odoo>

@@ -94,6 +94,8 @@
 
                             <field name="dhl_number"/>
                             <field name="eta_dhl"/>
+                            <!-- New container input for Achat -->
+                            <field name="container_number_input"/>
                         </group>
                         <group string="Document's comments">
                             <field name="comment"/>

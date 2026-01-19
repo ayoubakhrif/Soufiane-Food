@@ -9,7 +9,6 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="container_names" placeholder="Ex: CONT001, CONT002..."/>
                         </group>
                         <group string="Numéros Finance (Lecture seule)">
                             <field name="prov_number" readonly="1"/>

@@ -9,6 +9,7 @@
                 <field name="week"/>
                 <field name="saisi_par"/>
                 <field name="dossier_id"/>
+                <field name="container_search_computed" string="Conteneurs" optional="show"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
@@ -170,6 +171,7 @@
                 <field name="supplier_id"/>
 
                 <field name="dossier_id"/>
+                <field name="container_search_computed" string="Conteneur"/>
                 <field name="status"/>
                 <field name="article_id"/>
 

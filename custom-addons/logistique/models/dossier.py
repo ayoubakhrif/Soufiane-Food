@@ -22,7 +22,6 @@ class LogistiqueDossier(models.Model):
     container_names = fields.Char(
         string="Conteneurs",
         compute="_compute_container_names",
-        inverse="_set_container_names",
         store=True,
     )
 
@@ -32,27 +31,6 @@ class LogistiqueDossier(models.Model):
             rec.container_names = ', '.join(
                 rec.container_ids.mapped('name')
             )
-
-    def _set_container_names(self):
-        for rec in self:
-            if not rec.container_names:
-                rec.container_ids = [(5, 0, 0)]
-            else:
-                names = [x.strip() for x in rec.container_names.split(',') if x.strip()]
-                # Update logic: Simple Replace
-                # We use specific command to replace all linked records
-                # or we can try to be smarter to preserve IDs, but replace is safer for sync
-                # However, if containers have other data, this destroys it.
-                # Assuming simple string containers for now based on recent context.
-                
-                # Check existing to assume re-use or recreate?
-                # Let's recreate to ensure list matches string exactly.
-                
-                new_containers = []
-                for name in names:
-                    new_containers.append((0, 0, {'name': name}))
-                
-                rec.container_ids = [(5, 0, 0)] + new_containers
     
     # DUM Info (Refactored to douane module)
     # dum = fields.Char...

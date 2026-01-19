@@ -70,4 +70,4 @@ class LogistiqueDossier(models.Model):
                 ('id', '=', name if name.isdigit() else 0)
             ]
             return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid, order=order)
-        return super()._name_search(name, args, operator, limit, name_get_uid, order=order)
+        return super()._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid, order=order)

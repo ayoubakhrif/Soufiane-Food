@@ -39,6 +39,8 @@ access_finance_deduction_payment_employee,access.finance.deduction.payment.emplo
 
 access_finance_sutra_manager,access.finance.sutra.manager,model_finance_sutra,group_finance_user,1,1,1,1
 access_finance_sutra_employee,access.finance.sutra.employee,model_finance_sutra,group_finance_employee,1,1,1,1
+access_finance_sutra_payment_manager,access.finance.sutra.payment.manager,model_finance_sutra_payment,group_finance_user,1,1,1,1
+access_finance_sutra_payment_employee,access.finance.sutra.payment.employee,model_finance_sutra_payment,group_finance_employee,1,1,1,1
 
 access_finance_marglory_manager,access.finance.marglory.manager,model_finance_marglory,group_finance_user,1,1,1,0
 access_finance_marglory_employee,access.finance.marglory.employee,model_finance_marglory,group_finance_employee,1,1,1,1

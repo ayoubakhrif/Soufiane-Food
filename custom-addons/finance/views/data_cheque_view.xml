@@ -200,6 +200,7 @@
                 <field name="week"/>
                 <field name="facture"/>
                 <field name="talon_id"/>
+                <field name="benif_id"/>
                 <filter name="encours" string="Cheques in progress" domain="[('encours', '=', 'non_encaisse')]"/>
                 <filter name="no_pdf" string="Liens inexistants" domain="['|', '|', ('chq_pdf_url', '=', False), ('dem_pdf_url', '=', False), ('doc_pdf_url', '=', False)]"/>
             </search>

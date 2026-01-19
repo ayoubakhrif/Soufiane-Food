@@ -7,6 +7,11 @@ class LogisticsEntry(models.Model):
     contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]")
     free_time_negotiated = fields.Integer(string='Negotiated Free Time')
 
+    origin_id = fields.Many2one(
+        'achat.origin',
+        string='Origin'
+    )
+
     
     # Document Link
     document_ids = fields.One2many('logistique.entry.document', 'entry_id', string='Documents')

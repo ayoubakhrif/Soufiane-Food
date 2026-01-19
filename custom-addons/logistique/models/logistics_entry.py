@@ -119,21 +119,21 @@ class LogisticsEntry(models.Model):
         string="Surestarie",
         related="dossier_id.surestarie_amount",
         readonly=True,
-        store=False
+        store=True
     )
     comment = fields.Char(string='Comments')
     thc_amount = fields.Float(
         string="THC",
         related="dossier_id.thc_amount",
         readonly=True,
-        store=False
+        store=True
     )
 
     magasinage_amount = fields.Float(
         string="Magasinage",
         related="dossier_id.magasinage_amount",
         readonly=True,
-        store=False
+        store=True
     )
 
     def action_move_to_draft(self):
@@ -150,7 +150,7 @@ class LogisticsEntry(models.Model):
         string="Nb Conteneurs",
         related="dossier_id.container_count",
         readonly=True,
-        store=False
+        store=True
     )
 
     cheque_count = fields.Integer(

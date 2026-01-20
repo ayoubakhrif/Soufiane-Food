@@ -115,7 +115,8 @@ class TransportTrip(models.Model):
         monthly_salary = employee.monthly_salary if employee else 0.0
 
         # 3. Find all trips for this driver in this month
-        trips = self.search([
+        Trip = self.env['transport.trip']
+        trips = Trip.search([
             ('driver_id', '=', driver_id),
             ('date', '>=', month_start),
             ('date', '<=', month_end),
@@ -133,8 +134,9 @@ class TransportTrip(models.Model):
             # 5. Update trips (avoid recursion loop using basic write if needed, though safe here)
             # We use write, but since charge_salary is not a computed field anymore and 
             # we are not triggering write on driver_id/date, no infinite loop should occur.
-            trips.write({'charge_salary': salary_per_trip})
-
+            trips.with_context(skip_salary_recompute=True).write({
+                'charge_salary': salary_per_trip
+            })
     @api.model
     def create(self, vals):
         record = super().create(vals)
@@ -144,22 +146,21 @@ class TransportTrip(models.Model):
         return record
     
     def write(self, vals):
-        # 1. Capture contexts BEFORE write (old state)
-        # We only care if driver_id or date is changing, but checking everything is safer/easier
+        # 🚫 Skip if called from salary recompute
+        if self.env.context.get('skip_salary_recompute'):
+            return super().write(vals)
+
         contexts_to_recompute = set()
         for rec in self:
             if rec.driver_id and rec.date:
                 contexts_to_recompute.add((rec.driver_id.id, rec.date))
 
-        # 2. Perform Write
         res = super().write(vals)
 
-        # 3. Capture contexts AFTER write (new state)
         for rec in self:
             if rec.driver_id and rec.date:
                 contexts_to_recompute.add((rec.driver_id.id, rec.date))
 
-        # 4. Recompute all affected contexts
         for driver_id, trip_date in contexts_to_recompute:
             self._recompute_monthly_salary(driver_id, trip_date)
 

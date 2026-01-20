@@ -52,6 +52,7 @@
                             <field name="honoraires"/>
                             <field name="temsa"/>
                             <field name="autres"/>
+                            <field name="tva"/>
                             <field name="total" class="oe_subtotal_footer oe_right"/>
                             <field name="scan_sutra_url" widget="url" readonly="1"/>
                         </group>

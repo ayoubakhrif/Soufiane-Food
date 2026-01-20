@@ -27,7 +27,7 @@ class GasoilSale(models.Model):
     )
 
     purchase_price = fields.Float(
-        string="Prix de vente / Litre",
+        string="Prix d'achat (Refill)",
         readonly=True,
         tracking=True
     )
@@ -52,17 +52,11 @@ class GasoilSale(models.Model):
     )
 
     # 🔹 Dernier prix d’achat automatiquement
-    @api.model
-    def create(self, vals):
-        last_refill = self.env['gasoil.refill'].search([], order='date desc', limit=1)
-        if last_refill:
-            vals['purchase_price'] = last_refill.purchase_price
-        return super().create(vals)
-
-    @api.depends('amount', 'purchase_price')
+    @api.depends('amount', 'sale_price')
     def _compute_liters(self):
         for rec in self:
             if rec.sale_price:
+                # FIX: Litrage = Montant / Prix de vente
                 rec.liters = rec.amount / rec.sale_price
             else:
                 rec.liters = 0.0
@@ -70,5 +64,26 @@ class GasoilSale(models.Model):
     @api.depends('amount', 'liters', 'purchase_price')
     def _compute_profit(self):
         for rec in self:
+            # FIX: Profit = Montant - (Litres * Prix d'achat)
             cost = rec.liters * rec.purchase_price
             rec.profit = rec.amount - cost
+
+    def write(self, vals):
+        res = super().write(vals)
+        self.env['gasoil.stock'].get_stock()._compute_stock()
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.env['gasoil.stock'].get_stock()._compute_stock()
+        return res
+        
+    @api.model
+    def create(self, vals):
+        last_refill = self.env['gasoil.refill'].search([], order='date desc', limit=1)
+        if last_refill:
+            vals['purchase_price'] = last_refill.purchase_price
+        
+        res = super().create(vals)
+        self.env['gasoil.stock'].get_stock()._compute_stock()
+        return res

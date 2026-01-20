@@ -35,3 +35,19 @@ class GasoilRefill(models.Model):
         for rec in self:
             rec.total_cost = (rec.liters or 0.0) * (rec.purchase_price or 0.0)
 
+    @api.model
+    def create(self, vals):
+        res = super().create(vals)
+        self.env['gasoil.stock'].get_stock()._compute_stock()
+        return res
+
+    def write(self, vals):
+        res = super().write(vals)
+        self.env['gasoil.stock'].get_stock()._compute_stock()
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.env['gasoil.stock'].get_stock()._compute_stock()
+        return res
+

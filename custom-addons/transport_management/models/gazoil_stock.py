@@ -42,10 +42,7 @@ class GasoilStock(models.Model):
         store=True
     )
 
-    @api.depends(
-        'total_liters_in',
-        'total_liters_out'
-    )
+    # Removed @api.depends to allow manual recomputation
     def _compute_stock(self):
         Refill = self.env['gasoil.refill']
         Sale = self.env['gasoil.sale']

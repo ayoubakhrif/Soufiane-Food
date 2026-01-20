@@ -153,3 +153,12 @@ class FinanceSutra(models.Model):
                     raise ValidationError(
                         "Cette facture Sutra est déjà payée par un autre chq."
                     )
+
+    @api.constrains('regime', 'ste_id')
+    def _check_regime_855_only_sn(self):
+        for rec in self:
+            if rec.regime == '855' and rec.ste_id:
+                if rec.ste_id.name != 'SN':
+                    raise ValidationError(
+                        "Le régime 855 est autorisé uniquement pour la société SN."
+                    )

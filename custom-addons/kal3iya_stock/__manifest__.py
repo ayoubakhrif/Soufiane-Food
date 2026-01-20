@@ -4,15 +4,11 @@
     'category': 'Inventory',
     'summary': 'Pilot Stock Management Module based on Movement Ledger (Kal3iya)',
     'description': """
-Stock Kal3iya
-=============
-This module provides a robust stock management system based on an immutable movement ledger.
-- Independent from existing Kal3iya module.
-- Movement-based stock core.
-- No deletion of validated operations.
-- Reversal moves for cancellations.
-    """,
-    'author': 'Soufiane-Food',
+    Stock Kal3iya
+    =============
+    This module provides a robust stock management system based on an immutable movement ledger.
+        """,
+    'author': 'Ayoub Akhrif',
     'depends': ['base', 'web', 'mail', 'custom_employee'],
     'data': [
         'security/groups.xml',

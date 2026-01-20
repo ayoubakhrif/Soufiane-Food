@@ -12,7 +12,7 @@ class FinanceSutraPayment(models.Model):
     cheque_id = fields.Many2one(
         'datacheque',
         string='Chèque',
-        domain="[('benif_id.name', 'ilike', 'SUTRA'), ('state', '=', 'bureau')]",
+        domain="[('benif_id.name', 'ilike', 'SUTRA')]",
         required=True,
         tracking=True
     )

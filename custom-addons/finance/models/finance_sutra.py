@@ -55,6 +55,7 @@ class FinanceSutra(models.Model):
     honoraires = fields.Float(string='Honoraires', tracking=True)
     temsa = fields.Float(string='TEMSA', tracking=True)
     autres = fields.Float(string='Autres charges', tracking=True)
+    tva = fields.Float(string='TVA', compute='_compute_tva', tracking=True)
     
     total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
 
@@ -76,7 +77,6 @@ class FinanceSutra(models.Model):
     cheque_number = fields.Char(related='cheque_id.chq', string="N° Chèque", readonly=True)
     
     # Encaissement Status (from DataCheque)
-    # datacheque has 'encours' selection field, not 'encaisse' boolean
     is_encaisse = fields.Boolean(string='Encaissé', compute='_compute_is_encaisse', store=True)
 
     @api.depends('cheque_id.encours')
@@ -110,9 +110,14 @@ class FinanceSutra(models.Model):
     ]
 
     @api.depends('honoraires', 'temsa', 'autres')
+    def _compute_tva(self):
+        for rec in self:
+            rec.tva = (rec.honoraires + rec.temsa + rec.autres)*0.2
+
+    @api.depends('honoraires', 'temsa', 'autres', 'tva')
     def _compute_total(self):
         for rec in self:
-            rec.total = rec.honoraires + rec.temsa + rec.autres
+            rec.total = rec.honoraires + rec.temsa + rec.autres + rec.tva
 
     def name_get(self):
         result = []

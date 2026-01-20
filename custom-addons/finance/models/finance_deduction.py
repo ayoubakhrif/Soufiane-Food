@@ -236,7 +236,7 @@ class FinanceDeductionPayment(models.Model):
     type = fields.Selection([
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
-        ('change', 'Change'),
+        ('change', 'THC'),
         ('inspection', 'Inspection'),
     ], string='Type', required=True, tracking=True)
 
@@ -290,7 +290,6 @@ class FinanceDeductionPayment(models.Model):
 
         # 2. Strict Balance Check
         # Available = Balance (Stored)
-        # Note: If concurrent creating, this might be race-condition prone but Odoo handles transactions.
         # Ideally we compute current balance from DB to be checking against most recent state.
         
         if account.balance < amount:

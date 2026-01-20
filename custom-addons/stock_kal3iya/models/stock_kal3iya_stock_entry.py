@@ -38,7 +38,7 @@ class StockKal3iyaEntry(models.Model):
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
     image_1920 = fields.Image(related='product_id.company_article_image', readonly=False)
-    
+    scan_dum = fields.Char(string='Scan DUM (Drive)', help="Poser le lien vers le scan de la DUM")
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('done', 'Confirmé'),

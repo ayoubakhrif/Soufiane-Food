@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- FORM VIEW -->
+    <record id="view_claims_dhl_delay_form" model="ir.ui.view">
+        <field name="name">claims.dhl.delay.form</field>
+        <field name="model">claims.dhl.delay</field>
+        <field name="arch" type="xml">
+            <form string="DHL Delay Claim">
+                <header>
+                    <button name="action_receive" string="Mark as Received" type="object" class="oe_highlight"
+                            states="initial"/>
+                    <button name="action_send_supplier" string="Sent to Supplier" type="object" class="oe_highlight"
+                            states="received"/>
+                    <button name="action_resolve" string="Mark as Resolved" type="object" class="oe_highlight"
+                            states="waiting"/>
+                    <button name="action_close" string="Close" type="object" class="oe_highlight"
+                            states="resolved"/>
+                    
+                    <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_id" placeholder="Select BL..." options="{'no_create': True, 'no_edit': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="BL Data">
+                            <field name="company_id"/>
+                            <field name="supplier_id"/>
+                            <field name="origin"/>
+                            <field name="article_id"/>
+                            <field name="lot"/>
+                            <field name="invoice_number"/>
+                        </group>
+                        <group string="Claim Details">
+                            <field name="eta_planned"/>
+                            <field name="eta_dhl"/>
+                            <field name="dhl_delay" decoration-danger="dhl_delay &gt; 0"/>
+                            <field name="amount_due"/>
+                        </group>
+                    </group>
+                    <group string="Follow-up">
+                        <field name="create_uid"/>
+                        <field name="responsible_id"/>
+                        <field name="comment"/>
+                    </group>
+                </sheet>
+                <!-- Chatter: Visible ONLY to Administrators -->
+                <div class="oe_chatter" groups="base.group_system">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- TREE VIEW -->
+    <record id="view_claims_dhl_delay_tree" model="ir.ui.view">
+        <field name="name">claims.dhl.delay.tree</field>
+        <field name="model">claims.dhl.delay</field>
+        <field name="arch" type="xml">
+            <tree string="DHL Delay Claims" decoration-muted="state == 'closed'">
+                <field name="bl_id"/>
+                <field name="supplier_id"/>
+                <field name="dhl_delay"/>
+                <field name="amount_due"/>
+                <field name="responsible_id"/>
+                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_claims_dhl_delay" model="ir.actions.act_window">
+        <field name="name">DHL Delay Claims</field>
+        <field name="res_model">claims.dhl.delay</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new DHL Delay Claim
+          </p>
+        </field>
+    </record>
+
+    <!-- TOP MENU -->
+    <menuitem id="menu_claims_root" name="Claims" sequence="40"/>
+    
+    <menuitem id="menu_claims_dhl_delay"
+              name="DHL Delay Claims"
+              parent="menu_claims_root"
+              action="action_claims_dhl_delay"
+              sequence="10"/>
+
+</odoo>

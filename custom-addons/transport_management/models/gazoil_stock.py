@@ -66,3 +66,10 @@ class GasoilStock(models.Model):
         if not stock:
             stock = self.create({})
         return stock
+
+    def action_refresh_stock(self):
+        self._compute_stock()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }

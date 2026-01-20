@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_gasoil_stock_form" model="ir.ui.view">
+        <field name="name">gasoil.stock.form</field>
+        <field name="model">gasoil.stock</field>
+        <field name="arch" type="xml">
+            <form string="Stock Gazoil" create="false" delete="false">
+                <header>
+                    <button name="action_refresh_stock" string="Recalculer le Stock" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="remaining_liters" class="oe_title" style="font-size: 2em; font-weight: bold; color: green;"/>
+                            <field name="stock_value"/>
+                        </group>
+                        <group>
+                            <field name="total_liters_in"/>
+                            <field name="total_liters_out"/>
+                            <field name="last_purchase_price"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_gasoil_stock" model="ir.actions.act_window">
+        <field name="name">Stock Gazoil</field>
+        <field name="res_model">gasoil.stock</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Suivi du Stock Gazoil
+          </p>
+        </field>
+    </record>
+
+    <!-- Tree View (Simple) -->
+    <record id="view_gasoil_stock_tree" model="ir.ui.view">
+        <field name="name">gasoil.stock.tree</field>
+        <field name="model">gasoil.stock</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false">
+                <field name="name"/>
+                <field name="remaining_liters"/>
+                <field name="stock_value"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_gasoil_stock"
+            name="Stock Gazoil"
+            parent="menu_transport_root"
+            action="action_gasoil_stock"
+            sequence="25"/>
+</odoo>

@@ -61,18 +61,23 @@ class FinanceSutraPayment(models.Model):
                 raise ValidationError("Le montant du chèque est vide.")
 
             # Comparaison montants
-            if abs(rec.amount_total - rec.cheque_amount) > 0.01:
+            difference = rec.cheque_amount - rec.amount_total
+
+            if abs(difference) > 0.01:
                 raise ValidationError(
                     _(
                         "Montant incohérent ❌\n\n"
                         "Montant du chèque : %(chq)s MAD\n"
-                        "Total des factures : %(inv)s MAD\n\n"
+                        "Total des factures : %(inv)s MAD\n"
+                        "Différence : %(diff)s MAD\n\n"
                         "Veuillez corriger avant de confirmer."
                     ) % {
                         'chq': rec.cheque_amount,
                         'inv': rec.amount_total,
+                        'diff': round(difference, 2),
                     }
                 )
+
 
             # Lier les factures au paiement
             rec.sutra_ids.write({'payment_id': rec.id})

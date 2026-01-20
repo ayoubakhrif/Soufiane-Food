@@ -8,13 +8,13 @@
         <field name="arch" type="xml">
             <form string="DHL Delay Claim">
                 <header>
-                    <button name="action_receive" string="Mark as Received" type="object" class="oe_highlight"
+                    <button name="action_receive" string="Reçu" type="object" class="oe_highlight"
                             invisible="state != 'initial'"/>
-                    <button name="action_send_supplier" string="Sent to Supplier" type="object" class="oe_highlight"
+                    <button name="action_send_supplier" string="Envoyé au Fournisseur" type="object" class="oe_highlight"
                             invisible="state != 'received'"/>
-                    <button name="action_resolve" string="Mark as Resolved" type="object" class="oe_highlight"
+                    <button name="action_resolve" string="Résolu" type="object" class="oe_highlight"
                             invisible="state != 'waiting'"/>
-                    <button name="action_close" string="Close" type="object" class="oe_highlight"
+                    <button name="action_close" string="Clôturé" type="object" class="oe_highlight"
                             invisible="state != 'resolved'"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
@@ -87,7 +87,7 @@
     </record>
 
     <!-- TOP MENU -->
-    <menuitem id="menu_claims_root" name="Claims" sequence="40"/>
+    <menuitem id="menu_claims_root" name="Réclamations" sequence="40"/>
     
     <menuitem id="menu_claims_dhl_delay"
               name="DHL Delay Claims"

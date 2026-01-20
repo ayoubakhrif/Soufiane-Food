@@ -1,9 +1,9 @@
 {
-    'name': 'Claims Management',
+    'name': 'Réclamations',
     'version': '1.0',
     'summary': 'Manage internal claims',
     'description': """
-        Claims Management Module
+        Réclamations Module
         ========================
         Track and follow up internal claims (e.g., DHL Delay).
     """,

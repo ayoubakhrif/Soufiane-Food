@@ -35,9 +35,9 @@ class LogisticsEntry(models.Model):
                     )
 
     def action_confirm_purchase(self):
-        # Security Check: Only Purchase Managers can confirm
-        if not self.env.user.has_group('achat.group_purchase_manager'):
-            raise ValidationError("Only Purchase Managers can confirm a dossier.")
+        # FIX: Allow regular purchase users to confirm too
+        if not self.env.user.has_group('achat.group_purchase_user'):
+            raise ValidationError("Only Purchase Users/Managers can confirm a dossier.")
         return super(LogisticsEntry, self).action_confirm_purchase()
 
     @api.onchange('contract_id')

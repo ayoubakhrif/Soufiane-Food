@@ -7,3 +7,4 @@ access_transport_driver,transport.driver,model_transport_driver,base.group_user,
 access_transport_client,transport.client,model_transport_client,base.group_user,1,1,1,1
 access_gasoil_sale_user,gasoil.sale.user,model_gasoil_sale,group_transport_user,1,1,1,0
 access_gasoil_sale_manager,gasoil.sale.manager,model_gasoil_sale,group_transport_manager,1,1,1,1
+access_gasoil_stock,gasoil.stock,model_gasoil_stock,base.group_user,1,1,1,1

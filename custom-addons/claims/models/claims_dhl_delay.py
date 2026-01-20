@@ -57,7 +57,6 @@ class ClaimsDHLDelay(models.Model):
         readonly=True,
     )
     amount_due = fields.Float(
-    amount_due = fields.Float(
         string='Amount Due',
         readonly=True,
         tracking=True

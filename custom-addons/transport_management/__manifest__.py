@@ -18,7 +18,6 @@
         'views/gazoil_sale_view.xml',
         'views/gazoil_stock_view.xml',
         'views/master_data_views.xml',
-        'views/menus.xml',
     ],
     'installable': True,
     'application': True,

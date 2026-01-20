@@ -9,20 +9,21 @@
             <form string="DHL Delay Claim">
                 <header>
                     <button name="action_receive" string="Mark as Received" type="object" class="oe_highlight"
-                            states="initial"/>
+                            invisible="state != 'initial'"/>
                     <button name="action_send_supplier" string="Sent to Supplier" type="object" class="oe_highlight"
-                            states="received"/>
+                            invisible="state != 'received'"/>
                     <button name="action_resolve" string="Mark as Resolved" type="object" class="oe_highlight"
-                            states="waiting"/>
+                            invisible="state != 'waiting'"/>
                     <button name="action_close" string="Close" type="object" class="oe_highlight"
-                            states="resolved"/>
+                            invisible="state != 'resolved'"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="bl_id" placeholder="Select BL..." options="{'no_create': True, 'no_edit': True}"/>
+                            <field name="bl_id" placeholder="Select BL..." options="{'no_create': True, 'no_edit': True}"
+                                   readonly="state != 'initial'"/>
                         </h1>
                     </div>
                     <group>
@@ -35,16 +36,16 @@
                             <field name="invoice_number"/>
                         </group>
                         <group string="Claim Details">
-                            <field name="eta_planned"/>
-                            <field name="eta_dhl"/>
+                            <field name="eta_planned" readonly="state != 'initial'"/>
+                            <field name="eta_dhl" readonly="state != 'initial'"/>
                             <field name="dhl_delay" decoration-danger="dhl_delay &gt; 0"/>
-                            <field name="amount_due"/>
+                            <field name="amount_due" readonly="state != 'initial'"/>
                         </group>
                     </group>
                     <group string="Follow-up">
                         <field name="create_uid"/>
                         <field name="responsible_id"/>
-                        <field name="comment"/>
+                        <field name="comment" readonly="state != 'initial'"/>
                     </group>
                 </sheet>
                 <!-- Chatter: Visible ONLY to Administrators -->

@@ -14,9 +14,9 @@ class ClaimsDHLDelay(models.Model):
     bl_id = fields.Many2one(
         'logistique.entry',
         string='BL Reference',
+        string='BL Reference',
         required=True,
         readonly=True,
-        states={'initial': [('readonly', False)]},
         domain="[('bl_number', '!=', False)]",
         tracking=True
     )
@@ -34,16 +34,16 @@ class ClaimsDHLDelay(models.Model):
     # ==========================
     eta_planned = fields.Date(
         string='ETA Planned',
+        string='ETA Planned',
         required=True,
         readonly=True,
-        states={'initial': [('readonly', False)]},
         tracking=True
     )
     eta_dhl = fields.Date(
         string='ETA DHL',
+        string='ETA DHL',
         required=True,
         readonly=True,
-        states={'initial': [('readonly', False)]},
         tracking=True
     )
     dhl_delay = fields.Integer(
@@ -55,12 +55,11 @@ class ClaimsDHLDelay(models.Model):
     comment = fields.Text(
         string='Comment',
         readonly=True,
-        states={'initial': [('readonly', False)]}
     )
+    amount_due = fields.Float(
     amount_due = fields.Float(
         string='Amount Due',
         readonly=True,
-        states={'initial': [('readonly', False)]},
         tracking=True
     )
 

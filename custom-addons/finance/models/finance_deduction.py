@@ -237,6 +237,7 @@ class FinanceDeductionPayment(models.Model):
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
+        ('inspection', 'Inspection'),
     ], string='Type', required=True, tracking=True)
 
     bl_id = fields.Many2one(

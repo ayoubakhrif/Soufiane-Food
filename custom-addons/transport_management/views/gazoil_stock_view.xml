@@ -59,7 +59,7 @@
     <!-- Menu -->
     <menuitem id="menu_gasoil_stock"
             name="Stock Gazoil"
-            parent="menu_transport_root"
+            parent="menu_transport_gasoil"
             action="action_gasoil_stock"
             sequence="25"/>
 </odoo>

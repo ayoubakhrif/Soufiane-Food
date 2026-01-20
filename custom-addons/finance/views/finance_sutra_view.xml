@@ -6,6 +6,7 @@
         <field name="model">finance.sutra</field>
         <field name="arch" type="xml">
             <tree string="Sutra Dossiers">
+                <field name="facture_sutra"/>
                 <field name="bl_number" />
                 <field name="dum"/>
                 <field name="container_names" string="Conteneur"/>
@@ -89,6 +90,7 @@
         <field name="model">finance.sutra</field>
         <field name="arch" type="xml">
             <search string="Search Sutra">
+                <field name="facture_sutra"/>
                 <field name="bl_number"/>
                 <field name="container_names" string="Conteneur"/>
                 <field name="dum"/>

@@ -14,7 +14,6 @@ class ClaimsDHLDelay(models.Model):
     bl_id = fields.Many2one(
         'logistique.entry',
         string='BL Reference',
-        string='BL Reference',
         required=True,
         readonly=True,
         domain="[('bl_number', '!=', False)]",
@@ -34,13 +33,11 @@ class ClaimsDHLDelay(models.Model):
     # ==========================
     eta_planned = fields.Date(
         string='ETA Planned',
-        string='ETA Planned',
         required=True,
         readonly=True,
         tracking=True
     )
     eta_dhl = fields.Date(
-        string='ETA DHL',
         string='ETA DHL',
         required=True,
         readonly=True,

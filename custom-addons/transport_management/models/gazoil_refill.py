@@ -18,7 +18,6 @@ class GasoilRefill(models.Model):
         required=True,
         tracking=True
     )
-
     purchase_price = fields.Float(
         string='Prix d’achat / Litre',
         required=True,
@@ -35,3 +34,4 @@ class GasoilRefill(models.Model):
     def _compute_total_cost(self):
         for rec in self:
             rec.total_cost = (rec.liters or 0.0) * (rec.purchase_price or 0.0)
+

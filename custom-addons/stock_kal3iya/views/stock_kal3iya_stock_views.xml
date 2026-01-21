@@ -16,6 +16,7 @@
                 <field name="weight"/>
                 <field name="dum"/>
                 <field name="scan_dum"/>
+                <field name="scan_invoice"/>
                 <field name="ste_id"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -118,6 +119,12 @@
                                                 <i class="fa fa-external-link"/> Ouvrir DUM
                                             </a>
                                         </t>
+                                        <!-- Invoice Link Button -->
+                                        <t t-if="record.scan_invoice.raw_value">
+                                            <a type="object" name="action_open_invoice" class="btn btn-sm btn-link pt-0 pb-0" style="font-size: 12px;" target="_blank">
+                                                <i class="fa fa-file-text-o"/> Ouvrir Facture
+                                            </a>
+                                        </t>
                                     </div>
                                 </div>
                             </div>
@@ -154,6 +161,7 @@
                 <header>
                     <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary"/>
                     <button name="action_open_dum" string="DUM" type="object" class="btn-secondary" invisible="not scan_dum"/>
+                    <button name="action_open_invoice" string="Facture" type="object" class="btn-secondary" invisible="not scan_invoice"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -169,6 +177,7 @@
                             <field name="lot"/>
                             <field name="dum"/>
                             <field name="scan_dum" widget="url"/>
+                            <field name="scan_invoice" widget="url"/>
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="garage"/>

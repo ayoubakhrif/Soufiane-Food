@@ -11,6 +11,7 @@ class StockKal3iyaMove(models.Model):
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     scan_dum = fields.Char(string='Scan DUM (Drive)')
+    scan_invoice = fields.Char(string='Scan Facture (Drive)')
     garage = fields.Selection([
         ('garage1', 'Garage 1'),
         ('garage2', 'Garage 2'),

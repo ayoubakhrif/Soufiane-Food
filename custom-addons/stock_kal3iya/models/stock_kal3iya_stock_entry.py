@@ -39,6 +39,7 @@ class StockKal3iyaEntry(models.Model):
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
     image_1920 = fields.Image(related='product_id.company_article_image', readonly=False)
     scan_dum = fields.Char(string='Scan DUM (Drive)', help="Poser le lien vers le scan de la DUM")
+    scan_invoice = fields.Char(string='Scan Facture (Drive)', help="Poser le lien vers le scan de la Facture")
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('done', 'Confirmé'),
@@ -81,6 +82,7 @@ class StockKal3iyaEntry(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'scan_dum': rec.scan_dum,
+                'scan_invoice': rec.scan_invoice,
                 'garage': rec.garage,
                 'qty': rec.qty,
                 'move_type': 'entry',

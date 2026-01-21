@@ -64,6 +64,7 @@
                             <field name="lot"/>
                             <field name="dum"/>
                             <field name="scan_dum" widget="url" placeholder="https://..."/>
+                            <field name="scan_invoice" widget="url" placeholder="https://..."/>
                         </group>
                         <group>
                             <field name="calibre"/>

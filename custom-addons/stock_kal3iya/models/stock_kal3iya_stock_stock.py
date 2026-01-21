@@ -11,6 +11,7 @@ class StockKal3iyaStock(models.Model):
     lot = fields.Char(string='Lot', readonly=True, required=True)
     dum = fields.Char(string='DUM', readonly=True, required=True)
     scan_dum = fields.Char(string='Scan DUM', readonly=True)
+    scan_invoice = fields.Char(string='Scan Facture', readonly=True)
     garage = fields.Selection([
         ('garage1', 'Garage 1'),
         ('garage2', 'Garage 2'),
@@ -44,6 +45,7 @@ class StockKal3iyaStock(models.Model):
                     m.lot,
                     m.dum,
                     max(m.scan_dum) as scan_dum,
+                    max(m.scan_invoice) as scan_invoice,
                     m.garage,
                     m.ste_id,
                     sum(m.qty) as quantity,
@@ -83,7 +85,7 @@ class StockKal3iyaStock(models.Model):
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 
             }
-            }
+        }
 
     def action_open_dum(self):
         self.ensure_one()
@@ -91,6 +93,16 @@ class StockKal3iyaStock(models.Model):
             return {
                 'type': 'ir.actions.act_url',
                 'url': self.scan_dum,
+                'target': 'new',
+            }
+        return False
+
+    def action_open_invoice(self):
+        self.ensure_one()
+        if self.scan_invoice:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.scan_invoice,
                 'target': 'new',
             }
         return False

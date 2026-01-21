@@ -30,6 +30,12 @@ class ExpenseCategory(models.Model):
         store=True
     )
 
+    expense_ids = fields.One2many(
+        'suivi.expense.daily', 
+        'category_id', 
+        string='Dépenses'
+    )
+
     def _get_month_period(self):
         config = self.env['suivi.config'].get_config()
         start_day = config.month_start_day or 1
@@ -43,7 +49,7 @@ class ExpenseCategory(models.Model):
 
         return month_start, today
     
-    @api.depends('monthly_limit', 'is_daily')
+    @api.depends('monthly_limit', 'is_daily', 'expense_ids.amount', 'expense_ids.date')
     def _compute_current_situation(self):
         Expense = self.env['suivi.expense.daily']
 

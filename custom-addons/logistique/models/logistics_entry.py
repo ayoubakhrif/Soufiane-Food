@@ -201,9 +201,14 @@ class LogisticsEntry(models.Model):
             record.container_ids.write({'dossier_id': record.dossier_id.id})
 
         # Automatically create corresponding finance tracking record
-        self.env['finance.logistics.tracking'].sudo().create({
-            'dossier_id': record.dossier_id.id,
-        })
+        existing_tracking = self.env['finance.logistics.tracking'].sudo().search([
+            ('dossier_id', '=', record.dossier_id.id)
+        ], limit=1)
+        
+        if not existing_tracking:
+            self.env['finance.logistics.tracking'].sudo().create({
+                'dossier_id': record.dossier_id.id,
+            })
         
         return record
 

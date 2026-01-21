@@ -32,7 +32,7 @@ class ClaimsDHLDelay(models.Model):
     # 2. User-entered Fields
     # ==========================
     eta_planned = fields.Date(
-        string='ETA Planned',
+        string='ETA',
         required=True,
         readonly=True,
         tracking=True

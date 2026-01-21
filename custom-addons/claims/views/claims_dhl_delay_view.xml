@@ -66,6 +66,8 @@
             <tree string="DHL Delay Claims" decoration-muted="state == 'closed'">
                 <field name="bl_id"/>
                 <field name="supplier_id"/>
+                <field name="eta_planned"/>
+                 <field name="eta_dhl"/>
                 <field name="dhl_delay"/>
                 <field name="amount_due"/>
                 <field name="responsible_id"/>

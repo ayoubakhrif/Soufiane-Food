@@ -9,3 +9,10 @@ class LogistiqueSupplier(models.Model):
         string='DHL Delay Claims',
         readonly=True
     )
+
+    franchise_claim_ids = fields.One2many(
+        'claims.franchise.difference',
+        'supplier_id',
+        string='Franchise Claims',
+        readonly=True
+    )

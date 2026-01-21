@@ -21,6 +21,20 @@
                             </tree>
                         </field>
                     </page>
+                    <page string="Franchise Claims">
+                        <field name="franchise_claim_ids" readonly="1">
+                            <tree decoration-muted="state == 'closed'">
+                                <field name="bl_id"/>
+                                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
+                                <field name="responsible_id"/>
+                                <field name="franchise_confirmed"/>
+                                <field name="franchise_found"/>
+                                <field name="franchise_difference"/>
+                                <field name="amount_due"/>
+                                <field name="claim_date"/>
+                            </tree>
+                        </field>
+                    </page>
                 </notebook>
             </sheet>
         </field>

@@ -3,7 +3,7 @@ from odoo import models, fields, api
 class ExpenseMonthly(models.Model):
     _name = 'suivi.expense.monthly'
     _description = 'Dépense Mensuelle'
-    _order = 'category_id'
+    _order = 'category'
 
     category = fields.Char(
         string='Catégorie',

@@ -15,6 +15,7 @@
                 <field name="image_1920"/>
                 <field name="weight"/>
                 <field name="dum"/>
+                <field name="scan_dum"/>
                 <field name="ste_id"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -111,6 +112,12 @@
                                     </div>
                                     <div>
                                         🏷️ <b>Lot :</b> <field name="lot"/> | <b>DUM :</b> <field name="dum"/>
+                                        <!-- DUM Link Button -->
+                                        <t t-if="record.scan_dum.raw_value">
+                                            <a type="object" name="action_open_dum" class="btn btn-sm btn-link pt-0 pb-0" style="font-size: 12px;" target="_blank">
+                                                <i class="fa fa-external-link"/> Ouvrir DUM
+                                            </a>
+                                        </t>
                                     </div>
                                 </div>
                             </div>
@@ -146,6 +153,7 @@
             <form string="Ligne de Stock" create="false" edit="false">
                 <header>
                     <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary"/>
+                    <button name="action_open_dum" string="DUM" type="object" class="btn-secondary" invisible="not scan_dum"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -160,6 +168,7 @@
                             <field name="calibre"/>
                             <field name="lot"/>
                             <field name="dum"/>
+                            <field name="scan_dum" widget="url"/>
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="garage"/>

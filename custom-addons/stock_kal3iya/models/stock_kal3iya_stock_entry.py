@@ -80,6 +80,7 @@ class StockKal3iyaEntry(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
+                'scan_dum': rec.scan_dum,
                 'garage': rec.garage,
                 'qty': rec.qty,
                 'move_type': 'entry',

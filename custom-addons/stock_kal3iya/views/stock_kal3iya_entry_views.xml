@@ -63,6 +63,7 @@
                             <field name="ste_id" options="{'no_create_edit': True}"/>
                             <field name="lot"/>
                             <field name="dum"/>
+                            <field name="scan_dum" widget="url" placeholder="https://..."/>
                         </group>
                         <group>
                             <field name="calibre"/>

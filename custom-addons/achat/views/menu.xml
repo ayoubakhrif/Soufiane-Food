@@ -64,14 +64,4 @@
           action="action_achat_article_price"
           sequence="20"/>
 
-     <menuitem id="menu_achat_reclamations"
-          name="Réclamations"
-          parent="menu_achat_root"
-          sequence="30"/>
-
-     <menuitem id="menu_achat_reclamation_dhl"
-          name="Réclamation DHL"
-          parent="menu_achat_reclamations"
-          action="action_achat_reclamation_dhl"/>
-
 </odoo>

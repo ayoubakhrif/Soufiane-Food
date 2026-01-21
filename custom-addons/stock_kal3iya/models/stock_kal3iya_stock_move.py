@@ -10,6 +10,7 @@ class StockKal3iyaMove(models.Model):
     product_id = fields.Many2one('stock.kal3iya.product', string='Produit', required=True, ondelete='restrict')
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
+    scan_dum = fields.Char(string='Scan DUM (Drive)')
     garage = fields.Selection([
         ('garage1', 'Garage 1'),
         ('garage2', 'Garage 2'),

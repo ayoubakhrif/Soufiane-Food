@@ -10,6 +10,7 @@ class StockKal3iyaStock(models.Model):
     product_id = fields.Many2one('stock.kal3iya.product', string='Produit', readonly=True, required=True)
     lot = fields.Char(string='Lot', readonly=True, required=True)
     dum = fields.Char(string='DUM', readonly=True, required=True)
+    scan_dum = fields.Char(string='Scan DUM', readonly=True)
     garage = fields.Selection([
         ('garage1', 'Garage 1'),
         ('garage2', 'Garage 2'),
@@ -42,6 +43,7 @@ class StockKal3iyaStock(models.Model):
                     m.product_id,
                     m.lot,
                     m.dum,
+                    max(m.scan_dum) as scan_dum,
                     m.garage,
                     m.ste_id,
                     sum(m.qty) as quantity,
@@ -81,4 +83,14 @@ class StockKal3iyaStock(models.Model):
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 
             }
-        }
+            }
+
+    def action_open_dum(self):
+        self.ensure_one()
+        if self.scan_dum:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.scan_dum,
+                'target': 'new',
+            }
+        return False

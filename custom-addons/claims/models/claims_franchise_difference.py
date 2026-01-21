@@ -1,10 +1,9 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
-from datetime import date
 
-class ClaimsDHLDelay(models.Model):
-    _name = 'claims.dhl.delay'
-    _description = 'DHL Delay Claim'
+class ClaimsFranchiseDifference(models.Model):
+    _name = 'claims.franchise.difference'
+    _description = 'Franchise Difference Claim'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'bl_id'
 
@@ -15,7 +14,7 @@ class ClaimsDHLDelay(models.Model):
         'logistique.entry',
         string='BL Reference',
         required=True,
-        readonly=True,
+        readonly=False, # Editable only in initial state (handled in view)
         domain="[('bl_number', '!=', False)]",
         tracking=True
     )
@@ -30,28 +29,32 @@ class ClaimsDHLDelay(models.Model):
     invoice_number = fields.Char(related='bl_id.invoice_number', string='Invoice Number', readonly=True, store=True)
 
     # ==========================
-    # 2. User-entered Fields
+    # 2. Franchise Specific Fields
     # ==========================
-    eta_planned = fields.Date(
-        string='ETA',
+    franchise_confirmed = fields.Float(
+        string='Franchise Confirmed',
         required=True,
-        readonly=True,
         tracking=True
     )
-    eta_dhl = fields.Date(
-        string='ETA DHL',
+    franchise_found = fields.Float(
+        string='Franchise Found',
         required=True,
-        readonly=True,
         tracking=True
     )
-    dhl_delay = fields.Integer(
-        string='DHL Delay (Days)',
-        compute='_compute_dhl_delay',
+    
+    franchise_difference = fields.Float(
+        string='Difference',
+        compute='_compute_difference',
         store=True,
         readonly=True
     )
-    comment = fields.Text(string='Old Comment (Deprecated)')
-    
+
+    amount_due = fields.Float(
+        string='Amount Due',
+        tracking=True
+    )
+
+    # Comments (Always Editable)
     comment_creator = fields.Text(
         string='Commentaire (Créateur)',
         help="Commentaire du créateur de la réclamation. Toujours modifiable."
@@ -59,11 +62,6 @@ class ClaimsDHLDelay(models.Model):
     comment_responsible = fields.Text(
         string='Commentaire (Responsable)',
         help="Commentaire du responsable. Toujours modifiable."
-    )
-
-    amount_due = fields.Float(
-        string='Amount Due',
-        tracking=True
     )
 
     # ==========================
@@ -89,17 +87,19 @@ class ClaimsDHLDelay(models.Model):
     ], string='Status', default='initial', required=True, tracking=True)
 
     # ==========================
-    # 5. Logic
+    # 5. Logic & Constraints
     # ==========================
 
-    @api.depends('eta_planned', 'eta_dhl')
-    def _compute_dhl_delay(self):
+    @api.depends('franchise_confirmed', 'franchise_found')
+    def _compute_difference(self):
         for rec in self:
-            if rec.eta_planned and rec.eta_dhl:
-                delta = rec.eta_dhl - rec.eta_planned
-                rec.dhl_delay = delta.days
-            else:
-                rec.dhl_delay = 0
+            rec.franchise_difference = rec.franchise_found - rec.franchise_confirmed
+
+    @api.constrains('franchise_confirmed', 'franchise_found')
+    def _check_difference(self):
+        for rec in self:
+            if rec.franchise_confirmed == rec.franchise_found:
+                 raise ValidationError("No franchise difference detected. A claim cannot be created (Confirmed == Found).")
 
     # ==========================
     # 6. Workflow Actions

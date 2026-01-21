@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_supplier_form_claims" model="ir.ui.view">
+        <field name="name">logistique.supplier.form.claims</field>
+        <field name="model">logistique.supplier</field>
+        <field name="inherit_id" ref="logistique.view_logistique_supplier_form"/>
+        <field name="arch" type="xml">
+            <sheet position="inside">
+                <notebook>
+                    <page string="Réclamations">
+                        <field name="dhl_claim_ids" readonly="1">
+                            <tree create="false" delete="false" edit="false">
+                                <field name="bl_id"/>
+                                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
+                                <field name="responsible_id"/>
+                                <field name="eta_planned"/>
+                                <field name="eta_dhl"/>
+                                <field name="dhl_delay"/>
+                                <field name="amount_due"/>
+                                <field name="claim_date"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </sheet>
+        </field>
+    </record>
+</odoo>

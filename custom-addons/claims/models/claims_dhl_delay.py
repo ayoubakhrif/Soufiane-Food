@@ -19,6 +19,7 @@ class ClaimsDHLDelay(models.Model):
         domain="[('bl_number', '!=', False)]",
         tracking=True
     )
+    claim_date = fields.Date(string='Date de création', default=fields.Date.context_today, readonly=True)
 
     # Auto-filled (Read-only, from BL)
     company_id = fields.Many2one(related='bl_id.ste_id', string='Société', readonly=True, store=True)

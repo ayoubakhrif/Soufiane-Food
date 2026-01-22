@@ -64,20 +64,26 @@ class AchatDocumentFollowup(models.Model):
     # Workflow Methods
     # ==========================
 
-    def action_send(self):
-        """Initial -> Sent"""
-        for rec in self:
-            if not rec.date_sent:
-                raise ValidationError(_("Vous devez renseigner la 'Date Envoi Fournisseur' avant de changer l'état."))
             rec.state = 'sent'
 
     def action_confirm(self):
         """Sent -> Confirmed"""
         for rec in self:
+            if not self.env.user.has_group('achat.group_purchase_manager'):
+                 raise ValidationError(_("Seul le responsable achat peut confirmer."))
             rec.write({
                 'state': 'confirmed',
                 'date_confirmed': fields.Date.context_today(self)
             })
+
+    def action_send(self):
+        """Initial -> Sent"""
+        for rec in self:
+            if not self.env.user.has_group('achat.group_purchase_manager'):
+                 raise ValidationError(_("Seul le responsable achat peut envoyer au fournisseur."))
+            if not rec.date_sent:
+                raise ValidationError(_("Vous devez renseigner la 'Date Envoi Fournisseur' avant de changer l'état."))
+            rec.state = 'sent'
 
     # ==========================
     # Constraints / Logic

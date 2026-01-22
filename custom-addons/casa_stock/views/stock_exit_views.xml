@@ -93,9 +93,24 @@
         </field>
     </record>
 
+    <record id="view_casa_stock_exit_pivot" model="ir.ui.view">
+        <field name="name">casa.stock.exit.pivot</field>
+        <field name="model">casa.stock.exit</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Sorties Casa">
+                <field name="date" interval="month" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="client_id" type="col"/>
+                <field name="qty" type="measure"/>
+                <field name="mt_vente" type="measure"/>
+                <field name="margin" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_casa_stock_exit" model="ir.actions.act_window">
         <field name="name">Sorties Stock Casa</field>
         <field name="res_model">casa.stock.exit</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
     </record>
 </odoo>

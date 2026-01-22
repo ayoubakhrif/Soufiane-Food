@@ -97,12 +97,22 @@
         </field>
     </record>
 
+    <record id="view_stock_kal3iya_exit_pivot" model="ir.ui.view">
+        <field name="name">stock.kal3iya.exit.pivot</field>
+        <field name="model">stock.kal3iya.exit</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Sorties Stock Kal3iya">
+                <field name="date" interval="month" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="client_id" type="col"/>
+                <field name="qty" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_stock_kal3iya_exit" model="ir.actions.act_window">
         <field name="name">Sorties Stock Kal3iya</field>
         <field name="res_model">stock.kal3iya.exit</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
     </record>
 </odoo>
-
-
-

@@ -20,6 +20,7 @@
         'views/achat_enquete_view.xml',
         'views/achat_article_view.xml',
         'views/achat_origin_view.xml',
+        'views/document_followup_views.xml',
         'views/menu.xml',
     ],
     'installable': True,

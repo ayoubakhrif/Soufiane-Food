@@ -30,3 +30,4 @@ access_achat_contract_viewer,achat.contract.viewer,model_achat_contract,group_pu
 access_achat_article_viewer,achat.article.viewer,model_achat_article,group_purchase_viewer,1,0,0,0
 access_achat_reclamation_viewer,achat.reclamation.viewer,model_achat_reclamation_dhl,group_purchase_viewer,1,0,0,0
 access_logistique_entry_document_viewer,logistique.entry.document.viewer,model_logistique_entry_document,group_purchase_viewer,1,0,0,0
+access_achat_document_followup_manager,achat.document.followup.manager,model_achat_document_followup,group_purchase_manager,1,1,1,1

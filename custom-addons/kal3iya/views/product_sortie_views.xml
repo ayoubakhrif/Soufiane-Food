@@ -3,7 +3,22 @@
     <record id="kal3iyasortie_action" model="ir.actions.act_window">
         <field name="name">Sortie</field>
         <field name="res_model">kal3iyasortie</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
+    </record>
+
+    <record id="view_kal3iyasortie_pivot" model="ir.ui.view">
+        <field name="name">kal3iyasortie.pivot</field>
+        <field name="model">kal3iyasortie</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Sorties">
+                <field name="date_exit" interval="month" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="client_id" type="col"/>
+                <field name="quantity" type="measure"/>
+                <field name="mt_vente" type="measure"/>
+                <field name="benif_perte" type="measure"/>
+            </pivot>
+        </field>
     </record>
 
     <menuitem 

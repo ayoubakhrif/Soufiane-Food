@@ -124,6 +124,8 @@ class ClaimsDHLDelay(models.Model):
     def action_close(self):
         """Resolved -> Closed"""
         self._check_responsibility()
+        if not self.env.user.has_group('claims.group_claims_manager'):
+            raise UserError("Only Administrators can close claims.")
         self.write({'state': 'closed'})
 
     def _check_responsibility(self):

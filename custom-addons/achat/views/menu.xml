@@ -67,7 +67,8 @@
     <menuitem id="menu_achat_document_followup"
               name="Suivi Documents"
               parent="menu_achat_root" 
-              action="action_achat_document_followup"
-              sequence="30"/>
+              action="achat.action_achat_document_followup"
+              sequence="30"
+              groups="achat.group_purchase_user,achat.group_purchase_manager"/>
 
 </odoo>

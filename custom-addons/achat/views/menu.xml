@@ -64,4 +64,10 @@
           action="action_achat_article_price"
           sequence="20"/>
 
+    <menuitem id="menu_achat_document_followup"
+              name="Suivi Documents"
+              parent="menu_achat_root" 
+              action="action_achat_document_followup"
+              sequence="30"/>
+
 </odoo>

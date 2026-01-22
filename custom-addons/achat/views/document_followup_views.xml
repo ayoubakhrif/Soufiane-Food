@@ -92,10 +92,5 @@
         </field>
     </record>
 
-    <!-- Menu -->
-    <menuitem id="menu_achat_document_followup"
-              name="Suivi Documents"
-              parent="menu_achat_root" 
-              action="action_achat_document_followup"
-              sequence="20"/>
+
 </odoo>

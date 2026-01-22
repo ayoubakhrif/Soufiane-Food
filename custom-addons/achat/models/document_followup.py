@@ -64,7 +64,6 @@ class AchatDocumentFollowup(models.Model):
     # Workflow Methods
     # ==========================
 
-            rec.state = 'sent'
 
     def action_confirm(self):
         """Sent -> Confirmed"""

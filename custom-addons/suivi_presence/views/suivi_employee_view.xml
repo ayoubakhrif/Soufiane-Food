@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_employee_tree" model="ir.ui.view">
+        <field name="name">suivi.employee.tree</field>
+        <field name="model">suivi.employee</field>
+        <field name="arch" type="xml">
+            <tree string="Employés">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="payroll_site"/>
+                <field name="leaves_remaining"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_employee_form" model="ir.ui.view">
+        <field name="name">suivi.employee.form</field>
+        <field name="model">suivi.employee</field>
+        <field name="arch" type="xml">
+            <form string="Employé">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="custom_employee_id" placeholder="Selectionner un employé"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="monthly_salary"/>
+                        </group>
+                        <group>
+                            <field name="payroll_site"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Présences">
+                            <field name="presence_ids">
+                                <tree editable="bottom">
+                                    <field name="datetime"/>
+                                    <field name="type"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Congés">
+                            <group>
+                                <group>
+                                    <field name="annual_leave_quota"/>
+                                    <field name="leaves_taken"/>
+                                    <field name="leaves_remaining" decoration-danger="leaves_remaining &lt; 0"/>
+                                </group>
+                            </group>
+                            <field name="leave_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_employee" model="ir.actions.act_window">
+        <field name="name">Employés</field>
+        <field name="res_model">suivi.employee</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

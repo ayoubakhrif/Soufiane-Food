@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_salary_tree" model="ir.ui.view">
+        <field name="name">suivi.salary.tree</field>
+        <field name="model">suivi.salary</field>
+        <field name="arch" type="xml">
+            <tree string="Bulletins de Salaire" decoration-muted="state == 'draft'">
+                <field name="employee_id"/>
+                <field name="month"/>
+                <field name="year"/>
+                <field name="base_salary"/>
+                <field name="final_salary" decoration-bf="1"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'validated'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_salary_form" model="ir.ui.view">
+        <field name="name">suivi.salary.form</field>
+        <field name="model">suivi.salary</field>
+        <field name="arch" type="xml">
+            <form string="Bulletin de Salaire">
+                <header>
+                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Période">
+                            <field name="employee_id"/>
+                            <field name="month"/>
+                            <field name="year"/>
+                        </group>
+                        <group string="Salaire de Base">
+                            <field name="base_salary"/>
+                            <field name="working_days_count"/>
+                            <field name="hourly_salary"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Détails des Heures">
+                            <group>
+                                <field name="total_normal_hours"/>
+                                <field name="total_overtime_hours"/>
+                                <field name="total_missing_hours"/>
+                                <field name="total_holiday_hours"/>
+                            </group>
+                        </page>
+                    </notebook>
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="final_salary" class="oe_subtotal_footer_separator"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_salary" model="ir.actions.act_window">
+        <field name="name">Salaires</field>
+        <field name="res_model">suivi.salary</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

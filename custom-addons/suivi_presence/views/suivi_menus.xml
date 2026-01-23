@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_suivi_presence_root" name="Suivi Présence" sequence="10"/>
+
+    <menuitem id="menu_suivi_employee" name="Employés" parent="menu_suivi_presence_root" action="action_suivi_employee" sequence="5"/>
+    <menuitem id="menu_suivi_presence_action" name="Entrée / Sortie" parent="menu_suivi_presence_root" action="action_suivi_presence" sequence="10"/>
+    <menuitem id="menu_suivi_leave" name="Congés" parent="menu_suivi_presence_root" action="action_suivi_leave" sequence="15"/>
+    <menuitem id="menu_suivi_salary" name="Salaires" parent="menu_suivi_presence_root" action="action_suivi_salary" sequence="20"/>
+    <menuitem id="menu_suivi_config" name="Configuration" parent="menu_suivi_presence_root" action="action_suivi_config" sequence="50"/>
+</odoo>

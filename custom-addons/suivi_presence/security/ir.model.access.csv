@@ -1,2 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_suivi_presence_user,suivi.presence.user,model_suivi_presence,base.group_user,1,1,1,1
+access_suivi_employee,suivi.employee,model_suivi_employee,base.group_user,1,1,1,1
+access_suivi_presence,suivi.presence,model_suivi_presence,base.group_user,1,1,1,1
+access_suivi_leave,suivi.leave,model_suivi_leave,base.group_user,1,1,1,1
+access_suivi_salary,suivi.salary,model_suivi_salary,base.group_user,1,1,1,1
+access_suivi_config,suivi.config,model_suivi_config,base.group_user,1,1,1,1
+access_suivi_public_holiday,suivi.public.holiday,model_suivi_public_holiday,base.group_user,1,1,1,1

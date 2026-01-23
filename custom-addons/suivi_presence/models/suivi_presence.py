@@ -5,9 +5,9 @@ class SuiviPresence(models.Model):
     _description = 'Suivi de Présence'
     _order = 'datetime desc'
 
-    employee_id = fields.Many2one('custom.employee', string='Employé', required=True)
+    employee_id = fields.Many2one('suivi.employee', string='Employé', required=True)
     
-    # Related fields for context
+    # Related fields
     employee_phone = fields.Char(related='employee_id.phone', string='Téléphone', readonly=True)
     employee_site = fields.Selection(related='employee_id.payroll_site', string='Site de Paie', readonly=True)
 

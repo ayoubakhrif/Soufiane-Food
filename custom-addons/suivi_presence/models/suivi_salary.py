@@ -40,7 +40,7 @@ class SuiviSalary(models.Model):
 
     @api.depends('employee_id', 'month', 'year')
     def _compute_salary_details(self):
-        config = self.env['suivi.config'].get_main_config()
+        config = self.env['suivi.presence.config'].get_main_config()
         daily_hours = config.working_hours_per_day if config else 8.0
         non_working_day = int(config.non_working_day) if config else 6
         holidays_map = {h.date: h.name for h in config.public_holiday_ids} if config else {}
@@ -162,7 +162,7 @@ class SuiviSalary(models.Model):
 
     @api.depends('total_normal_hours', 'total_overtime_hours', 'total_holiday_hours', 'total_missing_hours')
     def _compute_final_salary(self):
-        config = self.env['suivi.config'].get_main_config()
+        config = self.env['suivi.presence.config'].get_main_config()
         ot_coeff = config.overtime_coefficient if config else 1.0
         
         for rec in self:

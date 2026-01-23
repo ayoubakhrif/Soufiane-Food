@@ -38,7 +38,7 @@ class SuiviEmployee(models.Model):
     @api.depends('leave_ids.state', 'leave_ids.days_count', 'leave_ids.leave_type')
     def _compute_leave_stats(self):
         current_year = date.today().year
-        config = self.env['suivi.config'].get_main_config()
+        config = self.env['suivi.presence.config'].get_main_config()
         quota = config.annual_leave_quota if config else 18
         
         for rec in self:

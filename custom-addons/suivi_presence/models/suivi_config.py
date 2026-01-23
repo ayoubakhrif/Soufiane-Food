@@ -1,7 +1,7 @@
 from odoo import models, fields, api, exceptions
 
 class SuiviConfig(models.Model):
-    _name = 'suivi.config'
+    _name = 'suivi.presence.config'
     _description = 'Configuration Suivi Présence'
     _inherit = ['mail.thread']
     _rec_name = 'name'
@@ -34,6 +34,6 @@ class SuiviPublicHoliday(models.Model):
     _name = 'suivi.public.holiday'
     _description = 'Jour Férié'
     
-    config_id = fields.Many2one('suivi.config', string='Configuration', ondelete='cascade')
+    config_id = fields.Many2one('suivi.presence.config', string='Configuration', ondelete='cascade')
     name = fields.Char(string='Description', required=True)
     date = fields.Date(string='Date', required=True)

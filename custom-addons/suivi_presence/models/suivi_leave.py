@@ -29,7 +29,7 @@ class SuiviLeave(models.Model):
     
     @api.depends('date_from', 'date_to', 'employee_id')
     def _compute_days_count(self):
-        config = self.env['suivi.config'].get_main_config()
+        config = self.env['suivi.presence.config'].get_main_config()
         non_working_day = int(config.non_working_day) if config else 6
         holidays = config.public_holiday_ids.mapped('date') if config else []
         

@@ -2,7 +2,7 @@
 <odoo>
     <record id="view_suivi_config_form" model="ir.ui.view">
         <field name="name">suivi.config.form</field>
-        <field name="model">suivi.config</field>
+        <field name="model">suivi.presence.config</field>
         <field name="arch" type="xml">
             <form string="Configuration">
                 <sheet>
@@ -35,7 +35,7 @@
 
     <record id="action_suivi_config" model="ir.actions.act_window">
         <field name="name">Configuration</field>
-        <field name="res_model">suivi.config</field>
+        <field name="res_model">suivi.presence.config</field>
         <field name="view_mode">tree,form</field>
     </record>
 </odoo>

@@ -80,6 +80,8 @@ class Kal3iyaClient(models.Model):
     @api.depends(
         'sortie_ids.mt_vente',
         'sortie_ids.mt_vente_final',
+        'sortie_ids.tonnage',
+        'sortie_ids.tonnage_final',
         'avances.amount',
         'retour_ids.selling_price',
         'retour_ids.tonnage',

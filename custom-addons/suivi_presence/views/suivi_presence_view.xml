@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_suivi_presence_tree" model="ir.ui.view">
+        <field name="name">suivi.presence.tree</field>
+        <field name="model">suivi.presence</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi Présence" decoration-info="type == 'entree'" decoration-warning="type == 'sortie'">
+                <field name="datetime"/>
+                <field name="employee_id"/>
+                <field name="employee_phone" optional="hide"/>
+                <field name="employee_site" optional="show"/>
+                <field name="type" widget="badge" decoration-success="type == 'entree'" decoration-danger="type == 'sortie'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_suivi_presence_form" model="ir.ui.view">
+        <field name="name">suivi.presence.form</field>
+        <field name="model">suivi.presence</field>
+        <field name="arch" type="xml">
+            <form string="Suivi Présence">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="datetime"/>
+                            <field name="type" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="employee_phone"/>
+                            <field name="employee_site"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_suivi_presence_search" model="ir.ui.view">
+        <field name="name">suivi.presence.search</field>
+        <field name="model">suivi.presence</field>
+        <field name="arch" type="xml">
+            <search string="Search Suivi Présence">
+                <field name="employee_id"/>
+                <field name="datetime"/>
+                <field name="type"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employé" name="group_by_employee" context="{'group_by':'employee_id'}"/>
+                    <filter string="Type" name="group_by_type" context="{'group_by':'type'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by':'datetime:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_suivi_presence" model="ir.actions.act_window">
+        <field name="name">Suivi Présence</field>
+        <field name="res_model">suivi.presence</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_suivi_presence_search"/>
+        <field name="context">{'search_default_group_by_date': 1}</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_suivi_presence_root" name="Suivi Présence" sequence="10"/>
+    <menuitem id="menu_suivi_presence_action" name="Entrée / Sortie" parent="menu_suivi_presence_root" action="action_suivi_presence" sequence="1"/>
+</odoo>

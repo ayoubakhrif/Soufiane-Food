@@ -12,7 +12,10 @@
                     <group>
                         <group string="Paramètres Généraux">
                             <field name="active" invisible="1"/>
-                            <field name="working_hours_per_day"/>
+                            <field name="official_check_in" widget="float_time"/>
+                            <field name="official_check_out" widget="float_time"/>
+                            <field name="delay_tolerance"/>
+                            <field name="working_hours_per_day" widget="float_time"/>
                             <field name="overtime_coefficient"/>
                             <field name="annual_leave_quota"/>
                             <field name="non_working_day"/>

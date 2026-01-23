@@ -8,7 +8,7 @@ class SuiviLeave(models.Model):
     _rec_name = 'employee_id'
     _order = 'date_from desc'
 
-    employee_id = fields.Many2one('suivi.employee', string='Employé', required=True, tracking=True)
+    employee_id = fields.Many2one('suivi.employee', string='Employé', required=True, tracking=True, ondelete='cascade')
     date_from = fields.Date(string='Date Début', required=True, tracking=True)
     date_to = fields.Date(string='Date Fin', required=True, tracking=True)
     

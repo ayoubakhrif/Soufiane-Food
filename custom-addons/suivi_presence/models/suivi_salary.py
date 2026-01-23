@@ -10,7 +10,7 @@ class SuiviSalary(models.Model):
     _description = 'Bulletin de Salaire (Suivi)'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    employee_id = fields.Many2one('suivi.employee', string='Employé', required=True)
+    employee_id = fields.Many2one('suivi.employee', string='Employé', required=True, ondelete='cascade')
     month = fields.Selection([
         ('1', 'Janvier'), ('2', 'Février'), ('3', 'Mars'), ('4', 'Avril'),
         ('5', 'Mai'), ('6', 'Juin'), ('7', 'Juillet'), ('8', 'Aout'),

@@ -5,16 +5,16 @@ class SuiviEmployee(models.Model):
     _name = 'suivi.employee'
     _description = 'Employé Suivi Présence'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _rec_name = 'custom_employee_id'
+    _rec_name = 'core_employee_id'
 
-    custom_employee_id = fields.Many2one('custom.employee', string='Employé Principal', required=True, tracking=True)
+    core_employee_id = fields.Many2one('core.employee', string='Employé Principal', required=True, tracking=True)
     
-    # Related fields
-    name = fields.Char(related='custom_employee_id.name', store=True)
-    phone = fields.Char(related='custom_employee_id.phone', readonly=True)
+    # Related fields from Core Employee
+    name = fields.Char(related='core_employee_id.name', store=True)
+    phone = fields.Char(related='core_employee_id.phone', readonly=True)
+    monthly_salary = fields.Float(related='core_employee_id.monthly_salary', string='Salaire mensuel', readonly=True, store=True)
     
-    # Editable fields specific to this module (as requested)
-    monthly_salary = fields.Float(string='Salaire mensuel', required=True, tracking=True)
+    # Editable fields specific to this module
     payroll_site = fields.Selection([
         ('mediouna', 'Mediouna'),
         ('casa', 'Casa')
@@ -28,12 +28,6 @@ class SuiviEmployee(models.Model):
     annual_leave_quota = fields.Integer(string='Quota Annuel', compute='_compute_leave_stats')
     leaves_taken = fields.Float(string='Congés Pris', compute='_compute_leave_stats')
     leaves_remaining = fields.Float(string='Solde Restant', compute='_compute_leave_stats')
-
-    @api.onchange('custom_employee_id')
-    def _on_change_custom_employee(self):
-        if self.custom_employee_id:
-            self.monthly_salary = self.custom_employee_id.monthly_salary
-            self.payroll_site = self.custom_employee_id.payroll_site
 
     @api.depends('leave_ids.state', 'leave_ids.days_count', 'leave_ids.leave_type')
     def _compute_leave_stats(self):

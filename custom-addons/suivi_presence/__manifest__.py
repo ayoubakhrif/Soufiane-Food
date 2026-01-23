@@ -8,7 +8,7 @@
         Includes Employee Management, Leaves, Configuration, and Monthly Salary calculation.
     """,
     'author': 'Antigravity',
-    'depends': ['base', 'custom_attendance', 'mail'],
+    'depends': ['base', 'custom_employee', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'views/suivi_employee_view.xml',

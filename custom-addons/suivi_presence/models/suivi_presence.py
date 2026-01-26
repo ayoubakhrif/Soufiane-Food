@@ -36,6 +36,19 @@ class SuiviPresence(models.Model):
     @api.model
     def create(self, vals):
         rec = super(SuiviPresence, self).create(vals)
+        if rec.type == 'entree':
+            # Check-in Restriction: 10:00 AM
+            # Allowed for Admins (suivi_presence.group_suivi_admin)
+            if not self.env.user.has_group('suivi_presence.group_suivi_admin'):
+                import pytz
+                user_tz = pytz.timezone('Africa/Casablanca')
+                local_dt = rec.datetime.astimezone(user_tz)
+                # Compare decimal hour
+                hour_dec = local_dt.hour + local_dt.minute / 60.0
+                if hour_dec > 10.0:
+                    from odoo import exceptions
+                    raise exceptions.ValidationError("L'entrée n'est pas autorisée après 10:00. Contactez un administrateur.")
+
         if rec.type == 'absent' and rec.absence_type == 'leave':
             # Check if day is holiday or non-working day
             config = self.env['suivi.presence.config'].get_main_config()

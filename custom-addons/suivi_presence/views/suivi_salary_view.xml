@@ -54,6 +54,7 @@
                         </page>
                     </notebook>
                     <group class="oe_subtotal_footer oe_right">
+                        <field name="total_advances" widget="monetary"/>
                         <field name="final_salary" class="oe_subtotal_footer_separator"/>
                     </group>
                 </sheet>

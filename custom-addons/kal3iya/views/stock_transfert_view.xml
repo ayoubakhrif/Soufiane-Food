@@ -118,7 +118,7 @@
     <!-- ========================================================= -->
     <menuitem id="menu_kal3iya_stock_transfer"
               name="Transferts de stock"
-              parent="kal3iya_menu_root"
+              parent="Kal3iya_root_menu"
               action="action_kal3iya_stock_transfer"
               sequence="30"/>
 

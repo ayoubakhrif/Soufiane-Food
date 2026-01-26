@@ -11,8 +11,12 @@ class SuiviConfig(models.Model):
     
     annual_leave_quota = fields.Integer(string='Quota Congé Annuel', required=True, default=18, help="Jours par an")
     working_hours_per_day = fields.Float(string='Heures de travaille / jour', default=8.0, required=True)
-    official_check_in = fields.Float(string='Heure entrée officielle', default=9.5, help="Format: 9.5 = 09:30", required=True)
-    official_check_out = fields.Float(string='Heure de sortie officielle', default=17.5, help="Format: 17.5 = 17:30", required=True)
+    official_check_in_mediouna = fields.Float(string='Entrée (Mediouna)', default=9, required=True)
+    official_check_out_mediouna = fields.Float(string='Sortie (Mediouna)', default=17, required=True)
+    
+    official_check_in_casa = fields.Float(string='Entrée (Casa)', default=9.5, required=True)
+    official_check_out_casa = fields.Float(string='Sortie (Casa)', default=17.5, required=True)
+
     delay_tolerance = fields.Integer(string='Tolérance de retard (Minutes)', default=0, help="Minutes tolérées avant retard")
     overtime_coefficient = fields.Float(string='Coefficient HS', default=1.0, required=True)
     

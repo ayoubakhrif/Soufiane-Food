@@ -10,10 +10,16 @@
                         <h1><field name="name"/></h1>
                     </div>
                     <group>
+                        <group string="Mediouna">
+                            <field name="official_check_in_mediouna" widget="float_time"/>
+                            <field name="official_check_out_mediouna" widget="float_time"/>
+                        </group>
+                        <group string="Casa">
+                            <field name="official_check_in_casa" widget="float_time"/>
+                            <field name="official_check_out_casa" widget="float_time"/>
+                        </group>
                         <group string="Paramètres Généraux">
                             <field name="active" invisible="1"/>
-                            <field name="official_check_in" widget="float_time"/>
-                            <field name="official_check_out" widget="float_time"/>
                             <field name="delay_tolerance"/>
                             <field name="working_hours_per_day" widget="float_time"/>
                             <field name="overtime_coefficient"/>

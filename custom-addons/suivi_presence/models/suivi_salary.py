@@ -100,14 +100,19 @@ class SuiviSalary(models.Model):
             t_norm = t_over = t_miss = t_holi = 0.0
             h_med = s_med = h_casa = s_casa = 0.0
             
-            # Fetch config for official hours
-            off_in = config.official_check_in if config else 9.5
-            off_out = config.official_check_out if config else 17.5
+            # Fetch config
+            # Default values if config missing
+            off_in_med = config.official_check_in_mediouna if config else 9
+            off_out_med = config.official_check_out_mediouna if config else 17
+            off_in_casa = config.official_check_in_casa if config else 9.5
+            off_out_casa = config.official_check_out_casa if config else 17.5
+            
             tolerance_min = config.delay_tolerance if config else 0
             ot_coeff = config.overtime_coefficient if config else 1.0
             
-            # Expected hours per day based on config
-            expected_daily = off_out - off_in
+            # Expected hours per day used for Missing calculation
+            # We use working_hours_per_day as the target for the day regardless of site mix
+            expected_daily = config.working_hours_per_day if config else 8.0
 
             # A. Process Leaves First
             approved_leaves = self.env['suivi.leave'].search([
@@ -179,31 +184,36 @@ class SuiviSalary(models.Model):
                     in_f = local_start.hour + local_start.minute / 60.0
                     out_f = local_end.hour + local_end.minute / 60.0
                     
+                    # Determine Applicable Limits based on SITE
+                    if p_site == 'casa':
+                        c_off_in = off_in_casa
+                        c_off_out = off_out_casa
+                    else:
+                        c_off_in = off_in_med
+                        c_off_out = off_out_med
+
                     pair_cost = 0.0
                     pair_hours = 0.0
                     
                     # Logic 1: Normal with Tolerance & Early Ignore
                     eff_in = in_f
                     
-                    if in_f < off_in:
-                        eff_in = off_in
+                    if in_f < c_off_in:
+                        eff_in = c_off_in
                     else:
-                        diff_min = (in_f - off_in) * 60.0
+                        diff_min = (in_f - c_off_in) * 60.0
                         if diff_min > 0 and diff_min <= tolerance_min:
-                            eff_in = off_in
+                            eff_in = c_off_in
                     
-                    eff_out_norm = min(out_f, off_out)
+                    eff_out_norm = min(out_f, c_off_out)
                     dur_norm = max(0, eff_out_norm - eff_in)
                     
                     # Logic 2: Overtime (Strictly after Official Out)
-                    over_start = max(in_f, off_out)
+                    over_start = max(in_f, c_off_out)
                     dur_over = max(0, out_f - over_start)
 
                     if is_off_day or is_holiday:
                         # All is extra
-                        # Recalculate raw duration for simplicity or use dur_norm+dur_over?
-                        # Actually official logic implies boundaries. 
-                        # Let's use raw duration for off days as per previous step
                         raw_dur = (local_end - local_start).total_seconds() / 3600.0
                         
                         if is_holiday:
@@ -232,6 +242,7 @@ class SuiviSalary(models.Model):
                         s_med += pair_cost
 
                 # Missing Calculation (Per Day)
+                # We compare day_normal against expected_daily (global target)
                 if not is_off_day and not is_holiday:
                     if day_normal < expected_daily:
                         miss = expected_daily - day_normal

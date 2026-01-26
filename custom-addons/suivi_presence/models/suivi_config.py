@@ -33,6 +33,13 @@ class SuiviConfig(models.Model):
             raise exceptions.ValidationError("Une seule configuration active est autorisée.")
         return super(SuiviConfig, self).create(vals)
 
+    def write(self, vals):
+        if vals.get('active'):
+            # Check if any OTHER config is active
+            if self.search_count([('active', '=', True), ('id', '!=', self.id)]) >= 1:
+                raise exceptions.ValidationError("Une seule configuration active est autorisée.")
+        return super(SuiviConfig, self).write(vals)
+
     @api.model
     def get_main_config(self):
         return self.search([('active', '=', True)], limit=1)

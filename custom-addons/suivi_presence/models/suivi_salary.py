@@ -124,6 +124,8 @@ class SuiviSalary(models.Model):
             unpaid_leave_days = set()
             
             for l in approved_leaves:
+                if not l.date_from or not l.date_to:
+                    continue
                 curr = max(l.date_from, start_date)
                 lend = min(l.date_to, end_date)
                 while curr <= lend:
@@ -177,8 +179,10 @@ class SuiviSalary(models.Model):
                 for (start_dt, end_dt, p_site) in processed_pairs:
                     import pytz
                     user_tz = pytz.timezone('Africa/Casablanca')
-                    local_start = pytz.utc.localize(start_dt).astimezone(user_tz)
-                    local_end = pytz.utc.localize(end_dt).astimezone(user_tz)
+                    # Odoo Datetime fields are already UTC aware (if not naive)
+                    # We simply convert to target timezone
+                    local_start = start_dt.astimezone(user_tz)
+                    local_end = end_dt.astimezone(user_tz)
                     
                     in_f = local_start.hour + local_start.minute / 60.0
                     out_f = local_end.hour + local_end.minute / 60.0

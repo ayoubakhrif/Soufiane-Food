@@ -37,16 +37,33 @@ class SuiviPresence(models.Model):
     def create(self, vals):
         rec = super(SuiviPresence, self).create(vals)
         if rec.type == 'absent' and rec.absence_type == 'leave':
-            # Create a Paid Leave
-            # We assume 1 day duration for the absence date
-            leave_vals = {
-                'employee_id': rec.employee_id.id,
-                'date_from': rec.datetime.date(),
-                'date_to': rec.datetime.date(),
-                'leave_type': 'paid',
-                'reason': 'Absence marquée depuis le suivi de présence',
-                'state': 'approved'
-            }
-            # Create and auto-approve
-            self.env['suivi.leave'].create(leave_vals)
+            # Check if day is holiday or non-working day
+            config = self.env['suivi.presence.config'].get_main_config()
+            target_date = rec.datetime.date()
+            
+            is_valid_day = True
+            if config:
+                # Check Non Working Day
+                non_working = int(config.non_working_day)
+                if target_date.weekday() == non_working:
+                    is_valid_day = False
+                
+                # Check Public Holiday
+                holiday = self.env['suivi.public.holiday'].search([
+                    ('date', '=', target_date)
+                ], limit=1)
+                if holiday:
+                    is_valid_day = False
+            
+            if is_valid_day:
+                # Create a Paid Leave in DRAFT
+                leave_vals = {
+                    'employee_id': rec.employee_id.id,
+                    'date_from': target_date,
+                    'date_to': target_date,
+                    'leave_type': 'paid',
+                    'reason': 'Absence marquée depuis le suivi de présence',
+                    'state': 'draft'
+                }
+                self.env['suivi.leave'].create(leave_vals)
         return rec

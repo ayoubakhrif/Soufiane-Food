@@ -263,8 +263,9 @@ class Kal3iyaClient(models.Model):
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            wizard_action = self.env.ref('kal3iya.action_kal3iya_week_update_wizard')
-            wizard_action_id = wizard_action.id if wizard_action else False
+            # Action de liste pour modification
+            list_action = self.env.ref('kal3iya.action_kal3iya_week_update_list')
+            list_action_id = list_action.id if list_action else False
 
             for week, records in groups.items():
                 total_week = sum(
@@ -272,11 +273,13 @@ class Kal3iyaClient(models.Model):
                     for r in records
                 )
 
-                # URL du wizard (on utilise le premier record comme contexte pour récupérer la semaine)
+                # URL vers la vue liste filtrée
+                # On passe le domaine directement dans l'URL
                 wizard_url = "#"
-                if records and wizard_action_id:
-                    first_id = records[0].id
-                    wizard_url = f"/web#action={wizard_action_id}&active_id={first_id}&model=kal3iyasortie&view_type=form"
+                if list_action_id:
+                    # Construction du domaine sous forme de chaîne
+                    domain_str = f"[('week', '=', '{week}'), ('client_id', '=', {rec.id})]"
+                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_str}"
 
                 html += f"""
                     <div class="week-card">

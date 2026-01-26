@@ -62,7 +62,7 @@
                             type="object"
                             string="Confirmer le transfert"
                             class="oe_highlight"
-                            states="draft"/>
+                            invisible="state != 'draft'"/>
 
                     <field name="state"
                            widget="statusbar"

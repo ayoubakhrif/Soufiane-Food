@@ -263,32 +263,34 @@ class Kal3iyaClient(models.Model):
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            # Action Serveur pour ouverture dynamique
-            server_action = self.env.ref('kal3iya.action_server_open_week_list')
-            server_action_id = server_action.id if server_action else False
+            # Action de liste pour modification
+            list_action = self.env.ref('kal3iya.action_kal3iya_week_update_list')
+            list_action_id = list_action.id if list_action else False
             
-            import json
             import urllib.parse
+            import json
 
             for week, records in groups.items():
                 total_week = sum(
                     r.mt_vente_final or r.mt_vente
                     for r in records
                 )
-                
-                # Gérer le cas "Sans semaine" -> pas de semaine (False)
-                search_week = week if week != "Sans semaine" else False
-                
-                # Construction du contexte pour l'action serveur
-                ctx = {
-                    'target_week': search_week,
-                    'target_client_id': rec.id,
-                }
-                ctx_json = json.dumps(ctx)
-                ctx_encoded = urllib.parse.quote(ctx_json)
-                
-                # URL appelant l'action serveur avec le contexte
-                wizard_url = f"/web#action={server_action_id}&model=kal3iyasortie&view_type=list&context={ctx_encoded}"
+
+                # URL vers la vue liste filtrée
+                # On passe le domaine directement dans l'URL
+                wizard_url = "#"
+                if list_action_id:
+                    # Gérer le cas "Sans semaine" -> pas de semaine (False)
+                    search_week = week if week != "Sans semaine" else False
+                    
+                    # Construction du domaine
+                    domain_list = [('week', '=', search_week), ('client_id', '=', rec.id)]
+                    
+                    # Serialize to JSON (ensures double quotes) and then URL encode
+                    domain_json = json.dumps(domain_list)
+                    domain_encoded = urllib.parse.quote(domain_json)
+                    
+                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_encoded}"
 
                 html += f"""
                     <div class="week-card">
@@ -296,8 +298,8 @@ class Kal3iyaClient(models.Model):
                             <div class="week-title">
                                 📅 Semaine {week}
                                 <a href="{wizard_url}" 
-                                   class="edit-btn"
-                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea; cursor:pointer;">
+                                   class="edit-btn oe_kanban_action oe_kanban_global_click"
+                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea;">
                                    ✏️ Modifier la semaine
                                 </a>
                             </div>

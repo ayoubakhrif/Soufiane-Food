@@ -186,21 +186,6 @@
         </field>
     </record>
 
-    <record id="action_server_open_week_list" model="ir.actions.server">
-        <field name="name">Ouvrir Modification Hebdomadaire</field>
-        <field name="model_id" ref="model_kal3iyasortie"/>
-        <field name="state">code</field>
-        <field name="code">
-action = env.ref('kal3iya.action_kal3iya_week_update_list').read()[0]
-target_week = env.context.get('target_week')
-target_client_id = env.context.get('target_client_id')
-domain = [('client_id', '=', target_client_id)]
-if target_week:
-    domain.append(('week', '=', target_week))
-action['domain'] = domain
-        </field>
-    </record>
-
     <!-- Vue recherche -->
     <record id="sortie_view_search" model="ir.ui.view">
         <field name="name">sortie search</field>
@@ -214,7 +199,6 @@ action['domain'] = domain
                 <field name="ville"/>
                 <field name="frigo"/>
                 <field name="date_exit"/>
-                <field name="week"/>
             </search>
         </field>
     </record>

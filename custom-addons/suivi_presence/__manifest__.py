@@ -12,6 +12,7 @@
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
+        'security/ir_rule.xml',
         'views/suivi_employee_view.xml',
         'views/suivi_presence_view.xml',
         'views/suivi_leave_view.xml',

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Root Menu -->
-    <menuitem id="menu_core_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png"/>
+    <menuitem id="menu_core_employee_root" name="Employees" sequence="10" web_icon="custom_employee,static/description/icon.png" groups="group_core_employee_user"/>
 
     <!-- Main Menus -->
     <menuitem id="menu_core_employee_main" name="Employees" parent="menu_core_employee_root" action="action_core_employee" sequence="1"/>

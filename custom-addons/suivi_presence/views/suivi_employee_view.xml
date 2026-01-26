@@ -37,6 +37,7 @@
                                 <tree editable="bottom">
                                     <field name="datetime"/>
                                     <field name="type"/>
+                                    <field name="absence_type" invisible="type != 'absent'" required="type == 'absent'"/>
                                 </tree>
                             </field>
                         </page>

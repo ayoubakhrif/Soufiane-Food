@@ -107,12 +107,17 @@ class SuiviSalary(models.Model):
                 ('date_from', '<=', end_date),
                 ('date_to', '>=', start_date)
             ])
-            leave_days = set()
+            paid_leave_days = set()
+            unpaid_leave_days = set()
+            
             for l in approved_leaves:
                 curr = max(l.date_from, start_date)
                 lend = min(l.date_to, end_date)
                 while curr <= lend:
-                    leave_days.add(curr)
+                    if l.leave_type == 'paid':
+                        paid_leave_days.add(curr)
+                    else:
+                        unpaid_leave_days.add(curr)
                     curr += timedelta(days=1)
 
             # B. Iterate Days
@@ -121,9 +126,18 @@ class SuiviSalary(models.Model):
                 is_holiday = curr_date in holidays_map
                 is_off_day = curr_date.weekday() == non_working_day
                 
-                # If Leave
-                if curr_date in leave_days:
+                # If Paid Leave
+                if curr_date in paid_leave_days:
                     t_norm += daily_hours 
+                    continue
+                
+                # If Unpaid Leave (Calculated as missing/deducted automatically if we skip)
+                if curr_date in unpaid_leave_days:
+                    # We continue without adding hours, so t_miss will increase at default calculation
+                    # Or we explicitly set it? 
+                    # Logic below: if day_normal < expected, t_miss += diff.
+                    # So if we continue here, day_normal is 0. 
+                    # t_miss += 8. Correct.
                     continue
 
                 events = day_records.get(curr_date, [])

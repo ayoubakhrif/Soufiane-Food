@@ -14,5 +14,29 @@ class SuiviPresence(models.Model):
     datetime = fields.Datetime(string='Date et Heure', required=True, default=fields.Datetime.now)
     type = fields.Selection([
         ('entree', 'Entrée'),
-        ('sortie', 'Sortie')
+        ('sortie', 'Sortie'),
+        ('absent', 'Absent')
     ], string='Type', required=True)
+    
+    absence_type = fields.Selection([
+        ('deduction', 'Déduit du salaire'),
+        ('leave', 'Consomme un jour de congé')
+    ], string="Type d'absence")
+
+    @api.model
+    def create(self, vals):
+        rec = super(SuiviPresence, self).create(vals)
+        if rec.type == 'absent' and rec.absence_type == 'leave':
+            # Create a Paid Leave
+            # We assume 1 day duration for the absence date
+            leave_vals = {
+                'employee_id': rec.employee_id.id,
+                'date_from': rec.datetime.date(),
+                'date_to': rec.datetime.date(),
+                'leave_type': 'paid',
+                'reason': 'Absence marquée depuis le suivi de présence',
+                'state': 'approved'
+            }
+            # Create and auto-approve
+            self.env['suivi.leave'].create(leave_vals)
+        return rec

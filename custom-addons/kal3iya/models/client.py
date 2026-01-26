@@ -268,6 +268,7 @@ class Kal3iyaClient(models.Model):
             list_action_id = list_action.id if list_action else False
             
             import urllib.parse
+            import json
 
             for week, records in groups.items():
                 total_week = sum(
@@ -285,9 +286,9 @@ class Kal3iyaClient(models.Model):
                     # Construction du domaine
                     domain_list = [('week', '=', search_week), ('client_id', '=', rec.id)]
                     
-                    # Conversion en string et encodage URL pour éviter les erreurs de parsing
-                    domain_str = f"{domain_list}"
-                    domain_encoded = urllib.parse.quote(domain_str)
+                    # Serialize to JSON (ensures double quotes) and then URL encode
+                    domain_json = json.dumps(domain_list)
+                    domain_encoded = urllib.parse.quote(domain_json)
                     
                     wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_encoded}"
 

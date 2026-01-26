@@ -199,6 +199,7 @@
                 <field name="ville"/>
                 <field name="frigo"/>
                 <field name="date_exit"/>
+                <field name="week"/>
             </search>
         </field>
     </record>

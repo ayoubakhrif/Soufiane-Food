@@ -18,4 +18,4 @@ access_suivi_public_holiday_manager,suivi.public.holiday.manager,model_suivi_pub
 access_suivi_public_holiday_admin,suivi.public.holiday.admin,model_suivi_public_holiday,suivi_presence.group_suivi_admin,1,1,1,1
 access_suivi_salary_advance_manager,suivi.salary.advance.manager,model_suivi_salary_advance,suivi_presence.group_suivi_manager,1,1,1,1
 access_suivi_salary_advance_admin,suivi.salary.advance.admin,model_suivi_salary_advance,suivi_presence.group_suivi_admin,1,1,1,1
-access_core_employee_suivi_manager,core.employee.suivi.manager,model_core_employee,suivi_presence.group_suivi_manager,1,0,0,0
+access_core_employee_suivi_manager,core.employee.suivi.manager,custom_employee.model_core_employee,suivi_presence.group_suivi_manager,1,0,0,0

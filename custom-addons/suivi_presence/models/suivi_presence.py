@@ -23,6 +23,16 @@ class SuiviPresence(models.Model):
         ('leave', 'Consomme un jour de congé')
     ], string="Type d'absence")
 
+    site = fields.Selection([
+        ('mediouna', 'Mediouna'),
+        ('casa', 'Casa')
+    ], string='Site de Travail', required=True, default='mediouna')
+
+    @api.onchange('employee_id')
+    def _onchange_employee_site(self):
+        if self.employee_id and self.employee_id.payroll_site:
+            self.site = self.employee_id.payroll_site
+
     @api.model
     def create(self, vals):
         rec = super(SuiviPresence, self).create(vals)

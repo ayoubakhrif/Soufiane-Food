@@ -45,6 +45,12 @@
                                 <field name="total_missing_hours"/>
                                 <field name="total_holiday_hours"/>
                             </group>
+                            <group string="Détails par Site">
+                                <field name="hours_mediouna"/>
+                                <field name="salary_mediouna"/>
+                                <field name="hours_casa"/>
+                                <field name="salary_casa"/>
+                            </group>
                         </page>
                     </notebook>
                     <group class="oe_subtotal_footer oe_right">

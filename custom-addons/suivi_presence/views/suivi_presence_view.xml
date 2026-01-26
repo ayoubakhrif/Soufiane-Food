@@ -9,7 +9,8 @@
                 <field name="datetime"/>
                 <field name="employee_id"/>
                 <field name="employee_phone" optional="hide"/>
-                <field name="employee_site" optional="show"/>
+                <field name="employee_site" optional="show" string="Site de Paie"/>
+                <field name="site" optional="show"/>
                 <field name="type" widget="badge" decoration-success="type == 'entree'" decoration-danger="type == 'sortie'" decoration-warning="type == 'absent'"/>
                 <field name="absence_type" optional="hide"/>
             </tree>
@@ -28,6 +29,7 @@
                             <field name="employee_id"/>
                             <field name="datetime"/>
                             <field name="type" widget="radio"/>
+                            <field name="site" readonly="employee_site == 'casa'"/>
                             <field name="absence_type" invisible="type != 'absent'" required="type == 'absent'"/>
                         </group>
                         <group>

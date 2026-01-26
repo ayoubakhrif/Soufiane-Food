@@ -268,6 +268,7 @@ class Kal3iyaClient(models.Model):
             server_action_id = server_action.id if server_action else False
             
             import json
+            import urllib.parse
 
             for week, records in groups.items():
                 total_week = sum(
@@ -284,15 +285,17 @@ class Kal3iyaClient(models.Model):
                     'target_client_id': rec.id,
                 }
                 ctx_json = json.dumps(ctx)
+                ctx_encoded = urllib.parse.quote(ctx_json)
+                
+                # URL appelant l'action serveur avec le contexte
+                wizard_url = f"/web#action={server_action_id}&model=kal3iyasortie&view_type=list&context={ctx_encoded}"
 
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
                             <div class="week-title">
                                 📅 Semaine {week}
-                                <a type="action" 
-                                   name="{server_action_id}"
-                                   data-oe-context="{ctx_json}"
+                                <a href="{wizard_url}" 
                                    class="edit-btn"
                                    style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea; cursor:pointer;">
                                    ✏️ Modifier la semaine

@@ -266,6 +266,8 @@ class Kal3iyaClient(models.Model):
             # Action de liste pour modification
             list_action = self.env.ref('kal3iya.action_kal3iya_week_update_list')
             list_action_id = list_action.id if list_action else False
+            
+            import urllib.parse
 
             for week, records in groups.items():
                 total_week = sum(
@@ -277,9 +279,17 @@ class Kal3iyaClient(models.Model):
                 # On passe le domaine directement dans l'URL
                 wizard_url = "#"
                 if list_action_id:
-                    # Construction du domaine sous forme de chaîne
-                    domain_str = f"[('week', '=', '{week}'), ('client_id', '=', {rec.id})]"
-                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_str}"
+                    # Gérer le cas "Sans semaine" -> pas de semaine (False)
+                    search_week = week if week != "Sans semaine" else False
+                    
+                    # Construction du domaine
+                    domain_list = [('week', '=', search_week), ('client_id', '=', rec.id)]
+                    
+                    # Conversion en string et encodage URL pour éviter les erreurs de parsing
+                    domain_str = f"{domain_list}"
+                    domain_encoded = urllib.parse.quote(domain_str)
+                    
+                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_encoded}"
 
                 html += f"""
                     <div class="week-card">

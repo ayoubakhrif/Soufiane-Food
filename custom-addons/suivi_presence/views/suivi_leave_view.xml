@@ -21,9 +21,9 @@
         <field name="arch" type="xml">
             <form string="Demande de Congé">
                 <header>
-                    <button name="action_approve" string="Approuver" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_refuse" string="Refuser" type="object" invisible="state != 'draft'"/>
-                    <button name="action_draft" string="Remettre en Brouillon" type="object" invisible="state == 'draft'"/>
+                    <button name="action_approve" string="Approuver" type="object" class="oe_highlight" invisible="state != 'draft'" groups="suivi_presence.group_suivi_manager"/>
+                    <button name="action_refuse" string="Refuser" type="object" invisible="state != 'draft'" groups="suivi_presence.group_suivi_manager"/>
+                    <button name="action_draft" string="Remettre en Brouillon" type="object" invisible="state == 'draft'" groups="suivi_presence.group_suivi_manager"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>

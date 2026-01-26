@@ -271,26 +271,30 @@ class SuiviSalary(models.Model):
             rec.hours_casa = round(h_casa, 2)
             rec.salary_casa = round(s_casa, 2)
 
+    total_advances = fields.Float(string='Avances', compute='_compute_final_salary', store=True)
+
     @api.depends('total_normal_hours', 'total_overtime_hours', 'total_holiday_hours', 'total_missing_hours')
     def _compute_final_salary(self):
         config = self.env['suivi.presence.config'].get_main_config()
         ot_coeff = config.overtime_coefficient if config else 1.0
         
         for rec in self:
-            rate = rec.hourly_salary
+            # 1. Base Salary from Hours (Splits)
+            gross_salary = rec.salary_mediouna + rec.salary_casa
             
-            # Simple Formula: (Normal + Over*Coeff + Holiday*2) * Rate
-            # Missing is implicitly deducted by not being in Normal
+            # 2. Calculate Advances
+            domain = [
+                ('employee_id', '=', rec.employee_id.id),
+                ('state', '=', 'confirmed'),
+                ('month', '=', rec.month),
+                ('year', '=', rec.year)
+            ]
+            advances = self.env['suivi.salary.advance'].search(domain)
+            total_adv = sum(advances.mapped('amount'))
+            rec.total_advances = total_adv
             
-            # Wait, base salary includes normal hours.
-            # So Final = (WorkingDays * Hours * Rate) - (Missing * Rate) + (Over * Rate * Coeff) + ...
-            # Actually easier: Final = (TotalNormal * Rate) + (Over * Rate * Coeff) + (Holiday * Rate * 2)
-            
-            # Sum of Split Salaries
-            # Each split component (s_med, s_casa) already includes: Normal + Overtime*Coeff + Holiday*2
-            # So Final = Sum(Splits)
-            
-            rec.final_salary = rec.salary_mediouna + rec.salary_casa
+            # 3. Final Net
+            rec.final_salary = gross_salary - total_adv
 
     def action_validate(self):
         for rec in self:

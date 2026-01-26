@@ -1,7 +1,32 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_suivi_employee,suivi.employee,model_suivi_employee,base.group_user,1,1,1,1
-access_suivi_presence,suivi.presence,model_suivi_presence,base.group_user,1,1,1,1
-access_suivi_leave,suivi.leave,model_suivi_leave,base.group_user,1,1,1,1
-access_suivi_salary,suivi.salary,model_suivi_salary,base.group_user,1,1,1,1
-access_suivi_config,suivi.config,model_suivi_presence_config,base.group_user,1,1,1,1
-access_suivi_public_holiday,suivi.public.holiday,model_suivi_public_holiday,base.group_user,1,1,1,1
+# Employees: User (Read/Write to select?), Manager (Full), Admin (Full)
+access_suivi_employee_user,suivi.employee.user,model_suivi_employee,suivi_presence.group_suivi_user,1,0,0,0
+access_suivi_employee_manager,suivi.employee.manager,model_suivi_employee,suivi_presence.group_suivi_manager,1,1,1,1
+access_suivi_employee_admin,suivi.employee.admin,model_suivi_employee,suivi_presence.group_suivi_admin,1,1,1,1
+
+# Presence: User (CRU, No Delete), Manager (CRU, No Delete), Admin (Full)
+access_suivi_presence_user,suivi.presence.user,model_suivi_presence,suivi_presence.group_suivi_user,1,1,1,0
+access_suivi_presence_manager,suivi.presence.manager,model_suivi_presence,suivi_presence.group_suivi_manager,1,1,1,0
+access_suivi_presence_admin,suivi.presence.admin,model_suivi_presence,suivi_presence.group_suivi_admin,1,1,1,1
+
+# Leave: User (Create Draft), Manager (Full), Admin (Full)
+access_suivi_leave_user,suivi.leave.user,model_suivi_leave,suivi_presence.group_suivi_user,1,1,1,0
+access_suivi_leave_manager,suivi.leave.manager,model_suivi_leave,suivi_presence.group_suivi_manager,1,1,1,1
+access_suivi_leave_admin,suivi.leave.admin,model_suivi_leave,suivi_presence.group_suivi_admin,1,1,1,1
+
+# Salary: User (No Access), Manager (Full), Admin (Full)
+access_suivi_salary_manager,suivi.salary.manager,model_suivi_salary,suivi_presence.group_suivi_manager,1,1,1,1
+access_suivi_salary_admin,suivi.salary.admin,model_suivi_salary,suivi_presence.group_suivi_admin,1,1,1,1
+
+# Config: User (No Access), Manager (Full), Admin (Full)
+access_suivi_config_manager,suivi.config.manager,model_suivi_presence_config,suivi_presence.group_suivi_manager,1,1,1,1
+access_suivi_config_admin,suivi.config.admin,model_suivi_presence_config,suivi_presence.group_suivi_admin,1,1,1,1
+
+# Public Holiday: User (Read), Manager (Full), Admin (Full)
+access_suivi_public_holiday_user,suivi.public.holiday.user,model_suivi_public_holiday,suivi_presence.group_suivi_user,1,0,0,0
+access_suivi_public_holiday_manager,suivi.public.holiday.manager,model_suivi_public_holiday,suivi_presence.group_suivi_manager,1,1,1,1
+access_suivi_public_holiday_admin,suivi.public.holiday.admin,model_suivi_public_holiday,suivi_presence.group_suivi_admin,1,1,1,1
+
+# Advance: User (No Access), Manager (Full), Admin (Full)
+access_suivi_salary_advance_manager,suivi.salary.advance.manager,model_suivi_salary_advance,suivi_presence.group_suivi_manager,1,1,1,1
+access_suivi_salary_advance_admin,suivi.salary.advance.admin,model_suivi_salary_advance,suivi_presence.group_suivi_admin,1,1,1,1

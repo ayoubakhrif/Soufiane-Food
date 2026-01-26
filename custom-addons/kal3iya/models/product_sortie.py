@@ -261,6 +261,16 @@ class ProductExit(models.Model):
     # ------------------------------------------------------------
     
     
+    # ------------------------------------------------------------
+    # ONCHANGE
+    # ------------------------------------------------------------
+    @api.onchange('quantity', 'weight')
+    def _onchange_quantity_weight(self):
+        """Met à jour le tonnage_final si la quantité ou le poids change"""
+        for rec in self:
+            if rec.quantity and rec.weight:
+                rec.tonnage_final = rec.quantity * rec.weight
+
     def write(self, vals):
         # 1️⃣ Vérification de stock (avant écriture)
         if 'quantity' in vals:
@@ -272,6 +282,16 @@ class ProductExit(models.Model):
                     raise UserError(
                         f"Stock insuffisant : demande +{diff} > disponible {rec.entry_id.quantity}."
                     )
+                
+                # Mise à jour du tonnage_final si non spécifié explicitement dans vals
+                # et si on change la quantité
+                if 'tonnage_final' not in vals:
+                    # On recalcule le tonnage théorique avec la nouvelle quantité
+                    # rec.weight peut ne pas être dans vals, on prend celui du record
+                    weight = rec.weight
+                    new_tonnage = new_qty * weight if weight else 0.0
+                    vals['tonnage_final'] = new_tonnage
+
 
         # 2️⃣ Écriture normale
         res = super().write(vals)

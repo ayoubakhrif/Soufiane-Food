@@ -25,7 +25,6 @@ class SuiviSalary(models.Model):
     total_normal_hours = fields.Float(string='Heures Normales', compute='_compute_salary_details', store=True)
     total_missing_hours = fields.Float(string='Heures Manquantes', compute='_compute_salary_details', store=True)
     total_overtime_hours = fields.Float(string='Heures Supp.', compute='_compute_salary_details', store=True)
-    total_overtime_hours = fields.Float(string='Heures Supp.', compute='_compute_salary_details', store=True)
     total_holiday_hours = fields.Float(string='Heures Fériés', compute='_compute_salary_details', store=True)
 
     # Site Split

@@ -263,11 +263,10 @@ class Kal3iyaClient(models.Model):
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            # Action de liste pour modification
-            list_action = self.env.ref('kal3iya.action_kal3iya_week_update_list')
-            list_action_id = list_action.id if list_action else False
+            # Action Serveur pour ouverture dynamique
+            server_action = self.env.ref('kal3iya.action_server_open_week_list')
+            server_action_id = server_action.id if server_action else False
             
-            import urllib.parse
             import json
 
             for week, records in groups.items():
@@ -275,28 +274,27 @@ class Kal3iyaClient(models.Model):
                     r.mt_vente_final or r.mt_vente
                     for r in records
                 )
-
-                # URL vers la vue liste filtrée
-                # DEBUG: Filtre UNIQUEMENT sur le client pour isoler le problème de semaine
-                wizard_url = "#"
-                if list_action_id:
-                    # Construction du domaine (CLIENT SEULEMENT)
-                    domain_list = [('client_id', '=', rec.id)]
-                    
-                    # Serialize to JSON and then URL encode
-                    domain_json = json.dumps(domain_list)
-                    domain_encoded = urllib.parse.quote(domain_json)
-                    
-                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_encoded}"
+                
+                # Gérer le cas "Sans semaine" -> pas de semaine (False)
+                search_week = week if week != "Sans semaine" else False
+                
+                # Construction du contexte pour l'action serveur
+                ctx = {
+                    'target_week': search_week,
+                    'target_client_id': rec.id,
+                }
+                ctx_json = json.dumps(ctx)
 
                 html += f"""
                     <div class="week-card">
                         <div class="week-header">
                             <div class="week-title">
                                 📅 Semaine {week}
-                                <a href="{wizard_url}" 
-                                   class="edit-btn oe_kanban_action oe_kanban_global_click"
-                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea;">
+                                <a type="action" 
+                                   name="{server_action_id}"
+                                   data-oe-context="{ctx_json}"
+                                   class="edit-btn"
+                                   style="margin-left: 15px; font-size: 14px; padding: 5px 12px; background: #667eea; cursor:pointer;">
                                    ✏️ Modifier la semaine
                                 </a>
                             </div>

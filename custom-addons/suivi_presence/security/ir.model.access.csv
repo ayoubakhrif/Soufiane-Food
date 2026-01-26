@@ -10,6 +10,7 @@ access_suivi_leave_manager,suivi.leave.manager,model_suivi_leave,suivi_presence.
 access_suivi_leave_admin,suivi.leave.admin,model_suivi_leave,suivi_presence.group_suivi_admin,1,1,1,1
 access_suivi_salary_manager,suivi.salary.manager,model_suivi_salary,suivi_presence.group_suivi_manager,1,1,1,1
 access_suivi_salary_admin,suivi.salary.admin,model_suivi_salary,suivi_presence.group_suivi_admin,1,1,1,1
+access_suivi_config_user,suivi.config.user,model_suivi_presence_config,suivi_presence.group_suivi_user,1,0,0,0
 access_suivi_config_manager,suivi.config.manager,model_suivi_presence_config,suivi_presence.group_suivi_manager,1,1,1,1
 access_suivi_config_admin,suivi.config.admin,model_suivi_presence_config,suivi_presence.group_suivi_admin,1,1,1,1
 access_suivi_public_holiday_user,suivi.public.holiday.user,model_suivi_public_holiday,suivi_presence.group_suivi_user,1,0,0,0

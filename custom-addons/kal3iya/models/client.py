@@ -277,20 +277,24 @@ class Kal3iyaClient(models.Model):
                 )
 
                 # URL vers la vue liste filtrée
-                # On passe le domaine directement dans l'URL
+                # On passe le contexte dans l'URL pour que l'action l'utilise dans son domain
                 wizard_url = "#"
                 if list_action_id:
                     # Gérer le cas "Sans semaine" -> pas de semaine (False)
                     search_week = week if week != "Sans semaine" else False
                     
-                    # Construction du domaine
-                    domain_list = [('week', '=', search_week), ('client_id', '=', rec.id)]
+                    # Construction du contexte
+                    ctx = {
+                        'target_week': search_week,
+                        'target_client_id': rec.id,
+                    }
                     
-                    # Serialize to JSON (ensures double quotes) and then URL encode
-                    domain_json = json.dumps(domain_list)
-                    domain_encoded = urllib.parse.quote(domain_json)
+                    # Serialize to JSON and then URL encode
+                    ctx_json = json.dumps(ctx)
+                    ctx_encoded = urllib.parse.quote(ctx_json)
                     
-                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_encoded}"
+                    # On utilise &context=... au lieu de &domain=...
+                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&context={ctx_encoded}"
 
                 html += f"""
                     <div class="week-card">

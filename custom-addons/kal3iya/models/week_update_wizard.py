@@ -12,15 +12,7 @@ class WeekUpdateWizard(models.TransientModel):
         return False
 
     week = fields.Char(string='Semaine', default=_default_week, readonly=True)
-    search_product_id = fields.Many2one('kal3iya.product', string="Rechercher un produit")
     line_ids = fields.One2many('kal3iya.week.update.line', 'wizard_id', string='Lignes')
-
-    @api.onchange('search_product_id')
-    def _onchange_search_product_id(self):
-        if self.search_product_id:
-            return {'domain': {'line_ids': [('product_id', '=', self.search_product_id.id)]}}
-        else:
-            return {'domain': {'line_ids': []}}
 
     @api.model
     def default_get(self, fields_list):

@@ -263,12 +263,8 @@ class Kal3iyaClient(models.Model):
                 w = s.week or "Sans semaine"
                 groups.setdefault(w, []).append(s)
 
-            # Action de liste pour modification
-            list_action = self.env.ref('kal3iya.action_kal3iya_week_update_list')
-            list_action_id = list_action.id if list_action else False
-            
-            import urllib.parse
-            import json
+            wizard_action = self.env.ref('kal3iya.action_kal3iya_week_update_wizard')
+            wizard_action_id = wizard_action.id if wizard_action else False
 
             for week, records in groups.items():
                 total_week = sum(
@@ -276,21 +272,11 @@ class Kal3iyaClient(models.Model):
                     for r in records
                 )
 
-                # URL vers la vue liste filtrée
-                # On passe le domaine directement dans l'URL
+                # URL du wizard (on utilise le premier record comme contexte pour récupérer la semaine)
                 wizard_url = "#"
-                if list_action_id:
-                    # Gérer le cas "Sans semaine" -> pas de semaine (False)
-                    search_week = week if week != "Sans semaine" else False
-                    
-                    # Construction du domaine
-                    domain_list = [('week', '=', search_week), ('client_id', '=', rec.id)]
-                    
-                    # Serialize to JSON (ensures double quotes) and then URL encode
-                    domain_json = json.dumps(domain_list)
-                    domain_encoded = urllib.parse.quote(domain_json)
-                    
-                    wizard_url = f"/web#action={list_action_id}&model=kal3iyasortie&view_type=list&domain={domain_encoded}"
+                if records and wizard_action_id:
+                    first_id = records[0].id
+                    wizard_url = f"/web#action={wizard_action_id}&active_id={first_id}&model=kal3iyasortie&view_type=form"
 
                 html += f"""
                     <div class="week-card">

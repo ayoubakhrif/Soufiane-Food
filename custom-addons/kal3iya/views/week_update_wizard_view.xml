@@ -7,7 +7,12 @@
             <form string="Modification Hebdomadaire">
                 <sheet>
                     <group>
-                        <field name="week"/>
+                        <group>
+                            <field name="week"/>
+                        </group>
+                        <group>
+                            <field name="search_product_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Commandes">

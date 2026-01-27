@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_ste_form_inherit_achat" model="ir.ui.view">
+        <field name="name">logistique.ste.form.inherit.achat</field>
+        <field name="model">logistique.ste</field>
+        <field name="inherit_id" ref="logistique.view_logistique_ste_form"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="core_ste_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_logistique_ste_tree_inherit_achat" model="ir.ui.view">
+        <field name="name">logistique.ste.tree.inherit.achat</field>
+        <field name="model">logistique.ste</field>
+        <field name="inherit_id" ref="logistique.view_logistique_ste_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="core_ste_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>

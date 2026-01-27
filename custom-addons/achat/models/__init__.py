@@ -8,3 +8,4 @@ from . import achat_article
 from . import achat_reclamation_dhl
 from . import achat_origin
 from . import document_followup
+from . import logistique_ste_inherit

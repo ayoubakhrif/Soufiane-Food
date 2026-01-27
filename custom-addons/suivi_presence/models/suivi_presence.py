@@ -33,7 +33,16 @@ class SuiviPresence(models.Model):
         # 1️⃣ Check-in restriction BEFORE create
         # ----------------------------------
         if vals.get('type') == 'entree' and not self.env.user.has_group('suivi_presence.group_suivi_admin'):
-            dt = fields.Datetime.to_datetime(vals.get('datetime'))
+            dt_val = vals.get('datetime')
+            if dt_val:
+                dt = fields.Datetime.to_datetime(dt_val)
+            else:
+                dt = fields.Datetime.now()
+            
+            # Localize to UTC (if naive) then convert to Casablanca
+            if not dt.tzinfo:
+                dt = pytz.utc.localize(dt)
+            
             user_tz = pytz.timezone('Africa/Casablanca')
             local_dt = dt.astimezone(user_tz)
 

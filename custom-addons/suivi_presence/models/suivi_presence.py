@@ -51,63 +51,88 @@ class SuiviPresence(models.Model):
 
     def _check_entry_compliance(self, vals):
         """ 
-        Block creation/modification of 'Entrée' for TODAY if Current System Time > 10:00 AM.
-        Allowed: Past dates, Future dates, Admins.
+        Strict Rules for 'Entrée' records (Creation & Modification):
+        1. GLOBAL TIME LOCK: If System Time > 10:00 AM -> BLOCK EVERYTHING.
+        2. DATE LOCK: Entry Date must be TODAY. Past/Future -> BLOCK.
+        
+        Allowed: Admins bypass all rules.
         """
         if self.env.user.has_group('suivi_presence.group_suivi_admin'):
             return
 
-        # 1. Get Current System Time in Casablanca
+        # ---------------------------------------------------------
+        # 1. SETUP: Get Current System Time in Casablanca
+        # ---------------------------------------------------------
         user_tz = pytz.timezone('Africa/Casablanca')
-        # fields.Datetime.now() is UTC. We convert to Casa.
         utc_now = fields.Datetime.now()
         casa_now = utc_now.astimezone(user_tz)
         
-        # 2. Check if we are past the limit (10:00 AM)
+        # ---------------------------------------------------------
+        # 2. CHECK GLOBAL TIME LOCK
+        # If it is past 10:00 AM now, NO 'Entrée' operations allowed.
+        # ---------------------------------------------------------
         current_decimal = casa_now.hour + casa_now.minute / 60.0
-        if current_decimal <= 10.0:
-            return
+        if current_decimal > 10.0:
+            # We need to see if we are dealing with an 'Entrée' record.
+            # If self exists, check if any record is 'Entrée' or becoming 'Entrée'
+            # If create, check vals.
+            
+            is_entree_operation = False
+            
+            # Check for Create
+            if not self: 
+                if vals.get('type') == 'entree':
+                    is_entree_operation = True
+            
+            # Check for Write
+            else:
+                for rec in self:
+                    new_type = vals.get('type') or rec.type
+                    if new_type == 'entree':
+                        is_entree_operation = True
+                        break
+            
+            if is_entree_operation:
+                raise exceptions.ValidationError(
+                    "SYSTEM LOCK: It is past 10:00 AM. No Entry operations allowed."
+                )
 
-        # 3. Analyze Target Records
-        # If self is a recordset (write), we inspect each record merged with vals
-        # If self is empty/model (create), we inspect vals only
-        
+        # ---------------------------------------------------------
+        # 3. PREPARE TARGETS (For Date Check)
+        # ---------------------------------------------------------
         targets = []
         if self:
-            for rec in self:
+             for rec in self:
                 targets.append({
                     'type': vals.get('type') or rec.type,
                     'datetime': vals.get('datetime') or rec.datetime
                 })
         else:
-            targets.append({
+             targets.append({
                 'type': vals.get('type'),
                 'datetime': vals.get('datetime')
             })
 
+        # ---------------------------------------------------------
+        # 4. CHECK DATE LOCK
+        # Entry Date must be TODAY.
+        # ---------------------------------------------------------
         for t in targets:
             if t['type'] == 'entree':
-                # Determin Target Date
                 dt_val = t['datetime']
                 if dt_val:
-                    # Convert to datetime object if string
                     target_dt = fields.Datetime.to_datetime(dt_val)
                 else:
-                    # Default to NOW if missing (e.g. create default)
                     target_dt = fields.Datetime.now()
 
-                # Convert Target to Casa for Date Comparison
-                # Ensure UTC aware before converting
                 if not target_dt.tzinfo:
                     target_dt = pytz.utc.localize(target_dt)
                 
                 target_casa = target_dt.astimezone(user_tz)
 
-                # 4. Compare Dates
-                # Rule: Block if Target Date is TODAY (and we are > 10 AM)
-                if target_casa.date() == casa_now.date():
+                if target_casa.date() != casa_now.date():
                     raise exceptions.ValidationError(
-                        "Il est passé 10h00. Vous ne pouvez plus créer ou modifier une entrée pour aujourd'hui."
+                        "INVALID DATE: Entry records must be for TODAY only."
                     )
     
     def _process_absence_leave_creation(self):

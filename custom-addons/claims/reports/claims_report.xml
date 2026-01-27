@@ -30,63 +30,104 @@
                 <t t-set="company" t-value="env.company"/>
                 <t t-call="web.external_layout">
                     <div class="page">
-                        <!-- Header with dynamic logo -->
-                        <div class="row mb-4">
+                        <!-- Header with dynamic logo and better spacing -->
+                        <div class="row mb-5">
                             <div class="col-6">
                                 <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
                                      t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
-                                     style="max-height: 100px; max-width: 200px;" alt="Logo"/>
+                                     style="max-height: 120px; max-width: 250px;" alt="Logo"/>
                             </div>
                             <div class="col-6 text-right">
-                                <h2><span t-field="o.company_id.name"/></h2>
+                                <h2 style="font-weight: bold; color: #2c3e50;"><span t-field="o.company_id.name"/></h2>
                             </div>
                         </div>
 
-                        <div class="text-center mb-5">
-                            <h3>Réclamation DHL Delay</h3>
+                        <!-- Title with better styling -->
+                        <div class="text-center mb-5" style="background-color: #e74c3c; padding: 20px; border-radius: 8px;">
+                            <h2 style="color: white; font-weight: bold; margin: 0;">RÉCLAMATION DHL DELAY</h2>
                         </div>
 
-                        <div class="row mt-4">
-                            <div class="col-6">
-                                <strong>Fournisseur:</strong> <span t-field="o.supplier_id"/><br/>
-                                <strong>BL Référence:</strong> <span t-field="o.bl_id"/><br/>
-                                <strong>Origine:</strong> <span t-field="o.origin"/><br/>
-                                <strong>Facture N°:</strong> <span t-field="o.invoice_number"/><br/>
-                            </div>
-                            <div class="col-6">
-                                <strong>Article:</strong> <span t-field="o.article_id"/><br/>
-                                <strong>LOT:</strong> <span t-field="o.lot"/><br/>
-                                <strong>Date de création:</strong> <span t-field="o.claim_date"/><br/>
-                                <strong>Montant Dû:</strong> <span t-field="o.amount_due"/><br/>
-                            </div>
-                        </div>
-
-                        <div class="row mt-4">
+                        <!-- Information section with better layout -->
+                        <div class="row mt-5 mb-4">
                             <div class="col-12">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>ETA Prévu</th>
-                                            <th>ETA DHL</th>
-                                            <th>Retard (Jours)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><span t-field="o.eta_planned"/></td>
-                                            <td><span t-field="o.eta_dhl"/></td>
-                                            <td><span t-field="o.dhl_delay"/></td>
-                                        </tr>
-                                    </tbody>
+                                <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+                                    Informations Générales
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="width: 40%; padding: 8px 0;"><strong style="color: #34495e;">Fournisseur:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.supplier_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">BL Référence:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.bl_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Origine:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.origin" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Facture N°:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.invoice_number" style="font-size: 15px;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="width: 40%; padding: 8px 0;"><strong style="color: #34495e;">Article:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.article_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">LOT:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.lot" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Date de création:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.claim_date" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Montant Dû:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.amount_due" style="font-size: 16px; font-weight: bold; color: #e74c3c;"/></td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="row mt-4">
+                        <!-- Delay information with enhanced styling -->
+                        <div class="row mt-5 mb-4">
                             <div class="col-12">
-                                <strong>Commentaires:</strong><br/>
-                                <p><strong>Créateur:</strong> <span t-field="o.comment_creator"/></p>
-                                <p><strong>Responsable:</strong> <span t-field="o.comment_responsible"/></p>
+                                <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+                                    Détails du Retard
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered" style="font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <thead style="background-color: #3498db;">
+                                        <tr>
+                                            <th style="color: white; padding: 15px; text-align: center; font-weight: bold;">ETA Prévu</th>
+                                            <th style="color: white; padding: 15px; text-align: center; font-weight: bold;">ETA DHL</th>
+                                            <th style="color: white; padding: 15px; text-align: center; font-weight: bold;">Retard (Jours)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 15px; text-align: center; background-color: #ecf0f1;"><span t-field="o.eta_planned" style="font-weight: bold;"/></td>
+                                            <td style="padding: 15px; text-align: center; background-color: #ecf0f1;"><span t-field="o.eta_dhl" style="font-weight: bold;"/></td>
+                                            <td style="padding: 15px; text-align: center; background-color: #ffe6e6;">
+                                                <span t-field="o.dhl_delay" style="font-weight: bold; color: #e74c3c; font-size: 18px;"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -102,63 +143,104 @@
                 <t t-set="company" t-value="env.company"/>
                 <t t-call="web.external_layout">
                     <div class="page">
-                        <!-- Header with dynamic logo -->
-                        <div class="row mb-4">
+                        <!-- Header with dynamic logo and better spacing -->
+                        <div class="row mb-5">
                             <div class="col-6">
                                 <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
                                      t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
-                                     style="max-height: 100px; max-width: 200px;" alt="Logo"/>
+                                     style="max-height: 120px; max-width: 250px;" alt="Logo"/>
                             </div>
                             <div class="col-6 text-right">
-                                <h2><span t-field="o.company_id.name"/></h2>
+                                <h2 style="font-weight: bold; color: #2c3e50;"><span t-field="o.company_id.name"/></h2>
                             </div>
                         </div>
 
-                        <div class="text-center mb-5">
-                            <h3>Réclamation Différence de Franchise</h3>
+                        <!-- Title with better styling -->
+                        <div class="text-center mb-5" style="background-color: #e67e22; padding: 20px; border-radius: 8px;">
+                            <h2 style="color: white; font-weight: bold; margin: 0;">RÉCLAMATION DIFFÉRENCE DE FRANCHISE</h2>
                         </div>
 
-                        <div class="row mt-4">
-                            <div class="col-6">
-                                <strong>Fournisseur:</strong> <span t-field="o.supplier_id"/><br/>
-                                <strong>BL Référence:</strong> <span t-field="o.bl_id"/><br/>
-                                <strong>Origine:</strong> <span t-field="o.origin"/><br/>
-                                <strong>Facture N°:</strong> <span t-field="o.invoice_number"/><br/>
-                            </div>
-                            <div class="col-6">
-                                <strong>Article:</strong> <span t-field="o.article_id"/><br/>
-                                <strong>LOT:</strong> <span t-field="o.lot"/><br/>
-                                <strong>Date de création:</strong> <span t-field="o.claim_date"/><br/>
-                                <strong>Montant Dû:</strong> <span t-field="o.amount_due"/><br/>
-                            </div>
-                        </div>
-
-                        <div class="row mt-4">
+                        <!-- Information section with better layout -->
+                        <div class="row mt-5 mb-4">
                             <div class="col-12">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Franchise Confirmée</th>
-                                            <th>Franchise Trouvée</th>
-                                            <th>Différence</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><span t-field="o.franchise_confirmed"/></td>
-                                            <td><span t-field="o.franchise_found"/></td>
-                                            <td><span t-field="o.franchise_difference"/></td>
-                                        </tr>
-                                    </tbody>
+                                <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+                                    Informations Générales
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="width: 40%; padding: 8px 0;"><strong style="color: #34495e;">Fournisseur:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.supplier_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">BL Référence:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.bl_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Origine:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.origin" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Facture N°:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.invoice_number" style="font-size: 15px;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="width: 40%; padding: 8px 0;"><strong style="color: #34495e;">Article:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.article_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">LOT:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.lot" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Date de création:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.claim_date" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong style="color: #34495e;">Montant Dû:</strong></td>
+                                        <td style="padding: 8px 0;"><span t-field="o.amount_due" style="font-size: 16px; font-weight: bold; color: #e67e22;"/></td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="row mt-4">
+                        <!-- Franchise difference information with enhanced styling -->
+                        <div class="row mt-5 mb-4">
                             <div class="col-12">
-                                <strong>Commentaires:</strong><br/>
-                                <p><strong>Créateur:</strong> <span t-field="o.comment_creator"/></p>
-                                <p><strong>Responsable:</strong> <span t-field="o.comment_responsible"/></p>
+                                <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+                                    Détails de la Franchise
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered" style="font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <thead style="background-color: #3498db;">
+                                        <tr>
+                                            <th style="color: white; padding: 15px; text-align: center; font-weight: bold;">Franchise Confirmée</th>
+                                            <th style="color: white; padding: 15px; text-align: center; font-weight: bold;">Franchise Trouvée</th>
+                                            <th style="color: white; padding: 15px; text-align: center; font-weight: bold;">Différence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 15px; text-align: center; background-color: #ecf0f1;"><span t-field="o.franchise_confirmed" style="font-weight: bold;"/></td>
+                                            <td style="padding: 15px; text-align: center; background-color: #ecf0f1;"><span t-field="o.franchise_found" style="font-weight: bold;"/></td>
+                                            <td style="padding: 15px; text-align: center; background-color: #ffe6e6;">
+                                                <span t-field="o.franchise_difference" style="font-weight: bold; color: #e67e22; font-size: 18px;"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

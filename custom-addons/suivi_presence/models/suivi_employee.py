@@ -5,7 +5,7 @@ class SuiviEmployee(models.Model):
     _name = 'suivi.employee'
     _description = 'Employé Suivi Présence'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _rec_name = 'core_employee_id'
+    _rec_name = 'name'
 
     core_employee_id = fields.Many2one('core.employee', string='Employé Principal', required=True, tracking=True)
     

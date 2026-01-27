@@ -30,94 +30,101 @@
                 <t t-set="company" t-value="env.company"/>
                 <t t-call="web.external_layout">
                     <div class="page">
-                        <!-- Header -->
-                        <div class="row mb-5">
+                        <!-- Header with dynamic logo and better spacing -->
+                        <div class="row" style="margin-bottom: 60px;">
                             <div class="col-6">
                                 <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
                                      t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
-                                     style="max-height: 100px; max-width: 200px;" alt="Logo"/>
+                                     style="max-height: 120px; max-width: 250px;" alt="Logo"/>
                             </div>
                             <div class="col-6 text-right">
-                                <h3 style="color: #2c3e50; margin-top: 20px;"><span t-field="o.company_id.name"/></h3>
+                                <h2 style="font-weight: bold; color: #2c3e50;"><span t-field="o.company_id.name"/></h2>
                             </div>
                         </div>
 
-                        <!-- Title -->
-                        <div class="text-center mb-5 mt-5">
-                            <h2 style="color: #2c3e50; font-weight: bold; letter-spacing: 1px;">DHL DELAY CLAIM</h2>
-                            <div style="width: 80px; height: 3px; background-color: #3498db; margin: 15px auto;"></div>
+                        <!-- Title with better styling -->
+                        <div class="text-center" style="background-color: #e74c3c; padding: 25px; border-radius: 8px; margin-bottom: 70px;">
+                            <h2 style="color: white; font-weight: bold; margin: 0;">DHL DELAY CLAIM</h2>
                         </div>
 
-                        <!-- General Information -->
-                        <div style="margin-top: 50px; margin-bottom: 50px;">
-                            <h5 style="color: #7f8c8d; margin-bottom: 30px; font-weight: 600;">GENERAL INFORMATION</h5>
-                            
-                            <div class="row" style="margin-bottom: 40px;">
-                                <div class="col-6">
-                                    <table class="table table-borderless" style="font-size: 13px;">
-                                        <tr style="height: 45px;">
-                                            <td style="width: 35%; color: #7f8c8d;">Supplier</td>
-                                            <td><span t-field="o.supplier_id" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">BL Reference</td>
-                                            <td><span t-field="o.bl_id" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Origin</td>
-                                            <td><span t-field="o.origin" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Invoice Number</td>
-                                            <td><span t-field="o.invoice_number" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-6">
-                                    <table class="table table-borderless" style="font-size: 13px;">
-                                        <tr style="height: 45px;">
-                                            <td style="width: 35%; color: #7f8c8d;">Article</td>
-                                            <td><span t-field="o.article_id" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">LOT</td>
-                                            <td><span t-field="o.lot" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Claim Date</td>
-                                            <td><span t-field="o.claim_date" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Amount Due</td>
-                                            <td><span t-field="o.amount_due" style="color: #e74c3c; font-weight: 600; font-size: 14px;"/></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+                        <!-- Information section with better layout -->
+                        <div style="margin-bottom: 60px;">
+                            <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 35px;">
+                                General Information
+                            </h4>
                         </div>
 
-                        <!-- Delay Details -->
-                        <div style="margin-top: 60px;">
-                            <h5 style="color: #7f8c8d; margin-bottom: 30px; font-weight: 600;">DELAY DETAILS</h5>
-                            
-                            <table class="table" style="font-size: 13px;">
-                                <thead>
-                                    <tr style="background-color: #f8f9fa; border-top: 2px solid #dee2e6; border-bottom: 2px solid #dee2e6;">
-                                        <th style="padding: 20px; color: #2c3e50; font-weight: 600; text-align: center;">Planned ETA</th>
-                                        <th style="padding: 20px; color: #2c3e50; font-weight: 600; text-align: center;">DHL ETA</th>
-                                        <th style="padding: 20px; color: #2c3e50; font-weight: 600; text-align: center;">Delay (Days)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                        <div class="row" style="margin-bottom: 70px;">
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
                                     <tr>
-                                        <td style="padding: 25px; text-align: center; color: #34495e;"><span t-field="o.eta_planned" style="font-size: 14px;"/></td>
-                                        <td style="padding: 25px; text-align: center; color: #34495e;"><span t-field="o.eta_dhl" style="font-size: 14px;"/></td>
-                                        <td style="padding: 25px; text-align: center;">
-                                            <span t-field="o.dhl_delay" style="font-weight: 600; color: #e74c3c; font-size: 16px;"/>
-                                        </td>
+                                        <td style="width: 40%; padding: 12px 0;"><strong style="color: #34495e;">Supplier:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.supplier_id" style="font-size: 15px;"/></td>
                                     </tr>
-                                </tbody>
-                            </table>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">BL Reference:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.bl_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Origin:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.origin" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Invoice Number:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.invoice_number" style="font-size: 15px;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="width: 40%; padding: 12px 0;"><strong style="color: #34495e;">Article:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.article_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">LOT:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.lot" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Claim Date:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.claim_date" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Amount Due:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.amount_due" style="font-size: 16px; font-weight: bold; color: #e74c3c;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Delay information with enhanced styling -->
+                        <div style="margin-bottom: 60px;">
+                            <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 35px;">
+                                Delay Details
+                            </h4>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered" style="font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <thead style="background-color: #3498db;">
+                                        <tr>
+                                            <th style="color: white; padding: 20px; text-align: center; font-weight: bold;">Planned ETA</th>
+                                            <th style="color: white; padding: 20px; text-align: center; font-weight: bold;">DHL ETA</th>
+                                            <th style="color: white; padding: 20px; text-align: center; font-weight: bold;">Delay (Days)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 20px; text-align: center; background-color: #ecf0f1;"><span t-field="o.eta_planned" style="font-weight: bold;"/></td>
+                                            <td style="padding: 20px; text-align: center; background-color: #ecf0f1;"><span t-field="o.eta_dhl" style="font-weight: bold;"/></td>
+                                            <td style="padding: 20px; text-align: center; background-color: #ffe6e6;">
+                                                <span t-field="o.dhl_delay" style="font-weight: bold; color: #e74c3c; font-size: 18px;"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </t>
@@ -132,94 +139,101 @@
                 <t t-set="company" t-value="env.company"/>
                 <t t-call="web.external_layout">
                     <div class="page">
-                        <!-- Header -->
-                        <div class="row mb-5">
+                        <!-- Header with dynamic logo and better spacing -->
+                        <div class="row" style="margin-bottom: 60px;">
                             <div class="col-6">
                                 <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
                                      t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
-                                     style="max-height: 100px; max-width: 200px;" alt="Logo"/>
+                                     style="max-height: 120px; max-width: 250px;" alt="Logo"/>
                             </div>
                             <div class="col-6 text-right">
-                                <h3 style="color: #2c3e50; margin-top: 20px;"><span t-field="o.company_id.name"/></h3>
+                                <h2 style="font-weight: bold; color: #2c3e50;"><span t-field="o.company_id.name"/></h2>
                             </div>
                         </div>
 
-                        <!-- Title -->
-                        <div class="text-center mb-5 mt-5">
-                            <h2 style="color: #2c3e50; font-weight: bold; letter-spacing: 1px;">FRANCHISE DIFFERENCE CLAIM</h2>
-                            <div style="width: 80px; height: 3px; background-color: #3498db; margin: 15px auto;"></div>
+                        <!-- Title with better styling -->
+                        <div class="text-center" style="background-color: #e67e22; padding: 25px; border-radius: 8px; margin-bottom: 70px;">
+                            <h2 style="color: white; font-weight: bold; margin: 0;">FRANCHISE DIFFERENCE CLAIM</h2>
                         </div>
 
-                        <!-- General Information -->
-                        <div style="margin-top: 50px; margin-bottom: 50px;">
-                            <h5 style="color: #7f8c8d; margin-bottom: 30px; font-weight: 600;">GENERAL INFORMATION</h5>
-                            
-                            <div class="row" style="margin-bottom: 40px;">
-                                <div class="col-6">
-                                    <table class="table table-borderless" style="font-size: 13px;">
-                                        <tr style="height: 45px;">
-                                            <td style="width: 35%; color: #7f8c8d;">Supplier</td>
-                                            <td><span t-field="o.supplier_id" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">BL Reference</td>
-                                            <td><span t-field="o.bl_id" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Origin</td>
-                                            <td><span t-field="o.origin" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Invoice Number</td>
-                                            <td><span t-field="o.invoice_number" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-6">
-                                    <table class="table table-borderless" style="font-size: 13px;">
-                                        <tr style="height: 45px;">
-                                            <td style="width: 35%; color: #7f8c8d;">Article</td>
-                                            <td><span t-field="o.article_id" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">LOT</td>
-                                            <td><span t-field="o.lot" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Claim Date</td>
-                                            <td><span t-field="o.claim_date" style="color: #2c3e50; font-weight: 500;"/></td>
-                                        </tr>
-                                        <tr style="height: 45px;">
-                                            <td style="color: #7f8c8d;">Amount Due</td>
-                                            <td><span t-field="o.amount_due" style="color: #e67e22; font-weight: 600; font-size: 14px;"/></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+                        <!-- Information section with better layout -->
+                        <div style="margin-bottom: 60px;">
+                            <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 35px;">
+                                General Information
+                            </h4>
                         </div>
 
-                        <!-- Franchise Details -->
-                        <div style="margin-top: 60px;">
-                            <h5 style="color: #7f8c8d; margin-bottom: 30px; font-weight: 600;">FRANCHISE DETAILS</h5>
-                            
-                            <table class="table" style="font-size: 13px;">
-                                <thead>
-                                    <tr style="background-color: #f8f9fa; border-top: 2px solid #dee2e6; border-bottom: 2px solid #dee2e6;">
-                                        <th style="padding: 20px; color: #2c3e50; font-weight: 600; text-align: center;">Confirmed Franchise</th>
-                                        <th style="padding: 20px; color: #2c3e50; font-weight: 600; text-align: center;">Found Franchise</th>
-                                        <th style="padding: 20px; color: #2c3e50; font-weight: 600; text-align: center;">Difference</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                        <div class="row" style="margin-bottom: 70px;">
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
                                     <tr>
-                                        <td style="padding: 25px; text-align: center; color: #34495e;"><span t-field="o.franchise_confirmed" style="font-size: 14px;"/></td>
-                                        <td style="padding: 25px; text-align: center; color: #34495e;"><span t-field="o.franchise_found" style="font-size: 14px;"/></td>
-                                        <td style="padding: 25px; text-align: center;">
-                                            <span t-field="o.franchise_difference" style="font-weight: 600; color: #e67e22; font-size: 16px;"/>
-                                        </td>
+                                        <td style="width: 40%; padding: 12px 0;"><strong style="color: #34495e;">Supplier:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.supplier_id" style="font-size: 15px;"/></td>
                                     </tr>
-                                </tbody>
-                            </table>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">BL Reference:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.bl_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Origin:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.origin" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Invoice Number:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.invoice_number" style="font-size: 15px;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="width: 40%; padding: 12px 0;"><strong style="color: #34495e;">Article:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.article_id" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">LOT:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.lot" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Claim Date:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.claim_date" style="font-size: 15px;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0;"><strong style="color: #34495e;">Amount Due:</strong></td>
+                                        <td style="padding: 12px 0;"><span t-field="o.amount_due" style="font-size: 16px; font-weight: bold; color: #e67e22;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Franchise difference information with enhanced styling -->
+                        <div style="margin-bottom: 60px;">
+                            <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 35px;">
+                                Franchise Details
+                            </h4>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered" style="font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <thead style="background-color: #3498db;">
+                                        <tr>
+                                            <th style="color: white; padding: 20px; text-align: center; font-weight: bold;">Confirmed Franchise</th>
+                                            <th style="color: white; padding: 20px; text-align: center; font-weight: bold;">Found Franchise</th>
+                                            <th style="color: white; padding: 20px; text-align: center; font-weight: bold;">Difference</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 20px; text-align: center; background-color: #ecf0f1;"><span t-field="o.franchise_confirmed" style="font-weight: bold;"/></td>
+                                            <td style="padding: 20px; text-align: center; background-color: #ecf0f1;"><span t-field="o.franchise_found" style="font-weight: bold;"/></td>
+                                            <td style="padding: 20px; text-align: center; background-color: #ffe6e6;">
+                                                <span t-field="o.franchise_difference" style="font-weight: bold; color: #e67e22; font-size: 18px;"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </t>

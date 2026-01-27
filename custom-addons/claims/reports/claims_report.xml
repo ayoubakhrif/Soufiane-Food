@@ -7,7 +7,7 @@
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">claims.report_claims_dhl_delay</field>
         <field name="report_file">claims.report_claims_dhl_delay</field>
-        <field name="print_report_name">'Reclamation_DHL_%s' % object.bl_id.name</field>
+        <field name="print_report_name">'Reclamation_DHL_%s' % object.bl_id.bl_number</field>
         <field name="binding_model_id" ref="model_claims_dhl_delay"/>
         <field name="binding_type">report</field>
     </record>
@@ -18,7 +18,7 @@
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">claims.report_claims_franchise_difference</field>
         <field name="report_file">claims.report_claims_franchise_difference</field>
-        <field name="print_report_name">'Reclamation_Franchise_%s' % object.bl_id.name</field>
+        <field name="print_report_name">'Reclamation_Franchise_%s' % object.bl_id.bl_number</field>
         <field name="binding_model_id" ref="model_claims_franchise_difference"/>
         <field name="binding_type">report</field>
     </record>

@@ -8,13 +8,14 @@
         <field name="arch" type="xml">
             <form string="Franchise Difference Claim">
                 <header>
-                    <button name="action_receive" string="Reçu" type="object" class="oe_highlight"
+                    <button name="action_print_report" string="Generate Claim PDF" type="object" class="oe_highlight"/>
+                    <button name="action_receive" string="Reçu" type="object"
                             invisible="state != 'initial'"/>
-                    <button name="action_send_supplier" string="Envoyé au Fournisseur" type="object" class="oe_highlight"
+                    <button name="action_send_supplier" string="Envoyé au Fournisseur" type="object"
                             invisible="state != 'received'"/>
-                    <button name="action_resolve" string="Résolu" type="object" class="oe_highlight"
+                    <button name="action_resolve" string="Résolu" type="object"
                             invisible="state != 'waiting'"/>
-                    <button name="action_close" string="Clôturé" type="object" class="oe_highlight"
+                    <button name="action_close" string="Clôturé" type="object"
                             invisible="state != 'resolved'"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
@@ -71,8 +72,9 @@
                 <field name="franchise_found"/>
                 <field name="franchise_difference"/>
                 <field name="amount_due"/>
-                <field name="responsible_id"/>
-                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'" optional="show"/>
             </tree>
         </field>
     </record>

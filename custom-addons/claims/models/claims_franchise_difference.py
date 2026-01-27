@@ -10,6 +10,10 @@ class ClaimsFranchiseDifference(models.Model):
     # ==========================
     # 1. Main Data
     # ==========================
+
+    def action_print_report(self):
+        return self.env.ref('claims.action_report_claims_franchise_difference').report_action(self)
+
     bl_id = fields.Many2one(
         'logistique.entry',
         string='BL Reference',

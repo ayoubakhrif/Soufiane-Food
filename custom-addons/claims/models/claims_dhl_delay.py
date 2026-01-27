@@ -11,6 +11,10 @@ class ClaimsDHLDelay(models.Model):
     # ==========================
     # 1. Main Data
     # ==========================
+    
+    def action_print_report(self):
+        return self.env.ref('claims.action_report_claims_dhl_delay').report_action(self)
+        
     bl_id = fields.Many2one(
         'logistique.entry',
         string='BL Reference',

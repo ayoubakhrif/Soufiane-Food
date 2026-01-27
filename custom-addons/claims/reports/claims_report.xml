@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Report Action -->
+    <record id="action_report_claims_dhl_delay" model="ir.actions.report">
+        <field name="name">Réclamation DHL</field>
+        <field name="model">claims.dhl.delay</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">claims.report_claims_dhl_delay</field>
+        <field name="report_file">claims.report_claims_dhl_delay</field>
+        <field name="print_report_name">'Reclamation_DHL_%s' % object.bl_id.name</field>
+        <field name="binding_model_id" ref="model_claims_dhl_delay"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_claims_franchise_difference" model="ir.actions.report">
+        <field name="name">Réclamation Franchise</field>
+        <field name="model">claims.franchise.difference</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">claims.report_claims_franchise_difference</field>
+        <field name="report_file">claims.report_claims_franchise_difference</field>
+        <field name="print_report_name">'Reclamation_Franchise_%s' % object.bl_id.name</field>
+        <field name="binding_model_id" ref="model_claims_franchise_difference"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- DHL Delay Template -->
+    <template id="report_claims_dhl_delay">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header with dynamic logo -->
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
+                                     t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
+                                     style="max-height: 100px; max-width: 200px;" alt="Logo"/>
+                            </div>
+                            <div class="col-6 text-right">
+                                <h2><span t-field="o.company_id.name"/></h2>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-5">
+                            <h3>Réclamation DHL Delay</h3>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Fournisseur:</strong> <span t-field="o.supplier_id"/><br/>
+                                <strong>BL Référence:</strong> <span t-field="o.bl_id"/><br/>
+                                <strong>Origine:</strong> <span t-field="o.origin"/><br/>
+                                <strong>Facture N°:</strong> <span t-field="o.invoice_number"/><br/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Article:</strong> <span t-field="o.article_id"/><br/>
+                                <strong>LOT:</strong> <span t-field="o.lot"/><br/>
+                                <strong>Date de création:</strong> <span t-field="o.claim_date"/><br/>
+                                <strong>Montant Dû:</strong> <span t-field="o.amount_due"/><br/>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ETA Prévu</th>
+                                            <th>ETA DHL</th>
+                                            <th>Retard (Jours)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span t-field="o.eta_planned"/></td>
+                                            <td><span t-field="o.eta_dhl"/></td>
+                                            <td><span t-field="o.dhl_delay"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <strong>Commentaires:</strong><br/>
+                                <p><strong>Créateur:</strong> <span t-field="o.comment_creator"/></p>
+                                <p><strong>Responsable:</strong> <span t-field="o.comment_responsible"/></p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Franchise Difference Template -->
+    <template id="report_claims_franchise_difference">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header with dynamic logo -->
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
+                                     t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
+                                     style="max-height: 100px; max-width: 200px;" alt="Logo"/>
+                            </div>
+                            <div class="col-6 text-right">
+                                <h2><span t-field="o.company_id.name"/></h2>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-5">
+                            <h3>Réclamation Différence de Franchise</h3>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Fournisseur:</strong> <span t-field="o.supplier_id"/><br/>
+                                <strong>BL Référence:</strong> <span t-field="o.bl_id"/><br/>
+                                <strong>Origine:</strong> <span t-field="o.origin"/><br/>
+                                <strong>Facture N°:</strong> <span t-field="o.invoice_number"/><br/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Article:</strong> <span t-field="o.article_id"/><br/>
+                                <strong>LOT:</strong> <span t-field="o.lot"/><br/>
+                                <strong>Date de création:</strong> <span t-field="o.claim_date"/><br/>
+                                <strong>Montant Dû:</strong> <span t-field="o.amount_due"/><br/>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Franchise Confirmée</th>
+                                            <th>Franchise Trouvée</th>
+                                            <th>Différence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span t-field="o.franchise_confirmed"/></td>
+                                            <td><span t-field="o.franchise_found"/></td>
+                                            <td><span t-field="o.franchise_difference"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <strong>Commentaires:</strong><br/>
+                                <p><strong>Créateur:</strong> <span t-field="o.comment_creator"/></p>
+                                <p><strong>Responsable:</strong> <span t-field="o.comment_responsible"/></p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

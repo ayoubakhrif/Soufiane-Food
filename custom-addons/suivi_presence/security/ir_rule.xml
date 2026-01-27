@@ -3,7 +3,7 @@
     <record id="rule_core_employee_suivi_manager_casablanca" model="ir.rule">
         <field name="name">Core Employee: Suivi Manager Casablanca &amp; Mediouna</field>
         <field name="model_id" ref="custom_employee.model_core_employee"/>
-        <field name="domain_force">['|', ('site', '=', 'Casablanca'), ('site', '=', 'Mediouna')]</field>
+        <field name="domain_force">['|', ('site', 'ilike', 'Casablanca'), ('site', 'ilike', 'Mediouna')]</field>
         <field name="groups" eval="[(4, ref('suivi_presence.group_suivi_manager'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>

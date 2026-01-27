@@ -29,40 +29,51 @@ class SuiviPresence(models.Model):
 
     @api.model
     def create(self, vals):
-        # ----------------------------------
-        # 1️⃣ Check-in restriction BEFORE create
-        # ----------------------------------
-        if vals.get('type') == 'entree' and not self.env.user.has_group('suivi_presence.group_suivi_admin'):
-            dt_val = vals.get('datetime')
-            if dt_val:
-                dt = fields.Datetime.to_datetime(dt_val)
-            else:
-                dt = fields.Datetime.now()
-            
-            # Localize to UTC (if naive) then convert to Casablanca
-            if not dt.tzinfo:
-                dt = pytz.utc.localize(dt)
-            
-            user_tz = pytz.timezone('Africa/Casablanca')
-            local_dt = dt.astimezone(user_tz)
-
-            hour_dec = local_dt.hour + local_dt.minute / 60.0
-            if hour_dec > 10.0:
-                raise exceptions.ValidationError(
-                    "Check-in is not allowed after 10:00 AM. Please contact an administrator."
-                )
-
-        # ----------------------------------
-        # 2️⃣ Create record safely
-        # ----------------------------------
         rec = super().create(vals)
-
+        rec._check_entry_compliance()
+        
         # ----------------------------------
         # 3️⃣ Absence → Paid Leave logic
         # ----------------------------------
         if rec.type == 'absent' and rec.absence_type == 'leave':
+            # ... (leave logic remains here, calling self.env...)
+            rec._process_absence_leave_creation()
+            
+        return rec
+
+    def write(self, vals):
+        res = super().write(vals)
+        for rec in self:
+            rec._check_entry_compliance()
+        return res
+
+    def _check_entry_compliance(self):
+        """ Block Entree > 10:00 AM for non-admins """
+        if self.env.user.has_group('suivi_presence.group_suivi_admin'):
+            return
+
+        for rec in self:
+            if rec.type == 'entree' and rec.datetime:
+                # Odoo Datetime is UTC. Convert to Casa.
+                dt = rec.datetime
+                if not dt.tzinfo:
+                    dt = pytz.utc.localize(dt)
+                
+                user_tz = pytz.timezone('Africa/Casablanca')
+                local_dt = dt.astimezone(user_tz)
+                
+                hour_dec = local_dt.hour + local_dt.minute / 60.0
+                if hour_dec > 10.0:
+                     raise exceptions.ValidationError(
+                        "Check-in is not allowed after 10:00 AM. Please contact an administrator."
+                    )
+    
+    def _process_absence_leave_creation(self):
+        """ Separate method for leave creation logic to keep create() clean """
+        if self.type == 'absent' and self.absence_type == 'leave':
+             # Check if day is holiday or non-working day
             config = self.env['suivi.presence.config'].get_main_config()
-            target_date = rec.datetime.date()
+            target_date = self.datetime.date()
 
             is_valid_day = True
             if config:
@@ -74,7 +85,7 @@ class SuiviPresence(models.Model):
 
             if is_valid_day:
                 leave = self.env['suivi.leave'].create({
-                    'employee_id': rec.employee_id.id,
+                    'employee_id': self.employee_id.id,
                     'date_from': target_date,
                     'date_to': target_date,
                     'leave_type': 'paid',
@@ -83,4 +94,3 @@ class SuiviPresence(models.Model):
                 })
                 leave.action_approve()
 
-        return rec

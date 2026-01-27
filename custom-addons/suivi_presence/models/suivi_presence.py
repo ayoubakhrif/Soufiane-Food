@@ -42,7 +42,11 @@ class SuiviPresence(models.Model):
             if not self.env.user.has_group('suivi_presence.group_suivi_admin'):
                 import pytz
                 user_tz = pytz.timezone('Africa/Casablanca')
-                local_dt = rec.datetime.astimezone(user_tz)
+                # Odoo Datetime fields are stored in UTC and are naive in Python code
+                # We must localize to UTC first, then convert to target timezone
+                utc_dt = pytz.utc.localize(rec.datetime)
+                local_dt = utc_dt.astimezone(user_tz)
+                
                 # Compare decimal hour
                 hour_dec = local_dt.hour + local_dt.minute / 60.0
                 if hour_dec > 10.0:

@@ -3,7 +3,7 @@
     <record id="rule_core_employee_suivi_manager_casablanca" model="ir.rule">
         <field name="name">Core Employee: Suivi Manager Casablanca &amp; Mediouna</field>
         <field name="model_id" ref="custom_employee.model_core_employee"/>
-        <field name="domain_force">['|', ('site', '=', 'Casablanca'), ('site', '=', 'Mediouna')]</field>
+        <field name="domain_force">['|', ('site', 'ilike', 'Casablanca'), ('site', 'ilike', 'Mediouna')]</field>
         <field name="groups" eval="[(4, ref('suivi_presence.group_suivi_manager'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -14,11 +14,22 @@
     <record id="rule_core_employee_suivi_user_casablanca" model="ir.rule">
         <field name="name">Core Employee: Suivi User Casablanca &amp; Mediouna</field>
         <field name="model_id" ref="custom_employee.model_core_employee"/>
-        <field name="domain_force">['|', ('site', '=', 'Casablanca'), ('site', '=', 'Mediouna')]</field>
+        <field name="domain_force">['|', ('site', 'ilike', 'Casablanca'), ('site', 'ilike', 'Mediouna')]</field>
         <field name="groups" eval="[(4, ref('suivi_presence.group_suivi_user'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
         <field name="perm_create" eval="0"/>
         <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="rule_suivi_employee_visibility" model="ir.rule">
+        <field name="name">Suivi Employee: Visibility Sync</field>
+        <field name="model_id" ref="model_suivi_employee"/>
+        <field name="domain_force">['|', ('core_employee_id.site', 'ilike', 'Casablanca'), ('core_employee_id.site', 'ilike', 'Mediouna')]</field>
+        <field name="groups" eval="[(4, ref('suivi_presence.group_suivi_user')), (4, ref('suivi_presence.group_suivi_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
     </record>
 </odoo>

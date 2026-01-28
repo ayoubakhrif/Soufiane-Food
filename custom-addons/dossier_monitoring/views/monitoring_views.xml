@@ -59,6 +59,70 @@
         </field>
     </record>
 
+    <!-- FORM VIEW -->
+    <record id="view_dossier_monitoring_form" model="ir.ui.view">
+        <field name="name">dossier.monitoring.form</field>
+        <field name="model">dossier.monitoring</field>
+        <field name="arch" type="xml">
+            <form string="Dossier Detail" create="false" edit="false" delete="false">
+                <header>
+                    <field name="phase" widget="statusbar" statusbar_visible="1_contract,3_booking,6_transit,8_delivered,9_closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="bl_number" string="BL Reference"/>
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                        <h3>
+                            <span class="text-muted">Supplier: </span>
+                            <field name="supplier_id" readonly="1" class="oe_inline"/>
+                            <span class="ps-3 text-muted"> | Company: </span>
+                            <field name="company_id" readonly="1" class="oe_inline"/>
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group string="📄 Contract &amp; Booking">
+                            <field name="contract_id" readonly="1"/>
+                            <field name="date_contract" readonly="1"/>
+                            <field name="date_booking" readonly="1"/>
+                        </group>
+                        <group string="📂 Documentation">
+                            <field name="date_docs_received" readonly="1"/>
+                            <field name="date_docs_confirmed" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="🚚 Logistics Journey"/>
+                    <group>
+                        <group string="🚢 In Transit (DHL)">
+                            <field name="eta_dhl" readonly="1"/>
+                            <div class="text-muted" invisible="not eta_dhl">
+                                <i class="fa fa-info-circle"/> Shipment is en route via DHL
+                            </div>
+                        </group>
+                        <group string="🛃 Customs (BAD)">
+                            <field name="bad_date" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="🏁 Delivery (Exit)">
+                            <field name="exit_date" readonly="1"/>
+                        </group>
+                        <group string="✅ Status">
+                            <field name="phase" readonly="1" widget="badge" 
+                                decoration-success="phase == '9_closed'" 
+                                decoration-info="phase == '8_delivered'"
+                                decoration-warning="phase in ('6_transit', '7_customs')"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <!-- TREE VIEW -->
     <record id="view_dossier_monitoring_tree" model="ir.ui.view">
         <field name="name">dossier.monitoring.tree</field>
@@ -91,7 +155,7 @@
     </record>
 
     <!-- MENUS -->
-    <menuitem id="menu_dossier_monitoring_root" name="Monitoring" sequence="50" web_icon="dossier_monitoring,static/description/icon.png"/>
+    <menuitem id="menu_dossier_monitoring_root" name="Monitoring" sequence="50" web_icon="dossier_monitoring,static/description/icon.png" groups="dossier_monitoring.group_monitoring_viewer"/>
     <menuitem id="menu_dossier_monitoring_dashboard" name="Dashboard" parent="menu_dossier_monitoring_root" action="action_dossier_monitoring" sequence="1"/>
 
 </odoo>

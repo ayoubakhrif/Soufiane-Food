@@ -87,6 +87,33 @@
         </field>
     </record>
 
+    <record id="view_stock_kal3iya_entry_search" model="ir.ui.view">
+        <field name="name">stock.kal3iya.entry.search</field>
+        <field name="model">stock.kal3iya.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Entrées">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="ste_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="provider_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_stock_kal3iya_entry" model="ir.actions.act_window">
         <field name="name">Entrées Stock Kal3iya</field>
         <field name="res_model">stock.kal3iya.entry</field>

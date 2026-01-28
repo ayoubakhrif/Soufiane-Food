@@ -5,6 +5,5 @@ class CasaProduct(models.Model):
     _description = 'Produits Casa'
 
     name = fields.Char(string='Nom', required=True)
-    image_1920 = fields.Image(string='Image')
-    
-    article_id = fields.Many2one('company.article', string='Article (Company)')
+    article_id = fields.Many2one('company.article', string='Article (Company)', required=True)
+    image_1920 = fields.Image(related='article_id.image_1920', string='Image', store=True, readonly=True)

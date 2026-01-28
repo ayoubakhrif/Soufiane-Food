@@ -14,3 +14,4 @@ access_casa_stock_exit_user,casa.stock.exit,model_casa_stock_exit,group_user,1,1
 access_casa_stock_exit_manager,casa.stock.exit,model_casa_stock_exit,group_manager,1,1,1,0
 access_casa_stock_stock_user,casa.stock.stock,model_casa_stock_stock,group_user,1,0,0,0
 access_casa_stock_stock_manager,casa.stock.stock,model_casa_stock_stock,group_manager,1,0,0,0
+access_company_article_user_stock,company.article,company_data.model_company_article,group_user,1,0,0,0

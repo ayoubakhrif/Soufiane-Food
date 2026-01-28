@@ -7,6 +7,7 @@
             <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
                 <field name="name"/>
+                <field name="create_uid" string="Créé par" widget="many2one_avatar_user" optional="show"/>
                 <field name="product_id"/>
                 <field name="ste_id"/>
                 <field name="qty"/>
@@ -39,6 +40,9 @@
                         <h1>
                             <field name="name"/>
                         </h1>
+                        <h3>
+                            <field name="create_uid" string="Créé par" widget="many2one_avatar_user" readonly="1"/>
+                        </h3>
                     </div>
                     
                     <separator string="Produit &amp; Quantités"/>
@@ -83,6 +87,34 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="view_casa_stock_entry_search" model="ir.ui.view">
+        <field name="name">casa.stock.entry.search</field>
+        <field name="model">casa.stock.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Entrées">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="ste_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="provider_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Fournisseur" name="group_provider" context="{'group_by': 'provider_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
         </field>
     </record>
 

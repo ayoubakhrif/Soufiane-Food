@@ -7,6 +7,7 @@
             <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
                 <field name="name"/>
+                <field name="create_uid" string="Créé par" widget="many2one_avatar_user" optional="show"/>
                 <field name="exit_id"/>
                 <field name="product_id"/>
                 <field name="client_id"/>
@@ -34,6 +35,9 @@
                         <h1>
                             <field name="name"/>
                         </h1>
+                        <h3>
+                            <field name="create_uid" string="Créé par" widget="many2one_avatar_user" readonly="1"/>
+                        </h3>
                     </div>
                     <group>
                         <group string="A remplir">
@@ -68,6 +72,31 @@
         </field>
     </record>
     
+    <record id="view_casa_stock_return_search" model="ir.ui.view">
+        <field name="name">casa.stock.return.search</field>
+        <field name="model">casa.stock.return</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Retours">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="client_id"/>
+                <field name="exit_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_casa_stock_return" model="ir.actions.act_window">
         <field name="name">Retours Clients</field>
         <field name="res_model">casa.stock.return</field>

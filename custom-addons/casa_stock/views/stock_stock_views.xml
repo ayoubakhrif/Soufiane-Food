@@ -180,6 +180,27 @@
         </field>
     </record>
 
+    <record id="view_casa_stock_stock_search" model="ir.ui.view">
+        <field name="name">casa.stock.stock.search</field>
+        <field name="model">casa.stock.stock</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Stock">
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="ville"/>
+                <field name="frigo"/>
+                <field name="ste_id"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
+                    <filter string="Frigo" name="group_frigo" context="{'group_by': 'frigo'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_casa_stock_stock" model="ir.actions.act_window">
         <field name="name">Stock Casa</field>
         <field name="res_model">casa.stock.stock</field>

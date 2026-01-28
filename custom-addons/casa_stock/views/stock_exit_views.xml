@@ -7,6 +7,7 @@
             <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
                 <field name="name"/>
+                <field name="create_uid" string="Créé par" widget="many2one_avatar_user" optional="show"/>
                 <field name="product_id"/>
                 <field name="ste_id"/>
                 <field name="qty"/>
@@ -30,11 +31,20 @@
         <field name="arch" type="xml">
             <form string="Sortie Stock Casa">
                 <header>
-                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
+                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state != 'done'"/>
                     <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state != 'done'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="%(action_casa_stock_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="returned_qty"/></span>
+                                <span class="o_stat_text">Retourné</span>
+                            </div>
+                        </button>
+                    </div>
                     <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
                         <i class="fa fa-info-circle me-2"/>
                         <strong>Attention:</strong> Les opérations confirmées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et créez une nouvelle opération.
@@ -43,6 +53,9 @@
                         <h1>
                             <field name="name"/>
                         </h1>
+                        <h3>
+                            <field name="create_uid" string="Créé par" widget="many2one_avatar_user" readonly="1"/>
+                        </h3>
                     </div>
                     
                     <separator string="Détails Sortie"/>
@@ -105,6 +118,33 @@
                 <field name="mt_vente" type="measure"/>
                 <field name="margin" type="measure"/>
             </pivot>
+        </field>
+    </record>
+
+    <record id="view_casa_stock_exit_search" model="ir.ui.view">
+        <field name="name">casa.stock.exit.search</field>
+        <field name="model">casa.stock.exit</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Sorties">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="client_id"/>
+                <field name="driver_id"/>
+                <field name="ste_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
         </field>
     </record>
 

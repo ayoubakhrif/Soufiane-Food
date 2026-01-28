@@ -145,7 +145,7 @@
     <record id="action_dossier_monitoring" model="ir.actions.act_window">
         <field name="name">Dossier Lifecycle Monitoring</field>
         <field name="res_model">dossier.monitoring</field>
-        <field name="view_mode">kanban,tree</field>
+        <field name="view_mode">kanban,tree,form</field>
         <field name="context">{'search_default_group_phase': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

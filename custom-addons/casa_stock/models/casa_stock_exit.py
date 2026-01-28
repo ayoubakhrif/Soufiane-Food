@@ -54,6 +54,10 @@ class CasaStockExit(models.Model):
         compute='_compute_amounts',
         store=True
     )
+    returned_qty = fields.Float(
+        string='Qté Retournée',
+        compute='_compute_returned_qty'
+    )
     margin = fields.Float(
         string='Résultat (Gain / Perte)',
         compute='_compute_amounts',
@@ -189,6 +193,34 @@ class CasaStockExit(models.Model):
                 'state': 'cancel',
                 'cancel_move_id': cancel_move.id
             })
+
+    def _compute_returned_qty(self):
+        for rec in self:
+            returns = self.env['casa.stock.return'].search([
+                ('exit_id', '=', rec.id),
+                ('state', '=', 'done')
+            ])
+            rec.returned_qty = sum(returns.mapped('qty'))
+
+    def action_new_return(self):
+        self.ensure_one()
+        return {
+            'name': _('Retour Client'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'casa.stock.return',
+            'view_mode': 'form',
+            'context': {
+                'default_exit_id': self.id,
+                'default_product_id': self.product_id.id,
+                'default_client_id': self.client_id.id,
+                'default_ste_id': self.ste_id.id,
+                'default_driver_id': self.driver_id.id,
+                'default_lot': self.lot,
+                'default_dum': self.dum,
+                'default_frigo': self.frigo,
+                'default_calibre': self.calibre,
+            }
+        }
 
     @api.constrains('qty')
     def _check_qty_positive(self):

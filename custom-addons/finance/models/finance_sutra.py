@@ -56,7 +56,7 @@ class FinanceSutra(models.Model):
     honoraires = fields.Float(string='Honoraires', tracking=True)
     temsa = fields.Float(string='TEMSA', tracking=True)
     autres = fields.Float(string='Autres charges', tracking=True)
-    tva = fields.Float(string='TVA', compute='_compute_tva', tracking=True)
+    tva = fields.Float(string='TVA', compute='_compute_tva', store=True, tracking=True)
     
     total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
 
@@ -122,7 +122,13 @@ class FinanceSutra(models.Model):
             else:
                 rec.tva = (rec.honoraires + rec.temsa + rec.autres)*0.2
 
-    @api.depends('honoraires', 'temsa', 'autres', 'tva')
+    tva = fields.Float(string='TVA', compute='_compute_tva', store=True, tracking=True)
+    
+    total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
+
+    # ... existing code ...
+
+    @api.depends('honoraires', 'temsa', 'autres', 'tva', 'ste_id')
     def _compute_total(self):
         for rec in self:
             rec.total = rec.honoraires + rec.temsa + rec.autres + rec.tva

@@ -5,9 +5,9 @@
         <field name="model">logistique.ste</field>
         <field name="inherit_id" ref="logistique.view_logistique_ste_form"/>
         <field name="arch" type="xml">
-            <field name="name" position="after">
+            <!-- <field name="name" position="after">
                 <field name="core_ste_id"/>
-            </field>
+            </field> -->
         </field>
     </record>
 
@@ -16,9 +16,9 @@
         <field name="model">logistique.ste</field>
         <field name="inherit_id" ref="logistique.view_logistique_ste_tree"/>
         <field name="arch" type="xml">
-            <field name="name" position="after">
+            <!-- <field name="name" position="after">
                 <field name="core_ste_id"/>
-            </field>
+            </field> -->
         </field>
     </record>
 </odoo>

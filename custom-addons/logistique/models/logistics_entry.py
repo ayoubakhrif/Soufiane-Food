@@ -108,9 +108,6 @@ class LogisticsEntry(models.Model):
     lot = fields.Char(string='Lot')
     dhl_number = fields.Char(string='DHL Number')
     eta_dhl = fields.Date(string='ETA DHL')
-    origin = fields.Char(string='Origin')
-    # origin_id moved to achat module
-    # origin_id = fields.Many2one('achat.origin', string='Origin')
     entry_date = fields.Date(string='Date of entry')
     exit_date = fields.Date(string='Date of exit')
     bad_date = fields.Date(string='Date of BAD')

@@ -201,10 +201,25 @@
         </field>
     </record>
 
+    <record id="view_casa_stock_stock_pivot" model="ir.ui.view">
+        <field name="name">casa.stock.stock.pivot</field>
+        <field name="model">casa.stock.stock</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Stock">
+                <field name="product_id" type="row"/>
+                <field name="ste_id" type="row"/>
+                <field name="ville" type="col"/>
+                <field name="quantity" type="measure"/>
+                <field name="weight" type="measure"/>
+                <field name="mt_achat" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_casa_stock_stock" model="ir.actions.act_window">
         <field name="name">Stock Casa</field>
         <field name="res_model">casa.stock.stock</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,tree,form,pivot</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucun stock disponible.

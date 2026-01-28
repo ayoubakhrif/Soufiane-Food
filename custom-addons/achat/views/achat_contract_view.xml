@@ -44,7 +44,6 @@
                             <field name="details"/>
                             <field name="incoterm"/>
                             <field name="origin_id"/>
-                            <field name="origin" string="Origin (Legacy)" readonly="1"/>
                         </group>
                         <group string="Quantities &amp; Conditions">
                             <field name="quantity_negotiated"/>

@@ -55,8 +55,9 @@
                             <field name="supplier_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="shipping_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="origin_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="origin" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="incoterm" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <!-- date_booking readonly if draft (interpreted as locked from draft onwards) -->
+                            <field name="date_booking" readonly="purchase_state in ('draft', 'confirmed')"/>
                             
                             <!-- For admins: always editable -->
                             <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" groups="achat.group_purchase_admin"/> 
@@ -64,7 +65,6 @@
                             <field name="supplier_id" groups="achat.group_purchase_admin"/>
                             <field name="shipping_id" groups="achat.group_purchase_admin"/>
                             <field name="origin_id" groups="achat.group_purchase_admin"/>
-                            <field name="origin" groups="achat.group_purchase_admin"/>
                             <field name="incoterm" groups="achat.group_purchase_admin"/>
                         </group>
                         <group string="Détails Marchandise">
@@ -111,7 +111,9 @@
                                 <group>
                                     <field name="doc_fito" widget="radio" options="{'horizontal': true}"/>
                                     <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
-                                    <!-- readonly="purchase_state == 'confirmed'"-->
+                                    <!-- dates readonly if confirmed -->
+                                    <field name="date_docs_received" readonly="purchase_state == 'confirmed'"/>
+                                    <field name="date_docs_confirmed" readonly="purchase_state == 'confirmed'"/>
                                 </group>
                             </group>
                         </page>

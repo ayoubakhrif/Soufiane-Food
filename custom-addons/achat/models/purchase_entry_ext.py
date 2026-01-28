@@ -7,6 +7,10 @@ class LogisticsEntry(models.Model):
     contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]")
     free_time_negotiated = fields.Integer(string='Negotiated Free Time')
 
+    date_booking = fields.Date(string='Date of Booking')
+    date_docs_received = fields.Date(string='Date Documents Received')
+    date_docs_confirmed = fields.Date(string='Date Documents Confirmed')
+
     origin_id = fields.Many2one(
         'achat.origin',
         string='Origin'

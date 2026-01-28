@@ -386,7 +386,9 @@ class FinanceTalon(models.Model):
     @api.depends('cheque_ids', 'num_chq')
     def _compute_counts(self):
         for rec in self:
-            rec.used_chqs = len(rec.cheque_ids)
+            # Count unique check numbers
+            unique_chqs = {c.chq for c in rec.cheque_ids if c.chq}
+            rec.used_chqs = len(unique_chqs)
             rec.unused_chqs = rec.num_chq - rec.used_chqs
 
     # -------------------------------------------------------------------

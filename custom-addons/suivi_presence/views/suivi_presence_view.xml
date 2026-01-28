@@ -29,7 +29,7 @@
                             <field name="employee_id"/>
                             <field name="datetime"/>
                             <field name="type" widget="radio"/>
-                            <field name="site" force_save="1"/>
+                            <field name="site" readonly="employee_site == 'casa'" force_save="1"/>
                             <field name="absence_type" invisible="type != 'absent'" required="type == 'absent'"/>
                         </group>
                         <group>

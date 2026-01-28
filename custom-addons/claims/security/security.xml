@@ -7,6 +7,13 @@
             <field name="sequence">10</field>
         </record>
 
+        <!-- Viewer Group (Read Only) -->
+        <record id="group_claims_viewer" model="res.groups">
+            <field name="name">Viewer</field>
+            <field name="category_id" ref="module_category_claims"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
         <!-- User Group (Employees) -->
         <record id="group_claims_user" model="res.groups">
             <field name="name">User</field>

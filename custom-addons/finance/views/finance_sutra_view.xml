@@ -9,6 +9,7 @@
                 <field name="facture_sutra"/>
                 <field name="bl_number" />
                 <field name="dum"/>
+                <field name="week"/>
                 <field name="container_names" string="Conteneur"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
@@ -46,6 +47,7 @@
                         
                         <!-- FINANCE INFO -->
                         <group string="Informations Finance (Editable)">
+                            <field name="week"/>
                             <field name="regime"/>
                             <field name="facture_sutra"/>
                             <field name="scan_sutra" widget="url"/>
@@ -92,6 +94,7 @@
             <search string="Search Sutra">
                 <field name="facture_sutra"/>
                 <field name="bl_number"/>
+                <field name="week"/>
                 <field name="container_names" string="Conteneur"/>
                 <field name="dum"/>
                 <field name="ste_id"/>

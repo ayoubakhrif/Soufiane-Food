@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Product Action -->
+    <!-- Product Views -->
+    <record id="view_casa_product_tree" model="ir.ui.view">
+        <field name="name">casa.product.tree</field>
+        <field name="model">casa.product</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="article_id"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="action_casa_stock_product" model="ir.actions.act_window">
         <field name="name">Produits</field>
         <field name="res_model">casa.product</field>
@@ -21,14 +33,38 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Driver Action -->
+    <!-- Driver Views -->
+    <record id="view_casa_driver_tree" model="ir.ui.view">
+        <field name="name">casa.driver.tree</field>
+        <field name="model">casa.driver</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="phone"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="action_casa_stock_driver" model="ir.actions.act_window">
         <field name="name">Chauffeurs</field>
         <field name="res_model">casa.driver</field>
         <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Société Action -->
+    <!-- STE Views -->
+    <record id="view_casa_ste_tree" model="ir.ui.view">
+        <field name="name">casa.ste.tree</field>
+        <field name="model">casa.ste</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="core_ste_id"/>
+                <field name="address"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="action_casa_stock_ste" model="ir.actions.act_window">
         <field name="name">Sociétés</field>
         <field name="res_model">casa.ste</field>

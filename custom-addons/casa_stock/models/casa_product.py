@@ -6,3 +6,5 @@ class CasaProduct(models.Model):
 
     name = fields.Char(string='Nom', required=True)
     image_1920 = fields.Image(string='Image')
+    
+    article_id = fields.Many2one('company.article', string='Article (Company)')

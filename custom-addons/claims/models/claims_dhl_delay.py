@@ -28,7 +28,7 @@ class ClaimsDHLDelay(models.Model):
     # Auto-filled (Read-only, from BL)
     company_id = fields.Many2one(related='bl_id.ste_id', string='Société', readonly=True, store=True)
     supplier_id = fields.Many2one(related='bl_id.supplier_id', string='Supplier', readonly=True, store=True)
-    origin = fields.Char(related='bl_id.origin', string='Origin', readonly=True, store=True)
+    origin = fields.Char(related='bl_id.origin_id.name', string='Origin', readonly=True, store=True)
     article_id = fields.Many2one(related='bl_id.article_id', string='Article', readonly=True, store=True)
     lot = fields.Char(related='bl_id.lot', string='LOT', readonly=True, store=True)
     invoice_number = fields.Char(related='bl_id.invoice_number', string='Invoice Number', readonly=True, store=True)

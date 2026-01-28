@@ -23,6 +23,7 @@
             <tree>
                 <field name="code"/>
                 <field name="name"/>
+                <field name="is_zone_franche" widget="boolean_toggle"/>
                 <field name="manager_name"/>
                 <field name="rc"/>
                 <field name="ice"/>
@@ -51,6 +52,7 @@
                         <group>
                             <field name="manager_name"/>
                             <field name="address"/>
+                            <field name="is_zone_franche"/>
                         </group>
                         <group>
                             <field name="ice"/>

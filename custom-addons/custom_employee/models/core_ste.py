@@ -13,5 +13,6 @@ class CoreSte(models.Model):
     ice = fields.Char(string='I.C.E', tracking=True)
     if_field = fields.Char(string='I.F', tracking=True)
     address = fields.Text(string='Address')
+    is_zone_franche = fields.Boolean(string='Zone Franche', default=False, tracking=True)
     
     # image_1920 is inherited from image.mixin

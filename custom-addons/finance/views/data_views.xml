@@ -49,6 +49,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
+                <field name="core_ste_id"/>
+                <field name="is_zone_franche" widget="boolean_toggle"/>
                 <field name="num_compte"/>
             </tree>
         </field>

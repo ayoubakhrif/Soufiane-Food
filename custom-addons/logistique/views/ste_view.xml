@@ -6,6 +6,8 @@
         <field name="arch" type="xml">
             <tree string="Sociétés">
                 <field name="name"/>
+                <field name="core_ste_id"/>
+                <field name="is_zone_franche" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -18,6 +20,8 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="core_ste_id"/>
+                        <field name="is_zone_franche"/>
                     </group>
                 </sheet>
             </form>

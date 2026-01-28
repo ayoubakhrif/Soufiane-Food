@@ -10,7 +10,7 @@
     """,
     'category': 'Operations',
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'custom_employee'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

@@ -114,10 +114,13 @@ class FinanceSutra(models.Model):
         ('douane_id_uniq', 'unique (douane_id)', 'Un dossier Sutra existe déjà pour ce dossier Douane !')
     ]
 
-    @api.depends('honoraires', 'temsa', 'autres')
+    @api.depends('honoraires', 'temsa', 'autres', 'ste_id.is_zone_franche')
     def _compute_tva(self):
         for rec in self:
-            rec.tva = (rec.honoraires + rec.temsa + rec.autres)*0.2
+            if rec.ste_id and rec.ste_id.is_zone_franche:
+                rec.tva = 0.0
+            else:
+                rec.tva = (rec.honoraires + rec.temsa + rec.autres)*0.2
 
     @api.depends('honoraires', 'temsa', 'autres', 'tva')
     def _compute_total(self):

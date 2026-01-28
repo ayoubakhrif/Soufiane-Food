@@ -7,3 +7,4 @@ from . import casa_stock_move
 from . import casa_stock_entry
 from . import casa_stock_exit
 from . import casa_stock_stock
+from . import casa_stock_return

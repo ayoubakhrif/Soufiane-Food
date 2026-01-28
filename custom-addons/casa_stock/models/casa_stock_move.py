@@ -25,8 +25,10 @@ class CasaStockMove(models.Model):
     move_type = fields.Selection([
         ('entry', 'Entrée'),
         ('exit', 'Sortie'),
+        ('return', 'Retour Client'),
         ('cancel_entry', 'Annulation Entrée'),
         ('cancel_exit', 'Annulation Sortie'),
+        ('cancel_return', 'Annulation Retour'),
         ('adjustment', 'Ajustement'),
     ], string='Type de mouvement', required=True)
     

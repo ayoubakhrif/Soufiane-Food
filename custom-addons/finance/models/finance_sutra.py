@@ -93,7 +93,11 @@ class FinanceSutra(models.Model):
         compute="_compute_container_names",
         store=True
     )
-
+    week = fields.Char(
+        string="Semaine",
+        help="Format : W01 à W52 (ex: W12)",
+        store=True
+    )
     @api.depends('scan_sutra')
     def _compute_scan_url(self):
         for rec in self:
@@ -139,7 +143,15 @@ class FinanceSutra(models.Model):
                 raise ValidationError(
                     "Merci de scanner la facture avant d'enregistrer."
                 )
-            
+    @api.constrains('week')
+    def _check_week_format(self):
+        for rec in self:
+            if rec.week and not re.match(r'^W(0[1-9]|[1-4][0-9]|5[0-2])$', rec.week):
+                raise ValidationError(
+                    "Format de semaine invalide.\n"
+                    "Utilisez : W01 à W52 (ex: W12)"
+                )
+
     @api.constrains('payment_id')
     def _check_single_payment(self):
         for rec in self:

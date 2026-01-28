@@ -27,6 +27,11 @@ class SuiviPresence(models.Model):
         ('casa', 'Casa')
     ], string='Site de Travail', required=True, default='mediouna')
 
+    @api.onchange('employee_id')
+    def _onchange_employee_id(self):
+        if self.employee_id and self.employee_id.payroll_site:
+            self.site = self.employee_id.payroll_site
+
     @api.model
     def create(self, vals):
         # Check-in restriction BEFORE create

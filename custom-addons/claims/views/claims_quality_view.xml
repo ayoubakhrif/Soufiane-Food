@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_claims_quality_search" model="ir.ui.view">
+        <field name="name">claims.quality.search</field>
+        <field name="model">claims.quality</field>
+        <field name="arch" type="xml">
+            <search string="Search Quality Claims">
+                <field name="bl_id"/>
+                <field name="supplier_id"/>
+                <field name="create_uid"/>
+                <field name="responsible_id"/>
+                <field name="state"/>
+                <filter string="My Claims" name="my_claims" domain="[('responsible_id', '=', uid)]"/>
+                <filter string="Initial" name="state_initial" domain="[('state', '=', 'initial')]"/>
+                <filter string="Pending" name="state_pending" domain="[('state', 'in', ('received', 'waiting'))]"/>
+                <filter string="Resolved" name="state_resolved" domain="[('state', '=', 'resolved')]"/>
+                <filter string="Closed" name="state_closed" domain="[('state', '=', 'closed')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Responsible" name="group_responsible" context="{'group_by': 'responsible_id'}"/>
+                    <filter string="Supplier" name="group_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'claim_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_claims_quality_form" model="ir.ui.view">
+        <field name="name">claims.quality.form</field>
+        <field name="model">claims.quality</field>
+        <field name="arch" type="xml">
+            <form string="Quality Claim">
+                <header>
+                    <button name="action_print_report" string="Generate Claim PDF" type="object" class="oe_highlight" groups="claims.group_claims_user"/>
+                    <button name="action_receive" string="Reçu" type="object"
+                            invisible="state != 'initial'"/>
+                    <button name="action_send_supplier" string="Envoyé au Fournisseur" type="object"
+                            invisible="state != 'received'"/>
+                    <button name="action_resolve" string="Résolu" type="object"
+                            invisible="state != 'waiting'"/>
+                    <button name="action_close" string="Clôturé" type="object"
+                            invisible="state != 'resolved'"/>
+                    
+                    <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_id" placeholder="Select BL..." options="{'no_create': True, 'no_edit': True}"
+                                   readonly="state != 'initial'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="BL Data">
+                            <field name="company_id"/>
+                            <field name="supplier_id"/>
+                            <field name="origin"/>
+                            <field name="article_id"/>
+                            <field name="lot"/>
+                            <field name="invoice_number"/>
+                        </group>
+                        <group string="Claim Details">
+                            <field name="qc_url" widget="url" placeholder="https://..." readonly="state != 'initial'"/>
+                            <field name="amount_due" readonly="state in ('resolved', 'closed')"/>
+                        </group>
+                    </group>
+                    <group string="Follow-up">
+                        <field name="create_uid"/>
+                        <field name="responsible_id"/>
+                        <field name="comment_creator" placeholder="Commentaire du créateur..." />
+                        <field name="comment_responsible" placeholder="Commentaire du responsable..." />
+                    </group>
+                </sheet>
+                <!-- Chatter: Visible ONLY to Administrators -->
+                <div class="oe_chatter" groups="base.group_system">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- TREE VIEW -->
+    <record id="view_claims_quality_tree" model="ir.ui.view">
+        <field name="name">claims.quality.tree</field>
+        <field name="model">claims.quality</field>
+        <field name="arch" type="xml">
+            <tree string="Quality Claims" decoration-muted="state == 'closed'">
+                <field name="bl_id"/>
+                <field name="supplier_id"/>
+                <field name="qc_url" widget="url"/>
+                <field name="amount_due"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_claims_quality" model="ir.actions.act_window">
+        <field name="name">Quality Claims</field>
+        <field name="res_model">claims.quality</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new Quality Claim
+          </p>
+        </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_claims_quality"
+              name="Quality Claims"
+              parent="menu_claims_root"
+              action="action_claims_quality"
+              sequence="40"/>
+
+</odoo>

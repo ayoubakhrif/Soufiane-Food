@@ -23,6 +23,28 @@
         <field name="binding_type">report</field>
     </record>
 
+    <record id="action_report_claims_quantity" model="ir.actions.report">
+        <field name="name">Quantity Claim</field>
+        <field name="model">claims.quantity</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">claims.report_claims_quantity</field>
+        <field name="report_file">claims.report_claims_quantity</field>
+        <field name="print_report_name">'Quantity_Claim_%s' % object.bl_id.bl_number</field>
+        <field name="binding_model_id" ref="model_claims_quantity"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_claims_quality" model="ir.actions.report">
+        <field name="name">Quality Claim</field>
+        <field name="model">claims.quality</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">claims.report_claims_quality</field>
+        <field name="report_file">claims.report_claims_quality</field>
+        <field name="print_report_name">'Quality_Claim_%s' % object.bl_id.bl_number</field>
+        <field name="binding_model_id" ref="model_claims_quality"/>
+        <field name="binding_type">report</field>
+    </record>
+
     <!-- DHL Delay Template -->
     <template id="report_claims_dhl_delay">
         <t t-call="web.html_container">
@@ -222,6 +244,176 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Quantity Template -->
+    <template id="report_claims_quantity">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="padding: 20px 40px;">
+                    <div class="row" style="margin-bottom: 30px; align-items: center;">
+                        <div class="col-4">
+                            <img t-if="o.company_logo" 
+                                 t-att-src="image_data_uri(o.company_logo)" 
+                                 style="max-height: 80px; max-width: 200px;" alt="Logo"/>
+                        </div>
+                        <div class="col-8">
+                            <div class="text-center" style="background-color: #8e44ad; padding: 15px; border-radius: 8px;">
+                                <h2 style="color: white; font-weight: bold; margin: 0; font-size: 22px;">QUANTITY CLAIM</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 8px; margin-bottom: 20px; font-size: 16px;">
+                            General Information
+                        </h4>
+                    </div>
+
+                    <div class="row" style="margin-bottom: 30px;">
+                        <div class="col-6">
+                            <table class="table table-borderless" style="font-size: 13px; margin-bottom: 0;">
+                                <tr>
+                                    <td style="width: 40%; padding: 6px 0;"><strong style="color: #34495e;">Supplier:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.supplier_id" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">BL Reference:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.bl_id" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">Origin:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.origin" style="font-size: 14px;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                             <table class="table table-borderless" style="font-size: 13px; margin-bottom: 0;">
+                                <tr>
+                                    <td style="width: 40%; padding: 6px 0;"><strong style="color: #34495e;">Article:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.article_id" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">Claim Date:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.claim_date" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">Amount Due:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.amount_due" style="font-size: 15px; font-weight: bold; color: #8e44ad;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 8px; margin-bottom: 20px; font-size: 16px;">
+                            Verification Details
+                        </h4>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered" style="font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 0;">
+                                <thead style="background-color: #3498db;">
+                                    <tr>
+                                        <th style="color: white; padding: 15px; text-align: center; font-weight: bold; width: 50%;">Item</th>
+                                        <th style="color: white; padding: 15px; text-align: center; font-weight: bold; width: 50%;">Missing Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 15px; text-align: center; background-color: #ecf0f1;"><span t-field="o.article_id" style="font-weight: bold;"/></td>
+                                        <td style="padding: 15px; text-align: center; background-color: #ffe6e6;">
+                                            <span t-field="o.missing_quantity" style="font-weight: bold; color: #8e44ad; font-size: 18px;"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Quality Template -->
+    <template id="report_claims_quality">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="padding: 20px 40px;">
+                    <div class="row" style="margin-bottom: 30px; align-items: center;">
+                        <div class="col-4">
+                            <img t-if="o.company_logo" 
+                                 t-att-src="image_data_uri(o.company_logo)" 
+                                 style="max-height: 80px; max-width: 200px;" alt="Logo"/>
+                        </div>
+                        <div class="col-8">
+                            <div class="text-center" style="background-color: #16a085; padding: 15px; border-radius: 8px;">
+                                <h2 style="color: white; font-weight: bold; margin: 0; font-size: 22px;">QUALITY CLAIM</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div style="margin-bottom: 25px;">
+                        <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 8px; margin-bottom: 20px; font-size: 16px;">
+                            General Information
+                        </h4>
+                    </div>
+
+                    <div class="row" style="margin-bottom: 30px;">
+                        <div class="col-6">
+                            <table class="table table-borderless" style="font-size: 13px; margin-bottom: 0;">
+                                <tr>
+                                    <td style="width: 40%; padding: 6px 0;"><strong style="color: #34495e;">Supplier:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.supplier_id" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">BL Reference:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.bl_id" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">Origin:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.origin" style="font-size: 14px;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                             <table class="table table-borderless" style="font-size: 13px; margin-bottom: 0;">
+                                <tr>
+                                    <td style="width: 40%; padding: 6px 0;"><strong style="color: #34495e;">Article:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.article_id" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">Claim Date:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.claim_date" style="font-size: 14px;"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;"><strong style="color: #34495e;">Amount Due:</strong></td>
+                                    <td style="padding: 6px 0;"><span t-field="o.amount_due" style="font-size: 15px; font-weight: bold; color: #16a085;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 8px; margin-bottom: 20px; font-size: 16px;">
+                            Quality Details
+                        </h4>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                             <div style="padding: 20px; background-color: #f1f2f6; border-left: 5px solid #16a085; border-radius: 4px;">
+                                <strong style="color: #2c3e50; font-size: 14px;">Quality Operations Folder:</strong><br/>
+                                <a t-att-href="o.qc_url" target="_blank" style="color: #2980b9; font-weight: bold; font-size: 16px; text-decoration: underline;">
+                                    <t t-esc="o.qc_url"/>
+                                </a>
+                             </div>
                         </div>
                     </div>
                 </div>

@@ -5,3 +5,9 @@ access_claims_dhl_delay_user,claims.dhl.delay.user,model_claims_dhl_delay,group_
 access_claims_dhl_delay_manager,claims.dhl.delay.manager,model_claims_dhl_delay,group_claims_manager,1,1,1,1
 access_claims_franchise_difference_user,claims.franchise.difference.user,model_claims_franchise_difference,group_claims_user,1,1,1,0
 access_claims_franchise_difference_manager,claims.franchise.difference.manager,model_claims_franchise_difference,group_claims_manager,1,1,1,1
+access_claims_quantity_viewer,claims.quantity.viewer,model_claims_quantity,group_claims_viewer,1,0,0,0
+access_claims_quality_viewer,claims.quality.viewer,model_claims_quality,group_claims_viewer,1,0,0,0
+access_claims_quantity_user,claims.quantity.user,model_claims_quantity,group_claims_user,1,1,1,0
+access_claims_quality_user,claims.quality.user,model_claims_quality,group_claims_user,1,1,1,0
+access_claims_quantity_manager,claims.quantity.manager,model_claims_quantity,group_claims_manager,1,1,1,1
+access_claims_quality_manager,claims.quality.manager,model_claims_quality,group_claims_manager,1,1,1,1

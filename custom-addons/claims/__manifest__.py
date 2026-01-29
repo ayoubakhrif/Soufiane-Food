@@ -15,6 +15,8 @@
         'security/ir.model.access.csv',
         'views/claims_dhl_delay_view.xml',
         'views/claims_franchise_difference_view.xml',
+        'views/claims_quantity_view.xml',
+        'views/claims_quality_view.xml',
         'views/supplier_view_ext.xml',
         'reports/claims_report.xml',
     ],

@@ -159,3 +159,13 @@ class CasaStockEntry(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
+    @api.constrains('lot', 'dum')
+    def _check_lot_dum_format(self):
+        for rec in self:
+            # LOT : doit contenir au moins un chiffre
+            if rec.lot and not re.search(r'\d', rec.lot):
+                raise ValidationError("LOT erroné.")
+
+            # DUM : doit commencer par un chiffre
+            if rec.dum and not re.match(r'^\d', rec.dum):
+                raise ValidationError("DUM erroné.")

@@ -12,6 +12,13 @@ class ClaimsFranchiseDifference(models.Model):
     # ==========================
 
     def action_print_report(self):
+        for rec in self:
+            if rec.amount_due <= 0:
+                raise UserError("Cannot print report: Amount Due must be greater than 0.")
+            if rec.state == 'initial':
+                raise UserError("Cannot print report: Claim is in Initial state.")
+            if rec.responsible_id and rec.responsible_id != self.env.user:
+                raise UserError("You cannot print this report. Only the responsible user (%s) can print it." % rec.responsible_id.name)
         return self.env.ref('claims.action_report_claims_franchise_difference').report_action(self)
 
     bl_id = fields.Many2one(

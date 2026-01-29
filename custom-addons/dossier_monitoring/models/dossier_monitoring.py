@@ -146,93 +146,133 @@ class DossierMonitoring(models.Model):
             # Generating HTML (Improved UI)
             html = f"""
             <style>
+            /* ====== GLOBAL ====== */
             .dlm-wrapper {{
                 font-family: 'Inter', 'Roboto', sans-serif;
-                background: #f5f7fa;
-                padding: 30px;
-                border-radius: 14px;
+                background: linear-gradient(180deg, #f5f7fa, #ffffff);
+                padding: 35px;
+                border-radius: 16px;
             }}
 
+            /* ====== HEADER ====== */
             .dlm-header {{
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 20px;
                 background: #ffffff;
-                padding: 25px;
-                border-radius: 14px;
-                margin-bottom: 30px;
-                box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+                padding: 28px;
+                border-radius: 16px;
+                margin-bottom: 35px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.08);
             }}
 
             .dlm-title {{
-                font-size: 26px;
-                font-weight: 700;
+                font-size: 28px;
+                font-weight: 800;
                 color: #2c3e50;
             }}
 
             .dlm-meta {{
-                margin-top: 6px;
+                margin-top: 8px;
                 font-size: 14px;
                 color: #7f8c8d;
             }}
 
-            .dlm-badge {{
-                margin-top: 12px;
-                display: inline-block;
-                background: #3498db;
-                color: white;
-                padding: 6px 16px;
-                border-radius: 20px;
-                font-size: 13px;
-                font-weight: 600;
+            .dlm-phase {{
+                text-align: right;
             }}
 
+            .dlm-phase-badge {{
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                color: #fff;
+                padding: 10px 18px;
+                border-radius: 30px;
+                font-size: 14px;
+                font-weight: 600;
+                display: inline-block;
+            }}
+
+            /* ====== KPI STRIP ====== */
+            .dlm-kpis {{
+                display: flex;
+                gap: 25px;
+                margin-top: 18px;
+            }}
+
+            .dlm-kpi {{
+                background: #f8f9fa;
+                padding: 12px 18px;
+                border-radius: 12px;
+                font-size: 13px;
+                color: #7f8c8d;
+            }}
+
+            .dlm-kpi strong {{
+                display: block;
+                font-size: 15px;
+                color: #2c3e50;
+            }}
+
+            /* ====== TIMELINE ====== */
             .dlm-timeline {{
                 position: relative;
-                margin-left: 20px;
+                margin-left: 25px;
+                padding-left: 25px;
             }}
 
             .dlm-timeline::before {{
                 content: '';
                 position: absolute;
-                left: 18px;
+                left: 12px;
                 top: 0;
                 bottom: 0;
                 width: 3px;
-                background: #dfe6e9;
+                background: linear-gradient(to bottom, #dfe6e9, #ecf0f1);
             }}
 
             .dlm-item {{
                 display: flex;
-                margin-bottom: 25px;
+                margin-bottom: 28px;
                 position: relative;
             }}
 
             .dlm-icon {{
-                width: 40px;
-                height: 40px;
+                width: 42px;
+                height: 42px;
                 border-radius: 50%;
-                background: #bdc3c7;
-                color: white;
+                background: #b2bec3;
+                color: #fff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 16px;
                 z-index: 2;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             }}
 
-            .dlm-item.done .dlm-icon {{ background: #2ecc71; }}
-            .dlm-item.current .dlm-icon {{ background: #f39c12; }}
-            .dlm-item.pending .dlm-icon {{ background: #b2bec3; }}
+            .dlm-item.done .dlm-icon {{
+                background: linear-gradient(135deg, #2ecc71, #27ae60);
+            }}
+
+            .dlm-item.current .dlm-icon {{
+                background: linear-gradient(135deg, #f39c12, #e67e22);
+            }}
+
+            .dlm-item.pending .dlm-icon {{
+                background: #bdc3c7;
+            }}
 
             .dlm-content {{
                 background: #ffffff;
-                margin-left: 20px;
-                padding: 15px 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+                margin-left: 22px;
+                padding: 18px 22px;
+                border-radius: 14px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.07);
                 flex: 1;
             }}
 
             .dlm-label {{
-                font-size: 15px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #2c3e50;
             }}
@@ -240,19 +280,40 @@ class DossierMonitoring(models.Model):
             .dlm-date {{
                 font-size: 13px;
                 color: #7f8c8d;
-                margin-top: 4px;
+                margin-top: 6px;
             }}
             </style>
 
             <div class="dlm-wrapper">
+
                 <div class="dlm-header">
-                    <div class="dlm-title">{rec.bl_number}</div>
-                    <div class="dlm-meta">
-                        <i class="fa fa-building"></i> {rec.company_id.name or '-'} &nbsp;|&nbsp;
-                        <i class="fa fa-industry"></i> {rec.supplier_id.name or '-'}
+                    <div>
+                        <div class="dlm-title">{rec.bl_number}</div>
+                        <div class="dlm-meta">
+                            <i class="fa fa-building"></i> {rec.company_id.name or '-'} &nbsp;&nbsp;
+                            <i class="fa fa-industry"></i> {rec.supplier_id.name or '-'}
+                        </div>
+
+                        <div class="dlm-kpis">
+                            <div class="dlm-kpi">
+                                <strong>{fmt(rec.date_contract)}</strong>
+                                Contrat
+                            </div>
+                            <div class="dlm-kpi">
+                                <strong>{fmt(rec.eta_dhl)}</strong>
+                                ETA DHL
+                            </div>
+                            <div class="dlm-kpi">
+                                <strong>{fmt(rec.exit_date)}</strong>
+                                Livraison
+                            </div>
+                        </div>
                     </div>
-                    <div class="dlm-badge">
-                        {dict(self._fields['phase'].selection).get(rec.phase, '')}
+
+                    <div class="dlm-phase">
+                        <div class="dlm-phase-badge">
+                            {dict(self._fields['phase'].selection).get(rec.phase, '')}
+                        </div>
                     </div>
                 </div>
 

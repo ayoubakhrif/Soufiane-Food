@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+import re
 
 class CasaStockEntry(models.Model):
     _name = 'casa.stock.entry'

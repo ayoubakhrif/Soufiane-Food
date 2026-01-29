@@ -83,11 +83,11 @@
                         <field name="comment_responsible" placeholder="Commentaire du responsable..." />
                     </group>
                 </sheet>
-                <!-- Chatter: Visible ONLY to Administrators -->
-                <separator string="Chatter" groups="base.group_system"/>
-                <field name="message_follower_ids" widget="mail_followers" groups="base.group_system"/>
-                <field name="activity_ids" widget="mail_activity" groups="base.group_system"/>
-                <field name="message_ids" widget="mail_thread" groups="base.group_system"/>
+                <separator string="Chatter"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>

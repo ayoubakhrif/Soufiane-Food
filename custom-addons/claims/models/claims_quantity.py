@@ -113,6 +113,8 @@ class ClaimsQuantity(models.Model):
     def action_resolve(self):
         """Waiting -> Resolved"""
         self._check_responsibility()
+        if not self.evidence_link:
+             raise ValidationError("You must provide an evidence link before resolving this claim.")
         self.write({'state': 'resolved'})
 
     def action_close(self):
@@ -127,3 +129,24 @@ class ClaimsQuantity(models.Model):
         for rec in self:
             if rec.responsible_id and rec.responsible_id != self.env.user:
                 raise UserError("You are not the responsible person for this claim. Only %s can proceed." % rec.responsible_id.name)
+
+    # ==========================
+    # 6. Evidence Logic
+    # ==========================
+    evidence_link = fields.Char(string='Evidence Link', help="Link to proof documents (emails, reports, etc.)")
+    can_see_evidence = fields.Boolean(compute='_compute_can_see_evidence')
+
+    @api.depends('responsible_id')
+    def _compute_can_see_evidence(self):
+        is_admin = self.env.user.has_group('claims.group_claims_manager') or self.env.user.has_group('base.group_system')
+        for rec in self:
+            rec.can_see_evidence = is_admin or (rec.responsible_id == self.env.user)
+
+    def action_open_evidence(self):
+        self.ensure_one()
+        if self.evidence_link:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.evidence_link,
+                'target': 'new',
+            }

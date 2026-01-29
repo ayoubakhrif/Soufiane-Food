@@ -47,6 +47,11 @@
                     <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_evidence" type="object" class="oe_stat_button" icon="fa-external-link" string="Open Evidence"
+                                groups="claims.group_claims_manager"
+                                invisible="not evidence_link"/>
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="bl_id" placeholder="Select BL..." options="{'no_create': True, 'no_edit': True}"
@@ -67,6 +72,8 @@
                             <field name="eta_dhl" readonly="state != 'initial'"/>
                             <field name="dhl_delay" decoration-danger="dhl_delay &gt; 0"/>
                             <field name="amount_due" readonly="state in ('resolved', 'closed')"/>
+                            <field name="can_see_evidence" invisible="1"/>
+                            <field name="evidence_link" widget="url" invisible="not can_see_evidence"/> 
                         </group>
                     </group>
                     <group string="Follow-up">
@@ -77,11 +84,10 @@
                     </group>
                 </sheet>
                 <!-- Chatter: Visible ONLY to Administrators -->
-                <div class="oe_chatter" groups="base.group_system">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <separator string="Chatter" groups="base.group_system"/>
+                <field name="message_follower_ids" widget="mail_followers" groups="base.group_system"/>
+                <field name="activity_ids" widget="mail_activity" groups="base.group_system"/>
+                <field name="message_ids" widget="mail_thread" groups="base.group_system"/>
             </form>
         </field>
     </record>

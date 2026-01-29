@@ -30,6 +30,8 @@ class CasaStockStock(models.Model):
     write_date = fields.Datetime(string='Last Update', readonly=True)
     create_date = fields.Datetime(string='Creation Date', readonly=True)
 
+    total_weight = fields.Float(string='Poids Total', readonly=True)
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
@@ -44,9 +46,10 @@ class CasaStockStock(models.Model):
                     m.ste_id,
                     sum(m.qty) as quantity,
                     max(m.weight) as weight,
+                    (sum(m.qty) * max(m.weight)) as total_weight,
                     max(m.calibre) as calibre,
                     max(m.price_purchase) as price,
-                    sum(CASE WHEN m.qty > 0 THEN m.qty * COALESCE(m.price_purchase,0) ELSE 0 END) as mt_achat,
+                    ((sum(m.qty) * max(m.weight)) * max(m.price_purchase)) as mt_achat,
                     max(m.date) as write_date,
                     min(m.date) as create_date
                 FROM

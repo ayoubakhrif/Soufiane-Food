@@ -91,7 +91,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <t t-esc="record.quantity.raw_value * record.weight.raw_value"/> Kg)
+                                        ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <field name="total_weight"/> Kg)
                                     </div>
                                     <div>
                                         📍 <b>Frigo :</b> <field name="frigo"/>
@@ -139,6 +139,7 @@
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
                 <field name="weight"/>
+                <field name="total_weight" sum="Total Poids"/>
                 <field name="price"/>
                 <field name="mt_achat" sum="Total Mt Achat"/>
             </tree>
@@ -163,6 +164,7 @@
                         <group string="Détails Stock">
                             <field name="quantity"/>
                             <field name="weight"/>
+                            <field name="total_weight"/>
                             <field name="calibre"/>
                             <field name="lot"/>
                             <field name="dum"/>
@@ -211,6 +213,7 @@
                 <field name="ville" type="col"/>
                 <field name="quantity" type="measure"/>
                 <field name="weight" type="measure"/>
+                <field name="total_weight" type="measure"/>
                 <field name="mt_achat" type="measure"/>
             </pivot>
         </field>

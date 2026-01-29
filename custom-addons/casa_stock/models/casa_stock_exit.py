@@ -63,6 +63,7 @@ class CasaStockExit(models.Model):
         compute='_compute_amounts',
         store=True
     )
+    not_delivered = fields.Boolean(string='Non Livré', default=False, tracking=True)
 
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
@@ -112,6 +113,7 @@ class CasaStockExit(models.Model):
                     'product_id', 'qty', 'weight', 'price_sale',
                     'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
+                # 'not_delivered' is EXPLICITLY ALLOWED to be changed
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
         return super(CasaStockExit, self).write(vals)

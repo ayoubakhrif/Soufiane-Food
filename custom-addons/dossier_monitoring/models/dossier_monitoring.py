@@ -143,176 +143,273 @@ class DossierMonitoring(models.Model):
                 'icon': 'fa-check-circle'
             })
             
-            # Generating HTML (Improved UI)
+            # Generating HTML (Improved UI with Better Colors)
             html = f"""
             <style>
             /* ====== GLOBAL ====== */
             .dlm-wrapper {{
-                font-family: 'Inter', 'Roboto', sans-serif;
-                background: linear-gradient(180deg, #f5f7fa, #ffffff);
-                padding: 35px;
-                border-radius: 16px;
+                font-family: 'Segoe UI', 'Roboto', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 20px;
             }}
 
             /* ====== HEADER ====== */
             .dlm-header {{
-                display: grid;
-                grid-template-columns: 1fr auto;
-                gap: 20px;
                 background: #ffffff;
-                padding: 28px;
+                padding: 30px 35px;
                 border-radius: 16px;
-                margin-bottom: 35px;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+                margin-bottom: 30px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            }}
+
+            .dlm-header-top {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
             }}
 
             .dlm-title {{
-                font-size: 28px;
-                font-weight: 800;
-                color: #2c3e50;
-            }}
-
-            .dlm-meta {{
-                margin-top: 8px;
-                font-size: 14px;
-                color: #7f8c8d;
-            }}
-
-            .dlm-phase {{
-                text-align: right;
+                font-size: 32px;
+                font-weight: 900;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
             }}
 
             .dlm-phase-badge {{
-                background: linear-gradient(135deg, #3498db, #2980b9);
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
                 color: #fff;
-                padding: 10px 18px;
-                border-radius: 30px;
-                font-size: 14px;
-                font-weight: 600;
-                display: inline-block;
+                padding: 12px 24px;
+                border-radius: 50px;
+                font-size: 15px;
+                font-weight: 700;
+                box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+
+            .dlm-meta {{
+                font-size: 15px;
+                color: #5a6c7d;
+                margin-bottom: 20px;
+            }}
+
+            .dlm-meta i {{
+                color: #667eea;
+                margin-right: 8px;
             }}
 
             /* ====== KPI STRIP ====== */
             .dlm-kpis {{
-                display: flex;
-                gap: 25px;
-                margin-top: 18px;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
             }}
 
             .dlm-kpi {{
-                background: #f8f9fa;
-                padding: 12px 18px;
-                border-radius: 12px;
-                font-size: 13px;
-                color: #7f8c8d;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+                border-radius: 16px;
+                text-align: center;
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
             }}
 
-            .dlm-kpi strong {{
+            .dlm-kpi-value {{
                 display: block;
-                font-size: 15px;
-                color: #2c3e50;
+                font-size: 20px;
+                font-weight: 800;
+                color: #ffffff;
+                margin-bottom: 8px;
+            }}
+
+            .dlm-kpi-label {{
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.9);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-weight: 600;
             }}
 
             /* ====== TIMELINE ====== */
             .dlm-timeline {{
                 position: relative;
-                margin-left: 25px;
-                padding-left: 25px;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                backdrop-filter: blur(10px);
             }}
 
             .dlm-timeline::before {{
                 content: '';
                 position: absolute;
-                left: 12px;
-                top: 0;
-                bottom: 0;
-                width: 3px;
-                background: linear-gradient(to bottom, #dfe6e9, #ecf0f1);
+                left: 50px;
+                top: 30px;
+                bottom: 30px;
+                width: 4px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 2px;
             }}
 
             .dlm-item {{
                 display: flex;
-                margin-bottom: 28px;
+                align-items: center;
+                margin-bottom: 20px;
                 position: relative;
+                padding-left: 20px;
             }}
 
             .dlm-icon {{
-                width: 42px;
-                height: 42px;
+                width: 60px;
+                height: 60px;
                 border-radius: 50%;
-                background: #b2bec3;
+                background: #95a5a6;
                 color: #fff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 16px;
+                font-size: 22px;
                 z-index: 2;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                flex-shrink: 0;
+                border: 5px solid rgba(255, 255, 255, 0.2);
             }}
 
             .dlm-item.done .dlm-icon {{
-                background: linear-gradient(135deg, #2ecc71, #27ae60);
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                animation: pulse-done 2s infinite;
             }}
 
             .dlm-item.current .dlm-icon {{
-                background: linear-gradient(135deg, #f39c12, #e67e22);
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                animation: pulse-current 1.5s infinite;
             }}
 
             .dlm-item.pending .dlm-icon {{
-                background: #bdc3c7;
+                background: linear-gradient(135deg, #868f96 0%, #596164 100%);
+                opacity: 0.6;
+            }}
+
+            @keyframes pulse-done {{
+                0%, 100% {{
+                    box-shadow: 0 8px 25px rgba(56, 239, 125, 0.4);
+                }}
+                50% {{
+                    box-shadow: 0 12px 35px rgba(56, 239, 125, 0.7);
+                }}
+            }}
+
+            @keyframes pulse-current {{
+                0%, 100% {{
+                    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+                }}
+                50% {{
+                    box-shadow: 0 12px 35px rgba(245, 87, 108, 0.8);
+                }}
             }}
 
             .dlm-content {{
                 background: #ffffff;
-                margin-left: 22px;
-                padding: 18px 22px;
-                border-radius: 14px;
-                box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+                margin-left: 25px;
+                padding: 20px 28px;
+                border-radius: 16px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.12);
                 flex: 1;
+                border-left: 5px solid transparent;
+            }}
+
+            .dlm-item.done .dlm-content {{
+                border-left-color: #38ef7d;
+            }}
+
+            .dlm-item.current .dlm-content {{
+                border-left-color: #f5576c;
+                background: linear-gradient(to right, #fff5f7, #ffffff);
+            }}
+
+            .dlm-item.pending .dlm-content {{
+                border-left-color: #95a5a6;
+                opacity: 0.7;
             }}
 
             .dlm-label {{
-                font-size: 16px;
-                font-weight: 700;
+                font-size: 18px;
+                font-weight: 800;
                 color: #2c3e50;
+                margin-bottom: 8px;
             }}
 
             .dlm-date {{
-                font-size: 13px;
+                font-size: 14px;
                 color: #7f8c8d;
-                margin-top: 6px;
+                font-weight: 600;
+            }}
+
+            .dlm-item.done .dlm-date {{
+                color: #27ae60;
+            }}
+
+            .dlm-item.current .dlm-date {{
+                color: #e74c3c;
+            }}
+
+            /* Status badges */
+            .dlm-status-badge {{
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 8px;
+            }}
+
+            .dlm-item.done .dlm-status-badge {{
+                background: #d4edda;
+                color: #155724;
+            }}
+
+            .dlm-item.current .dlm-status-badge {{
+                background: #fff3cd;
+                color: #856404;
+            }}
+
+            .dlm-item.pending .dlm-status-badge {{
+                background: #e2e3e5;
+                color: #6c757d;
             }}
             </style>
 
             <div class="dlm-wrapper">
 
                 <div class="dlm-header">
-                    <div>
+                    <div class="dlm-header-top">
                         <div class="dlm-title">{rec.bl_number}</div>
-                        <div class="dlm-meta">
-                            <i class="fa fa-building"></i> {rec.company_id.name or '-'} &nbsp;&nbsp;
-                            <i class="fa fa-industry"></i> {rec.supplier_id.name or '-'}
-                        </div>
-
-                        <div class="dlm-kpis">
-                            <div class="dlm-kpi">
-                                <strong>{fmt(rec.date_contract)}</strong>
-                                Contrat
-                            </div>
-                            <div class="dlm-kpi">
-                                <strong>{fmt(rec.eta_dhl)}</strong>
-                                ETA DHL
-                            </div>
-                            <div class="dlm-kpi">
-                                <strong>{fmt(rec.exit_date)}</strong>
-                                Livraison
-                            </div>
+                        <div class="dlm-phase-badge">
+                            {dict(self._fields['phase'].selection).get(rec.phase, '')}
                         </div>
                     </div>
 
-                    <div class="dlm-phase">
-                        <div class="dlm-phase-badge">
-                            {dict(self._fields['phase'].selection).get(rec.phase, '')}
+                    <div class="dlm-meta">
+                        <i class="fa fa-building"></i> <strong>{rec.company_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
+                        <i class="fa fa-industry"></i> <strong>{rec.supplier_id.name or '-'}</strong>
+                    </div>
+
+                    <div class="dlm-kpis">
+                        <div class="dlm-kpi">
+                            <span class="dlm-kpi-value">{fmt(rec.date_contract)}</span>
+                            <span class="dlm-kpi-label">Date Contrat</span>
+                        </div>
+                        <div class="dlm-kpi">
+                            <span class="dlm-kpi-value">{fmt(rec.eta_dhl)}</span>
+                            <span class="dlm-kpi-label">ETA DHL</span>
+                        </div>
+                        <div class="dlm-kpi">
+                            <span class="dlm-kpi-value">{fmt(rec.exit_date)}</span>
+                            <span class="dlm-kpi-label">Date Livraison</span>
                         </div>
                     </div>
                 </div>
@@ -320,6 +417,12 @@ class DossierMonitoring(models.Model):
                 <div class="dlm-timeline">
             """
 
+            # Get status labels
+            status_labels = {
+                'done': '✓ COMPLÉTÉ',
+                'current': '⚡ EN COURS',
+                'pending': '⏳ EN ATTENTE'
+            }
             
             for step in steps:
                 html += f"""
@@ -330,6 +433,7 @@ class DossierMonitoring(models.Model):
                     <div class="dlm-content">
                         <div class="dlm-label">{step['label']}</div>
                         <div class="dlm-date">{step['date']}</div>
+                        <span class="dlm-status-badge">{status_labels[step['status']]}</span>
                     </div>
                 </div>
                 """

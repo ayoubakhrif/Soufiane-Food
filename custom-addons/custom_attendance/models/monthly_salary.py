@@ -257,8 +257,8 @@ class CustomMonthlySalary(models.Model):
                     # Normal Day
                     # Hours = Normal + Overtime + Holiday
                     hours_to_add = g_norm + g_over + g_holi
-                    # Cost = Normal*1 + Overtime*Coeff + Holiday*2
-                    cost = (g_norm * 1) + (g_over * ot_coeff) + (g_holi * 2)
+                    # Cost = Normal*1 + Overtime*Coeff + Holiday*2 - Missing*1
+                    cost = (g_norm * 1) + (g_over * ot_coeff) + (g_holi * 2) - (g_miss * 1)
                     cost *= rate
                     
                 else:

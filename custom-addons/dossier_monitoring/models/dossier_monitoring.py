@@ -37,7 +37,11 @@ class DossierMonitoring(models.Model):
     ], string='Phase Actuelle', readonly=True)
 
     # HTML Visualization
-    lifecycle_html = fields.Html(compute='_compute_lifecycle_html', string='Lifecycle Visualization')
+    lifecycle_html = fields.Html(
+        compute='_compute_lifecycle_html',
+        string='Lifecycle Visualization',
+        sanitize=False
+    )
 
     def _compute_lifecycle_html(self):
         for rec in self:

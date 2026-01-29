@@ -63,7 +63,11 @@
         <field name="arch" type="xml">
             <form string="Détail Dossier" create="false" edit="false" delete="false">
                 <sheet>
-                    <field name="lifecycle_html" widget="html" readonly="1" nolabel="1"/>
+                    <field name="lifecycle_html"
+                    widget="html"
+                    readonly="1"
+                    nolabel="1"
+                    options="{'sanitize': False}"/>
                 </sheet>
             </form>
         </field>

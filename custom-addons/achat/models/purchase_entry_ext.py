@@ -4,7 +4,7 @@ from odoo.exceptions import ValidationError
 class LogisticsEntry(models.Model):
     _inherit = 'logistique.entry'
 
-    contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]")
+    contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]", required=True)
     free_time_negotiated = fields.Integer(string='Negotiated Free Time')
 
     date_booking = fields.Date(string='Date of Booking')
@@ -53,7 +53,7 @@ class LogisticsEntry(models.Model):
             self.article_id = self.contract_id.article_id
             self.incoterm = self.contract_id.incoterm
             self.details = self.contract_id.details
-            self.origin = self.contract_id.origin
+
             self.origin_id = self.contract_id.origin_id
             self.free_time_negotiated = self.contract_id.free_time_negotiated
             # Pre-fill actual free time with negotiated value

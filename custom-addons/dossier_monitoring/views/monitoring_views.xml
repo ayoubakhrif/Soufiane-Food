@@ -5,14 +5,15 @@
         <field name="name">dossier.monitoring.search</field>
         <field name="model">dossier.monitoring</field>
         <field name="arch" type="xml">
-            <search string="Monitoring Search">
-                <field name="bl_number"/>
-                <field name="contract_id"/>
-                <field name="supplier_id"/>
-                <field name="phase"/>
-                <group expand="0" string="Group By">
+            <search string="Recherche Monitoring">
+                <field name="bl_number" string="Numéro BL"/>
+                <field name="contract_id" string="Contrat"/>
+                <field name="supplier_id" string="Fournisseur"/>
+                <field name="phase" string="Phase"/>
+                <group expand="0" string="Grouper par">
                     <filter string="Phase" name="group_phase" context="{'group_by': 'phase'}"/>
-                    <filter string="Supplier" name="group_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Fournisseur" name="group_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Société" name="group_company" context="{'group_by': 'company_id'}"/>
                 </group>
             </search>
         </field>
@@ -23,7 +24,7 @@
         <field name="name">dossier.monitoring.kanban</field>
         <field name="model">dossier.monitoring</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="phase" create="false" edit="false" delete="false" records_draggable="false">
+            <kanban default_group_by="phase" create="false" edit="false" delete="false" records_draggable="false" class="o_kanban_dashboard">
                 <field name="bl_number"/>
                 <field name="contract_id"/>
                 <field name="supplier_id"/>
@@ -38,17 +39,13 @@
                                 </strong>
                                 <div class="o_kanban_tags_section"/>
                                 <ul>
-                                    <li>Contract: <field name="contract_id"/></li>
-                                    <li>Supplier: <field name="supplier_id"/></li>
-                                    <li>Company: <field name="company_id"/></li>
+                                    <li><i class="fa fa-file-contract"/> <field name="contract_id"/></li>
+                                    <li><i class="fa fa-industry"/> <field name="supplier_id"/></li>
+                                    <li><i class="fa fa-building"/> <field name="company_id"/></li>
                                 </ul>
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
-                                        <!-- Phase Indicator Icons could go here -->
-                                        <field name="phase" widget="label_selection"/>
-                                    </div>
-                                    <div class="oe_kanban_bottom_right">
-                                        <!-- Check logic for urgency if needed -->
+                                        <field name="phase" widget="label_selection" options="{'classes': {'9_closed': 'success', '8_delivered': 'info'}}"/>
                                     </div>
                                 </div>
                             </div>
@@ -59,65 +56,14 @@
         </field>
     </record>
 
-    <!-- FORM VIEW -->
+    <!-- FORM VIEW (HTML Only) -->
     <record id="view_dossier_monitoring_form" model="ir.ui.view">
         <field name="name">dossier.monitoring.form</field>
         <field name="model">dossier.monitoring</field>
         <field name="arch" type="xml">
-            <form string="Dossier Detail" create="false" edit="false" delete="false">
-                <header>
-                    <field name="phase" widget="statusbar" statusbar_visible="1_contract,3_booking,6_transit,8_delivered,9_closed"/>
-                </header>
+            <form string="Détail Dossier" create="false" edit="false" delete="false">
                 <sheet>
-                    <div class="oe_title">
-                        <label for="bl_number" string="BL Reference"/>
-                        <h1>
-                            <field name="bl_number" readonly="1"/>
-                        </h1>
-                        <h3>
-                            <span class="text-muted">Supplier: </span>
-                            <field name="supplier_id" readonly="1" class="oe_inline"/>
-                            <span class="ps-3 text-muted"> | Company: </span>
-                            <field name="company_id" readonly="1" class="oe_inline"/>
-                        </h3>
-                    </div>
-
-                    <group>
-                        <group string="📄 Contract &amp; Booking">
-                            <field name="contract_id" readonly="1"/>
-                            <field name="date_contract" readonly="1"/>
-                            <field name="date_booking" readonly="1"/>
-                        </group>
-                        <group string="📂 Documentation">
-                            <field name="date_docs_received" readonly="1"/>
-                            <field name="date_docs_confirmed" readonly="1"/>
-                        </group>
-                    </group>
-
-                    <separator string="🚚 Logistics Journey"/>
-                    <group>
-                        <group string="🚢 In Transit (DHL)">
-                            <field name="eta_dhl" readonly="1"/>
-                            <div class="text-muted" invisible="not eta_dhl">
-                                <i class="fa fa-info-circle"/> Shipment is en route via DHL
-                            </div>
-                        </group>
-                        <group string="🛃 Customs (BAD)">
-                            <field name="bad_date" readonly="1"/>
-                        </group>
-                    </group>
-
-                    <group>
-                        <group string="🏁 Delivery (Exit)">
-                            <field name="exit_date" readonly="1"/>
-                        </group>
-                        <group string="✅ Status">
-                            <field name="phase" readonly="1" widget="badge" 
-                                decoration-success="phase == '9_closed'" 
-                                decoration-info="phase == '8_delivered'"
-                                decoration-warning="phase in ('6_transit', '7_customs')"/>
-                        </group>
-                    </group>
+                    <field name="lifecycle_html" widget="html" readonly="1" nolabel="1"/>
                 </sheet>
             </form>
         </field>
@@ -128,7 +74,7 @@
         <field name="name">dossier.monitoring.tree</field>
         <field name="model">dossier.monitoring</field>
         <field name="arch" type="xml">
-            <tree string="Dossier Lifecycles" create="false" edit="false" delete="false" decoration-muted="phase == '9_closed'" decoration-success="phase == '8_delivered'" decoration-info="phase == '6_transit'">
+            <tree string="Cycle de Vie Dossiers" create="false" edit="false" delete="false" decoration-muted="phase == '9_closed'" decoration-success="phase == '8_delivered'" decoration-info="phase == '6_transit'">
                 <field name="bl_number"/>
                 <field name="contract_id"/>
                 <field name="supplier_id"/>

@@ -11,7 +11,11 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="article_id"/>
+                <field name="article_id"/>
                 <field name="eta"/>
+                <field name="date_booking" optional="show"/>
+                <field name="date_docs_received" optional="show"/>
+                <field name="date_docs_confirmed" optional="show"/>
                 <field name="purchase_state" widget="badge" decoration-info="purchase_state == 'initial'" decoration-success="purchase_state == 'confirmed'" decoration-muted="purchase_state == 'closed'"/>
             </tree>
         </field>

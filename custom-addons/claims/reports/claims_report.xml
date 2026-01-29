@@ -31,8 +31,8 @@
                     <!-- Header with logo and title on same row -->
                     <div class="row" style="margin-bottom: 30px; align-items: center;">
                         <div class="col-4">
-                            <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
-                                 t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
+                            <img t-if="o.company_logo" 
+                                 t-att-src="image_data_uri(o.company_logo)" 
                                  style="max-height: 80px; max-width: 200px;" alt="Logo"/>
                         </div>
                         <div class="col-8">
@@ -134,8 +134,8 @@
                     <!-- Header with logo and title on same row -->
                     <div class="row" style="margin-bottom: 30px; align-items: center;">
                         <div class="col-4">
-                            <img t-if="o.bl_id.ste_id.core_ste_id.image_1920" 
-                                 t-att-src="image_data_uri(o.bl_id.ste_id.core_ste_id.image_1920)" 
+                            <img t-if="o.company_logo" 
+                                 t-att-src="image_data_uri(o.company_logo)" 
                                  style="max-height: 80px; max-width: 200px;" alt="Logo"/>
                         </div>
                         <div class="col-8">

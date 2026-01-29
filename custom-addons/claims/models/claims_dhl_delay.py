@@ -36,6 +36,17 @@ class ClaimsDHLDelay(models.Model):
     # ==========================
     # 2. User-entered Fields
     # ==========================
+    
+    company_logo = fields.Binary(compute='_compute_company_logo', string='Logo Société')
+
+    def _compute_company_logo(self):
+        for rec in self:
+            # Sudo to bypass access rights to core.ste
+            if rec.bl_id and rec.bl_id.ste_id and rec.bl_id.ste_id.core_ste_id:
+                rec.company_logo = rec.bl_id.ste_id.core_ste_id.sudo().image_1920
+            else:
+                rec.company_logo = False
+
     eta_planned = fields.Date(
         string='ETA',
         required=True,

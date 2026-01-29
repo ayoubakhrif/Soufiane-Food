@@ -143,102 +143,167 @@ class DossierMonitoring(models.Model):
                 'icon': 'fa-check-circle'
             })
             
-            # Generating HTML
-            html = """
+            # Generating HTML (Improved UI)
+            html = f"""
             <style>
-                .dlm-card {
-                    background: #fff;
-                    border: 1px solid #e0e0e0;
-                    border-radius: 8px;
-                    padding: 20px;
-                    margin-bottom: 20px;
-                    font-family: 'Roboto', sans-serif;
-                }
-                .dlm-header {
-                    border-bottom: 1px solid #eee;
-                    padding-bottom: 15px;
-                    margin-bottom: 20px;
+                .dlm-wrapper {{
+                    font-family: 'Inter', 'Roboto', sans-serif;
+                    background: #f5f7fa;
+                    padding: 30px;
+                    border-radius: 12px;
+                }}
+
+                .dlm-header {{
+                    background: linear-gradient(135deg, #2c3e50, #34495e);
+                    color: #fff;
+                    padding: 25px;
+                    border-radius: 12px;
+                    margin-bottom: 40px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                }}
+
+                .dlm-header h1 {{
+                    margin: 0;
+                    font-size: 26px;
+                    font-weight: 600;
+                }}
+
+                .dlm-meta {{
+                    margin-top: 8px;
+                    font-size: 14px;
+                    opacity: 0.9;
+                }}
+
+                .dlm-badge {{
+                    background: #1abc9c;
+                    color: white;
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    display: inline-block;
+                    margin-top: 10px;
+                }}
+
+                .dlm-timeline {{
                     display: flex;
                     justify-content: space-between;
-                    align-items: center;
-                }
-                .dlm-title { font-size: 24px; font-weight: bold; color: #2c3e50; }
-                .dlm-subtitle { font-size: 14px; color: #7f8c8d; margin-top: 5px; }
-                
-                .dlm-timeline {
-                    display: grid;
-                    grid-template-columns: repeat(4, 1fr); /* 2 rows of 4 */
-                    gap: 20px;
-                }
-                
-                .dlm-step {
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    padding: 15px;
                     position: relative;
-                    border-left: 5px solid #bdc3c7; /* Default grey */
-                    transition: transform 0.2s;
-                }
-                .dlm-step:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-                
-                .dlm-step.done { border-left-color: #27ae60; background: #eafaf1; } /* Green */
-                .dlm-step.current { border-left-color: #f39c12; background: #fef5e7; } /* Orange */
-                .dlm-step.pending { border-left-color: #bdc3c7; background: #fdfdfd; opacity: 0.7; }
-                
-                .dlm-icon {
-                    font-size: 24px;
-                    margin-bottom: 10px;
-                    color: #7f8c8d;
-                }
-                .dlm-step.done .dlm-icon { color: #27ae60; }
-                .dlm-step.current .dlm-icon { color: #f39c12; }
-                
-                .dlm-label { font-weight: bold; font-size: 14px; color: #34495e; margin-bottom: 5px; }
-                .dlm-date { font-size: 13px; color: #7f8c8d; }
-                
-                .dlm-status-icon {
+                    margin-top: 20px;
+                    padding: 0 20px;
+                }}
+
+                /* Line background */
+                .dlm-timeline::before {{
+                    content: '';
                     position: absolute;
-                    top: 15px;
-                    right: 15px;
-                    font-size: 16px;
-                }
+                    top: 25px; /* Centers line with circle */
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    background: #e0e0e0;
+                    z-index: 1;
+                    border-radius: 2px;
+                }}
+
+                /* Progress bar based on completion - tricky in static HTML without calc, 
+                   so we'll rely on colored steps. */
+
+                .dlm-step {{
+                    position: relative;
+                    z-index: 2;
+                    text-align: center;
+                    width: 12%; /* Distribute space */
+                }}
+
+                .dlm-circle {{
+                    width: 50px;
+                    height: 50px;
+                    background: #fff;
+                    border: 4px solid #e0e0e0;
+                    border-radius: 50%;
+                    display: flex; /* Centering icon */
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto;
+                    transition: all 0.3s ease;
+                }}
+
+                .dlm-icon {{
+                    font-size: 18px;
+                    color: #bdc3c7;
+                }}
+
+                .dlm-content {{
+                    margin-top: 15px;
+                }}
+
+                .dlm-label {{
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #7f8c8d;
+                    margin-bottom: 4px;
+                }}
+
+                .dlm-date {{
+                    font-size: 12px;
+                    color: #95a5a6;
+                }}
+
+                /* States */
+                .dlm-step.done .dlm-circle {{
+                    border-color: #27ae60;
+                    background: #27ae60;
+                }}
+                .dlm-step.done .dlm-icon {{
+                    color: #fff;
+                }}
+                .dlm-step.done .dlm-label {{
+                    color: #2c3e50;
+                }}
+
+                .dlm-step.current .dlm-circle {{
+                    border-color: #f39c12;
+                    background: #fff;
+                }}
+                .dlm-step.current .dlm-icon {{
+                    color: #f39c12;
+                }}
+                .dlm-step.current .dlm-label {{
+                    color: #f39c12;
+                }}
+
             </style>
             
-            <div class="dlm-container">
-                <div class="dlm-card">
-                    <div class="dlm-header">
-                        <div>
-                            <div class="dlm-title">%s</div>
-                            <div class="dlm-subtitle">
-                                <i class="fa fa-building"></i> %s &nbsp;|&nbsp; 
-                                <i class="fa fa-industry"></i> %s
-                            </div>
-                        </div>
-                        <div>
-                            <span class="badge rounded-pill bg-primary">%s</span>
-                        </div>
+            <div class="dlm-wrapper">
+                <div class="dlm-header">
+                    <h1>{rec.bl_number}</h1>
+                    <div class="dlm-meta">
+                        <i class="fa fa-building"></i> {rec.company_id.name or '-'} &nbsp;|&nbsp; 
+                        <i class="fa fa-industry"></i> {rec.supplier_id.name or '-'}
                     </div>
-                    
-                    <div class="dlm-timeline">
-            """ % (rec.bl_number, rec.company_id.name or '-', rec.supplier_id.name or '-', dict(self._fields['phase'].selection).get(rec.phase, ''))
+                    <div class="dlm-badge">
+                        {dict(self._fields['phase'].selection).get(rec.phase, '')}
+                    </div>
+                </div>
+                
+                <div class="dlm-timeline">
+            """
             
             for step in steps:
-                status_icon = ""
-                if step['status'] == 'done': status_icon = "✅"
-                elif step['status'] == 'current': status_icon = "⏳"
-                else: status_icon = "⚪"
-                
-                html += """
-                    <div class="dlm-step %s">
-                        <div class="dlm-status-icon">%s</div>
-                        <div class="dlm-icon"><i class="fa %s"></i></div>
-                        <div class="dlm-label">%s</div>
-                        <div class="dlm-date">%s</div>
+                html += f"""
+                    <div class="dlm-step {step['status']}">
+                        <div class="dlm-circle">
+                            <i class="fa {step['icon']} dlm-icon"></i>
+                        </div>
+                        <div class="dlm-content">
+                            <div class="dlm-label">{step['label']}</div>
+                            <div class="dlm-date">{step['date']}</div>
+                        </div>
                     </div>
-                """ % (step['status'], status_icon, step['icon'], step['label'], step['date'])
+                """
                 
             html += """
-                    </div>
                 </div>
             </div>
             """

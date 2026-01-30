@@ -11,7 +11,7 @@
                 <field name="ste_id"/>
                 <field name="qty"/>
                 <field name="client_id"/>
-                <field name="price_sale"/>
+
                 <field name="garage"/>
                 <field name="frigo"/>
                 <field name="lot"/>
@@ -65,7 +65,7 @@
                             <field name="qty"/>
                             <field name="weight" readonly="1" force_save="1"/>
                             <field name="tonnage"/>
-                            <field name="price_sale"/>
+
                             <field name="date"/>
                         </group>
                     </group>

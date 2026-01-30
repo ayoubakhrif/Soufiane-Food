@@ -53,7 +53,7 @@ class Kal3iyaStockMove(models.Model):
 
     # Optional fields for reporting
     price_purchase = fields.Float(string='Prix Achat')
-    price_sale = fields.Float(string='Prix Vente')
+
     weight = fields.Float(string='Poids (Kg)')
     calibre = fields.Char(string='Calibre')
     

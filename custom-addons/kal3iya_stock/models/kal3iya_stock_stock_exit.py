@@ -13,7 +13,7 @@ class Kal3iyaStockExit(models.Model):
     weight = fields.Float(string='Poids unit (Kg)')
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
-    price_sale = fields.Float(string='Prix Vente')
+
     
     date = fields.Date(string='Date', required=True)
     lot = fields.Char(string='Lot')
@@ -89,7 +89,7 @@ class Kal3iyaStockExit(models.Model):
         for rec in self:
             if rec.state == 'done':
                 forbidden_fields = [
-                    'product_id', 'qty', 'weight', 'price_sale',
+                    'product_id', 'qty', 'weight',
                     'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
@@ -128,7 +128,7 @@ class Kal3iyaStockExit(models.Model):
                 'state': 'done',
                 'date': rec.date,
                 'reference': rec.name,
-                'price_sale': rec.price_sale,
+
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
@@ -159,7 +159,7 @@ class Kal3iyaStockExit(models.Model):
                 'state': 'done',
                 'date': fields.Datetime.now(),
                 'reference': rec.name,
-                'price_sale': rec.price_sale,
+
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,

@@ -64,7 +64,7 @@
                             <field name="qty"/>
                             <field name="weight" readonly="1" force_save="1"/>
                             <field name="tonnage"/>
-                            <field name="price_sale"/>
+
                             <field name="date"/>
                         </group>
                     </group>

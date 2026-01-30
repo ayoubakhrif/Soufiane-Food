@@ -20,7 +20,7 @@
                     decoration-danger="margin &lt; 0"/>
                 <field name="ville"/>
                 <field name="frigo"/>
-                <field name="not_delivered" optional="show"/>
+                <field name="not_delivered" widget="boolean_toggle" optional="show"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>

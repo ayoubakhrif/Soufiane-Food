@@ -150,6 +150,34 @@ class DossierMonitoring(models.Model):
                 'icon': 'fa-check-circle'
             })
             
+            # Generators Containers HTML
+            container_html = ""
+            containers = rec.dossier_id.container_ids
+            if containers:
+                container_html = """
+                <div style="margin-top: 25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">
+                    <div style="font-size: 14px; color: #5a6c7d; margin-bottom: 12px; font-weight: 600;">
+                        <i class="fa fa-boxes" style="color: #667eea; margin-right: 8px;"></i> LISTE DES CONTENEURS ({})
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                """.format(len(containers))
+                
+                for c in containers:
+                    container_html += f"""
+                    <span style="
+                        background: #f1f5f9; 
+                        color: #475569; 
+                        padding: 8px 16px; 
+                        border-radius: 8px; 
+                        font-family: monospace; 
+                        font-size: 14px; 
+                        font-weight: 600; 
+                        border: 1px solid #cbd5e1;">
+                        {c.name}
+                    </span>
+                    """
+                container_html += "</div></div>"
+
             # Generating HTML (Improved UI with Better Colors)
             html = f"""
             <style>
@@ -403,8 +431,7 @@ class DossierMonitoring(models.Model):
                     <div class="dlm-meta">
                         <i class="fa fa-cube"></i> <strong>{rec.article_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
                         <i class="fa fa-building"></i> <strong>{rec.company_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
-                        <i class="fa fa-industry"></i> <strong>{rec.supplier_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
-                        <i class="fa fa-boxes"></i> <strong>{rec.container_count} Conteneurs</strong>
+                        <i class="fa fa-industry"></i> <strong>{rec.supplier_id.name or '-'}</strong>
                     </div>
 
                     <div class="dlm-kpis">
@@ -421,6 +448,8 @@ class DossierMonitoring(models.Model):
                             <span class="dlm-kpi-label">Date Livraison</span>
                         </div>
                     </div>
+
+                    {container_html}
                 </div>
 
                 <div class="dlm-timeline">

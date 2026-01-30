@@ -115,7 +115,6 @@
         <field name="model">stock.kal3iya.exit</field>
         <field name="arch" type="xml">
             <search string="Recherche Sorties">
-                <field name="name"/>
                 <field name="product_id"/>
                 <field name="client_id"/>
                 <field name="driver_id"/>

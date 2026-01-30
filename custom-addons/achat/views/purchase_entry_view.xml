@@ -60,9 +60,7 @@
                             <field name="shipping_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="origin_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="incoterm" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <!-- date_booking readonly if draft (interpreted as locked from draft onwards) -->
-                            <field name="date_booking" readonly="purchase_state in ('draft', 'confirmed')"/>
-                            
+                            <!-- date_booking readonly if draft (interpreted as locked from draft onwards) -->                            
                             <!-- For admins: always editable -->
                             <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" groups="achat.group_purchase_admin"/> 
                             <field name="ste_id" groups="achat.group_purchase_admin"/>
@@ -99,6 +97,14 @@
                             <field name="dhl_number"/>
                             <field name="eta_dhl"/>
                         </group>
+                        <group string="Dates">
+                            <field name="date_booking" groups="achat.group_purchase_admin"/>
+                            <field name="date_booking" readonly="purchase_state in ('draft', 'confirmed')" groups="!achat.group_purchase_admin"/>
+                            <field name="date_docs_received" groups="achat.group_purchase_admin"/>
+                            <field name="date_docs_received" readonly="purchase_state == 'confirmed'" groups="!achat.group_purchase_admin"/>
+                            <field name="date_docs_confirmed" groups="achat.group_purchase_admin"/>
+                            <field name="date_docs_confirmed" readonly="purchase_state == 'confirmed'" groups="!achat.group_purchase_admin"/>
+                        </group>
                         <group string="Document's comments">
                             <field name="comment"/>
                         </group>
@@ -115,9 +121,6 @@
                                 <group>
                                     <field name="doc_fito" widget="radio" options="{'horizontal': true}"/>
                                     <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
-                                    <!-- dates readonly if confirmed -->
-                                    <field name="date_docs_received" readonly="purchase_state == 'confirmed'"/>
-                                    <field name="date_docs_confirmed" readonly="purchase_state == 'confirmed'"/>
                                 </group>
                             </group>
                         </page>

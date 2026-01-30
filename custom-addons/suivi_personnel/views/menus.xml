@@ -58,7 +58,7 @@
     <menuitem id="menu_suivi_settings"
               name="Paramètres Généraux"
               parent="menu_suivi_config"
-              action="action_suivi_config"
+              action="action_suivi_config_server"
               sequence="10"/>
 
     <menuitem id="menu_expense_categories"

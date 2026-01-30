@@ -6,16 +6,15 @@
         <field name="arch" type="xml">
             <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
-                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="product_id"/>
+                <field name="weight"/>
+                <field name="qty"/>
                 <field name="lot"/>
                 <field name="dum"/>
-                <field name="product_id"/>
-                <field name="ste_id"/>
-                <field name="qty"/>
-                <field name="client_id"/>
                 <field name="soufiane_client"/>
+                <field name="client_id"/>
                 <field name="driver_id"/>
-                <field name="price_sale"/>
                 <field name="garage"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>

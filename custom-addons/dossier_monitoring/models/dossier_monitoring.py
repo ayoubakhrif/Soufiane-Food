@@ -13,6 +13,7 @@ class DossierMonitoring(models.Model):
     contract_id = fields.Many2one('achat.contract', string='Contrat', readonly=True)
     supplier_id = fields.Many2one('logistique.supplier', string='Fournisseur', readonly=True)
     company_id = fields.Many2one('logistique.ste', string='Société', readonly=True)
+    article_id = fields.Many2one('company.article', string='Article', readonly=True)
     
     # Dates
     date_contract = fields.Date(string='Date Contrat', readonly=True)
@@ -22,12 +23,13 @@ class DossierMonitoring(models.Model):
     eta_dhl = fields.Date(string='Date DHL (ETA)', readonly=True)
     bad_date = fields.Date(string='Date BAD', readonly=True)
     exit_date = fields.Date(string='Date Sortie (Full)', readonly=True)
+    empty_container_date = fields.Date(string='Date Vide (Clôture)', readonly=True)
     
     # Phase (Computed in SQL)
     phase = fields.Selection([
         ('1_contract', 'Contrat Signé'),
-        ('2_created', 'Dossier Créé'),
-        ('3_booking', 'Booking'),
+        ('2_booking', 'Booking'),
+        ('3_created', 'Dossier Créé'),
         ('4_docs_rec', 'Docs Reçus'),
         ('5_docs_conf', 'Docs Confirmés'),
         ('6_transit', 'En Transit (DHL)'),
@@ -64,23 +66,23 @@ class DossierMonitoring(models.Model):
                 'icon': 'fa-file-signature'
             })
             
-            # 2. Création (Always done if record exists)
-            s2_done = True
+            # 2. Booking (Now before Creation)
+            s2_done = bool(rec.date_booking)
+            s2_status = 'done' if s2_done else ('current' if s1_done else 'pending')
+            steps.append({
+                'label': 'Booking',
+                'date': fmt(rec.date_booking),
+                'status': s2_status,
+                'icon': 'fa-calendar-check'
+            })
+
+            # 3. Création (Always done if record exists)
+            s3_done = True
             steps.append({
                 'label': 'Création du dossier',
                 'date': "Fait",
                 'status': 'done',
                 'icon': 'fa-folder-plus'
-            })
-            
-            # 3. Booking
-            s3_done = bool(rec.date_booking)
-            s3_status = 'done' if s3_done else ('current' if s1_done else 'pending')
-            steps.append({
-                'label': 'Booking',
-                'date': fmt(rec.date_booking),
-                'status': s3_status,
-                'icon': 'fa-calendar-check'
             })
             
             # 4. Docs
@@ -93,7 +95,7 @@ class DossierMonitoring(models.Model):
                 s4_status = 'current'
                 s4_date = "Reçu: " + fmt(rec.date_docs_received)
             else:
-                s4_status = 'current' if s3_done else 'pending'
+                s4_status = 'current' if s2_done else 'pending'
                 s4_date = "Non renseigné"
                 
             steps.append({
@@ -138,11 +140,11 @@ class DossierMonitoring(models.Model):
                 'icon': 'fa-truck'
             })
 
-            # 8. Clôture
-            is_closed = (rec.phase == '9_closed')
+            # 8. Clôture (Driven by Empty Container Date)
+            is_closed = bool(rec.empty_container_date)
             steps.append({
-                'label': 'Clôture',
-                'date': "Clôturé" if is_closed else "Non clôturé",
+                'label': 'Clôture (Vide)',
+                'date': fmt(rec.empty_container_date) if is_closed else "Non clôturé",
                 'status': 'done' if is_closed else ('current' if s7_done else 'pending'),
                 'icon': 'fa-check-circle'
             })
@@ -398,6 +400,7 @@ class DossierMonitoring(models.Model):
                     </div>
 
                     <div class="dlm-meta">
+                        <i class="fa fa-cube"></i> <strong>{rec.article_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
                         <i class="fa fa-building"></i> <strong>{rec.company_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
                         <i class="fa fa-industry"></i> <strong>{rec.supplier_id.name or '-'}</strong>
                     </div>
@@ -460,6 +463,7 @@ class DossierMonitoring(models.Model):
                     l.contract_id as contract_id,
                     l.supplier_id as supplier_id,
                     l.ste_id as company_id,
+                    l.article_id as article_id,
                     c.date as date_contract,
                     l.date_booking as date_booking,
                     l.date_docs_received as date_docs_received,
@@ -467,17 +471,18 @@ class DossierMonitoring(models.Model):
                     l.eta_dhl as eta_dhl,
                     l.bad_date as bad_date,
                     l.exit_date as exit_date,
+                    l.empty_container_date as empty_container_date,
                     
                     CASE
-                        WHEN l.status = 'closed' THEN '9_closed'
+                        WHEN l.empty_container_date IS NOT NULL THEN '9_closed'
                         WHEN l.exit_date IS NOT NULL THEN '8_delivered'
                         WHEN l.bad_date IS NOT NULL THEN '7_customs'
                         WHEN l.eta_dhl IS NOT NULL THEN '6_transit'
                         WHEN l.date_docs_confirmed IS NOT NULL THEN '5_docs_conf'
                         WHEN l.date_docs_received IS NOT NULL THEN '4_docs_rec'
-                        WHEN l.date_booking IS NOT NULL THEN '3_booking'
+                        WHEN l.date_booking IS NOT NULL THEN '2_booking'
                         WHEN l.contract_id IS NOT NULL THEN '1_contract'
-                        ELSE '2_created'
+                        ELSE '3_created'
                     END as phase
                     
                 FROM logistique_entry l

@@ -25,3 +25,15 @@ class SuiviConfig(models.Model):
         for rec in self:
             if rec.month_start_day < 1 or rec.month_start_day > 31:
                 raise models.ValidationError("Le jour de début doit être entre 1 et 31")
+
+    def open_settings(self):
+        """Helper to open the form view of the singleton"""
+        config = self.get_config()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Paramètres Généraux',
+            'res_model': 'suivi.config',
+            'res_id': config.id,
+            'view_mode': 'form',
+            'target': 'inline',
+        }

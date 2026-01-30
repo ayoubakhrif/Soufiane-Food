@@ -114,7 +114,7 @@
                 <field name="limit_exceeded" string="⚠️ Statut" widget="badge"
                        decoration-success="limit_exceeded == False"
                        decoration-danger="limit_exceeded == True"/>
-                <field name="is_daily" string="🔄 Type" widget="badge"/>
+                <field name="is_daily" string="🔄 Type" widget="boolean_toggle"/>
                 <field name="description" string="📝 Description"/>
                 <field name="active" widget="boolean_toggle" string="🔓 Actif"/>
             </tree>

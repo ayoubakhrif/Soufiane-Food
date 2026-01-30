@@ -1,37 +1,93 @@
-# Odoo
+# Soufiane Food - Odoo Project
 
-[![Build Status](https://runbot.odoo.com/runbot/badge/flat/1/master.svg)](https://runbot.odoo.com/runbot)
-[![Documentation](https://img.shields.io/badge/master-docs-875A7B.svg?style=flat&colorA=8F8F8F)](https://www.odoo.com/documentation/17.0)
-[![Help](https://img.shields.io/badge/master-help-875A7B.svg?style=flat&colorA=8F8F8F)](https://www.odoo.com/forum/help-1)
-[![Nightly Builds](https://img.shields.io/badge/master-nightly-875A7B.svg?style=flat&colorA=8F8F8F)](https://nightly.odoo.com/)
+This repository contains the custom Odoo modules for **Soufiane Food**, a comprehensive system for managing food import/export, logistics, stock, and finance.
 
-Odoo is a suite of web based open source business apps.
+## Project Overview
 
-The main Odoo Apps include an [Open Source CRM](https://www.odoo.com/page/crm),
-[Website Builder](https://www.odoo.com/app/website),
-[eCommerce](https://www.odoo.com/app/ecommerce),
-[Warehouse Management](https://www.odoo.com/app/inventory),
-[Project Management](https://www.odoo.com/app/project),
-[Billing &amp; Accounting](https://www.odoo.com/app/accounting),
-[Point of Sale](https://www.odoo.com/app/point-of-sale-shop),
-[Human Resources](https://www.odoo.com/app/employees),
-[Marketing](https://www.odoo.com/app/social-marketing),
-[Manufacturing](https://www.odoo.com/app/manufacturing),
-[...](https://www.odoo.com/)
+The system is designed to handle the end-to-end lifecycle of food trading, from international purchasing and logistics tracking to local warehousing and sales distribution. It includes specialized modules for monitoring shipment phases, managing financials (cheques, transfers), and tracking employee attendance.
 
-Odoo Apps can be used as stand-alone applications, but they also integrate seamlessly so you get
-a full-featured [Open Source ERP](https://www.odoo.com) when you install several Apps.
+## Core Modules
 
-## Getting started with Odoo
+### 📦 Import & Logistics
 
-For a standard installation please follow the [Setup instructions](https://www.odoo.com/documentation/17.0/administration/install/install.html)
-from the documentation.
+*   **`achat` (Purchasing)**
+    *   Manages international purchase contracts and dossiers.
+    *   Tracks supplier agreements.
+    *   **Key Features**: Contract digitization, Purchase Dossier creation.
+    
+*   **`logistique` (Logistics)**
+    *   Central hub for shipment tracking.
+    *   Tracks Containers, Bill of Lading (BL), ETA, and Document statuses (commercial invoice, packing list, etc.).
+    *   **Key Features**: Week management, Container tracking, Freight Forwarder management, Surestarie/Magasinage simulations.
 
-To learn the software, we recommend the [Odoo eLearning](https://www.odoo.com/slides),
-or [Scale-up, the business game](https://www.odoo.com/page/scale-up-business-game).
-Developers can start with [the developer tutorials](https://www.odoo.com/documentation/17.0/developer/howtos.html).
+*   **`douane` (Customs)**
+    *   Manages customs clearance procedures.
+    *   Tracks DUM (Document Unique de Marchandise) and related taxes/duties.
 
-## Security
+*   **`dossier_monitoring` (Lifecycle Monitoring)**
+    *   **New!** Provides a read-only, visual dashboard for tracking the entire lifecycle of a purchase dossier.
+    *   **Phases**: Contract -> Booking -> Creation -> Docs -> Transit -> Customs -> Delivery -> Closure.
+    *   **Visuals**: HTML Dashboard with progress bars and KPIs.
 
-If you believe you have found a security issue, check our [Responsible Disclosure page](https://www.odoo.com/security-report)
-for details and get in touch with us via email.
+### 🏭 Stock Management
+
+*   **`casa_stock`**
+    *   Manages stock for the **Casablanca** warehouse.
+    *   Tracks Entrées (Entries), Sorties (Exits), and Retours (Returns).
+    *   **Key Features**: "Not Delivered" tracking for sold items remaining in warehouse.
+
+*   **`stock_kal3iya` / `kal3iya_stock`**
+    *   Manages stock for the **Kal3iya** site.
+    *   Includes specific logic for that location's operations.
+
+*   **`claims` (Réclamations)**
+    *   Manages issues with shipments or suppliers.
+    *   **Types**: Quantity Claims (Missing goods), Quality Claims (Damaged goods), DHL Delay, Franchise Difference.
+    *   **Features**: Evidence handling, QC Folder linking, PDF Reports.
+
+### 💰 Finance
+
+*   **`finance`**
+    *   Comprehensive financial management tailored to import operations.
+    *   **Cheques**: Tracking incoming/outgoing cheques, talons, and series.
+    *   **Sutra**: Management of "Sutra" payments and transactions.
+    *   **Deductions**: Logic for payment by deduction.
+    *   **Bank Transfers**: Tracking virements.
+
+### 👥 HR & Administration
+
+*   **`custom_employee`**
+    *   Extends the standard Employee model.
+    *   Adds structure for Companies (STE), Departments, and Job Positions.
+
+*   **`custom_attendance`**
+    *   Tailored attendance tracking.
+    *   Calculates monthly salaries based on attendance, missing hours, and overtime.
+
+*   **`suivi_presence`**
+    *   Simplified daily presence tracking (Check-in/Check-out) with strict time/date validation rules.
+
+*   **`suivi_personnel`**
+    *   Personal tracking for staff.
+
+## Key Features & Workflows
+
+1.  **Dossier Lifecycle**:
+    *   A dossier starts in `achat` (Contract).
+    *   Moves to `logistique` for shipment tracking (Booking, BL, Containers).
+    *   Customs data is added in `douane`.
+    *   Stock is received in `casa_stock`.
+    *   The entire process is visualized in `dossier_monitoring`.
+
+2.  **Access Control**:
+    *   Granular security groups (e.g., "Viewer", "User", "Manager", "Admin").
+    *   Strict separation of duties between Achat, Logistique, and Finance.
+
+## Installation
+
+1.  Clone this repository to your Odoo addons path.
+2.  Update your Odoo configuration file to include this directory in `addons_path`.
+3.  Install the required modules (start with `logistique`, `achat`, `finance`).
+
+---
+*Generated by Antigravity AI*

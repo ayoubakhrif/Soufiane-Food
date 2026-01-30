@@ -69,22 +69,8 @@ class ExpenseCategory(models.Model):
                 category.limit_exceeded = False
                 continue
 
-            # 🔹 Nombre total de jours du mois comptable
-            total_days = (month_end - month_start).days + 1
-
-            # 🔹 Nombre de jours écoulés jusqu'à اليوم
-            days_passed = (today - month_start).days + 1
-            days_passed = max(days_passed, 0)
-
-            # 🔹 Catégorie journalière
-            if category.is_daily:
-                daily_limit = category.monthly_limit / total_days
-                allowed_until_today = daily_limit * days_passed
-            else:
-                # 🔹 Catégorie mensuelle
-                allowed_until_today = category.monthly_limit
-
-            category.current_balance = allowed_until_today - total_spent
+            # 🔹 Calcul Simplifié : Solde = Limite Mensuelle - Dépenses Totales
+            category.current_balance = category.monthly_limit - total_spent
             category.limit_exceeded = category.current_balance < 0
 
 

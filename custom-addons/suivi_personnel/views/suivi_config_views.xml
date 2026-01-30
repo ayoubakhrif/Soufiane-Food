@@ -32,10 +32,15 @@
     <!-- ========================= -->
     <!-- 🚀 Action -->
     <!-- ========================= -->
-    <record id="action_suivi_config" model="ir.actions.act_window">
+    <!-- ========================= -->
+    <!-- 🚀 Server Action (Singleton Force) -->
+    <!-- ========================= -->
+    <record id="action_suivi_config" model="ir.actions.server">
         <field name="name">Paramètres Généraux</field>
-        <field name="res_model">suivi.config</field>
-        <field name="view_mode">form</field>
-        <field name="target">inline</field>
+        <field name="model_id" ref="model_suivi_config"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.open_settings()
+        </field>
     </record>
 </odoo>

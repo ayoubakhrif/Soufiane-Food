@@ -6,9 +6,15 @@
         <field name="sequence">10</field>
     </record>
 
+    <record id="group_transport_viewer" model="res.groups">
+        <field name="name">Viewer</field>
+        <field name="category_id" ref="module_category_transport"/>
+    </record>
+
     <record id="group_transport_user" model="res.groups">
         <field name="name">User</field>
         <field name="category_id" ref="module_category_transport"/>
+        <field name="implied_ids" eval="[(4, ref('group_transport_viewer'))]"/>
     </record>
 
     <record id="group_transport_manager" model="res.groups">

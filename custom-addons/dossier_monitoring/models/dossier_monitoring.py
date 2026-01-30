@@ -141,10 +141,10 @@ class DossierMonitoring(models.Model):
             })
 
             # 8. Clôture (Driven by Empty Container Date)
-            is_closed = bool(rec.empty_container_date)
+            is_closed = bool(rec.entry_date)
             steps.append({
                 'label': 'Clôture (Vide)',
-                'date': fmt(rec.empty_container_date) if is_closed else "Non clôturé",
+                'date': fmt(rec.entry_date) if is_closed else "Non clôturé",
                 'status': 'done' if is_closed else ('current' if s7_done else 'pending'),
                 'icon': 'fa-check-circle'
             })
@@ -471,10 +471,10 @@ class DossierMonitoring(models.Model):
                     l.eta_dhl as eta_dhl,
                     l.bad_date as bad_date,
                     l.exit_date as exit_date,
-                    l.empty_container_date as empty_container_date,
+                    l.entry_date as entry_date,
                     
                     CASE
-                        WHEN l.empty_container_date IS NOT NULL THEN '9_closed'
+                        WHEN l.entry_date IS NOT NULL THEN '9_closed'
                         WHEN l.exit_date IS NOT NULL THEN '8_delivered'
                         WHEN l.bad_date IS NOT NULL THEN '7_customs'
                         WHEN l.eta_dhl IS NOT NULL THEN '6_transit'

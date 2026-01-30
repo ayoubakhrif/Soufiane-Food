@@ -30,6 +30,7 @@
                 <field name="supplier_id"/>
                 <field name="company_id"/>
                 <field name="phase"/>
+                <field name="article_id"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click">
@@ -39,6 +40,7 @@
                                 </strong>
                                 <div class="o_kanban_tags_section"/>
                                 <ul>
+                                    <li><i class="fa fa-cube"/> <field name="article_id"/></li>
                                     <li><i class="fa fa-file-contract"/> <field name="contract_id"/></li>
                                     <li><i class="fa fa-industry"/> <field name="supplier_id"/></li>
                                     <li><i class="fa fa-building"/> <field name="company_id"/></li>

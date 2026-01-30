@@ -14,6 +14,7 @@ class DossierMonitoring(models.Model):
     supplier_id = fields.Many2one('logistique.supplier', string='Fournisseur', readonly=True)
     company_id = fields.Many2one('logistique.ste', string='Société', readonly=True)
     article_id = fields.Many2one('company.article', string='Article', readonly=True)
+    container_count = fields.Integer(string='Nb Conteneurs', readonly=True)
     
     # Dates
     date_contract = fields.Date(string='Date Contrat', readonly=True)
@@ -402,7 +403,8 @@ class DossierMonitoring(models.Model):
                     <div class="dlm-meta">
                         <i class="fa fa-cube"></i> <strong>{rec.article_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
                         <i class="fa fa-building"></i> <strong>{rec.company_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
-                        <i class="fa fa-industry"></i> <strong>{rec.supplier_id.name or '-'}</strong>
+                        <i class="fa fa-industry"></i> <strong>{rec.supplier_id.name or '-'}</strong> &nbsp;&nbsp;&nbsp;
+                        <i class="fa fa-boxes"></i> <strong>{rec.container_count} Conteneurs</strong>
                     </div>
 
                     <div class="dlm-kpis">
@@ -464,6 +466,7 @@ class DossierMonitoring(models.Model):
                     l.supplier_id as supplier_id,
                     l.ste_id as company_id,
                     l.article_id as article_id,
+                    l.container_count as container_count,
                     c.date as date_contract,
                     l.date_booking as date_booking,
                     l.date_docs_received as date_docs_received,

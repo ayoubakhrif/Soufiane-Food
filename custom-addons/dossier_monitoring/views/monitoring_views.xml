@@ -41,6 +41,7 @@
                                 <div class="o_kanban_tags_section"/>
                                 <ul>
                                     <li><i class="fa fa-cube"/> <field name="article_id"/></li>
+                                    <li><i class="fa fa-boxes"/> <field name="container_count"/> Conteneurs</li>
                                     <li><i class="fa fa-file-contract"/> <field name="contract_id"/></li>
                                     <li><i class="fa fa-industry"/> <field name="supplier_id"/></li>
                                     <li><i class="fa fa-building"/> <field name="company_id"/></li>

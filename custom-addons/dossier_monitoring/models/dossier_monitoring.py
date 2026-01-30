@@ -23,7 +23,7 @@ class DossierMonitoring(models.Model):
     eta_dhl = fields.Date(string='Date DHL (ETA)', readonly=True)
     bad_date = fields.Date(string='Date BAD', readonly=True)
     exit_date = fields.Date(string='Date Sortie (Full)', readonly=True)
-    empty_container_date = fields.Date(string='Date Vide (Clôture)', readonly=True)
+    entry_date = fields.Date(string='Date Vide (Clôture)', readonly=True)
     
     # Phase (Computed in SQL)
     phase = fields.Selection([

@@ -30,7 +30,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="period_id" options="{'no_create': True}"/>
+                            <field name="period_id" options="{'no_create': True}" readonly="state == 'done'"/>
                             <field name="name" verbose_name="Libellé" readonly="1" force_save="1"/>
                             <field name="date_start" readonly="1" force_save="1"/>
                             <field name="date_end" readonly="1" force_save="1"/>

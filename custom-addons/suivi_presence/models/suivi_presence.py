@@ -35,32 +35,33 @@ class SuiviPresence(models.Model):
     @api.constrains('employee_id', 'type', 'datetime')
     def _check_unique_entry(self):
         for rec in self:
-            if rec.type == 'entree':
+            if rec.type in ['entree', 'absent']:
                 # Convert to date to check "Same Day"
-                # Using user's timezone or UTC? "Same Day" usually implies local date.
-                # existing code uses 'Africa/Casablanca' for checks, let's stick to that for consistency.
                 user_tz = pytz.timezone('Africa/Casablanca')
-                rec_dt = rec.datetime.astimezone(user_tz)
+                # Ensure we handle naive datetimes (though stored ones are usually UTC)
+                dt = rec.datetime
+                if not dt.tzinfo:
+                    dt = pytz.utc.localize(dt)
+                    
+                rec_dt = dt.astimezone(user_tz)
                 start_of_day = rec_dt.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.utc)
                 end_of_day = rec_dt.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.utc)
 
                 domain = [
                     ('employee_id', '=', rec.employee_id.id),
-                    ('type', '=', 'entree'),
+                    ('type', '=', rec.type),
                     ('datetime', '>=', start_of_day),
                     ('datetime', '<=', end_of_day),
                     ('id', '!=', rec.id)
                 ]
                 if self.search_count(domain) > 0:
-                    raise exceptions.ValidationError("Cet employé a déjà une entrée enregistrée pour ce jour.")
+                    raise exceptions.ValidationError(f"Cet employé a déjà un enregistrement de type '{rec.type}' pour ce jour.")
 
     @api.onchange('employee_id', 'type', 'datetime')
     def _onchange_check_duplicate_exit(self):
         if self.type == 'sortie' and self.employee_id and self.datetime:
-            user_tz = pytz.timezone('Africa/Casablanca')
-            # datetime in onchange might be naive if coming from UI, or UTC. 
-            # Safe to assume Odoo handles it, but let's be careful.
             try:
+                user_tz = pytz.timezone('Africa/Casablanca')
                 dt = self.datetime
                 if not dt.tzinfo:
                     dt = pytz.utc.localize(dt)
@@ -74,11 +75,7 @@ class SuiviPresence(models.Model):
                     ('type', '=', 'sortie'),
                     ('datetime', '>=', start_of_day),
                     ('datetime', '<=', end_of_day),
-                    # Onchange runs on new record (no ID) or existing.
-                    # We want to warn even if we are editing? Maybe just for new ones creates less noise.
-                    # User request: "when the user enters...".
                 ]
-                # If we are editing an existing record, exclude itself
                 if self._origin.id:
                     domain.append(('id', '!=', self._origin.id))
 
@@ -89,8 +86,11 @@ class SuiviPresence(models.Model):
                             'message': "Attention vous avez déjà rentré la sortie de cet employé ce jour là"
                         }
                     }
-            except Exception:
-                pass # Fail silently in onchange if date math fails
+            except Exception as e:
+                # Log error if needed, but don't crash
+                import logging
+                _logger = logging.getLogger(__name__)
+                _logger.error(f"Error in onchange check duplicate exit: {str(e)}")
 
     @api.model
     def create(self, vals):

@@ -97,6 +97,137 @@ class StockKal3iyaStock(models.Model):
             }
         return False
 
+    @api.model
+    def validate_stock_exit(self, data):
+        """
+        Validate a stock exit request for AI Agent.
+        
+        Args:
+            data (dict): {
+                'product_name': str,
+                'lot': str,
+                'dum': str,
+                'garage': str, # Selection key or label
+                'qty': float,
+                'ste_name': str (optional)
+            }
+            
+        Returns:
+            dict: {
+                'valid': bool,
+                'stock_found': bool,
+                'available_qty': float,
+                'errors': list[str],
+                'normalized_data': dict (resolved IDs/Values)
+            }
+        """
+        response = {
+            'valid': False,
+            'stock_found': False,
+            'available_qty': 0.0,
+            'errors': [],
+            'normalized_data': {}
+        }
+        
+        # 1. Normalize Inputs (Trim only, NO STRICT FORMATTING)
+        raw_product = (data.get('product_name') or '').strip()
+        raw_lot = (data.get('lot') or '').strip()
+        raw_dum = (data.get('dum') or '').strip()
+        raw_garage = (data.get('garage') or '').strip()
+        qty = data.get('qty', 0.0)
+        
+        if not raw_product:
+            response['errors'].append("Le nom du produit est requis.")
+        if not raw_lot:
+            response['errors'].append("Le numéro de LOT est requis.")
+        if not raw_dum:
+            response['errors'].append("Le numéro DUM est requis.")
+        if not raw_garage:
+            response['errors'].append("Le garage est requis.")
+        if qty <= 0:
+            response['errors'].append("La quantité doit être supérieure à 0.")
+            
+        if response['errors']:
+            return response
+
+        # 2. Resolve Product (Fuzzy / Alias)
+        Product = self.env['stock.kal3iya.product']
+        product = Product.search([('name', '=ilike', raw_product)], limit=1)
+        
+        if not product:
+            # Try Alias
+            alias = self.env['ai.alias'].search([
+                ('model_name', '=', 'stock.kal3iya.product'),
+                ('input_text', '=ilike', raw_product)
+            ], limit=1)
+            if alias:
+                 product = Product.browse(alias.record_id)
+        
+        if not product:
+            response['errors'].append(f"Produit non trouvé : '{raw_product}'")
+            return response
+            
+        response['normalized_data']['product_id'] = product.id
+        response['normalized_data']['product_name'] = product.name
+
+        # 3. Resolve Garage (Selection)
+        # We need to map text like "Garage 1" or "garage1" to the selection key "garage1"
+        garage_key = False
+        selection = self.fields_get(['garage'])['garage']['selection']
+        
+        # Direct key match
+        for key, label in selection:
+            if raw_garage.lower() == key.lower():
+                garage_key = key
+                break
+        
+        # Label match
+        if not garage_key:
+             for key, label in selection:
+                if raw_garage.lower() == label.lower():
+                    garage_key = key
+                    break
+        
+        if not garage_key:
+             response['errors'].append(f"Garage invalide : '{raw_garage}'")
+             return response
+
+        response['normalized_data']['garage'] = garage_key
+
+        # 4. Check Stock Availability
+        # Rely strictly on database content for LOT and DUM (Case Insensitive search is safer for user input)
+        domain = [
+            ('product_id', '=', product.id),
+            ('garage', '=', garage_key),
+            ('lot', '=ilike', raw_lot), 
+            ('dum', '=ilike', raw_dum),
+        ]
+        
+        stock_lines = self.search(domain)
+        
+        if not stock_lines:
+            response['errors'].append("Aucun stock trouvé pour ces critères (Produit + Lot + DUM + Garage).")
+            return response
+            
+        # 5. Calculate Total Available
+        total_available = sum(line.quantity for line in stock_lines)
+        response['stock_found'] = True
+        response['available_qty'] = total_available
+        
+        # 6. Validate Quantity
+        if qty > total_available:
+            response['errors'].append(f"Stock insuffisant. Demandé: {qty}, Disponible: {total_available}")
+            response['valid'] = False
+        else:
+            response['valid'] = True
+            
+        # Pass back the exact LOT/DUM found (or the input if multiple/fuzzy match, but here we used ilike)
+        # Ideally we return the one from the database to standardize subsequent calls
+        response['normalized_data']['lot'] = stock_lines[0].lot 
+        response['normalized_data']['dum'] = stock_lines[0].dum
+        
+        return response
+
     def action_open_invoice(self):
         self.ensure_one()
         if self.scan_invoice:

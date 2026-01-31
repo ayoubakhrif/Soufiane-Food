@@ -40,23 +40,14 @@
             <form string="Entrées logistique" create="false" delete="false">
                 <header>
                     <div class="oe_button_box" position="inside">
-                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-hourglass-half" invisible="status != 'in_progress'">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text text-warning" style="font-size: 16px; font-weight: bold;">En cours</span>
-                            </div>
-                        </button>
-                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-truck" invisible="status != 'get_out'">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text text-success" style="font-size: 16px; font-weight: bold;">Get Out</span>
-                            </div>
-                        </button>
-                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive" invisible="status != 'closed'">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text text-danger" style="font-size: 16px; font-weight: bold;">Clot uré</span>
-                            </div>
-                        </button>
+                    <div class="oe_button_box" position="inside">
+                        <!-- Stat buttons removed or kept as is? Keeping as is but removing toggle_active logic if it was just UI -->
                     </div>
-                    <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
+
+                    <button name="action_set_gate_out" string="Gate Out" type="object" class="btn-primary" invisible="status != 'in_progress'"/>
+                    <button name="action_set_closed" string="Clôturer" type="object" class="btn-primary" invisible="status != 'get_out'"/>
+                    
+                    <field name="status" widget="statusbar" statusbar_visible="in_progress,get_out,closed"/>
                 </header>
                 <sheet>
                     <group>
@@ -93,6 +84,7 @@
                         </group>
                         <group string="Tracking">
                             <field name="incoterm" readonly="1"/>
+                            <field name="fret" invisible="incoterm != 'fob'" required="incoterm == 'fob'"/>
                             <field name="free_time" readonly="1"/>
                             <field name="doc_status" readonly="1"/>
                         </group>
@@ -101,9 +93,9 @@
                         <group string="Infos logistiques">
                             <field name="week"/>
                             <field name="consolidator_id" invisible="incoterm != 'fob'"/>
-                            <field name="bad_date"/>
-                            <field name="exit_date"/>
-                            <field name="entry_date"/>
+                            <field name="bad_date" required="status == 'in_progress'"/>
+                            <field name="exit_date" required="status == 'closed'"/>
+                            <field name="entry_date" required="status == 'closed'"/>
                             <field name="remarks"/>
                         </group>
                         <group string="Frais logistiques (depuis chèques)">
@@ -176,15 +168,12 @@
                 <field name="article_id"/>
 
                 <group string="Regrouper par">
-                    <filter name="group_supplier"
-                            string="Supplier"
-                            context="{'group_by': 'supplier_id'}"/>
-
-
-
                     <filter name="group_status"
                             string="Status"
                             context="{'group_by': 'status'}"/>
+                    <filter name="group_supplier"
+                            string="Supplier"
+                            context="{'group_by': 'supplier_id'}"/>
                 </group>
 
             </search>

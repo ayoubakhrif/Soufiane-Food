@@ -119,6 +119,7 @@ class LogisticsEntry(models.Model):
         store=True
     )
     comment = fields.Char(string='Comments')
+    fret = fields.Float(string='Fret')
     thc_amount = fields.Float(
         string="THC",
         related="dossier_id.thc_amount",
@@ -136,8 +137,21 @@ class LogisticsEntry(models.Model):
     def action_move_to_draft(self):
         self.write({'purchase_state': 'draft'})
 
-    def action_confirm_purchase(self):
-        self.write({'purchase_state': 'confirmed'})
+    def action_set_gate_out(self):
+        for rec in self:
+            if not rec.bad_date:
+                raise ValidationError(_("La date BAD est requise pour passer à l'étape Gate Out."))
+            if rec.incoterm == 'fob' and not rec.fret:
+                raise ValidationError(_("Le montant du Fret est requis quand l'Incoterm est FOB."))
+            rec.write({'status': 'get_out'})
+
+    def action_set_closed(self):
+        for rec in self:
+            if not rec.entry_date:
+                raise ValidationError(_("La date d'entrée est requise pour clôturer."))
+            if not rec.exit_date:
+                raise ValidationError(_("La date de sortie est requise pour clôturer."))
+            rec.write({'status': 'closed'})
 
     # _onchange_contract_id moved to achat module
     

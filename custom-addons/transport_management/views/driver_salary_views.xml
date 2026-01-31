@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View Form Extension for Transport Driver -->
+    <record id="view_transport_driver_form_salary" model="ir.ui.view">
+        <field name="name">transport.driver.form.salary</field>
+        <field name="model">transport.driver</field>
+        <field name="inherit_id" ref="transport_management.view_transport_driver_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Suivi Salaire">
+                        <group string="Résumé Mensuel">
+                            <field name="monthly_summary_ids" readonly="1">
+                                <tree string="Résumé Mensuel" default_order="month desc">
+                                    <field name="month"/>
+                                    <field name="monthly_salary" widget="monetary"/>
+                                    <field name="total_advances" widget="monetary" decoration-danger="total_advances &gt; monthly_salary"/>
+                                    <field name="remaining_salary" widget="monetary" decoration-bf="1" decoration-danger="remaining_salary &lt; 0"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Détail des Avances">
+                            <field name="advance_ids" context="{'default_driver_id': active_id}">
+                                <tree string="Avances" editable="bottom" default_order="date desc">
+                                    <field name="date"/>
+                                    <field name="month" readonly="1"/>
+                                    <field name="amount" widget="monetary"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_transport_driver_advance_search" model="ir.ui.view">
+        <field name="name">transport.driver.advance.search</field>
+        <field name="model">transport.driver.advance</field>
+        <field name="arch" type="xml">
+            <search string="Avances Chauffeurs">
+                <field name="driver_id"/>
+                <field name="month"/>
+                <field name="date"/>
+                <filter string="Ce Mois" name="this_month" domain="[('month', '=', context_today().strftime('%Y-%m'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Chauffeur" name="group_driver" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Mois" name="group_month" context="{'group_by': 'month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

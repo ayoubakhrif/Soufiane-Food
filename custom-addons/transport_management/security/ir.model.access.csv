@@ -4,6 +4,10 @@ access_transport_driver_viewer,transport.driver.viewer,model_transport_driver,gr
 access_transport_client_viewer,transport.client.viewer,model_transport_client,group_transport_viewer,1,0,0,0
 access_gasoil_refill_viewer,gasoil.refill.viewer,model_gasoil_refill,group_transport_viewer,1,0,0,0
 access_gasoil_sale_viewer,gasoil.sale.viewer,model_gasoil_sale,group_transport_viewer,1,0,0,0
+access_transport_driver_monthly_summary_user,transport.driver.monthly.summary,model_transport_driver_monthly_summary,group_transport_user,1,1,1,0
+access_transport_driver_monthly_summary_manager,transport.driver.monthly.summary,model_transport_driver_monthly_summary,group_transport_manager,1,1,1,0
+access_transport_driver_advance_user,transport.driver.advance,model_transport_driver_advance,group_transport_user,1,1,1,0
+access_transport_driver_advance_manager,transport.driver.advance,model_transport_driver_advance,group_transport_manager,1,1,1,1
 access_gasoil_stock_viewer,gasoil.stock.viewer,model_gasoil_stock,group_transport_viewer,1,0,0,0
 access_transport_trip_user,transport.trip.user,model_transport_trip,group_transport_user,1,1,1,0
 access_transport_trip,transport.trip,model_transport_trip,base.group_user,1,1,1,1

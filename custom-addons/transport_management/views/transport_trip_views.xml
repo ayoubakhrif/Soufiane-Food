@@ -51,12 +51,10 @@
                     <group string="Charges">
                         <group>
                             <field name="charge_fuel"/>
-                            <field name="charge_adblue"/>
-                        </group>
-                        <group>
                             <field name="charge_driver"/>
-                            <field name="charge_salary"/>
+                            <field name="charge_adblue"/>
                             <field name="charge_mixed"/>
+                            <field name="note" invisible="charge_mixed == 0"/>
                         </group>
                     </group>
 

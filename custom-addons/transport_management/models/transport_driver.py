@@ -11,3 +11,6 @@ class TransportDriver(models.Model):
         domain="[('job_position_id.name', 'ilike', 'Chauffeur')]",
         help="Linked HR Employee. Filtered by job position 'Chauffeur'."
     )
+    
+    monthly_summary_ids = fields.One2many('transport.driver.monthly.summary', 'driver_id', string='Suivi Salaire')
+    advance_ids = fields.One2many('transport.driver.advance', 'driver_id', string='Avances')

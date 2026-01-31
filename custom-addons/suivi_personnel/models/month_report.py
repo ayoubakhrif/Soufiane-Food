@@ -7,7 +7,7 @@ class SuiviMonthReport(models.Model):
     _description = 'Rapport Mensuel'
     _order = 'date_start desc'
 
-    period_id = fields.Many2one('suivi.period', string='Période', required=True, readonly=True, states={'draft': [('readonly', False)]})
+    period_id = fields.Many2one('suivi.period', string='Période', required=True)
     name = fields.Char(string='Libellé', compute='_compute_period_details', store=True)
     date_start = fields.Date(string='Date Début', compute='_compute_period_details', store=True)
     date_end = fields.Date(string='Date Fin', compute='_compute_period_details', store=True)

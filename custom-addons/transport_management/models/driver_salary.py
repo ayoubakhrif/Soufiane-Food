@@ -78,7 +78,8 @@ class TransportDriverAdvance(models.Model):
             if not driver.employee_id:
                 raise ValidationError(_("Impossible de créer une avance : Ce chauffeur n'est lié à aucun employé (pas de salaire de référence)."))
             
-            monthly_salary = driver.employee_id.monthly_salary
+            # Use sudo() to bypass record rules (e.g. Suivi access) when reading the salary
+            monthly_salary = driver.employee_id.sudo().monthly_salary
             
             summary = Summary.create({
                 'driver_id': driver_id,

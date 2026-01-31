@@ -21,6 +21,7 @@ Features:
         'security/groups.xml',
         'security/ir.model.access.csv',
         'views/suivi_config_views.xml',
+        'views/month_report_views.xml',
         'views/expense_category_views.xml',
         'views/income_monthly_views.xml',
         'views/income_daily_views.xml',

@@ -1,4 +1,5 @@
 from . import suivi_config
+from . import month_report
 from . import expense_category
 from . import income_monthly
 from . import income_daily

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_month_report_tree" model="ir.ui.view">
+        <field name="name">suivi.month.report.tree</field>
+        <field name="model">suivi.month.report</field>
+        <field name="arch" type="xml">
+            <tree string="Rapports Mensuels" decoration-info="state == 'draft'" decoration-success="state == 'done'">
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="income_total" sum="Total Revenus"/>
+                <field name="expense_total" sum="Total Dépenses"/>
+                <field name="balance" sum="Solde"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_month_report_form" model="ir.ui.view">
+        <field name="name">suivi.month.report.form</field>
+        <field name="model">suivi.month.report</field>
+        <field name="arch" type="xml">
+            <form string="Rapport Mensuel">
+                <header>
+                    <button name="action_compute" string="Calculer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Valider" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <div class="oe_title">
+                                <h1>
+                                    <field name="balance" decoration-danger="balance &lt; 0" decoration-success="balance &gt; 0"/>
+                                    <span> MAD</span>
+                                </h1>
+                                <label for="balance" string="Solde Net"/>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <group string="Synthèse Financière">
+                        <group string="Revenus">
+                            <field name="income_fixed"/>
+                            <field name="income_daily"/>
+                            <field name="income_total" decoration-bf="1"/>
+                        </group>
+                        <group string="Dépenses">
+                            <field name="expense_fixed"/>
+                            <field name="expense_daily"/>
+                            <field name="expense_total" decoration-bf="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Analyse par Catégorie">
+                            <field name="line_ids" readonly="1">
+                                <tree decoration-danger="remaining &lt; 0" decoration-warning="remaining &lt; 100 and remaining &gt; 0">
+                                    <field name="category_id"/>
+                                    <field name="limit"/>
+                                    <field name="spent"/>
+                                    <field name="remaining" widget="monetary"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_month_report" model="ir.actions.act_window">
+        <field name="name">Rapports Mensuels</field>
+        <field name="res_model">suivi.month.report</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_suivi_reporting"
+              name="Analyse"
+              parent="menu_suivi_personnel_root"
+              sequence="30"/>
+
+    <menuitem id="menu_suivi_month_report"
+              name="Rapports Mensuels"
+              parent="menu_suivi_reporting"
+              action="action_suivi_month_report"
+              sequence="10"/>
+</odoo>

@@ -1,4 +1,5 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 from datetime import date
 from calendar import monthrange
 
@@ -85,6 +86,12 @@ class TransportTrip(models.Model):
 
 
     
+    @api.constrains('charge_mixed', 'note')
+    def _check_mixed_note(self):
+        for rec in self:
+            if rec.charge_mixed > 0 and not rec.note:
+                raise ValidationError(_("Veuillez spécifier un commentaire pour les charges mixtes."))
+
     @api.model
     def create(self, vals):
         record = super().create(vals)

@@ -54,7 +54,7 @@
                             <field name="charge_driver"/>
                             <field name="charge_adblue"/>
                             <field name="charge_mixed"/>
-                            <field name="note" invisible="charge_mixed == 0"/>
+                            <field name="note" invisible="charge_mixed == 0" required="charge_mixed &gt; 0"/>
                         </group>
                     </group>
 

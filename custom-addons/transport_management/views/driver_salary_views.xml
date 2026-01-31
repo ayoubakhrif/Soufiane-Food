@@ -52,4 +52,23 @@
             </search>
         </field>
     </record>
+
+    <!-- Action for Advances -->
+    <record id="action_transport_driver_advance" model="ir.actions.act_window">
+        <field name="name">Avances sur Salaire</field>
+        <field name="res_model">transport.driver.advance</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_transport_driver_advance_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Enregistrer une nouvelle avance
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_transport_driver_advance"
+              name="Avances Salaires"
+              parent="transport_management.menu_transport_operations"
+              action="action_transport_driver_advance"
+              sequence="10"/>
 </odoo>

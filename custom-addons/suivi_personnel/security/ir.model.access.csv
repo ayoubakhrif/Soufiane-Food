@@ -15,3 +15,5 @@ access_month_report_mgr,suivi.month.report,model_suivi_month_report,group_suivi_
 access_month_report_user,suivi.month.report,model_suivi_month_report,group_suivi_user,1,0,0,0
 access_month_report_line_mgr,suivi.month.report.line,model_suivi_month_report_line,group_suivi_manager,1,1,1,1
 access_month_report_line_user,suivi.month.report.line,model_suivi_month_report_line,group_suivi_user,1,0,0,0
+access_period_mgr,suivi.period,model_suivi_period,group_suivi_manager,1,1,1,1
+access_period_user,suivi.period,model_suivi_period,group_suivi_user,1,1,1,0

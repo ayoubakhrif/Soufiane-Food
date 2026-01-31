@@ -7,9 +7,10 @@ class SuiviMonthReport(models.Model):
     _description = 'Rapport Mensuel'
     _order = 'date_start desc'
 
-    name = fields.Char(string='Libellé', required=True, readonly=True, states={'draft': [('readonly', False)]})
-    date_start = fields.Date(string='Date Début', required=True, default=lambda self: date.today().replace(day=1), readonly=True, states={'draft': [('readonly', False)]})
-    date_end = fields.Date(string='Date Fin', required=True, default=lambda self: (date.today() + relativedelta(months=1, days=-1)), readonly=True, states={'draft': [('readonly', False)]})
+    period_id = fields.Many2one('suivi.period', string='Période', required=True, readonly=True, states={'draft': [('readonly', False)]})
+    name = fields.Char(string='Libellé', compute='_compute_period_details', store=True)
+    date_start = fields.Date(string='Date Début', compute='_compute_period_details', store=True)
+    date_end = fields.Date(string='Date Fin', compute='_compute_period_details', store=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -30,6 +31,18 @@ class SuiviMonthReport(models.Model):
     balance = fields.Float(string='Solde (Revenus - Dépenses)', compute='_compute_totals', store=True)
 
     line_ids = fields.One2many('suivi.month.report.line', 'report_id', string='Détail par Catégorie', readonly=True)
+
+    @api.depends('period_id')
+    def _compute_period_details(self):
+        for rec in self:
+            if rec.period_id:
+                rec.name = f"Rapport Mensuel - {rec.period_id.name}"
+                rec.date_start = rec.period_id.date_start
+                rec.date_end = rec.period_id.date_end
+            else:
+                rec.name = False
+                rec.date_start = False
+                rec.date_end = False
 
     @api.depends('income_fixed', 'income_daily', 'expense_fixed', 'expense_daily')
     def _compute_totals(self):

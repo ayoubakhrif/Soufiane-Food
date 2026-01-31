@@ -29,6 +29,13 @@ class ExpenseDaily(models.Model):
         store=True,
         index=True
     )
+    period_id = fields.Many2one(
+        'suivi.period',
+        string='Période',
+        compute='_compute_period',
+        store=True,
+        index=True
+    )
     category_name = fields.Char(
         string='Catégorie',
         related='category_id.name',
@@ -41,6 +48,7 @@ class ExpenseDaily(models.Model):
             if not rec.date:
                 rec.month_period = False
                 rec.year = False
+                rec.period_id = False
                 continue
             
             config = self.env['suivi.config'].get_config()
@@ -49,9 +57,26 @@ class ExpenseDaily(models.Model):
             if rec.date.day >= start_day:
                 # Current month period
                 period_date = rec.date
+                month_start = rec.date.replace(day=start_day)
             else:
                 # Previous month period
                 period_date = rec.date - relativedelta(months=1)
+                month_start = (rec.date - relativedelta(months=1)).replace(day=start_day)
             
-            rec.month_period = period_date.strftime('%Y-%m')
+            # Calculate Month End
+            month_end = month_start + relativedelta(months=1) - relativedelta(days=1)
+
+            period_name = period_date.strftime('%Y-%m')
+            
+            # Find or Create Period
+            period = self.env['suivi.period'].search([('name', '=', period_name)], limit=1)
+            if not period:
+                period = self.env['suivi.period'].create({
+                    'name': period_name,
+                    'date_start': month_start,
+                    'date_end': month_end,
+                })
+
+            rec.month_period = period_name
             rec.year = period_date.year
+            rec.period_id = period.id

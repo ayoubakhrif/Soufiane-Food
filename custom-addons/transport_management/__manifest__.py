@@ -11,8 +11,8 @@
     'author': 'Ayoub Akhrif',
     'depends': ['base', 'mail', 'web', 'custom_employee'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
-        'data/sequence_data.xml',
         'views/transport_trip_views.xml',
         'views/driver_salary_views.xml',
         'views/gazoil_refill_view.xml',

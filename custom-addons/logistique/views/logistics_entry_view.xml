@@ -39,11 +39,6 @@
         <field name="arch" type="xml">
             <form string="Entrées logistique" create="false" delete="false">
                 <header>
-                    <div class="oe_button_box" position="inside">
-                    <div class="oe_button_box" position="inside">
-                        <!-- Stat buttons removed or kept as is? Keeping as is but removing toggle_active logic if it was just UI -->
-                    </div>
-
                     <button name="action_set_gate_out" string="Gate Out" type="object" class="btn-primary" invisible="status != 'in_progress'"/>
                     <button name="action_set_closed" string="Clôturer" type="object" class="btn-primary" invisible="status != 'get_out'"/>
                     

@@ -207,6 +207,7 @@
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form,pivot,graph</field>
         <field name="search_view_id" ref="view_logistique_entry_search"/>
+        <field name="context">{'search_default_group_status': 1}</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_logistique_entry_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_logistique_entry_form')})]"/>

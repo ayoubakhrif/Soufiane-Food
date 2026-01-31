@@ -83,7 +83,7 @@
 
     <menuitem id="menu_suivi_reporting"
               name="Analyse"
-              parent="menu_suivi_personnel_root"
+              parent="menu_suivi_root"
               sequence="30"/>
 
     <menuitem id="menu_suivi_month_report"

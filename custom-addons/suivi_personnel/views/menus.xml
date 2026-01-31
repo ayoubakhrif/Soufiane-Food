@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ========================= -->
-    <!-- 📊 Root Menu -->
+    <!-- 📊 Root Menu (Moved to suivi_root.xml) -->
     <!-- ========================= -->
-    <menuitem id="menu_suivi_root"
-              name="Suivi Personnel"
-              sequence="50"/>
 
     <!-- ========================= -->
     <!-- 💰 Incomes Section -->

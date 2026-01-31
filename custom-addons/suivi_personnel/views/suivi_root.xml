@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================= -->
+    <!-- 📊 Root Menu -->
+    <!-- ========================= -->
+    <menuitem id="menu_suivi_root"
+              name="Suivi Personnel"
+              sequence="50"/>
+</odoo>

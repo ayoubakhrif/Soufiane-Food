@@ -12,6 +12,7 @@
                 <field name="ste_id"/>
                 <field name="qty"/>
                 <field name="client_id"/>
+                <field name="driver_id"/>
                 <field name="price_sale"/>
                 <field name="mt_vente"/>
                 <field name="mt_achat"/>

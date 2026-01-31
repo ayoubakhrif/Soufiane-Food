@@ -21,6 +21,7 @@
         <field name="arch" type="xml">
             <form string="Bulletin de Salaire">
                 <header>
+                    <button name="action_recalculate_salary" string="Recalculer" type="object" class="btn-secondary" invisible="state != 'draft'"/>
                     <button name="action_validate" string="Valider" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <field name="state" widget="statusbar"/>
                 </header>

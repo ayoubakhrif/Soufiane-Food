@@ -299,3 +299,8 @@ class SuiviSalary(models.Model):
     def action_validate(self):
         for rec in self:
             rec.state = 'validated'
+
+    def action_recalculate_salary(self):
+        self._compute_salary_details()
+        self._compute_final_salary()
+        return True

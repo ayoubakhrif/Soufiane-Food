@@ -17,6 +17,13 @@
             <field name="company_id" eval="False"/>
         </record>
     </data>
+    <record id="seq_stock_kal3iya_transfer" model="ir.sequence">
+        <field name="name">Stock Kal3iya Transfer</field>
+        <field name="code">stock.kal3iya.transfer</field>
+        <field name="prefix">TRANS/K/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
 </odoo>
 
 

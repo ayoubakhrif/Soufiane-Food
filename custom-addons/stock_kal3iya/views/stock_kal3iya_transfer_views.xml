@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_stock_kal3iya_transfer_tree" model="ir.ui.view">
+        <field name="name">stock.kal3iya.transfer.tree</field>
+        <field name="model">stock.kal3iya.transfer</field>
+        <field name="arch" type="xml">
+            <tree string="Transferts Stock" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="garage_from"/>
+                <field name="garage_to"/>
+                <field name="qty"/>
+                <field name="driver_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-muted="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_stock_kal3iya_transfer_form" model="ir.ui.view">
+        <field name="name">stock.kal3iya.transfer.form</field>
+        <field name="model">stock.kal3iya.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Transfert Stock">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Annuler" type="object" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Détails du Transfert">
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="garage_from" readonly="state != 'draft'"/>
+                            <field name="garage_to" readonly="state != 'draft'"/>
+                            <field name="ste_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Produit">
+                            <field name="product_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="qty" readonly="state != 'draft'"/>
+                            <field name="lot" readonly="state != 'draft'"/>
+                            <field name="dum" readonly="state != 'draft'"/>
+                            <field name="driver_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mouvements Liés" invisible="state == 'draft'">
+                            <group>
+                                <field name="move_out_id"/>
+                                <field name="move_in_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_stock_kal3iya_transfer_search" model="ir.ui.view">
+        <field name="name">stock.kal3iya.transfer.search</field>
+        <field name="model">stock.kal3iya.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Transferts">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="garage_from"/>
+                <field name="garage_to"/>
+                <field name="driver_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Garage Départ" name="group_garage_from" context="{'group_by': 'garage_from'}"/>
+                    <filter string="Garage Arrivée" name="group_garage_to" context="{'group_by': 'garage_to'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_stock_kal3iya_transfer" model="ir.actions.act_window">
+        <field name="name">Transferts Stock</field>
+        <field name="res_model">stock.kal3iya.transfer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_stock_kal3iya_transfer_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau transfert interne
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_stock_kal3iya_transfer"
+              name="Transferts"
+              parent="menu_stock_kal3iya_root"
+              action="action_stock_kal3iya_transfer"
+              sequence="25"/>
+</odoo>

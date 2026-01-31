@@ -7,6 +7,7 @@ from . import stock_kal3iya_stock_move
 from . import stock_kal3iya_stock_entry
 from . import stock_kal3iya_stock_exit
 from . import stock_kal3iya_stock_stock
+from . import stock_kal3iya_transfer
 from . import stock_kal3iya_return
 
 

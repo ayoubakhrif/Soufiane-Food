@@ -31,6 +31,8 @@ class StockKal3iyaMove(models.Model):
         ('entry', 'Entrée'),
         ('exit', 'Sortie'),
         ('return', 'Retour Client'),
+        ('transfer_out', 'Transfert Sortant'),
+        ('transfer_in', 'Transfert Entrant'),
         ('cancel_entry', 'Annulation Entrée'),
         ('cancel_exit', 'Annulation Sortie'),
         ('adjustment', 'Ajustement'),

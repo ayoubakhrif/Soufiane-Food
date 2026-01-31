@@ -14,6 +14,8 @@ access_stock_kal3iya_stock_stock_user,stock.kal3iya.stock,model_stock_kal3iya_st
 access_stock_kal3iya_stock_stock_manager,stock.kal3iya.stock,model_stock_kal3iya_stock,group_manager,1,0,0,0
 access_stock_kal3iya_return_user,stock.kal3iya.return,model_stock_kal3iya_return,group_user,1,1,1,0
 access_stock_kal3iya_return_manager,stock.kal3iya.return,model_stock_kal3iya_return,group_manager,1,1,1,0
+access_stock_kal3iya_transfer_user,stock.kal3iya.transfer,model_stock_kal3iya_transfer,group_user,1,1,1,0
+access_stock_kal3iya_transfer_manager,stock.kal3iya.transfer,model_stock_kal3iya_transfer,group_manager,1,1,1,0
 
 
 

@@ -13,3 +13,4 @@ from . import finance_sutra
 from . import finance_sutra_payment
 from . import finance_marglory
 from . import logistics_integration
+from . import finance_effet

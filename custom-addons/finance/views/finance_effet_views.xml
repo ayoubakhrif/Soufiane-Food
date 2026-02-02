@@ -1,0 +1,124 @@
+<odoo>
+    <record id="finance_effet_action" model="ir.actions.act_window">
+        <field name="name">Effets</field>
+        <field name="res_model">finance.effet</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+
+    <menuitem 
+        id="finance_effet_menu"
+        name="Effets"
+        parent="finance_root_menu"
+        sequence="20"
+    />
+
+    <menuitem 
+        id="finance_effet_list_menu"
+        name="Tous les effets"
+        parent="finance_effet_menu"
+        action="finance_effet_action"
+        sequence="1"
+    />
+
+    <record id="finance_effet_view_tree" model="ir.ui.view">
+        <field name="name">finance.effet.tree</field>
+        <field name="model">finance.effet</field>
+        <field name="arch" type="xml">
+            <tree string="Effets">
+                <field name="serie"/>
+                <field name="emitter"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="date_emission"/>
+                <field name="date_echeance"/>
+                <field name="date_encaissement"/>
+                <field name="montant" sum="Total"/>
+                <field name="state" widget="badge" decoration-success="state == 'encaisse'" decoration-info="state == 'non_encaisse'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="finance_effet_view_form" model="ir.ui.view">
+        <field name="name">finance.effet.form</field>
+        <field name="model">finance.effet</field>
+        <field name="arch" type="xml">
+            <form string="Effet">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="serie" class="oe_edit_only"/>
+                        <h1><field name="serie" placeholder="Référence de l'effet"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="emitter"/>
+                            <field name="ste_id"/>
+                            <field name="benif_id"/>
+                        </group>
+                        <group>
+                            <field name="date_emission"/>
+                            <field name="date_echeance"/>
+                            <field name="date_encaissement"/>
+                            <field name="montant"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="comment" placeholder="Notes..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="finance_effet_view_search" model="ir.ui.view">
+        <field name="name">finance.effet.search</field>
+        <field name="model">finance.effet</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Effets">
+                <field name="serie"/>
+                <field name="emitter"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <filter string="Encaissé" name="encaisse" domain="[('state', '=', 'encaisse')]"/>
+                <filter string="Non Encaissé" name="non_encaisse" domain="[('state', '=', 'non_encaisse')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Bénéficiaire" name="group_by_benif" context="{'group_by': 'benif_id'}"/>
+                    <filter string="Émetteur" name="group_by_emitter" context="{'group_by': 'emitter'}"/>
+                    <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="finance_effet_view_pivot" model="ir.ui.view">
+        <field name="name">finance.effet.pivot</field>
+        <field name="model">finance.effet</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Effets">
+                <field name="montant" type="measure"/>
+                <field name="ste_id" type="row"/>
+                <field name="benif_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="finance_effet_view_graph" model="ir.ui.view">
+        <field name="name">finance.effet.graph</field>
+        <field name="model">finance.effet</field>
+        <field name="arch" type="xml">
+            <graph string="Graphique des Effets" type="bar">
+                <field name="ste_id"/>
+                <field name="montant" type="measure"/>
+            </graph>
+        </field>
+    </record>
+</odoo>

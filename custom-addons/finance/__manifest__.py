@@ -19,6 +19,7 @@
         'views/logistics_integration_view.xml',
         'views/finance_deduction_view.xml',
         'views/finance_sutra_view.xml',
+        'views/finance_effet_views.xml',
         'views/finance_sutra_payment_view.xml',
         'views/finance_marglory_view.xml',
         'reports/cheque_request_report.xml',

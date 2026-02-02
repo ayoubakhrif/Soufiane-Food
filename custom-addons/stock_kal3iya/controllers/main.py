@@ -127,7 +127,10 @@ class StockKal3iyaController(http.Controller):
         Stock = request.env['stock.kal3iya.stock'].sudo()
         
         # Fetch all records from the view
-        records = Stock.search_read([], ['product_id', 'lot', 'garage'])
+        records = Stock.search_read(
+            [('quantity', '>', 0)],
+            ['product_id', 'lot', 'garage']
+        )
         
         # Deduplicate by (product_id, lot, garage)
         unique_keys = set()

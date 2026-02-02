@@ -29,6 +29,11 @@ class TransportResultFollowup(models.Model):
         store=True,
         tracking=True
     )
+
+    type = fields.Selection([
+        ('transport', 'Transport'),
+        ('gasoil', 'Gasoil')
+    ], string='Type', required=True, default='transport', tracking=True)
     
     line_ids = fields.One2many(
         'transport.result.line', 
@@ -76,10 +81,7 @@ class TransportResultLine(models.Model):
         ('banque', 'Banque')
     ], string='Payé à', required=True)
     
-    type = fields.Selection([
-        ('transport', 'Transport'),
-        ('gasoil', 'Gasoil')
-    ], string='Type', required=True)
+    type = fields.Selection(related='followup_id.type', store=True, readonly=True)
     
     comment = fields.Char(string='Commentaire')
 

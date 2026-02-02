@@ -99,6 +99,7 @@
                 <field name="charge_driver"/>
                 <field name="charge_adblue"/>
                 <field name="charge_mixed"/>
+                <field name="create_date" string="Date de création" optional="hide"/>
                 <field name="total_amount" sum="Total charges"/>
                 <field name="profit" sum="Bénéfice"/>
                 <field name="is_paid" widget="boolean_toggle" decoration-success="is_paid" decoration-danger="not is_paid"/>

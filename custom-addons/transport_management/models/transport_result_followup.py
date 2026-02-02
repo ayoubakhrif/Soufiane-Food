@@ -53,7 +53,14 @@ class TransportResultFollowup(models.Model):
         for rec in self:
             distributed = sum(rec.line_ids.mapped('amount'))
             rec.distributed_amount = distributed
-            rec.remaining_amount = rec.total_profit - distributed
+            rec.remaining_amount = rec.total_profit - rec.distributed_amount
+
+    def action_refresh(self):
+        """Refreshes the view to update computed fields."""
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
 
 class TransportResultLine(models.Model):
     _name = 'transport.result.line'

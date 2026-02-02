@@ -7,17 +7,10 @@
 
     <menuitem 
         id="finance_effet_menu"
-        name="Effets"
-        parent="finance_root_menu"
-        sequence="20"
-    />
-
-    <menuitem 
-        id="finance_effet_list_menu"
-        name="Tous les effets"
-        parent="finance_effet_menu"
+        name="Par effets"
+        parent="finance.data_cheque_menu"
         action="finance_effet_action"
-        sequence="1"
+        sequence="100"
     />
 
     <record id="finance_effet_view_tree" model="ir.ui.view">

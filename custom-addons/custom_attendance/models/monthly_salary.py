@@ -232,11 +232,12 @@ class CustomMonthlySalary(models.Model):
             payroll_site = rec.employee_id.payroll_site # mediouna or casa
             
             # --- Fixed Holiday Bonus Logic ---
-            # Calculate number of public holidays in this month
+            # Calculate number of public holidays in this month (excluding rest days)
             num_holidays = 0
             for h_date in holiday_dates:
                  if start_date <= h_date <= end_date:
-                     num_holidays += 1
+                     if h_date.weekday() != non_working_day:
+                         num_holidays += 1
             
             fixed_holiday_hours = num_holidays * daily_hours
             fixed_holiday_amount = fixed_holiday_hours * rate

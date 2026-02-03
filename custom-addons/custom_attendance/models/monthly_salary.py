@@ -230,6 +230,26 @@ class CustomMonthlySalary(models.Model):
             s_casa = 0.0
             
             payroll_site = rec.employee_id.payroll_site # mediouna or casa
+            
+            # --- Fixed Holiday Bonus Logic ---
+            # Calculate number of public holidays in this month
+            num_holidays = 0
+            for h_date in holiday_dates:
+                 if start_date <= h_date <= end_date:
+                     num_holidays += 1
+            
+            fixed_holiday_hours = num_holidays * daily_hours
+            fixed_holiday_amount = fixed_holiday_hours * rate
+            
+            # Add to initial site accumulators based on payroll_site
+            if payroll_site == 'mediouna':
+                h_med += fixed_holiday_hours
+                s_med += fixed_holiday_amount
+            else:
+                h_casa += fixed_holiday_hours
+                s_casa += fixed_holiday_amount
+                
+            t_holiday += fixed_holiday_hours
 
             for g in groups:
                 site = g['site']

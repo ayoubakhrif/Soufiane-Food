@@ -256,13 +256,13 @@ class CustomAttendance(models.Model):
             if rec.date.weekday() == non_working_day:
                 continue
             
-            # Holiday Logic
-            if rec.date in holidays:
-                if rec.check_in_minutes and rec.check_out_minutes:
-                    duration = max(0, rec.check_out_minutes - rec.check_in_minutes)
-                    rec.holiday_minutes = duration
-                    rec.normal_minutes = duration # For pay consistency
-                continue
+            # Holiday Logic - REMOVED: Now treated as normal days
+            # if rec.date in holidays:
+            #     if rec.check_in_minutes and rec.check_out_minutes:
+            #         duration = max(0, rec.check_out_minutes - rec.check_in_minutes)
+            #         rec.holiday_minutes = duration
+            #         rec.normal_minutes = duration # For pay consistency
+            #     continue
 
             # B. Calculation (Integers)
             in_m = rec.check_in_minutes
@@ -294,7 +294,10 @@ class CustomAttendance(models.Model):
                  rec.overtime_minutes = out_m - off_out_min
             
             # 4. Missing
-            rec.missing_minutes = max(0, daily_min - rec.normal_minutes)
+            if rec.date not in holidays:
+                rec.missing_minutes = max(0, daily_min - rec.normal_minutes)
+            else:
+                rec.missing_minutes = 0
 
 
     @api.depends('normal_minutes', 'missing_minutes', 'overtime_minutes', 'holiday_minutes')

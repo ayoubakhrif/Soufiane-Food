@@ -223,34 +223,25 @@ class CustomMonthlySalary(models.Model):
             t_overtime = 0.0
             t_holiday = 0.0
             
-            # Site accumulators
-            h_med = 0.0
-            s_med = 0.0
-            h_casa = 0.0
-            s_casa = 0.0
+            # Accumulators for Hours (Separated by Type)
+            norm_hours_med = 0.0
+            norm_hours_casa = 0.0
             
-            payroll_site = rec.employee_id.payroll_site # mediouna or casa
+            over_hours_med = 0.0
+            over_hours_casa = 0.0
             
-            # --- Fixed Holiday Bonus Logic ---
-            # Calculate number of public holidays in this month (excluding rest days)
-            num_holidays = 0
-            for h_date in holiday_dates:
-                 if start_date <= h_date <= end_date:
-                     if h_date.weekday() != non_working_day:
-                         num_holidays += 1
+            # Start with Fixed Holiday Hours (added to Normal and Holiday accumulators for tracking)
+            # Actually, per user formula: "Holiday Days * Daily Salary" is a separate component.
+            # We will accumulate it in 'fixed_holiday_site' buckets.
+            fixed_holiday_med = 0.0
+            fixed_holiday_casa = 0.0
             
-            fixed_holiday_hours = num_holidays * daily_hours
-            fixed_holiday_amount = fixed_holiday_hours * rate
-            
-            # Add to initial site accumulators based on payroll_site
             if payroll_site == 'mediouna':
-                h_med += fixed_holiday_hours
-                s_med += fixed_holiday_amount
+                fixed_holiday_med = fixed_holiday_hours
             else:
-                h_casa += fixed_holiday_hours
-                s_casa += fixed_holiday_amount
+                fixed_holiday_casa = fixed_holiday_hours
                 
-            t_holiday += fixed_holiday_hours
+            t_holiday += fixed_holiday_hours # Global tracker
 
             for g in groups:
                 site = g['site']
@@ -261,68 +252,64 @@ class CustomMonthlySalary(models.Model):
                 g_norm = g['normal_working_hours']
                 g_miss = g['missing_hours']
                 g_over = g['overtime_hours']
-                g_holi = g['holiday_hours']
-                count = g['__count'] # record count - FIXED from site_count
+                count = g['__count']
                 
                 t_normal += g_norm
                 t_missing += g_miss
                 t_overtime += g_over
-                # t_holiday += g_holi # COMPLETELY IGNORE legacy data. We use fixed bonus.
                 
                 # Allocation Logic
                 target_site = site
-                cost = 0.0
-                hours_to_add = 0.0
+                hours_norm = 0.0
+                hours_over = 0.0
                 
                 if not is_absent:
-                    # Normal Day
-                    # Hours = Normal + Overtime
-                    # We ignore g_holi here because g_norm captures the work (both now and in legacy)
-                    hours_to_add = g_norm + g_over
-                    
-                    # Cost = Normal*1 + Overtime*Coeff (Missing is implicit)
-                    cost = (g_norm * 1) + (g_over * ot_coeff)
-                    cost *= rate
+                    # Normal Day (Worked)
+                    hours_norm = g_norm
+                    hours_over = g_over
                     
                 else:
                     # Absent Day
                     target_site = payroll_site # Force correct site
                     if abs_type == 'leave':
-                        # Consumed Leave -> 8 hours paid
-                        added_h = daily_hours * count
-                        hours_to_add = added_h
-                        cost = added_h * rate
-                        
+                        # Consumed Leave -> Treated as Normal Paid Hours
+                        hours_norm = daily_hours * count
                     elif abs_type == 'deduction':
-                        # Deduction -> Reduce salary
-                        deduction = g_miss * rate
-                        cost = -deduction
-                        hours_to_add = 0.0
+                         # Deduction -> Reduce salary?
+                         # Actually user said "Missing hours not counted".
+                         # We do nothing here, hours_norm remains 0.
+                         pass
                 
-                # Accumulate
+                # Accumulate Hours to Site
                 if target_site == 'mediouna':
-                    h_med += hours_to_add
-                    s_med += cost
+                    norm_hours_med += hours_norm
+                    over_hours_med += hours_over
                 elif target_site == 'casa':
-                    h_casa += hours_to_add
-                    s_casa += cost
-                elif not target_site and not is_absent:
+                    norm_hours_casa += hours_norm
+                    over_hours_casa += hours_over
+                elif not target_site:
+                     # Fallback
                      if payroll_site == 'mediouna':
-                         h_med += hours_to_add
-                         s_med += cost
+                         norm_hours_med += hours_norm
+                         over_hours_med += hours_over
                      else:
-                         h_casa += hours_to_add
-                         s_casa += cost
+                         norm_hours_casa += hours_norm
+                         over_hours_casa += hours_over
 
             rec.total_normal_hours = t_normal
             rec.total_missing_hours = t_missing
             rec.total_overtime_hours = t_overtime
             rec.total_holiday_hours = t_holiday
             
-            rec.hours_mediouna = h_med
-            rec.salary_mediouna = s_med
-            rec.hours_casa = h_casa
-            rec.salary_casa = s_casa
+            # FINAL SALARY FORMULA APPLICATION
+            # Salary = (Normal * Rate) + (Overtime * Coeff * Rate) + (HolidayDays * DailySalary [which is fixed_holiday * Rate])
+            
+            rec.hours_mediouna = norm_hours_med + over_hours_med + fixed_holiday_med
+            rec.salary_mediouna = (norm_hours_med * rate) + (over_hours_med * ot_coeff * rate) + (fixed_holiday_med * rate)
+            
+            rec.hours_casa = norm_hours_casa + over_hours_casa + fixed_holiday_casa
+            rec.salary_casa = (norm_hours_casa * rate) + (over_hours_casa * ot_coeff * rate) + (fixed_holiday_casa * rate)
+
 
     @api.depends('salary_mediouna', 'salary_casa')
     def _compute_final_salary(self):

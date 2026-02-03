@@ -16,7 +16,7 @@
                 <field name="client_id" type="col"/>
                 <field name="quantity" type="measure"/>
                 <field name="mt_vente" type="measure"/>
-                <field name="benif_perte" type="measure"/>
+                <field name="diff" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -48,7 +48,7 @@
                 <field name="mt_achat"/>
                 <field name="mt_vente"/>
                 <field name="diff"/>
-                <field name="benif_perte" widget="html" readonly="1"/>
+                <field name="benif_perte_badge" widget="html" readonly="1"/>
                 <field name="charge_transport"/>
                 <field name="driver_id" optional="1"/>
                 <field name="cellphone" optional="1"/>

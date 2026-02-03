@@ -69,11 +69,8 @@ class CustomMonthlySalary(models.Model):
                 continue
 
             # 1. Fetch all attendances for this employee in this month
-            attendances = self.env['custom.attendance.search']([
-                ('employee_id', '=', rec.employee_id.id),
-                ('date', '>=', start_date),
-                ('date', '<=', end_date)
-            ]) if hasattr(self.env['custom.attendance'], 'search') else self.env['custom.attendance'].search([
+            # 1. Fetch all attendances for this employee in this month
+            attendances = self.env['custom.attendance'].search([
                 ('employee_id', '=', rec.employee_id.id),
                 ('date', '>=', start_date),
                 ('date', '<=', end_date)

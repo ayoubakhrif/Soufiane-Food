@@ -64,7 +64,8 @@ class ProductExit(models.Model):
     image_1920 = fields.Image(string="Image", related='entry_id.image_1920', readonly=True, store=False)
     drive_file_url = fields.Char(string="Lien Google Drive", readonly=True, copy=False)
     drive_file_id = fields.Char(string="ID Fichier Drive", readonly=True, copy=False)
-    benif_perte = fields.Html(string='Bénéfice/ perte', compute='_compute_benif_perte', sanitize=False)
+    benif_perte_badge = fields.Html(string='Bénéfice/ perte', compute='_compute_benif_perte_badge', sanitize=False)
+    benif_perte = fields.Float(string='Bénéfice/ perte', related='diff', store=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     selling_price_final = fields.Float(string="Prix final", tracking=True)
     tonnage_final = fields.Float(string="Tonnage final", tracking=True)
@@ -76,7 +77,7 @@ class ProductExit(models.Model):
     # BADGE VISUEL
     # ------------------------------------------------------------
     @api.depends('diff')
-    def _compute_benif_perte(self):
+    def _compute_benif_perte_badge(self):
         for rec in self:
             if rec.diff > 0:
                 label = "bénéfice"
@@ -90,7 +91,7 @@ class ProductExit(models.Model):
                 label = "0"
                 color = "#6c757d"  # gris neutre
                 bg = "rgba(108,117,125,0.12)"
-            rec.benif_perte = (
+            rec.benif_perte_badge = (
                 f"<span style='display:inline-block;padding:2px 8px;border-radius:12px;"
                 f"font-weight:600;background:{bg};color:{color};'>"
                 f"{label}"

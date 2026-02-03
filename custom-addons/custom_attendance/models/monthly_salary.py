@@ -223,6 +223,8 @@ class CustomMonthlySalary(models.Model):
             t_overtime = 0.0
             t_holiday = 0.0
             
+            payroll_site = rec.employee_id.payroll_site # mediouna or casa
+            
             # Accumulators for Hours (Separated by Type)
             norm_hours_med = 0.0
             norm_hours_casa = 0.0

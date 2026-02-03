@@ -232,6 +232,18 @@ class CustomMonthlySalary(models.Model):
             over_hours_med = 0.0
             over_hours_casa = 0.0
             
+            over_hours_casa = 0.0
+            
+            # --- Fixed Holiday Bonus Logic ---
+            # Calculate number of public holidays in this month (excluding rest days)
+            num_holidays = 0
+            for h_date in holiday_dates:
+                 if start_date <= h_date <= end_date:
+                     if h_date.weekday() != non_working_day:
+                         num_holidays += 1
+            
+            fixed_holiday_hours = num_holidays * daily_hours
+            
             # Start with Fixed Holiday Hours (added to Normal and Holiday accumulators for tracking)
             # Actually, per user formula: "Holiday Days * Daily Salary" is a separate component.
             # We will accumulate it in 'fixed_holiday_site' buckets.

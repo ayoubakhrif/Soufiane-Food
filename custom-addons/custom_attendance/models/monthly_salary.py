@@ -336,7 +336,7 @@ class CustomMonthlySalary(models.Model):
             # Update legacy fields for display consistency
             rec.deduction_amount = rec.total_missing_hours * rec.hourly_salary
             rec.overtime_amount = rec.total_overtime_hours * rec.hourly_salary * ot_coeff
-            rec.holiday_amount = rec.total_holiday_hours * rec.hourly_salary * 2
+            rec.holiday_amount = rec.total_holiday_hours * rec.hourly_salary # Fixed bonus only (1x)
 
     def action_validate(self):
         for rec in self:

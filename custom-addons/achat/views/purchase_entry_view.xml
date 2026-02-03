@@ -94,8 +94,8 @@
                                 <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
                             </div>
 
-                            <field name="dhl_number"/>
-                            <field name="eta_dhl"/>
+                            <field name="dhl_number" readonly="purchase_state in ('draft', 'confirmed')"/>
+                            <field name="eta_dhl" readonly="purchase_state in ('draft', 'confirmed')"/>
                         </group>
                         <group string="Dates">
                             <field name="date_booking" groups="achat.group_purchase_admin"/>

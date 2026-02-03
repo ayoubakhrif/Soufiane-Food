@@ -188,7 +188,7 @@ class CustomMonthlySalary(models.Model):
                     current_date = date(y, m, day)
                     wd = current_date.weekday()
                     
-                    if wd != non_working_day and current_date not in holiday_dates:
+                    if wd != non_working_day:
                         working_days += 1
                         
                 rec.working_days_count = working_days

@@ -267,7 +267,7 @@ class CustomMonthlySalary(models.Model):
                 t_normal += g_norm
                 t_missing += g_miss
                 t_overtime += g_over
-                t_holiday += g_holi
+                t_holiday += g_holi # Should be ignored if we rely on Fixed Bonus, but harmless if 0
                 
                 # Allocation Logic
                 target_site = site
@@ -276,10 +276,13 @@ class CustomMonthlySalary(models.Model):
                 
                 if not is_absent:
                     # Normal Day
-                    # Hours = Normal + Overtime + Holiday
+                    # Hours = Normal + Overtime + Holiday (which is now just Normal)
                     hours_to_add = g_norm + g_over + g_holi
-                    # Cost = Normal*1 + Overtime*Coeff + Holiday*2 - Missing*1
-                    cost = (g_norm * 1) + (g_over * ot_coeff) + (g_holi * 2) - (g_miss * 1)
+                    # Cost = Normal*1 + Overtime*Coeff + Holiday*1 - Missing*1
+                    # With new logic: g_norm contains holiday work. g_holi should be 0.
+                    # With OLD logic: g_norm=g_holi. So we double count if we keep (g_holi * something).
+                    # FIX: Ignore g_holi for cost, rely on Fixed Bonus + Normal Work
+                    cost = (g_norm * 1) + (g_over * ot_coeff) - (g_miss * 1)
                     cost *= rate
                     
                 else:

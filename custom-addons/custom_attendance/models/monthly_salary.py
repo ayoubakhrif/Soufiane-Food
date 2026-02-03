@@ -282,7 +282,7 @@ class CustomMonthlySalary(models.Model):
                     # With new logic: g_norm contains holiday work. g_holi should be 0.
                     # With OLD logic: g_norm=g_holi. So we double count if we keep (g_holi * something).
                     # FIX: Ignore g_holi for cost, rely on Fixed Bonus + Normal Work
-                    cost = (g_norm * 1) + (g_over * ot_coeff) - (g_miss * 1)
+                    cost = (g_norm * 1) + (g_over * ot_coeff) 
                     cost *= rate
                     
                 else:

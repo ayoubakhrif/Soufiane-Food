@@ -112,7 +112,7 @@
     <!-- Top Level or Child of Finance Root? Assuming child of Finance Root -->
     <menuitem id="menu_finance_verification_root" 
               name="Vérifications" 
-              parent="finance_menu_root" 
+              parent="finance_root_menu" 
               sequence="30"/>
 
     <menuitem id="menu_finance_deduction_verification" 

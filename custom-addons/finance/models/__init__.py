@@ -8,6 +8,7 @@ from . import data_cheque
 from . import edit_request
 from . import cheque_encaisse
 from . import logistics_tracking
+from . import finance_deduction_verification
 from . import finance_deduction
 from . import finance_sutra
 from . import finance_sutra_payment

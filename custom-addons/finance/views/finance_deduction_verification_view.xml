@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- TREE VIEW -->
+    <record id="view_finance_deduction_verification_tree" model="ir.ui.view">
+        <field name="name">finance.deduction.verification.tree</field>
+        <field name="model">finance.deduction.verification</field>
+        <field name="arch" type="xml">
+            <tree string="Vérification Déductions" 
+                  decoration-success="state == 'matched_ok'" 
+                  decoration-danger="state == 'matched_diff'" 
+                  decoration-info="state == 'not_found'">
+                <field name="bl"/>
+                <field name="facture_ref"/>
+                <field name="benif_id"/>
+                <field name="amount_expected"/>
+                <field name="matched_amount" optional="show"/>
+                <field name="difference" optional="show"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'matched_ok'" 
+                       decoration-danger="state == 'matched_diff'" 
+                       decoration-info="state == 'not_found'"/>
+                <field name="message_info" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_finance_deduction_verification_form" model="ir.ui.view">
+        <field name="name">finance.deduction.verification.form</field>
+        <field name="model">finance.deduction.verification</field>
+        <field name="arch" type="xml">
+            <form string="Vérification Facture">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_payment" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-money"
+                                invisible="not matched_payment_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Ouvrir</span>
+                                <span class="o_stat_text">Paiement</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon" title="Conforme" bg_color="bg-success" invisible="state != 'matched_ok'"/>
+                    <widget name="web_ribbon" title="Différence" bg_color="bg-danger" invisible="state != 'matched_diff'"/>
+                    <widget name="web_ribbon" title="Non Trouvé" bg_color="bg-info" invisible="state != 'not_found'"/>
+
+                    <group>
+                        <group string="Données à Vérifier">
+                            <field name="facture_ref"/>
+                            <field name="bl"/>
+                            <field name="benif_id" options="{'no_create': True}"/>
+                            <field name="amount_expected"/>
+                        </group>
+                        <group string="Résultat Matching">
+                            <field name="state" invisible="1"/>
+                            <field name="matched_payment_id" readonly="1"/>
+                            <field name="matched_amount" readonly="1"/>
+                            <field name="matched_facture_ref" readonly="1"/>
+                            <field name="difference" decoration-danger="difference != 0"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                         <field name="message_info" readonly="1" nolabel="1" class="oe_inline alert alert-info" invisible="not message_info"/>
+                    </group>
+
+                    <group string="Détails techniques (Lecture seule)" col="4">
+                        <field name="matched_bl_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_finance_deduction_verification_search" model="ir.ui.view">
+        <field name="name">finance.deduction.verification.search</field>
+        <field name="model">finance.deduction.verification</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="facture_ref"/>
+                <field name="bl"/>
+                <field name="benif_id"/>
+                <filter string="Conforme" name="ok" domain="[('state','=','matched_ok')]"/>
+                <filter string="Différence" name="diff" domain="[('state','=','matched_diff')]"/>
+                <filter string="Non trouvé" name="not_found" domain="[('state','=','not_found')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="État" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_finance_deduction_verification" model="ir.actions.act_window">
+        <field name="name">Réclamations déduction</field>
+        <field name="res_model">finance.deduction.verification</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- MENUS -->
+    <!-- Assuming generic Finance menus structure. Adding 'Vérifications' parent if not exists, or using existing? 
+         User asked for: New menu "Vérifications" -> Submenu "Réclamations déduction"
+    -->
+    
+    <!-- Top Level or Child of Finance Root? Assuming child of Finance Root -->
+    <menuitem id="menu_finance_verification_root" 
+              name="Vérifications" 
+              parent="finance_menu_root" 
+              sequence="30"/>
+
+    <menuitem id="menu_finance_deduction_verification" 
+              name="Réclamations déduction" 
+              parent="menu_finance_verification_root" 
+              action="action_finance_deduction_verification" 
+              sequence="10"/>
+
+</odoo>

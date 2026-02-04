@@ -18,6 +18,7 @@
         'views/cheque_encaisse_view.xml',
         'views/logistics_integration_view.xml',
         'views/finance_deduction_view.xml',
+        'views/finance_deduction_verification_view.xml',
         'views/finance_sutra_view.xml',
         'views/finance_effet_views.xml',
         'views/finance_sutra_payment_view.xml',

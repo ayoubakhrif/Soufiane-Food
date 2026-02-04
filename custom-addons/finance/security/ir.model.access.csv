@@ -57,3 +57,6 @@ access_finance_effet_manager,access.finance.effet.manager,model_finance_effet,gr
 access_finance_effet_employee,access.finance.effet.employee,model_finance_effet,group_finance_employee,1,1,1,0
 
 
+
+access_finance_deduction_verification_manager,access.finance.deduction.verification.verification.manager,model_finance_deduction_verification,group_finance_user,1,1,1,1
+access_finance_deduction_verification_employee,access.finance.deduction.verification.verification.employee,model_finance_deduction_verification,group_finance_employee,1,1,1,1

@@ -238,7 +238,7 @@ class FinanceDeductionPayment(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'THC'),
         ('inspection', 'Inspection'),
-        ('avoir', "L'avoir"),
+        ('avoir', "Avoir"),
     ], string='Type', required=True, tracking=True)
 
     bl_id = fields.Many2one(

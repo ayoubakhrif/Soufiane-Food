@@ -51,14 +51,14 @@
                     <widget name="web_ribbon" title="Non Trouvé" bg_color="bg-info" invisible="state != 'not_found'"/>
 
                     <group>
-                        <group string="Données à Vérifier">
+                        <group string="Données de bénificiaires">
                             <field name="ste_id" options="{'no_create': True}"/>
                             <field name="facture_ref"/>
                             <field name="bl"/>
                             <field name="benif_id" options="{'no_create': True}"/>
                             <field name="amount_expected"/>
                         </group>
-                        <group string="Résultat Matching">
+                        <group string="Résultat groupe Soufiane foods">
                             <field name="state" invisible="1"/>
                             <field name="matched_payment_id" readonly="1"/>
                             <field name="matched_amount" readonly="1"/>

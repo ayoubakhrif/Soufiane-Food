@@ -10,6 +10,7 @@
                   decoration-success="state == 'matched_ok'" 
                   decoration-danger="state == 'matched_diff'" 
                   decoration-info="state == 'not_found'">
+                <field name="ste_id"/>
                 <field name="bl"/>
                 <field name="facture_ref"/>
                 <field name="benif_id"/>
@@ -51,6 +52,7 @@
 
                     <group>
                         <group string="Données à Vérifier">
+                            <field name="ste_id" options="{'no_create': True}"/>
                             <field name="facture_ref"/>
                             <field name="bl"/>
                             <field name="benif_id" options="{'no_create': True}"/>
@@ -84,6 +86,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="facture_ref"/>
+                <field name="ste_id"/>
                 <field name="bl"/>
                 <field name="benif_id"/>
                 <filter string="Conforme" name="ok" domain="[('state','=','matched_ok')]"/>
@@ -91,6 +94,7 @@
                 <filter string="Non trouvé" name="not_found" domain="[('state','=','not_found')]"/>
                 <group expand="0" string="Group By">
                     <filter string="État" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
                     <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
                 </group>
             </search>

@@ -12,12 +12,18 @@ class FinanceDeductionVerification(models.Model):
     bl = fields.Char(string='BL', required=True)
     facture_ref = fields.Char(string='Réf. Facture', required=True)
     amount_expected = fields.Float(string='Montant Attendu', required=True)
+    
+    ste_id = fields.Many2one('finance.ste', string='Société', required=True)
+    
     benif_id = fields.Many2one(
         'finance.benif', 
         string='Bénéficiaire', 
         required=True,
-        domain="[('benif_deduction', '=', True)]"
     )
+
+    _sql_constraints = [
+        ('unique_verification', 'unique(facture_ref, benif_id, ste_id)', 'cette facture pour ce fournisseur et cette société existe déjà.')
+    ]
 
     # -------------------------------------------------------------------------
     # Computed / Readonly Match Data
@@ -73,18 +79,19 @@ class FinanceDeductionVerification(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTES
     # -------------------------------------------------------------------------
-    @api.depends('facture_ref', 'benif_id')
+    @api.depends('facture_ref', 'benif_id', 'ste_id')
     def _compute_matching(self):
         for rec in self:
-            if not rec.facture_ref or not rec.benif_id:
+            if not rec.facture_ref or not rec.benif_id or not rec.ste_id:
                 rec.matched_payment_id = False
                 continue
 
-            # Rule: Ref == Ref AND Benif == Benif. 
+            # Rule: Ref == Ref AND Benif == Benif AND Ste == Ste. 
             # If multiple, take most recent (order='date desc' in deduction model)
             payments = self.env['finance.deduction.payment'].search([
                 ('operation_ref', '=', rec.facture_ref),
-                ('benif_id', '=', rec.benif_id.id)
+                ('benif_id', '=', rec.benif_id.id),
+                ('ste_id', '=', rec.ste_id.id)
             ], order='date desc', limit=1)
 
             rec.matched_payment_id = payments.id if payments else False

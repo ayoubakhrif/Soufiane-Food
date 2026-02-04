@@ -238,6 +238,7 @@ class FinanceDeductionPayment(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'THC'),
         ('inspection', 'Inspection'),
+        ('avoir', "L'avoir"),
     ], string='Type', required=True, tracking=True)
 
     bl_id = fields.Many2one(
@@ -273,7 +274,7 @@ class FinanceDeductionPayment(models.Model):
         amount = vals.get('amount', 0)
 
         # Basic Checks
-        if amount <= 0:
+        if amount <= 0 and vals.get('type') != 'avoir':
             raise ValidationError("Le montant de la déduction doit être strictement positif.")
 
         # Find Account

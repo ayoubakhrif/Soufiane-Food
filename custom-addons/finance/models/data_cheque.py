@@ -47,7 +47,7 @@ class DataCheque(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
         ('divers', 'Divers'),
-    ], store=True, string='Type', tracking=True)
+    ], store=True, string='Type', tracking=True, required=True)
     
     # New Fields
     bl = fields.Char(string='BL', tracking=True)

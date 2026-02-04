@@ -88,9 +88,9 @@
                         <group string="Infos logistiques">
                             <field name="week"/>
                             <field name="consolidator_id" invisible="incoterm != 'fob'"/>
-                            <field name="bad_date" required="status == 'in_progress'"/>
-                            <field name="exit_date" required="status == 'closed'"/>
-                            <field name="entry_date" required="status == 'closed'"/>
+                            <field name="bad_date" required="status == 'in_progress' and incoterm != 'emirate'"/>
+                            <field name="exit_date" required="status == 'closed' and incoterm != 'emirate'"/>
+                            <field name="entry_date" required="status == 'closed' and incoterm != 'emirate'"/>
                             <field name="remarks"/>
                         </group>
                         <group string="Frais logistiques (depuis chèques)">

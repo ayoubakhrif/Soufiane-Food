@@ -139,7 +139,7 @@ class LogisticsEntry(models.Model):
 
     def action_set_gate_out(self):
         for rec in self:
-            if not rec.bad_date:
+            if not rec.bad_date and rec.incoterm != 'emirate':
                 raise ValidationError(_("La date BAD est requise pour passer à l'étape Gate Out."))
             if rec.incoterm == 'fob' and rec.fret <= 0:
                 raise ValidationError(_("Le montant du Fret doit être supérieur à 0 quand l'Incoterm est FOB."))
@@ -147,9 +147,9 @@ class LogisticsEntry(models.Model):
 
     def action_set_closed(self):
         for rec in self:
-            if not rec.entry_date:
+            if not rec.entry_date and rec.incoterm != 'emirate':
                 raise ValidationError(_("La date d'entrée est requise pour clôturer."))
-            if not rec.exit_date:
+            if not rec.exit_date and rec.incoterm != 'emirate':
                 raise ValidationError(_("La date de sortie est requise pour clôturer."))
             rec.write({'status': 'closed'})
 

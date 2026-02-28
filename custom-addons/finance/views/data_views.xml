@@ -1,0 +1,58 @@
+<odoo>
+
+    <record id="finance_perso_action" model="ir.actions.act_window">
+        <field name="name">Personnes</field>
+        <field name="res_model">finance.perso</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="finance_ste_action" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">finance.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem 
+        id="data_finance_menu"
+        name="Données"
+        parent="finance_root_menu"
+        sequence="30"
+    />
+
+    <menuitem 
+        id="finance_perso_menu"
+        name="Personnes"
+        parent="data_finance_menu"
+        action="finance_perso_action"
+    />
+
+    <menuitem 
+        id="finance_ste_menu"
+        name="Sociétés"
+        parent="data_finance_menu"
+        action="finance_ste_action"
+    />
+    
+    <record id="finance_perso_view_tree" model="ir.ui.view">
+        <field name="name">perso tree</field>
+        <field name="model">finance.perso</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="finance_ste_view_tree" model="ir.ui.view">
+        <field name="name">ste tree</field>
+        <field name="model">finance.ste</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="core_ste_id"/>
+                <field name="is_zone_franche" widget="boolean_toggle"/>
+                <field name="num_compte"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

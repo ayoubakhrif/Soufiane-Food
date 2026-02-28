@@ -1,0 +1,48 @@
+/* =========================================
+   FINANCE APP – CUSTOM NAVBAR (BLUE)
+   Scoped using the .o_app_finance context class
+   ========================================= */
+
+/* Top Navbar Background */
+.o_app_finance .o_main_navbar {
+    background-color: #87CEEB !important;
+    border-bottom: 1px solid #5F9EA0 !important;
+}
+
+/* Navbar Text Color */
+.o_app_finance .o_main_navbar .o_menu_brand,
+.o_app_finance .o_main_navbar .o_menu_sections>li>a,
+.o_app_finance .o_main_navbar .o_menu_systray>li>a {
+    color: #ffffff !important;
+}
+
+/* Navbar Hover Effects */
+.o_app_finance .o_main_navbar .o_menu_sections>li>a:hover,
+.o_app_finance .o_main_navbar .o_menu_sections>li.show>a,
+.o_app_finance .o_main_navbar .o_menu_systray>li>a:hover,
+.o_app_finance .o_main_navbar .o_menu_systray>li.show>a {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* =========================================
+   FINANCE MENU – FORCE MENU TRANSPARENCY
+   ========================================= */
+
+/* Force menu item container */
+.o_app_finance .o_main_navbar .o_menu_sections>li {
+    background-color: transparent !important;
+}
+
+/* Force active link style */
+.o_app_finance .o_main_navbar .o_menu_sections>li.active>a {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 6px;
+    color: #ffffff !important;
+}
+
+/* Odoo Link Pseudo-elements cleanup */
+.o_app_finance .o_main_navbar .o_menu_sections>li::before,
+.o_app_finance .o_main_navbar .o_menu_sections>li>a::before {
+    background: none !important;
+    box-shadow: none !important;
+}

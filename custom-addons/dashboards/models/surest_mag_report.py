@@ -1,0 +1,87 @@
+from odoo import models, fields, api, tools
+
+class SurestarieMagasinageReport(models.Model):
+    _name = "surestarie.magasinage.report"
+    _description = "Rapport Surestarie et Magasinage"
+    _auto = False
+    _order = 'bad_date desc'
+
+    bad_date = fields.Date(string="Date BAD", readonly=True)
+    week = fields.Char(string="Semaine", readonly=True)
+    bl_number = fields.Char(string="Numéro BL", readonly=True)
+    
+    article_id = fields.Many2one('logistique.article', string="Article", readonly=True)
+    supplier_id = fields.Many2one('logistique.supplier', string="Fournisseur", readonly=True)
+    
+    status = fields.Selection([
+        ('in_progress', 'En cours'),
+        ('get_out', 'Gate Out'),
+        ('closed', 'Clotured'),
+    ], string='Status', readonly=True)
+
+    # Cleaned up fields - No more averages in SQL view
+    container_count = fields.Integer(string="Nb Conteneurs", readonly=True)
+    surestarie_amount = fields.Float(string="Montant Surestarie", readonly=True)
+    magasinage_amount = fields.Float(string="Montant Magasinage", readonly=True)
+    total_charges = fields.Float(string="Total Charges", readonly=True)
+    
+    # Average fields for Pivot display (calculated in read_group)
+    average_cost = fields.Float(string="Coût par Conteneur", readonly=True)
+    average_surestarie = fields.Float(string="Surestarie par Conteneur", readonly=True)
+    average_magasinage = fields.Float(string="Magasinage par Conteneur", readonly=True)
+
+    def init(self):
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
+            CREATE OR REPLACE VIEW %s AS (
+                SELECT
+                    le.id,
+                    le.bad_date,
+                    le.week,
+                    le.bl_number,
+                    le.article_id,
+                    le.supplier_id,
+                    le.status,
+                    
+                    -- Direct fields from logistique.entry
+                    le.container_count as container_count,
+                    le.surestarie_amount as surestarie_amount,
+                    le.magasinage_amount as magasinage_amount,
+
+                    -- Total Charges
+                    (le.surestarie_amount + le.magasinage_amount) as total_charges,
+                    
+                    -- Placeholders for averages (calculated in Python via read_group)
+                    0.0 as average_cost,
+                    0.0 as average_surestarie,
+                    0.0 as average_magasinage
+
+                FROM
+                    logistique_entry le
+                WHERE
+                    (le.surestarie_amount != 0 OR le.magasinage_amount != 0)
+            )
+        """ % self._table)
+
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        res = super(SurestarieMagasinageReport, self).read_group(domain, fields, groupby, offset, limit, orderby, lazy)
+        
+        for line in res:
+            # Get aggregated totals
+            container_count = line.get('container_count', 0)
+            total_charges = line.get('total_charges', 0.0)
+            surestarie_amount = line.get('surestarie_amount', 0.0)
+            magasinage_amount = line.get('magasinage_amount', 0.0)
+
+            # Calculate Weighted Averages
+            if container_count > 0:
+                line['average_cost'] = total_charges / container_count
+                line['average_surestarie'] = surestarie_amount / container_count
+                line['average_magasinage'] = magasinage_amount / container_count
+            else:
+                line['average_cost'] = 0.0
+                line['average_surestarie'] = 0.0
+                line['average_magasinage'] = 0.0
+                
+        return res

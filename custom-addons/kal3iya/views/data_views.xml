@@ -1,0 +1,56 @@
+<odoo>
+    <record id="kal3iyaproduct_action" model="ir.actions.act_window">
+        <field name="name">Produits</field>
+        <field name="res_model">kal3iya.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="kal3iyaste_action" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">kal3iya.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem 
+        id="data_menu"
+        name="Données"
+        parent="Kal3iya_root_menu"
+    />
+    <menuitem 
+        id="product_menu"
+        name="Produits"
+        parent="data_menu"
+        action="kal3iyaproduct_action"
+    />
+
+    <menuitem 
+        id="ste_menu"
+        name="Sociétés"
+        parent="data_menu"
+        action="kal3iyaste_action"
+    />
+    
+    <record id="product_view_tree" model="ir.ui.view">
+        <field name="name">product tree</field>
+        <field name="model">kal3iya.product</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ste_view_tree" model="ir.ui.view">
+        <field name="name">ste tree</field>
+        <field name="model">kal3iya.ste</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="logo"/>
+                <field name="cachee"/>
+            </tree>
+        </field>
+    </record>
+    
+
+</odoo>

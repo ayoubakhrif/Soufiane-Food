@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ⚙️ Actions pour boutons -->
+    <record id="finance_benif_action" model="ir.actions.act_window">
+        <field name="name">Bénificiaires</field>
+        <field name="res_model">finance.benif</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_finance_benif_form" model="ir.ui.view">
+        <field name="name">finance.benif.form</field>
+        <field name="model">finance.benif</field>
+        <field name="arch" type="xml">
+            <form string="Bénificiaires">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="days"/>
+                        <field name="type"/>
+                        <field name="benif_deduction"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 🌳 Vue liste des clients -->
+    <record id="view_finance_benif_tree" model="ir.ui.view">
+        <field name="name">finance.benif.tree</field>
+        <field name="model">finance.benif</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name"/>
+                <field name="type"/>
+                <field name="days"/>
+                <field name="benif_deduction"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="finance_benif_menu"
+              name="Bénificiaires"
+              parent="finance_root_menu"
+              action="finance_benif_action"
+              sequence="20"/>
+</odoo>

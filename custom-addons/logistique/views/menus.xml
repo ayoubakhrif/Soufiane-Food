@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_logistique_root"
+              name="Logistique"
+              sequence="10"/>
+
+    <!-- Main Menus -->
+    <menuitem id="menu_logistique_entries"
+              name="Logistique data"
+              parent="menu_logistique_root"
+              action="action_logistique_entry"
+              sequence="10"/>
+
+    <menuitem id="menu_logistique_container"
+              name="Containers"
+              parent="menu_logistique_root"
+              action="action_logistique_container"
+              sequence="20"/>
+
+
+</odoo>

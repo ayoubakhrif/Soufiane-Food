@@ -1,0 +1,108 @@
+<odoo>
+    <record id="view_custom_attendance_tree" model="ir.ui.view">
+        <field name="name">custom.attendance.tree</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="delay_minutes &gt; 0 or missing_hours &gt; 0" decoration-success="overtime_hours &gt; 0" decoration-muted="state == 'locked'">
+                <field name="date"/>
+                <field name="employee_id"/>
+                <field name="check_in_time"/>
+                <field name="check_out_time"/>
+                <field name="normal_working_hours" sum="Total Normal"/>
+                <field name="delay_minutes" sum="Total Delay"/>
+                <field name="missing_hours" sum="Total Missing"/>
+                <field name="overtime_hours" sum="Total Overtime"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-muted="state == 'locked'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_custom_attendance_form" model="ir.ui.view">
+        <field name="name">custom.attendance.form</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_set_absent" string="Marquer Comme Absent" type="object" class="oe_highlight" invisible="is_absent"/>
+                    <button name="action_set_present" string="Restaurer Présence" type="object" invisible="not is_absent"/>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="employee_payroll_site" invisible="1"/>
+                            <field name="site" widget="radio" options="{'horizontal': true}" invisible="employee_payroll_site == 'casa'"/>
+                            <field name="is_absent" invisible="1"/>
+                            <field name="absence_type" widget="radio" invisible="not is_absent" required="is_absent"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                        <group>
+                            <field name="check_in_time" readonly="is_absent"/>
+                            <field name="check_out_time" readonly="is_absent"/>
+                            <field name="check_in" invisible="1"/>
+                            <field name="check_out" invisible="1"/>
+                        </group>
+                        </group>
+                    </group>
+                    <group string="Calculs">
+                        <group>
+                            <field name="normal_working_hours" widget="float_time"/>
+                            <field name="delay_minutes"/>
+                        </group>
+                        <group>
+                            <field name="missing_hours" widget="float_time" decoration-danger="missing_hours &gt; 0"/>
+                            <field name="overtime_hours" widget="float_time" decoration-success="overtime_hours &gt; 0"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter" groups="custom_attendance.group_custom_attendance_manager,custom_attendance.group_custom_attendance_admin">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="view_custom_attendance_calendar" model="ir.ui.view">
+        <field name="name">custom.attendance.calendar</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <calendar string="Présence" date_start="date" color="state" mode="month">
+                <field name="employee_id"/>
+                <field name="check_in_time"/>
+                <field name="check_out_time"/>
+                <field name="delay_minutes"/>
+                <field name="missing_hours"/>
+            </calendar>
+        </field>
+    </record>
+    
+    <record id="view_custom_attendance_search" model="ir.ui.view">
+        <field name="name">custom.attendance.search</field>
+        <field name="model">custom.attendance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <filter string="Retard" name="late" domain="[('delay_minutes', '&gt;', 0)]"/>
+                <filter string="Heures manquantes" name="missing" domain="[('missing_hours', '&gt;', 0)]"/>
+                <filter string="Temps sup" name="overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employés" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_custom_attendance" model="ir.actions.act_window">
+        <field name="name">Présence journalière</field>
+        <field name="res_model">custom.attendance</field>
+        <field name="view_mode">tree,calendar,form</field>
+        <field name="context">{'group_by': 'date:day'}</field>
+    </record>
+</odoo>

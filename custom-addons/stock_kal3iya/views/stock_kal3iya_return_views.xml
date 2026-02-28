@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_kal3iya_return_tree" model="ir.ui.view">
+        <field name="name">stock.kal3iya.return.tree</field>
+        <field name="model">stock.kal3iya.return</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="exit_id"/>
+                <field name="product_id"/>
+                <field name="soufiane_client"/>
+                <field name="client_id"/>
+                <field name="qty"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
+                <field name="garage"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_stock_kal3iya_return_form" model="ir.ui.view">
+        <field name="name">stock.kal3iya.return.form</field>
+        <field name="model">stock.kal3iya.return</field>
+        <field name="arch" type="xml">
+            <form string="Retour Stock Kal3iya">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="A remplir">
+                            <field name="qty" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="driver_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="exit_id" readonly="1"/>
+                            <field name="ste_id" options="{'no_create_edit': True}"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="soufiane_client"/>
+                            <field name="client_id"/>
+                        </group>
+                    </group>
+                    <group string="Traçabilité">
+                        <group>
+                            <field name="lot"/>
+                            <field name="dum"/>
+                            <field name="garage"/>
+                            <field name="calibre"/>
+                            <field name="weight"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter" groups="stock_kal3iya.group_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="view_stock_kal3iya_return_search" model="ir.ui.view">
+        <field name="name">stock.kal3iya.return.search</field>
+        <field name="model">stock.kal3iya.return</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Retours">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="client_id"/>
+                <field name="exit_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stock_kal3iya_return" model="ir.actions.act_window">
+        <field name="name">Retours Clients</field>
+        <field name="res_model">stock.kal3iya.return</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <menuitem
+        id="menu_stock_kal3iya_return"
+        name="Retours Clients"
+        parent="menu_stock_kal3iya_root"
+        action="action_stock_kal3iya_return"
+        sequence="25"
+    />
+</odoo>
+
+
+

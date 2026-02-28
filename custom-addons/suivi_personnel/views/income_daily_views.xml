@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================= -->
+    <!-- 📋 Form View -->
+    <!-- ========================= -->
+    <record id="view_income_daily_form" model="ir.ui.view">
+        <field name="name">suivi.income.daily.form</field>
+        <field name="model">suivi.income.daily</field>
+        <field name="arch" type="xml">
+            <form string="Revenu Quotidien">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="amount"/>
+                        </group>
+                        <group>
+                            <field name="category"/>
+                            <field name="month_period" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Description optionnelle..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🌳 Tree View -->
+    <!-- ========================= -->
+    <record id="view_income_daily_tree" model="ir.ui.view">
+        <field name="name">suivi.income.daily.tree</field>
+        <field name="model">suivi.income.daily</field>
+        <field name="arch" type="xml">
+            <tree string="Revenus Quotidiens">
+                <field name="date"/>
+                <field name="amount" sum="Total"/>
+                <field name="category"/>
+                <field name="month_period"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 📊 Pivot View -->
+    <!-- ========================= -->
+    <record id="view_income_daily_pivot" model="ir.ui.view">
+        <field name="name">suivi.income.daily.pivot</field>
+        <field name="model">suivi.income.daily</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Revenus Quotidiens">
+                <field name="month_period" type="row"/>
+                <field name="category" type="row"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 📈 Graph View -->
+    <!-- ========================= -->
+    <record id="view_income_daily_graph" model="ir.ui.view">
+        <field name="name">suivi.income.daily.graph</field>
+        <field name="model">suivi.income.daily</field>
+        <field name="arch" type="xml">
+            <graph string="Graphique Revenus Quotidiens" type="bar">
+                <field name="month_period"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🔍 Search View -->
+    <!-- ========================= -->
+    <record id="view_income_daily_search" model="ir.ui.view">
+        <field name="name">suivi.income.daily.search</field>
+        <field name="model">suivi.income.daily</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Revenus">
+                <field name="category"/>
+                <field name="date"/>
+                <separator/>
+                <filter string="Ce mois" name="this_month" 
+                        domain="[('date','&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Période" name="group_period" context="{'group_by':'month_period'}"/>
+                    <filter string="Catégorie" name="group_category" context="{'group_by':'category'}"/>
+                    <filter string="Année" name="group_year" context="{'group_by':'year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🚀 Action -->
+    <!-- ========================= -->
+    <record id="action_income_daily" model="ir.actions.act_window">
+        <field name="name">Revenus Quotidiens</field>
+        <field name="res_model">suivi.income.daily</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+</odoo>

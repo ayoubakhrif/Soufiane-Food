@@ -1,0 +1,226 @@
+from odoo import models, fields, api, _
+from datetime import date
+
+class SurestarieMagasinageDashboard(models.Model):
+    _name = "surestarie.magasinage.dashboard"
+    _description = "Surestarie & Magasinage KPI Dashboard"
+
+    name = fields.Char(string="Name", default="Tableau de Bord")
+    content_html = fields.Html(compute='_compute_content_html')
+
+    @api.depends('name')
+    def _compute_content_html(self):
+        for rec in self:
+            # 1. Build Domain based on Amounts (No Year Filter)
+            domain = [
+                '|',
+                ('surestarie_amount', '!=', 0),
+                ('magasinage_amount', '!=', 0)
+            ]
+            
+            # 2. Fetch Global Aggregates
+            global_data = self.env['surestarie.magasinage.report'].read_group(
+                domain,
+                ['container_count', 'surestarie_amount', 'magasinage_amount', 'total_charges'],
+                []
+            )
+
+            if global_data:
+                res = global_data[0]
+                total_containers = res.get('container_count', 0)
+                total_surestarie = res.get('surestarie_amount', 0.0)
+                total_magasinage = res.get('magasinage_amount', 0.0)
+                total_charges = res.get('total_charges', 0.0)
+            else:
+                total_containers = 0
+                total_surestarie = 0.0
+                total_magasinage = 0.0
+                total_charges = 0.0
+
+            # Global Weighted Average
+            if total_containers > 0:
+                global_avg_cost = total_charges / total_containers
+            else:
+                global_avg_cost = 0.0
+
+            # Format Global Values
+            formatted_surestarie = "{:,.2f}".format(total_surestarie).replace(",", " ").replace(".", ",")
+            formatted_magasinage = "{:,.2f}".format(total_magasinage).replace(",", " ").replace(".", ",")
+            formatted_charges = "{:,.2f}".format(total_charges).replace(",", " ").replace(".", ",")
+            formatted_avg = "{:,.2f}".format(global_avg_cost).replace(",", " ").replace(".", ",")
+
+            # 3. Helper Function for Detailed Sections (Product & Supplier)
+            def get_detailed_data(groupby_field, name_field_model):
+                groups = self.env['surestarie.magasinage.report'].read_group(
+                    domain,
+                    ['container_count', 'surestarie_amount', 'magasinage_amount', 'total_charges'],
+                    [groupby_field]
+                )
+                
+                rows = []
+                for group in groups:
+                    g_containers = group.get('container_count', 0)
+                    g_surestarie = group.get('surestarie_amount', 0.0)
+                    g_magasinage = group.get('magasinage_amount', 0.0)
+                    g_charges = group.get('total_charges', 0.0)
+                    
+                    # Manual Weighted Average
+                    if g_containers > 0:
+                        g_weighted_avg = g_charges / g_containers
+                    else:
+                        g_weighted_avg = 0.0
+
+                    # Get Name
+                    # group[groupby_field] returns (id, display_name) tuple usually
+                    group_val = group.get(groupby_field)
+                    if isinstance(group_val, tuple):
+                        name = group_val[1]
+                    elif group_val:
+                        # Fallback if just ID (shouldn't happen with read_group usually)
+                        name = str(group_val)
+                    else:
+                        name = "Indéfini"
+
+                    rows.append({
+                        'name': name,
+                        'containers': g_containers,
+                        'surestarie': g_surestarie,
+                        'magasinage': g_magasinage,
+                        'total_charges': g_charges,
+                        'weighted_avg': g_weighted_avg
+                    })
+                
+                # Sort by Weighted Average DESC (Moyenne des charges)
+                rows.sort(key=lambda x: x['weighted_avg'], reverse=True)
+                
+                # Ranking: Find Best (Lowest Avg) and Worst (Highest Avg)
+                if rows:
+                    # Filter out 0 avg if necessary? Usually 0 means efficient or no cost.
+                    # Assuming 0 cost is best.
+                    best_row = min(rows, key=lambda x: x['weighted_avg'])
+                    worst_row = max(rows, key=lambda x: x['weighted_avg'])
+                    
+                    for row in rows:
+                        row['is_best'] = (row == best_row)
+                        row['is_worst'] = (row == worst_row)
+                
+                return rows
+
+            # 4. Fetch Detailed Data
+            product_rows = get_detailed_data('article_id', 'logistique.article')
+            supplier_rows = get_detailed_data('supplier_id', 'logistique.supplier')
+
+            # 5. Build HTML Table Function
+            def build_table_html(title, rows):
+                tbody = ""
+                for row in rows:
+                    # Styling for Best/Worst
+                    row_class = ""
+                    badge = ""
+                    if row.get('is_best') and len(rows) > 1:
+                        row_class = "table-success"
+                        badge = '<span class="badge badge-pill badge-success">Top</span>'
+                    elif row.get('is_worst') and len(rows) > 1:
+                        row_class = "table-danger"
+                        badge = '<span class="badge badge-pill badge-danger">Flop</span>'
+                    
+                    fmt_sur = "{:,.2f}".format(row['surestarie']).replace(",", " ").replace(".", ",")
+                    fmt_mag = "{:,.2f}".format(row['magasinage']).replace(",", " ").replace(".", ",")
+                    fmt_tot = "{:,.2f}".format(row['total_charges']).replace(",", " ").replace(".", ",")
+                    fmt_avg = "{:,.2f}".format(row['weighted_avg']).replace(",", " ").replace(".", ",")
+                    
+                    tbody += f"""
+                    <tr class="{row_class}">
+                        <td>{row['name']} {badge}</td>
+                        <td class="text-right">{row['containers']}</td>
+                        <td class="text-right">{fmt_sur}</td>
+                        <td class="text-right">{fmt_mag}</td>
+                        <td class="text-right font-weight-bold">{fmt_tot}</td>
+                        <td class="text-right font-weight-bold">{fmt_avg}</td>
+                    </tr>
+                    """
+                
+                return f"""
+                <div class="col-md-12 mt-4">
+                    <div class="card">
+                        <div class="card-header"><h3>{title}</h3></div>
+                        <div class="card-body p-0">
+                            <table class="table table-bordered table-sm table-hover mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th class="text-right">Conteneurs</th>
+                                        <th class="text-right">Surestarie</th>
+                                        <th class="text-right">Magasinage</th>
+                                        <th class="text-right">Total Charges</th>
+                                        <th class="text-right">Moyenne Pondérée / Ctrl</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tbody}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                """
+
+            # 6. Assemble Final HTML
+            html = f"""
+            <div class="o_dashboard_view container-fluid">
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <h2 class="text-center">Performance Surestarie & Magasinage (Global)</h2>
+                    </div>
+                </div>
+                
+                <!-- Global KPIs -->
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white mb-3">
+                            <div class="card-header">Total Conteneurs</div>
+                            <div class="card-body"><h3 class="card-title">{total_containers}</h3></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white mb-3">
+                            <div class="card-header">Total Charges</div>
+                            <div class="card-body"><h3 class="card-title">{formatted_charges} MAD</h3></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white mb-3">
+                            <div class="card-header">Surestarie</div>
+                            <div class="card-body"><h3 class="card-title">{formatted_surestarie} MAD</h3></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-secondary text-white mb-3">
+                            <div class="card-header">Magasinage</div>
+                            <div class="card-body"><h3 class="card-title">{formatted_magasinage} MAD</h3></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Global Average -->
+                <div class="row justify-content-center mt-2">
+                    <div class="col-md-6">
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-success text-white text-center">
+                                <h4>Coût Moyen Global par Conteneur (Pondéré)</h4>
+                            </div>
+                            <div class="card-body text-success text-center">
+                                <h1 class="display-4 font-weight-bold">{formatted_avg} MAD</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Tables -->
+                <div class="row">
+                    {build_table_html("Charges par Article (Trier par Moyenne Pondérée)", product_rows)}
+                    {build_table_html("Charges par Fournisseur (Trier par Moyenne Pondérée)", supplier_rows)}
+                </div>
+            </div>
+            """
+            rec.content_html = html

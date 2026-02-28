@@ -1,0 +1,52 @@
+<odoo>
+    <record id="view_school_grade_tree" model="ir.ui.view">
+        <field name="name">school.grade.tree</field>
+        <field name="model">school.grade</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="date"/>
+                <field name="student_id"/>
+                <field name="subject_id"/>
+                <field name="evaluation_type"/>
+                <field name="score"/>
+                <field name="teacher_id"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="view_school_grade_form" model="ir.ui.view">
+        <field name="name">school.grade.form</field>
+        <field name="model">school.grade</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="student_id"/>
+                            <field name="subject_id"/>
+                        </group>
+                        <group>
+                            <field name="evaluation_type"/>
+                            <field name="score"/>
+                            <field name="date"/>
+                            <field name="teacher_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_school_grade" model="ir.actions.act_window">
+        <field name="name">Grades</field>
+        <field name="res_model">school.grade</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_school_grade" name="Grades" parent="menu_school_grade_root" action="action_school_grade" sequence="10"/>
+</odoo>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Action -->
+    <record id="action_kal3iya_stock_product" model="ir.actions.act_window">
+        <field name="name">Produits</field>
+        <field name="res_model">kal3iya.stock.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Client Action -->
+    <record id="action_kal3iya_stock_client" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">kal3iya.stock.client</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Provider Action -->
+    <record id="action_kal3iya_stock_provider" model="ir.actions.act_window">
+        <field name="name">Fournisseurs</field>
+        <field name="res_model">kal3iya.stock.provider</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Driver Views -->
+    <record id="view_kal3iya_stock_driver_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.driver.tree</field>
+        <field name="model">kal3iya.stock.driver</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="employee_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_driver_form" model="ir.ui.view">
+        <field name="name">kal3iya.stock.driver.form</field>
+        <field name="model">kal3iya.stock.driver</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="employee_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Driver Action -->
+    <record id="action_kal3iya_stock_driver" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">kal3iya.stock.driver</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Société Action -->
+    <record id="action_kal3iya_stock_ste" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">kal3iya.stock.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

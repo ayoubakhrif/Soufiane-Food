@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_finance_logistics_reconciliation_tree" model="ir.ui.view">
+        <field name="name">finance.logistics.reconciliation.tree</field>
+        <field name="model">finance.logistics.reconciliation</field>
+        <field name="arch" type="xml">
+            <tree string="Rapprochement Finance-Logistique" default_order="date_operation desc">
+                <field name="chq_number"/>
+                <field name="date_operation"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                
+                <field name="finance_amount" sum="Total Finance"/>
+                <field name="logistics_amount" sum="Total Logistique"/>
+                <field name="difference" sum="Total Ecart" decoration-danger="difference != 0"/>
+                
+                <field name="dossier_id" widget="many2one_clickable" optional="show"/>
+                
+                <field name="state" widget="badge" 
+                    decoration-success="state == 'matches'" 
+                    decoration-warning="state == 'mismatch'" 
+                    decoration-danger="state == 'missing'"
+                />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View (Finance Admin Only) -->
+    <record id="view_finance_logistics_reconciliation_form" model="ir.ui.view">
+        <field name="name">finance.logistics.reconciliation.form</field>
+        <field name="model">finance.logistics.reconciliation</field>
+        <field name="groups_id" eval="[(6, 0, [ref('finance.group_finance_admin')])]"/>
+        <field name="arch" type="xml">
+            <form string="Rapprochement Finance-Logistique" create="false" edit="false">
+                <header>
+                    <button name="action_mark_no_problem"
+                            string="Aucun Problème Détecté"
+                            type="object"
+                            class="btn-success"
+                            confirm="Confirmer que ce chèque ne présente aucun problème ? Il disparaîtra du rapprochement."/>
+                </header>
+                <sheet>
+                    <group string="Finance">
+                        <field name="chq_number"/>
+                        <field name="date_operation"/>
+                        <field name="ste_id"/>
+                        <field name="benif_id"/>
+                        <field name="finance_amount"/>
+                    </group>
+                    <group string="Logistique">
+                        <field name="dossier_id"/>
+                        <field name="logistics_amount"/>
+                    </group>
+                    <group string="Analyse">
+                        <field name="difference"/>
+                        <field name="state" widget="badge"
+                            decoration-success="state == 'matches'"
+                            decoration-warning="state == 'mismatch'"
+                            decoration-danger="state == 'missing'"
+                        />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_finance_logistics_reconciliation_search" model="ir.ui.view">
+        <field name="name">finance.logistics.reconciliation.search</field>
+        <field name="model">finance.logistics.reconciliation</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Rapprochement">
+                <field name="chq_number"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="dossier_id"/>
+                
+                <separator/>
+                <filter string="Conforme" name="matches" domain="[('state', '=', 'matches')]"/>
+                <filter string="Non Conforme" name="mismatch" domain="[('state', '=', 'mismatch')]"/>
+                <filter string="Non Trouvé" name="missing" domain="[('state', '=', 'missing')]"/>
+                
+                <group expand="0" string="Grouper par">
+                    <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Bénéficiaire" name="group_benif" context="{'group_by': 'benif_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_finance_logistics_reconciliation" model="ir.actions.act_window">
+        <field name="name">Rapprochement Chèques (Logistique)</field>
+        <field name="res_model">finance.logistics.reconciliation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_finance_logistics_reconciliation_search"/>
+        <field name="context">{'search_default_missing': 1}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_finance_logistics_reconciliation_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_finance_logistics_reconciliation_form')})
+        ]"/>
+    </record>
+
+    <menuitem id="menu_finance_logistics_reconciliation"
+        name="Rapprochement Logistique"
+        parent="menu_finance_verification_root"
+        action="action_finance_logistics_reconciliation"
+        sequence="50"/>
+</odoo>

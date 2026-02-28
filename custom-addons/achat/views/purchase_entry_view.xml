@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- PURCHASE TREE VIEW -->
+    <record id="view_purchase_entry_tree" model="ir.ui.view">
+        <field name="name">purchase.entry.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <tree string="Dossiers Achat">
+                <field name="bl_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="article_id"/>
+                <field name="article_id"/>
+                <field name="eta"/>
+                <field name="date_booking" optional="show"/>
+                <field name="date_docs_received" optional="show"/>
+                <field name="date_docs_confirmed" optional="show"/>
+                <field name="purchase_state" widget="badge" decoration-info="purchase_state == 'initial'" decoration-success="purchase_state == 'confirmed'" decoration-muted="purchase_state == 'closed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- PURCHASE FORM VIEW -->
+    <record id="view_purchase_entry_form" model="ir.ui.view">
+        <field name="name">purchase.entry.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Dossier Achat" chatter_position="bottom">
+                <header>
+                    <button name="action_move_to_draft" string="Move to Draft" type="object" class="oe_highlight" invisible="purchase_state != 'initial'"/>
+                    <button name="action_confirm_purchase" string="Confirm" type="object" class="oe_highlight" invisible="purchase_state != 'draft'"/>
+                    <!-- Admin-only reset buttons -->
+                    <button name="action_reset_to_initial"
+                            string="⟲ Remettre en Initial"
+                            type="object"
+                            class="btn-warning"
+                            invisible="purchase_state == 'initial'"
+                            groups="achat.group_purchase_admin"
+                            confirm="Remettre ce dossier en statut Initial ?"/>
+                    <button name="action_reset_to_draft"
+                            string="⟲ Remettre en Draft"
+                            type="object"
+                            class="btn-warning"
+                            invisible="purchase_state != 'confirmed'"
+                            groups="achat.group_purchase_admin"
+                            confirm="Remettre ce dossier en statut Draft ?"/>
+                    <field name="purchase_state" widget="statusbar" statusbar_visible="initial,draft,confirmed"/>
+                </header>
+                <sheet>
+                    <!-- Hidden field to enable user_has_groups in modifiers -->
+                    <field name="purchase_state" invisible="1"/>
+                    
+                    <div class="oe_title">
+                        <label for="bl_number" string="BL Number" class="oe_edit_only"/>
+
+                        <h1>
+                            <div class="o_row">
+                                <field name="contract_num" placeholder="Contract No." readonly="1" class="oe_inline"/>
+                                <span invisible="not contract_num"> / </span>
+                                <field name="bl_number" placeholder="BL Number" class="oe_inline"/>
+                                <!--readonly="purchase_state != 'initial'"-->
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="eta"/>
+                            
+                            <!-- For non-admins: readonly when confirmed -->
+                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/> 
+                            <field name="ste_id"      options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="supplier_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="shipping_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="origin_id"   options="{'no_create': True, 'no_create_edit': True}" groups="!achat.group_purchase_admin"/>
+                            <field name="incoterm" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <!-- date_booking readonly if draft (interpreted as locked from draft onwards) -->                            
+                            <!-- For admins: always editable -->
+                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" groups="achat.group_purchase_admin"/> 
+                            <field name="ste_id"      options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="supplier_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="shipping_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="origin_id"   options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="incoterm" groups="achat.group_purchase_admin"/>
+                        </group>
+                        <group string="Détails Marchandise">
+                            <!-- For non-admins: readonly when confirmed -->
+                            <field name="article_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="details" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="lot" groups="!achat.group_purchase_admin"/>
+                            <field name="invoice_number" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="weight" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="price_unit" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="amount_total" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            
+                            <!-- For admins: always editable -->
+                            <field name="article_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="details" groups="achat.group_purchase_admin"/>
+                            <field name="lot" groups="achat.group_purchase_admin"/>
+                            <field name="invoice_number" groups="achat.group_purchase_admin"/>
+                            <field name="weight" groups="achat.group_purchase_admin"/>
+                            <field name="price_unit" groups="achat.group_purchase_admin"/>
+                            <field name="amount_total" groups="achat.group_purchase_admin"/>
+                            
+                            <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate'"/>
+                            <div class="o_row" invisible="incoterm == 'emirate'">
+                                <field name="free_time_negotiated" readonly="1" force_save="1" class="oe_inline"/> / 
+                                <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
+                            </div>
+
+                            <field name="dhl_number"/>
+                            <field name="eta_dhl"/>
+                        </group>
+                        <group string="Dates">
+                            <field name="date_booking" groups="achat.group_purchase_admin"/>
+                            <field name="date_booking" readonly="purchase_state in ('draft', 'confirmed')" groups="!achat.group_purchase_admin"/>
+                            <field name="date_docs_received" groups="achat.group_purchase_admin"/>
+                            <field name="date_docs_received" readonly="purchase_state == 'confirmed'" groups="!achat.group_purchase_admin"/>
+                            <field name="date_docs_confirmed" groups="achat.group_purchase_admin"/>
+                            <field name="date_docs_confirmed" readonly="purchase_state == 'confirmed'" groups="!achat.group_purchase_admin"/>
+                        </group>
+                        <group string="Document's comments">
+                            <field name="comment"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Documents" name="documents">
+                            <group>
+                                <group>
+                                    <field name="doc_invoice" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_packing" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_bl" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                                <group>
+                                    <field name="doc_fito" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="doc_origin" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Conteneurs" name="containers">
+                            <field name="container_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Documents (Files)" name="attached_files">
+                            <field name="document_ids">
+                                <tree editable="bottom">
+                                    <field name="document_type"/>
+                                    <field name="file" widget="binary" filename="file_name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter" groups="achat.group_purchase_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- PURCHASE SEARCH VIEW -->
+    <record id="view_purchase_entry_search" model="ir.ui.view">
+        <field name="name">purchase.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Search Purchase Dossiers">
+                <field name="bl_number" filter_domain="[('bl_number', 'ilike', self)]"/>
+                <field name="contract_id"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <field name="article_id"/>
+                <field name="invoice_number"/>
+                <field name="lot"/>
+                
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('purchase_state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('purchase_state', '=', 'confirmed')]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Supplier" name="group_by_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'purchase_state'}"/>
+                    <filter string="Article" name="group_by_article" context="{'group_by': 'article_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- PURCHASE PIVOT VIEW -->
+    <record id="view_purchase_entry_pivot" model="ir.ui.view">
+        <field name="name">purchase.entry.pivot</field>
+        <field name="model">logistique.entry</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Dossiers Achat">
+                <field name="supplier_id" type="row"/>
+                <field name="article_id"  type="row"/>
+                <field name="ste_id"      type="col"/>
+                <field name="weight"       type="measure" string="Poids (T)"/>
+                <field name="amount_total" type="measure" string="Montant Total"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- PURCHASE GRAPH VIEW -->
+    <record id="view_purchase_entry_graph" model="ir.ui.view">
+        <field name="name">purchase.entry.graph</field>
+        <field name="model">logistique.entry</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <graph string="Analyse Dossiers Achat" type="bar" stacked="True">
+                <field name="supplier_id" type="row"/>
+                <field name="article_id"  type="row"/>
+                <field name="amount_total" type="measure" string="Montant Total"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ACTION PURCHASE -->
+    <record id="action_purchase_entry" model="ir.actions.act_window">
+        <field name="name">Dossiers Achat</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_purchase_entry_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree',  'view_id': ref('view_purchase_entry_tree')}),
+            (0, 0, {'view_mode': 'form',  'view_id': ref('view_purchase_entry_form')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_purchase_entry_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_purchase_entry_graph')})]" />
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

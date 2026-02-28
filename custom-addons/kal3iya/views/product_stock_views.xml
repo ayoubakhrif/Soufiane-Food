@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kal3iya_stock_kanban" model="ir.ui.view">
+        <field name="name">kal3iya.stock.kanban</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+           <kanban class="o_kanban_example" editable="false" create="false" delete="false">
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="calibre"/>
+                <field name="price"/>
+                <field name="mt_achat"/>
+                <field name="lot"/>
+                <field name="ville"/>
+                <field name="image_1920"/>
+                <field name="weight"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_record"
+                            style="
+                                border-radius:12px;
+                                border:1px solid #e5e7eb;
+                                box-shadow:0 4px 14px rgba(0,0,0,0.08);
+                                background:#ffffff;
+                                padding:12px;
+                                display:flex;
+                                gap:14px;
+                            ">
+
+                            <!-- 🖼️ Image -->
+                            <aside style="width:90px; height:90px; flex-shrink:0;">
+                                <div class="o_kanban_image_fill w-100 h-100">
+                                    <field name="image_1920"
+                                        widget="image"
+                                        class="w-100 h-100 rounded"
+                                        options="{'img_class': 'object-fit-cover'}"/>
+                                </div>
+                            </aside>
+
+                            <!-- 📋 Infos -->
+                            <div class="flex-grow-1">
+
+                                <!-- Produit -->
+                                <div style="font-weight:700; font-size:15px; color:#111827; margin-bottom:6px;">
+                                    <field name="product_id"/>
+                                </div>
+
+                                <!-- Badges -->
+                                <div style="margin-bottom:8px;">
+                                    <span style="
+                                        background:#e0f2fe;
+                                        color:#0369a1;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;
+                                        margin-right:6px;">
+                                        <field name="ville"/>
+                                    </span>
+
+                                    <span style="
+                                        background:#f3f4f6;
+                                        color:#374151;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;">
+                                        Calibre <field name="calibre"/>
+                                    </span>
+                                </div>
+
+                                <!-- Stock -->
+                                <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                    <div>
+                                        📦 <b>Quantité :</b>
+                                        <span style="color:#059669;">
+                                            <field name="quantity"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        ⚖️ <b>Poids :</b> <field name="weight"/>
+                                    </div>
+                                </div>
+
+                                <hr style="margin:8px 0; border:none; border-top:1px dashed #e5e7eb;"/>
+
+                                <!-- Financier -->
+                                <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                    <div>
+                                        💰 <b>Prix :</b>
+                                        <span style="color:#1d4ed8;">
+                                            <field name="price"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        🧾 <b>Montant achat :</b>
+                                        <span style="color:#7c2d12;">
+                                            <field name="mt_achat"/>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        🏷️ <b>Lot :</b> <field name="lot"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.tree</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="product_id" string="Nom du produit"/>
+                <field name="mt_achat" sum="Total Mt. Achat"/>
+                <field name="tonnage" sum="Total tonnage(Kg)"/>
+                <field name="price"/>
+                <field name="quantity" sum="Quantité totale"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_pivot" model="ir.ui.view">
+        <field name="name">kal3iya.stock.pivot</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse stock">
+                <field name="product_id" type="row"/>
+                <field name="mt_achat" type="measure"/>
+                <field name="tonnage" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+
+    <record id="action_kal3iya_stock" model="ir.actions.act_window">
+        <field name="name">Stock</field>
+        <field name="res_model">kal3iya.stock</field>
+        <field name="view_mode">kanban,tree,form,pivot</field>
+        <field name="view_id" ref="view_kal3iya_stock_kanban"/>
+    </record>
+
+    <record id="stock_view_search" model="ir.ui.view">
+        <field name="name">stock search</field>
+        <field name="model">kal3iya.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id" string="Nom du produit"/>
+                <field name="dum"/>
+                <field name="lot"/>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="menu_kal3iya_stock" name="Stock"
+              parent="Kal3iya_root_menu"
+              action="action_kal3iya_stock"/>
+
+    <record id="action_server_recalculate_stock" model="ir.actions.server">
+        <field name="name">Recalculer tout le stock</field>
+        <field name="model_id" ref="model_kal3iya_stock"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_recalculate_all_stock()
+        </field>
+    </record>
+
+    <menuitem id="menu_recalculate_stock"
+              name="Recalculer tout le stock"
+              parent="Kal3iya_root_menu"
+              action="action_server_recalculate_stock"
+              sequence="100"/>
+</odoo>

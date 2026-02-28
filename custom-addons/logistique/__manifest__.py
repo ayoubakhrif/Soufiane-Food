@@ -1,0 +1,35 @@
+{
+    'name': 'Logistique',
+    'version': '1.1',
+    'summary': 'Gestion des entrées logistiques et des conteneurs',
+    'description': """
+        Module pour gérer les dossiers logistiques et le suivi des conteneurs.
+        - Entrées logistiques
+        - Gestion des conteneurs
+        - Données de référence (Sociétés, Fournisseurs, Articles, Compagnies maritimes)
+    """,
+    'category': 'Operations',
+    'author': 'Ayoub Akhrif',
+    'depends': ['base', 'mail', 'custom_employee', 'company_data'],
+    'data': [
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'views/ste_view.xml',
+        'views/supplier_view.xml',
+        'views/article_view.xml',
+        'views/shipping_view.xml',
+        'views/container_view.xml',
+        'views/logistics_entry_view.xml',
+        'views/dossier_view.xml',
+        'views/dossier_cheque_view.xml',
+        'views/dossier_transfer_view.xml',
+        'views/consolidator_view.xml',
+        'views/surest_mag_views.xml',
+        'views/surest_mag_menus.xml',
+        'views/menus.xml',
+        'data/server_actions.xml',
+    ],
+    'installable': True,
+    'application': True,
+    'license': 'LGPL-3',
+}

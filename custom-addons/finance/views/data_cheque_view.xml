@@ -1,0 +1,238 @@
+<odoo>
+    <record id="finance_app_action" model="ir.actions.client">
+        <field name="name">Finance</field>
+        <field name="tag">finance.app_entry</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem 
+        id="finance_root_menu"
+        name="Finance"
+        sequence="1"
+        web_icon="finance,static/description/icon.svg"
+        action="finance_app_action"
+        groups="finance.group_finance_viewer,finance.group_finance_employee"
+    />
+
+    <record id="data_cheque_action" model="ir.actions.act_window">
+        <field name="name">Saisie</field>
+        <field name="res_model">datacheque</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+
+    <menuitem 
+        id="data_cheque_menu"
+        name="Saisie"
+        parent="finance_root_menu"
+        sequence="10"
+    />
+
+    <menuitem 
+        id="data_cheque_list_menu"
+        name="Par chèque"
+        parent="data_cheque_menu"
+        action="data_cheque_action"
+        sequence="1"
+    />
+
+    <record id="datachq_view_tree" model="ir.ui.view">
+        <field name="name">datachq tree</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="ste_id"/>
+                <field name="chq"/>
+                <field name="talon_id"/>
+                <field name="benif_id"/>
+                <field name="serie" optional="1"/>
+                <field name="date_emission"/>
+                <field name="week"/>
+                <field name="journal"/>
+                <field name="date_echeance"/>
+                <field name="date_encaissement"/>
+                <field name="amount" sum="Total"/>
+                <field name="type"/>
+                <field name="state" optional="1"/>
+                <field name="facture_tag" widget="html" readonly="1" optional="1"/>
+                <field name="perso_id"/>
+                <field name="existing_tag" optional="1"/>
+                <field name="existing_dem_tag" optional="1"/>
+                <field name="existing_doc_tag" optional="1"/>
+            </tree>
+        </field>
+    </record>
+    <record id="datachq_view_form" model="ir.ui.view">
+        <field name="name">datachq form</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_request_edit"
+                            string="Demander une authorisation"
+                            type="object"
+                            class="btn-warning"
+                            invisible="not is_locked or is_manager"
+                            groups="finance.group_finance_employee"/>
+                    <button name="action_request_deletion"
+                            string="Demander la suppression"
+                            type="object"
+                            class="btn-danger"
+                            invisible="is_manager"
+                            groups="finance.group_finance_employee"/>
+                    <field name="unlock_until" invisible="1"/>
+                    <div invisible="not unlock_until or is_manager or is_locked"
+                        style="flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 0 10px;">
+                        
+                        <div role="alert" style="
+                            padding: 6px 16px;
+                            background-color: #E3F2FD;
+                            border: 1px solid #90CAF9;
+                            color: #0D47A1;
+                            border-radius: 50px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            font-size: 13px;
+                        ">
+                            <i class="fa fa-unlock-alt"/>
+                            <strong>Autorisation temporaire de modification active jusqu’au</strong>
+                            <field name="unlock_until_label" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+
+                    <field name="state" widget="statusbar" options="{'clickable': true}"/>
+                </header>
+
+                <sheet>
+                    <field name="is_manager" invisible="1"/>
+                    <field name="is_locked" invisible="1"/>
+
+                    <!-- Boutons PDF style Odoo (stat buttons box) -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_pdf_chq" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">CHQ</span>
+                            </div>
+                        </button>
+
+                        <button name="action_open_pdf_dem" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">DEM</span>
+                            </div>
+                        </button>
+
+                        <button name="action_open_pdf_doc" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">DOC</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Titre propre -->
+                    <div class="oe_title">
+                        <h1 class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                            <span class="text-muted" style="font-size:14px;">Société</span>
+                            <field name="ste_id" class="oe_inline" placeholder="Choisir une société" options="{'no_create': True}"/>
+
+                            <span class="text-muted" style="font-size:14px;">Chèque</span>
+                            <field name="chq" class="oe_inline" placeholder="Numéro de chèque"/>
+                        </h1>
+                    </div>
+
+                    <!-- Infos principales -->
+                    <group string="Informations">
+                        <group>
+                            <field name="talon_id" readonly="1"/>
+                            <field name="benif_id" options="{'no_create': True}"/>
+                            <field name="bl" invisible="benif_type != 'import'"/>
+                            <field name="perso_id" readonly="state == 'annule'" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="date_emission" readonly="state in ['bureau','annule']" required="state not in ['bureau', 'annule']"/>
+                            <field name="week"/>
+                            <field name="journal"/>
+                            <field name="benif_type" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Échéances et montant">
+                        <group>
+                            <field name="date_echeance" readonly="benif_type == 'import' or state in ['bureau', 'annule']" required="state not in ['bureau', 'annule']"/>
+                            <field name="date_encaissement" readonly="1" invisible="not date_encaissement"/>
+                        </group>
+                        <group>
+                            <field name="amount" readonly="date_encaissement"/>
+                            <field name="type" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+
+                    <group string="Facturation">
+                        <group>
+                            <field name="facture"/>
+                            <field name="serie" invisible="facture in ['m', 'bureau']"/>
+                        </group>
+                    </group>
+
+                    <!-- Liens PDF -->
+                    <group string="Documents">
+                        <group>
+                            <field name="chq_pdf_url" widget="url" string="PDF CHQ"/>
+                            <field name="doc_pdf_url" widget="url" string="PDF DOC"/>
+                        </group>
+                    </group>
+                    <separator string="Historique"/>
+                    <div class="oe_chatter" groups="finance.group_finance_user">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="datachq_view_search" model="ir.ui.view">
+        <field name="name">datachq search</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="chq"/>
+                <field name="week"/>
+                <field name="serie"/>
+                <field name="facture"/>
+                <field name="talon_id"/>
+                <field name="benif_id"/>
+                <filter name="encours" string="Cheques in progress" domain="[('encours', '=', 'non_encaisse')]"/>
+                <filter name="no_pdf" string="Liens inexistants" domain="['|', '|', ('chq_pdf_url', '=', False), ('dem_pdf_url', '=', False), ('doc_pdf_url', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="datachq_view_pivot" model="ir.ui.view">
+        <field name="name">datachq pivot</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Chèques">
+                <field name="amount" type="measure"/>
+                <field name="cheque_count" type="measure"/>
+                <field name="week" type="row"/>
+                <field name="ste_id"/>
+                <field name="type"/>
+                <field name="state"/>
+                <field name="benif_id"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="datachq_view_graph" model="ir.ui.view">
+        <field name="name">datachq graph</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <graph string="Graphique des Chèques" type="bar">
+                <field name="week" />
+                <field name="benif_id" />
+            </graph>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,78 @@
+# =====================
+# ⚙️  Odoo / Soufiane-Food Project Gitignore
+# =====================
+
+# --- Base Odoo ---
+_build/
+*.py[co]
+__pycache__/
+*.egg-info
+*~
+*.orig
+status
+odoo/filestore
+odoo/addons/base/maintenance
+/odoo.conf
+
+# --- Docker ---
+postgres_data/
+filestore/
+sessions/
+.env
+docker-compose.override.yml
+
+# --- Windows / Logs / Cache ---
+*.log
+Thumbs.db
+desktop.ini
+
+# --- IDE / Editors ---
+.vscode/
+.idea/
+*.code-workspace
+
+# --- Node / Frontend ---
+node_modules/
+package-lock.json
+package.json
+jsconfig.json
+tsconfig.json
+.husky/
+pnpm-lock.yaml
+
+# --- Python Virtual Environments ---
+venv/
+venv310/
+.env/
+.env.bak/
+.env.dev/
+.env.prod/
+bin/
+build/
+dist/
+include/
+lib/
+man/
+share/
+
+# --- Reports / Generated Files ---
+*.pdf
+*.xlsx
+*.csv
+*.rtf
+*.zip
+*.bak
+
+# --- Exceptions (we keep these) ---
+!.gitignore
+!.github/
+!.mailmap
+!.weblate.json
+!ir.model.access.csv
+
+# --- Google Drive Credentials (NEVER commit these!) ---
+**/drive_auth/*.json
+!**/drive_auth/credentials.json
+
+google_credentials/
+custom-addons/9al3iya/static/drive_auth/

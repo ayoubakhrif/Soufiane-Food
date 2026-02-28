@@ -1,0 +1,73 @@
+<odoo>
+    <data>
+
+        <record id="ir_cron_sync_chq_pdf" model="ir.cron">
+            <field name="name">Synchroniser PDF CHQ</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_sync_all_chq_pdf()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+            <field name="nextcall">2025-12-05 19:00:00</field>
+        </record>
+
+        <record id="ir_cron_update_talons" model="ir.cron">
+            <field name="name">Finance: Update Talons</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_find_all_talons()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">3</field>
+            <field name="nextcall" eval="'2025-12-10 21:00:00'"/>
+        </record>
+        
+        <!-- ✅ Computation des tags d'existence une seule fois aujourd'hui à 12:45 -->
+        <record id="ir_cron_compute_existance_tags_once" model="ir.cron">
+            <field name="name">Finance: Compute Existence Tags Once</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">
+records = model.search([])
+records._compute_existance_tag()
+records._compute_existance_dem_tag()
+records._compute_existance_doc_tag()
+            </field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">1</field>
+            <field name="nextcall">2025-12-13 11:45:00</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Cron to automatically re-lock cheques after temporary unlock expires -->
+        <record id="cron_clear_expired_unlocks" model="ir.cron">
+            <field name="name">Verrouiller les chèques expirés</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_clear_expired_unlocks()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- MIGRATE PHYSICAL CHEQUES (Once) -->
+        <record id="cron_migrate_physical_cheques" model="ir.cron">
+            <field name="name">Finance: Migrate Physical Cheques</field>
+            <field name="model_id" ref="model_datacheque"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_migrate_physical_cheques()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">1</field>
+            <field name="doall">True</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

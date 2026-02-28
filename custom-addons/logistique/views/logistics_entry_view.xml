@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_logistique_entry_tree" model="ir.ui.view">
+        <field name="name">logistique.entry.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Entrées Logistiques" decoration-info="status == 'in_progress'" decoration-success="status == 'closed'" create="false" delete="false">
+                <field name="status" widget="badge" decoration-info="status == 'in_progress'" decoration-warning="status == 'get_out'" decoration-success="status == 'closed'"/>
+                <field name="week"/>
+                <field name="saisi_par"/>
+                <field name="dossier_id"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="invoice_number"/>
+                <field name="article_id"/>
+                <field name="details"/>
+                <field name="incoterm"/>
+                <field name="free_time"/>
+                <field name="shipping_id"/>
+                <field name="consolidator_id"/>
+                <field name="amount_total"/>
+                <field name="eta"/>
+                <field name="container_count"/>
+                <field name="container_names" string="Conteneur" optional="show"/>
+                <field name="def_number"/>
+                <field name="thc_amount" sum="THC"/>
+                <field name="surestarie_amount" sum="Surestarie"/>
+                <field name="magasinage_amount" sum="Magasinage"/>
+                <field name="bad_date"/>
+                <field name="exit_date"/>
+                <field name="entry_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_logistique_entry_form" model="ir.ui.view">
+        <field name="name">logistique.entry.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <form string="Entrées logistique" create="false" delete="false">
+                <header>
+                    <button name="action_set_gate_out" string="Gate Out" type="object" class="btn-primary" invisible="status != 'in_progress'"/>
+                    <button name="action_set_closed" string="Clôturer" type="object" class="btn-primary" invisible="status != 'get_out'"/>
+                    
+                    <!-- Operational Exit Button -->
+                    <button name="action_exit_port" string="Sortie Port" type="object" class="oe_highlight" 
+                            invisible="port_status == 'exited'"
+                            groups="logistique.group_logistique_user"/>
+                            
+                    <field name="status" widget="statusbar" statusbar_visible="in_progress,get_out,closed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Statut Opérationnel">
+                             <field name="port_status" readonly="1" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
+                             <field name="exit_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Dossier / BL">
+                            <field name="dossier_id" options="{'no_create': True}" readonly="1"/> <!-- Readonly for Logistics -->
+                            <field name="bl_number" readonly="1"/> <!-- Readonly for Logistics -->
+                        </group>
+                        <group string="Suivi Finance (Lecture seule)">
+                            <field name="prov_number" readonly="1"/>
+                            <field name="def_number" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Dates et Références">
+
+                            <field name="eta" readonly="1"/>
+
+                            <field name="invoice_number" readonly="1"/>
+                            <field name="saisi_par" readonly="1"/> <!-- Likely readonly too -->
+                        </group>
+                        <group string="Entités">
+                            <field name="ste_id" readonly="1"/>
+                            <field name="supplier_id" readonly="1"/>
+                            <field name="shipping_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Logistics">
+                            <field name="article_id" readonly="1"/>
+                            <field name="details" readonly="1"/>
+                            <field name="weight" readonly="1"/>
+                        </group>
+                        <group string="Tracking">
+                            <field name="incoterm" readonly="1"/>
+                            <field name="fret" invisible="incoterm != 'fob'" required="incoterm == 'fob'"/>
+                            <field name="free_time" readonly="1"/>
+                            <field name="doc_status" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Infos logistiques">
+                            <field name="week"/>
+                            <field name="consolidator_id" invisible="incoterm != 'fob'"/>
+                            <field name="bad_date" required="status == 'in_progress' and incoterm != 'emirate'"/>
+                            <field name="exit_date" required="status == 'closed' and incoterm != 'emirate'"/>
+                            <field name="entry_date" required="status == 'closed' and incoterm != 'emirate'"/>
+                            <field name="remarks"/>
+                        </group>
+                        <group string="Frais logistiques (depuis chèques)">
+                            <field name="surestarie_amount" readonly="1"/>
+                            <field name="thc_amount" readonly="1"/>
+                            <field name="magasinage_amount" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Conteneurs (Lecture seule)" name="containers">
+                            <field name="container_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Chèques" name="cheques">
+                            <field name="cheque_ids" context="{'default_dossier_id': dossier_id, 'default_entry_id': id}">
+                                <tree>
+                                    <field name="cheque_serie"/>
+                                    <field name="date"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="ste_id" readonly="1"/>
+                                    <field name="create_uid" string="Saisi par" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Déductions" name="deductions">
+                            <field name="deduction_ids"
+                                   context="{'default_entry_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="ste_id" readonly="1"/>
+                                    <field name="create_uid" string="Saisi par" optional="show" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Virements" name="transfers">
+                            <field name="transfer_ids"
+                                   context="{'default_entry_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="beneficiary_id"/>
+                                    <field name="ste_id" readonly="1"/>
+                                    <field name="create_uid" string="Saisi par" optional="show" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter" groups="logistique.group_logistique_manager">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_logistique_entry_search" model="ir.ui.view">
+        <field name="name">logistique.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Entrées Logistiques">
+
+                <field name="supplier_id"/>
+
+                <field name="dossier_id"/>
+                <field name="container_names" string="Conteneur"/>
+                <field name="status"/>
+                <field name="article_id"/>
+                <field name="cheque_ids" string="Numéro Chèque" filter_domain="[('cheque_ids.cheque_serie', 'ilike', self)]"/>
+
+                <group string="Regrouper par">
+                    <filter name="group_status"
+                            string="Status"
+                            context="{'group_by': 'status'}"/>
+                    <filter name="group_supplier"
+                            string="Supplier"
+                            context="{'group_by': 'supplier_id'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <record id="view_logistique_entry_pivot" model="ir.ui.view">
+        <field name="name">logistique.entry.pivot</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <pivot string="Entrées Logistiques">
+                <field name="ste_id" type="row"/>
+                <field name="entry_date" interval="month" type="col"/>
+                <field name="container_count" type="measure"/>
+                <field name="weight" type="measure"/>
+                <field name="thc_amount" type="measure"/>
+                <field name="surestarie_amount" type="measure"/>
+                <field name="magasinage_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_logistique_entry_graph" model="ir.ui.view">
+        <field name="name">logistique.entry.graph</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <graph string="Entrées Logistiques">
+                <field name="ste_id"/>
+                <field name="container_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_logistique_entry" model="ir.actions.act_window">
+        <field name="name">Entrées Logistiques</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_logistique_entry_search"/>
+        <field name="context">{'search_default_group_status': 1}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_logistique_entry_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_logistique_entry_form')})]"/>
+        <field name="domain">[('purchase_state', 'in', ('draft', 'confirmed'))]</field>
+    </record>
+</odoo>

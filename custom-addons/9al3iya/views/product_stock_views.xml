@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cal3iya_stock_kanban" model="ir.ui.view">
+        <field name="name">cal3iya.stock.kanban</field>
+        <field name="model">cal3iya.stock</field>
+        <field name="arch" type="xml">
+           <kanban class="o_kanban_example o_kanban_small_column" editable="false" create="false" delete="false">
+                <field name="name"/>
+                <field name="quantity"/>
+                <field name="price"/>
+                <field name="lot"/>
+                <field name="garage"/>
+                <field name="image_1920"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_record"
+                            style="border-radius:8px; border:1px solid #ddd; 
+                                    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+                                    background:#fff; padding:8px; display:flex; align-items:center;">
+
+                            <!-- 🖼️ Image à gauche (widget Odoo natif) -->
+                            <aside style="width:90px; height:90px; flex-shrink:0; margin-right:12px;">
+                                <div class="o_kanban_image_fill position-relative w-100 h-100">
+                                    <field name="image_1920"
+                                        widget="image"
+                                        class="h-100 w-100"
+                                        options="{'img_class': 'object-fit-cover rounded'}"/>
+                                </div>
+                            </aside>
+
+                            <!-- 📋 Détails à droite -->
+                            <div class="flex-grow-1">
+                                <div style="font-weight:600; font-size:14px; color:#2b2b2b; margin-bottom:6px;">
+                                    <field name="name"/>
+                                </div>
+                                <div style="font-size:13px; color:#444; line-height:1.5;">
+                                    <div><b>Prix :</b> <field name="price"/></div>
+                                    <div><b>Quantité :</b> <field name="quantity"/></div>
+                                    <div><b>Lot :</b> <field name="lot"/></div>
+                                    <div><b>garage :</b> <field name="garage"/></div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+
+        </field>
+    </record>
+
+    
+
+    <record id="action_cal3iya_stock" model="ir.actions.act_window">
+        <field name="name">Stock</field>
+        <field name="res_model">cal3iya.stock</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="view_cal3iya_stock_kanban"/>
+    </record>
+
+    <menuitem id="menu_cal3iya_stock" name="Stock"
+              parent="cal3iya_root_menu"
+              action="action_cal3iya_stock"/>
+</odoo>

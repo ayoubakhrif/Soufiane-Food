@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================= -->
+    <!-- 📋 Configuration Form -->
+    <!-- ========================= -->
+    <record id="view_suivi_config_form" model="ir.ui.view">
+        <field name="name">suivi.config.form</field>
+        <field name="model">suivi.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuration Suivi Personnel">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Paramètres de Période">
+                            <field name="month_start_day"/>
+                            <div class="text-muted">
+                                Ce paramètre définit le jour de début de votre mois comptable.
+                                <br/>
+                                Exemple : Si vous choisissez 15, votre mois comptable ira du 15 au 14 du mois suivant.
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🚀 Action -->
+    <!-- ========================= -->
+    <!-- ========================= -->
+    <!-- 🚀 Server Action (Singleton Force) -->
+    <!-- ========================= -->
+    <record id="action_suivi_config_server" model="ir.actions.server">
+        <field name="name">Paramètres Généraux</field>
+        <field name="model_id" ref="model_suivi_config"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.open_settings()
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,61 @@
+<odoo>
+    <record id="view_school_payment_tree" model="ir.ui.view">
+        <field name="name">school.payment.tree</field>
+        <field name="model">school.payment</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="status == 'draft'" decoration-success="status == 'posted'" decoration-muted="status == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="student_id"/>
+                <field name="amount"/>
+                <field name="payment_method"/>
+                <field name="status" widget="badge" decoration-info="status == 'draft'" decoration-success="status == 'posted'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_school_payment_form" model="ir.ui.view">
+        <field name="name">school.payment.form</field>
+        <field name="model">school.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_post" string="Confirm" type="object" class="oe_highlight" invisible="status != 'draft'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="status not in ('draft', 'posted')"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" invisible="status == 'draft'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="student_id"/>
+                            <field name="parent_id"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="payment_method"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_school_payment" model="ir.actions.act_window">
+        <field name="name">Payments</field>
+        <field name="res_model">school.payment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_school_payment" name="Payments" parent="menu_school_finance_root" action="action_school_payment" sequence="10"/>
+</odoo>

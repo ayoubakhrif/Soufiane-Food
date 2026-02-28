@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_casa_stock_entry" model="ir.sequence">
+            <field name="name">Entrée Stock Casa</field>
+            <field name="code">casa.stock.entry</field>
+            <field name="prefix">ENTRY/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_casa_stock_exit" model="ir.sequence">
+            <field name="name">Sortie Stock Casa</field>
+            <field name="code">casa.stock.exit</field>
+            <field name="prefix">EXIT/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

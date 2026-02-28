@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================= -->
+    <!-- 📊 Root Menu (Moved to suivi_root.xml) -->
+    <!-- ========================= -->
+
+    <!-- ========================= -->
+    <!-- 💰 Incomes Section -->
+    <!-- ========================= -->
+    <menuitem id="menu_suivi_incomes"
+              name="Revenus"
+              parent="menu_suivi_root"
+              sequence="20"/>
+
+    <menuitem id="menu_income_daily"
+              name="Revenus Quotidiens"
+              parent="menu_suivi_incomes"
+              action="action_income_daily"
+              sequence="10"/>
+
+    <menuitem id="menu_income_monthly"
+              name="Revenus Mensuels"
+              parent="menu_suivi_incomes"
+              action="action_income_monthly"
+              sequence="20"/>
+
+    <!-- ========================= -->
+    <!-- 💸 Expenses Section -->
+    <!-- ========================= -->
+    <menuitem id="menu_suivi_expenses"
+              name="Dépenses"
+              parent="menu_suivi_root"
+              sequence="10"/>
+
+    <menuitem id="menu_expense_daily"
+              name="Dépenses Quotidiennes"
+              parent="menu_suivi_expenses"
+              action="action_expense_daily"
+              sequence="10"/>
+
+    <menuitem id="menu_expense_monthly"
+              name="Dépenses Mensuelles"
+              parent="menu_suivi_expenses"
+              action="action_expense_monthly"
+              sequence="20"/>
+
+    <!-- ========================= -->
+    <!-- ⚙️ Configuration Section -->
+    <!-- ========================= -->
+    <menuitem id="menu_suivi_config"
+              name="Configuration"
+              parent="menu_suivi_root"
+              sequence="100"/>
+
+    <menuitem id="menu_suivi_settings"
+              name="Paramètres Généraux"
+              parent="menu_suivi_config"
+              action="action_suivi_config_server"
+              sequence="10"/>
+
+    <menuitem id="menu_expense_categories"
+              name="Catégories de Dépenses"
+              parent="menu_suivi_config"
+              action="action_expense_category"
+              sequence="20"/>
+</odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Action Configuration -->
+    <record id="action_surest_mag_config" model="ir.actions.act_window">
+        <field name="name">Configuration Tarifs</field>
+        <field name="res_model">logistique.surest_mag.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new tariff configuration
+          </p>
+        </field>
+    </record>
+
+    <!-- Action Simulation -->
+    <record id="action_surest_mag_simulation" model="ir.actions.act_window">
+        <field name="name">Simulations</field>
+        <field name="res_model">logistique.surest_mag.simulation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new simulation
+          </p>
+        </field>
+    </record>
+
+    <!-- Top Menu -->
+    <menuitem id="menu_surest_mag_root" 
+              name="Surest/Mag" 
+              parent="menu_logistique_root" 
+              sequence="50"/>
+
+    <!-- Sub Menus -->
+    <menuitem id="menu_surest_mag_simulation"
+              name="Simulation"
+              parent="menu_surest_mag_root"
+              action="action_surest_mag_simulation"
+              sequence="10"/>
+
+    <menuitem id="menu_surest_mag_config"
+              name="Configuration"
+              parent="menu_surest_mag_root"
+              action="action_surest_mag_config"
+              sequence="20"/>
+
+</odoo>

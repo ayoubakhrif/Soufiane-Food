@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_kal3iya_stock_entry" model="ir.sequence">
+            <field name="name">Entrée Stock Kal3iya</field>
+            <field name="code">kal3iya.stock.entry</field>
+            <field name="prefix">KE/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_kal3iya_stock_exit" model="ir.sequence">
+            <field name="name">Sortie Stock Kal3iya</field>
+            <field name="code">kal3iya.stock.exit</field>
+            <field name="prefix">KS/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

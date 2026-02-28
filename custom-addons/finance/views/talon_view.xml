@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ⚙️ Actions pour boutons -->
+    <record id="finance_talon_action" model="ir.actions.act_window">
+        <field name="name">Talons</field>
+        <field name="res_model">finance.talon</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_filter_actif': 1}</field>
+    </record>
+
+    <record id="view_finance_talon_form" model="ir.ui.view">
+        <field name="name">finance.talon.form</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <form string="Talons">
+                <header>
+                    <button string="Exporter chèques manquants (Excel)"
+                            name="action_export_missing_cheques_excel"
+                            type="object"
+                            class="oe_highlight"
+                            icon="fa-file-excel-o"
+                            groups="finance.group_finance_user"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_cheques"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-list">
+                            <field name="used_chqs" widget="statinfo" string="Chèques"/>
+                        </button>
+                    </div>
+                    <field name="progress_html" widget="html"/>
+                    <group>
+                        <field name="num_chq"/>
+                        <field name="name_shown"/>
+                        <field name="name"/>
+                        <field name="ste_id"/>
+                        <field name="serie"/>
+                        <field name="etat" readonly="1"/>
+                    </group>
+                    <field name="summary_card" widget="html"/>
+                    <notebook>
+                        <page string="Chèques absents">
+                            <field name="missing_cheques_html" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 🌳 Vue liste des clients -->
+    <record id="view_finance_talon_tree" model="ir.ui.view">
+        <field name="name">finance.talon.tree</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="num_chq"/>
+                <field name="name_shown"/>
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="serie"/>
+                <field name="etat"/>
+                <field name="used_chqs"/>
+                <field name="unused_chqs"/>
+                <field name="missing_chqs"/>
+                <field name="usage_percentage" widget="percentpie"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_talon_graph" model="ir.ui.view">
+        <field name="name">finance.talon.graph</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <graph string="Talons Analytics" type="bar">
+                <field name="name_shown" type="row"/>
+                <field name="usage_percentage" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="finance_talon_view_search" model="ir.ui.view">
+        <field name="name">fiance.talon.search</field>
+        <field name="model">finance.talon</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name_shown"/>
+                <field name="ste_id"/>
+                <field name="etat"/>
+                <filter string="Actif" name="filter_actif" domain="[('etat', '=', 'actif')]"/>
+                <separator/>
+                <filter string="Cloturé" name="filter_cloture" domain="[('etat', '=', 'cloture')]"/>
+                <filter string="Coffre" name="filter_coffre" domain="[('etat', '=', 'coffre')]"/>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="finance_talon_menu"
+              name="Talons"
+              parent="finance_root_menu"
+              action="finance_talon_action"
+              sequence="25"/>
+</odoo>

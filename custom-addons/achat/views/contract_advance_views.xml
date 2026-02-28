@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TREE VIEW -->
+    <record id="view_achat_contract_advance_tree" model="ir.ui.view">
+        <field name="name">achat.contract.advance.tree</field>
+        <field name="model">achat.contract.advance</field>
+        <field name="arch" type="xml">
+            <tree string="Contract Advances">
+                <field name="date"/>
+                <field name="contract_id"/>
+                <field name="partner_id"/>
+                <field name="amount" sum="Total Advances"/>
+                <field name="remaining_amount"/>
+                <field name="document_link" widget="url" text="View Doc"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_achat_contract_advance_form" model="ir.ui.view">
+        <field name="name">achat.contract.advance.form</field>
+        <field name="model">achat.contract.advance</field>
+        <field name="arch" type="xml">
+            <form string="Contract Advance">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_document" type="object" 
+                                string="Open Document" icon="fa-external-link" 
+                                class="oe_stat_button"
+                                invisible="not document_link"/>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="contract_id" placeholder="Select Contract..." options="{'no_create': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Advance Details">
+                            <field name="date"/>
+                            <field name="amount"/>
+                            <field name="document_link" widget="url"/>
+                        </group>
+                        <group string="Contract Information">
+                            <field name="contract_name"/>
+                            <field name="partner_id"/>
+                            <field name="origin_id"/>
+                            <field name="contract_amount"/>
+                            <field name="remaining_amount" decoration-danger="remaining_amount &lt; 0"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Add notes here..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_achat_contract_advance_search" model="ir.ui.view">
+        <field name="name">achat.contract.advance.search</field>
+        <field name="model">achat.contract.advance</field>
+        <field name="arch" type="xml">
+            <search string="Search Advances">
+                <field name="contract_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <group expand="0" string="Group By">
+                    <filter string="Contract" name="group_contract" context="{'group_by': 'contract_id'}"/>
+                    <filter string="Supplier" name="group_supplier" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_achat_contract_advance" model="ir.actions.act_window">
+        <field name="name">Contract Advances</field>
+        <field name="res_model">achat.contract.advance</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Contract Advance
+            </p>
+        </field>
+    </record>
+</odoo>

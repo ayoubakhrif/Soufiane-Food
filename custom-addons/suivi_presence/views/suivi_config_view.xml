@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_config_form" model="ir.ui.view">
+        <field name="name">suivi.config.form</field>
+        <field name="model">suivi.presence.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuration">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Mediouna">
+                            <field name="official_check_in_mediouna" widget="float_time"/>
+                            <field name="official_check_out_mediouna" widget="float_time"/>
+                        </group>
+                        <group string="Casa">
+                            <field name="official_check_in_casa" widget="float_time"/>
+                            <field name="official_check_out_casa" widget="float_time"/>
+                        </group>
+                        <group string="Paramètres Généraux">
+                            <field name="active" invisible="1"/>
+                            <field name="delay_tolerance"/>
+                            <field name="working_hours_per_day" widget="float_time"/>
+                            <field name="overtime_coefficient"/>
+                            <field name="annual_leave_quota"/>
+                            <field name="non_working_day"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Jours Fériés">
+                            <field name="public_holiday_ids">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_config" model="ir.actions.act_window">
+        <field name="name">Configuration</field>
+        <field name="res_model">suivi.presence.config</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

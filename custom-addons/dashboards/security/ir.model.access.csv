@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_management_dashboard,management.dashboard,model_management_dashboard,dashboards.group_dashboard_manager,1,0,0,0
+access_dashboard_profit_client,dashboard.profit.client,model_dashboard_profit_client,dashboards.group_dashboard_manager,1,0,0,0
+access_surestarie_magasinage_report,surestarie.magasinage.report,model_surestarie_magasinage_report,dashboards.group_dashboard_manager,1,0,0,0
+access_surestarie_magasinage_dashboard,surestarie.magasinage.dashboard,model_surestarie_magasinage_dashboard,dashboards.group_dashboard_manager,1,0,0,0

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_fix_cheque_data" model="ir.actions.server">
+        <field name="name">Réparer Dossier/Société Manquant</field>
+        <field name="model_id" ref="model_logistique_dossier_cheque"/>
+        <field name="binding_model_id" ref="model_logistique_dossier_cheque"/>
+        <field name="state">code</field>
+        <field name="code">
+# 1. Fix missing dossier_id from entry_id
+for rec in records:
+    if not rec.dossier_id and rec.entry_id:
+        rec.write({'dossier_id': rec.entry_id.dossier_id.id})
+
+# 2. Fix missing ste_id from dossier_id
+for rec in records:
+    if not rec.ste_id and rec.dossier_id:
+        rec.write({'ste_id': rec.dossier_id.ste_id.id})
+        </field>
+    </record>
+</odoo>

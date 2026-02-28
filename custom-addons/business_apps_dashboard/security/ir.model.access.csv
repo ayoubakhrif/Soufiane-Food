@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_business_app_user,business.app.user,model_business_app,base.group_user,1,0,0,0
+access_business_app_admin,business.app.admin,model_business_app,base.group_system,1,1,1,1

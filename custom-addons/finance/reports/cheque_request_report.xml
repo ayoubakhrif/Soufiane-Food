@@ -1,0 +1,23 @@
+<odoo>
+    <record id="action_report_cheque_request" model="ir.actions.report">
+        <field name="name">Demande de Chéquier</field>
+        <field name="model">finance.cheque.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance.report_cheque_request</field>
+        <field name="report_file">finance.report_cheque_request</field>
+        <field name="print_report_name">'Demande_Chequier_%s' % object.ste_id.name</field>
+        <field name="binding_model_id" ref="model_finance_cheque_request"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_cheque_request">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <!-- Render the HTML preview as the report content -->
+                    <t t-raw="doc.preview_html"/>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

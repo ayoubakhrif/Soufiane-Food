@@ -1,0 +1,70 @@
+<odoo>
+    <record id="view_school_class_tree" model="ir.ui.view">
+        <field name="name">school.class.tree</field>
+        <field name="model">school.class</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="level"/>
+                <field name="academic_year"/>
+                <field name="teacher_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_school_class_form" model="ir.ui.view">
+        <field name="name">school.class.form</field>
+        <field name="model">school.class</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="level"/>
+                            <field name="academic_year"/>
+                        </group>
+                        <group>
+                            <field name="teacher_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Students">
+                            <field name="student_ids">
+                                <tree readonly="1">
+                                    <field name="registration_number"/>
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Subjects">
+                            <field name="subject_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="coefficient"/>
+                                    <field name="teacher_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_school_class" model="ir.actions.act_window">
+        <field name="name">Classes</field>
+        <field name="res_model">school.class</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_school_class" name="Classes" parent="menu_school_academic_root" action="action_school_class" sequence="10"/>
+</odoo>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TREE VIEW -->
+    <record id="view_finance_sutra_tree" model="ir.ui.view">
+        <field name="name">finance.sutra.tree</field>
+        <field name="model">finance.sutra</field>
+        <field name="arch" type="xml">
+            <tree string="Sutra Dossiers">
+                <field name="facture_sutra"/>
+                <field name="bl_number" />
+                <field name="dum"/>
+                <field name="week"/>
+                <field name="container_names" string="Conteneur"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="eta"/>
+                <field name="regime" optional="hide"/>
+                <field name="total" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_finance_sutra_form" model="ir.ui.view">
+        <field name="name">finance.sutra.form</field>
+        <field name="model">finance.sutra</field>
+        <field name="arch" type="xml">
+            <form string="Sutra Dossier">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <!-- DOUANE INFO -->
+                        <group string="Informations Douane (Source: Logistique/Douane)">
+                            <field name="douane_id" options="{'no_create': True, 'no_edit': True}"/>
+                            <field name="ste_id"/>
+                            <field name="supplier_id"/>
+                            <field name="dum"/>
+                            <field name="dum_date"/>
+                            <field name="eta"/>
+                            <field name="container_ids" widget="many2many_tags" readonly="1"/>
+                        </group>
+                        
+                        <!-- FINANCE INFO -->
+                        <group string="Informations Finance (Editable)">
+                            <field name="week"/>
+                            <field name="regime"/>
+                            <field name="facture_sutra"/>
+                            <field name="scan_sutra"/>
+                            <separator string="Charges"/>
+                            <field name="honoraires"/>
+                            <field name="temsa"/>
+                            <field name="autres"/>
+                            <field name="tva"/>
+                            <field name="total" class="oe_subtotal_footer oe_right"/>
+                            <field name="scan_sutra_url" widget="url" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <!-- PAIEMENT LINK (Source: Finance Sutra Payment) -->
+                        <group string="Paiement">
+                            <field name="payment_id"/>
+                            <field name="is_encaisse" widget="boolean_toggle"/>
+                        </group>
+                        
+                        <!-- CHEQUE INFO (Read Only) -->
+                        <group string="Détails du Chèque (Lecture Seule)">
+                            <field name="cheque_id"/>
+                            <field name="cheque_number"/>
+                            <field name="cheque_date_emission"/>
+                            <field name="cheque_date_echeance"/>
+                        </group>
+                    </group>
+                    <separator string="Historique"/>
+                    <div class="oe_chatter" groups="finance.group_finance_user">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_finance_sutra_search" model="ir.ui.view">
+        <field name="name">finance.sutra.search</field>
+        <field name="model">finance.sutra</field>
+        <field name="arch" type="xml">
+            <search string="Search Sutra">
+                <field name="facture_sutra"/>
+                <field name="bl_number"/>
+                <field name="week"/>
+                <field name="container_names" string="Conteneur"/>
+                <field name="dum"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="cheque_number"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_finance_sutra" model="ir.actions.act_window">
+        <field name="name">Sutra</field>
+        <field name="res_model">finance.sutra</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez un nouveau dossier en sélectionnant un BL.
+            </p>
+        </field>
+    </record>
+
+    <!-- MENUS (Parent IDs assumed from context) -->
+    <menuitem id="menu_finance_sutra_marglory_root"
+              name="Sutra / Marglory"
+              parent="finance_root_menu"
+              sequence="40"/>
+
+    <menuitem id="menu_finance_sutra"
+              name="Sutra"
+              parent="menu_finance_sutra_marglory_root"
+              sequence="10"/>
+
+    <menuitem id="menu_finance_sutra_dossier"
+              name="Dossiers"
+              parent="menu_finance_sutra"
+              action="action_finance_sutra"
+              sequence="10"/>
+
+</odoo>

@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_school_subject_tree" model="ir.ui.view">
+        <field name="name">school.subject.tree</field>
+        <field name="model">school.subject</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="class_id"/>
+                <field name="coefficient"/>
+                <field name="teacher_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_school_subject" model="ir.actions.act_window">
+        <field name="name">Subjects</field>
+        <field name="res_model">school.subject</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+    <!-- Typically subjects are managed within classes, but a list view is useful -->
+    <menuitem id="menu_school_subject" name="Subjects" parent="menu_school_academic_root" action="action_school_subject" sequence="20"/>
+</odoo>

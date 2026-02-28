@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- 📋 FORM VIEW : Casa Client -->
+    <!-- ========================= -->
+    <record id="filtered_exit_action" model="ir.actions.act_window">
+        <field name="name">Sorties du client</field>
+        <field name="res_model">casa.stock.exit</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('client_id', '=', active_id), ('state', '!=', 'cancel')]</field>
+    </record>
+    
+    <record id="view_casa_client_form" model="ir.ui.view">
+        <field name="name">casa.client.form</field>
+        <field name="model">casa.client</field>
+        <field name="arch" type="xml">
+            <form string="Client Casa">
+                <sheet>
+
+                    <!-- ✅ SMART BUTTON EN HAUT À DROITE -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(filtered_exit_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-truck">
+                            <field name="exit_count" 
+                                   widget="statinfo" 
+                                   string="Commandes"/>
+                        </button>
+                    </div>
+
+                    <!-- TITRE -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du client..."/>
+                        </h1>
+                        
+                        <div style="margin-top:10px;">
+                            <span style="
+                                font-size:22px;
+                                font-weight:700;
+                                color:#4c51bf;
+                                background:#ebf4ff;
+                                padding:10px 20px;
+                                border-radius:12px;
+                                border:2px solid #4c51bf;
+                            ">
+                                💰 Compte total :
+                                <field name="compte_total" widget="monetary"
+                                    options="{'currency_field': 'company_currency_id'}"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- INFORMATIONS SIMPLES -->
+                    <group>
+                        <group string="Informations Client">
+                            <field name="name"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <!-- 👁️ Lecture -->
+                        <page string="Historique des commandes">
+                            <field name="sorties_grouped_html"
+                                nolabel="1"
+                                readonly="1"/>
+                        </page>
+
+                        <!-- ✏️ (optionnel) saisie ailleurs -->
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🌳 TREE VIEW : Casa Client -->
+    <!-- ========================= -->
+    <record id="view_casa_client_tree" model="ir.ui.view">
+        <field name="name">casa.client.tree</field>
+        <field name="model">casa.client</field>
+        <field name="arch" type="xml">
+            <tree string="Clients Casa">
+                <field name="name"/>
+                <field name="exit_count" string="Nb. Commandes"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🔍 SEARCH VIEW -->
+    <!-- ========================= -->
+    <record id="view_casa_client_search" model="ir.ui.view">
+        <field name="name">casa.client.search</field>
+        <field name="model">casa.client</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Client">
+                <field name="name" 
+                       string="Client" 
+                       filter_domain="[('name','ilike',self)]"/>
+                
+                <separator/>
+                
+                <filter string="Avec commandes" 
+                        name="with_orders" 
+                        domain="[('exit_count','>',0)]"/>
+                
+                <filter string="Sans commandes" 
+                        name="without_orders" 
+                        domain="[('exit_count','=',0)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🚀 ACTION -->
+    <!-- ========================= -->
+    <record id="action_casa_stock_client" model="ir.actions.act_window">
+        <field name="name">Clients Casa</field>
+        <field name="res_model">casa.client</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier client Casa
+            </p>
+            <p>
+                Les clients sont liés aux sorties de stock.
+            </p>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 📁 MENU ITEM -->
+    <!-- ========================= -->
+
+
+</odoo>

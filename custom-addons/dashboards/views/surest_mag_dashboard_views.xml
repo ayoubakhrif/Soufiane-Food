@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form View for Dashboard -->
+        <record id="view_surestarie_magasinage_dashboard_form" model="ir.ui.view">
+            <field name="name">surestarie.magasinage.dashboard.form</field>
+            <field name="model">surestarie.magasinage.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Tableau de Bord Surestarie" create="false" edit="false" delete="false">
+                    <sheet>
+                        <field name="content_html" widget="html"  readonly="1" options="{'style-inline': true}"/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action to Open Dashboard -->
+        <record id="action_surestarie_magasinage_dashboard" model="ir.actions.act_window">
+            <field name="name">Tableau de Bord Surestarie</field>
+            <field name="res_model">surestarie.magasinage.dashboard</field>
+            <field name="view_mode">form</field>
+            <field name="res_id" ref="dashboards.record_surestarie_magasinage_dashboard"/> 
+            <field name="target">current</field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_surestarie_magasinage_dashboard"
+                  name="Tableau de Bord"
+                  parent="menu_surest_mag_category"
+                  action="action_surestarie_magasinage_dashboard"
+                  sequence="0"/>
+    </data>
+</odoo>

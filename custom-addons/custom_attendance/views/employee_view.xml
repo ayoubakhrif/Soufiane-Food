@@ -1,0 +1,74 @@
+<odoo>
+    <record id="view_custom_employee_tree" model="ir.ui.view">
+        <field name="name">custom.employee.tree</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not active">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="monthly_salary" groups="custom_attendance.group_custom_attendance_admin,custom_attendance.group_custom_attendance_manager"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_custom_employee_form" model="ir.ui.view">
+        <field name="name">custom.employee.form</field>
+        <field name="model">custom.employee</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Full Name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="monthly_salary" groups="custom_attendance.group_custom_attendance_admin,custom_attendance.group_custom_attendance_manager" widget="monetary"/>
+                            <field name="payroll_site" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Historique de présence">
+                            <field name="attendance_ids" readonly="1">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="check_in" widget="float_time"/>
+                                    <field name="check_out" widget="float_time"/>
+                                    <field name="delay_minutes" decoration-danger="delay_minutes &gt; 0"/>
+                                    <field name="missing_hours" decoration-warning="missing_hours &gt; 0"/>
+                                    <field name="overtime_hours" decoration-success="overtime_hours &gt; 0"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Congés" groups="custom_attendance.group_custom_attendance_entry_agent,custom_attendance.group_custom_attendance_manager">
+                            <group col="4">
+                                <field name="annual_leave_quota" readonly="1"/>
+                                <field name="leaves_taken" readonly="1"/>
+                                <field name="leaves_remaining" readonly="1" decoration-danger="leaves_remaining &lt; 0"/>
+                            </group>
+                            <field name="leave_ids" readonly="1">
+                                <tree decoration-info="state == 'draft'" decoration-success="state == 'approved'">
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="leave_type"/>
+                                    <field name="days_count"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_employee" model="ir.actions.act_window">
+        <field name="name">Employés</field>
+        <field name="res_model">custom.employee</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

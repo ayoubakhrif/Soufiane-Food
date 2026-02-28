@@ -1,0 +1,22 @@
+{
+    'name': '9al3iya',
+    'summary': 'Module pour la gestion du stock de Kal3iya (Entrée, Sortie, Stock, Retour)',
+    'author': 'Ayoub Akhrif',
+    'category': 'Inventory',
+    'version': '1.0',
+    'depends': ['base', 'mail'],
+    'data': [
+        'security/groups.xml',
+        'security/ir.model.access.csv',
+        'views/product_entry_views.xml',
+        'views/product_sortie_views.xml',
+        'views/product_stock_views.xml',
+        'views/data_views.xml',
+        'views/client_view.xml',
+        'reports/bon_report.xml',
+    ],
+    'images': ['static/description/icon.svg'],
+    'installable': True,
+    'application': True,
+    'license': 'LGPL-3',
+}

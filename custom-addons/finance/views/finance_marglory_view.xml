@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TREE VIEW -->
+    <record id="view_finance_marglory_tree" model="ir.ui.view">
+        <field name="name">finance.marglory.tree</field>
+        <field name="model">finance.marglory</field>
+        <field name="arch" type="xml">
+            <tree string="Marglory Dossiers">
+                <field name="facture_marglory"/>
+                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'"/>
+                <field name="bl_number" />
+                <field name="dum"/>
+                <field name="dossier_reglement"/>
+                <field name="container_names" string="Conteneurs"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="eta"/>
+                <field name="amount" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_finance_marglory_form" model="ir.ui.view">
+        <field name="name">finance.marglory.form</field>
+        <field name="model">finance.marglory</field>
+        <field name="arch" type="xml">
+            <form string="Marglory Dossier">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <!-- DOUANE INFO -->
+                        <group string="Informations Douane (Source: Logistique/Douane)">
+                            <field name="douane_id" options="{'no_create': True, 'no_edit': True}"/>
+                            <field name="ste_id"/>
+                            <field name="supplier_id"/>
+                            <field name="dum"/>
+                            <field name="eta"/>
+                            <field name="container_ids" widget="many2many_tags" readonly="1"/>
+                        </group>
+                        
+                        <!-- FINANCE INFO -->
+                        <group string="Informations Finance (Editable)">
+                            <field name="dossier_reglement"/>
+                            <field name="type"/>
+                            <field name="facture_marglory"/>
+                            <field name="scan_marglory"/>
+                            <field name="amount"/>
+                            <field name="scan_marglory_url" widget="url" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <!-- PAIEMENT LINK (Source: Finance Marglory Payment) -->
+                        <group string="Paiement">
+                            <field name="payment_id"/>
+                            <!-- is_encaisse logic derived from cheque status -->
+                            <field name="is_encaisse" widget="boolean_toggle"/>
+                        </group>
+                        
+                        <!-- CHEQUE INFO (Read Only) -->
+                        <group string="Détails du Chèque (Lecture Seule)">
+                            <field name="cheque_id"/>
+                            <field name="cheque_number"/>
+                            <field name="cheque_date_emission"/>
+                            <field name="cheque_date_echeance"/>
+                        </group>
+                    </group>
+                    
+                    <div class="oe_chatter" groups="finance.group_finance_user">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_finance_marglory_search" model="ir.ui.view">
+        <field name="name">finance.marglory.search</field>
+        <field name="model">finance.marglory</field>
+        <field name="arch" type="xml">
+            <search string="Search Marglory">
+                <field name="facture_marglory"/>
+                <field name="type"/>
+                <field name="bl_number"/>
+                <field name="dossier_reglement"/>
+                <field name="container_names" string="Conteneurs"/>
+                <field name="dum"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="cheque_number"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_finance_marglory" model="ir.actions.act_window">
+        <field name="name">Marglory</field>
+        <field name="res_model">finance.marglory</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez un nouveau dossier Marglory en sélectionnant un BL.
+            </p>
+        </field>
+    </record>
+
+    <!-- MENUS -->
+    <menuitem id="menu_finance_marglory"
+              name="Marglory"
+              parent="menu_finance_sutra_marglory_root"
+              sequence="20"/>
+
+    <menuitem id="menu_finance_marglory_dossier"
+              name="Dossiers"
+              parent="menu_finance_marglory"
+              action="action_finance_marglory"
+              sequence="10"/>
+
+</odoo>

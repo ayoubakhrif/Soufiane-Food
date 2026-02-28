@@ -1,0 +1,113 @@
+<odoo>
+    <record id="view_finance_deletion_request_tree" model="ir.ui.view">
+        <field name="name">finance.deletion.request.tree</field>
+        <field name="model">finance.deletion.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-warning="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
+                <field name="request_date" string="Date"/>
+                <field name="user_id" string="Demandeur"/>
+                <field name="ste_id"/>
+                <field name="talon_id"/>
+                <field name="record_name" string="N° chèque"/>
+                <field name="reason" string="Motif" optional="show"/>
+                <field name="state" widget="badge"/>
+                <button name="action_approve" invisible="state != 'pending'" string="Approuver" type="object" icon="fa-check" groups="finance.group_finance_user" class="btn-success"/>
+                <button name="action_reject" invisible="state != 'pending'" string="Rejeter" type="object" icon="fa-times" groups="finance.group_finance_user" class="btn-danger"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_deletion_request_form" model="ir.ui.view">
+        <field name="name">finance.deletion.request.form</field>
+        <field name="model">finance.deletion.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" invisible="state != 'pending'" string="Approuver la suppression" type="object" class="oe_highlight btn-danger" groups="finance.group_finance_user" confirm="Êtes-vous sûr de vouloir supprimer cet enregistrement définitivement ?"/>
+                    <button name="action_reject" invisible="state != 'pending'" string="Rejeter" type="object" groups="finance.group_finance_user"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Information de la demande">
+                            <field name="user_id"/>
+                            <field name="request_date"/>
+                            <field name="ste_id"/>
+                            <field name="talon_id"/>
+                        </group>
+                        <group string="Détails">
+                            <field name="record_name" string="N° chèque"/>
+                            <field name="reason"/>
+                            <field name="model" invisible="1"/>
+                            <field name="res_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_finance_deletion_request_search" model="ir.ui.view">
+        <field name="name">finance.deletion.request.search</field>
+        <field name="model">finance.deletion.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="record_name"/>
+                <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Traitées" name="processed" domain="[('state', 'in', ['approved', 'rejected'])]"/>
+                <group expand="0" string="Group By">
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Demandeur" name="group_user" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action: Pending Requests (Default) -->
+    <!-- Top Level Menus -->
+    <menuitem id="menu_finance_demandes"
+              name="Demandes"
+              parent="finance_root_menu"
+              sequence="100"
+              groups="finance.group_finance_user"/>
+
+    <menuitem id="menu_finance_historique"
+              name="Historique"
+              parent="finance_root_menu"
+              sequence="110"
+              groups="finance.group_finance_user"/>
+
+    <!-- Action: Pending Deletion Requests -->
+    <record id="action_finance_deletion_request_pending" model="ir.actions.act_window">
+        <field name="name">Demande de suppression</field> <!-- Renamed for the menu -->
+        <field name="res_model">finance.deletion.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
+        <field name="domain">[('state', '=', 'pending')]</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+
+    <!-- Action: History Deletion Requests -->
+    <record id="action_finance_deletion_request_history" model="ir.actions.act_window">
+        <field name="name">Demandes de suppression</field>
+        <field name="res_model">finance.deletion.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_finance_deletion_request_search"/>
+        <field name="domain">[('state', 'in', ['approved', 'rejected'])]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menus Placement -->
+    <menuitem id="menu_finance_deletion_request_pending"
+              name="Demande de suppression"
+              parent="menu_finance_demandes"
+              action="action_finance_deletion_request_pending"
+              sequence="10"/>
+
+    <menuitem id="menu_finance_deletion_request_history"
+              name="Demandes de suppression"
+              parent="menu_finance_historique"
+              action="action_finance_deletion_request_history"
+              sequence="10"/>
+</odoo>

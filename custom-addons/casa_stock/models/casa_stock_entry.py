@@ -1,0 +1,172 @@
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError, ValidationError
+import re
+
+class CasaStockEntry(models.Model):
+    _name = 'casa.stock.entry'
+    _description = 'Entrée Stock Casa'
+    _order = 'date desc, id desc'
+
+    name = fields.Char(string='Référence', readonly=True, default='/')
+    product_id = fields.Many2one('casa.product', string='Produit', required=True)
+    qty = fields.Float(string='Quantité', required=True)
+    weight = fields.Float(string='Poids (Kg)')
+    tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
+    
+    price_purchase = fields.Float(string='Prix Achat')
+    mt_achat = fields.Float(
+        string='Montant Achat',
+        compute='_compute_amounts',
+        store=True
+    )
+    
+    date = fields.Date(string='Date', required=True)
+    lot = fields.Char(string='Lot')
+    dum = fields.Char(string='DUM')
+    calibre = fields.Char(string='Calibre')
+    
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+    ], string='Ville', required=True, default='casa')
+    
+    frigo = fields.Selection([
+        ('frigo1', 'Frigo 1'),
+        ('frigo2', 'Frigo 2'),
+        ('stock_casa', 'Stock Casa'),
+    ], string='Frigo', default='stock_casa')
+    charge_transport = fields.Float(
+        string='Charge transport',
+        compute='_compute_charge_transport',
+        store=True
+    )
+    
+    provider_id = fields.Many2one('casa.provider', string='Fournisseur')
+    driver_id = fields.Many2one('casa.driver', string='Chauffeur')
+    ste_id = fields.Many2one('casa.ste', string='Société')
+    image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
+    
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('done', 'Confirmé'),
+        ('cancel', 'Annulé'),
+    ], string='État', default='draft', required=True)
+    driver_phone = fields.Char(
+        string='Téléphone chauffeur',
+        related='driver_id.phone',
+        readonly=True
+    )
+
+    move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
+    cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
+
+    @api.depends('qty', 'weight')
+    def _compute_tonnage(self):
+        for rec in self:
+            rec.tonnage = rec.qty * rec.weight
+
+    @api.depends('tonnage', 'price_purchase')
+    def _compute_amounts(self):
+        for rec in self:
+            rec.mt_achat = (rec.price_purchase or 0.0) * (rec.tonnage or 0.0)
+    
+    @api.depends('tonnage')
+    def _compute_charge_transport(self):
+        for rec in self:
+            rec.charge_transport = (rec.tonnage or 0.0) * 0.02
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.entry') or '/'
+        return super(CasaStockEntry, self).create(vals)
+
+    def write(self, vals):
+        for rec in self:
+            if rec.state == 'done':
+                forbidden_fields = [
+                    'product_id', 'qty', 'weight', 'price_purchase',
+                    'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id', 'ste_id'
+                ]
+                if any(f in vals for f in forbidden_fields):
+                    raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
+        return super(CasaStockEntry, self).write(vals)
+
+    def action_confirm(self):
+        for rec in self:
+            if rec.state != 'draft':
+                continue
+            
+            # Create Move
+            move = self.env['casa.stock.move'].create({
+                'product_id': rec.product_id.id,
+                'lot': rec.lot,
+                'dum': rec.dum,
+                'ville': rec.ville,
+                'frigo': rec.frigo,
+                'qty': rec.qty,
+                'move_type': 'entry',
+                'state': 'done',
+                'date': rec.date,
+                'reference': rec.name,
+                'price_purchase': rec.price_purchase,
+                'weight': rec.weight,
+                'calibre': rec.calibre,
+                'provider_id': rec.provider_id.id,
+                'driver_id': rec.driver_id.id,
+                'ste_id': rec.ste_id.id,
+                'res_model': 'casa.stock.entry',
+                'res_id': rec.id,
+            })
+            rec.write({
+                'state': 'done',
+                'move_id': move.id
+            })
+
+    def action_cancel(self):
+        for rec in self:
+            if rec.state != 'done':
+                raise UserError(_("Vous ne pouvez annuler que des entrées confirmées."))
+            
+            # Create Reversal Move
+            cancel_move = self.env['casa.stock.move'].create({
+                'product_id': rec.product_id.id,
+                'lot': rec.lot,
+                'dum': rec.dum,
+                'ville': rec.ville,
+                'frigo': rec.frigo,
+                'qty': -rec.qty,
+                'move_type': 'cancel_entry',
+                'state': 'done',
+                'date': fields.Datetime.now(),
+                'reference': rec.name,
+                'price_purchase': rec.price_purchase,
+                'weight': rec.weight,
+                'calibre': rec.calibre,
+                'provider_id': rec.provider_id.id,
+                'driver_id': rec.driver_id.id,
+                'res_model': 'casa.stock.entry',
+                'res_id': rec.id,
+                'ste_id': rec.ste_id.id,
+            })
+            rec.write({
+                'state': 'cancel',
+                'cancel_move_id': cancel_move.id
+            })
+
+    @api.constrains('qty')
+    def _check_qty_positive(self):
+        for rec in self:
+            if rec.qty <= 0:
+                raise UserError(_("La quantité doit être strictement positive."))
+
+    @api.constrains('lot', 'dum')
+    def _check_lot_dum_format(self):
+        for rec in self:
+            #LOT : doit contenir au moins un chiffre
+            if rec.lot and not re.search(r'\d', rec.lot):
+                raise ValidationError("LOT erroné.")
+
+            # DUM : doit commencer par un chiffre
+            if rec.dum and not re.match(r'^\d', rec.dum):
+                raise ValidationError("DUM erroné.")

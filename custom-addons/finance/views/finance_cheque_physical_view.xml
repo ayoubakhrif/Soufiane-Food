@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SEARCH -->
+    <record id="view_finance_cheque_physical_search" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.search</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Chèque Physique">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
+                    <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- TREE -->
+    <record id="view_finance_cheque_physical_tree" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.tree</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <tree string="Chèques Physiques">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="date_emission"/>
+                <field name="date_echeance"/>
+                <field name="amount_total" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_finance_cheque_physical_form" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.form</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <form string="Chèque Physique">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name_custom" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="amount_total"/>
+                        </group>
+                        <group>
+                            <field name="benif_id" readonly="1"/>
+                            <field name="date_emission" readonly="1"/>
+                            <field name="date_echeance" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Répartitions (Opérations)">
+                            <field name="datacheque_ids" readonly="1">
+                                <tree>
+                                    <field name="type"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="facture"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter" groups="finance.group_finance_user">
+                     <field name="message_follower_ids"/>
+                     <field name="activity_ids"/>
+                     <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_finance_cheque_physical" model="ir.actions.act_window">
+        <field name="name">Chèques Physiques</field>
+        <field name="res_model">finance.cheque.physical</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+
+    <menuitem id="menu_finance_cheque_physical"
+              name="Chèques Physiques"
+              parent="data_finance_menu"
+              action="action_finance_cheque_physical"
+              sequence="5"/>
+</odoo>

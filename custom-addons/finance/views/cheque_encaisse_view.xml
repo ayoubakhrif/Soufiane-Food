@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Tree View -->
+        <record id="view_finance_cheque_encaisse_tree" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.tree</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <tree string="Chèques Encaissés" decoration-info="create_date">
+                    <field name="create_date" string="Date de saisie"/>
+                    <field name="ste_id"/>
+                    <field name="cheque_id"/>
+                    <field name="amount" sum="Total"/>
+                    <field name="benif_id"/>
+                    <field name="date_encaissement"/>
+                    <field name="create_uid" string="Saisi par"/>
+                    <field name="type"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_finance_cheque_encaisse_form" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.form</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <form string="Chèque Encaissé">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="cheque_id" readonly="1" invisible="not cheque_id"/>
+                                <span invisible="cheque_id">Nouveau Chèque Encaissé</span>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Sélection">
+                                <field name="ste_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="benif_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="type"/>
+                                <field name="cheque_id" options="{'no_create': True, 'no_open': True}" 
+                                       invisible="not ste_id or not benif_id or not type"/>
+                            </group>
+                            <group string="Action" invisible="not cheque_id">
+                                <field name="amount" widget="monetary"/>
+                                <field name="date_encaissement"/>
+                            </group>
+                        </group>
+                        <group string="Détails du chèque" invisible="not cheque_id">
+                            <group>
+                                <field name="journal"/>
+                                <field name="date_emission"/>
+                            </group>
+                            <group>
+                                <field name="date_echeance"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter" groups="finance.group_finance_user">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Pivot View -->
+        <record id="view_finance_cheque_encaisse_pivot" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.pivot</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <pivot string="Analyse des Chèques Encaissés">
+                    <field name="date_encaissement" type="row" interval="day"/>
+                    <field name="amount" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- Graph View -->
+        <record id="view_finance_cheque_encaisse_graph" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.graph</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <graph string="Analyse des Chèques Encaissés" type="bar">
+                    <field name="benif_id"/>
+                    <field name="amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_finance_cheque_encaisse_search" model="ir.ui.view">
+            <field name="name">finance.cheque.encaisse.search</field>
+            <field name="model">finance.cheque.encaisse</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Chèques Encaissés">
+                    <field name="ste_id"/>
+                    <field name="cheque_id"/>
+                    <group expand="1" string="Group By">
+                        <filter string="Date d'encaissement" name="groupby_date" context="{'group_by':'date_encaissement:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_finance_cheque_encaisse" model="ir.actions.act_window">
+            <field name="name">Chèques Encaissés</field>
+            <field name="res_model">finance.cheque.encaisse</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+            <field name="context">{'search_default_groupby_date': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Enregistrer un chèque encaissé
+                </p>
+                <p>
+                    Utilisez ce formulaire pour marquer des chèques existants comme encaissés.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu -->
+        <menuitem id="menu_finance_cheque_encaisse"
+                  name="Chèques Encaissés"
+                  parent="finance_root_menu"
+                  action="action_finance_cheque_encaisse"
+                  sequence="11"/>
+    </data>
+</odoo>

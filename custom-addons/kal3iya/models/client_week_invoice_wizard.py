@@ -35,8 +35,14 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         weeks.update(retours.mapped('week'))
         
         # Avances
+        # Avances
         avances = env['kal3iya.advance'].sudo().search([('date_paid', '!=', False)])
         for date in avances.mapped('date_paid'):
+            weeks.add(date_to_week(date))
+            
+        # Sorties Supp
+        sorties_supp = env['kal3iya.sortie.supp'].sudo().search([('date', '!=', False)])
+        for date in sorties_supp.mapped('date'):
             weeks.add(date_to_week(date))
             
         # Sort desc
@@ -79,6 +85,10 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         for a in client.avances:
             if a.date_paid:
                 client_weeks.add(a.date_paid.strftime("%Y-W%W"))
+                
+        for supp in client.sortie_supp_ids:
+            if supp.date:
+                client_weeks.add(supp.date.strftime("%Y-W%W"))
                 
         sorted_client_weeks = sorted(client_weeks, reverse=True)
 

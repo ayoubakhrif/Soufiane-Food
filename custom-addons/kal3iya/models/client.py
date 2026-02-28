@@ -505,8 +505,14 @@ class Kal3iyaClient(models.Model):
         )
         total_avances = sum(avances.mapped('amount'))
 
+        # 3.5️⃣ Filtrer sorties supp de la semaine
+        sorties_supp = self.sortie_supp_ids.filtered(
+            lambda s: s.date and s.date.strftime("%Y-W%W") == week
+        )
+        total_sorties_supp = sum(sorties_supp.mapped('amount'))
+
         # 4️⃣ Compte de la semaine
-        compte_semaine = total_sorties - total_retours - total_avances
+        compte_semaine = total_sorties + total_sorties_supp - total_retours - total_avances
 
         # 5️⃣ Calculer les dates de début et fin de semaine
         start_date = None
@@ -541,9 +547,11 @@ class Kal3iyaClient(models.Model):
             'sorties': sorties,
             'retours': retours,
             'avances': avances,
+            'sorties_supp': sorties_supp,
             'total_sorties': total_sorties,
             'total_retours': total_retours,
             'total_avances': total_avances,
+            'total_sorties_supp': total_sorties_supp,
             'compte_semaine': compte_semaine,
             'compte_total': self.compte,
         }

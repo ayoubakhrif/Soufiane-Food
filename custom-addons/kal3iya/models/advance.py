@@ -5,7 +5,7 @@ class Kal3iyaAdvance(models.Model):
     _description = 'Avances'
     client_id = fields.Many2one('kal3iya.client', required=True)
     amount = fields.Float(string='Montant', required=True)
-    date_paid = fields.Date(string='Date', required=True)
+    date_paid = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     driver_id = fields.Many2one('kal3iya.driver', string='Chauffeur')
     comment = fields.Text(string='Commentaire')
     payment_mode = fields.Selection([

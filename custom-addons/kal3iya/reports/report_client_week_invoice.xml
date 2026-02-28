@@ -49,6 +49,9 @@
                         .section-sorties {
                             background: #4c51bf;
                         }
+                        .section-sorties-supp {
+                            background: #ed8936;
+                        }
                         .section-retours {
                             background: #e53e3e;
                         }
@@ -173,6 +176,35 @@
                         </table>
                     </t>
 
+                    <!-- Section Sorties Supp -->
+                    <t t-if="week_data.get('sorties_supp')">
+                        <div class="section-title section-sorties-supp">
+                             SORTIES SUPPLEMENTAIRES
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['sorties_supp']" t-as="supp">
+                                    <tr>
+                                        <td><t t-esc="supp.date"/></td>
+                                        <td><t t-esc="supp.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="'%.2f' % supp.amount"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">TOTAL SORTIES SUPP:</td>
+                                    <td class="amount"><t t-esc="'%.2f' % week_data['total_sorties_supp']"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
                     <!-- Section Retours -->
                     <t t-if="week_data['retours']">
                         <div class="section-title section-retours">
@@ -251,6 +283,10 @@
                         <div class="recap-line">
                             <span>Total Sorties:</span>
                             <span><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Total Sorties Supp:</span>
+                            <span>+ <t t-esc="'%.2f' % week_data['total_sorties_supp']"/> Dh</span>
                         </div>
                         <div class="recap-line">
                             <span>Total Retours:</span>

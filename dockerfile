@@ -20,13 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies for Google Drive integration
-# Force uninstall system pyOpenSSL to prevent AttributeError with new cryptography
-RUN pip3 uninstall -y pyOpenSSL cryptography && \
-    pip3 install --no-cache-dir \
+RUN pip3 install --no-cache-dir \
     google-auth \
     google-auth-oauthlib \
     google-api-python-client \
-    "cryptography<42.0.0" \
-    "pyOpenSSL==24.0.0"
+    "urllib3<2" \
+    "cryptography<=36.0.0"
 
 USER odoo

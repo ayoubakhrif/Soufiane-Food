@@ -137,7 +137,7 @@ class CasaStockOrderLine(models.Model):
             # Find an available stock entry for this product
             stock = self.env['casa.stock.stock'].search([
                 ('product_id', '=', self.product_id.id),
-                ('qty', '>', 0)
+                ('quantity', '>', 0)
             ], limit=1, order='id asc') # Older stock first (FIFO suggestion)
             
             if stock:

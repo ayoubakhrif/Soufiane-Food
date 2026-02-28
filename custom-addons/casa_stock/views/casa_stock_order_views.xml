@@ -16,6 +16,15 @@
         </field>
     </record>
 
+    <!-- Action definition for the stat button -->
+    <record id="action_casa_stock_exit_for_order" model="ir.actions.act_window">
+        <field name="name">Sorties de la Commande</field>
+        <field name="res_model">casa.stock.exit</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('order_id', '=', active_id)]</field>
+        <field name="context">{'default_order_id': active_id}</field>
+    </record>
+
     <!-- View Form: Orders -->
     <record id="view_casa_stock_order_form" model="ir.ui.view">
         <field name="name">casa.stock.order.form</field>
@@ -70,15 +79,6 @@
                 </sheet>
             </form>
         </field>
-    </record>
-
-    <!-- Action definition for the stat button -->
-    <record id="action_casa_stock_exit_for_order" model="ir.actions.act_window">
-        <field name="name">Sorties de la Commande</field>
-        <field name="res_model">casa.stock.exit</field>
-        <field name="view_mode">tree,form</field>
-        <field name="domain">[('order_id', '=', active_id)]</field>
-        <field name="context">{'default_order_id': active_id}</field>
     </record>
 
     <!-- Action definition for the main order menu -->

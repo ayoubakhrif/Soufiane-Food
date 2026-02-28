@@ -10,7 +10,6 @@ class CasaStockOrder(models.Model):
     client_id = fields.Many2one('casa.client', string='Client', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
-    ste_id = fields.Many2one('casa.ste', string='Société', required=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -52,7 +51,7 @@ class CasaStockOrder(models.Model):
     def write(self, vals):
         for rec in self:
             if rec.state == 'done':
-                forbidden_fields = ['client_id', 'date', 'driver_id', 'ste_id', 'order_line_ids']
+                forbidden_fields = ['client_id', 'date', 'driver_id', 'order_line_ids']
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Vous ne pouvez pas modifier une commande confirmée."))
         return super(CasaStockOrder, self).write(vals)
@@ -73,7 +72,7 @@ class CasaStockOrder(models.Model):
                     'order_id': order.id,
                     'client_id': order.client_id.id,
                     'driver_id': order.driver_id.id,
-                    'ste_id': order.ste_id.id,
+                    'ste_id': line.ste_id.id,
                     'date': order.date,
                     'product_id': line.product_id.id,
                     'qty': line.qty,
@@ -111,6 +110,7 @@ class CasaStockOrderLine(models.Model):
     order_id = fields.Many2one('casa.stock.order', string='Commande', required=True, ondelete='cascade')
     
     product_id = fields.Many2one('casa.product', string='Produit', required=True)
+    ste_id = fields.Many2one('casa.ste', string='Société', required=True)
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids unit (Kg)')
     
@@ -130,6 +130,24 @@ class CasaStockOrderLine(models.Model):
     ], string='Frigo')
     
     price_sale = fields.Float(string='Prix Vente')
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        if self.product_id:
+            # Find an available stock entry for this product
+            stock = self.env['casa.stock.stock'].search([
+                ('product_id', '=', self.product_id.id),
+                ('qty', '>', 0)
+            ], limit=1, order='id asc') # Older stock first (FIFO suggestion)
+            
+            if stock:
+                self.ste_id = stock.ste_id.id
+                self.lot = stock.lot
+                self.dum = stock.dum
+                self.calibre = stock.calibre
+                self.ville = stock.ville
+                self.frigo = stock.frigo
+                self.weight = stock.weight
 
     @api.constrains('qty')
     def _check_qty_positive(self):

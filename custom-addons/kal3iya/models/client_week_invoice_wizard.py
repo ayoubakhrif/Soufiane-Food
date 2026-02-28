@@ -35,7 +35,6 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         weeks.update(retours.mapped('week'))
         
         # Avances
-        # Avances
         avances = env['kal3iya.advance'].sudo().search([('date_paid', '!=', False)])
         for date in avances.mapped('date_paid'):
             weeks.add(date_to_week(date))

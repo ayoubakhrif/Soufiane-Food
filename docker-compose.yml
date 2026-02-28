@@ -12,7 +12,9 @@ services:
     restart: always
 
   odoo:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile
     depends_on:
       - db
     ports:

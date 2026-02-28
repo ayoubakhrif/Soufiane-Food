@@ -48,7 +48,7 @@
                     <separator string="Produit &amp; Quantités"/>
                     <group>
                         <group>
-                            <field name="product_id" options="{'no_create_edit': True}"/>
+                            <field name="product_id" options="{'no_create': True, 'no_create_edit': True}"/>
                             <field name="qty"/>
                             <field name="weight"/>
                             <field name="tonnage"/>

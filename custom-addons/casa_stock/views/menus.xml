@@ -17,6 +17,12 @@
               action="action_casa_stock_entry"
               sequence="20"/>
 
+    <menuitem id="menu_casa_stock_order"
+              name="Commandes"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_order"
+              sequence="35"/>
+
     <menuitem id="menu_casa_stock_exit"
               name="Sorties"
               parent="menu_casa_stock_root"

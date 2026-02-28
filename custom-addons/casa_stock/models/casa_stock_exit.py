@@ -67,6 +67,7 @@ class CasaStockExit(models.Model):
 
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
+    order_id = fields.Many2one('casa.stock.order', string='Origine (Commande)', readonly=True, ondelete='set null')
 
     @api.depends('qty', 'weight')
     def _compute_tonnage(self):

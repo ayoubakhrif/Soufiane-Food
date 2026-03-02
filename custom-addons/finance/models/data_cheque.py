@@ -552,9 +552,13 @@ class DataCheque(models.Model):
     # 1) Connexion API Google Drive
     def _get_drive_service(self):
         creds_path = self._get_drive_credentials_path()
-        scopes = ['https://www.googleapis.com/auth/drive.readonly']
-        creds = service_account.Credentials.from_service_account_file(creds_path, scopes=scopes)
-        return build('drive', 'v3', credentials=creds)
+        try:
+            scopes = ['https://www.googleapis.com/auth/drive.readonly']
+            creds = service_account.Credentials.from_service_account_file(creds_path, scopes=scopes)
+            return build('drive', 'v3', credentials=creds)
+        except Exception:
+            # Prevent blocking creation if credentials are not found (e.g. locally)
+            return None
 
     # 2) Recherche dossier exact
     def _find_folder_exact(self, service, folder_name, parent_id):
@@ -601,6 +605,8 @@ class DataCheque(models.Model):
             return False
 
         service = self._get_drive_service()
+        if not service:
+            return False
 
         # Dossier Société
         ste_folder_id = self._find_folder_exact(service, self.ste_id.name, root_id)

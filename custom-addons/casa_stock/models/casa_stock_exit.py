@@ -192,6 +192,7 @@ class CasaStockExit(models.Model):
                 'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.exit',
                 'res_id': rec.id,
+                'price_purchase': rec.price_purchase,
             })
             rec.write({
                 'state': 'cancel',

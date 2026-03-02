@@ -36,6 +36,7 @@ class StockKal3iyaExit(models.Model):
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')
     soufiane_client = fields.Selection([
         ('soufiane', 'Soufiane'),
+        ('hamza', 'Hamza'),
     ], string='Soufiane?')
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')

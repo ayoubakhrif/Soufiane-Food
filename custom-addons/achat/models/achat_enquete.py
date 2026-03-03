@@ -58,3 +58,8 @@ class AchatArticlePrice(models.Model):
         default=lambda self: self.env.user,
         readonly=True
     )
+
+    details = fields.Char(
+        string='Details',
+        help='Additional information or remarks'
+    )

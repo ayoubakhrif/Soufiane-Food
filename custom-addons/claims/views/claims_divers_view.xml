@@ -78,6 +78,18 @@
                             <field name="evidence_link" widget="url" invisible="not can_see_evidence"/> 
                         </group>
                     </group>
+                    <group string="Dates Clés" col="2">
+                        <group>
+                            <field name="claim_date"/>
+                            <field name="date_received"/>
+                            <field name="date_waiting"/>
+                        </group>
+                        <group>
+                            <field name="date_resolved"/>
+                            <field name="date_refused"/>
+                            <field name="date_closed"/>
+                        </group>
+                    </group>
                     <notebook>
                         <page string="Charges">
                             <field name="charge_ids" readonly="state in ('resolved', 'closed', 'refused')">
@@ -91,19 +103,7 @@
                             </group>
                         </page>
                     </notebook>
-                    <group string="Dates Clés" col="2">
-                        <group>
-                            <field name="claim_date"/>
-                            <field name="date_received"/>
-                            <field name="date_waiting"/>
-                        </group>
-                        <group>
-                            <field name="date_resolved"/>
-                            <field name="date_refused"/>
-                            <field name="date_closed"/>
-                        </group>
-                    </group>
-                    <group string="Follow-up">
+                    <group string="Historique">
                         <field name="create_uid"/>
                         <field name="responsible_id"/>
                         <field name="comment_creator" placeholder="Commentaire du créateur..." />

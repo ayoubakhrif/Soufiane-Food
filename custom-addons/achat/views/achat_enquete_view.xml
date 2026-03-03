@@ -24,6 +24,7 @@
                     <group>
                         <group string="Price Information">
                             <field name="article_id"/>
+                            <field name="details"/>
                             <field name="supplier_id"/>
                             <field name="origin_id"/>
                             <field name="price"/>

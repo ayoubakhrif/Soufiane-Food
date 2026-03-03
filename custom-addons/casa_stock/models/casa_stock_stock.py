@@ -33,10 +33,10 @@ class CasaStockStock(models.Model):
 
     total_weight = fields.Float(string='Poids Total', readonly=True)
 
-    def name_get(self):
-        result = []
+    @api.depends('product_id.name', 'lot', 'dum', 'price', 'create_date')
+    def _compute_display_name(self):
         for rec in self:
-            name_parts = [rec.product_id.name]
+            name_parts = [rec.product_id.name] if rec.product_id else ['Inconnu']
             if rec.lot:
                 name_parts.append(f"Lot: {rec.lot}")
             if rec.dum:
@@ -46,8 +46,7 @@ class CasaStockStock(models.Model):
             if rec.create_date:
                 name_parts.append(rec.create_date.strftime('%Y-%m-%d'))
                 
-            result.append((rec.id, ' - '.join(name_parts)))
-        return result
+            rec.display_name = ' - '.join(name_parts)
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, **kwargs):

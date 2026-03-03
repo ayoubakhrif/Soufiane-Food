@@ -18,6 +18,7 @@ class StockKal3iyaReturn(models.Model):
     garage = fields.Selection(related='exit_id.garage', store=True, string='Garage')
     soufiane_client = fields.Selection([
         ('soufiane', 'Soufiane'),
+        ('hamza', 'Hamza'),
     ], string='Soufiane?', related='exit_id.soufiane_client')
     client_id = fields.Many2one('stock.kal3iya.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('stock.kal3iya.ste', related='exit_id.ste_id', store=True, string='Société')

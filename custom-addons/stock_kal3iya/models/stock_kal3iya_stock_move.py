@@ -57,6 +57,7 @@ class StockKal3iyaMove(models.Model):
     calibre = fields.Char(string='Calibre')
     soufiane_client = fields.Selection([
         ('soufiane', 'Soufiane'),
+        ('hamza', 'Hamza'),
     ], string='Soufiane?')
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')
     provider_id = fields.Many2one('stock.kal3iya.provider', string='Fournisseur')

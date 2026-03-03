@@ -17,6 +17,7 @@
         'views/claims_franchise_difference_view.xml',
         'views/claims_quantity_view.xml',
         'views/claims_quality_view.xml',
+        'views/claims_divers_view.xml',
         'views/supplier_view_ext.xml',
         'reports/claims_report.xml',
     ],

@@ -11,3 +11,10 @@ access_claims_quantity_user,claims.quantity.user,model_claims_quantity,group_cla
 access_claims_quality_user,claims.quality.user,model_claims_quality,group_claims_user,1,1,1,0
 access_claims_quantity_manager,claims.quantity.manager,model_claims_quantity,group_claims_manager,1,1,1,1
 access_claims_quality_manager,claims.quality.manager,model_claims_quality,group_claims_manager,1,1,1,1
+
+access_claims_divers_viewer,claims.divers.viewer,model_claims_divers,group_claims_viewer,1,0,0,0
+access_claims_divers_user,claims.divers.user,model_claims_divers,group_claims_user,1,1,1,0
+access_claims_divers_manager,claims.divers.manager,model_claims_divers,group_claims_manager,1,1,1,1
+access_claims_divers_charge_viewer,claims.divers.charge.viewer,model_claims_divers_charge,group_claims_viewer,1,0,0,0
+access_claims_divers_charge_user,claims.divers.charge.user,model_claims_divers_charge,group_claims_user,1,1,1,0
+access_claims_divers_charge_manager,claims.divers.charge.manager,model_claims_divers_charge,group_claims_manager,1,1,1,1

@@ -83,21 +83,35 @@ class CasaStockExit(models.Model):
             rec.mt_vente = mt_vente
             rec.margin = mt_vente - mt_achat
 
-    @api.depends('product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id')
+    @api.depends('product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id', 'weight', 'calibre')
     def _compute_price_purchase(self):
         Stock = self.env['casa.stock.stock']
         for rec in self:
-            price = 0.0
+            price = rec.price_purchase
             if rec.product_id:
-                stock = Stock.search([
+                domain = [
                     ('product_id', '=', rec.product_id.id),
                     ('lot', '=', rec.lot),
                     ('dum', '=', rec.dum),
                     ('ville', '=', rec.ville),
                     ('frigo', '=', rec.frigo),
                     ('ste_id', '=', rec.ste_id.id),
-                ], limit=1)
-                price = stock.price if stock else 0.0
+                ]
+                
+                if rec.weight:
+                    domain.append(('weight', '=', rec.weight))
+                if rec.calibre:
+                    domain.append(('calibre', '=', rec.calibre))
+
+                stock_records = Stock.search(domain)
+                
+                if stock_records:
+                    if rec.price_purchase and rec.price_purchase in stock_records.mapped('price'):
+                        price = rec.price_purchase
+                    else:
+                        price = stock_records[0].price
+                else:
+                    price = 0.0
             rec.price_purchase = price
 
 

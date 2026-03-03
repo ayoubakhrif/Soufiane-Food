@@ -109,7 +109,8 @@ class CasaStockOrderLine(models.Model):
     
     order_id = fields.Many2one('casa.stock.order', string='Commande', required=True, ondelete='cascade')
     
-    product_id = fields.Many2one('casa.product', string='Produit', required=True)
+    stock_id = fields.Many2one('casa.stock.stock', string='Stock', required=True)
+    product_id = fields.Many2one('casa.product', string='Produit', related='stock_id.product_id', store=True)
     ste_id = fields.Many2one('casa.ste', string='Société')
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids unit (Kg)')
@@ -121,7 +122,7 @@ class CasaStockOrderLine(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True)
+    ], string='Ville')
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
@@ -131,23 +132,16 @@ class CasaStockOrderLine(models.Model):
     
     price_sale = fields.Float(string='Prix Vente')
 
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        if self.product_id:
-            # Find an available stock entry for this product
-            stock = self.env['casa.stock.stock'].search([
-                ('product_id', '=', self.product_id.id),
-                ('quantity', '>', 0)
-            ], limit=1, order='id asc') # Older stock first (FIFO suggestion)
-            
-            if stock:
-                self.ste_id = stock.ste_id.id
-                self.lot = stock.lot
-                self.dum = stock.dum
-                self.calibre = stock.calibre
-                self.ville = stock.ville
-                self.frigo = stock.frigo
-                self.weight = stock.weight
+    @api.onchange('stock_id')
+    def _onchange_stock_id(self):
+        if self.stock_id:
+            self.ste_id = self.stock_id.ste_id.id
+            self.lot = self.stock_id.lot
+            self.dum = self.stock_id.dum
+            self.calibre = self.stock_id.calibre
+            self.ville = self.stock_id.ville
+            self.frigo = self.stock_id.frigo
+            self.weight = self.stock_id.weight
 
     @api.constrains('qty')
     def _check_qty_positive(self):

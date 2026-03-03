@@ -33,6 +33,31 @@ class CasaStockStock(models.Model):
 
     total_weight = fields.Float(string='Poids Total', readonly=True)
 
+    def name_get(self):
+        result = []
+        for rec in self:
+            name_parts = [rec.product_id.name]
+            if rec.lot:
+                name_parts.append(f"Lot: {rec.lot}")
+            if rec.dum:
+                name_parts.append(f"DUM: {rec.dum}")
+            if rec.price:
+                name_parts.append(f"{rec.price} MAD")
+            if rec.create_date:
+                name_parts.append(rec.create_date.strftime('%Y-%m-%d'))
+                
+            result.append((rec.id, ' - '.join(name_parts)))
+        return result
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        args = args or []
+        domain = []
+        if name:
+            domain = ['|', '|', ('product_id.name', operator, name), ('lot', operator, name), ('dum', operator, name)]
+        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""

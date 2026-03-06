@@ -6,6 +6,10 @@ class TransportResultFollowup(models.Model):
     _description = 'Suivi des Résultats Transport'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    _sql_constraints = [
+        ('unique_type', 'UNIQUE(type)', 'Un seul suivi par type est autorisé ! Un suivi avec ce type existe déjà.'),
+    ]
+
     name = fields.Char(string='Référence', required=True, copy=False, readonly=True, default=lambda self: _('Suivi des résultats'))
     date = fields.Date(string='Date', default=fields.Date.context_today, required=True, tracking=True)
     
@@ -39,19 +43,16 @@ class TransportResultFollowup(models.Model):
         string='Lignes de distribution'
     )
 
-    @api.depends('line_ids.amount') # Depend largely so it refreshes. For total_profit, we might need a dummy dependency or just not store it.
+    @api.depends('type', 'line_ids.amount')
     def _compute_total_profit(self):
-        # Global sum of all profits
-        # This is a heavy operation potentially, but requested.
-        # We search *all* trips.
-        # Ideally this should be optimized or cached, but per requirement: "fully automatic and coming from transport operations"
-        # Since it is not stored, it will recompute often.
-        trips = self.env['transport.trip'].search([])
-        total = sum(trips.mapped('profit'))
         for rec in self:
-            rec.total_profit = total
+            if rec.type == 'gasoil':
+                records = self.env['gasoil.sale'].search([])
+            else:
+                records = self.env['transport.trip'].search([])
+            rec.total_profit = sum(records.mapped('profit'))
 
-    @api.depends('line_ids.amount')
+    @api.depends('type', 'line_ids.amount')
     def _compute_amounts(self):
         for rec in self:
             distributed = sum(rec.line_ids.mapped('amount'))

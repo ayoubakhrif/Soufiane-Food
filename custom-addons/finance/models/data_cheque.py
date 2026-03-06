@@ -547,7 +547,7 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # Chemin vers le JSON
     def _get_drive_credentials_path(self):
-        return "/srv/google_credentials/odoo_drive_service.json"
+        return "/srv/google_credentials/service_account.json"
 
     # 1) Connexion API Google Drive
     def _get_drive_service(self):

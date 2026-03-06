@@ -74,7 +74,7 @@ class StockKal3iyaEntry(models.Model):
         return super(StockKal3iyaEntry, self).write(vals)
 
     def _get_drive_credentials_path(self):
-        return "/srv/google_credentials/odoo_drive_service.json"
+        return "/srv/google_credentials/service_account.json"
 
     def _get_drive_service(self):
         creds_path = self._get_drive_credentials_path()

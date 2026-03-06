@@ -13,7 +13,8 @@ class AchatContract(models.Model):
     ste_id = fields.Many2one('logistique.ste', string='Company', required=True)
     
     # Agreement Details
-    article_id = fields.Many2one('logistique.article', string='Article', required=True)
+    legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
+    article_id = fields.Many2one('achat.article', string='Article', required=True)
     incoterm = fields.Selection([
         ('cfr', 'CFR'),
         ('fob', 'FOB'),

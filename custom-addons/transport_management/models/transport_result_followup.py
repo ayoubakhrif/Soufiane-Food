@@ -19,15 +19,13 @@ class TransportResultFollowup(models.Model):
     distributed_amount = fields.Float(
         string='Montant Distribué', 
         compute='_compute_amounts', 
-        store=True,
-        tracking=True
+        store=False,
     )
     
     remaining_amount = fields.Float(
         string='Reste à Distribuer', 
         compute='_compute_amounts', 
-        store=True,
-        tracking=True
+        store=False,
     )
 
     type = fields.Selection([
@@ -53,7 +51,7 @@ class TransportResultFollowup(models.Model):
         for rec in self:
             rec.total_profit = total
 
-    @api.depends('total_profit', 'line_ids.amount')
+    @api.depends('line_ids.amount')
     def _compute_amounts(self):
         for rec in self:
             distributed = sum(rec.line_ids.mapped('amount'))

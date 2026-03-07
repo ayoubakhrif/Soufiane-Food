@@ -66,6 +66,12 @@ class CasaClient(models.Model):
         compute='_compute_client_summary', store=True,
     )
 
+    summary_html = fields.Html(
+        string='Resume Client',
+        compute='_compute_summary_html',
+        sanitize=False,
+    )
+
     @api.depends('exit_ids', 'exit_ids.state')
     def _compute_exit_count(self):
         """Compte uniquement les sorties confirmées (done)"""
@@ -94,6 +100,112 @@ class CasaClient(models.Model):
             client.total_client_discounts = total_discounts
             client.discount_rate = (total_discounts / total_orders * 100) if total_orders else 0.0
             client.total_profit = total_profit
+
+    @api.depends('total_orders_amount', 'total_client_discounts', 'discount_rate', 'total_profit')
+    def _compute_summary_html(self):
+        for client in self:
+            profit = client.total_profit or 0.0
+            if profit > 0:
+                profit_color = '#059669'
+                profit_bg = '#ecfdf5'
+                profit_border = '#a7f3d0'
+                profit_icon = '&#x2705;'
+            elif profit == 0:
+                profit_color = '#d97706'
+                profit_bg = '#fffbeb'
+                profit_border = '#fde68a'
+                profit_icon = '&#x26A0;'
+            else:
+                profit_color = '#dc2626'
+                profit_bg = '#fef2f2'
+                profit_border = '#fecaca'
+                profit_icon = '&#x274C;'
+
+            client.summary_html = """
+            <style>
+                .kpi-grid {{
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    gap: 20px;
+                    padding: 20px 0;
+                }}
+                .kpi-card {{
+                    border-radius: 16px;
+                    padding: 24px;
+                    text-align: center;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                    transition: transform 0.2s;
+                }}
+                .kpi-card:hover {{
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+                }}
+                .kpi-icon {{
+                    font-size: 32px;
+                    margin-bottom: 8px;
+                }}
+                .kpi-label {{
+                    font-size: 13px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin-bottom: 8px;
+                }}
+                .kpi-value {{
+                    font-size: 28px;
+                    font-weight: 800;
+                    line-height: 1.2;
+                }}
+                .kpi-unit {{
+                    font-size: 14px;
+                    font-weight: 400;
+                    opacity: 0.7;
+                }}
+            </style>
+            <div class="kpi-grid">
+                <div class="kpi-card" style="background: #eff6ff; border: 2px solid #93c5fd;">
+                    <div class="kpi-icon">&#x1F4E6;</div>
+                    <div class="kpi-label" style="color: #1e40af;">Total Commandes</div>
+                    <div class="kpi-value" style="color: #1d4ed8;">
+                        {total_orders:,.2f}
+                        <span class="kpi-unit">Dh</span>
+                    </div>
+                </div>
+                <div class="kpi-card" style="background: #fef2f2; border: 2px solid #fca5a5;">
+                    <div class="kpi-icon">&#x1F3F7;</div>
+                    <div class="kpi-label" style="color: #991b1b;">Total Reductions</div>
+                    <div class="kpi-value" style="color: #dc2626;">
+                        {total_discounts:,.2f}
+                        <span class="kpi-unit">Dh</span>
+                    </div>
+                </div>
+                <div class="kpi-card" style="background: #fffbeb; border: 2px solid #fcd34d;">
+                    <div class="kpi-icon">&#x1F4CA;</div>
+                    <div class="kpi-label" style="color: #92400e;">Taux de Reduction</div>
+                    <div class="kpi-value" style="color: #d97706;">
+                        {rate:.2f}
+                        <span class="kpi-unit">%</span>
+                    </div>
+                </div>
+                <div class="kpi-card" style="background: {profit_bg}; border: 2px solid {profit_border};">
+                    <div class="kpi-icon">{profit_icon}</div>
+                    <div class="kpi-label" style="color: {profit_color};">Total Profit</div>
+                    <div class="kpi-value" style="color: {profit_color};">
+                        {profit_val:,.2f}
+                        <span class="kpi-unit">Dh</span>
+                    </div>
+                </div>
+            </div>
+            """.format(
+                total_orders=client.total_orders_amount or 0.0,
+                total_discounts=client.total_client_discounts or 0.0,
+                rate=client.discount_rate or 0.0,
+                profit_bg=profit_bg,
+                profit_border=profit_border,
+                profit_icon=profit_icon,
+                profit_color=profit_color,
+                profit_val=profit,
+            )
 
 
     @api.depends('name')

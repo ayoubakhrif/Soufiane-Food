@@ -81,7 +81,7 @@
                         <page string="Lignes de Sorties" name="discount_lines">
                             <field name="line_ids" readonly="state == 'done'">
                                 <tree editable="bottom">
-                                    <field name="exit_id" readonly="1"/>
+                                    <field name="exit_id" readonly="1" force_save="1"/>
                                     <field name="product_id" readonly="1"/>
                                     <field name="qty" readonly="1"/>
                                     <field name="weight" readonly="1"/>

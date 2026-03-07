@@ -13,9 +13,9 @@ class CasaStockDiscount(models.Model):
         'casa.stock.order', string='Commande', required=True,
         domain="[('state', '=', 'done')]",
     )
-    client_id = fields.Many2one('casa.client', string='Client', readonly=True)
-    date = fields.Date(string='Date', readonly=True)
-    driver_id = fields.Many2one('casa.driver', string='Chauffeur', readonly=True)
+    client_id = fields.Many2one('casa.client', string='Client')
+    date = fields.Date(string='Date')
+    driver_id = fields.Many2one('casa.driver', string='Chauffeur')
 
     discount_type = fields.Selection([
         ('amount', 'Montant'),

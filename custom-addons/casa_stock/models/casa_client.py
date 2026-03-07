@@ -24,6 +24,12 @@ class CasaClient(models.Model):
         string='Sorties de ce client',
     )
 
+    discount_ids = fields.One2many(
+        'casa.stock.discount',
+        'client_id',
+        string='Réductions',
+    )
+
     total_commandes = fields.Float(
         string='Total commandes',
         compute='_compute_totals',
@@ -111,7 +117,7 @@ class CasaClient(models.Model):
                 }
                 .row {
                     display: grid;
-                    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+                    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
                     padding: 8px 0;
                     border-bottom: 1px dashed #e5e7eb;
                     font-size: 13px;
@@ -125,7 +131,7 @@ class CasaClient(models.Model):
 
             for week, records in grouped.items():
                 total_week = sum(
-                    (r.qty or 0) * (r.price_sale or 0)
+                    (r.tonnage or 0) * (r.price_sale or 0)
                     for r in records
                 )
 
@@ -141,12 +147,16 @@ class CasaClient(models.Model):
                         <div>Qté</div>
                         <div>Prix</div>
                         <div>Montant</div>
+                        <div>Réduction</div>
+                        <div>Montant Final</div>
                         <div>Date</div>
                     </div>
                 """
 
                 for r in records:
-                    montant = (r.qty or 0) * (r.price_sale or 0)
+                    montant = (r.tonnage or 0) * (r.price_sale or 0)
+                    reduction = r.discount_amount or 0.0
+                    montant_final = montant - reduction
                     html += f"""
                     <div class="row">
                         <div>{r.product_id.name if r.product_id else ''}</div>
@@ -155,6 +165,8 @@ class CasaClient(models.Model):
                         <div style="font-weight:700;color:#2563eb;">
                             {montant:.2f}
                         </div>
+                        <div style="color:#e53e3e;">{reduction:.2f}</div>
+                        <div style="font-weight:700;color:#38a169;">{montant_final:.2f}</div>
                         <div>{r.date}</div>
                     </div>
                     """

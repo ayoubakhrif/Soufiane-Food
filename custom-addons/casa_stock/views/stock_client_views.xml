@@ -67,6 +67,24 @@
                                 readonly="1"/>
                         </page>
 
+                        <page string="Réductions">
+                            <field name="discount_ids" readonly="1">
+                                <tree>
+                                    <field name="name" string="Référence"/>
+                                    <field name="order_id" string="Commande"/>
+                                    <field name="date"/>
+                                    <field name="reason" string="Motif"/>
+                                    <field name="total_before_discount" string="Montant Avant" sum="Total Avant"/>
+                                    <field name="total_discount" string="Réduction" sum="Total Réduction"/>
+                                    <field name="total_after_discount" string="Montant Final" sum="Total Après"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'draft'"
+                                           decoration-success="state == 'done'"
+                                           decoration-danger="state == 'cancel'"/>
+                                </tree>
+                            </field>
+                        </page>
+
                         <!-- ✏️ (optionnel) saisie ailleurs -->
                     </notebook>
                 </sheet>

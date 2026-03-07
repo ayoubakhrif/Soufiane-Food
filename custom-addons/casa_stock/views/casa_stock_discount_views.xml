@@ -89,15 +89,14 @@
                                     <field name="price_sale" readonly="1" string="Prix Vente Initial"/>
                                     <field name="initial_amount" readonly="1"/>
                                     <field name="discount_value"
-                                           string="Réduction"
-                                           readonly="state == 'done'"/>
+                                           string="Réduction"/>
                                     <field name="discount_amount" readonly="1"/>
                                     <field name="final_amount" readonly="1"/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Notes" name="notes">
-                            <field name="comment" readonly="state != 'draft'" placeholder="Commentaires..."/>
+                            <field name="comment" placeholder="Commentaires..."/>
                         </page>
                     </notebook>
                     <group class="oe_subtotal_footer oe_right">

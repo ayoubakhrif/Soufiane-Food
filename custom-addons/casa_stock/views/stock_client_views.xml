@@ -85,6 +85,19 @@
                             </field>
                         </page>
 
+                        <page string="Résumé Client">
+                            <group>
+                                <group string="Synthèse Commerciale">
+                                    <field name="total_orders_amount" string="Total Commandes"/>
+                                    <field name="total_client_discounts" string="Total Réductions"/>
+                                    <field name="discount_rate" string="Taux de Réduction (%)" widget="float" digits="[16,2]"/>
+                                </group>
+                                <group string="Rentabilité">
+                                    <field name="total_profit" string="Total Profit"/>
+                                </group>
+                            </group>
+                        </page>
+
                         <!-- ✏️ (optionnel) saisie ailleurs -->
                     </notebook>
                 </sheet>

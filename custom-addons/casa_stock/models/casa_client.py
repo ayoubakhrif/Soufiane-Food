@@ -48,6 +48,24 @@ class CasaClient(models.Model):
         sanitize=False,
     )
 
+    # --- Résumé Client ---
+    total_orders_amount = fields.Float(
+        string='Total Commandes (Avant Réductions)',
+        compute='_compute_client_summary', store=True,
+    )
+    total_client_discounts = fields.Float(
+        string='Total Réductions',
+        compute='_compute_client_summary', store=True,
+    )
+    discount_rate = fields.Float(
+        string='Taux de Réduction (%)',
+        compute='_compute_client_summary', store=True,
+    )
+    total_profit = fields.Float(
+        string='Total Profit',
+        compute='_compute_client_summary', store=True,
+    )
+
     @api.depends('exit_ids', 'exit_ids.state')
     def _compute_exit_count(self):
         """Compte uniquement les sorties confirmées (done)"""
@@ -62,6 +80,19 @@ class CasaClient(models.Model):
 
             client.total_commandes = total_ventes
             client.compte_total = (client.compte_initial or 0.0) + total_ventes
+
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'exit_ids.margin')
+    def _compute_client_summary(self):
+        for client in self:
+            commandes = client.exit_ids.filtered(lambda s: s.state == 'done')
+            total_orders = sum(commandes.mapped('mt_vente'))
+            total_discounts = sum(commandes.mapped('discount_amount'))
+            total_profit = sum(commandes.mapped('margin'))
+
+            client.total_orders_amount = total_orders
+            client.total_client_discounts = total_discounts
+            client.discount_rate = (total_discounts / total_orders * 100) if total_orders else 0.0
+            client.total_profit = total_profit
 
 
     @api.depends('name')

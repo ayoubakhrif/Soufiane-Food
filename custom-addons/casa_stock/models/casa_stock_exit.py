@@ -54,6 +54,26 @@ class CasaStockExit(models.Model):
         compute='_compute_amounts',
         store=True
     )
+
+    # Discount traceability fields (written by casa.stock.discount on confirmation)
+    discount_amount = fields.Float(string='Réduction', default=0.0)
+    price_sale_final = fields.Float(
+        string='Prix Vente Final',
+        compute='_compute_final_price', store=True,
+    )
+    mt_vente_final = fields.Float(
+        string='Montant Vente Final',
+        compute='_compute_final_price', store=True,
+    )
+
+    @api.depends('mt_vente', 'discount_amount', 'tonnage', 'price_sale')
+    def _compute_final_price(self):
+        for rec in self:
+            rec.mt_vente_final = (rec.mt_vente or 0.0) - (rec.discount_amount or 0.0)
+            if rec.tonnage:
+                rec.price_sale_final = rec.mt_vente_final / rec.tonnage
+            else:
+                rec.price_sale_final = rec.price_sale or 0.0
     returned_qty = fields.Float(
         string='Qté Retournée',
         compute='_compute_returned_qty'

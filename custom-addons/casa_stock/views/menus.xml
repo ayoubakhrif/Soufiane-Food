@@ -29,6 +29,12 @@
               action="action_casa_stock_exit"
               sequence="30"/>
 
+    <menuitem id="menu_casa_stock_discount"
+              name="Réductions"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_discount"
+              sequence="40"/>
+
     <menuitem id="menu_casa_stock_audit"
               name="Audit Ledger"
               parent="menu_casa_stock_root"

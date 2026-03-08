@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med: Dedicated Tree View              -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_entry_tree" model="ir.ui.view">
+        <field name="name">tanger.med.entry.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Tanger Med" create="false" delete="false">
+                <field name="bl_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="article_id"/>
+                <field name="container_names" string="Conteneurs" optional="show"/>
+                <field name="exit_date"/>
+                <field name="entry_date"/>
+                <field name="bad_date"/>
+                <field name="sur_mag_amount" sum="SUR+MAG"/>
+                <field name="sur_mag_date"/>
+                <field name="sur_mag_user" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med: Inherited Form View (new tab)    -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_entry_form_inherit" model="ir.ui.view">
+        <field name="name">tanger.med.entry.form.inherit</field>
+        <field name="model">logistique.entry</field>
+        <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Tanger Med" name="tanger_med" invisible="port_status != 'exited'">
+                    <group>
+                        <group string="Dates Opérationnelles">
+                            <field name="exit_date" readonly="1"/>
+                            <field name="entry_date" readonly="1"/>
+                            <field name="bad_date" readonly="1"/>
+                        </group>
+                        <group string="SUR+MAG">
+                            <field name="sur_mag_amount"/>
+                            <field name="sur_mag_date" readonly="1"/>
+                            <field name="sur_mag_user" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med: Search View                      -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_entry_search" model="ir.ui.view">
+        <field name="name">tanger.med.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Tanger Med">
+                <field name="bl_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="article_id"/>
+                <field name="container_names" string="Conteneur"/>
+                <group string="Regrouper par">
+                    <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
+                    <filter name="group_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_article" string="Article" context="{'group_by': 'article_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

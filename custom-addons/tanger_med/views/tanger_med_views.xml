@@ -69,6 +69,12 @@
                             </group>
                         </page>
                     </notebook>
+                    <separator string="Historique"/>
+                    <div class="oe_chatter" groups="tanger_med.group_tanger_med_manager">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
                 </sheet>
             </form>
         </field>

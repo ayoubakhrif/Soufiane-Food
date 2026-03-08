@@ -140,7 +140,7 @@
         </field>
     </record>
 
-    <!-- Window Action for "Tanger Med" (Exited Dossiers) -->
+    <!-- Window Action for "Tanger Med" (Exited Dossiers)-->
     <record id="action_achat_tanger_med" model="ir.actions.act_window">
         <field name="name">Tanger Med</field>
         <field name="res_model">logistique.entry</field>

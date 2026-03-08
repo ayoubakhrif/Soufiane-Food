@@ -10,6 +10,7 @@ from . import stock_kal3iya_stock_stock
 from . import stock_kal3iya_transfer
 from . import ai_utils
 from . import stock_kal3iya_return
+from . import chatbot
 
 
 

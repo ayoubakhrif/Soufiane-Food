@@ -14,6 +14,9 @@ This module provides a robust stock management system based on an immutable move
     """,
     'author': 'Soufiane-Food',
     'depends': ['base', 'web', 'mail', 'custom_employee'],
+    'external_dependencies': {
+        'python': ['openai'],
+    },
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',

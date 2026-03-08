@@ -157,3 +157,59 @@ class StockKal3iyaController(http.Controller):
             json.dumps({'products': products_list}),
             headers={'Content-Type': 'application/json'}
         )
+
+    @http.route('/api/stock_kal3iya/chat', type='http', auth='public', methods=['POST'], csrf=False)
+    def chat(self, **post):
+        """WhatsApp chatbot endpoint. Receives a message, returns a stock-related answer."""
+        # 1. Security Check (Token)
+        expected_token = request.env['ir.config_parameter'].sudo().get_param('stock_kal3iya.api_token')
+        auth_header = request.httprequest.headers.get('Authorization')
+
+        if not expected_token:
+            _logger.warning("Chat API attempted but 'stock_kal3iya.api_token' is not set.")
+            return request.make_response(
+                json.dumps({'error': 'Server configuration error (Token)'}),
+                headers={'Content-Type': 'application/json'},
+                status=500
+            )
+
+        if auth_header != f"Bearer {expected_token}":
+            return request.make_response(
+                json.dumps({'error': 'Unauthorized'}),
+                headers={'Content-Type': 'application/json'},
+                status=401
+            )
+
+        # 2. Parse Body
+        try:
+            data = json.loads(request.httprequest.data)
+        except Exception:
+            return request.make_response(
+                json.dumps({'error': 'Invalid JSON format'}),
+                headers={'Content-Type': 'application/json'},
+                status=400
+            )
+
+        message = data.get('message', '').strip()
+        sender = data.get('sender', 'unknown')
+
+        if not message:
+            return request.make_response(
+                json.dumps({'error': 'No message provided'}),
+                headers={'Content-Type': 'application/json'},
+                status=400
+            )
+
+        # 3. Process via Chatbot Engine
+        try:
+            Chatbot = request.env['stock.kal3iya.chatbot'].sudo()
+            response_text = Chatbot.process_message(message, sender=sender)
+        except Exception as e:
+            _logger.error("Chatbot processing error: %s", str(e))
+            response_text = "Erreur interne. Veuillez réessayer."
+
+        # 4. Return Response
+        return request.make_response(
+            json.dumps({'response': response_text}),
+            headers={'Content-Type': 'application/json'}
+        )

@@ -12,3 +12,4 @@ access_logistique_consolidator_tanger_user,access.logistique.consolidator.tanger
 access_logistique_dossier_cheque_tanger_user,access.logistique.dossier.cheque.tanger.user,logistique.model_logistique_dossier_cheque,group_tanger_med_user,1,0,0,0
 access_logistique_dossier_deduction_tanger_user,access.logistique.dossier.deduction.tanger.user,logistique.model_logistique_dossier_deduction,group_tanger_med_user,1,0,0,0
 access_logistique_dossier_transfer_tanger_user,access.logistique.dossier.transfer.tanger.user,logistique.model_logistique_dossier_transfer,group_tanger_med_user,1,0,0,0
+access_logistique_entry_document_tanger_user,access.logistique.entry.document.tanger.user,achat.model_logistique_entry_document,group_tanger_med_user,1,0,0,0

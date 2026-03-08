@@ -9,7 +9,8 @@
         <field name="domain">[('port_status', '=', 'exited')]</field>
         <field name="search_view_id" ref="view_tanger_med_entry_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_tanger_med_entry_tree')})]"/>
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_tanger_med_entry_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_tanger_med_entry_form')})]"/>
     </record>
 
     <!-- Root Menu -->

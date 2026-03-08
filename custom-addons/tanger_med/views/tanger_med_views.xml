@@ -25,29 +25,52 @@
     </record>
 
     <!-- ============================================ -->
-    <!-- Tanger Med: Inherited Form View (new tab)    -->
+    <!-- Tanger Med: Dedicated Form View              -->
     <!-- ============================================ -->
-    <record id="view_tanger_med_entry_form_inherit" model="ir.ui.view">
-        <field name="name">tanger.med.entry.form.inherit</field>
+    <record id="view_tanger_med_entry_form" model="ir.ui.view">
+        <field name="name">tanger.med.entry.form</field>
         <field name="model">logistique.entry</field>
-        <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//notebook" position="inside">
-                <page string="Tanger Med" name="tanger_med" invisible="port_status != 'exited'">
+            <form string="Dossier Tanger Med" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                    </div>
                     <group>
-                        <group string="Dates Opérationnelles">
-                            <field name="exit_date" readonly="1"/>
-                            <field name="entry_date" readonly="1"/>
-                            <field name="bad_date" readonly="1"/>
+                        <group string="Informations Dossier">
+                            <field name="dossier_id" readonly="1"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="supplier_id" readonly="1"/>
+                            <field name="article_id" readonly="1"/>
+                            <field name="details" readonly="1"/>
+                            <field name="container_names" readonly="1"/>
                         </group>
-                        <group string="SUR+MAG">
-                            <field name="sur_mag_amount"/>
-                            <field name="sur_mag_date" readonly="1"/>
-                            <field name="sur_mag_user" readonly="1"/>
+                        <group string="Statut">
+                            <field name="port_status" readonly="1" widget="badge" decoration-success="port_status == 'exited'"/>
+                            <field name="status" readonly="1" widget="badge"/>
+                            <field name="incoterm" readonly="1"/>
                         </group>
                     </group>
-                </page>
-            </xpath>
+                    <notebook>
+                        <page string="Tanger Med" name="tanger_med">
+                            <group>
+                                <group string="Dates Opérationnelles">
+                                    <field name="exit_date" readonly="1"/>
+                                    <field name="entry_date" readonly="1"/>
+                                    <field name="bad_date" readonly="1"/>
+                                </group>
+                                <group string="SUR+MAG">
+                                    <field name="sur_mag_amount"/>
+                                    <field name="sur_mag_date" readonly="1"/>
+                                    <field name="sur_mag_user" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
         </field>
     </record>
 

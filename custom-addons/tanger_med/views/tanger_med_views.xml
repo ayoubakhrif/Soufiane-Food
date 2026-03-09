@@ -18,6 +18,7 @@
                 <field name="entry_date"/>
                 <field name="bad_date"/>
                 <field name="eta" optional="show"/>
+                <field name="invoice_number" optional="show"/>
                 <field name="tanger_med_lot" optional="show"/>
                 <field name="tanger_med_dum" optional="show"/>
                 <field name="sur_mag_amount" sum="SUR+MAG"/>
@@ -64,6 +65,7 @@
                                     <field name="entry_date" readonly="1"/>
                                     <field name="bad_date" readonly="1"/>
                                     <field name="eta" readonly="1"/>
+                                    <field name="invoice_number" readonly="1"/>
                                     <field name="tanger_med_lot"/>
                                     <field name="tanger_med_dum"/>
                                 </group>

@@ -21,7 +21,7 @@ class SurestarieMagasinageDashboard(models.Model):
             # 2. Fetch Global Aggregates
             global_data = self.env['surestarie.magasinage.report'].read_group(
                 domain,
-                ['container_count', 'surestarie_amount', 'magasinage_amount', 'total_charges'],
+                ['container_count', 'surestarie_amount', 'magasinage_amount', 'total_charges', 'claims_amount', 'total_charges_net'],
                 []
             )
 
@@ -31,29 +31,38 @@ class SurestarieMagasinageDashboard(models.Model):
                 total_surestarie = res.get('surestarie_amount', 0.0)
                 total_magasinage = res.get('magasinage_amount', 0.0)
                 total_charges = res.get('total_charges', 0.0)
+                total_claims = res.get('claims_amount', 0.0)
+                total_charges_net = res.get('total_charges_net', 0.0)
             else:
                 total_containers = 0
                 total_surestarie = 0.0
                 total_magasinage = 0.0
                 total_charges = 0.0
+                total_claims = 0.0
+                total_charges_net = 0.0
 
-            # Global Weighted Average
+            # Global Weighted Average (Net)
             if total_containers > 0:
-                global_avg_cost = total_charges / total_containers
+                global_avg_cost_net = total_charges_net / total_containers
             else:
-                global_avg_cost = 0.0
+                global_avg_cost_net = 0.0
 
             # Format Global Values
-            formatted_surestarie = "{:,.2f}".format(total_surestarie).replace(",", " ").replace(".", ",")
-            formatted_magasinage = "{:,.2f}".format(total_magasinage).replace(",", " ").replace(".", ",")
-            formatted_charges = "{:,.2f}".format(total_charges).replace(",", " ").replace(".", ",")
-            formatted_avg = "{:,.2f}".format(global_avg_cost).replace(",", " ").replace(".", ",")
+            def fmt(val):
+                return "{:,.2f}".format(val).replace(",", " ").replace(".", ",")
+
+            formatted_surestarie = fmt(total_surestarie)
+            formatted_magasinage = fmt(total_magasinage)
+            formatted_charges = fmt(total_charges)
+            formatted_claims = fmt(total_claims)
+            formatted_charges_net = fmt(total_charges_net)
+            formatted_avg_net = fmt(global_avg_cost_net)
 
             # 3. Helper Function for Detailed Sections (Product & Supplier)
             def get_detailed_data(groupby_field, name_field_model):
                 groups = self.env['surestarie.magasinage.report'].read_group(
                     domain,
-                    ['container_count', 'surestarie_amount', 'magasinage_amount', 'total_charges'],
+                    ['container_count', 'surestarie_amount', 'magasinage_amount', 'total_charges', 'claims_amount', 'total_charges_net'],
                     [groupby_field]
                 )
                 
@@ -63,20 +72,20 @@ class SurestarieMagasinageDashboard(models.Model):
                     g_surestarie = group.get('surestarie_amount', 0.0)
                     g_magasinage = group.get('magasinage_amount', 0.0)
                     g_charges = group.get('total_charges', 0.0)
+                    g_claims = group.get('claims_amount', 0.0)
+                    g_charges_net = group.get('total_charges_net', 0.0)
                     
-                    # Manual Weighted Average
+                    # Manual Weighted Average (Net)
                     if g_containers > 0:
-                        g_weighted_avg = g_charges / g_containers
+                        g_weighted_avg = g_charges_net / g_containers
                     else:
                         g_weighted_avg = 0.0
 
                     # Get Name
-                    # group[groupby_field] returns (id, display_name) tuple usually
                     group_val = group.get(groupby_field)
                     if isinstance(group_val, tuple):
                         name = group_val[1]
                     elif group_val:
-                        # Fallback if just ID (shouldn't happen with read_group usually)
                         name = str(group_val)
                     else:
                         name = "Indéfini"
@@ -87,16 +96,16 @@ class SurestarieMagasinageDashboard(models.Model):
                         'surestarie': g_surestarie,
                         'magasinage': g_magasinage,
                         'total_charges': g_charges,
+                        'claims': g_claims,
+                        'total_charges_net': g_charges_net,
                         'weighted_avg': g_weighted_avg
                     })
                 
-                # Sort by Weighted Average DESC (Moyenne des charges)
-                rows.sort(key=lambda x: x['weighted_avg'], reverse=True)
+                # Sort by Total Charges DESC
+                rows.sort(key=lambda x: x['total_charges'], reverse=True)
                 
                 # Ranking: Find Best (Lowest Avg) and Worst (Highest Avg)
                 if rows:
-                    # Filter out 0 avg if necessary? Usually 0 means efficient or no cost.
-                    # Assuming 0 cost is best.
                     best_row = min(rows, key=lambda x: x['weighted_avg'])
                     worst_row = max(rows, key=lambda x: x['weighted_avg'])
                     
@@ -124,10 +133,12 @@ class SurestarieMagasinageDashboard(models.Model):
                         row_class = "table-danger"
                         badge = '<span class="badge badge-pill badge-danger">Flop</span>'
                     
-                    fmt_sur = "{:,.2f}".format(row['surestarie']).replace(",", " ").replace(".", ",")
-                    fmt_mag = "{:,.2f}".format(row['magasinage']).replace(",", " ").replace(".", ",")
-                    fmt_tot = "{:,.2f}".format(row['total_charges']).replace(",", " ").replace(".", ",")
-                    fmt_avg = "{:,.2f}".format(row['weighted_avg']).replace(",", " ").replace(".", ",")
+                    fmt_sur = fmt(row['surestarie'])
+                    fmt_mag = fmt(row['magasinage'])
+                    fmt_tot = fmt(row['total_charges'])
+                    fmt_cl = fmt(row['claims'])
+                    fmt_net = fmt(row['total_charges_net'])
+                    fmt_avg = fmt(row['weighted_avg'])
                     
                     tbody += f"""
                     <tr class="{row_class}">
@@ -135,7 +146,9 @@ class SurestarieMagasinageDashboard(models.Model):
                         <td class="text-right">{row['containers']}</td>
                         <td class="text-right">{fmt_sur}</td>
                         <td class="text-right">{fmt_mag}</td>
-                        <td class="text-right font-weight-bold">{fmt_tot}</td>
+                        <td class="text-right">{fmt_tot}</td>
+                        <td class="text-right text-success">{fmt_cl}</td>
+                        <td class="text-right font-weight-bold">{fmt_net}</td>
                         <td class="text-right font-weight-bold">{fmt_avg}</td>
                     </tr>
                     """
@@ -152,8 +165,10 @@ class SurestarieMagasinageDashboard(models.Model):
                                         <th class="text-right">Conteneurs</th>
                                         <th class="text-right">Surestarie</th>
                                         <th class="text-right">Magasinage</th>
-                                        <th class="text-right">Total Charges</th>
-                                        <th class="text-right">Moyenne Pondérée / Ctrl</th>
+                                        <th class="text-right">Total Brut</th>
+                                        <th class="text-right">Claims</th>
+                                        <th class="text-right">Total Net</th>
+                                        <th class="text-right">Moyenne Net / Ctrl</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -176,41 +191,53 @@ class SurestarieMagasinageDashboard(models.Model):
                 
                 <!-- Global KPIs -->
                 <div class="row text-center">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="card bg-primary text-white mb-3">
                             <div class="card-header">Total Conteneurs</div>
                             <div class="card-body"><h3 class="card-title">{total_containers}</h3></div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white mb-3">
-                            <div class="card-header">Total Charges</div>
-                            <div class="card-body"><h3 class="card-title">{formatted_charges} MAD</h3></div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="card bg-warning text-white mb-3">
                             <div class="card-header">Surestarie</div>
                             <div class="card-body"><h3 class="card-title">{formatted_surestarie} MAD</h3></div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="card bg-secondary text-white mb-3">
                             <div class="card-header">Magasinage</div>
                             <div class="card-body"><h3 class="card-title">{formatted_magasinage} MAD</h3></div>
                         </div>
                     </div>
+                    <div class="col-md-2">
+                        <div class="card bg-info text-white mb-3">
+                            <div class="card-header">Charges Brutes</div>
+                            <div class="card-body"><h3 class="card-title">{formatted_charges} MAD</h3></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-success mb-3">
+                            <div class="card-header text-success">Claims</div>
+                            <div class="card-body"><h3 class="card-title text-success">- {formatted_claims} MAD</h3></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card bg-danger text-white mb-3">
+                            <div class="card-header">Charges Nettes</div>
+                            <div class="card-body"><h3 class="card-title">{formatted_charges_net} MAD</h3></div>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Global Average -->
+                <!-- Global Average (Net) -->
                 <div class="row justify-content-center mt-2">
                     <div class="col-md-6">
                         <div class="card border-success mb-3">
                             <div class="card-header bg-success text-white text-center">
-                                <h4>Coût Moyen Global par Conteneur (Pondéré)</h4>
+                                <h4>Coût Moyen Net par Conteneur (Pondéré)</h4>
                             </div>
                             <div class="card-body text-success text-center">
-                                <h1 class="display-4 font-weight-bold">{formatted_avg} MAD</h1>
+                                <h1 class="display-4 font-weight-bold">{formatted_avg_net} MAD</h1>
                             </div>
                         </div>
                     </div>
@@ -218,8 +245,8 @@ class SurestarieMagasinageDashboard(models.Model):
 
                 <!-- Detailed Tables -->
                 <div class="row">
-                    {build_table_html("Charges par Article (Trier par Moyenne Pondérée)", product_rows)}
-                    {build_table_html("Charges par Fournisseur (Trier par Moyenne Pondérée)", supplier_rows)}
+                    {build_table_html("Charges par Article (Trier par Total Charges)", product_rows)}
+                    {build_table_html("Charges par Fournisseur (Trier par Total Charges)", supplier_rows)}
                 </div>
             </div>
             """

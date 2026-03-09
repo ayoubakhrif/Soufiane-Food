@@ -38,8 +38,11 @@
                     <field name="article_id" optional="show"/>
                     <field name="supplier_id" optional="show"/>
                     <field name="container_count" sum="Total Conteneurs"/>
+                    <field name="surestarie_amount" sum="Total Surestarie" optional="show"/>
                     <field name="magasinage_amount" sum="Total Magasinage"/>
-                    <field name="total_charges" sum="Total Charges"/>
+                    <field name="total_charges" sum="Total Charges Brut"/>
+                    <field name="claims_amount" sum="Total Claims" optional="show"/>
+                    <field name="total_charges_net" sum="Total Charges Nettes"/>
                 </tree>
             </field>
         </record>
@@ -54,9 +57,12 @@
                     <field name="surestarie_amount" type="measure"/>
                     <field name="magasinage_amount" type="measure"/>
                     <field name="total_charges" type="measure"/>
+                    <field name="claims_amount" type="measure"/>
+                    <field name="total_charges_net" type="measure"/>
                     <field name="average_cost" type="measure"/>
                     <field name="average_surestarie" type="measure"/>
                     <field name="average_magasinage" type="measure"/>
+                    <field name="average_cost_net" type="measure"/>
                 </pivot>
             </field>
         </record>

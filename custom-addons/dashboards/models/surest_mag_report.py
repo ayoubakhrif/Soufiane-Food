@@ -1,5 +1,6 @@
 from odoo import models, fields, api, tools
 
+
 class SurestarieMagasinageReport(models.Model):
     _name = "surestarie.magasinage.report"
     _description = "Rapport Surestarie et Magasinage"
@@ -23,12 +24,17 @@ class SurestarieMagasinageReport(models.Model):
     container_count = fields.Integer(string="Nb Conteneurs", readonly=True)
     surestarie_amount = fields.Float(string="Montant Surestarie", readonly=True)
     magasinage_amount = fields.Float(string="Montant Magasinage", readonly=True)
-    total_charges = fields.Float(string="Total Charges", readonly=True)
+    total_charges = fields.Float(string="Total Charges (Brut)", readonly=True)
+
+    # Claims
+    claims_amount = fields.Float(string="Réclamations (Remboursé)", readonly=True)
+    total_charges_net = fields.Float(string="Total Charges Nettes", readonly=True)
     
     # Average fields for Pivot display (calculated in read_group)
-    average_cost = fields.Float(string="Coût par Conteneur", readonly=True)
-    average_surestarie = fields.Float(string="Surestarie par Conteneur", readonly=True)
-    average_magasinage = fields.Float(string="Magasinage par Conteneur", readonly=True)
+    average_cost = fields.Float(string="Coût Brut / Conteneur", readonly=True)
+    average_surestarie = fields.Float(string="Surestarie / Conteneur", readonly=True)
+    average_magasinage = fields.Float(string="Magasinage / Conteneur", readonly=True)
+    average_cost_net = fields.Float(string="Coût Net / Conteneur", readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -48,16 +54,34 @@ class SurestarieMagasinageReport(models.Model):
                     le.surestarie_amount as surestarie_amount,
                     le.magasinage_amount as magasinage_amount,
 
-                    -- Total Charges
+                    -- Total Charges (Brut)
                     (le.surestarie_amount + le.magasinage_amount) as total_charges,
+
+                    -- Claims amount (closed only)
+                    COALESCE(cl.claims_total, 0.0) as claims_amount,
+
+                    -- Total Charges Nettes
+                    (le.surestarie_amount + le.magasinage_amount) - COALESCE(cl.claims_total, 0.0) as total_charges_net,
                     
                     -- Placeholders for averages (calculated in Python via read_group)
                     0.0 as average_cost,
                     0.0 as average_surestarie,
-                    0.0 as average_magasinage
+                    0.0 as average_magasinage,
+                    0.0 as average_cost_net
 
                 FROM
                     logistique_entry le
+                LEFT JOIN (
+                    SELECT
+                        bl_id,
+                        SUM(amount_due) as claims_total
+                    FROM
+                        claims_dhl_delay
+                    WHERE
+                        state = 'closed'
+                    GROUP BY
+                        bl_id
+                ) cl ON cl.bl_id = le.id
                 WHERE
                     (le.surestarie_amount != 0 OR le.magasinage_amount != 0)
             )
@@ -71,6 +95,7 @@ class SurestarieMagasinageReport(models.Model):
             # Get aggregated totals
             container_count = line.get('container_count', 0)
             total_charges = line.get('total_charges', 0.0)
+            total_charges_net = line.get('total_charges_net', 0.0)
             surestarie_amount = line.get('surestarie_amount', 0.0)
             magasinage_amount = line.get('magasinage_amount', 0.0)
 
@@ -79,9 +104,11 @@ class SurestarieMagasinageReport(models.Model):
                 line['average_cost'] = total_charges / container_count
                 line['average_surestarie'] = surestarie_amount / container_count
                 line['average_magasinage'] = magasinage_amount / container_count
+                line['average_cost_net'] = total_charges_net / container_count
             else:
                 line['average_cost'] = 0.0
                 line['average_surestarie'] = 0.0
                 line['average_magasinage'] = 0.0
+                line['average_cost_net'] = 0.0
                 
         return res

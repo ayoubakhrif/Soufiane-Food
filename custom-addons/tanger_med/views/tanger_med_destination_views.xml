@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med Destination: Tree View            -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_destination_tree" model="ir.ui.view">
+        <field name="name">tanger.med.destination.tree</field>
+        <field name="model">tanger.med.destination</field>
+        <field name="arch" type="xml">
+            <tree string="Destinations">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med Destination: Form View            -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_destination_form" model="ir.ui.view">
+        <field name="name">tanger.med.destination.form</field>
+        <field name="model">tanger.med.destination</field>
+        <field name="arch" type="xml">
+            <form string="Destination">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med Destination: Action               -->
+    <!-- ============================================ -->
+    <record id="action_tanger_med_destination" model="ir.actions.act_window">
+        <field name="name">Destinations</field>
+        <field name="res_model">tanger.med.destination</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle destination
+            </p>
+        </field>
+    </record>
+
+</odoo>

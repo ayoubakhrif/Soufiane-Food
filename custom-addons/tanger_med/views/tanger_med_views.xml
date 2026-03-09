@@ -19,6 +19,7 @@
                 <field name="bad_date"/>
                 <field name="eta" optional="show"/>
                 <field name="invoice_number" optional="show"/>
+                <field name="destination_id" optional="show"/>
                 <field name="tanger_med_lot" optional="show"/>
                 <field name="tanger_med_dum" optional="show"/>
                 <field name="sur_mag_amount" sum="SUR+MAG"/>
@@ -48,7 +49,9 @@
                             <field name="ste_id" readonly="1"/>
                             <field name="supplier_id" readonly="1"/>
                             <field name="article_id" readonly="1"/>
+                            <field name="destination_id" />
                             <field name="details" readonly="1"/>
+                            <field name="invoice_number" readonly="1"/>
                             <field name="container_names" readonly="1"/>
                         </group>
                         <group string="Statut">
@@ -65,7 +68,6 @@
                                     <field name="entry_date" readonly="1"/>
                                     <field name="bad_date" readonly="1"/>
                                     <field name="eta" readonly="1"/>
-                                    <field name="invoice_number" readonly="1"/>
                                     <field name="tanger_med_lot"/>
                                     <field name="tanger_med_dum"/>
                                 </group>

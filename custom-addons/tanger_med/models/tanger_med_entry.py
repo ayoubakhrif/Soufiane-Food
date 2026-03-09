@@ -14,7 +14,9 @@ class TangerMedEntry(models.Model):
 
     tanger_med_lot = fields.Char(string='Lot Tanger Med')
     tanger_med_dum = fields.Char(string='DUM Tanger Med')
+    destination_id = fields.Many2one('tanger.med.destination', string='Destination')
 
+    
     @api.onchange('tanger_med_lot')
     def _onchange_tanger_med_lot(self):
         if self.tanger_med_lot and self.lot and self.tanger_med_lot != self.lot:

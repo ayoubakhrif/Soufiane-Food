@@ -15,6 +15,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/tanger_med_views.xml',
+        'views/tanger_med_destination_views.xml',
         'views/menus.xml',
     ],
     'installable': True,

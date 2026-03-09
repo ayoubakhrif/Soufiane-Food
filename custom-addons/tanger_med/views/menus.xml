@@ -23,6 +23,16 @@
               name="Dossiers Tanger Med"
               parent="menu_tanger_med_root"
               action="action_tanger_med_entry"
+      <!-- Configuration Menu -->
+    <menuitem id="menu_tanger_med_config"
+              name="Configuration"
+              parent="menu_tanger_med_root"
+              sequence="100"/>
+
+    <menuitem id="menu_tanger_med_destinations"
+              name="Destinations"
+              parent="menu_tanger_med_config"
+              action="action_tanger_med_destination"
               sequence="10"/>
 
 </odoo>

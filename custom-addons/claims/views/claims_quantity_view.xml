@@ -54,7 +54,6 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_evidence" type="object" class="oe_stat_button" icon="fa-external-link" string="Open Evidence"
-                                groups="claims.group_claims_manager"
                                 invisible="not evidence_link"/>
                     </div>
                     <div class="oe_title">
@@ -76,7 +75,7 @@
                             <field name="missing_quantity" readonly="state != 'initial'"/>
                             <field name="amount_due" readonly="state in ('resolved', 'closed')"/>
                             <field name="can_see_evidence" invisible="1"/>
-                            <field name="evidence_link" widget="url" invisible="not can_see_evidence"/>
+                            <field name="evidence_link" widget="url"/>
                         </group>
                     </group>
                     <group string="Dates Clés" col="2">

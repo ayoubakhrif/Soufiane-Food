@@ -148,3 +148,15 @@ class CasaStockOrderLine(models.Model):
         for line in self:
             if line.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
+                
+    @api.constrains('qty', 'stock_id')
+    def _check_stock_availability(self):
+        for line in self:
+            if line.stock_id and line.qty > line.stock_id.quantity:
+                raise UserError(_(
+                    "Quantité insuffisante pour l'article %(product)s.\n"
+                    "Demandée: %(req)s, Disponible: %(avail)s",
+                    product=line.product_id.name,
+                    req=line.qty,
+                    avail=line.stock_id.quantity
+                ))

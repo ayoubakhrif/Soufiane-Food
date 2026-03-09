@@ -241,8 +241,8 @@
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
             <calendar string="Chèques par Date d'échéance" date_start="date_echeance" color="benif_id" mode="month">
-                <field name="benif_id" invisible="1"/>
-                <field name="chq" string="[benif_id.name] - "/>
+                <field name="chq" />
+                <field name="benif_id" />
                 <field name="amount"/>
                 <field name="ste_id"/>
             </calendar>

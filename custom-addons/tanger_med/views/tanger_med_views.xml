@@ -13,6 +13,7 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="article_id"/>
+                <field name="container_count" optional="show"/>
                 <field name="container_names" string="Conteneurs" optional="show"/>
                 <field name="exit_date"/>
                 <field name="entry_date"/>
@@ -52,6 +53,7 @@
                             <field name="destination_id" />
                             <field name="details" readonly="1"/>
                             <field name="invoice_number" readonly="1"/>
+                            <field name="container_count" readonly="1"/>
                             <field name="container_names" readonly="1"/>
                         </group>
                         <group string="Statut">

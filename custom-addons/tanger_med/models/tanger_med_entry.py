@@ -12,6 +12,31 @@ class TangerMedEntry(models.Model):
         readonly=True,
     )
 
+    tanger_med_lot = fields.Char(string='Lot Tanger Med')
+    tanger_med_dum = fields.Char(string='DUM Tanger Med')
+
+    @api.onchange('tanger_med_lot')
+    def _onchange_tanger_med_lot(self):
+        if self.tanger_med_lot and self.lot and self.tanger_med_lot != self.lot:
+            return {
+                'warning': {
+                    'title': 'Lot Incohérent',
+                    'message': f"Le Lot saisi ({self.tanger_med_lot}) est différent du Lot d'Achat ({self.lot})."
+                }
+            }
+
+    @api.onchange('tanger_med_dum')
+    def _onchange_tanger_med_dum(self):
+        # We need to fetch the DUM from the douane entry/logistique entry based on the model inheritance
+        if self.tanger_med_dum and hasattr(self, 'dum') and self.dum and self.tanger_med_dum != self.dum:
+            return {
+                'warning': {
+                    'title': 'DUM Incohérent',
+                    'message': f"La DUM saisie ({self.tanger_med_dum}) est différente de la DUM Douane ({self.dum})."
+                }
+            }
+
+
     @api.onchange('sur_mag_amount')
     def _onchange_sur_mag_amount(self):
         if self.sur_mag_amount:

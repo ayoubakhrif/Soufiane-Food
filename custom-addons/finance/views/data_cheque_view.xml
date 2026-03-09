@@ -17,7 +17,7 @@
     <record id="data_cheque_action" model="ir.actions.act_window">
         <field name="name">Saisie</field>
         <field name="res_model">datacheque</field>
-        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="view_mode">tree,form,pivot,graph,calendar</field>
     </record>
 
     <menuitem 
@@ -233,6 +233,19 @@
                 <field name="week" />
                 <field name="benif_id" />
             </graph>
+        </field>
+    </record>
+
+    <record id="datachq_view_calendar" model="ir.ui.view">
+        <field name="name">datachq calendar</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <calendar string="Chèques par Date d'échéance" date_start="date_echeance" color="ste_id" mode="month">
+                <field name="chq"/>
+                <field name="amount"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+            </calendar>
         </field>
     </record>
 </odoo>

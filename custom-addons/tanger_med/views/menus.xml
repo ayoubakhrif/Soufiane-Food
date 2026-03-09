@@ -23,7 +23,9 @@
               name="Dossiers Tanger Med"
               parent="menu_tanger_med_root"
               action="action_tanger_med_entry"
-      <!-- Configuration Menu -->
+              sequence="10"/>
+
+    <!-- Configuration Menu -->
     <menuitem id="menu_tanger_med_config"
               name="Configuration"
               parent="menu_tanger_med_root"

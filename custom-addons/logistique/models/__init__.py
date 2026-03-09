@@ -11,3 +11,4 @@ from . import dossier_deduction
 from . import dossier_transfer
 from . import surest_mag_config
 from . import surest_mag_simulation
+from . import logistics_document

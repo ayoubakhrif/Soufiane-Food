@@ -157,6 +157,17 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Documents" name="documents">
+                            <field name="logistique_doc_ids"
+                                   context="{'default_entry_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="document_type"/>
+                                    <field name="drive_link"/>
+                                    <field name="drive_url" widget="url"/>
+                                    <field name="notes" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter" groups="logistique.group_logistique_manager">

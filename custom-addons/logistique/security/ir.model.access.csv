@@ -43,3 +43,6 @@ access_logistique_surest_mag_config_viewer,access.logistique.surest_mag.config.v
 access_logistique_surest_mag_phase_viewer,access.logistique.surest_mag.phase.viewer,model_logistique_surest_mag_phase,group_logistique_viewer,1,1,1,0
 access_logistique_surest_mag_simulation_viewer,access.logistique.surest_mag.simulation.viewer,model_logistique_surest_mag_simulation,group_logistique_viewer,1,1,1,0
 access_logistique_surest_mag_simulation_line_viewer,access.logistique.surest_mag.simulation.line.viewer,model_logistique_surest_mag_simulation_line,group_logistique_viewer,1,1,1,0
+access_logistique_doc_user,access.logistique.doc.user,model_logistique_doc,group_logistique_user,1,1,1,0
+access_logistique_doc_manager,access.logistique.doc.manager,model_logistique_doc,group_logistique_manager,1,1,1,1
+access_logistique_doc_viewer,access.logistique.doc.viewer,model_logistique_doc,group_logistique_viewer,1,0,0,0

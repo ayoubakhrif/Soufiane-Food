@@ -101,8 +101,8 @@ class SurestarieMagasinageDashboard(models.Model):
                         'weighted_avg': g_weighted_avg
                     })
                 
-                # Sort by Total Charges DESC
-                rows.sort(key=lambda x: x['total_charges'], reverse=True)
+                # Sort by Total Charges Net DESC
+                rows.sort(key=lambda x: x['total_charges_net'], reverse=True)
                 
                 # Ranking: Find Best (Lowest Avg) and Worst (Highest Avg)
                 if rows:
@@ -245,8 +245,8 @@ class SurestarieMagasinageDashboard(models.Model):
 
                 <!-- Detailed Tables -->
                 <div class="row">
-                    {build_table_html("Charges par Article (Trier par Total Charges)", product_rows)}
-                    {build_table_html("Charges par Fournisseur (Trier par Total Charges)", supplier_rows)}
+                    {build_table_html("Charges par Article (Trier par Total Net)", product_rows)}
+                    {build_table_html("Charges par Fournisseur (Trier par Total Net)", supplier_rows)}
                 </div>
             </div>
             """

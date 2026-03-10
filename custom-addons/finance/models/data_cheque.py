@@ -12,13 +12,14 @@ class DataCheque(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'chq'
 
-    @api.depends('chq', 'benif_id.name')
+    @api.depends('chq', 'benif_id.name', 'ste_id.name', 'amount')
     def _compute_display_name(self):
         for rec in self:
-            if rec.benif_id:
-                rec.display_name = f"{rec.chq} - {rec.benif_id.name}"
-            else:
-                rec.display_name = rec.chq
+            chq = rec.chq or ""
+            benif = rec.benif_id.name if rec.benif_id else ""
+            ste = rec.ste_id.name if rec.ste_id else ""
+            amount = rec.amount or 0.0
+            rec.display_name = f"({chq} - {benif} - {ste} - {amount} MAD)"
 
     physical_cheque_id = fields.Many2one('finance.cheque.physical', string="Chèque Physique", readonly=True, index=True)
 

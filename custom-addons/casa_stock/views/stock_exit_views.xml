@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="create_uid" string="Créé par" widget="many2one_avatar_user" optional="show"/>
+                <field name="validation_user_id" string="Validé par" widget="many2one_avatar_user" optional="show"/>
                 <field name="product_id"/>
                 <field name="ste_id"/>
                 <field name="qty"/>
@@ -56,7 +57,8 @@
                             <field name="name"/>
                         </h1>
                         <h3>
-                            <field name="create_uid" string="Créé par" widget="many2one_avatar_user" readonly="1"/>
+                            <span class="o_form_label">Créé par</span> <field name="create_uid" widget="many2one_avatar_user" readonly="1" class="oe_inline"/>
+                            <span class="o_form_label ms-3" invisible="not validation_user_id">Validé par</span> <field name="validation_user_id" widget="many2one_avatar_user" readonly="1" class="oe_inline" invisible="not validation_user_id"/>
                         </h3>
                     </div>
                     

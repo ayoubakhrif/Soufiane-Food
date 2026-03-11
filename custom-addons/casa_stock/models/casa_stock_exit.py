@@ -57,6 +57,7 @@ class CasaStockExit(models.Model):
 
     # Discount traceability fields (written by casa.stock.discount on confirmation)
     discount_amount = fields.Float(string='Réduction', default=0.0)
+    validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
     price_sale_final = fields.Float(
         string='Prix Vente Final',
         compute='_compute_final_price', store=True,
@@ -198,7 +199,8 @@ class CasaStockExit(models.Model):
             })
             rec.write({
                 'state': 'done',
-                'move_id': move.id
+                'move_id': move.id,
+                'validation_user_id': self.env.user.id
             })
 
     def action_cancel(self):

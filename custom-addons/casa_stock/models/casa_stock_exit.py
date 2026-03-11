@@ -266,3 +266,30 @@ class CasaStockExit(models.Model):
         for rec in self:
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
+
+    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id')
+    def _check_stock_availability(self):
+        for rec in self:
+            if rec.state != 'draft':
+                continue
+                
+            domain = [
+                ('product_id', '=', rec.product_id.id),
+                ('lot', '=', rec.lot),
+                ('dum', '=', rec.dum),
+                ('ville', '=', rec.ville),
+                ('frigo', '=', rec.frigo),
+                ('ste_id', '=', rec.ste_id.id),
+                ('state', '=', 'done')
+            ]
+            res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
+            total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
+            
+            if rec.qty > total_available:
+                raise UserError(_(
+                    "Quantité insuffisante pour l'article %(product)s.\n"
+                    "Demandée: %(req)s, Disponible: %(avail)s",
+                    product=rec.product_id.name,
+                    req=rec.qty,
+                    avail=total_available
+                ))

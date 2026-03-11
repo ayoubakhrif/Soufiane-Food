@@ -97,4 +97,52 @@
             </p>
         </field>
     </record>
+
+    <!-- UI Validation for Article Correcteur -->
+    <record id="view_achat_contract_form_article_correcteur" model="ir.ui.view">
+        <field name="name">achat.contract.form.correcteur</field>
+        <field name="model">achat.contract</field>
+        <field name="inherit_id" ref="achat.view_achat_contract_form"/>
+        <field name="groups_id" eval="[(4, ref('achat.group_achat_article_correcteur'))]"/>
+        <field name="arch" type="xml">
+            <!-- Ensure other fields are visually readonly. 
+                 Since Odoo view inheritance doesn't natively support "make everything EXCEPT one field readonly" easily 
+                 without explicit XPaths, we will rely predominantly on the server-side constraint for full security,
+                 but can try to disable the main fields visually to avoid user frustration -->
+            <xpath expr="//field[@name='date']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='supplier_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='ste_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='legacy_article_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='details']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='incoterm']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='origin_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='total_amount']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='quantity_negotiated']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='weight_total']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='free_time_negotiated']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

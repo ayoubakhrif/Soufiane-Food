@@ -1,5 +1,5 @@
-from odoo import models, fields, api
-
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 class AchatContract(models.Model):
     _name = 'achat.contract'
     _description = 'Purchase Contract'
@@ -76,3 +76,13 @@ class AchatContract(models.Model):
                 rec.state = 'open'
             # Note: We don't auto-open because user might manually close a contract early
 
+    def write(self, vals):
+        if self.env.user.has_group('achat.group_achat_article_correcteur') and not self.env.user.has_group('achat.group_purchase_manager') and not self.env.user.has_group('achat.group_purchase_admin'):
+            allowed_fields = {'article_id'}
+            attempted_fields = set(vals.keys())
+            unauthorized_fields = attempted_fields - allowed_fields
+            
+            if unauthorized_fields:
+                raise UserError(_("En tant qu'« Article correcteur », vous n'êtes autorisé à modifier que l'article sur ce contrat."))
+
+        return super(AchatContract, self).write(vals)

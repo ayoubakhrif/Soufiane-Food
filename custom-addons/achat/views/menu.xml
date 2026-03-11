@@ -19,7 +19,7 @@
               name="Contrats"
               parent="menu_achat_root"
               action="action_achat_contract"
-              groups="achat.group_purchase_manager,achat.group_purchase_admin"
+              groups="achat.group_purchase_manager,achat.group_purchase_admin,achat.group_achat_article_correcteur"
               sequence="5"/>
 
     <menuitem id="menu_achat_contract_advances"

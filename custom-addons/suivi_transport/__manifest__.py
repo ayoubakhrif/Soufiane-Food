@@ -15,10 +15,10 @@
     'depends': ['base', 'company_data', 'hr'],
     'data': [
         'security/ir.model.access.csv',
-        'views/menus.xml',
         'views/suivi_client_views.xml',
         'views/suivi_chauffeur_views.xml',
         'views/suivi_operation_views.xml',
+        'views/menus.xml',
     ],
     'installable': True,
     'application': True,

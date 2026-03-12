@@ -54,7 +54,17 @@ class LogisticsEntry(models.Model):
             article = rec.article_id.name or ''
             ste = rec.ste_id.name or ''
             total = rec.amount_total or 0.0
-            rec.calendar_label = f"{supplier} - {article} - {ste} - {total:,.2f} MAD"
+            # Format total with space as thousands separator
+            total_str = "{:,.2f}".format(total).replace(",", " ")
+            rec.calendar_label = f"{supplier} - {article} - {ste} - {total_str} MAD"
+
+    @api.depends('calendar_label', 'bl_number')
+    def _compute_display_name(self):
+        for rec in self:
+            if rec.calendar_label:
+                rec.display_name = rec.calendar_label
+            else:
+                rec.display_name = rec.bl_number or "Nouveau"
 
     @api.constrains('bl_number', 'contract_id')
     def _check_bl_contract_unique(self):

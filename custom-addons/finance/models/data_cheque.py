@@ -8,7 +8,6 @@ from markupsafe import Markup
 class DataCheque(models.Model):
     _name = 'datacheque'
     _description = 'Data chèque'
-    _description = 'Data chèque'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'chq'
 

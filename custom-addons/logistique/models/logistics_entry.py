@@ -177,7 +177,7 @@ class LogisticsEntry(models.Model):
     # _onchange_contract_id moved to achat module
     
     # BL number from dossier
-    bl_number = fields.Char(string='BL Number', store=True)
+    bl_number = fields.Char(related='dossier_id.name', string='BL Number', store=True, readonly=False)
     container_count = fields.Integer(
         string="Nb Conteneurs",
         compute="_compute_container_count",
@@ -237,6 +237,9 @@ class LogisticsEntry(models.Model):
                     'name': vals.get('bl_number')
                 })
                 vals['dossier_id'] = dossier.id
+            
+            # Since bl_number is now related, we don't want Odoo to try writing it twice during creation
+            vals.pop('bl_number', None)
 
         # Create the logistics entry
         record = super(LogisticsEntry, self).create(vals)
@@ -264,10 +267,6 @@ class LogisticsEntry(models.Model):
         
         res = super(LogisticsEntry, self).write(vals)
         for rec in self:
-            # Sync BL Number to Dossier Name
-            if 'bl_number' in vals and rec.dossier_id:
-                rec.dossier_id.name = vals['bl_number']
-            
             # Sync Containers to Dossier (if added/changed)
             if 'container_ids' in vals and rec.dossier_id:
                 rec.container_ids.write({'dossier_id': rec.dossier_id.id})

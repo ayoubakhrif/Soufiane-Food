@@ -31,7 +31,6 @@
                         <group>
                             <field name="chauffeur_id"/>
                             <field name="date"/>
-                            <field name="lot"/>
                         </group>
                         <group>
                             <field name="montant"/>

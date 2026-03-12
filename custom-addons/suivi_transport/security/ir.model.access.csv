@@ -9,3 +9,5 @@ access_suivi_operation_manager,suivi.operation manager,model_suivi_operation,gro
 access_suivi_operation_line_manager,suivi.operation.line manager,model_suivi_operation_line,group_suivi_manager,1,1,1,1
 access_core_employee_suivi_user,core.employee suivi user,custom_employee.model_core_employee,group_suivi_user,1,0,0,0
 access_core_employee_suivi_manager,core.employee suivi manager,custom_employee.model_core_employee,group_suivi_manager,1,0,0,0
+access_core_job_position_suivi_user,core.job.position suivi user,custom_employee.model_core_job_position,group_suivi_user,1,0,0,0
+access_core_job_position_suivi_manager,core.job.position suivi manager,custom_employee.model_core_job_position,group_suivi_manager,1,0,0,0

@@ -1,5 +1,11 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_suivi_client_user,suivi.client user,model_suivi_client,base.group_user,1,1,1,1
-access_suivi_chauffeur_user,suivi.chauffeur user,model_suivi_chauffeur,base.group_user,1,1,1,1
-access_suivi_operation_user,suivi.operation user,model_suivi_operation,base.group_user,1,1,1,1
-access_suivi_operation_line_user,suivi.operation.line user,model_suivi_operation_line,base.group_user,1,1,1,1
+access_suivi_client_user,suivi.client user,model_suivi_client,group_suivi_user,1,1,1,0
+access_suivi_chauffeur_user,suivi.chauffeur user,model_suivi_chauffeur,group_suivi_user,1,1,1,0
+access_suivi_operation_user,suivi.operation user,model_suivi_operation,group_suivi_user,1,1,1,0
+access_suivi_operation_line_user,suivi.operation.line user,model_suivi_operation_line,group_suivi_user,1,1,1,0
+access_suivi_client_manager,suivi.client manager,model_suivi_client,group_suivi_manager,1,1,1,1
+access_suivi_chauffeur_manager,suivi.chauffeur manager,model_suivi_chauffeur,group_suivi_manager,1,1,1,1
+access_suivi_operation_manager,suivi.operation manager,model_suivi_operation,group_suivi_manager,1,1,1,1
+access_suivi_operation_line_manager,suivi.operation.line manager,model_suivi_operation_line,group_suivi_manager,1,1,1,1
+access_core_employee_suivi_user,core.employee suivi user,custom_employee.model_core_employee,group_suivi_user,1,0,0,0
+access_core_employee_suivi_manager,core.employee suivi manager,custom_employee.model_core_employee,group_suivi_manager,1,0,0,0

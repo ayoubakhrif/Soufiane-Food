@@ -4,6 +4,7 @@
     <menuitem id="menu_suivi_transport_root"
               name="Suivi Transport"
               web_icon="suivi_transport,static/description/icon.png"
+              groups="suivi_transport.group_suivi_user,suivi_transport.group_suivi_manager"
               sequence="25"/> <!-- Positioned somewhat near transport or logistique -->
 
     <!-- Operations Menu -->

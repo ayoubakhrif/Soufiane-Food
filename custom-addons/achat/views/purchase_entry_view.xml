@@ -165,6 +165,17 @@
         </field>
     </record>
 
+    <!-- PURCHASE CALENDAR VIEW -->
+    <record id="view_purchase_entry_calendar" model="ir.ui.view">
+        <field name="name">purchase.entry.calendar</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <calendar string="Dossiers Achat" date_start="eta" color="supplier_id" mode="month">
+                <field name="calendar_label"/>
+            </calendar>
+        </field>
+    </record>
+
 
     <!-- PURCHASE SEARCH VIEW -->
     <record id="view_purchase_entry_search" model="ir.ui.view">
@@ -228,11 +239,12 @@
     <record id="action_purchase_entry" model="ir.actions.act_window">
         <field name="name">Dossiers Achat</field>
         <field name="res_model">logistique.entry</field>
-        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="view_mode">tree,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_purchase_entry_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree',  'view_id': ref('view_purchase_entry_tree')}),
             (0, 0, {'view_mode': 'form',  'view_id': ref('view_purchase_entry_form')}),
+            (0, 0, {'view_mode': 'calendar', 'view_id': ref('view_purchase_entry_calendar')}),
             (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_purchase_entry_pivot')}),
             (0, 0, {'view_mode': 'graph', 'view_id': ref('view_purchase_entry_graph')})]" />
         <field name="domain">[]</field>

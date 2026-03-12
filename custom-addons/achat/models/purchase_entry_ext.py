@@ -45,6 +45,17 @@ class LogisticsEntry(models.Model):
                 and rec.eta <= next_thursday
             )
 
+    calendar_label = fields.Char(string='Label Calendrier', compute='_compute_calendar_label')
+
+    @api.depends('supplier_id.name', 'article_id.name', 'ste_id.name', 'amount_total')
+    def _compute_calendar_label(self):
+        for rec in self:
+            supplier = rec.supplier_id.name or ''
+            article = rec.article_id.name or ''
+            ste = rec.ste_id.name or ''
+            total = rec.amount_total or 0.0
+            rec.calendar_label = f"{supplier} - {article} - {ste} - {total:,.2f} MAD"
+
     @api.constrains('bl_number', 'contract_id')
     def _check_bl_contract_unique(self):
         """Prevent duplicate BL numbers for the same contract"""

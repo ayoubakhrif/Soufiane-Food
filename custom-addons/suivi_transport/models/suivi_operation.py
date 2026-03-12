@@ -28,3 +28,4 @@ class SuiviOperationLine(models.Model):
     operation_id = fields.Many2one('suivi.operation', string='Opération', required=True, ondelete='cascade')
     client_id = fields.Many2one('suivi.client', string='Client')
     article_id = fields.Many2one('company.article', string='Article')
+    lot = fields.Char(string='LOT')

@@ -45,6 +45,7 @@
                                 <tree editable="bottom">
                                     <field name="client_id" required="1"/>
                                     <field name="article_id" required="1"/>
+                                    <field name="lot"/>
                                 </tree>
                             </field>
                         </page>

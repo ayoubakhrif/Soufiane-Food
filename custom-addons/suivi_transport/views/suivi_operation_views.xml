@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_operation_tree" model="ir.ui.view">
+        <field name="name">suivi.operation.tree</field>
+        <field name="model">suivi.operation</field>
+        <field name="arch" type="xml">
+            <tree string="Opérations Transport">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="chauffeur_id"/>
+                <field name="lot"/>
+                <field name="montant" sum="Total Montant"/>
+                <field name="credit" sum="Total Crédit"/>
+                <field name="payer_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_operation_form" model="ir.ui.view">
+        <field name="name">suivi.operation.form</field>
+        <field name="model">suivi.operation</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Opération">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chauffeur_id"/>
+                            <field name="date"/>
+                            <field name="lot"/>
+                        </group>
+                        <group>
+                            <field name="montant"/>
+                            <field name="credit"/>
+                            <field name="payer_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Détails" name="lines_details">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="client_id" required="1"/>
+                                    <field name="article_id" required="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_operation" model="ir.actions.act_window">
+        <field name="name">Opérations</field>
+        <field name="res_model">suivi.operation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_chauffeur_tree" model="ir.ui.view">
+        <field name="name">suivi.chauffeur.tree</field>
+        <field name="model">suivi.chauffeur</field>
+        <field name="arch" type="xml">
+            <tree string="Chauffeurs Suivi">
+                <field name="name"/>
+                <field name="employee_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_chauffeur_form" model="ir.ui.view">
+        <field name="name">suivi.chauffeur.form</field>
+        <field name="model">suivi.chauffeur</field>
+        <field name="arch" type="xml">
+            <form string="Chauffeur Suivi">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <field name="employee_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_chauffeur" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">suivi.chauffeur</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

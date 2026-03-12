@@ -63,3 +63,8 @@ class AchatArticlePrice(models.Model):
         string='Details',
         help='Additional information or remarks'
     )
+
+    _sql_constraints = [
+        ('article_supplier_date_uniq', 'unique(article_id, supplier_id, date)', 
+         'Ce produit existe déjà pour ce fournisseur à la même date !')
+    ]

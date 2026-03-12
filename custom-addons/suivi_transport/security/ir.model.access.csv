@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_suivi_client_user,suivi.client user,model_suivi_client,base.group_user,1,1,1,1
+access_suivi_chauffeur_user,suivi.chauffeur user,model_suivi_chauffeur,base.group_user,1,1,1,1
+access_suivi_operation_user,suivi.operation user,model_suivi_operation,base.group_user,1,1,1,1
+access_suivi_operation_line_user,suivi.operation.line user,model_suivi_operation_line,base.group_user,1,1,1,1

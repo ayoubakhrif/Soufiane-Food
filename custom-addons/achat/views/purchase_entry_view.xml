@@ -172,6 +172,9 @@
         <field name="arch" type="xml">
             <calendar string="Dossiers Achat" date_start="eta" color="supplier_id" mode="month">
                 <field name="calendar_label"/>
+                <field name="bl_number"/>
+                <field name="container_names"/>
+                <field name="invoice_number"/>
             </calendar>
         </field>
     </record>

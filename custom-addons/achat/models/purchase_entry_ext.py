@@ -56,7 +56,7 @@ class LogisticsEntry(models.Model):
             total = rec.amount_total or 0.0
             # Format total with space as thousands separator
             total_str = "{:,.2f}".format(total).replace(",", " ")
-            rec.calendar_label = f"{supplier} - {article} - {ste} - {total_str} MAD"
+            rec.calendar_label = f"{supplier} - {article} - {ste} - {total_str} USD"
 
     @api.depends('calendar_label', 'bl_number')
     def _compute_display_name(self):

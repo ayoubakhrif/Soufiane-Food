@@ -11,6 +11,8 @@ class DataCheque(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'chq'
 
+    active = fields.Boolean(default=True, tracking=True)
+
     @api.depends('chq', 'benif_id.name', 'ste_id.name', 'amount')
     def _compute_display_name(self):
         for rec in self:

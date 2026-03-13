@@ -9,5 +9,11 @@ class LogistiqueContainer(models.Model):
     ]
 
     name = fields.Char(string='Numéro Conteneur', required=True)
-    dossier_id = fields.Many2one('logistique.dossier', string='Dossier / BL')
     entry_id = fields.Many2one('logistique.entry', string='Entry')
+    dossier_id = fields.Many2one(
+        'logistique.dossier',
+        string='Dossier / BL',
+        related='entry_id.dossier_id',
+        store=True,
+        readonly=True
+    )

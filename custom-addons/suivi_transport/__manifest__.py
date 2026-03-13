@@ -12,7 +12,7 @@
     """,
     'author': 'Soufiane Food',
     'website': '',
-    'depends': ['base', 'company_data', 'hr'],
+    'depends': ['base', 'company_data', 'custom_employee'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

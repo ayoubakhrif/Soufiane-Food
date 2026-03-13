@@ -11,7 +11,7 @@ class SurestarieMagasinageReport(models.Model):
     week = fields.Char(string="Semaine", readonly=True)
     bl_number = fields.Char(string="Numéro BL", readonly=True)
     
-    article_id = fields.Many2one('logistique.article', string="Article", readonly=True)
+    article_id = fields.Many2one('achat.article', string="Article", readonly=True)
     supplier_id = fields.Many2one('logistique.supplier', string="Fournisseur", readonly=True)
     
     status = fields.Selection([

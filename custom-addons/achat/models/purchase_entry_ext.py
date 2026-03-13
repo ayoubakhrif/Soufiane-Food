@@ -96,6 +96,9 @@ class LogisticsEntry(models.Model):
         """Admin-only: Reset purchase state back to Draft."""
         self.write({'purchase_state': 'draft'})
 
+    article_id = fields.Many2one('achat.article', string='Article')
+    details = fields.Char(string='Details')
+
     @api.onchange('contract_id')
     def _onchange_contract_id(self):
         if self.contract_id:

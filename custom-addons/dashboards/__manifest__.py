@@ -12,7 +12,7 @@
     'author': "Ayoub Akhrif",
     'category': 'Reporting',
     'version': '0.1',
-    'depends': ['base', 'kal3iya', 'logistique', 'claims'],
+    'depends': ['base', 'kal3iya', 'logistique', 'claims', 'achat'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

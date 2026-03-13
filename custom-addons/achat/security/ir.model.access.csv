@@ -66,3 +66,4 @@ access_company_article_category_purchase_viewer,company.article.category.purchas
 access_company_article_category_purchase_user,company.article.category.purchase.user,company_data.model_company_article_category,achat.group_purchase_user,1,0,0,0
 access_company_article_category_purchase_manager,company.article.category.purchase.manager,company_data.model_company_article_category,achat.group_purchase_manager,1,0,0,0
 access_company_article_category_purchase_admin,company.article.category.purchase.admin,company_data.model_company_article_category,achat.group_purchase_admin,1,0,0,0
+access_achat_article_all_read,achat.article all read,model_achat_article,base.group_user,1,0,0,0

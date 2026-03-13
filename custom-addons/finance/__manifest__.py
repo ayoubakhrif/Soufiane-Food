@@ -4,7 +4,7 @@
     'author': 'Ayoub Akhrif',
     'category': 'Accounting',
     'version': '1.0',
-    'depends': ['base', 'mail', 'logistique', 'douane', 'custom_employee'],
+    'depends': ['base', 'mail', 'logistique', 'douane', 'custom_employee', 'achat'],
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',

@@ -96,6 +96,7 @@ class LogisticsEntry(models.Model):
         """Admin-only: Reset purchase state back to Draft."""
         self.write({'purchase_state': 'draft'})
 
+    legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
     article_id = fields.Many2one('achat.article', string='Article')
     details = fields.Char(string='Details')
 

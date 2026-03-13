@@ -17,14 +17,28 @@ def migrate(cr, version):
     ]
 
     for table in tables_to_check:
-        # Check if column exists before renaming
+        # Check if 'article_id' exists
         cr.execute("""
             SELECT column_name 
             FROM information_schema.columns 
             WHERE table_name = %s AND column_name = 'article_id'
         """, (table,))
+        has_article_id = cr.fetchone()
         
-        if cr.fetchone():
+        # Check if 'legacy_article_id' exists
+        cr.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = %s AND column_name = 'legacy_article_id'
+        """, (table,))
+        has_legacy_id = cr.fetchone()
+        
+        if has_article_id:
+            if has_legacy_id:
+                _logger.info("Both article_id and legacy_article_id exist in %s. Dropping new column to rename old one.", table)
+                # Drop the newly created (likely empty) column to allow renaming the old data-filled one
+                cr.execute(f"ALTER TABLE {table} DROP COLUMN legacy_article_id")
+            
             _logger.info("Renaming column article_id to legacy_article_id on %s", table)
             cr.execute(f"ALTER TABLE {table} RENAME COLUMN article_id TO legacy_article_id")
         else:

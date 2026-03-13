@@ -23,6 +23,7 @@
                             <field name="bl_number" readonly="1"/>
                             <field name="supplier_id" readonly="1" options="{'no_open': True}"/>
                             <field name="article_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="lot" readonly="1"/>
                         </group>
                         <group>
                             <field name="eta" readonly="1"/>
@@ -111,6 +112,7 @@
                 <field name="dum"/>
                 <field name="supplier_id"/>
                 <field name="article_id"/>
+                <field name="lot"/>
                 <field name="invoice_number"/>
                 <filter string="En cours" name="status_in_progress" domain="[('status', '=', 'in_progress')]"/>
                 <group expand="0" string="Group By">

@@ -35,9 +35,9 @@ def migrate(cr, version):
         
         if has_article_id:
             if has_legacy_id:
-                _logger.info("Both article_id and legacy_article_id exist in %s. Dropping new column to rename old one.", table)
-                # Drop the newly created (likely empty) column to allow renaming the old data-filled one
-                cr.execute(f"ALTER TABLE {table} DROP COLUMN legacy_article_id")
+                _logger.info("Both article_id and legacy_article_id exist in %s. Dropping new column (CASCADE) to rename old one.", table)
+                # Use CASCADE to drop dependent SQL views (Odoo will recreate them later)
+                cr.execute(f"ALTER TABLE {table} DROP COLUMN legacy_article_id CASCADE")
             
             _logger.info("Renaming column article_id to legacy_article_id on %s", table)
             cr.execute(f"ALTER TABLE {table} RENAME COLUMN article_id TO legacy_article_id")

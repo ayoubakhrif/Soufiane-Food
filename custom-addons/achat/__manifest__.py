@@ -1,6 +1,6 @@
 {
     'name': 'Achat Management',
-    'version': '1.3',
+    'version': '1.4',
     'category': 'Purchase',
     'summary': 'Gestion des Achats et Dossiers Logistiques',
     'description': """

@@ -10,8 +10,7 @@
                 <field name="bl_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="article_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="eta"/>
                 <field name="date_booking" optional="show"/>
                 <field name="date_docs_received" optional="show"/>
@@ -86,7 +85,7 @@
                         </group>
                         <group string="Détails Marchandise">
                             <!-- For non-admins: readonly when confirmed -->
-                            <field name="article_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="achat_article_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="details" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="lot" groups="!achat.group_purchase_admin"/>
                             <field name="invoice_number" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
@@ -95,7 +94,7 @@
                             <field name="amount_total" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             
                             <!-- For admins: always editable -->
-                            <field name="article_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="achat_article_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
                             <field name="details" groups="achat.group_purchase_admin"/>
                             <field name="lot" groups="achat.group_purchase_admin"/>
                             <field name="invoice_number" groups="achat.group_purchase_admin"/>
@@ -190,7 +189,7 @@
                 <field name="contract_id"/>
                 <field name="supplier_id"/>
                 <field name="ste_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="invoice_number"/>
                 <field name="lot"/>
                 
@@ -202,7 +201,7 @@
                     <filter string="Supplier" name="group_by_supplier" context="{'group_by': 'supplier_id'}"/>
                     <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Status" name="group_by_state" context="{'group_by': 'purchase_state'}"/>
-                    <filter string="Article" name="group_by_article" context="{'group_by': 'article_id'}"/>
+                    <filter string="Article" name="group_by_article" context="{'group_by': 'achat_article_id'}"/>
                 </group>
             </search>
         </field>
@@ -216,7 +215,7 @@
         <field name="arch" type="xml">
             <pivot string="Analyse Dossiers Achat">
                 <field name="supplier_id" type="row"/>
-                <field name="article_id"  type="row"/>
+                <field name="achat_article_id"  type="row"/>
                 <field name="ste_id"      type="col"/>
                 <field name="weight"       type="measure" string="Poids (T)"/>
                 <field name="amount_total" type="measure" string="Montant Total"/>
@@ -232,7 +231,7 @@
         <field name="arch" type="xml">
             <graph string="Analyse Dossiers Achat" type="bar" stacked="True">
                 <field name="supplier_id" type="row"/>
-                <field name="article_id"  type="row"/>
+                <field name="achat_article_id"  type="row"/>
                 <field name="amount_total" type="measure" string="Montant Total"/>
             </graph>
         </field>

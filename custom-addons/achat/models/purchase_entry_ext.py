@@ -47,11 +47,11 @@ class LogisticsEntry(models.Model):
 
     calendar_label = fields.Char(string='Label Calendrier', compute='_compute_calendar_label')
 
-    @api.depends('supplier_id.name', 'article_id.name', 'ste_id.name', 'amount_total')
+    @api.depends('supplier_id.name', 'achat_article_id.name', 'ste_id.name', 'amount_total')
     def _compute_calendar_label(self):
         for rec in self:
             supplier = rec.supplier_id.name or ''
-            article = rec.article_id.name or ''
+            article = rec.achat_article_id.name or ''
             ste = rec.ste_id.name or ''
             total = rec.amount_total or 0.0
             # Format total with space as thousands separator
@@ -97,7 +97,7 @@ class LogisticsEntry(models.Model):
         self.write({'purchase_state': 'draft'})
 
     legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
-    article_id = fields.Many2one('achat.article', string='Article')
+    achat_article_id = fields.Many2one('achat.article', string='Article')
     details = fields.Char(string='Details')
 
     @api.onchange('contract_id')
@@ -106,7 +106,7 @@ class LogisticsEntry(models.Model):
             self.contract_num = self.contract_id.name
             self.supplier_id = self.contract_id.supplier_id
             self.ste_id = self.contract_id.ste_id
-            self.article_id = self.contract_id.article_id
+            self.achat_article_id = self.contract_id.article_id
             self.incoterm = self.contract_id.incoterm
             self.details = self.contract_id.details
 

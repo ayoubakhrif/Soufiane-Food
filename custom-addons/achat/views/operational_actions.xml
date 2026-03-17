@@ -11,7 +11,7 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="details"/>
                 <field name="weight" sum="Total Poids"/>
                 <field name="price_unit" string="UP"/>
@@ -80,7 +80,7 @@
                 <field name="bl_number"/>
                 <field name="supplier_id"/>
                 <field name="ste_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
 
                 <!-- Filter: ETA <= next Thursday, evaluated server-side via computed field -->
                 <filter name="eta_semaine"
@@ -125,7 +125,7 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="details"/>
                 <field name="weight" sum="Total Poids"/>
                 <field name="price_unit" string="UP"/>

@@ -46,7 +46,7 @@ class CasaStockReturn(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.return') or '/'
-        return super(CasaStockReturn, self).create(vals)
+        return super().create(vals)
 
     def write(self, vals):
         for rec in self:
@@ -54,7 +54,7 @@ class CasaStockReturn(models.Model):
                 forbidden_fields = ['exit_id', 'qty', 'date', 'driver_id']
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les retours confirmés ne peuvent pas être modifiés. Utilisez 'Annuler'."))
-        return super(CasaStockReturn, self).write(vals)
+        return super().write(vals)
 
     def action_confirm(self):
         for rec in self:
@@ -111,6 +111,16 @@ class CasaStockReturn(models.Model):
             if rec.state != 'done':
                 raise UserError(_("Vous ne pouvez annuler que des retours confirmés."))
             
+            # Check if cancelling results in negative stock
+            # Reusing the helper from casa.stock.entry
+            current_stock = self.env['casa.stock.entry']._get_current_stock_qty(rec)
+            if current_stock < rec.qty:
+                 raise UserError(_(
+                    "Annulation impossible ! Le stock deviendrait négatif.\n"
+                    "Stock actuel : %s, Quantité à retirer : %s.\n"
+                    "Certaines quantités ont probablement déjà été vendues."
+                ) % (current_stock, rec.qty))
+
             # Reverse Move (Negative quantity)
             cancel_move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,

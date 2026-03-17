@@ -1,0 +1,25 @@
+{
+    "name": "Odoo Dev Container",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "odoo",
+    "workspaceFolder": "/mnt/extra-addons/custom-addons",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "odooide.odoo-snippets",
+                "manhnd.odoo-code-snippets"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "python.analysis.extraPaths": [
+                    "/usr/lib/python3/dist-packages"
+                ]
+            }
+        }
+    },
+    "remoteUser": "odoo"
+}

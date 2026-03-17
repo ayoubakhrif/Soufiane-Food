@@ -28,6 +28,7 @@
         'views/surest_mag_menus.xml',
         'views/menus.xml',
         'data/server_actions.xml',
+        'data/cron_terminal49.xml',
     ],
     'installable': True,
     'application': True,

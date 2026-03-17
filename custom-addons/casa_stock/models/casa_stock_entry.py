@@ -79,7 +79,7 @@ class CasaStockEntry(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.entry') or '/'
-        return super(CasaStockEntry, self).create(vals)
+        return super().create(vals)
 
     def write(self, vals):
         for rec in self:
@@ -90,7 +90,7 @@ class CasaStockEntry(models.Model):
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
-        return super(CasaStockEntry, self).write(vals)
+        return super().write(vals)
 
     def action_confirm(self):
         for rec in self:
@@ -128,6 +128,15 @@ class CasaStockEntry(models.Model):
             if rec.state != 'done':
                 raise UserError(_("Vous ne pouvez annuler que des entrées confirmées."))
             
+            # Check if cancelling results in negative stock
+            current_stock = self._get_current_stock_qty(rec)
+            if current_stock < rec.qty:
+                 raise UserError(_(
+                    "Annulation impossible ! Le stock deviendrait négatif.\n"
+                    "Stock actuel : %s, Quantité à retirer : %s.\n"
+                    "Certaines quantités ont probablement déjà été vendues."
+                ) % (current_stock, rec.qty))
+
             # Create Reversal Move
             cancel_move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,
@@ -153,6 +162,33 @@ class CasaStockEntry(models.Model):
                 'state': 'cancel',
                 'cancel_move_id': cancel_move.id
             })
+
+    def _get_current_stock_qty(self, rec, price=None):
+        """Helper to get stock for specific dimensions."""
+        domain = [
+            ('product_id', '=', rec.product_id.id),
+            ('lot', '=', rec.lot),
+            ('dum', '=', rec.dum),
+            ('ville', '=', rec.ville),
+            ('frigo', '=', rec.frigo),
+            ('ste_id', '=', rec.ste_id.id),
+            ('state', '=', 'done')
+        ]
+        if rec.weight:
+            domain.append(('weight', '=', rec.weight))
+        else:
+            domain.append(('weight', '=', False))
+            
+        if rec.calibre:
+            domain.append(('calibre', '=', rec.calibre))
+        else:
+            domain.append(('calibre', '=', False))
+
+        if price is not None:
+             domain.append(('price_purchase', '=', price))
+
+        res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
+        return res[0]['qty'] if res and res[0]['qty'] else 0.0
 
     @api.constrains('qty')
     def _check_qty_positive(self):

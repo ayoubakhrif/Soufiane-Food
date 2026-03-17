@@ -144,7 +144,7 @@ class CasaStockExit(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.exit') or '/'
-        return super(CasaStockExit, self).create(vals)
+        return super().create(vals)
 
     def write(self, vals):
         for rec in self:
@@ -156,37 +156,20 @@ class CasaStockExit(models.Model):
                 # 'not_delivered' is EXPLICITLY ALLOWED to be changed
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
-        return super(CasaStockExit, self).write(vals)
+        return super().write(vals)
 
     def action_confirm(self):
         for rec in self:
             if rec.state != 'draft':
                 continue
             
-            # Optimized availability check using read_group
-            domain = [
-                ('product_id', '=', rec.product_id.id),
-                ('lot', '=', rec.lot),
-                ('dum', '=', rec.dum),
-                ('ville', '=', rec.ville),
-                ('frigo', '=', rec.frigo),
-                ('ste_id', '=', rec.ste_id.id),
-                ('state', '=', 'done')
-            ]
-            if rec.weight:
-                domain.append(('weight', '=', rec.weight))
-            else:
-                domain.append(('weight', '=', False))
-                
-            if rec.calibre:
-                domain.append(('calibre', '=', rec.calibre))
-            else:
-                domain.append(('calibre', '=', False))
-            res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
-            total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
+            # Optimized availability check using helper
+            total_available = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=rec.price_purchase)
             
             if rec.qty > total_available:
-                raise UserError(_("Stock insuffisant ! Disponible : %s, Demandé : %s") % (total_available, rec.qty))
+                raise UserError(_(
+                    "Stock insuffisant pour le prix %s MAD ! Disponible : %s, Demandé : %s"
+                ) % (rec.price_purchase, total_available, rec.qty))
             
             # Create Move
             move = self.env['casa.stock.move'].create({
@@ -282,38 +265,20 @@ class CasaStockExit(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
-    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id', 'weight', 'calibre')
+    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id', 'weight', 'calibre', 'price_purchase')
     def _check_stock_availability(self):
         for rec in self:
             if rec.state != 'draft':
                 continue
                 
-            domain = [
-                ('product_id', '=', rec.product_id.id),
-                ('lot', '=', rec.lot),
-                ('dum', '=', rec.dum),
-                ('ville', '=', rec.ville),
-                ('frigo', '=', rec.frigo),
-                ('ste_id', '=', rec.ste_id.id),
-                ('state', '=', 'done')
-            ]
-            if rec.weight:
-                domain.append(('weight', '=', rec.weight))
-            else:
-                domain.append(('weight', '=', False))
-                
-            if rec.calibre:
-                domain.append(('calibre', '=', rec.calibre))
-            else:
-                domain.append(('calibre', '=', False))
-            res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
-            total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
+            total_available = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=rec.price_purchase)
             
             if rec.qty > total_available:
                 raise UserError(_(
-                    "Quantité insuffisante pour l'article %(product)s.\n"
+                    "Quantité insuffisante pour l'article %(product)s au prix %(price)s MAD.\n"
                     "Demandée: %(req)s, Disponible: %(avail)s",
                     product=rec.product_id.name,
+                    price=rec.price_purchase,
                     req=rec.qty,
                     avail=total_available
                 ))

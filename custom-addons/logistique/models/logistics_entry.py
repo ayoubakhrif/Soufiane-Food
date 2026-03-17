@@ -1,6 +1,15 @@
 import re
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
+import logging
+import requests
+import json
+from datetime import datetime
+
+_logger = logging.getLogger(__name__)
+
+TERMINAL49_API_TOKEN = 'dD7a1vYR4KGS9iXE463Mv2dN'
+TERMINAL49_BASE_URL = 'https://api.terminal49.com/v2'
 
 class LogisticsEntry(models.Model):
     _name = 'logistique.entry'
@@ -111,6 +120,124 @@ class LogisticsEntry(models.Model):
     entry_date = fields.Date(string='Date of entry', tracking=True)
     exit_date = fields.Date(string='Date of exit', tracking=True)
     bad_date = fields.Date(string='Date of BAD', tracking=True)
+    
+    # Terminal49 Integration Fields
+    terminal49_shipment_id = fields.Char(string='ID Shipment Terminal49', copy=False, tracking=True)
+    last_terminal49_sync = fields.Datetime(string='Last T49 Sync', copy=False)
+
+    def _terminal49_get_tracking_number(self):
+        """Returns the BL number or the first container number."""
+        self.ensure_one()
+        if self.bl_number:
+            return self.bl_number
+        if self.container_ids:
+            return self.container_ids[0].name
+        return False
+
+    def action_terminal49_register(self):
+        """Manually register the shipment in Terminal49."""
+        for rec in self:
+            rec._terminal49_register_shipment()
+
+    def _terminal49_register_shipment(self):
+        """Sends a POST request to register tracking in Terminal49."""
+        self.ensure_one()
+        tracking_number = self._terminal49_get_tracking_number()
+        if not tracking_number or self.terminal49_shipment_id:
+            return
+
+        headers = {
+            'Authorization': f'Bearer {TERMINAL49_API_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        # We try to track by BOL if possible, or container
+        # Note: Terminal49 requires SCAC sometimes, but many numbers are auto-detected
+        payload = {
+            "data": {
+                "type": "tracking_request",
+                "attributes": {
+                    "number": tracking_number,
+                    # SCAC can be added if we have it in shipping_id (e.g. shipping_id.scac)
+                }
+            }
+        }
+
+        try:
+            response = requests.post(f"{TERMINAL49_BASE_URL}/tracking_requests", headers=headers, json=payload, timeout=10)
+            if response.status_code in (200, 201):
+                data = response.json()
+                shipment_id = data.get('data', {}).get('relationships', {}).get('shipment', {}).get('data', {}).get('id')
+                if shipment_id:
+                    self.write({'terminal49_shipment_id': shipment_id})
+                    self.message_post(body=_("Dossier enregistré sur Terminal49 (ID: %s)") % shipment_id)
+            elif response.status_code == 422:
+                # Already exists or invalid
+                _logger.warning("Terminal49: Error 422 for %s - %s", tracking_number, response.text)
+            else:
+                _logger.error("Terminal49 Register Error: %s - %s", response.status_code, response.text)
+        except Exception as e:
+            _logger.exception("Terminal49 Registration Exception: %s", str(e))
+
+    def action_terminal49_update_eta(self):
+        """Force update ETA from Terminal49."""
+        for rec in self:
+            rec._terminal49_update_eta()
+
+    def _terminal49_update_eta(self):
+        """Retrieves latest shipment data and updates ETA."""
+        self.ensure_one()
+        if not self.terminal49_shipment_id:
+            # Try registering if not done
+            self._terminal49_register_shipment()
+            if not self.terminal49_shipment_id:
+                return
+
+        headers = {
+            'Authorization': f'Bearer {TERMINAL49_API_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+
+        try:
+            response = requests.get(f"{TERMINAL49_BASE_URL}/shipments/{self.terminal49_shipment_id}", headers=headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                attrs = data.get('data', {}).get('attributes', {})
+                
+                # Priority: pod_eta_at (Port of Discharge ETA) -> predicted_eta
+                new_eta_str = attrs.get('pod_eta_at') or attrs.get('predicted_eta')
+                
+                if new_eta_str:
+                    # Date format from T49 usually ISO YYYY-MM-DD...
+                    new_eta_date = new_eta_str.split('T')[0]
+                    if str(self.eta) != new_eta_date:
+                        old_eta = self.eta
+                        self.write({
+                            'eta': new_eta_date,
+                            'last_terminal49_sync': fields.Datetime.now()
+                        })
+                        self.message_post(body=_(
+                            "Mise à jour automatique Terminal49 : ETA modifié de %s à %s"
+                        ) % (old_eta or 'vide', new_eta_date))
+                    else:
+                        self.write({'last_terminal49_sync': fields.Datetime.now()})
+            else:
+                _logger.error("Terminal49 Update Error: %s - %s", response.status_code, response.text)
+        except Exception as e:
+            _logger.exception("Terminal49 Update Exception: %s", str(e))
+
+    @api.model
+    def cron_terminal49_sync_eta(self):
+        """Cron method to sync ETA for all active entries."""
+        entries = self.search([
+            ('status', '!=', 'closed'),
+            ('terminal49_shipment_id', '!=', False)
+        ])
+        _logger.info("Terminal49 Sync: Processing %s entries", len(entries))
+        for entry in entries:
+            entry._terminal49_update_eta()
+            self.env.cr.commit() # Commit each to avoid losing progress if one fails? 
+            # Or depend on individual try/except in _terminal49_update_eta
     
     port_status = fields.Selection([
         ('on_port', 'On Port'),
@@ -242,7 +369,10 @@ class LogisticsEntry(models.Model):
             vals.pop('bl_number', None)
 
         # Create the logistics entry
-        record = super(LogisticsEntry, self).create(vals)
+        record = super().create(vals)
+        
+        # Register in Terminal49
+        record._terminal49_register_shipment()
         
         # Sync containers with dossier
         if record.dossier_id and record.container_ids:
@@ -265,7 +395,7 @@ class LogisticsEntry(models.Model):
         if 'status' in vals:
             vals['saisi_par'] = self.env.user.name
         
-        res = super(LogisticsEntry, self).write(vals)
+        res = super().write(vals)
         for rec in self:
             # Sync Containers to Dossier (if added/changed)
             if 'container_ids' in vals and rec.dossier_id:

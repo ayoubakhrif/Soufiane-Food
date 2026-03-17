@@ -82,6 +82,12 @@ class LogisticsEntry(models.Model):
                         f"The same BL number cannot be used twice for the same contract."
                     )
 
+    @api.constrains('price_unit')
+    def _check_price_unit(self):
+        for rec in self:
+            if rec.price_unit <= 0:
+                raise ValidationError("Le prix unitaire (P.U) doit être strictement supérieur à 0.")
+
     def action_confirm_purchase(self):
         # FIX: Allow regular purchase users to confirm too
         if not self.env.user.has_group('achat.group_purchase_user'):

@@ -1,5 +1,5 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class CasaStockExit(models.Model):
     _name = 'casa.stock.exit'
@@ -121,8 +121,12 @@ class CasaStockExit(models.Model):
                 
                 if rec.weight:
                     domain.append(('weight', '=', rec.weight))
+                else:
+                    domain.append(('weight', '=', False))
                 if rec.calibre:
                     domain.append(('calibre', '=', rec.calibre))
+                else:
+                    domain.append(('calibre', '=', False))
 
                 stock_records = Stock.search(domain)
                 
@@ -169,6 +173,15 @@ class CasaStockExit(models.Model):
                 ('ste_id', '=', rec.ste_id.id),
                 ('state', '=', 'done')
             ]
+            if rec.weight:
+                domain.append(('weight', '=', rec.weight))
+            else:
+                domain.append(('weight', '=', False))
+                
+            if rec.calibre:
+                domain.append(('calibre', '=', rec.calibre))
+            else:
+                domain.append(('calibre', '=', False))
             res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
             total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
             
@@ -269,7 +282,7 @@ class CasaStockExit(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
-    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id')
+    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id', 'weight', 'calibre')
     def _check_stock_availability(self):
         for rec in self:
             if rec.state != 'draft':
@@ -284,6 +297,15 @@ class CasaStockExit(models.Model):
                 ('ste_id', '=', rec.ste_id.id),
                 ('state', '=', 'done')
             ]
+            if rec.weight:
+                domain.append(('weight', '=', rec.weight))
+            else:
+                domain.append(('weight', '=', False))
+                
+            if rec.calibre:
+                domain.append(('calibre', '=', rec.calibre))
+            else:
+                domain.append(('calibre', '=', False))
             res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
             total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
             

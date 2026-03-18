@@ -230,7 +230,7 @@ class LogisticsEntry(models.Model):
     def cron_terminal49_sync_eta(self):
         """Cron method to sync ETA for all active entries."""
         entries = self.search([
-            ('status', '!=', 'closed'),
+            ('port_status', '=', 'on_port'),
             ('terminal49_shipment_id', '!=', False)
         ])
         _logger.info("Terminal49 Sync: Processing %s entries", len(entries))

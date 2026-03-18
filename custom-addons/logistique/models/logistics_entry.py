@@ -152,16 +152,16 @@ class LogisticsEntry(models.Model):
         }
         
         # We try to track by BOL if possible, or container
-        # Extraction automatique du SCAC (les 4 premières lettres)
-        scac = tracking_number[:4] if len(tracking_number) > 4 else ""
-        number_only = tracking_number[4:] if len(tracking_number) > 4 else tracking_number
+        # Extraction du SCAC (4 premières lettres) et du numéro (le reste)
+        scac = tracking_number[:4].upper()
+        number_only = tracking_number[4:]
 
         payload = {
             "data": {
                 "type": "tracking_request",
                 "attributes": {
-                    "number": number_only, # Le numéro sans le code SCAC
-                    "scac": scac           # Le code SCAC (ex: HLCU)
+                    "request_number": number_only, # Changé 'number' en 'request_number'
+                    "scac": scac
                 }
             }
         }

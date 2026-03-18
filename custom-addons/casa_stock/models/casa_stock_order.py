@@ -20,6 +20,14 @@ class CasaStockOrder(models.Model):
     
     order_line_ids = fields.One2many('casa.stock.order.line', 'order_id', string='Lignes de Commande')
     exit_ids = fields.One2many('casa.stock.exit', 'order_id', string='Sorties Générées', readonly=True)
+    is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
+
+    def _compute_is_cancel_hidden(self):
+        is_valid_admin = self.env.user.has_group('casa_stock.group_valid_admin')
+        is_admin = self.env.user.has_group('casa_stock.group_admin')
+        hidden = is_valid_admin and not is_admin
+        for rec in self:
+            rec.is_cancel_hidden = hidden
 
     @api.model
     def create(self, vals):

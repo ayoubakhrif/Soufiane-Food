@@ -29,10 +29,11 @@
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
                     <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
-                    <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state not in ('confirmed', 'done')"/>
+                    <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="is_cancel_hidden or state not in ('confirmed', 'done')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
                 </header>
                 <sheet>
+                    <field name="is_cancel_hidden" invisible="1"/>
                     <div class="alert alert-info border-0 mb-4" role="alert" invisible="state not in ('confirmed', 'done')">
                         <i class="fa fa-info-circle me-2"/>
                         <strong>Attention:</strong> Les opérations confirmées/validées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler</strong>.

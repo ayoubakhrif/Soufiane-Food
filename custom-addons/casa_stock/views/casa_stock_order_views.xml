@@ -33,10 +33,11 @@
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
-                    <button name="action_cancel" string="Annuler" type="object" invisible="state == 'cancel'"/>
+                    <button name="action_cancel" string="Annuler" type="object" invisible="is_cancel_hidden or state == 'cancel'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                 </header>
                 <sheet>
+                    <field name="is_cancel_hidden" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="action" icon="fa-truck" 
                                 name="%(action_casa_stock_exit_for_order)d"

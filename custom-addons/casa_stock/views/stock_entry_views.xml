@@ -28,7 +28,7 @@
             <form string="Entrée Stock Casa">
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
-                    <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'"/>
+                    <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
                     <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state not in ('confirmed', 'done')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
                 </header>

@@ -129,10 +129,10 @@ class LogisticsEntry(models.Model):
         """Returns the BL number or the first container number."""
         self.ensure_one()
         if self.bl_number:
-            return self.bl_number
-        if self.container_ids:
-            return self.container_ids[0].name
-        return False
+            return str(self.bl_number)
+        if self.container_ids and self.container_ids[0].name:
+            return str(self.container_ids[0].name)
+        return ""
 
     def action_terminal49_register(self):
         """Manually register the shipment in Terminal49."""
@@ -152,13 +152,16 @@ class LogisticsEntry(models.Model):
         }
         
         # We try to track by BOL if possible, or container
-        # Note: Terminal49 requires SCAC sometimes, but many numbers are auto-detected
+        # Extraction automatique du SCAC (les 4 premières lettres)
+        scac = tracking_number[:4] if len(tracking_number) > 4 else ""
+        number_only = tracking_number[4:] if len(tracking_number) > 4 else tracking_number
+
         payload = {
             "data": {
                 "type": "tracking_request",
                 "attributes": {
-                    "number": tracking_number,
-                    # SCAC can be added if we have it in shipping_id (e.g. shipping_id.scac)
+                    "number": number_only, # Le numéro sans le code SCAC
+                    "scac": scac           # Le code SCAC (ex: HLCU)
                 }
             }
         }
@@ -181,7 +184,6 @@ class LogisticsEntry(models.Model):
 
     def action_terminal49_update_eta(self):
         """Force update ETA from Terminal49."""
-        raise UserError("Le bouton fonctionne !")
         for rec in self:
             rec._terminal49_update_eta()
 

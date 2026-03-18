@@ -47,7 +47,8 @@ class CasaStockExit(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('done', 'Confirmé'),
+        ('confirmed', 'Confirmé'),
+        ('done', 'Validé'),
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
     mt_vente = fields.Float(
@@ -149,14 +150,14 @@ class CasaStockExit(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state == 'done':
+            if rec.state in ('confirmed', 'done'):
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
                     'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
                 # 'not_delivered' is EXPLICITLY ALLOWED to be changed
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
+                    raise UserError(_("Les opérations confirmées ou validées ne peuvent pas être modifiées. Utilisez 'Annuler'."))
         return super().write(vals)
 
     def action_confirm(self):
@@ -195,15 +196,23 @@ class CasaStockExit(models.Model):
                 'price_purchase': rec.price_purchase,
             })
             rec.write({
-                'state': 'done',
+                'state': 'confirmed',
                 'move_id': move.id,
+            })
+
+    def action_validate(self):
+        for rec in self:
+            if rec.state != 'confirmed':
+                continue
+            rec.write({
+                'state': 'done',
                 'validation_user_id': self.env.user.id
             })
 
     def action_cancel(self):
         for rec in self:
-            if rec.state != 'done':
-                raise UserError(_("Vous ne pouvez annuler que des sorties confirmées."))
+            if rec.state not in ('confirmed', 'done'):
+                raise UserError(_("Vous ne pouvez annuler que des sorties confirmées ou validées."))
             
             # Create Reversal Move
             cancel_move = self.env['casa.stock.move'].create({

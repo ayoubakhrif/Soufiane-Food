@@ -5,7 +5,7 @@
         <field name="name">casa.stock.order.tree</field>
         <field name="model">casa.stock.order</field>
         <field name="arch" type="xml">
-            <tree decoration-muted="state == 'cancel'" decoration-info="state == 'draft'" decoration-success="state == 'done'">
+            <tree decoration-muted="state == 'cancel'" decoration-info="state == 'draft'" decoration-warning="state == 'confirmed'" decoration-success="state == 'done'">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="client_id"/>
@@ -32,8 +32,9 @@
             <form>
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
                     <button name="action_cancel" string="Annuler" type="object" invisible="state == 'cancel'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -59,7 +60,7 @@
                     </group>
                     <notebook>
                         <page string="Lignes de Commande" name="order_lines">
-                            <field name="order_line_ids" readonly="state == 'done'">
+                            <field name="order_line_ids" readonly="state in ('confirmed', 'done')">
                                 <tree editable="bottom">
                                     <field name="stock_id" options="{'no_create': True, 'no_create_edit': True}"/>
                                     <field name="product_id" column_invisible="True"/>

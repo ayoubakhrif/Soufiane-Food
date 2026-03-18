@@ -13,7 +13,8 @@ class CasaStockOrder(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('done', 'Confirmée'),
+        ('confirmed', 'Confirmée'),
+        ('done', 'Validée'),
         ('cancel', 'Annulée'),
     ], string='État', default='draft', required=True)
     
@@ -50,10 +51,10 @@ class CasaStockOrder(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state == 'done':
+            if rec.state in ('confirmed', 'done'):
                 forbidden_fields = ['client_id', 'date', 'driver_id', 'order_line_ids']
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Vous ne pouvez pas modifier une commande confirmée."))
+                    raise UserError(_("Vous ne pouvez pas modifier une commande confirmée ou validée."))
         return super(CasaStockOrder, self).write(vals)
 
     def action_confirm(self):
@@ -92,14 +93,23 @@ class CasaStockOrder(models.Model):
             # and automatically rolls back the ENTIRE transaction (no exits or order state changes are saved)
             generated_exits.action_confirm()
 
+            order.write({'state': 'confirmed'})
+
+    def action_validate(self):
+        for order in self:
+            if order.state != 'confirmed':
+                continue
+            
+            # Validate generated exits
+            order.exit_ids.action_validate()
             order.write({'state': 'done'})
 
     def action_cancel(self):
         for order in self:
-            if order.state == 'done':
+            if order.state in ('confirmed', 'done'):
                 # Cancel all generated exits
                 for exit_record in order.exit_ids:
-                    if exit_record.state == 'done':
+                    if exit_record.state in ('confirmed', 'done'):
                         exit_record.action_cancel()
             order.write({'state': 'cancel'})
 

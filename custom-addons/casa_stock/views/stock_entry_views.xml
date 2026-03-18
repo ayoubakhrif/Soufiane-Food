@@ -27,7 +27,6 @@
         <field name="arch" type="xml">
             <form string="Entrée Stock Casa">
                 <header>
-                <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
                     <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'"/>
                     <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state not in ('confirmed', 'done')"/>

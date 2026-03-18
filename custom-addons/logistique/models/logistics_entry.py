@@ -243,9 +243,9 @@ class LogisticsEntry(models.Model):
     port_status = fields.Selection([
         ('on_port', 'On Port'),
         ('exited', 'Exited'),
-    ], string='Port Status', default='on_port', track_visibility='onchange')
+    ], string='Port Status', default='on_port', tracking=True)
 
-    exit_comment = fields.Text(string='Commentaire Sortie', track_visibility='onchange')
+    exit_comment = fields.Text(string='Commentaire Sortie', tracking=True)
 
     def action_exit_port(self):
         self.write({

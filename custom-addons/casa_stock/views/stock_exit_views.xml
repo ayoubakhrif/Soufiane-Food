@@ -67,9 +67,9 @@
                     <group>
                         <group string="Selection Stock">
                             <field name="is_from_stock" invisible="1"/>
-                            <field name="product_id" readonly="state in ('confirmed', 'done') or is_from_stock" options="{'no_create': True, 'no_create_edit': True}"/>
-                            <field name="lot" readonly="state in ('confirmed', 'done') or is_from_stock"/>
-                            <field name="dum" readonly="state in ('confirmed', 'done') or is_from_stock"/>
+                            <field name="product_id" readonly="1" force_save="1" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="lot" readonly="1" force_save="1"/>
+                            <field name="dum" readonly="1" force_save="1"/>
                             <field name="ville" readonly="1" force_save="1"/>
                             <field name="frigo" readonly="1" force_save="1"/>
                             <field name="ste_id" readonly="1" force_save="1" options="{'no_create_edit': True}"/>
@@ -77,7 +77,7 @@
                         <group string="Quantités &amp; Prix">
                             <field name="qty"/>
                             <field name="weight" readonly="1" force_save="1"/>
-                            <field name="tonnage"/>
+                            <field name="tonnage" readonly="1" force_save="1"/>
                             <field name="price_sale"/>
                             <field name="date"/>
                         </group>
@@ -91,7 +91,7 @@
                             <field name="not_delivered" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="calibre" readonly="state in ('confirmed', 'done') or is_from_stock"/>
+                            <field name="calibre" readonly="1" force_save="1"/>
                             <field name="order_id" invisible="not order_id"/>
                         </group>
                     </group>

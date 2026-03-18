@@ -108,5 +108,6 @@ class CasaStockStock(models.Model):
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 
                 'default_price_purchase': self.price,
+                'default_is_from_stock': True,
             }
         }

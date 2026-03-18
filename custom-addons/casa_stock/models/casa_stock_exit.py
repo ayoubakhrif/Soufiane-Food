@@ -11,6 +11,7 @@ class CasaStockExit(models.Model):
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids unit (Kg)')
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
+    is_from_stock = fields.Boolean(string='Depuis Stock', default=False)
     
     price_sale = fields.Float(string='Prix Vente')
     price_purchase = fields.Float(

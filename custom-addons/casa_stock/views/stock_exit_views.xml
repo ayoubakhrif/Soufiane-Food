@@ -65,9 +65,10 @@
                     <separator string="Détails Sortie"/>
                     <group>
                         <group string="Selection Stock">
-                            <field name="product_id" readonly="state == 'done'" options="{'no_create': True, 'no_create_edit': True}"/>
-                            <field name="lot" readonly="state == 'done'"/>
-                            <field name="dum" readonly="state == 'done'"/>
+                            <field name="is_from_stock" invisible="1"/>
+                            <field name="product_id" readonly="state == 'done' or is_from_stock" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="lot" readonly="state == 'done' or is_from_stock"/>
+                            <field name="dum" readonly="state == 'done' or is_from_stock"/>
                             <field name="ville" readonly="1" force_save="1"/>
                             <field name="frigo" readonly="1" force_save="1"/>
                             <field name="ste_id" readonly="1" force_save="1" options="{'no_create_edit': True}"/>
@@ -89,7 +90,7 @@
                             <field name="not_delivered" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="calibre" readonly="state == 'done'"/>
+                            <field name="calibre" readonly="state == 'done' or is_from_stock"/>
                             <field name="order_id" invisible="not order_id"/>
                         </group>
                     </group>

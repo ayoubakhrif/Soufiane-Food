@@ -46,14 +46,6 @@
                             invisible="port_status == 'exited'"
                             groups="logistique.group_logistique_user"/>
                             
-                    <!-- Terminal49 Buttons -->
-                    <button name="action_terminal49_register" string="T49 Register" type="object" 
-                            invisible="terminal49_shipment_id != False"
-                            groups="logistique.group_logistique_manager"/>
-                    <button name="action_terminal49_update_eta" string="T49 Sync ETA" type="object" 
-                            invisible="terminal49_shipment_id == False"
-                            groups="logistique.group_logistique_manager"/>
-                            
                     <field name="status" widget="statusbar" statusbar_visible="in_progress,get_out,closed"/>
                 </header>
                 <sheet>
@@ -100,10 +92,6 @@
                             <field name="fret" invisible="incoterm != 'fob'" required="incoterm == 'fob'"/>
                             <field name="free_time" readonly="1"/>
                             <field name="doc_status" readonly="1"/>
-                        </group>
-                        <group string="Terminal49">
-                            <field name="terminal49_shipment_id" readonly="1"/>
-                            <field name="last_terminal49_sync" readonly="1"/>
                         </group>
                     </group>
                     <group>

@@ -45,6 +45,13 @@
                             invisible="purchase_state != 'confirmed'"
                             groups="achat.group_purchase_admin"
                             confirm="Remettre ce dossier en statut Draft ?"/>
+                    <!-- Terminal49 Buttons -->
+                    <button name="action_terminal49_register" string="T49 Register" type="object" 
+                            invisible="terminal49_shipment_id != False"
+                            groups="achat.group_purchase_user"/>
+                    <button name="action_terminal49_update_eta" string="T49 Sync ETA" type="object" 
+                            invisible="terminal49_shipment_id == False"
+                            groups="achat.group_purchase_user"/>
                     <field name="purchase_state" widget="statusbar" statusbar_visible="initial,draft,confirmed"/>
                 </header>
                 <sheet>
@@ -121,6 +128,10 @@
                         </group>
                         <group string="Document's comments">
                             <field name="comment"/>
+                        </group>
+                        <group string="Terminal49">
+                            <field name="terminal49_shipment_id" readonly="1"/>
+                            <field name="last_terminal49_sync" readonly="1"/>
                         </group>
                     </group>
                     

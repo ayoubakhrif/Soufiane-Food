@@ -241,6 +241,48 @@ class CasaStockExit(models.Model):
                 'cancel_move_id': cancel_move.id
             })
 
+    def action_draft(self):
+        for rec in self:
+            if rec.state not in ('confirmed', 'done', 'cancel'):
+                raise UserError(_("Seules les opérations confirmées, validées ou annulées peuvent être remises en brouillon."))
+                
+            if rec.state in ('confirmed', 'done'):
+                # Create Reversal Move
+                cancel_move = self.env['casa.stock.move'].create({
+                    'product_id': rec.product_id.id,
+                    'lot': rec.lot,
+                    'dum': rec.dum,
+                    'ville': rec.ville,
+                    'frigo': rec.frigo,
+                    'qty': rec.qty,
+                    'move_type': 'cancel_exit',
+                    'state': 'done',
+                    'date': fields.Datetime.now(),
+                    'reference': rec.name + ' (Remise Brouillon)',
+                    'price_sale': rec.price_sale,
+                    'weight': rec.weight,
+                    'calibre': rec.calibre,
+                    'client_id': rec.client_id.id,
+                    'driver_id': rec.driver_id.id,
+                    'ste_id': rec.ste_id.id,
+                    'res_model': 'casa.stock.exit',
+                    'res_id': rec.id,
+                    'price_purchase': rec.price_purchase,
+                })
+                rec.write({
+                    'state': 'draft',
+                    'cancel_move_id': cancel_move.id,
+                    'move_id': False,
+                    'validation_user_id': False
+                })
+            else:
+                rec.write({
+                    'state': 'draft',
+                    'move_id': False,
+                    'cancel_move_id': False,
+                    'validation_user_id': False
+                })
+
     def _compute_returned_qty(self):
         for rec in self:
             returns = self.env['casa.stock.return'].search([

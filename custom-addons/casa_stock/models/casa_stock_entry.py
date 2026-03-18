@@ -48,7 +48,8 @@ class CasaStockEntry(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('done', 'Confirmé'),
+        ('confirmed', 'Confirmé'),
+        ('done', 'Validé'),
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
     driver_phone = fields.Char(
@@ -83,18 +84,26 @@ class CasaStockEntry(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state == 'done':
+            if rec.state in ('confirmed', 'done'):
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_purchase',
                     'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Les opérations confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
+                    raise UserError(_("Les opérations confirmées ou validées ne peuvent pas être modifiées. Utilisez 'Annuler'."))
         return super().write(vals)
 
     def action_confirm(self):
         for rec in self:
             if rec.state != 'draft':
+                continue
+            rec.write({
+                'state': 'confirmed',
+            })
+
+    def action_validate(self):
+        for rec in self:
+            if rec.state != 'confirmed':
                 continue
             
             # Create Move
@@ -125,43 +134,48 @@ class CasaStockEntry(models.Model):
 
     def action_cancel(self):
         for rec in self:
-            if rec.state != 'done':
-                raise UserError(_("Vous ne pouvez annuler que des entrées confirmées."))
+            if rec.state not in ('confirmed', 'done'):
+                raise UserError(_("Vous ne pouvez annuler que des entrées confirmées ou validées."))
             
-            # Check if cancelling results in negative stock
-            current_stock = self._get_current_stock_qty(rec)
-            if current_stock < rec.qty:
-                 raise UserError(_(
-                    "Annulation impossible ! Le stock deviendrait négatif.\n"
-                    "Stock actuel : %s, Quantité à retirer : %s.\n"
-                    "Certaines quantités ont probablement déjà été vendues."
-                ) % (current_stock, rec.qty))
+            if rec.state == 'done':
+                # Check if cancelling results in negative stock
+                current_stock = self._get_current_stock_qty(rec)
+                if current_stock < rec.qty:
+                     raise UserError(_(
+                        "Annulation impossible ! Le stock deviendrait négatif.\n"
+                        "Stock actuel : %s, Quantité à retirer : %s.\n"
+                        "Certaines quantités ont probablement déjà été vendues."
+                    ) % (current_stock, rec.qty))
 
-            # Create Reversal Move
-            cancel_move = self.env['casa.stock.move'].create({
-                'product_id': rec.product_id.id,
-                'lot': rec.lot,
-                'dum': rec.dum,
-                'ville': rec.ville,
-                'frigo': rec.frigo,
-                'qty': -rec.qty,
-                'move_type': 'cancel_entry',
-                'state': 'done',
-                'date': fields.Datetime.now(),
-                'reference': rec.name,
-                'price_purchase': rec.price_purchase,
-                'weight': rec.weight,
-                'calibre': rec.calibre,
-                'provider_id': rec.provider_id.id,
-                'driver_id': rec.driver_id.id,
-                'res_model': 'casa.stock.entry',
-                'res_id': rec.id,
-                'ste_id': rec.ste_id.id,
-            })
-            rec.write({
-                'state': 'cancel',
-                'cancel_move_id': cancel_move.id
-            })
+                # Create Reversal Move
+                cancel_move = self.env['casa.stock.move'].create({
+                    'product_id': rec.product_id.id,
+                    'lot': rec.lot,
+                    'dum': rec.dum,
+                    'ville': rec.ville,
+                    'frigo': rec.frigo,
+                    'qty': -rec.qty,
+                    'move_type': 'cancel_entry',
+                    'state': 'done',
+                    'date': fields.Datetime.now(),
+                    'reference': rec.name,
+                    'price_purchase': rec.price_purchase,
+                    'weight': rec.weight,
+                    'calibre': rec.calibre,
+                    'provider_id': rec.provider_id.id,
+                    'driver_id': rec.driver_id.id,
+                    'res_model': 'casa.stock.entry',
+                    'res_id': rec.id,
+                    'ste_id': rec.ste_id.id,
+                })
+                rec.write({
+                    'state': 'cancel',
+                    'cancel_move_id': cancel_move.id
+                })
+            elif rec.state == 'confirmed':
+                rec.write({
+                    'state': 'cancel'
+                })
 
     def _get_current_stock_qty(self, rec, price=None):
         """Helper to get stock for specific dimensions."""

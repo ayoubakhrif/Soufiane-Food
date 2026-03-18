@@ -27,14 +27,16 @@
         <field name="arch" type="xml">
             <form string="Entrée Stock Casa">
                 <header>
-                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state != 'done'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
+                    <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state not in ('confirmed', 'done')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
                 </header>
                 <sheet>
-                    <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
+                    <div class="alert alert-info border-0 mb-4" role="alert" invisible="state not in ('confirmed', 'done')">
                         <i class="fa fa-info-circle me-2"/>
-                        <strong>Attention:</strong> Les opérations confirmées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et créez une nouvelle opération.
+                        <strong>Attention:</strong> Les opérations confirmées/validées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler</strong>.
                     </div>
                     <div class="oe_title">
                         <h1>
@@ -54,7 +56,7 @@
                             <field name="tonnage"/>
                         </group>
                         <group>
-                            <field name="price_purchase"/>
+                            <field name="price_purchase" groups="casa_stock.group_manager"/>
                             <field name="date"/>
                         </group>
                     </group>
@@ -103,7 +105,8 @@
                 <field name="provider_id"/>
                 <separator/>
                 <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Validé" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>

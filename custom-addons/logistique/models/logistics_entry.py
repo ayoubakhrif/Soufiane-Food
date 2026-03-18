@@ -181,6 +181,7 @@ class LogisticsEntry(models.Model):
 
     def action_terminal49_update_eta(self):
         """Force update ETA from Terminal49."""
+        raise UserError("Le bouton fonctionne !")
         for rec in self:
             rec._terminal49_update_eta()
 

@@ -147,7 +147,7 @@ class LogisticsEntry(models.Model):
             return
 
         headers = {
-            'Authorization': f'Bearer {TERMINAL49_API_TOKEN}',
+            'Authorization': f'Token {TERMINAL49_API_TOKEN}',
             'Content-Type': 'application/json'
         }
         
@@ -195,7 +195,7 @@ class LogisticsEntry(models.Model):
                 return
 
         headers = {
-            'Authorization': f'Bearer {TERMINAL49_API_TOKEN}',
+            'Authorization': f'Token {TERMINAL49_API_TOKEN}',
             'Content-Type': 'application/json'
         }
 

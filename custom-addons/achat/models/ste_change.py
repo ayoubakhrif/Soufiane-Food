@@ -35,4 +35,7 @@ class SteChange(models.Model):
                 body=_("Société modifiée de %s vers %s") % (old_ste_name, new_ste_name)
             )
             record.entry_id.write({'ste_id': record.new_ste_id.id})
+            # Also update ste_id on the linked contract if any
+            if record.entry_id.contract_id:
+                record.entry_id.contract_id.write({'ste_id': record.new_ste_id.id})
         return record

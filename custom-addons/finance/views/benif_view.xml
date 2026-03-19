@@ -30,7 +30,7 @@
                                     <field name="date_echeance"/>
                                     <field name="date_encaissement"/>
                                     <field name="credit" sum="Total Crédit"/>
-                                    <field name="encaissement" sum="Total encaissé"/>
+                                    <field name="debit" sum="Total encaissé"/>
                                 </tree>
                             </field>
                             <group class="oe_subtotal_footer oe_right">

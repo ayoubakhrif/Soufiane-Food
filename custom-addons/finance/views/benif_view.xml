@@ -13,6 +13,9 @@
         <field name="model">finance.benif</field>
         <field name="arch" type="xml">
             <form string="Bénificiaires">
+                <header>
+                    <button name="action_export_excel" string="Exporter Excel" type="object" class="btn-primary" icon="fa-file-excel-o"/>
+                </header>
                 <sheet>
                     <group>
                         <field name="name"/>

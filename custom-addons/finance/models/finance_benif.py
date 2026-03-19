@@ -14,3 +14,20 @@ class Cal3iyaClient(models.Model):
         ], string='Imp/Div', required=True, store=True)
 
     benif_deduction = fields.Boolean(string="Autorise Paiement par Déduction", default=False)
+
+    physical_chq_ids = fields.One2many(
+        'finance.cheque.physical',
+        'benif_id',
+        string="Chèques Physiques"
+    )
+
+    total_credit = fields.Float(string="Total Crédit", compute="_compute_chq_totals", store=True)
+    total_debit = fields.Float(string="Total Débit", compute="_compute_chq_totals", store=True)
+    solde = fields.Float(string="Différence (Solde)", compute="_compute_chq_totals", store=True)
+
+    @api.depends('physical_chq_ids.credit', 'physical_chq_ids.debit')
+    def _compute_chq_totals(self):
+        for rec in self:
+            rec.total_credit = sum(rec.physical_chq_ids.mapped('credit'))
+            rec.total_debit = sum(rec.physical_chq_ids.mapped('debit'))
+            rec.solde = rec.total_credit - rec.total_debit

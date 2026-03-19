@@ -17,7 +17,11 @@ class FinanceChequePhysical(models.Model):
     # Computed fields from the first linked datacheque (source of truth for shared data)
     date_emission = fields.Date(string="Date d'émission", compute='_compute_shared_info', store=True)
     date_echeance = fields.Date(string="Date d'échéance", compute='_compute_shared_info', store=True)
+    date_encaissement = fields.Date(string="Date d'encaissement", compute='_compute_shared_info', store=True)
     benif_id = fields.Many2one('finance.benif', string='Bénéficiaire', compute='_compute_shared_info', store=True)
+    
+    credit = fields.Float(string="Crédit", compute='_compute_credit_debit', store=True)
+    debit = fields.Float(string="Débit", compute='_compute_credit_debit', store=True)
     
     display_name_custom = fields.Char(string="Nom complet", compute='_compute_display_name_custom', store=True)
     
@@ -41,7 +45,7 @@ class FinanceChequePhysical(models.Model):
         for rec in self:
             rec.amount_total = sum(rec.datacheque_ids.mapped('amount'))
 
-    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.benif_id')
+    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement')
     def _compute_shared_info(self):
         for rec in self:
             if rec.datacheque_ids:
@@ -50,10 +54,23 @@ class FinanceChequePhysical(models.Model):
                 rec.date_emission = first.date_emission
                 rec.date_echeance = first.date_echeance
                 rec.benif_id = first.benif_id
+                rec.date_encaissement = first.date_encaissement
             else:
                 rec.date_emission = False
                 rec.date_echeance = False
                 rec.benif_id = False
+                rec.date_encaissement = False
+
+    @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours')
+    def _compute_credit_debit(self):
+        for rec in self:
+            rec.credit = rec.amount_total or 0.0
+            total_debit = 0.0
+            if rec.datacheque_ids:
+                for split in rec.datacheque_ids:
+                    if split.encours == 'encaisse':
+                        total_debit += split.amount
+            rec.debit = total_debit
 
     @api.depends('datacheque_ids.encours')
     def _compute_encours(self):

@@ -20,6 +20,26 @@
                         <field name="type"/>
                         <field name="benif_deduction"/>
                     </group>
+                    <notebook>
+                        <page string="Chèques">
+                            <field name="physical_chq_ids" readonly="1">
+                                <tree>
+                                    <field name="name" string="Chèque"/>
+                                    <field name="ste_id"/>
+                                    <field name="date_emission"/>
+                                    <field name="date_echeance"/>
+                                    <field name="date_encaissement"/>
+                                    <field name="credit" sum="Total Crédit"/>
+                                    <field name="debit" sum="Total Débit"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_credit"/>
+                                <field name="total_debit"/>
+                                <field name="solde" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

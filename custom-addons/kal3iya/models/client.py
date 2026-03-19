@@ -292,7 +292,8 @@ class Kal3iyaClient(models.Model):
                             <div class="week-total">{total_week:,.2f} Dh</div>
                         </div>
 
-                        <div class="table-header" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                        <div class="table-header" style="grid-template-columns: 0.8fr 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                            <div>Stock</div>
                             <div>Produit</div>
                             <div>Qté</div>
                             <div>Poids(Kg)</div>
@@ -305,7 +306,8 @@ class Kal3iyaClient(models.Model):
 
                 for s in records:
                     html += f"""
-                        <div class="list-row" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                        <div class="list-row" style="grid-template-columns: 0.8fr 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                            <div class="col-label stock-ville">{dict(s._fields['ville'].selection).get(s.ville, s.ville)}</div>
                             <div class="col-label">{s.product_id.name}</div>
                             <div class="col-value">{s.quantity}</div>
                             <div class="col-value">{s.weight}</div>

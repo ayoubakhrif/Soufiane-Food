@@ -97,6 +97,13 @@ class ClientWeekInvoiceWizard(models.TransientModel):
             
         return res
 
+    def format_amount(self, value):
+        """Format a number with narrow no-break space as thousand separator (French standard)."""
+        try:
+            return '{:,.2f}'.format(float(value or 0)).replace(',', '\u202f')
+        except (ValueError, TypeError):
+            return '0.00'
+
     def action_print_invoice(self):
         """Génère le PDF pour la semaine choisie."""
         self.ensure_one()

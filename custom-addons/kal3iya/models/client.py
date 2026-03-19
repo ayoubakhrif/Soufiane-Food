@@ -511,8 +511,14 @@ class Kal3iyaClient(models.Model):
         )
         total_sorties_supp = sum(sorties_supp.mapped('amount'))
 
+        # 3.6️⃣ Filtrer impayés de la semaine (basé sur la date de l'impayé)
+        impayes = self.unpaid_ids.filtered(
+            lambda u: u.date and u.date.strftime("%Y-W%W") == week
+        )
+        total_impayes = sum(impayes.mapped('amount'))
+
         # 4️⃣ Compte de la semaine
-        compte_semaine = total_sorties + total_sorties_supp - total_retours - total_avances
+        compte_semaine = total_sorties + total_sorties_supp + total_impayes - total_retours - total_avances
 
         # 5️⃣ Calculer les dates de début et fin de semaine
         start_date = None
@@ -548,10 +554,13 @@ class Kal3iyaClient(models.Model):
             'retours': retours,
             'avances': avances,
             'sorties_supp': sorties_supp,
+            'impayes': impayes,
             'total_sorties': total_sorties,
             'total_retours': total_retours,
             'total_avances': total_avances,
             'total_sorties_supp': total_sorties_supp,
+            'total_impayes': total_impayes,
             'compte_semaine': compte_semaine,
             'compte_total': self.compte,
         }
+

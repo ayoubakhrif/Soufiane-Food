@@ -50,10 +50,14 @@
                             <field name="ste_id" readonly="1"/>
                             <field name="supplier_id" readonly="1"/>
                             <field name="article_id" readonly="1"/>
+                            <field name="shipping_id" readonly="1"/>
+                            <field name="free_time" readonly="1"/>
                             <field name="destination_id" />
                             <field name="details" readonly="1"/>
                             <field name="invoice_number" readonly="1"/>
                             <field name="container_count" readonly="1"/>
+                            <field name="container_type"/>
+                            <field name="container_size"/>
                             <field name="container_names" readonly="1"/>
                         </group>
                         <group string="Statut">
@@ -66,14 +70,16 @@
                         <page string="Tanger Med" name="tanger_med">
                             <group>
                                 <group string="Dates Opérationnelles">
-                                    <field name="exit_date" readonly="1"/>
-                                    <field name="entry_date" readonly="1"/>
+                                    <field name="exit_date"/>
+                                    <field name="entry_date"/>
                                     <field name="bad_date" readonly="1"/>
                                     <field name="eta" readonly="1"/>
                                     <field name="tanger_med_lot"/>
                                     <field name="tanger_med_dum"/>
                                 </group>
                                 <group string="SUR+MAG">
+                                    <field name="calculated_surestarie_ht" readonly="1"/>
+                                    <field name="calculated_magasinage_ht" readonly="1"/>
                                     <field name="sur_mag_amount"/>
                                     <field name="sur_mag_date" readonly="1"/>
                                     <field name="sur_mag_user" readonly="1"/>

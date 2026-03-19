@@ -128,80 +128,15 @@ class SurestMagSimulation(models.Model):
 
         self.config_id = config
         
-        # 2. Setup Variables
-        lines = []
-        
         # Date Logic validation
         if not self.days_magasinage and not self.days_surestarie:
              self._reset_totals()
+             self.line_ids = [(5, 0, 0)]
              return
 
-        # Phase Iteration Variables
-        current_day_index = 1 # We start counting from Day 1
-        phases = config.phase_ids.sorted(key=lambda p: p.sequence)
+        result = config.calculate_amounts(self.days_magasinage, self.days_surestarie, self.free_surestarie_days, self.container_count)
         
-        # Surestarie Free Days logic setup
-        free_until_day = self.free_surestarie_days
-        
-        # Loop through phases - logic: mapped to global timeline
-        # A phase defined as "7 days" handles days [current, current + 7 - 1]
-        
-        for phase in phases:
-            # Determine Phase Interval [phase_start, phase_end]
-            phase_start = current_day_index
-            if phase.is_beyond:
-                phase_end = float('inf') # Infinite
-            else:
-                phase_end = phase_start + phase.days - 1
-            
-            # --- MAGASINAGE CALCULATION ---
-            # Relevant Magasinage Days: [1, self.days_magasinage]
-            # Intersect [phase_start, phase_end] AND [1, self.days_magasinage]
-            mag_overlap_start = max(phase_start, 1)
-            mag_overlap_end = min(phase_end, self.days_magasinage)
-            
-            days_mag_spent_in_phase = 0
-            if mag_overlap_end >= mag_overlap_start:
-                days_mag_spent_in_phase = (mag_overlap_end - mag_overlap_start) + 1
-            
-            # --- SURESTARIE CALCULATION ---
-            # Relevant Surestarie Days: [1, self.days_surestarie]
-            # BUT Billable only if day > free_until_day
-            # So Billable Interval = [free_until_day + 1, self.days_surestarie]
-            
-            sur_overlap_start = max(phase_start, free_until_day + 1)
-            sur_overlap_end = min(phase_end, self.days_surestarie)
-            
-            days_sur_billed_in_phase = 0
-            if sur_overlap_end >= sur_overlap_start:
-                days_sur_billed_in_phase = (sur_overlap_end - sur_overlap_start) + 1
-                
-            # --- ADD LINE IF RELEVANT ---
-            if days_mag_spent_in_phase > 0 or days_sur_billed_in_phase > 0:
-                
-                # Apply Container Count
-                cnt = self.container_count or 1
-                
-                surest_sub = days_sur_billed_in_phase * phase.surestarie_rate * cnt
-                mag_sub = days_mag_spent_in_phase * phase.magasinage_rate * cnt
-                
-                line_vals = {
-                    'phase_name': f"Beyond (Rate: {phase.surestarie_rate}/{phase.magasinage_rate})" if phase.is_beyond else f"Phase {phase.sequence} ({phase.days} days)",
-                    'days_magasinage': days_mag_spent_in_phase,
-                    'days_surestarie_billed': days_sur_billed_in_phase,
-                    'surestarie_rate': phase.surestarie_rate,
-                    'magasinage_rate': phase.magasinage_rate,
-                    'surestarie_subtotal': surest_sub,
-                    'magasinage_subtotal': mag_sub,
-                }
-                lines.append((0, 0, line_vals))
-            
-            # Advance global day cursor for next phase
-            if phase.is_beyond:
-                break # End structure
-            else:
-                current_day_index += phase.days
-
+        lines = [(0, 0, line_vals) for line_vals in result['lines']]
         self.line_ids = [(5, 0, 0)] + lines
         # Totals are computed by _compute_totals triggers
 

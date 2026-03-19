@@ -16,6 +16,68 @@ class TangerMedEntry(models.Model):
     tanger_med_dum = fields.Char(string='DUM Tanger Med')
     destination_id = fields.Many2one('tanger.med.destination', string='Destination')
 
+    entry_date = fields.Date(string='Date of entry', tracking=True)
+    exit_date = fields.Date(string='Date of exit', tracking=True)
+
+    container_type = fields.Selection([
+        ('generals', 'Dry'),
+        ('reefers', 'Reefers'),
+    ], string='Container Type', default='generals')
+    container_size = fields.Selection([
+        ('20', "20'"),
+        ('40', "40'"),
+    ], string='Container Size', default='20')
+
+    calculated_surestarie_ht = fields.Float(string='Surestarie HT (Simulé)', compute='_compute_surest_mag', store=True)
+    calculated_magasinage_ht = fields.Float(string='Magasinage HT (Simulé)', compute='_compute_surest_mag', store=True)
+
+    @api.depends('entry_date', 'exit_date', 'container_type', 'container_size', 'eta', 'shipping_id', 'free_time', 'container_count')
+    def _compute_surest_mag(self):
+        for rec in self:
+            rec.calculated_surestarie_ht = 0.0
+            rec.calculated_magasinage_ht = 0.0
+            if not rec.shipping_id or not rec.container_type or not rec.container_size or not rec.eta:
+                continue
+
+            config = self.env['logistique.surest_mag.config'].search([
+                ('shipping_id', '=', rec.shipping_id.id),
+                ('container_type', '=', rec.container_type),
+                ('container_size', '=', rec.container_size),
+            ], limit=1)
+
+            if not config:
+                continue
+
+            days_magasinage = 0
+            if rec.eta and rec.exit_date and rec.exit_date >= rec.eta:
+                days_magasinage = (rec.exit_date - rec.eta).days + 1
+            
+            days_surestarie = 0
+            if rec.eta and rec.entry_date and rec.entry_date >= rec.eta:
+                days_surestarie = (rec.entry_date - rec.eta).days + 1
+
+            result = config.calculate_amounts(days_magasinage, days_surestarie, rec.free_time or 0, rec.container_count or 1)
+            
+            rec.calculated_surestarie_ht = result.get('surestarie_ht', 0.0)
+            rec.calculated_magasinage_ht = result.get('magasinage_ht', 0.0)
+
+    @api.onchange('shipping_id', 'container_type', 'container_size')
+    def _onchange_check_config(self):
+        if self.shipping_id and self.container_type and self.container_size:
+            config = self.env['logistique.surest_mag.config'].search([
+                ('shipping_id', '=', self.shipping_id.id),
+                ('container_type', '=', self.container_type),
+                ('container_size', '=', self.container_size),
+            ], limit=1)
+            if not config:
+                container_type_label = dict(self._fields['container_type'].selection).get(self.container_type)
+                return {
+                    'warning': {
+                        'title': 'Configuration Introuvable',
+                        'message': f"Aucune configuration Surestarie/Magasinage trouvée pour {self.shipping_id.name} avec le type {container_type_label} et taille {self.container_size}'."
+                    }
+                }
+
     
     @api.onchange('tanger_med_lot')
     def _onchange_tanger_med_lot(self):

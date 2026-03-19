@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_tresorerie_root" name="Trésorerie" sequence="50"/>
+
+    <!-- Level 1 Menus -->
+    <menuitem id="menu_tresorerie_paiements" name="Paiements" parent="menu_tresorerie_root" sequence="10"/>
+    <menuitem id="menu_tresorerie_donnees" name="Données" parent="menu_tresorerie_root" sequence="20"/>
+
+</odoo>

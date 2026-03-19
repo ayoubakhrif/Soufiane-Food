@@ -1,6 +1,12 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 from datetime import date, timedelta
+import base64
+import io
+try:
+    import xlsxwriter
+except ImportError:
+    xlsxwriter = None
 
 class LogisticsEntry(models.Model):
     _inherit = 'logistique.entry'
@@ -124,3 +130,113 @@ class LogisticsEntry(models.Model):
             self.free_time = self.contract_id.free_time_negotiated
             if self.contract_id.weight_total:
                 self.weight = self.contract_id.weight_total # Optional sync, user might update per shipment
+
+    def action_generate_excel_dossiers_to_exit(self):
+        if not xlsxwriter:
+            raise ValidationError("La bibliothèque xlsxwriter n'est pas installée.")
+
+        from datetime import datetime, time
+
+        def to_xlsx_date(d):
+            if not d:
+                return None
+            return datetime.combine(d, time.min)
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+
+        # Styles
+        title_style = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center'})
+        header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'})
+        cell_style = workbook.add_format({'border': 1})
+        money_style = workbook.add_format({'border': 1, 'num_format': '#,##0.00'})
+        weight_style = workbook.add_format({'border': 1, 'num_format': '#,##0.000'})
+        date_style = workbook.add_format({'border': 1, 'num_format': 'dd/mm/yyyy'})
+        total_style = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#e6e6e6', 'num_format': '#,##0.00'})
+
+        sheet = workbook.add_worksheet("Dossiers à Sortir")
+
+        # Colonnes
+        sheet.set_column(0, 0, 20)  # Société
+        sheet.set_column(1, 1, 20)  # Supplier
+        sheet.set_column(2, 2, 15)  # Invoice
+        sheet.set_column(3, 3, 20)  # Article
+        sheet.set_column(4, 4, 30)  # Details
+        sheet.set_column(5, 5, 12)  # Poids
+        sheet.set_column(6, 6, 12)  # UP
+        sheet.set_column(7, 7, 15)  # Total
+        sheet.set_column(8, 8, 12)  # Incoterm
+        sheet.set_column(9, 9, 12)  # Franchise
+        sheet.set_column(10, 10, 25) # Conteneurs
+        sheet.set_column(11, 11, 15) # ETA
+        sheet.set_column(12, 12, 35) # Commentaire
+
+        sheet.merge_range('A1:M1', "Liste des Dossiers à Sortir", title_style)
+
+        row = 2
+
+        headers = [
+            "Société", "Supplier", "Invoice Number", "Article", "Details",
+            "Poids", "UP", "Total Montant", "Incoterm", "Franchise",
+            "Conteneurs", "ETA", "Commentaire Sortie"
+        ]
+        sheet.write_row(row, 0, headers, header_style)
+        row += 1
+
+        total_montant = 0.0
+
+        for rec in self:
+            sheet.write(row, 0, rec.ste_id.name if rec.ste_id else "", cell_style)
+            sheet.write(row, 1, rec.supplier_id.name if rec.supplier_id else "", cell_style)
+            sheet.write(row, 2, rec.invoice_number or "", cell_style)
+            sheet.write(row, 3, rec.achat_article_id.name if rec.achat_article_id else "", cell_style)
+            sheet.write(row, 4, rec.details or "", cell_style)
+            
+            sheet.write_number(row, 5, float(rec.weight or 0.0), weight_style)
+            sheet.write_number(row, 6, float(rec.price_unit or 0.0), money_style)
+            sheet.write_number(row, 7, float(rec.amount_total or 0.0), money_style)
+            
+            total_montant += float(rec.amount_total or 0.0)
+
+            sheet.write(row, 8, rec.incoterm.upper() if rec.incoterm else "", cell_style)
+            sheet.write(row, 9, rec.free_time or "", cell_style)
+            sheet.write(row, 10, rec.container_names or "", cell_style)
+            
+            dt_eta = to_xlsx_date(rec.eta)
+            if dt_eta:
+                sheet.write_datetime(row, 11, dt_eta, date_style)
+            else:
+                sheet.write(row, 11, "", cell_style)
+                
+            sheet.write(row, 12, rec.exit_comment or "", cell_style)
+            
+            row += 1
+
+        # Ligne de Total (seulement Total Montant selon demande)
+        sheet.merge_range(row, 0, row, 6, "Total", total_style)
+        sheet.write_number(row, 7, total_montant, total_style)
+        
+        # Style vide pour le reste
+        for col in range(8, 13):
+            sheet.write(row, col, "", total_style)
+
+        workbook.close()
+        output.seek(0)
+        file_data = base64.b64encode(output.read())
+        output.close()
+
+        filename = "Dossiers_A_Sortir.xlsx"
+
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': file_data,
+            'type': 'binary',
+            'res_model': self._name,
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }

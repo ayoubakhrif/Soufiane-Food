@@ -155,6 +155,17 @@
                 Aucun dossier sorti pour le moment.
             </p>
         </field>
+    <!-- Export Excel Action for Dossiers à Sortir -->
+    <record id="action_export_dossiers_excel" model="ir.actions.server">
+        <field name="name">Export Dossiers à Sortir (Excel)</field>
+        <field name="model_id" ref="logistique.model_logistique_entry"/>
+        <field name="binding_model_id" ref="logistique.model_logistique_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                action = records.action_generate_excel_dossiers_to_exit()
+        </field>
     </record>
 
 </odoo>

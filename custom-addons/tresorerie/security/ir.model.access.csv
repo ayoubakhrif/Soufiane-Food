@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tresorerie_client_user,tresorerie.client user,model_tresorerie_client,group_tresorerie_user,1,1,1,0
+access_tresorerie_client_manager,tresorerie.client manager,model_tresorerie_client,group_tresorerie_manager,1,1,1,1
+access_tresorerie_paiement_user,tresorerie.paiement user,model_tresorerie_paiement,group_tresorerie_user,1,1,1,0
+access_tresorerie_paiement_manager,tresorerie.paiement manager,model_tresorerie_paiement,group_tresorerie_manager,1,1,1,1

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Catégorie pour le module Trésorerie -->
+        <record id="module_category_tresorerie" model="ir.module.category">
+            <field name="name">Trésorerie</field>
+            <field name="description">Accès pour le module Trésorerie</field>
+            <field name="sequence">100</field>
+        </record>
+
+        <!-- Groupe Utilisateur : peut créer et lire les données, pas de suppression -->
+        <record id="group_tresorerie_user" model="res.groups">
+            <field name="name">Utilisateur</field>
+            <field name="category_id" ref="module_category_tresorerie"/>
+        </record>
+
+        <!-- Groupe Responsable : a tous les droits, y compris suppression -->
+        <record id="group_tresorerie_manager" model="res.groups">
+            <field name="name">Responsable</field>
+            <field name="category_id" ref="module_category_tresorerie"/>
+            <field name="implied_ids" eval="[(4, ref('group_tresorerie_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+    </data>
+</odoo>

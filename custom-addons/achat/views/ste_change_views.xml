@@ -47,6 +47,18 @@
         </field>
     </record>
 
+    <!-- View Search -->
+    <record id="view_ste_change_search" model="ir.ui.view">
+        <field name="name">ste.change.search</field>
+        <field name="model">ste.change</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Changement de Société">
+                <field name="invoice_number"/>
+                <field name="entry_id"/>
+            </search>
+        </field>
+    </record>
+
     <!-- Action -->
     <record id="action_ste_change" model="ir.actions.act_window">
         <field name="name">Ste Change</field>

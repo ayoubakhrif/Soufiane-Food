@@ -21,7 +21,7 @@ class FinanceChequePhysical(models.Model):
     benif_id = fields.Many2one('finance.benif', string='Bénéficiaire', compute='_compute_shared_info', store=True)
     
     credit = fields.Float(string="Crédit", compute='_compute_credit_debit')
-    debit = fields.Float(string="Débit", compute='_compute_credit_debit')
+    debit = fields.Float(string="Encaissement", compute='_compute_credit_debit')
     
     display_name_custom = fields.Char(string="Nom complet", compute='_compute_display_name_custom', store=True)
     

@@ -17,6 +17,7 @@
         'data/currency_data.xml',
         'views/purchase_entry_view.xml',
         'views/achat_contract_view.xml',
+        'views/ste_change_views.xml',
         'views/achat_enquete_view.xml',
         'views/achat_article_view.xml',
         'views/achat_origin_view.xml',

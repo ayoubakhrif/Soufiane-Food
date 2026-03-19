@@ -10,3 +10,4 @@ from . import achat_origin
 from . import document_followup
 from . import logistique_ste_inherit
 from . import contract_advance
+from . import ste_change

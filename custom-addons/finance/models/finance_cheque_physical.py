@@ -61,14 +61,14 @@ class FinanceChequePhysical(models.Model):
                 rec.benif_id = False
                 rec.date_encaissement = False
 
-    @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours')
+    @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours', 'datacheque_ids.date_encaissement')
     def _compute_credit_debit(self):
         for rec in self:
             rec.credit = rec.amount_total or 0.0
             total_debit = 0.0
             if rec.datacheque_ids:
                 for split in rec.datacheque_ids:
-                    if split.encours == 'encaisse':
+                    if split.date_encaissement or split.encours == 'encaisse':
                         total_debit += split.amount
             rec.debit = total_debit
 

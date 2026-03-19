@@ -23,7 +23,7 @@ class Cal3iyaClient(models.Model):
 
     total_credit = fields.Float(string="Total Crédit", compute="_compute_chq_totals")
     total_debit = fields.Float(string="Total Débit", compute="_compute_chq_totals")
-    solde = fields.Float(string="Différence (Solde)", compute="_compute_chq_totals")
+    solde = fields.Float(string="Solde à ce jour", compute="_compute_chq_totals")
 
     @api.depends('physical_chq_ids.credit', 'physical_chq_ids.debit')
     def _compute_chq_totals(self):

@@ -8,7 +8,7 @@
         <field name="name">tanger.med.entry.tree</field>
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
-            <tree string="Tanger Med" create="false" delete="false">
+            <tree string="Tanger Med" create="false" delete="false" default_order="exit_date desc">
                 <field name="bl_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>

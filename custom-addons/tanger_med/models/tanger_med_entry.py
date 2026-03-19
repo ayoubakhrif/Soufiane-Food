@@ -4,8 +4,8 @@ from odoo import models, fields, api
 class TangerMedEntry(models.Model):
     _inherit = 'logistique.entry'
 
-    sur_mag_amount = fields.Float(string='SUR+MAG')
-    sur_mag_date = fields.Date(string='SUR+MAG Date', readonly=True)
+    sur_mag_amount = fields.Float(string='SUR+MAG', compute='_compute_surest_mag', store=True)
+    sur_mag_date = fields.Date(string='SUR+MAG Date', compute='_compute_surest_mag', store=True)
     sur_mag_user = fields.Many2one(
         'res.users',
         string='SUR+MAG Saisi par',
@@ -22,11 +22,11 @@ class TangerMedEntry(models.Model):
     container_type = fields.Selection([
         ('generals', 'Dry'),
         ('reefers', 'Reefers'),
-    ], string='Container Type', default='generals')
+    ], string='Container Type')
     container_size = fields.Selection([
         ('20', "20'"),
         ('40', "40'"),
-    ], string='Container Size', default='20')
+    ], string='Container Size')
 
     calculated_surestarie_ht = fields.Float(string='Surestarie HT (Simulé)', compute='_compute_surest_mag', store=True)
     calculated_magasinage_ht = fields.Float(string='Magasinage HT (Simulé)', compute='_compute_surest_mag', store=True)
@@ -36,6 +36,8 @@ class TangerMedEntry(models.Model):
         for rec in self:
             rec.calculated_surestarie_ht = 0.0
             rec.calculated_magasinage_ht = 0.0
+            rec.sur_mag_amount = 0.0
+            rec.sur_mag_date = False
             if not rec.shipping_id or not rec.container_type or not rec.container_size or not rec.eta:
                 continue
 
@@ -60,6 +62,8 @@ class TangerMedEntry(models.Model):
             
             rec.calculated_surestarie_ht = result.get('surestarie_ht', 0.0)
             rec.calculated_magasinage_ht = result.get('magasinage_ht', 0.0)
+            rec.sur_mag_amount = rec.calculated_surestarie_ht + rec.calculated_magasinage_ht
+            rec.sur_mag_date = fields.Date.context_today(self)
 
     @api.onchange('shipping_id', 'container_type', 'container_size')
     def _onchange_check_config(self):
@@ -101,26 +105,7 @@ class TangerMedEntry(models.Model):
             }
 
 
-    @api.onchange('sur_mag_amount')
-    def _onchange_sur_mag_amount(self):
-        if self.sur_mag_amount:
-            self.sur_mag_date = fields.Date.context_today(self)
-            self.sur_mag_user = self.env.user
-        else:
-            self.sur_mag_date = False
-            self.sur_mag_user = False
-
     def write(self, vals):
-        res = super().write(vals)
-        if 'sur_mag_amount' in vals:
-            if vals['sur_mag_amount']:
-                super().write({
-                    'sur_mag_date': fields.Date.context_today(self),
-                    'sur_mag_user': self.env.user.id,
-                })
-            else:
-                super().write({
-                    'sur_mag_date': False,
-                    'sur_mag_user': False,
-                })
-        return res
+        if 'exit_date' in vals and vals.get('exit_date'):
+            vals['sur_mag_user'] = self.env.user.id
+        return super().write(vals)

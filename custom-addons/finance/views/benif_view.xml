@@ -56,8 +56,9 @@
             <tree>
                 <field name="name"/>
                 <field name="type"/>
-                <field name="days"/>
-                <field name="benif_deduction"/>
+                <field name="total_credit"/>
+                <field name="total_debit"/>
+                <field name="solde"/>
             </tree>
         </field>
     </record>

@@ -31,7 +31,8 @@
                             <field name="date"/>
                             <field name="payment_type"/>
                             <field name="check_date" 
-                                   attrs="{'required': [('payment_type', '=', 'cheque')], 'invisible': [('payment_type', '!=', 'cheque')]}"/>
+                                   required="payment_type == 'cheque'" 
+                                   invisible="payment_type != 'cheque'"/>
                         </group>
                     </group>
                 </sheet>

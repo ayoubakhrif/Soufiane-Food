@@ -61,7 +61,9 @@ class LogisticsEntry(models.Model):
     @api.depends('calendar_label', 'bl_number')
     def _compute_display_name(self):
         for rec in self:
-            if rec.calendar_label:
+            if self.env.context.get('show_bl_number'):
+                rec.display_name = rec.bl_number or "Nouveau"
+            elif rec.calendar_label:
                 rec.display_name = rec.calendar_label
             else:
                 rec.display_name = rec.bl_number or "Nouveau"

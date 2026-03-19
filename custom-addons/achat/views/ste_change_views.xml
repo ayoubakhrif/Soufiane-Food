@@ -9,7 +9,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="entry_id" options="{'no_create': True}"/>
+                            <field name="entry_id" options="{'no_create': True}" context="{'show_bl_number': True}"/>
                             <field name="old_ste_id" force_save="1"/>
                         </group>
                         <group>
@@ -37,7 +37,7 @@
         <field name="model">ste.change</field>
         <field name="arch" type="xml">
             <tree string="Changements de Société">
-                <field name="entry_id"/>
+                <field name="entry_id" context="{'show_bl_number': True}"/>
                 <field name="invoice_number"/>
                 <field name="old_ste_id"/>
                 <field name="new_ste_id"/>

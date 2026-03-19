@@ -151,6 +151,7 @@
                             <thead>
                                 <tr>
                                     <th>Date</th>
+                                    <th>Stock</th>
                                     <th>Produit</th>
                                     <th>Quantite</th>
                                     <th>Poids (Kg)</th>
@@ -163,6 +164,7 @@
                                 <t t-foreach="week_data['sorties']" t-as="sortie">
                                     <tr>
                                         <td><t t-esc="sortie.date_exit"/></td>
+                                        <td><t t-esc="dict(sortie._fields['ville'].selection).get(sortie.ville, sortie.ville)"/></td>
                                         <td><t t-esc="sortie.product_id.name"/></td>
                                         <td><t t-esc="sortie.quantity"/></td>
                                         <td><t t-esc="sortie.weight"/></td>
@@ -172,7 +174,7 @@
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="6" style="text-align: right;">TOTAL SORTIES:</td>
+                                    <td colspan="7" style="text-align: right;">TOTAL SORTIES:</td>
                                     <td class="amount"><t t-esc="wizard.format_amount(week_data['total_sorties'])"/> Dh</td>
                                 </tr>
                             </tbody>

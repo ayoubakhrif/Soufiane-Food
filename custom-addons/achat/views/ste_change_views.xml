@@ -10,11 +10,15 @@
                     <group>
                         <group>
                             <field name="entry_id" options="{'no_create': True}" context="{'show_bl_number': True}"/>
-                            <field name="old_ste_id" force_save="1"/>
-                        </group>
-                        <group>
                             <field name="invoice_number"/>
+                        </group>
+                        <group string="Société">
+                            <field name="old_ste_id" force_save="1"/>
                             <field name="new_ste_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Incoterm">
+                            <field name="old_incoterm" force_save="1"/>
+                            <field name="new_incoterm"/>
                         </group>
                     </group>
                     <group string="Informations Automatiques">
@@ -36,11 +40,13 @@
         <field name="name">ste.change.tree</field>
         <field name="model">ste.change</field>
         <field name="arch" type="xml">
-            <tree string="Changements de Société">
+            <tree string="Changements de Société / Incoterm">
                 <field name="entry_id" context="{'show_bl_number': True}"/>
                 <field name="invoice_number"/>
                 <field name="old_ste_id"/>
                 <field name="new_ste_id"/>
+                <field name="old_incoterm" optional="show"/>
+                <field name="new_incoterm" optional="show"/>
                 <field name="date_change" optional="show"/>
                 <field name="supplier_id" optional="show"/>
             </tree>

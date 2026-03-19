@@ -65,5 +65,5 @@
               parent="achat.menu_achat_root"
               action="action_ste_change"
               groups="achat.group_purchase_manager,achat.group_achat_compta"
-              sequence="2"/>
+              sequence="9"/>
 </odoo>

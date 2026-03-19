@@ -278,10 +278,10 @@
                         </table>
                     </t>
 
-                    <!-- Section Impayés -->
+                    <!-- Section Impayes -->
                     <t t-if="week_data.get('impayes')">
                         <div class="section-title section-impayes">
-                             IMPAYÉS DE LA SEMAINE
+                             IMPAY&Eacute;S DE LA SEMAINE
                         </div>
                         <table class="data-table">
                             <thead>
@@ -300,14 +300,14 @@
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="2" style="text-align: right;">TOTAL IMPAYÉS:</td>
+                                    <td colspan="2" style="text-align: right;">TOTAL IMPAY&Eacute;S:</td>
                                     <td class="amount"><t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
                     </t>
 
-                    <!-- Récapitulatif -->
+                    <!-- Recapitulatif -->
                     <div class="section-title section-recap">
                          RECAPITULATIF FINANCIER
                     </div>
@@ -321,7 +321,7 @@
                             <span>+ <t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
-                            <span>Total Impayés:</span>
+                            <span>Total Impay&eacute;s:</span>
                             <span>+ <t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
@@ -345,7 +345,7 @@
 
                     <!-- Pied de page -->
                     <div class="footer-note">
-                        Document genere automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                        Document genere automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y a %H:%M')"/>
                     </div>
                 </div>
             </t>

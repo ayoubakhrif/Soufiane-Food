@@ -20,8 +20,8 @@ class FinanceChequePhysical(models.Model):
     date_encaissement = fields.Date(string="Date d'encaissement", compute='_compute_shared_info', store=True)
     benif_id = fields.Many2one('finance.benif', string='Bénéficiaire', compute='_compute_shared_info', store=True)
     
-    credit = fields.Float(string="Crédit", compute='_compute_credit_debit', store=True)
-    debit = fields.Float(string="Débit", compute='_compute_credit_debit', store=True)
+    credit = fields.Float(string="Crédit", compute='_compute_credit_debit')
+    debit = fields.Float(string="Débit", compute='_compute_credit_debit')
     
     display_name_custom = fields.Char(string="Nom complet", compute='_compute_display_name_custom', store=True)
     

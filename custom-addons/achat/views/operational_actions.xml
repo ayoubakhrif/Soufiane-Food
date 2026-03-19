@@ -155,6 +155,8 @@
                 Aucun dossier sorti pour le moment.
             </p>
         </field>
+    </record>
+
     <!-- Export Excel Action for Dossiers à Sortir -->
     <record id="action_export_dossiers_excel" model="ir.actions.server">
         <field name="name">Export Dossiers à Sortir (Excel)</field>

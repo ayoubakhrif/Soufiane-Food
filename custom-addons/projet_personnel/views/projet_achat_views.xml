@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Projet Achat Views -->
+    <record id="view_projet_achat_tree" model="ir.ui.view">
+        <field name="name">projet.achat.tree</field>
+        <field name="model">projet.achat</field>
+        <field name="arch" type="xml">
+            <tree string="Commandes d'Achat">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="total_prix_achat" sum="Total Achat"/>
+                <field name="total_benefice_prevu" sum="Bénéfice Prévu"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_projet_achat_form" model="ir.ui.view">
+        <field name="name">projet.achat.form</field>
+        <field name="model">projet.achat</field>
+        <field name="arch" type="xml">
+            <form string="Commande d'Achat">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="total_prix_achat"/>
+                            <field name="total_benefice_prevu"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Articles Achetés">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="item_id"/>
+                                    <field name="color_id" domain="[('item_id', '=', item_id)]"/>
+                                    <field name="prix_achat"/>
+                                    <field name="prix_vente_prevu"/>
+                                    <field name="benefice_prevu"/>
+                                    <field name="state" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_projet_achat" model="ir.actions.act_window">
+        <field name="name">Commandes d'Achat</field>
+        <field name="res_model">projet.achat</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_projet_achat"
+              name="Achats"
+              parent="menu_projet_operations"
+              action="action_projet_achat"
+              sequence="10"/>
+
+    <!-- Projet Stock Kanban View -->
+    <record id="view_projet_stock_kanban" model="ir.ui.view">
+        <field name="name">projet.stock.kanban</field>
+        <field name="model">projet.stock</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" create="false" edit="false">
+                <field name="id"/>
+                <field name="item_id"/>
+                <field name="color_id"/>
+                <field name="image"/>
+                <field name="prix_achat"/>
+                <field name="prix_vente_prevu"/>
+                <field name="achat_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <t t-if="record.image.raw_value">
+                                <div class="o_kanban_image_fill_left" t-attf-style="background-image:url('#{kanban_image('projet.stock', 'image', record.id.raw_value)}')"/>
+                            </t>
+                            <t t-else="">
+                                <img class="o_kanban_image" alt="Image" t-att-src='_s + "/base/static/img/avatar_grey.png"'/>
+                            </t>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="item_id"/>
+                                </strong>
+                                <div class="o_kanban_tags_section">
+                                    Couleur: <field name="color_id"/>
+                                </div>
+                                <ul>
+                                    <li>Achat: <field name="achat_id"/></li>
+                                    <li>Prix d'Achat: <field name="prix_achat"/></li>
+                                    <li>Prix de Vente Prévu: <field name="prix_vente_prevu"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_projet_stock_tree" model="ir.ui.view">
+        <field name="name">projet.stock.tree</field>
+        <field name="model">projet.stock</field>
+        <field name="arch" type="xml">
+            <tree string="Stock" create="false" edit="false">
+                <field name="item_id"/>
+                <field name="color_id"/>
+                <field name="achat_id"/>
+                <field name="date"/>
+                <field name="prix_achat"/>
+                <field name="prix_vente_prevu"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_projet_stock" model="ir.actions.act_window">
+        <field name="name">Articles en Stock</field>
+        <field name="res_model">projet.stock</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('state', '=', 'in_stock')]</field>
+    </record>
+
+    <menuitem id="menu_projet_stock_items"
+              name="Articles en Stock"
+              parent="menu_projet_stock"
+              action="action_projet_stock"
+              sequence="10"/>
+</odoo>

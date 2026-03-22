@@ -6,7 +6,7 @@
         <field name="model">projet.vente</field>
         <field name="arch" type="xml">
             <tree string="Commandes de Vente">
-                <field name="name"/>
+                <field name="command_number"/>
                 <field name="date"/>
                 <field name="total_prix_vente" sum="Total Vente"/>
                 <field name="total_benefice_reel" sum="Bénéfice Réel"/>
@@ -28,7 +28,7 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" readonly="1"/>
+                            <field name="command_number" readonly="1"/>
                         </h1>
                     </div>
                     <group>

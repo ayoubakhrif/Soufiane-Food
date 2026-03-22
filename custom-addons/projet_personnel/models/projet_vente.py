@@ -6,6 +6,7 @@ class ProjetVente(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', required=True, copy=False, default=lambda self: 'Nouveau')
+    command_number = fields.Char(string='Command', copy=False, readonly=True)
     date = fields.Date(string='Date de Vente', required=True, default=fields.Date.context_today)
     line_ids = fields.One2many('projet.vente.line', 'vente_id', string='Articles Vendus')
     
@@ -30,7 +31,11 @@ class ProjetVente(models.Model):
         for vals in vals_list:
             if not vals.get('name') or vals.get('name') == 'Nouveau':
                 vals['name'] = self.env['ir.sequence'].next_by_code('projet.vente.seq') or 'Nouveau'
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for record in records:
+            if not record.command_number:
+                record.command_number = f"Command {record.id}"
+        return records
 
     def action_validate(self):
         for record in self:

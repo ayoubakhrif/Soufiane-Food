@@ -274,6 +274,43 @@ class LogisticsEntry(models.Model):
             sheet.write_formula(row, 8, f'=SUM(I{exporter_start_row}:I{row})', footer_val_style)
             row += 1
 
+        # --- RÉSUMÉ GLOBAL EN BAS ---
+        row += 2
+        sheet.merge_range(row, 3, row, 6, "RÉSUMÉ DES DOSSIERS DE LA SEMAINE", supplier_title_style)
+        row += 1
+        
+        sheet.write(row, 3, "FOURNISSEUR", header_style)
+        sheet.write(row, 4, "TOTAL FCL", header_style)
+        sheet.write(row, 5, "POIDS TOTAL", header_style)
+        sheet.write(row, 6, "MONTANT TOTAL", header_style)
+        row += 1
+        
+        grand_fcl = 0
+        grand_weight = 0.0
+        grand_amount = 0.0
+
+        for exporter in exporters:
+            recs = self.filtered(lambda r: r.supplier_id == exporter)
+            supp_name = str(exporter.name).upper() if exporter else "SANS FOURNISSEUR"
+            supp_fcl = sum(len(r.container_names.split(',')) if r.container_names else 1 for r in recs)
+            supp_weight = sum(r.weight or 0.0 for r in recs)
+            supp_amount = sum(r.amount_total or 0.0 for r in recs)
+            
+            sheet.write(row, 3, supp_name, left_align_style)
+            sheet.write(row, 4, supp_fcl, cell_style)
+            sheet.write(row, 5, supp_weight, num_style)
+            sheet.write(row, 6, supp_amount, pink_num_style)
+            
+            grand_fcl += supp_fcl
+            grand_weight += supp_weight
+            grand_amount += supp_amount
+            row += 1
+            
+        sheet.write(row, 3, "TOTAL GÉNÉRAL", footer_label_style)
+        sheet.write(row, 4, grand_fcl, footer_label_style)
+        sheet.write(row, 5, grand_weight, footer_val_style)
+        sheet.write(row, 6, grand_amount, footer_val_style)
+
         workbook.close()
         output.seek(0)
         file_data = base64.b64encode(output.read())

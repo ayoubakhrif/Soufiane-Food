@@ -45,7 +45,7 @@ class SurestarieMagasinageReport(models.Model):
                     le.bad_date,
                     le.week,
                     le.bl_number,
-                    le.article_id,
+                    le.achat_article_id as article_id,
                     le.supplier_id,
                     le.status,
                     

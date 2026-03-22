@@ -5,7 +5,7 @@ class ProjetAchat(models.Model):
     _description = 'Commande d\'Achat'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Référence', required=True, copy=False, readonly=True, default=lambda self: 'Nouveau')
+    name = fields.Char(string='Référence', required=True, copy=False, default=lambda self: 'Nouveau')
     date = fields.Date(string='Date d\'Achat', required=True, default=fields.Date.context_today)
     date_livraison = fields.Date(string='Date de Livraison')
     line_ids = fields.One2many('projet.stock', 'achat_id', string='Articles Achetés')
@@ -24,8 +24,8 @@ class ProjetAchat(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if vals.get('name', 'Nouveau') == 'Nouveau':
-                vals['name'] = self.env['ir.sequence'].next_by_code('projet.achat') or 'Nouveau'
+            if not vals.get('name') or vals.get('name') == 'Nouveau':
+                vals['name'] = self.env['ir.sequence'].next_by_code('projet.achat.seq') or 'Nouveau'
         return super().create(vals_list)
 
 class ProjetStock(models.Model):

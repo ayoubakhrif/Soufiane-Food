@@ -5,7 +5,7 @@ class ProjetVente(models.Model):
     _description = 'Commande de Vente'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Référence', required=True, copy=False, readonly=True, default=lambda self: 'Nouveau')
+    name = fields.Char(string='Référence', required=True, copy=False, default=lambda self: 'Nouveau')
     date = fields.Date(string='Date de Vente', required=True, default=fields.Date.context_today)
     line_ids = fields.One2many('projet.vente.line', 'vente_id', string='Articles Vendus')
     
@@ -28,8 +28,8 @@ class ProjetVente(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if vals.get('name', 'Nouveau') == 'Nouveau':
-                vals['name'] = self.env['ir.sequence'].next_by_code('projet.vente') or 'Nouveau'
+            if not vals.get('name') or vals.get('name') == 'Nouveau':
+                vals['name'] = self.env['ir.sequence'].next_by_code('projet.vente.seq') or 'Nouveau'
         return super().create(vals_list)
 
     def action_validate(self):

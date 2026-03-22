@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <search string="Analyses Surestarie &amp; Magasinage">
                     <field name="bl_number"/>
-                    <field name="article_name"/>
+                    <field name="article_id"/>
                     <field name="supplier_id"/>
                     <field name="bad_date"/>
                     <field name="week"/>
@@ -19,7 +19,7 @@
                     <group expand="1" string="Regrouper par">
                         <filter string="Date BAD: Mois" name="group_bad_date" context="{'group_by':'bad_date:month'}"/>
                         <filter string="Semaine" name="group_week" context="{'group_by':'week'}"/>
-                        <filter string="Article" name="group_article" context="{'group_by':'article_name'}"/>
+                        <filter string="Article" name="group_article" context="{'group_by':'article_id'}"/>
                         <filter string="Fournisseur" name="group_supplier" context="{'group_by':'supplier_id'}"/>
                     </group>
                 </search>
@@ -35,7 +35,7 @@
                     <field name="bad_date"/>
                     <field name="week" optional="show"/>
                     <field name="bl_number"/>
-                    <field name="article_name" optional="show"/>
+                    <field name="article_id" optional="show"/>
                     <field name="supplier_id" optional="show"/>
                     <field name="container_count" sum="Total Conteneurs"/>
                     <field name="surestarie_amount" sum="Total Surestarie" optional="show"/>

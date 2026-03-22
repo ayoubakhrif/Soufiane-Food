@@ -116,7 +116,7 @@ class SurestarieMagasinageDashboard(models.Model):
                 return rows
 
             # 4. Fetch Detailed Data
-            product_rows = get_detailed_data('article_name', False)
+            product_rows = get_detailed_data('article_id', 'achat.article')
             supplier_rows = get_detailed_data('supplier_id', 'logistique.supplier')
 
             # 5. Build HTML Table Function

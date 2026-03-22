@@ -23,13 +23,14 @@ class ProjetVente(models.Model):
         for record in self:
             record.total_prix_vente = sum(record.line_ids.mapped('prix_vente'))
             record.total_benefice_reel = sum(record.line_ids.mapped('benefice_reel'))
-            record.total_benefice_percent = (record.total_benefice_reel / record.total_prix_vente * 100) if record.total_prix_vente else 0.0
+            record.total_benefice_percent = (record.total_benefice_reel / record.total_prix_vente) if record.total_prix_vente else 0.0
 
-    @api.model
-    def create(self, vals):
-        if vals.get('name', 'Nouveau') == 'Nouveau':
-            vals['name'] = self.env['ir.sequence'].next_by_code('projet.vente') or 'Nouveau'
-        return super(ProjetVente, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', 'Nouveau') == 'Nouveau':
+                vals['name'] = self.env['ir.sequence'].next_by_code('projet.vente') or 'Nouveau'
+        return super().create(vals_list)
 
     def action_validate(self):
         for record in self:
@@ -62,4 +63,4 @@ class ProjetVenteLine(models.Model):
     def _compute_benefice_reel(self):
         for record in self:
             record.benefice_reel = record.prix_vente - record.prix_achat
-            record.benefice_percent = (record.benefice_reel / record.prix_achat * 100) if record.prix_achat else 0.0
+            record.benefice_percent = (record.benefice_reel / record.prix_achat) if record.prix_achat else 0.0

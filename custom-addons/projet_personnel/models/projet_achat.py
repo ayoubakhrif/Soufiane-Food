@@ -19,13 +19,14 @@ class ProjetAchat(models.Model):
         for record in self:
             record.total_prix_achat = sum(record.line_ids.mapped('prix_achat'))
             record.total_benefice_prevu = sum(record.line_ids.mapped('benefice_prevu'))
-            record.total_benefice_percent = (record.total_benefice_prevu / record.total_prix_achat * 100) if record.total_prix_achat else 0.0
+            record.total_benefice_percent = (record.total_benefice_prevu / record.total_prix_achat) if record.total_prix_achat else 0.0
 
-    @api.model
-    def create(self, vals):
-        if vals.get('name', 'Nouveau') == 'Nouveau':
-            vals['name'] = self.env['ir.sequence'].next_by_code('projet.achat') or 'Nouveau'
-        return super(ProjetAchat, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', 'Nouveau') == 'Nouveau':
+                vals['name'] = self.env['ir.sequence'].next_by_code('projet.achat') or 'Nouveau'
+        return super().create(vals_list)
 
 class ProjetStock(models.Model):
     _name = 'projet.stock'
@@ -70,4 +71,4 @@ class ProjetStock(models.Model):
     def _compute_benefice_prevu(self):
         for record in self:
             record.benefice_prevu = record.prix_vente_prevu - record.prix_achat
-            record.benefice_percent = (record.benefice_prevu / record.prix_achat * 100) if record.prix_achat else 0.0
+            record.benefice_percent = (record.benefice_prevu / record.prix_achat) if record.prix_achat else 0.0

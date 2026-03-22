@@ -6,6 +6,8 @@
             <field name="code">projet.achat</field>
             <field name="prefix">Command </field>
             <field name="padding">1</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
         </record>
 
         <record id="seq_projet_vente" model="ir.sequence">

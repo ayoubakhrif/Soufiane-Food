@@ -11,7 +11,7 @@ class SurestarieMagasinageReport(models.Model):
     week = fields.Char(string="Semaine", readonly=True)
     bl_number = fields.Char(string="Numéro BL", readonly=True)
     
-    article_id = fields.Many2one('achat.article', string="Article", readonly=True)
+    article_name = fields.Char(string="Article", readonly=True)
     supplier_id = fields.Many2one('logistique.supplier', string="Fournisseur", readonly=True)
     
     status = fields.Selection([
@@ -45,7 +45,7 @@ class SurestarieMagasinageReport(models.Model):
                     le.bad_date,
                     le.week,
                     le.bl_number,
-                    le.achat_article_id as article_id,
+                    COALESCE(aa.name, la.name, 'Sans Article') as article_name,
                     le.supplier_id,
                     le.status,
                     
@@ -71,6 +71,8 @@ class SurestarieMagasinageReport(models.Model):
 
                 FROM
                     logistique_entry le
+                LEFT JOIN achat_article aa ON aa.id = le.achat_article_id
+                LEFT JOIN logistique_article la ON la.id = le.article_id
                 LEFT JOIN (
                     SELECT
                         bl_id,

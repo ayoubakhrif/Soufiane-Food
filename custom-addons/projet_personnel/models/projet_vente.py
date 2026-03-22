@@ -16,12 +16,14 @@ class ProjetVente(models.Model):
 
     total_prix_vente = fields.Float(string='Total Vente', compute='_compute_totals', store=True)
     total_benefice_reel = fields.Float(string='Bénéfice Réel Total', compute='_compute_totals', store=True)
+    total_benefice_percent = fields.Float(string='Bénéfice Réel %', compute='_compute_totals', store=True)
 
     @api.depends('line_ids.prix_vente', 'line_ids.benefice_reel')
     def _compute_totals(self):
         for record in self:
             record.total_prix_vente = sum(record.line_ids.mapped('prix_vente'))
             record.total_benefice_reel = sum(record.line_ids.mapped('benefice_reel'))
+            record.total_benefice_percent = (record.total_benefice_reel / record.total_prix_vente * 100) if record.total_prix_vente else 0.0
 
     @api.model
     def create(self, vals):
@@ -49,6 +51,7 @@ class ProjetVenteLine(models.Model):
     prix_achat = fields.Float(related='stock_id.prix_achat', string='Prix d\'Achat', readonly=True)
     prix_vente = fields.Float(string='Prix de Vente', required=True, default=0.0)
     benefice_reel = fields.Float(string='Bénéfice Réel', compute='_compute_benefice_reel', store=True)
+    benefice_percent = fields.Float(string='Bénéfice %', compute='_compute_benefice_reel', store=True)
 
     @api.onchange('stock_id')
     def _onchange_stock_id(self):
@@ -59,3 +62,4 @@ class ProjetVenteLine(models.Model):
     def _compute_benefice_reel(self):
         for record in self:
             record.benefice_reel = record.prix_vente - record.prix_achat
+            record.benefice_percent = (record.benefice_reel / record.prix_achat * 100) if record.prix_achat else 0.0

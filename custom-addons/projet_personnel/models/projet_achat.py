@@ -7,16 +7,19 @@ class ProjetAchat(models.Model):
 
     name = fields.Char(string='Référence', required=True, copy=False, readonly=True, default=lambda self: 'Nouveau')
     date = fields.Date(string='Date d\'Achat', required=True, default=fields.Date.context_today)
+    date_livraison = fields.Date(string='Date de Livraison')
     line_ids = fields.One2many('projet.stock', 'achat_id', string='Articles Achetés')
 
     total_prix_achat = fields.Float(string='Total Achat', compute='_compute_totals', store=True)
     total_benefice_prevu = fields.Float(string='Bénéfice Prévu Total', compute='_compute_totals', store=True)
+    total_benefice_percent = fields.Float(string='Bénéfice Prévu %', compute='_compute_totals', store=True)
 
     @api.depends('line_ids.prix_achat', 'line_ids.benefice_prevu')
     def _compute_totals(self):
         for record in self:
             record.total_prix_achat = sum(record.line_ids.mapped('prix_achat'))
             record.total_benefice_prevu = sum(record.line_ids.mapped('benefice_prevu'))
+            record.total_benefice_percent = (record.total_benefice_prevu / record.total_prix_achat * 100) if record.total_prix_achat else 0.0
 
     @api.model
     def create(self, vals):
@@ -39,6 +42,7 @@ class ProjetStock(models.Model):
     prix_achat = fields.Float(string='Prix d\'Achat', required=True, default=0.0)
     prix_vente_prevu = fields.Float(string='Prix de Vente Prévu', required=True, default=0.0)
     benefice_prevu = fields.Float(string='Bénéfice Prévu', compute='_compute_benefice_prevu', store=True)
+    benefice_percent = fields.Float(string='Bénéfice %', compute='_compute_benefice_prevu', store=True)
     
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     state = fields.Selection([
@@ -66,3 +70,4 @@ class ProjetStock(models.Model):
     def _compute_benefice_prevu(self):
         for record in self:
             record.benefice_prevu = record.prix_vente_prevu - record.prix_achat
+            record.benefice_percent = (record.benefice_prevu / record.prix_achat * 100) if record.prix_achat else 0.0

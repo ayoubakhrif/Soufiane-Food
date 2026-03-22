@@ -10,6 +10,7 @@
                 <field name="date"/>
                 <field name="total_prix_vente" sum="Total Vente"/>
                 <field name="total_benefice_reel" sum="Bénéfice Réel"/>
+                <field name="total_benefice_percent" avg="Bénéfice Réel %"/>
                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
             </tree>
         </field>
@@ -37,6 +38,7 @@
                         <group>
                             <field name="total_prix_vente"/>
                             <field name="total_benefice_reel"/>
+                            <field name="total_benefice_percent" widget="percentage"/>
                         </group>
                     </group>
                     <notebook>
@@ -49,6 +51,7 @@
                                     <field name="prix_achat" column_invisible="True"/>
                                     <field name="prix_vente"/>
                                     <field name="benefice_reel"/>
+                                    <field name="benefice_percent" widget="percentage"/>
                                 </tree>
                             </field>
                         </page>

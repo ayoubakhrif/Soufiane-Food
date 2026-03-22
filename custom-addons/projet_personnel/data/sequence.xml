@@ -4,8 +4,8 @@
         <record id="seq_projet_achat" model="ir.sequence">
             <field name="name">Commande d'Achat (Projet Personnel)</field>
             <field name="code">projet.achat</field>
-            <field name="prefix">ACH/</field>
-            <field name="padding">4</field>
+            <field name="prefix">Command </field>
+            <field name="padding">1</field>
         </record>
 
         <record id="seq_projet_vente" model="ir.sequence">

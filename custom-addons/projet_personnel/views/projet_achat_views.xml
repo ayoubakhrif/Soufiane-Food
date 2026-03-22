@@ -8,8 +8,10 @@
             <tree string="Commandes d'Achat">
                 <field name="name"/>
                 <field name="date"/>
+                <field name="date_livraison"/>
                 <field name="total_prix_achat" sum="Total Achat"/>
                 <field name="total_benefice_prevu" sum="Bénéfice Prévu"/>
+                <field name="total_benefice_percent" avg="Bénéfice Prévu %"/>
             </tree>
         </field>
     </record>
@@ -28,10 +30,12 @@
                     <group>
                         <group>
                             <field name="date"/>
+                            <field name="date_livraison"/>
                         </group>
                         <group>
                             <field name="total_prix_achat"/>
                             <field name="total_benefice_prevu"/>
+                            <field name="total_benefice_percent" widget="percentage"/>
                         </group>
                     </group>
                     <notebook>
@@ -43,6 +47,7 @@
                                     <field name="prix_achat"/>
                                     <field name="prix_vente_prevu"/>
                                     <field name="benefice_prevu"/>
+                                    <field name="benefice_percent" widget="percentage"/>
                                     <field name="state" readonly="1"/>
                                 </tree>
                             </field>
@@ -103,6 +108,7 @@
                                     <li>Achat: <field name="achat_id"/></li>
                                     <li>Prix d'Achat: <field name="prix_achat"/></li>
                                     <li>Prix de Vente Prévu: <field name="prix_vente_prevu"/></li>
+                                    <li>Bénéfice: <field name="benefice_percent" widget="percentage"/></li>
                                 </ul>
                             </div>
                         </div>
@@ -123,6 +129,7 @@
                 <field name="date"/>
                 <field name="prix_achat"/>
                 <field name="prix_vente_prevu"/>
+                <field name="benefice_percent" widget="percentage"/>
                 <field name="state"/>
             </tree>
         </field>

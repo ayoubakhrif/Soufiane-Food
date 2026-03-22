@@ -142,56 +142,88 @@ class LogisticsEntry(models.Model):
         # --- DÉFINITION DES STYLES ---
         header_style = workbook.add_format({
             'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter',
-            'bg_color': '#C6E0B4', 'font_size': 10, 'text_wrap': True
+            'bg_color': '#D9E1F2', 'font_size': 10, 'text_wrap': True
         })
         
-        cell_style = workbook.add_format({'border': 1, 'valign': 'vcenter', 'font_size': 9})
+        date_title_style = workbook.add_format({
+            'bold': True, 'align': 'center', 'valign': 'vcenter',
+            'bg_color': '#5B9BD5', 'font_size': 14, 'border': 1
+        })
+        
+        supplier_title_style = workbook.add_format({
+            'bold': True, 'align': 'center', 'valign': 'vcenter',
+            'bg_color': '#FFE699', 'font_size': 16, 'border': 1
+        })
+        
+        cell_style = workbook.add_format({'border': 1, 'valign': 'vcenter', 'font_size': 9, 'align': 'center'})
+        left_align_style = workbook.add_format({'border': 1, 'valign': 'vcenter', 'font_size': 9, 'align': 'left'})
         
         date_style = workbook.add_format({
             'border': 1, 'num_format': 'dd/mm/yyyy', 'align': 'center', 'font_size': 9
         })
         
         num_style = workbook.add_format({
-            'border': 1, 'num_format': '#,##0.00', 'align': 'right', 'font_size': 9
+            'border': 1, 'num_format': '#,##0.00', 'align': 'center', 'font_size': 9
+        })
+        
+        pink_num_style = workbook.add_format({
+            'border': 1, 'num_format': '#,##0.00', 'align': 'center', 'font_size': 9, 'bg_color': '#FCE4D6'
         })
 
-        total_row_style = workbook.add_format({
-            'bold': True, 'border': 1, 'bg_color': '#D9D9D9', 'num_format': '#,##0.00', 'font_size': 10
+        footer_label_style = workbook.add_format({
+            'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter', 'font_size': 10
+        })
+        
+        footer_val_style = workbook.add_format({
+            'bold': True, 'border': 1, 'bg_color': '#FF0000', 'font_color': 'white', 'num_format': '#,##0.00', 'font_size': 10, 'align': 'center'
+        })
+        
+        green_obs_style = workbook.add_format({
+            'border': 1, 'bg_color': '#C6E0B4', 'font_size': 9, 'align': 'center'
+        })
+        yellow_obs_style = workbook.add_format({
+            'border': 1, 'bg_color': '#FFF2CC', 'font_size': 9, 'align': 'center'
         })
 
         sheet = workbook.add_worksheet("SUIVI WEEK")
 
-        # Configuration des colonnes selon votre modèle
+        # Configuration des colonnes
         sheet.set_column('A:A', 18)  # Importer
-        sheet.set_column('B:B', 25)  # Exporter
-        sheet.set_column('C:C', 6)   # FCL (Conteneurs count)
-        sheet.set_column('D:D', 18)  # INV / CONTRACT
+        sheet.set_column('B:B', 20)  # Exporter
+        sheet.set_column('C:C', 5)   # FCL
+        sheet.set_column('D:D', 20)  # INV / CONTRACT
         sheet.set_column('E:E', 15)  # PRODUCT
         sheet.set_column('F:F', 20)  # DETAILS
-        sheet.set_column('G:I', 12)  # Weight, UP, Total
+        sheet.set_column('G:H', 12)  # Weight, UP
+        sheet.set_column('I:I', 15)  # Total
         sheet.set_column('J:K', 10)  # Incoterm, Franchise
-        sheet.set_column('L:L', 8)   # Rest
-        sheet.set_column('M:M', 25)  # Container
+        sheet.set_column('L:L', 6)   # Rest (if used)
+        sheet.set_column('M:M', 22)  # Container
         sheet.set_column('N:N', 12)  # ETA
         sheet.set_column('O:O', 20)  # Observation
 
-        # En-têtes (Ligne 4 dans votre fichier type généralement, ici ligne 0)
-        headers = [
-            "IMPORTER", "EXPORTER", "FCL", "INV/ CONTRACT", "PRODUCT", "DETAILS",
-            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "REST", "CONTAINER", "ETA", "OBSERVATIONS"
-        ]
-        sheet.write_row(0, 0, headers, header_style)
+        # Calcul des dates min et max pour le titre
+        etas = [r.eta for r in self if r.eta]
+        if etas:
+            min_date = min(etas).strftime('%d/%m')
+            max_date = max(etas).strftime('%d/%m')
+            date_str = f"{min_date} TO {max_date}"
+        else:
+            date_str = "SEMAINE EN COURS"
+
+        # Titre global dates (Merge A1:O1)
+        sheet.merge_range(0, 0, 0, 14, date_str, date_title_style)
 
         row = 1
-        # On trie par exportateur pour pouvoir faire des sous-totaux si nécessaire
-        # Ici on boucle sur les records sélectionnés
         
-        # Groupement par exportateur pour calculer les totaux FCL et Montant par bloc
         exporters = self.mapped('supplier_id')
         
-        grand_total_amount = 0.0
-
         for exporter in exporters:
+            # Ligne jaune du Fournisseur
+            export_name = str(exporter.name).upper() if exporter else "SANS FOURNISSEUR"
+            sheet.merge_range(row, 0, row, 14, export_name, supplier_title_style)
+            row += 1
+
             recs = self.filtered(lambda r: r.supplier_id == exporter)
             exporter_start_row = row + 1
             
@@ -199,47 +231,48 @@ class LogisticsEntry(models.Model):
                 sheet.write(row, 0, rec.ste_id.name or "", cell_style)
                 sheet.write(row, 1, rec.supplier_id.name or "", cell_style)
                 
-                # Nombre de conteneurs (si vous avez un champ, sinon 1 par défaut)
                 fcl_count = len(rec.container_names.split(',')) if rec.container_names else 1
                 sheet.write(row, 2, fcl_count, cell_style)
                 
                 sheet.write(row, 3, rec.invoice_number or rec.contract_num or "", cell_style)
                 sheet.write(row, 4, rec.achat_article_id.name or "", cell_style)
-                sheet.write(row, 5, rec.details or "", cell_style)
+                sheet.write(row, 5, rec.details or "", left_align_style)
                 sheet.write(row, 6, float(rec.weight or 0.0), num_style)
                 sheet.write(row, 7, float(rec.price_unit or 0.0), num_style)
-                sheet.write(row, 8, float(rec.amount_total or 0.0), num_style)
-                sheet.write(row, 9, rec.incoterm or "", cell_style)
+                sheet.write(row, 8, float(rec.amount_total or 0.0), pink_num_style)
+                
+                # J: Incoterm
+                sheet.write(row, 9, rec.incoterm.upper() if rec.incoterm else "", cell_style)
+                # K: Franchise
                 sheet.write(row, 10, rec.free_time or "", cell_style)
-                sheet.write(row, 11, "", cell_style) # REST (Calculé ou vide)
+                # L: Rest (Empty in the image, or shifted)
+                sheet.write(row, 11, "", cell_style)
+                # M: Container
                 sheet.write(row, 12, rec.container_names or "", cell_style)
                 
+                # N: ETA
                 if rec.eta:
                     sheet.write_datetime(row, 13, datetime.combine(rec.eta, time.min), date_style)
                 else:
                     sheet.write(row, 13, "", cell_style)
                 
-                sheet.write(row, 14, rec.exit_comment or "", cell_style)
+                # O: Observation
+                obs = rec.exit_comment or ""
+                if "dhl" in obs.lower() or "paye" in obs.lower():
+                    sheet.write(row, 14, obs.upper(), green_obs_style)
+                elif "en cours" in obs.lower():
+                    sheet.write(row, 14, obs.upper(), yellow_obs_style)
+                else:
+                    sheet.write(row, 14, obs.upper(), cell_style)
                 
-                grand_total_amount += float(rec.amount_total or 0.0)
                 row += 1
 
-            # Ligne de sous-total par Exportateur (Comme dans votre fichier)
-            sheet.write(row, 1, "TOTAL FCL", total_row_style)
-            # Somme FCL
-            sheet.write_formula(row, 2, f'=SUM(C{exporter_start_row}:C{row})', total_row_style)
-            # Espace vide
-            for c in range(3, 7): sheet.write(row, c, "", total_row_style)
-            sheet.write(row, 7, "TOTAL", total_row_style)
-            # Somme Montant
-            sheet.write_formula(row, 8, f'=SUM(I{exporter_start_row}:I{row})', total_row_style)
-            for c in range(9, 15): sheet.write(row, c, "", total_row_style)
+            # Ligne de sous-total par Exportateur
+            for c in range(0, 15): 
+                sheet.write(row, c, "", footer_label_style) # Apply empty borders to rest of line
+            sheet.write(row, 7, "TOTAL", footer_label_style)
+            sheet.write_formula(row, 8, f'=SUM(I{exporter_start_row}:I{row})', footer_val_style)
             row += 1
-
-        # Ligne Finale Grand Total
-        row += 1
-        sheet.merge_range(row, 0, row, 7, "TOTAL GÉNÉRAL", total_row_style)
-        sheet.write(row, 8, grand_total_amount, total_row_style)
 
         workbook.close()
         output.seek(0)

@@ -136,102 +136,120 @@ class LogisticsEntry(models.Model):
             raise ValidationError("La bibliothèque xlsxwriter n'est pas installée.")
 
         from datetime import datetime, time
-
-        def to_xlsx_date(d):
-            if not d:
-                return None
-            return datetime.combine(d, time.min)
-
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
 
-        # Styles
-        title_style = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center'})
-        header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'})
-        cell_style = workbook.add_format({'border': 1})
-        money_style = workbook.add_format({'border': 1, 'num_format': '#,##0.00'})
-        weight_style = workbook.add_format({'border': 1, 'num_format': '#,##0.000'})
-        date_style = workbook.add_format({'border': 1, 'num_format': 'dd/mm/yyyy'})
-        total_style = workbook.add_format({'bold': True, 'border': 1, 'bg_color': '#e6e6e6', 'num_format': '#,##0.00'})
+        # --- DÉFINITION DES STYLES ---
+        header_style = workbook.add_format({
+            'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter',
+            'bg_color': '#C6E0B4', 'font_size': 10, 'text_wrap': True
+        })
+        
+        cell_style = workbook.add_format({'border': 1, 'valign': 'vcenter', 'font_size': 9})
+        
+        date_style = workbook.add_format({
+            'border': 1, 'num_format': 'dd/mm/yyyy', 'align': 'center', 'font_size': 9
+        })
+        
+        num_style = workbook.add_format({
+            'border': 1, 'num_format': '#,##0.00', 'align': 'right', 'font_size': 9
+        })
 
-        sheet = workbook.add_worksheet("Dossiers à Sortir")
+        total_row_style = workbook.add_format({
+            'bold': True, 'border': 1, 'bg_color': '#D9D9D9', 'num_format': '#,##0.00', 'font_size': 10
+        })
 
-        # Colonnes
-        sheet.set_column(0, 0, 20)  # Société
-        sheet.set_column(1, 1, 20)  # Supplier
-        sheet.set_column(2, 2, 15)  # Invoice
-        sheet.set_column(3, 3, 20)  # Article
-        sheet.set_column(4, 4, 30)  # Details
-        sheet.set_column(5, 5, 12)  # Poids
-        sheet.set_column(6, 6, 12)  # UP
-        sheet.set_column(7, 7, 15)  # Total
-        sheet.set_column(8, 8, 12)  # Incoterm
-        sheet.set_column(9, 9, 12)  # Franchise
-        sheet.set_column(10, 10, 25) # Conteneurs
-        sheet.set_column(11, 11, 15) # ETA
-        sheet.set_column(12, 12, 35) # Commentaire
+        sheet = workbook.add_worksheet("SUIVI WEEK")
 
-        sheet.merge_range('A1:M1', "Liste des Dossiers à Sortir", title_style)
+        # Configuration des colonnes selon votre modèle
+        sheet.set_column('A:A', 18)  # Importer
+        sheet.set_column('B:B', 25)  # Exporter
+        sheet.set_column('C:C', 6)   # FCL (Conteneurs count)
+        sheet.set_column('D:D', 18)  # INV / CONTRACT
+        sheet.set_column('E:E', 15)  # PRODUCT
+        sheet.set_column('F:F', 20)  # DETAILS
+        sheet.set_column('G:I', 12)  # Weight, UP, Total
+        sheet.set_column('J:K', 10)  # Incoterm, Franchise
+        sheet.set_column('L:L', 8)   # Rest
+        sheet.set_column('M:M', 25)  # Container
+        sheet.set_column('N:N', 12)  # ETA
+        sheet.set_column('O:O', 20)  # Observation
 
-        row = 2
-
+        # En-têtes (Ligne 4 dans votre fichier type généralement, ici ligne 0)
         headers = [
-            "Société", "Supplier", "Invoice Number", "Article", "Details",
-            "Poids", "UP", "Total Montant", "Incoterm", "Franchise",
-            "Conteneurs", "ETA", "Commentaire Sortie"
+            "IMPORTER", "EXPORTER", "FCL", "INV/ CONTRACT", "PRODUCT", "DETAILS",
+            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "REST", "CONTAINER", "ETA", "OBSERVATIONS"
         ]
-        sheet.write_row(row, 0, headers, header_style)
-        row += 1
+        sheet.write_row(0, 0, headers, header_style)
 
-        total_montant = 0.0
+        row = 1
+        # On trie par exportateur pour pouvoir faire des sous-totaux si nécessaire
+        # Ici on boucle sur les records sélectionnés
+        
+        # Groupement par exportateur pour calculer les totaux FCL et Montant par bloc
+        exporters = self.mapped('supplier_id')
+        
+        grand_total_amount = 0.0
 
-        for rec in self:
-            sheet.write(row, 0, rec.ste_id.name if rec.ste_id else "", cell_style)
-            sheet.write(row, 1, rec.supplier_id.name if rec.supplier_id else "", cell_style)
-            sheet.write(row, 2, rec.invoice_number or "", cell_style)
-            sheet.write(row, 3, rec.achat_article_id.name if rec.achat_article_id else "", cell_style)
-            sheet.write(row, 4, rec.details or "", cell_style)
+        for exporter in exporters:
+            recs = self.filtered(lambda r: r.supplier_id == exporter)
+            exporter_start_row = row + 1
             
-            sheet.write_number(row, 5, float(rec.weight or 0.0), weight_style)
-            sheet.write_number(row, 6, float(rec.price_unit or 0.0), money_style)
-            sheet.write_number(row, 7, float(rec.amount_total or 0.0), money_style)
-            
-            total_montant += float(rec.amount_total or 0.0)
-
-            sheet.write(row, 8, rec.incoterm.upper() if rec.incoterm else "", cell_style)
-            sheet.write(row, 9, rec.free_time or "", cell_style)
-            sheet.write(row, 10, rec.container_names or "", cell_style)
-            
-            dt_eta = to_xlsx_date(rec.eta)
-            if dt_eta:
-                sheet.write_datetime(row, 11, dt_eta, date_style)
-            else:
-                sheet.write(row, 11, "", cell_style)
+            for rec in recs:
+                sheet.write(row, 0, rec.ste_id.name or "", cell_style)
+                sheet.write(row, 1, rec.supplier_id.name or "", cell_style)
                 
-            sheet.write(row, 12, rec.exit_comment or "", cell_style)
-            
+                # Nombre de conteneurs (si vous avez un champ, sinon 1 par défaut)
+                fcl_count = len(rec.container_names.split(',')) if rec.container_names else 1
+                sheet.write(row, 2, fcl_count, cell_style)
+                
+                sheet.write(row, 3, rec.invoice_number or rec.contract_num or "", cell_style)
+                sheet.write(row, 4, rec.achat_article_id.name or "", cell_style)
+                sheet.write(row, 5, rec.details or "", cell_style)
+                sheet.write(row, 6, float(rec.weight or 0.0), num_style)
+                sheet.write(row, 7, float(rec.price_unit or 0.0), num_style)
+                sheet.write(row, 8, float(rec.amount_total or 0.0), num_style)
+                sheet.write(row, 9, rec.incoterm or "", cell_style)
+                sheet.write(row, 10, rec.free_time or "", cell_style)
+                sheet.write(row, 11, "", cell_style) # REST (Calculé ou vide)
+                sheet.write(row, 12, rec.container_names or "", cell_style)
+                
+                if rec.eta:
+                    sheet.write_datetime(row, 13, datetime.combine(rec.eta, time.min), date_style)
+                else:
+                    sheet.write(row, 13, "", cell_style)
+                
+                sheet.write(row, 14, rec.exit_comment or "", cell_style)
+                
+                grand_total_amount += float(rec.amount_total or 0.0)
+                row += 1
+
+            # Ligne de sous-total par Exportateur (Comme dans votre fichier)
+            sheet.write(row, 1, "TOTAL FCL", total_row_style)
+            # Somme FCL
+            sheet.write_formula(row, 2, f'=SUM(C{exporter_start_row}:C{row})', total_row_style)
+            # Espace vide
+            for c in range(3, 7): sheet.write(row, c, "", total_row_style)
+            sheet.write(row, 7, "TOTAL", total_row_style)
+            # Somme Montant
+            sheet.write_formula(row, 8, f'=SUM(I{exporter_start_row}:I{row})', total_row_style)
+            for c in range(9, 15): sheet.write(row, c, "", total_row_style)
             row += 1
 
-        # Ligne de Total (seulement Total Montant selon demande)
-        sheet.merge_range(row, 0, row, 6, "Total", total_style)
-        sheet.write_number(row, 7, total_montant, total_style)
-        
-        # Style vide pour le reste
-        for col in range(8, 13):
-            sheet.write(row, col, "", total_style)
+        # Ligne Finale Grand Total
+        row += 1
+        sheet.merge_range(row, 0, row, 7, "TOTAL GÉNÉRAL", total_row_style)
+        sheet.write(row, 8, grand_total_amount, total_row_style)
 
         workbook.close()
         output.seek(0)
         file_data = base64.b64encode(output.read())
         output.close()
 
-        filename = "Dossiers_A_Sortir.xlsx"
-
         attachment = self.env['ir.attachment'].create({
-            'name': filename,
+            'name': "SUIVI_WEEK_LOGISTIQUE.xlsx",
             'datas': file_data,
             'type': 'binary',
-            'res_model': self._name,
             'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         })
 

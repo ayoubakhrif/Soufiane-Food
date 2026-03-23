@@ -11,6 +11,9 @@ class SurestarieMagasinageDashboard(models.Model):
     @api.depends('name')
     def _compute_content_html(self):
         for rec in self:
+            # Force recreate view to avoid Odoo upgrade caching issues
+            self.env['surestarie.magasinage.report'].init()
+            
             # 1. Build Domain based on Amounts (No Year Filter)
             domain = [
                 '|',

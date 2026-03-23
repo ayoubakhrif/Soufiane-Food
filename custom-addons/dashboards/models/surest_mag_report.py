@@ -45,7 +45,7 @@ class SurestarieMagasinageReport(models.Model):
                     le.bad_date,
                     le.week,
                     le.bl_number,
-                    COALESCE(le.achat_article_id, aa_fallback.id) as article_id,
+                    COALESCE(le.achat_article_id, aa_fallback.id, aa_legacy_fallback.id) as article_id,
                     le.supplier_id,
                     le.status,
                     
@@ -72,11 +72,17 @@ class SurestarieMagasinageReport(models.Model):
                 FROM
                     logistique_entry le
                 LEFT JOIN logistique_article la ON la.id = le.article_id
+                LEFT JOIN logistique_article la_legacy ON la_legacy.id = le.legacy_article_id
                 LEFT JOIN (
                     SELECT MIN(id) as id, company_article_id 
                     FROM achat_article 
                     GROUP BY company_article_id
                 ) aa_fallback ON aa_fallback.company_article_id = la.company_article_id
+                LEFT JOIN (
+                    SELECT MIN(id) as id, company_article_id 
+                    FROM achat_article 
+                    GROUP BY company_article_id
+                ) aa_legacy_fallback ON aa_legacy_fallback.company_article_id = la_legacy.company_article_id
                 LEFT JOIN (
                     SELECT
                         bl_id,

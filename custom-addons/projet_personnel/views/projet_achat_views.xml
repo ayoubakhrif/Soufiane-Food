@@ -11,6 +11,7 @@
                 <field name="date_livraison"/>
                 <field name="total_prix_achat" sum="Total Achat"/>
                 <field name="total_prix_vente_prevu" sum="Total Vente Prévu"/>
+                <field name="total_ventes_reelles" sum="Total Ventes Réalisées"/>
                 <field name="total_benefice_prevu" sum="Bénéfice Prévu"/>
                 <field name="total_benefice_percent" avg="Bénéfice Prévu %"/>
             </tree>
@@ -36,6 +37,7 @@
                         <group>
                             <field name="total_prix_achat"/>
                             <field name="total_prix_vente_prevu"/>
+                            <field name="total_ventes_reelles"/>
                             <field name="total_benefice_prevu"/>
                             <field name="total_benefice_percent" widget="percentage"/>
                         </group>
@@ -49,6 +51,7 @@
                                     <field name="quantite"/>
                                     <field name="prix_achat"/>
                                     <field name="prix_vente_prevu"/>
+                                    <field name="ventes_reelles"/>
                                     <field name="benefice_prevu"/>
                                     <field name="benefice_percent" widget="percentage"/>
                                     <field name="state" readonly="1"/>
@@ -137,6 +140,7 @@
                 <field name="quantite_restante"/>
                 <field name="prix_achat" sum="Total Achat"/>
                 <field name="prix_vente_prevu" sum="Total Vente Prévu"/>
+                <field name="ventes_reelles" sum="Total Ventes Réalisées"/>
                 <field name="benefice_percent" widget="percentage"/>
                 <field name="state"/>
             </tree>

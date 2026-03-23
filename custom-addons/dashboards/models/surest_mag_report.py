@@ -45,7 +45,7 @@ class SurestarieMagasinageReport(models.Model):
                     le.bad_date,
                     le.week,
                     le.bl_number,
-                    COALESCE(le.achat_article_id, aa_fallback.id, aa_legacy_fallback.id) as article_id,
+                    COALESCE(le.achat_article_id, ac.article_id, aa_fallback.id, aa_legacy_fallback.id) as article_id,
                     le.supplier_id,
                     le.status,
                     
@@ -71,6 +71,7 @@ class SurestarieMagasinageReport(models.Model):
 
                 FROM
                     logistique_entry le
+                LEFT JOIN achat_contract ac ON ac.id = le.contract_id
                 LEFT JOIN logistique_article la ON la.id = le.article_id
                 LEFT JOIN logistique_article la_legacy ON la_legacy.id = le.legacy_article_id
                 LEFT JOIN (

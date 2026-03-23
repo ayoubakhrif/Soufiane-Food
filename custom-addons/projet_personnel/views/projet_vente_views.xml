@@ -48,6 +48,7 @@
                                     <field name="stock_id" options="{'no_create': True}"/>
                                     <field name="item_id"/>
                                     <field name="color_id"/>
+                                    <field name="quantite"/>
                                     <field name="prix_achat" column_invisible="True"/>
                                     <field name="prix_vente"/>
                                     <field name="benefice_reel"/>

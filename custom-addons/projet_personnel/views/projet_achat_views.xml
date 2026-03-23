@@ -10,6 +10,7 @@
                 <field name="date"/>
                 <field name="date_livraison"/>
                 <field name="total_prix_achat" sum="Total Achat"/>
+                <field name="total_prix_vente_prevu" sum="Total Vente Prévu"/>
                 <field name="total_benefice_prevu" sum="Bénéfice Prévu"/>
                 <field name="total_benefice_percent" avg="Bénéfice Prévu %"/>
             </tree>
@@ -34,6 +35,7 @@
                         </group>
                         <group>
                             <field name="total_prix_achat"/>
+                            <field name="total_prix_vente_prevu"/>
                             <field name="total_benefice_prevu"/>
                             <field name="total_benefice_percent" widget="percentage"/>
                         </group>
@@ -44,6 +46,7 @@
                                 <tree editable="bottom">
                                     <field name="item_id"/>
                                     <field name="color_id" domain="[('item_id', '=', item_id)]"/>
+                                    <field name="quantite"/>
                                     <field name="prix_achat"/>
                                     <field name="prix_vente_prevu"/>
                                     <field name="benefice_prevu"/>
@@ -85,12 +88,14 @@
                 <field name="item_id"/>
                 <field name="color_id"/>
                 <field name="image"/>
+                <field name="quantite"/>
+                <field name="quantite_restante"/>
                 <field name="prix_achat"/>
                 <field name="prix_vente_prevu"/>
                 <field name="achat_id"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                        <div t-attf-class="o_kanban_record_has_image_fill">
                             <t t-if="record.image.raw_value">
                                 <div class="o_kanban_image_fill_left" t-attf-style="background-image:url('#{kanban_image('projet.stock', 'image', record.id.raw_value)}')"/>
                             </t>
@@ -106,6 +111,7 @@
                                 </div>
                                 <ul>
                                     <li>Achat: <field name="achat_id"/></li>
+                                    <li>Quantité: <field name="quantite_restante"/> / <field name="quantite"/></li>
                                     <li>Prix d'Achat: <field name="prix_achat"/></li>
                                     <li>Prix de Vente Prévu: <field name="prix_vente_prevu"/></li>
                                     <li>Bénéfice: <field name="benefice_percent" widget="percentage"/></li>
@@ -127,8 +133,10 @@
                 <field name="color_id"/>
                 <field name="achat_id"/>
                 <field name="date"/>
-                <field name="prix_achat"/>
-                <field name="prix_vente_prevu"/>
+                <field name="quantite"/>
+                <field name="quantite_restante"/>
+                <field name="prix_achat" sum="Total Achat"/>
+                <field name="prix_vente_prevu" sum="Total Vente Prévu"/>
                 <field name="benefice_percent" widget="percentage"/>
                 <field name="state"/>
             </tree>

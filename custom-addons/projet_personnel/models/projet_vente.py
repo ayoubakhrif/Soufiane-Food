@@ -19,11 +19,11 @@ class ProjetVente(models.Model):
     total_benefice_reel = fields.Float(string='Bénéfice Réel Total', compute='_compute_totals', store=True)
     total_benefice_percent = fields.Float(string='Bénéfice Réel %', compute='_compute_totals', store=True)
 
-    @api.depends('line_ids.prix_vente', 'line_ids.benefice_reel')
+    @api.depends('line_ids.prix_vente', 'line_ids.benefice_reel', 'line_ids.quantite')
     def _compute_totals(self):
         for record in self:
-            record.total_prix_vente = sum(record.line_ids.mapped('prix_vente'))
-            record.total_benefice_reel = sum(record.line_ids.mapped('benefice_reel'))
+            record.total_prix_vente = sum((line.prix_vente * line.quantite) for line in record.line_ids)
+            record.total_benefice_reel = sum(line.benefice_reel for line in record.line_ids)
             record.total_benefice_percent = (record.total_benefice_reel / record.total_prix_vente) if record.total_prix_vente else 0.0
 
     @api.model_create_multi
@@ -41,7 +41,7 @@ class ProjetVente(models.Model):
         for record in self:
             for line in record.line_ids:
                 if line.stock_id:
-                    line.stock_id.state = 'sold'
+                    line.stock_id.quantite_vendue += line.quantite
             record.state = 'done'
 
 class ProjetVenteLine(models.Model):
@@ -56,6 +56,7 @@ class ProjetVenteLine(models.Model):
     
     prix_achat = fields.Float(related='stock_id.prix_achat', string='Prix d\'Achat', readonly=True)
     prix_vente = fields.Float(string='Prix de Vente', required=True, default=0.0)
+    quantite = fields.Integer(string='Quantité', default=1, required=True)
     benefice_reel = fields.Float(string='Bénéfice Réel', compute='_compute_benefice_reel', store=True)
     benefice_percent = fields.Float(string='Bénéfice %', compute='_compute_benefice_reel', store=True)
 
@@ -64,8 +65,8 @@ class ProjetVenteLine(models.Model):
         if self.stock_id:
             self.prix_vente = self.stock_id.prix_vente_prevu
 
-    @api.depends('prix_vente', 'prix_achat')
+    @api.depends('prix_vente', 'prix_achat', 'quantite')
     def _compute_benefice_reel(self):
         for record in self:
-            record.benefice_reel = record.prix_vente - record.prix_achat
-            record.benefice_percent = (record.benefice_reel / record.prix_achat) if record.prix_achat else 0.0
+            record.benefice_reel = (record.prix_vente - record.prix_achat) * record.quantite
+            record.benefice_percent = (record.benefice_reel / (record.prix_achat * record.quantite)) if record.prix_achat and record.quantite else 0.0

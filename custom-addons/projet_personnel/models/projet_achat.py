@@ -12,14 +12,16 @@ class ProjetAchat(models.Model):
     line_ids = fields.One2many('projet.stock', 'achat_id', string='Articles Achetés')
 
     total_prix_achat = fields.Float(string='Total Achat', compute='_compute_totals', store=True)
+    total_prix_vente_prevu = fields.Float(string='Total Vente Prévu', compute='_compute_totals', store=True)
     total_benefice_prevu = fields.Float(string='Bénéfice Prévu Total', compute='_compute_totals', store=True)
     total_benefice_percent = fields.Float(string='Bénéfice Prévu %', compute='_compute_totals', store=True)
 
-    @api.depends('line_ids.prix_achat', 'line_ids.benefice_prevu')
+    @api.depends('line_ids.prix_achat', 'line_ids.prix_vente_prevu', 'line_ids.benefice_prevu', 'line_ids.quantite')
     def _compute_totals(self):
         for record in self:
-            record.total_prix_achat = sum(record.line_ids.mapped('prix_achat'))
-            record.total_benefice_prevu = sum(record.line_ids.mapped('benefice_prevu'))
+            record.total_prix_achat = sum(line.prix_achat * line.quantite for line in record.line_ids)
+            record.total_prix_vente_prevu = sum(line.prix_vente_prevu * line.quantite for line in record.line_ids)
+            record.total_benefice_prevu = sum(line.benefice_prevu * line.quantite for line in record.line_ids)
             record.total_benefice_percent = (record.total_benefice_prevu / record.total_prix_achat) if record.total_prix_achat else 0.0
 
     @api.model_create_multi
@@ -45,6 +47,10 @@ class ProjetStock(models.Model):
     
     image = fields.Image(string='Image', compute='_compute_image', store=True)
     
+    quantite = fields.Integer(string='Quantité initiale', required=True, default=1)
+    quantite_vendue = fields.Integer(string='Quantité Vendue', default=0, readonly=True)
+    quantite_restante = fields.Integer(string='Quantité Restante', compute='_compute_quantite', store=True)
+    
     prix_achat = fields.Float(string='Prix d\'Achat', required=True, default=0.0)
     prix_vente_prevu = fields.Float(string='Prix de Vente Prévu', required=True, default=0.0)
     benefice_prevu = fields.Float(string='Bénéfice Prévu', compute='_compute_benefice_prevu', store=True)
@@ -54,7 +60,16 @@ class ProjetStock(models.Model):
     state = fields.Selection([
         ('in_stock', 'En Stock'),
         ('sold', 'Vendu')
-    ], string='Statut', default='in_stock', required=True, tracking=True)
+    ], string='Statut', default='in_stock', required=True, tracking=True, compute='_compute_quantite', store=True)
+
+    @api.depends('quantite', 'quantite_vendue')
+    def _compute_quantite(self):
+        for record in self:
+            record.quantite_restante = record.quantite - record.quantite_vendue
+            if record.quantite_restante <= 0 and record.quantite > 0:
+                record.state = 'sold'
+            else:
+                record.state = 'in_stock'
 
     display_name = fields.Char(string='Nom complet', compute='_compute_display_name', store=True)
 

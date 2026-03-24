@@ -22,6 +22,7 @@
         'views/finance_cheque_physical_view.xml',
         'views/finance_sutra_view.xml',
         'views/finance_effet_views.xml',
+        'views/finance_cheque_effet_calendar_view.xml',
         'views/finance_sutra_payment_view.xml',
         'views/finance_marglory_view.xml',
         'views/finance_marglory_payment_view.xml',

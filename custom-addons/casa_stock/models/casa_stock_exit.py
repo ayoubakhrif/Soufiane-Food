@@ -26,8 +26,8 @@ class CasaStockExit(models.Model):
     )
     
     date = fields.Date(string='Date', required=True)
-    lot = fields.Char(string='Lot', required=True)
-    dum = fields.Char(string='DUM', required=True)
+    lot = fields.Char(string='Lot')
+    dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
     
     ville = fields.Selection([

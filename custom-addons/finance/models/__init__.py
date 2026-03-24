@@ -18,4 +18,4 @@ from . import finance_marglory_payment
 from . import logistics_integration
 from . import finance_effet
 from . import finance_logistics_reconciliation
-
+from . import finance_cheque_effet_calendar

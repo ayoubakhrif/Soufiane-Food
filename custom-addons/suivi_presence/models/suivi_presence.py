@@ -142,7 +142,7 @@ class SuiviPresence(models.Model):
         
         Allowed: Admins bypass all rules.
         """
-        if self.env.user.has_group('suivi_presence.group_suivi_admin'):
+        if self.env.user.has_group('suivi_presence.group_suivi_admin') or self.env.user.has_group('suivi_presence.group_suivi_user_special'):
             return
 
         # ALLOW EXCEPTION: Status Change (Confirmation)

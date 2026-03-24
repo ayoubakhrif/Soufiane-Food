@@ -57,7 +57,9 @@
                 <filter name="type_cheque" string="Chèques" domain="[('type_doc', '=', 'cheque')]"/>
                 <filter name="type_effet" string="Effets" domain="[('type_doc', '=', 'effet')]"/>
                 <separator/>
-                <filter name="encours" string="Non Encaissé" domain="[('state', '=', 'non_encaisse')]"/>
+                <filter name="encaisse" string="Encaissés" domain="[('state', '=', 'encaisse')]"/>
+                <filter name="en_cours" string="En cours" domain="[('state', '=', 'non_encaisse')]"/>
+                <separator/>
                 <group expand="0" string="Group By">
                     <filter name="group_by_type" string="Type" context="{'group_by':'type_doc'}"/>
                     <filter name="group_by_ste" string="Société" context="{'group_by':'ste_id'}"/>

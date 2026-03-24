@@ -24,6 +24,7 @@
                         <field name="image" widget="image"/>
                         <field name="display_name"/>
                         <field name="name"/>
+                        <field name="value"/>
                     </group>
                     <group string="Classification">
                         <field name="category_id"/>
@@ -74,6 +75,7 @@
                                 <div class="o_kanban_primary_text mb-2">
                                     <strong class="d-block" style="font-size: 1.1em; color: #2c3e50; font-weight: 600; line-height: 1.4;">
                                         <field name="display_name"/>
+                                        <field name="value"/>
                                     </strong>
                                 </div>
 

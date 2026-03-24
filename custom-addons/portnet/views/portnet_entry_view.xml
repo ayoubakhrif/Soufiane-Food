@@ -84,9 +84,10 @@
                     <group string="Montants">
                         <group>
                             <field name="total_fob"/>
-                            <!-- total_freight only visible when incoterm = cfr -->
+                            <!-- total_freight only visible+required when incoterm = cfr -->
                             <field name="total_freight"
-                                   invisible="incoterm != 'cfr'"/>
+                                   invisible="incoterm != 'cfr'"
+                                   required="incoterm == 'cfr'"/>
                         </group>
                         <group>
                             <!-- total_cfr only visible when incoterm = cfr -->

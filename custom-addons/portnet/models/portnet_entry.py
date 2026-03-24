@@ -23,11 +23,13 @@ class PortnetEntry(models.Model):
     origin_id = fields.Many2one(
         'achat.origin',
         string='Origine',
+        required=True,
     )
 
     supplier_id = fields.Many2one(
         'logistique.supplier',
         string='Fournisseur',
+        required=True,
     )
 
     incoterm = fields.Selection(
@@ -37,15 +39,18 @@ class PortnetEntry(models.Model):
             ('exw', 'EXW'),
         ],
         string='Incoterm',
+        required=True,
     )
 
     invoice = fields.Char(
         string='Facture',
+        required=True,
     )
 
     ste_id = fields.Many2one(
         'logistique.ste',
         string='Société',
+        required=True,
     )
 
     note = fields.Text(
@@ -55,6 +60,7 @@ class PortnetEntry(models.Model):
     provenance = fields.Many2one(
         'achat.origin',
         string='Provenance',
+        required=True,
     )
 
     device = fields.Selection(
@@ -63,15 +69,16 @@ class PortnetEntry(models.Model):
             ('eur', 'EUR'),
         ],
         string='Devise',
+        required=True,
     )
 
-    gross = fields.Float(string='Poids brut (kg)')
-    net = fields.Float(string='Poids net (kg)')
-    valeur = fields.Float(string='Valeur')
-    nomenclature = fields.Char(string='Nomenclature')
+    gross = fields.Float(string='Poids brut (kg)', required=True)
+    net = fields.Float(string='Poids net (kg)', required=True)
+    valeur = fields.Float(string='Valeur', required=True)
+    nomenclature = fields.Char(string='Nomenclature', required=True)
 
-    total_fob = fields.Float(string='Total FOB')
-    total_freight = fields.Float(string='Total Freight')
+    total_fob = fields.Float(string='Total FOB', required=True)
+    total_freight = fields.Float(string='Total Freight')  # required only when incoterm=cfr (enforced in view)
 
     total_cfr = fields.Float(
         string='Total CFR',
@@ -80,7 +87,7 @@ class PortnetEntry(models.Model):
     )
 
     payment_terms = fields.Boolean(string='Payment terms')
-    date_invoice = fields.Date(string='Date facture')
+    date_invoice = fields.Date(string='Date facture', required=True)
 
     state = fields.Selection(
         selection=[
@@ -101,10 +108,11 @@ class PortnetEntry(models.Model):
         for rec in self:
             rec.total_cfr = rec.total_fob + rec.total_freight
 
-    # ── Valeur validation helper ──────────────────────────────────────────────
+    # ── Valeur validation (only called on Domicilier) ───────────────────────
 
     def _check_valeur(self):
-        """Raise if the entered valeur differs from the article's reference value."""
+        """Block the Domicilier transition when valeur differs from the
+        article's reference value stored in company.article.value."""
         for rec in self:
             if not rec.article_id:
                 continue
@@ -112,6 +120,7 @@ class PortnetEntry(models.Model):
             if not company_article:
                 continue
             ref_value = company_article.value
+            # Only enforce when a reference value has been set (> 0)
             if ref_value and rec.valeur != ref_value:
                 raise ValidationError(
                     "La valeur saisie (%.2f) est différente de la valeur "

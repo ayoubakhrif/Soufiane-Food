@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_portnet_entry_user,portnet.entry.user,model_portnet_entry,portnet.group_portnet_user,1,1,1,0
+access_portnet_entry_manager,portnet.entry.manager,model_portnet_entry,portnet.group_portnet_manager,1,1,1,1

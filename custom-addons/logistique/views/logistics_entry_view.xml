@@ -12,7 +12,7 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
-                <field name="achat_article_id" string="Article"/>
+                <field name="article_id" string="Article"/>
                 <field name="details"/>
                 <field name="incoterm"/>
                 <field name="free_time"/>
@@ -84,7 +84,7 @@
                     
                     <group>
                         <group string="Logistics">
-                            <field name="achat_article_id" string="Article" readonly="1"/>
+                            <field name="article_id" string="Article" readonly="1"/>
                             <field name="details" readonly="1"/>
                             <field name="weight" readonly="1"/>
                         </group>
@@ -191,7 +191,7 @@
                 <field name="dossier_id"/>
                 <field name="container_names" string="Conteneur"/>
                 <field name="status"/>
-                <field name="achat_article_id" string="Article"/>
+                <field name="article_id" string="Article"/>
                 <field name="cheque_ids" string="Numéro Chèque" filter_domain="[('cheque_ids.cheque_serie', 'ilike', self)]"/>
 
                 <group string="Regrouper par">

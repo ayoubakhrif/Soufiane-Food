@@ -14,6 +14,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/transport_trip_views.xml',
+        'views/transport_trip_remorque_views.xml',
         'views/driver_salary_views.xml',
         'views/transport_result_followup_views.xml',
         'views/gazoil_refill_view.xml',

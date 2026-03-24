@@ -22,3 +22,6 @@ access_transport_result_followup_manager,access.transport.result.followup.manage
 access_transport_result_followup_user,access.transport.result.followup.user,model_transport_result_followup,group_transport_user,1,0,0,0
 access_transport_result_line_manager,access.transport.result.line.manager,model_transport_result_line,group_transport_manager,1,1,1,1
 access_transport_result_line_user,access.transport.result.line.user,model_transport_result_line,group_transport_user,1,0,0,0
+access_transport_trip_remorque_viewer,transport.trip.remorque.viewer,model_transport_trip_remorque,group_transport_viewer,1,0,0,0
+access_transport_trip_remorque_user,transport.trip.remorque.user,model_transport_trip_remorque,group_transport_user,1,1,1,0
+access_transport_trip_remorque,transport.trip.remorque,model_transport_trip_remorque,base.group_user,1,1,1,1

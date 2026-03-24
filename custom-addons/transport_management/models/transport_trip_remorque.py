@@ -3,26 +3,29 @@ from odoo.exceptions import ValidationError
 from datetime import date
 from calendar import monthrange
 
-class TransportTrip(models.Model):
-    _name = 'transport.trip'
-    _description = 'Transport Trip'
+class TransportTripRemorque(models.Model):
+    _name = 'transport.trip.remorque'
+    _description = 'Transport Trip Remorque'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
-    driver_id = fields.Many2one('transport.driver', string='Chauffeur', required=True, tracking=True)
+    driver_remorque_id = fields.Many2one(
+        'transport.driver', 
+        string='Chauffeur', 
+        required=True, 
+        tracking=True, 
+        domain=[('remorque', '=', True)]
+    )
     client_id = fields.Many2one('transport.client', string='Client', required=True, tracking=True)
-    
+
     # Deprecated fields (kept for data safety, but hidden in views)
     driver = fields.Char(string='Chauffeur (Legacy)')
     client = fields.Char(string='Client (Legacy)')
     
-    trip_type = fields.Selection([
-        ('tanger_med', 'Tanger Med'),
-        ('soufiane', 'Soufiane'),
-        ('la_zone', 'La zone'),
-        ('client', 'Client'),
-        ('mestapha', 'Mestapha'),
-    ], string='Type de voyage', tracking=True)
+    destination = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('fenideq', 'Fenideq'),
+    ], string='Destination', tracking=True)
     charge_fuel = fields.Float(string='Gazoil', tracking=True)
     charge_driver = fields.Float(string='Déplacement Chauffeur', tracking=True)
     charge_adblue = fields.Float(string='AdBlue', tracking=True)

@@ -215,8 +215,8 @@ class LogisticsEntry(models.Model):
         sheet.merge_range(0, 0, 0, 14, date_str, date_title_style)
 
         headers = [
-            "IMPORTER", "EXPORTER", "FCL", "INV / CONTRACT", "PRODUCT", "DETAILS",
-            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "REST", "CONTAINER", "ETA", "OBSERVATIONS"
+            "Ste", "Supplier", "N°CTN", "INVOICE", "PRODUCT", "DETAILS",
+            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "", "CONTAINERS", "ETA", "OBSERVATIONS"
         ]
         sheet.write_row(1, 0, headers, header_style)
 

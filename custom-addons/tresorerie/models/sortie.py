@@ -51,9 +51,14 @@ class TresorerieSortie(models.Model):
     # -------------------------------------------------------------------------
     # Computed readonly info fields (for UI display)
     # -------------------------------------------------------------------------
-    tresorerie_balance = fields.Float(
-        string='Solde disponible trésorerie (MAD)',
-        compute='_compute_tresorerie_balance',
+    balance_especes = fields.Float(
+        string='Solde Espèces disponible (MAD)',
+        compute='_compute_balances',
+        digits=(10, 2),
+    )
+    balance_cheques = fields.Float(
+        string='Solde Chèques disponible (MAD)',
+        compute='_compute_balances',
         digits=(10, 2),
     )
     client_cheque_balance = fields.Float(
@@ -65,27 +70,29 @@ class TresorerieSortie(models.Model):
     # -------------------------------------------------------------------------
     # Compute methods
     # -------------------------------------------------------------------------
-    @api.depends('state', 'amount')
-    def _compute_tresorerie_balance(self):
+    @api.depends('state', 'amount', 'payment_type')
+    def _compute_balances(self):
         """
-        Available balance = Total paiements (entries) - Total confirmed sorties
-        (excluding the current record so the user sees total available
-        before this sortie is counted).
+        Separate balances per payment type.
+        Espèces balance  = Σ paiements(especes) - Σ confirmed sorties(especes)
+        Chèques balance  = Σ paiements(cheque)  - Σ confirmed sorties(cheque)
+        Cheque entries do NOT add to the espèces reserve and vice-versa.
         """
-        today = date.today()
-        # Sum of all paiements
+        # --- Entries split by type ---
         paiements = self.env['tresorerie.paiement'].search([])
-        total_entrees = sum(p.amount for p in paiements)
+        total_especes_in = sum(p.amount for p in paiements if p.payment_type == 'especes')
+        total_cheques_in = sum(p.amount for p in paiements if p.payment_type == 'cheque')
 
-        # Sum of all *confirmed* sorties (excluding current record if already saved)
-        sorties = self.env['tresorerie.sortie'].search([
-            ('state', '=', 'confirmed'),
-        ])
+        # --- Confirmed sorties split by type ---
+        all_confirmed = self.env['tresorerie.sortie'].search([('state', '=', 'confirmed')])
+
         for rec in self:
-            already_confirmed_amount = sum(
-                s.amount for s in sorties if s.id != rec.id
-            )
-            rec.tresorerie_balance = total_entrees - already_confirmed_amount
+            especes_out = sum(s.amount for s in all_confirmed
+                              if s.payment_type == 'especes' and s.id != rec.id)
+            cheques_out = sum(s.amount for s in all_confirmed
+                              if s.payment_type == 'cheque' and s.id != rec.id)
+            rec.balance_especes = total_especes_in - especes_out
+            rec.balance_cheques = total_cheques_in - cheques_out
 
     @api.depends('client_id', 'state', 'amount')
     def _compute_client_cheque_balance(self):
@@ -149,59 +156,80 @@ class TresorerieSortie(models.Model):
     @api.constrains('amount', 'payment_type', 'client_id', 'state')
     def _check_amounts(self):
         for rec in self:
-            if rec.state == 'confirmed':
-                # 1. Global trésorerie balance check
-                paiements = self.env['tresorerie.paiement'].search([])
-                total_entrees = sum(p.amount for p in paiements)
+            if rec.state != 'confirmed':
+                continue
 
-                sorties = self.env['tresorerie.sortie'].search([
+            # ----------------------------------------------------------------
+            # Fetch entries & confirmed sorties split by payment type
+            # ----------------------------------------------------------------
+            paiements = self.env['tresorerie.paiement'].search([])
+            total_especes_in = sum(p.amount for p in paiements if p.payment_type == 'especes')
+            total_cheques_in = sum(p.amount for p in paiements if p.payment_type == 'cheque')
+
+            all_confirmed = self.env['tresorerie.sortie'].search([
+                ('state', '=', 'confirmed'),
+                ('id', '!=', rec.id),
+            ])
+            especes_out = sum(s.amount for s in all_confirmed if s.payment_type == 'especes')
+            cheques_out = sum(s.amount for s in all_confirmed if s.payment_type == 'cheque')
+
+            available_especes = total_especes_in - especes_out
+            available_cheques = total_cheques_in - cheques_out
+
+            # ----------------------------------------------------------------
+            # 1. Per-type trésorerie balance check
+            # ----------------------------------------------------------------
+            if rec.payment_type == 'especes':
+                if rec.amount > available_especes:
+                    raise ValidationError(
+                        f"❌ Solde Espèces insuffisant en trésorerie !\n"
+                        f"Montant demandé  : {rec.amount:,.2f} MAD\n"
+                        f"Solde Espèces    : {available_especes:,.2f} MAD"
+                    )
+
+            elif rec.payment_type == 'cheque':
+                # 1a. Global chèque reserve check
+                if rec.amount > available_cheques:
+                    raise ValidationError(
+                        f"❌ Solde Chèques insuffisant en trésorerie !\n"
+                        f"Montant demandé  : {rec.amount:,.2f} MAD\n"
+                        f"Solde Chèques    : {available_cheques:,.2f} MAD"
+                    )
+
+                # 1b. Client-specific cheque balance check
+                if not rec.client_id:
+                    raise ValidationError(
+                        "❌ Veuillez sélectionner un client pour un paiement par chèque."
+                    )
+
+                today = fields.Date.today()
+                client_cheques = self.env['tresorerie.paiement'].search([
+                    ('client_id', '=', rec.client_id.id),
+                    ('payment_type', '=', 'cheque'),
+                    ('check_date', '<=', today),
+                ])
+                total_client_cheques = sum(c.amount for c in client_cheques)
+
+                if total_client_cheques == 0:
+                    raise ValidationError(
+                        f"❌ Le client {rec.client_id.name} n'a aucun chèque échu disponible."
+                    )
+
+                client_sorties = self.env['tresorerie.sortie'].search([
+                    ('client_id', '=', rec.client_id.id),
+                    ('payment_type', '=', 'cheque'),
                     ('state', '=', 'confirmed'),
                     ('id', '!=', rec.id),
                 ])
-                total_sorties = sum(s.amount for s in sorties)
-                available = total_entrees - total_sorties
+                already_used = sum(s.amount for s in client_sorties)
+                client_available = total_client_cheques - already_used
 
-                if rec.amount > available:
+                if rec.amount > client_available:
                     raise ValidationError(
-                        f"❌ Montant insuffisant en trésorerie !\n"
-                        f"Montant demandé : {rec.amount:,.2f} MAD\n"
-                        f"Solde disponible : {available:,.2f} MAD"
+                        f"❌ Montant supérieur au solde chèques de {rec.client_id.name} !\n"
+                        f"Montant demandé          : {rec.amount:,.2f} MAD\n"
+                        f"Solde chèques disponible : {client_available:,.2f} MAD"
                     )
-
-                # 2. Client cheque balance check (only for cheque type)
-                if rec.payment_type == 'cheque':
-                    if not rec.client_id:
-                        raise ValidationError(
-                            "❌ Veuillez sélectionner un client pour un paiement par chèque."
-                        )
-
-                    today = fields.Date.today()
-                    cheques = self.env['tresorerie.paiement'].search([
-                        ('client_id', '=', rec.client_id.id),
-                        ('payment_type', '=', 'cheque'),
-                        ('check_date', '<=', today),
-                    ])
-                    total_cheques = sum(c.amount for c in cheques)
-
-                    if total_cheques == 0:
-                        raise ValidationError(
-                            f"❌ Le client {rec.client_id.name} n'a aucun chèque échu disponible."
-                        )
-
-                    used_sorties = self.env['tresorerie.sortie'].search([
-                        ('client_id', '=', rec.client_id.id),
-                        ('state', '=', 'confirmed'),
-                        ('id', '!=', rec.id),
-                    ])
-                    already_used = sum(s.amount for s in used_sorties)
-                    client_available = total_cheques - already_used
-
-                    if rec.amount > client_available:
-                        raise ValidationError(
-                            f"❌ Montant supérieur au solde chèques de {rec.client_id.name} !\n"
-                            f"Montant demandé : {rec.amount:,.2f} MAD\n"
-                            f"Solde chèques disponible : {client_available:,.2f} MAD"
-                        )
 
     @api.constrains('payment_type', 'client_id')
     def _check_cheque_requires_client(self):

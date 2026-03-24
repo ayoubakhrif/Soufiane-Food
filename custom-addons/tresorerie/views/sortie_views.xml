@@ -58,23 +58,26 @@
 
                     <!-- Balance information banners -->
                     <div class="alert alert-info" role="alert"
-                         style="margin-bottom:12px;">
-                        <strong>Solde disponible trésorerie :</strong>
-                        <field name="tresorerie_balance" readonly="1"
-                               widget="monetary"
-                               options="{'currency_field': False}"
-                               nolabel="1"/>
+                         style="margin-bottom:12px;"
+                         invisible="payment_type != 'especes'">
+                        <strong>💵 Solde Espèces disponible :</strong>
+                        <field name="balance_especes" readonly="1" nolabel="1"/>
+                        <span> MAD</span>
+                    </div>
+
+                    <div class="alert alert-info" role="alert"
+                         style="margin-bottom:12px;"
+                         invisible="payment_type != 'cheque'">
+                        <strong>🏦 Solde Chèques disponible :</strong>
+                        <field name="balance_cheques" readonly="1" nolabel="1"/>
                         <span> MAD</span>
                     </div>
 
                     <div class="alert alert-warning" role="alert"
                          style="margin-bottom:12px;"
                          invisible="payment_type != 'cheque' or not client_id">
-                        <strong>Solde chèques disponible pour ce client :</strong>
-                        <field name="client_cheque_balance" readonly="1"
-                               widget="monetary"
-                               options="{'currency_field': False}"
-                               nolabel="1"/>
+                        <strong>👤 Solde chèques disponible pour ce client :</strong>
+                        <field name="client_cheque_balance" readonly="1" nolabel="1"/>
                         <span> MAD</span>
                     </div>
 

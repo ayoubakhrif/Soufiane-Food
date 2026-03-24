@@ -27,7 +27,12 @@ class FinanceChequeEffetCalendar(models.Model):
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
                     (d.id * 10) + 1 AS id,
-                    d.chq AS name,
+                    CONCAT(
+                        d.chq, ' - ',
+                        COALESCE(fb.name, ''), ' - ',
+                        COALESCE(fs.name, ''), ' - ',
+                        TO_CHAR(d.amount, 'FM999G999G990D00'), ' MAD'
+                    ) AS name,
                     d.date_echeance AS date_echeance,
                     d.amount AS amount,
                     d.benif_id AS benif_id,
@@ -39,13 +44,20 @@ class FinanceChequeEffetCalendar(models.Model):
                         ELSE 'non_encaisse'
                     END AS state
                 FROM datacheque d
+                LEFT JOIN finance_benif fb ON fb.id = d.benif_id
+                LEFT JOIN finance_ste fs ON fs.id = d.ste_id
                 WHERE d.active = True
 
                 UNION ALL
 
                 SELECT
                     (e.id * 10) + 2 AS id,
-                    e.serie AS name,
+                    CONCAT(
+                        e.serie, ' - ',
+                        COALESCE(fb2.name, ''), ' - ',
+                        COALESCE(fs2.name, ''), ' - ',
+                        TO_CHAR(e.montant, 'FM999G999G990D00'), ' MAD'
+                    ) AS name,
                     e.date_echeance AS date_echeance,
                     e.montant AS amount,
                     e.benif_id AS benif_id,
@@ -56,5 +68,7 @@ class FinanceChequeEffetCalendar(models.Model):
                         ELSE 'non_encaisse'
                     END AS state
                 FROM finance_effet e
+                LEFT JOIN finance_benif fb2 ON fb2.id = e.benif_id
+                LEFT JOIN finance_ste fs2 ON fs2.id = e.ste_id
             )
         """ % self._table)

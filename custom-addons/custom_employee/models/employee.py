@@ -44,6 +44,7 @@ class CoreEmployee(models.Model):
     site = fields.Char(string='Site')
     entry_date = fields.Date(string='Date entrée', tracking=True)
     contract_date = fields.Date(string='Date de contrat', tracking=True)
+    contract_start_date = fields.Date(string='Date de début de contrat', tracking=True)
     active = fields.Boolean(string='Active', default=True, tracking=True)
     matriculation_cnss = fields.Char(string='Matriculation CNSS', tracking=True)
     matriculation = fields.Char(string='Matriculation', tracking=True)

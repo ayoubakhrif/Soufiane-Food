@@ -26,6 +26,7 @@
                 <field name="thc_amount" sum="THC"/>
                 <field name="surestarie_amount" sum="Surestarie"/>
                 <field name="magasinage_amount" sum="Magasinage"/>
+                <field name="charge_transport_local" sum="Charge transport local"/>
                 <field name="bad_date"/>
                 <field name="exit_date"/>
                 <field name="entry_date"/>
@@ -101,6 +102,7 @@
                             <field name="bad_date" required="status == 'in_progress' and incoterm != 'emirate'"/>
                             <field name="exit_date" required="status == 'closed' and incoterm != 'emirate'"/>
                             <field name="entry_date" required="status == 'closed' and incoterm != 'emirate'"/>
+                            <field name="charge_transport_local"/>
                             <field name="remarks"/>
                         </group>
                         <group string="Frais logistiques (depuis chèques)">

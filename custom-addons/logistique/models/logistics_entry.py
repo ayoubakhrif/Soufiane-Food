@@ -61,6 +61,7 @@ class LogisticsEntry(models.Model):
     ste_id = fields.Many2one('logistique.ste', string='Société')
     supplier_id = fields.Many2one('logistique.supplier', string='Supplier')
     invoice_number = fields.Char(string='Invoice Number')
+    charge_transport_local = fields.Float(string='Charge de transport local')
     
     # Product details
     article_id = fields.Many2one('logistique.article', string='Article')

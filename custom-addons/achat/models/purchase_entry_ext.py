@@ -214,7 +214,13 @@ class LogisticsEntry(models.Model):
         # Titre global dates (Merge A1:O1)
         sheet.merge_range(0, 0, 0, 14, date_str, date_title_style)
 
-        row = 1
+        headers = [
+            "IMPORTER", "EXPORTER", "FCL", "INV / CONTRACT", "PRODUCT", "DETAILS",
+            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "REST", "CONTAINER", "ETA", "OBSERVATIONS"
+        ]
+        sheet.write_row(1, 0, headers, header_style)
+
+        row = 2
         
         exporters = self.mapped('supplier_id')
         

@@ -75,7 +75,6 @@
                                 <div class="o_kanban_primary_text mb-2">
                                     <strong class="d-block" style="font-size: 1.1em; color: #2c3e50; font-weight: 600; line-height: 1.4;">
                                         <field name="display_name"/>
-                                        <field name="value"/>
                                     </strong>
                                 </div>
 
@@ -83,7 +82,7 @@
                                 <div class="o_kanban_tags_section mb-2 flex-grow-1">
                                     <span class="badge" style="background-color: rgba(102, 126, 234, 0.1); color: #667eea; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 500;">
                                         <i class="fa fa-tag mr-1"/>
-                                        <field name="name"/>
+                                        <field name="value"/>
                                     </span>
                                 </div>
 

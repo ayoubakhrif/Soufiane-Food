@@ -12,6 +12,7 @@
         'views/menu_views.xml',
         'views/client_views.xml',
         'views/paiement_views.xml',
+        'views/sortie_views.xml',
     ],
     'installable': True,
     'application': True,

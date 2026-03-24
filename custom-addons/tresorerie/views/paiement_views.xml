@@ -74,7 +74,7 @@
 
     <!-- Menu for Paiement under Paiements -->
     <menuitem id="menu_tresorerie_paiement_action" 
-              name="Paiements" 
+              name="Entrées" 
               parent="menu_tresorerie_paiements" 
               action="action_tresorerie_paiement" 
               sequence="10"/>

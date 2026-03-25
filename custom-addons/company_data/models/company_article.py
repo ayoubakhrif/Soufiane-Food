@@ -31,3 +31,7 @@ class CompanyArticle(models.Model):
         string='Valeur',
         required=True
     )
+
+    nomenclature = fields.Char(
+        string='Nomenclature'
+    )

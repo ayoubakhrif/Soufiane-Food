@@ -73,6 +73,7 @@
                         <group>
                             <field name="nomenclature"/>
                             <field name="valeur"/>
+                            <field name="avance"/>
                         </group>
                         <group>
                             <field name="gross"/>
@@ -122,6 +123,7 @@
                 <field name="invoice"/>
                 <field name="date_invoice"/>
                 <field name="valeur"/>
+                <field name="avance"/>
                 <field name="total_fob"/>
                 <field name="total_cfr"/>
                 <field name="ste_id"/>

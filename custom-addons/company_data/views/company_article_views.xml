@@ -9,6 +9,7 @@
             <tree>
                 <field name="display_name"/>
                 <field name="name"/>
+                <field name="nomenclature"/>
             </tree>
         </field>
     </record>
@@ -24,6 +25,7 @@
                         <field name="image" widget="image"/>
                         <field name="display_name"/>
                         <field name="name"/>
+                        <field name="nomenclature"/>
                         <field name="value"/>
                     </group>
                     <group string="Classification">

@@ -75,7 +75,8 @@ class PortnetEntry(models.Model):
     gross = fields.Float(string='Poids brut (kg)', required=True)
     net = fields.Float(string='Poids net (kg)', required=True)
     valeur = fields.Float(string='Valeur', required=True)
-    nomenclature = fields.Char(string='Nomenclature', required=True)
+    nomenclature = fields.Char(string='Nomenclature')
+    avance = fields.Float(string='Avance')
 
     total_fob = fields.Float(string='Total FOB', required=True)
     total_freight = fields.Float(string='Total Freight')  # required only when incoterm=cfr (enforced in view)
@@ -108,6 +109,13 @@ class PortnetEntry(models.Model):
         for rec in self:
             rec.total_cfr = rec.total_fob + rec.total_freight
 
+    @api.onchange('article_id')
+    def _onchange_article_id(self):
+        if self.article_id:
+            company_article = self.article_id.company_article_id
+            if company_article:
+                self.nomenclature = company_article.nomenclature
+
     # ── Valeur validation (only called on Domicilier) ───────────────────────
 
     def _check_valeur(self):
@@ -121,9 +129,9 @@ class PortnetEntry(models.Model):
                 continue
             ref_value = company_article.value
             # Only enforce when a reference value has been set (> 0)
-            if ref_value and rec.valeur != ref_value:
+            if ref_value and rec.valeur > ref_value:
                 raise ValidationError(
-                    "La valeur saisie (%.2f) est différente de la valeur "
+                    "La valeur saisie (%.2f) est strictement supérieure à la valeur "
                     "de référence de l'article \"%s\" (%.2f).\n"
                     "Veuillez corriger la valeur avant de domicilier."
                     % (rec.valeur, company_article.display_name, ref_value)

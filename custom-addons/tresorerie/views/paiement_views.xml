@@ -49,7 +49,7 @@
                                 <tree editable="bottom">
                                     <!-- Owner: empty = client, else pick from list -->
                                     <field name="owner_id"
-                                           string="Porteur (vide = client)"
+                                           string="Porteur"
                                            optional="show"
                                            options="{'no_quick_create': False, 'no_create_edit': False}"
                                            placeholder="— Client —"/>
@@ -59,7 +59,7 @@
                                            string="Montant (MAD)"
                                            sum="Total"/>
                                     <field name="note"
-                                           string="Réf. / N° chèque"
+                                           string="N° chèque"
                                            optional="show"/>
                                 </tree>
                             </field>

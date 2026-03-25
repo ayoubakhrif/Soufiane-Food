@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_data_2025_root"
+              name="Data 2025"
+              web_icon="data_2025,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_data_entry"
+              name="Entrées"
+              parent="menu_data_2025_root"
+              action="action_data_entry"
+              sequence="10"/>
+</odoo>

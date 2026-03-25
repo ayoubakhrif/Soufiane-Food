@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_data_entry_tree" model="ir.ui.view">
+        <field name="name">data.entry.tree</field>
+        <field name="model">data.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Entrées de Données 2025">
+                <field name="bl"/>
+                <field name="article_id"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="eta"/>
+                <field name="bad_date"/>
+                <field name="incoterm"/>
+                <field name="invoice"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_data_entry_form" model="ir.ui.view">
+        <field name="name">data.entry.form</field>
+        <field name="model">data.entry</field>
+        <field name="arch" type="xml">
+            <form string="Entrée de Données 2025">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="bl"/>
+                            <field name="article_id"/>
+                            <field name="ste_id"/>
+                            <field name="supplier_id"/>
+                            <field name="invoice"/>
+                        </group>
+                        <group>
+                            <field name="eta"/>
+                            <field name="bad_date"/>
+                            <field name="free_time"/>
+                            <field name="incoterm"/>
+                        </group>
+                    </group>
+                    <group string="Finances &amp; Logistique">
+                        <group>
+                            <field name="surestarie"/>
+                            <field name="magasinage"/>
+                            <field name="thc"/>
+                        </group>
+                        <group>
+                            <field name="freight" attrs="{'invisible': [('incoterm', '!=', 'fob')], 'required': [('incoterm', '=', 'fob')]}"/>
+                            <field name="charge_transport"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_data_entry" model="ir.actions.act_window">
+        <field name="name">Entrées de Données 2025</field>
+        <field name="res_model">data.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez une nouvelle entrée de données.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -11,6 +11,7 @@
         'security/ir.model.access.csv',
         'views/menu_views.xml',
         'views/client_views.xml',
+        'views/effets_owner_views.xml',
         'views/paiement_views.xml',
         'views/sortie_views.xml',
         'views/analyse_report_views.xml',

@@ -5,12 +5,11 @@
         <field name="name">tresorerie.paiement.tree</field>
         <field name="model">tresorerie.paiement</field>
         <field name="arch" type="xml">
-            <tree string="Paiements">
+            <tree string="Entrées" decoration-info="payment_type == 'cheque'">
                 <field name="date"/>
                 <field name="client_id"/>
-                <field name="amount" sum="Total"/>
                 <field name="payment_type"/>
-                <field name="check_date" optional="hide"/>
+                <field name="amount" sum="Total"/>
             </tree>
         </field>
     </record>
@@ -20,40 +19,85 @@
         <field name="name">tresorerie.paiement.form</field>
         <field name="model">tresorerie.paiement</field>
         <field name="arch" type="xml">
-            <form string="Paiement">
+            <form string="Entrée Trésorerie">
                 <sheet>
                     <group>
-                        <group>
+                        <group string="Informations générales">
                             <field name="client_id"/>
-                            <field name="amount"/>
-                        </group>
-                        <group>
                             <field name="date"/>
-                            <field name="payment_type"/>
-                            <field name="check_date" 
-                                   required="payment_type == 'cheque'" 
-                                   invisible="payment_type != 'cheque'"/>
+                            <field name="payment_type" widget="radio"/>
+                        </group>
+                        <group string="Montant">
+                            <!-- Espèces: simple flat amount -->
+                            <field name="amount_especes"
+                                   string="Montant (MAD)"
+                                   invisible="payment_type != 'especes'"
+                                   required="payment_type == 'especes'"/>
+                            <!-- Cheques: computed read-only total -->
+                            <field name="amount"
+                                   string="Total Chèques (MAD)"
+                                   invisible="payment_type != 'cheque'"
+                                   readonly="1"/>
                         </group>
                     </group>
+
+                    <!-- Cheque lines notebook — visible only in cheque mode -->
+                    <notebook invisible="payment_type != 'cheque'">
+                        <page string="Chèques / Effets" name="cheque_lines">
+                            <field name="cheque_line_ids"
+                                   context="{'default_check_date': date}">
+                                <tree editable="bottom">
+                                    <!-- Owner: empty = client, else pick from list -->
+                                    <field name="owner_id"
+                                           string="Porteur (vide = client)"
+                                           optional="show"
+                                           options="{'no_quick_create': False, 'no_create_edit': False}"
+                                           placeholder="— Client —"/>
+                                    <field name="check_date"
+                                           string="Date d'échéance"/>
+                                    <field name="amount"
+                                           string="Montant (MAD)"
+                                           sum="Total"/>
+                                    <field name="note"
+                                           string="Réf. / N° chèque"
+                                           optional="show"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="amount"
+                                       string="Total (MAD)"
+                                       readonly="1"
+                                       class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Search View to easily find payments -->
+    <!-- Search View -->
     <record id="view_tresorerie_paiement_search" model="ir.ui.view">
         <field name="name">tresorerie.paiement.search</field>
         <field name="model">tresorerie.paiement</field>
         <field name="arch" type="xml">
-            <search string="Recherche Paiements">
+            <search string="Recherche Entrées">
                 <field name="client_id"/>
                 <field name="payment_type"/>
-                <filter string="Chèques" name="type_cheque" domain="[('payment_type', '=', 'cheque')]"/>
-                <filter string="Espèces" name="type_especes" domain="[('payment_type', '=', 'especes')]"/>
+                <filter string="Chèques" name="type_cheque"
+                        domain="[('payment_type', '=', 'cheque')]"/>
+                <filter string="Espèces" name="type_especes"
+                        domain="[('payment_type', '=', 'especes')]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
-                    <filter string="Type de paiement" name="group_type" context="{'group_by': 'payment_type'}"/>
-                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                    <filter string="Client"
+                            name="group_client"
+                            context="{'group_by': 'client_id'}"/>
+                    <filter string="Type de paiement"
+                            name="group_type"
+                            context="{'group_by': 'payment_type'}"/>
+                    <filter string="Date"
+                            name="group_date"
+                            context="{'group_by': 'date'}"/>
                 </group>
             </search>
         </field>
@@ -73,10 +117,10 @@
     </record>
 
     <!-- Menu for Paiement under Paiements -->
-    <menuitem id="menu_tresorerie_paiement_action" 
-              name="Entrées" 
-              parent="menu_tresorerie_paiements" 
-              action="action_tresorerie_paiement" 
+    <menuitem id="menu_tresorerie_paiement_action"
+              name="Entrées"
+              parent="menu_tresorerie_paiements"
+              action="action_tresorerie_paiement"
               sequence="10"/>
 
 </odoo>

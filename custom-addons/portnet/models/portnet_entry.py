@@ -129,7 +129,7 @@ class PortnetEntry(models.Model):
                 continue
             ref_value = company_article.value
             # Only enforce when a reference value has been set (> 0)
-            if ref_value and rec.valeur > ref_value:
+            if ref_value and rec.valeur != ref_value:
                 raise ValidationError(
                     "La valeur saisie (%.2f) est strictement supérieure à la valeur "
                     "de référence de l'article \"%s\" (%.2f).\n"

@@ -22,7 +22,7 @@ class PaiementChequeLine(models.Model):
     # Otherwise = a third-party from effets_owner.
     owner_id = fields.Many2one(
         'tresorerie.effets.owner',
-        string='Porteur (si différent du client)',
+        string='Porteur',
         ondelete='restrict',
         help="Laisser vide si le chèque est au nom du client. "
              "Sélectionner le porteur si le chèque est un effet de commerce.",
@@ -37,7 +37,7 @@ class PaiementChequeLine(models.Model):
         required=True,
         digits=(10, 2),
     )
-    note = fields.Char(string='Référence / N° chèque')
+    note = fields.Char(string='N° chèque')
 
     # Convenience display: shows owner name or client name
     owner_display = fields.Char(

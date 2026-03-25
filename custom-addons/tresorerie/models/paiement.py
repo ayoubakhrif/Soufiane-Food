@@ -28,7 +28,7 @@ class TresoreriePaiement(models.Model):
     # Espèces: simple flat amount (editable, used when type = especes)
     # ------------------------------------------------------------------
     amount_especes = fields.Float(
-        string='Montant (MAD)',
+        string='Montant',
         digits=(10, 2),
     )
 
@@ -45,7 +45,7 @@ class TresoreriePaiement(models.Model):
     # For especes: equals amount_especes.
     # For cheques: equals sum of lines.
     amount = fields.Float(
-        string='Montant total (MAD)',
+        string='Montant total',
         compute='_compute_amount',
         store=True,
         digits=(10, 2),

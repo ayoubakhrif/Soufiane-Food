@@ -33,7 +33,7 @@ class PaiementChequeLine(models.Model):
         required=True,
     )
     amount = fields.Float(
-        string='Montant (MAD)',
+        string='Montant',
         required=True,
         digits=(10, 2),
     )

@@ -45,7 +45,7 @@
                             <field name="thc"/>
                         </group>
                         <group>
-                            <field name="freight" attrs="{'invisible': [('incoterm', '!=', 'fob')], 'required': [('incoterm', '=', 'fob')]}"/>
+                            <field name="freight"/>
                             <field name="charge_transport"/>
                         </group>
                     </group>

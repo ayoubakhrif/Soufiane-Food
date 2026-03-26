@@ -48,6 +48,11 @@ class LogistiqueDossier(models.Model):
         'dossier_id',
         string='Virements'
     )
+    sutra_ids = fields.One2many(
+        'logistique.dossier.sutra',
+        'dossier_id',
+        string='Sutra'
+    )
     container_count = fields.Integer(
         string="Nb Conteneurs",
         compute="_compute_counts",

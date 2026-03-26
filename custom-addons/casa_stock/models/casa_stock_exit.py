@@ -17,7 +17,8 @@ class CasaStockExit(models.Model):
     price_purchase = fields.Float(
         string='Prix Achat',
         compute='_compute_price_purchase',
-        store=True
+        store=True,
+        readonly=False
     )
     mt_achat = fields.Float(
         string='Montant Achat',
@@ -127,15 +128,27 @@ class CasaStockExit(models.Model):
             if rec.product_id:
                 domain = [
                     ('product_id', '=', rec.product_id.id),
-                    ('lot', '=', rec.lot),
-                    ('dum', '=', rec.dum),
                     ('ville', '=', rec.ville),
                     ('frigo', '=', rec.frigo),
                     ('ste_id', '=', rec.ste_id.id),
                 ]
                 
                 domain.append(('weight', '=', rec.weight or 0.0))
-                domain.append(('calibre', '=', rec.calibre or False))
+                
+                if rec.lot:
+                    domain.append(('lot', '=', rec.lot))
+                else:
+                    domain.append(('lot', 'in', [False, '']))
+                    
+                if rec.dum:
+                    domain.append(('dum', '=', rec.dum))
+                else:
+                    domain.append(('dum', 'in', [False, '']))
+                    
+                if rec.calibre:
+                    domain.append(('calibre', '=', rec.calibre))
+                else:
+                    domain.append(('calibre', 'in', [False, '']))
 
                 stock_records = Stock.search(domain)
                 

@@ -194,15 +194,27 @@ class CasaStockEntry(models.Model):
         """Helper to get stock for specific dimensions."""
         domain = [
             ('product_id', '=', rec.product_id.id),
-            ('lot', '=', rec.lot),
-            ('dum', '=', rec.dum),
             ('ville', '=', rec.ville),
             ('frigo', '=', rec.frigo),
             ('ste_id', '=', rec.ste_id.id),
             ('state', '=', 'done')
         ]
         domain.append(('weight', '=', rec.weight or 0.0))
-        domain.append(('calibre', '=', rec.calibre or False))
+        
+        if rec.lot:
+            domain.append(('lot', '=', rec.lot))
+        else:
+            domain.append(('lot', 'in', [False, '']))
+            
+        if rec.dum:
+            domain.append(('dum', '=', rec.dum))
+        else:
+            domain.append(('dum', 'in', [False, '']))
+            
+        if rec.calibre:
+            domain.append(('calibre', '=', rec.calibre))
+        else:
+            domain.append(('calibre', 'in', [False, '']))
 
         if price is not None:
              domain.append(('price_purchase', '=', price))

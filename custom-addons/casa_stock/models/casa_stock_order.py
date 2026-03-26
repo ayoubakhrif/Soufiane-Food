@@ -23,9 +23,8 @@ class CasaStockOrder(models.Model):
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
     def _compute_is_cancel_hidden(self):
-        is_valid_admin = self.env.user.has_group('casa_stock.group_valid_admin')
-        is_admin = self.env.user.has_group('casa_stock.group_admin')
-        hidden = is_valid_admin and not is_admin
+        is_manager = self.env.user.has_group('casa_stock.group_manager')
+        hidden = not is_manager
         for rec in self:
             rec.is_cancel_hidden = hidden
 

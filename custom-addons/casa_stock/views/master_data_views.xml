@@ -19,12 +19,7 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Client Action -->
-    <record id="action_casa_stock_client" model="ir.actions.act_window">
-        <field name="name">Clients</field>
-        <field name="res_model">casa.client</field>
-        <field name="view_mode">tree,form</field>
-    </record>
+
 
     <!-- Provider Action -->
     <record id="action_casa_stock_provider" model="ir.actions.act_window">

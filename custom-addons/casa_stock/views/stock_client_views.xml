@@ -168,7 +168,6 @@
             <pivot string="Analyse Clients">
                 <field name="name" type="row"/>
                 <field name="exit_count" type="measure"/>
-                <field name="total_commandes" type="measure"/>
                 <field name="total_client_discounts" type="measure"/>
                 <field name="compte_total" type="measure"/>
                 <field name="total_profit" type="measure"/>

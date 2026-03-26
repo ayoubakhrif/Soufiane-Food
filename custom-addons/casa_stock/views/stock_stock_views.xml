@@ -91,7 +91,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <field name="total_weight"/> Kg)
+                                        ⚖️ <b>Poids :</b> <field name="poids"/> (Poids tot: <field name="total_weight"/> Kg)
                                     </div>
                                     <div>
                                         📍 <b>Frigo :</b> <field name="frigo"/>
@@ -138,7 +138,7 @@
                 <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
-                <field name="weight"/>
+                <field name="poids"/>
                 <field name="total_weight" sum="Total Poids"/>
                 <field name="price"/>
                 <field name="mt_achat" sum="Total Mt Achat"/>
@@ -198,6 +198,7 @@
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
                     <filter string="Frigo" name="group_frigo" context="{'group_by': 'frigo'}"/>
+                    <filter string="Poids" name="group_poids" context="{'group_by': 'poids'}"/>
                 </group>
             </search>
         </field>
@@ -208,12 +209,11 @@
         <field name="model">casa.stock.stock</field>
         <field name="arch" type="xml">
             <pivot string="Analyse Stock">
+                <field name="ville" type="row"/>
                 <field name="product_id" type="row"/>
-                <field name="ste_id" type="row"/>
-                <field name="ville" type="col"/>
+                <field name="poids" type="row"/>
                 <field name="quantity" type="measure"/>
                 <field name="total_weight" type="measure"/>
-                <field name="mt_achat" type="measure"/>
             </pivot>
         </field>
     </record>

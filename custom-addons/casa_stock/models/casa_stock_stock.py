@@ -23,6 +23,7 @@ class CasaStockStock(models.Model):
     
     quantity = fields.Float(string='Quantité', readonly=True)
     weight = fields.Float(string='Poids (Kg)', readonly=True)
+    poids = fields.Char(string='Poids', readonly=True)
     calibre = fields.Char(string='Calibre', readonly=True)
     price = fields.Float(string='Dernier Prix (Achat)', readonly=True)
     mt_achat = fields.Float(string='Montant achat estimé', readonly=True)
@@ -31,7 +32,7 @@ class CasaStockStock(models.Model):
     write_date = fields.Datetime(string='Last Update', readonly=True)
     create_date = fields.Datetime(string='Creation Date', readonly=True)
 
-    total_weight = fields.Float(string='Poids Total', readonly=True)
+    total_weight = fields.Float(string='Tonnage', readonly=True)
 
     @api.depends('product_id.name', 'lot', 'dum', 'price', 'create_date')
     def _compute_display_name(self):
@@ -72,6 +73,7 @@ class CasaStockStock(models.Model):
                     m.ste_id,
                     m.calibre,
                     m.weight,
+                    m.weight || 'Kg' as poids,
                     m.price_purchase as price,
                     sum(m.qty) as quantity,
                     (sum(m.qty) * m.weight) as total_weight,

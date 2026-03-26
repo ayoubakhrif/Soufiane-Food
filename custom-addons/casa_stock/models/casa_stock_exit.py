@@ -344,6 +344,7 @@ class CasaStockExit(models.Model):
             if rec.state != 'draft':
                 continue
                 
+            total_available = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=rec.price_purchase)
             total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
             
             if rec.qty > total_available:

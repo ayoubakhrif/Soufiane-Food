@@ -57,6 +57,7 @@
                     <group>
                         <group string="Informations Client">
                             <field name="name"/>
+                            <field name="compte_initial"/>
                         </group>
                     </group>
                     <notebook>

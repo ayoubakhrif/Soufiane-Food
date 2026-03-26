@@ -96,7 +96,6 @@
         <field name="model">casa.stock.entry</field>
         <field name="arch" type="xml">
             <search string="Recherche Entrées">
-                <field name="name"/>
                 <field name="product_id"/>
                 <field name="ste_id"/>
                 <field name="lot"/>

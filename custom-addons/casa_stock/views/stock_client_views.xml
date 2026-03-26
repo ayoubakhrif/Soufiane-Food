@@ -101,6 +101,16 @@
                             </field>
                         </page>
 
+                        <page string="Impayées">
+                            <field name="unpaid_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total Impayés"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+
                         <!-- ✏️ (optionnel) saisie ailleurs -->
                     </notebook>
                 </sheet>

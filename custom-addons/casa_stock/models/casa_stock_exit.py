@@ -344,34 +344,29 @@ class CasaStockExit(models.Model):
             if rec.state != 'draft':
                 continue
                 
-            with open('C:\\odoo-repos\\Soufiane-Food\\debug_stock.log', 'a', encoding='utf-8') as f:
-                f.write(f"--- CHECK STOCK ---\n")
-                f.write(f"Product: {rec.product_id.name}\n")
-                f.write(f"Lot: '{rec.lot}' DUM: '{rec.dum}' Calibre: '{rec.calibre}' Ville: '{rec.ville}' Frigo: '{rec.frigo}' Ste: '{rec.ste_id.name}' wt: {rec.weight}\n")
-                f.write(f"Price Purchase: {rec.price_purchase}\n")
-                f.write(f"Total Available (Current price): {total_available}\n")
-                total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
-                f.write(f"Total Available (Any price): {total_any_price}\n")
-                
-                # Check actual stock records
+            total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
+            
+            if rec.qty > total_available:
+                # Build diagnostic string
+                diag = f"Product: {rec.product_id.name}\n"
+                diag += f"Recherche: Lot='{rec.lot or ''}' DUM='{rec.dum or ''}' Calibre='{rec.calibre or ''}' Ville='{rec.ville or ''}' Frigo='{rec.frigo or ''}' Ste='{rec.ste_id.name or ''}' wt={rec.weight}\n"
+
                 Stock = self.env['casa.stock.stock']
                 domain = [('product_id', '=', rec.product_id.id)]
-                stocks = Stock.search(domain)
-                f.write(f"\nALL STOCK FOR THIS PRODUCT ({len(stocks)} lines):\n")
+                stocks = Stock.search(domain, order='id desc', limit=10)
+                diag += f"Stock Existant (10 lignes max):\n"
                 for s in stocks:
-                    f.write(f"  {s.id} | lot='{s.lot}' dum='{s.dum}' cal='{s.calibre}' ville='{s.ville}' frigo='{s.frigo}' ste='{s.ste_id.name}' wt={s.weight} price={s.price} qty={s.quantity}\n")
-                f.write("\n======================\n")
+                    diag += f" - lot='{s.lot or ''}' dum='{s.dum or ''}' cal='{s.calibre or ''}' ville='{s.ville or ''}' frigo='{s.frigo or ''}' ste='{s.ste_id.name or ''}' wt={s.weight} price={s.price} qty={s.quantity}\n"
 
-            if rec.qty > total_available:
                 raise UserError(_(
-                    "Stock insuffisant pour l'article %(product)s !\n"
+                    "Stock insuffisant !\n"
                     "Au prix %(price)s MAD : Disponible %(avail)s, Demandé %(req)s\n"
-                    "Total disponible (tous prix confondus) : %(total)s\n\n"
-                    "(Validation contrainte: Vérifiez Lot/DUM/Calibre/Ville)"
+                    "Total disponible (tous prix) : %(total)s\n\n"
+                    "--- DIAGNOSTIC ---\n%(diag)s"
                 ) % {
-                    'product': rec.product_id.name,
                     'price': rec.price_purchase,
                     'avail': total_available,
                     'req': rec.qty,
-                    'total': total_any_price
+                    'total': total_any_price,
+                    'diag': diag
                 })

@@ -91,7 +91,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        ⚖️ <b>Poids :</b> <field name="poids"/> (Poids tot: <field name="total_weight"/> Kg)
+                                        ⚖️ <b>Poids :</b> <field name="poids"/> (Tonnage: <field name="total_weight"/> Kg)
                                     </div>
                                     <div>
                                         📍 <b>Frigo :</b> <field name="frigo"/>

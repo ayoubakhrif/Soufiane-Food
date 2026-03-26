@@ -214,6 +214,7 @@
                 <field name="poids" type="row"/>
                 <field name="quantity" type="measure"/>
                 <field name="total_weight" type="measure"/>
+                <field name="mt_achat" type="measure"/>
             </pivot>
         </field>
     </record>

@@ -60,6 +60,12 @@ class CasaStockExit(models.Model):
     # Discount traceability fields (written by casa.stock.discount on confirmation)
     discount_amount = fields.Float(string='Réduction', default=0.0)
     validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
+    poids = fields.Char(string='Poids', compute='_compute_poids')
+
+    @api.depends('weight')
+    def _compute_poids(self):
+        for rec in self:
+            rec.poids = f"{rec.weight or 0.0}Kg"
     price_sale_final = fields.Float(
         string='Prix Vente Final',
         compute='_compute_final_price', store=True,

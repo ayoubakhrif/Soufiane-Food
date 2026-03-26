@@ -57,6 +57,12 @@ class CasaStockEntry(models.Model):
         related='driver_id.phone',
         readonly=True
     )
+    poids = fields.Char(string='Poids', compute='_compute_poids')
+
+    @api.depends('weight')
+    def _compute_poids(self):
+        for rec in self:
+            rec.poids = f"{rec.weight or 0.0}Kg"
 
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)

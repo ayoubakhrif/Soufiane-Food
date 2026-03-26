@@ -150,6 +150,12 @@ class CasaStockOrderLine(models.Model):
     ], string='Frigo')
     
     price_sale = fields.Float(string='Prix Vente')
+    poids = fields.Char(string='Poids', compute='_compute_poids')
+
+    @api.depends('weight')
+    def _compute_poids(self):
+        for rec in self:
+            rec.poids = f"{rec.weight or 0.0}Kg"
 
     @api.onchange('stock_id')
     def _onchange_stock_id(self):

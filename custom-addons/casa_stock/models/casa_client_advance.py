@@ -1,0 +1,19 @@
+from odoo import models, fields, api
+
+class CasaClientAdvance(models.Model):
+    _name = 'casa.client.advance'
+    _description = 'Avance Client Casa'
+
+    client_id = fields.Many2one('casa.client', string='Client', required=True, ondelete='cascade')
+    amount = fields.Float(string='Montant', required=True)
+    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
+    
+    payment_mode = fields.Selection([
+        ('espece', 'Espèces'),
+        ('cheque', 'Chèques'),
+        ('charge', 'Charges'),
+        ('transport', 'Transport'),
+        ('autre', 'Autre'),
+    ], string='Type', required=True, default='espece')
+    
+    comment = fields.Char(string='Commentaire')

@@ -212,7 +212,6 @@
                 <field name="ste_id" type="row"/>
                 <field name="ville" type="col"/>
                 <field name="quantity" type="measure"/>
-                <field name="weight" type="measure"/>
                 <field name="total_weight" type="measure"/>
                 <field name="mt_achat" type="measure"/>
             </pivot>

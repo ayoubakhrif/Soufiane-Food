@@ -90,6 +90,17 @@
                             <field name="summary_html" nolabel="1" readonly="1"/>
                         </page>
 
+                        <page string="Avances">
+                            <field name="advance_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="payment_mode"/>
+                                    <field name="amount" sum="Total Avances"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+
                         <!-- ✏️ (optionnel) saisie ailleurs -->
                     </notebook>
                 </sheet>

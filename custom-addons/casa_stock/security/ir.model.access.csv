@@ -56,3 +56,7 @@ access_casa_stock_discount_line_user,casa.stock.discount.line.user,model_casa_st
 access_casa_stock_discount_line_manager,casa.stock.discount.line.manager,model_casa_stock_discount_line,group_manager,1,1,1,0
 access_casa_stock_discount_line_admin,casa.stock.discount.line.admin,model_casa_stock_discount_line,group_admin,1,1,1,1
 access_casa_stock_discount_line_viewer,casa.stock.discount.line.viewer,model_casa_stock_discount_line,group_viewer,1,0,0,0
+access_casa_client_advance_user,casa.client.advance.user,model_casa_client_advance,group_user,1,1,1,0
+access_casa_client_advance_manager,casa.client.advance.manager,model_casa_client_advance,group_manager,1,1,1,0
+access_casa_client_advance_admin,casa.client.advance.admin,model_casa_client_advance,group_admin,1,1,1,1
+access_casa_client_advance_viewer,casa.client.advance.viewer,model_casa_client_advance,group_viewer,1,0,0,0

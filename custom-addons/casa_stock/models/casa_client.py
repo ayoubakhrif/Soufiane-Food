@@ -29,6 +29,11 @@ class CasaClient(models.Model):
         'client_id',
         string='Réductions',
     )
+    advance_ids = fields.One2many(
+        'casa.client.advance',
+        'client_id',
+        string='Avances',
+    )
 
     total_commandes = fields.Float(
         string='Total commandes',
@@ -78,15 +83,16 @@ class CasaClient(models.Model):
         for rec in self:
             rec.exit_count = len(rec.exit_ids.filtered(lambda s: s.state == 'done'))
 
-    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'compte_initial')
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'compte_initial', 'advance_ids.amount')
     def _compute_totals(self):
         for client in self:
             commandes = client.exit_ids.filtered(lambda s: s.state == 'done')
             total_ventes = sum(commandes.mapped('mt_vente'))
             total_discounts = sum(commandes.mapped('discount_amount'))
+            total_advances = sum(client.advance_ids.mapped('amount'))
 
             client.total_commandes = total_ventes
-            client.compte_total = (client.compte_initial or 0.0) + total_ventes - total_discounts
+            client.compte_total = (client.compte_initial or 0.0) + total_ventes - total_discounts - total_advances
 
     @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'exit_ids.margin')
     def _compute_client_summary(self):

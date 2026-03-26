@@ -10,3 +10,4 @@ from . import casa_stock_stock
 from . import casa_stock_return
 from . import casa_stock_order
 from . import casa_stock_discount
+from . import casa_client_advance

@@ -90,8 +90,8 @@ class CasaStockOrder(models.Model):
                     'lot': line.lot,
                     'dum': line.dum,
                     'calibre': line.calibre,
-                    'ville': line.ville,
                     'frigo': line.frigo,
+                    'price_purchase': line.stock_id.price,
                 }
                 new_exit = self.env['casa.stock.exit'].create(exit_vals)
                 generated_exits += new_exit

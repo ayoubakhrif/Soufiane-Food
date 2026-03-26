@@ -90,6 +90,7 @@ class CasaStockOrder(models.Model):
                     'lot': line.lot,
                     'dum': line.dum,
                     'calibre': line.calibre,
+                    'ville': line.ville,
                     'frigo': line.frigo,
                     'price_purchase': line.stock_id.price,
                 }

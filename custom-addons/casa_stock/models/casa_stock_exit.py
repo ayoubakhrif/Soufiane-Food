@@ -129,14 +129,8 @@ class CasaStockExit(models.Model):
                     ('ste_id', '=', rec.ste_id.id),
                 ]
                 
-                if rec.weight:
-                    domain.append(('weight', '=', rec.weight))
-                else:
-                    domain.append(('weight', '=', False))
-                if rec.calibre:
-                    domain.append(('calibre', '=', rec.calibre))
-                else:
-                    domain.append(('calibre', '=', False))
+                domain.append(('weight', '=', rec.weight or 0.0))
+                domain.append(('calibre', '=', rec.calibre or False))
 
                 stock_records = Stock.search(domain)
                 

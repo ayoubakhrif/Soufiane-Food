@@ -196,15 +196,8 @@ class CasaStockEntry(models.Model):
             ('ste_id', '=', rec.ste_id.id),
             ('state', '=', 'done')
         ]
-        if rec.weight:
-            domain.append(('weight', '=', rec.weight))
-        else:
-            domain.append(('weight', '=', False))
-            
-        if rec.calibre:
-            domain.append(('calibre', '=', rec.calibre))
-        else:
-            domain.append(('calibre', '=', False))
+        domain.append(('weight', '=', rec.weight or 0.0))
+        domain.append(('calibre', '=', rec.calibre or False))
 
         if price is not None:
              domain.append(('price_purchase', '=', price))

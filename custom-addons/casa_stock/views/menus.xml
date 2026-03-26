@@ -61,9 +61,9 @@
 
     <menuitem id="menu_casa_stock_client"
               name="Clients"
-              parent="menu_casa_stock_data"
+              parent="menu_casa_stock_root"
               action="action_casa_stock_client"
-              sequence="20"/>
+              sequence="45"/>
 
     <menuitem id="menu_casa_stock_provider"
               name="Fournisseurs"

@@ -153,6 +153,7 @@ class CasaStockExit(models.Model):
                 stock_records = Stock.search(domain)
                 
                 if stock_records:
+                # Keep current price if it's valid for this stock group
                     if rec.price_purchase and rec.price_purchase in stock_records.mapped('price'):
                         price = rec.price_purchase
                     else:
@@ -346,11 +347,16 @@ class CasaStockExit(models.Model):
             total_available = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=rec.price_purchase)
             
             if rec.qty > total_available:
+                total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
                 raise UserError(_(
-                    "Quantité insuffisante pour l'article %(product)s au prix %(price)s MAD.\n"
-                    "Demandée: %(req)s, Disponible: %(avail)s",
-                    product=rec.product_id.name,
-                    price=rec.price_purchase,
-                    req=rec.qty,
-                    avail=total_available
-                ))
+                    "Stock insuffisant pour l'article %(product)s !\n"
+                    "Au prix %(price)s MAD : Disponible %(avail)s, Demandé %(req)s\n"
+                    "Total disponible (tous prix confondus) : %(total)s\n\n"
+                    "(Validation contrainte: Vérifiez Lot/DUM/Calibre/Ville)"
+                ) % {
+                    'product': rec.product_id.name,
+                    'price': rec.price_purchase,
+                    'avail': total_available,
+                    'req': rec.qty,
+                    'total': total_any_price
+                })

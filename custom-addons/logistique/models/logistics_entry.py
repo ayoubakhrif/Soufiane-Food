@@ -345,6 +345,12 @@ class LogisticsEntry(models.Model):
         'entry_id',
         string='Documents (Drive)',
     )
+    sutra_ids = fields.One2many(
+        'logistique.dossier.sutra',
+        'entry_id',
+        string='Sutra',
+        tracking=True
+    )
 
 
     @api.onchange('contract_id')

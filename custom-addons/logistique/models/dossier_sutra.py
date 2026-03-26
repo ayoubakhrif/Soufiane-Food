@@ -10,6 +10,11 @@ class LogistiqueDossierSutra(models.Model):
         ondelete='cascade',
         required=True
     )
+    entry_id = fields.Many2one(
+        'logistique.entry',
+        string='Entrée Logistique',
+        ondelete='cascade'
+    )
     amount = fields.Float(string='Montant', required=True)
     invoice = fields.Char(string='Facture')
     date = fields.Date(string='Date', default=fields.Date.context_today)

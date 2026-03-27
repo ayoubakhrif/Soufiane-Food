@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_data_entry_user,data.entry.user,model_data_entry,data_2025.group_data_2025_user,1,1,1,0
 access_data_entry_manager,data.entry.manager,model_data_entry,data_2025.group_data_2025_manager,1,1,1,1
+access_data_2025_logistique_ste_user,logistique_ste_data_2025_user,logistique.model_logistique_ste,data_2025.group_data_2025_user,1,0,0,0
+access_data_2025_logistique_ste_manager,logistique_ste_data_2025_manager,logistique.model_logistique_ste,data_2025.group_data_2025_manager,1,0,0,0

@@ -30,7 +30,6 @@ access_achat_article_manager,achat.article.manager,model_achat_article,group_pur
 access_achat_reclamation_dhl_user,achat.reclamation.dhl.user,model_achat_reclamation_dhl,group_purchase_user,1,1,1,0
 access_achat_reclamation_dhl_manager,achat.reclamation.dhl.manager,model_achat_reclamation_dhl,group_purchase_manager,1,1,1,1
 access_achat_origin_user,achat.origin.user,model_achat_origin,group_purchase_user,1,1,1,0
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_logistique_entry_purchase_user,logistique.entry.purchase.user,logistique.model_logistique_entry,group_purchase_user,1,1,1,0
 access_logistique_entry_purchase_manager,logistique.entry.purchase.manager,logistique.model_logistique_entry,group_purchase_manager,1,1,1,1
 access_logistique_dossier_purchase_user,logistique.dossier.purchase.user,logistique.model_logistique_dossier,group_purchase_user,1,1,1,0

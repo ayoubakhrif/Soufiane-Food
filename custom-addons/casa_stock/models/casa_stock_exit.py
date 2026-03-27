@@ -13,6 +13,8 @@ class CasaStockExit(models.Model):
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     is_from_stock = fields.Boolean(string='Depuis Stock', default=False)
     
+    stock_id = fields.Many2one('casa.stock.stock', string='Changer d\'Article Stock')
+    
     price_sale = fields.Float(string='Prix Vente')
     price_purchase = fields.Float(
         string='Prix Achat',
@@ -101,6 +103,21 @@ class CasaStockExit(models.Model):
     order_line_id = fields.Many2one('casa.stock.order.line', string='Ligne de Commande', readonly=True, ondelete='set null')
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
+    @api.onchange('stock_id')
+    def _onchange_stock_id(self):
+        if self.stock_id:
+            self.product_id = self.stock_id.product_id.id
+            self.lot = self.stock_id.lot
+            self.dum = self.stock_id.dum
+            self.calibre = self.stock_id.calibre
+            self.ville = self.stock_id.ville
+            self.frigo = self.stock_id.frigo
+            self.ste_id = self.stock_id.ste_id.id
+            self.weight = self.stock_id.weight
+            self.price_purchase = self.stock_id.price
+            # Clear it so it doesn't linger visually if not needed, or keep it.
+            # We keep it so user can see what they selected before saving.
+
     def _compute_is_cancel_hidden(self):
         is_manager = self.env.user.has_group('casa_stock.group_manager')
         hidden = not is_manager
@@ -185,7 +202,7 @@ class CasaStockExit(models.Model):
         res = super().write(vals)
         
         # 3. Sync changes back to Commande if in draft
-        sync_fields = ['qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'frigo', 'ste_id']
+        sync_fields = ['product_id', 'qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'frigo', 'ste_id']
         if any(f in vals for f in sync_fields):
             for rec in self:
                 if rec.order_line_id and rec.state == 'draft':

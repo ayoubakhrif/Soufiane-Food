@@ -131,7 +131,12 @@ class CasaStockOrderLine(models.Model):
     product_id = fields.Many2one('casa.product', string='Produit', related='stock_id.product_id', store=True)
     ste_id = fields.Many2one('casa.ste', string='Société')
     qty = fields.Float(string='Quantité', required=True)
-    weight = fields.Float(string='Poids unit (Kg)')
+    weight = fields.Float(
+        string='Poids unit (Kg)',
+        related='stock_id.weight',
+        store=True,
+        readonly=False
+    )
     
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')

@@ -69,7 +69,8 @@
                                     <field name="ville"/>
                                     <field name="frigo"/>
                                     <field name="qty"/>
-                                    <field name="poids"/>
+                                    <field name="weight" string="Poids (Kg)"/>
+                                    <field name="poids" column_invisible="True"/>
                                     <field name="lot"/>
                                     <field name="dum"/>
                                     <field name="calibre"/>

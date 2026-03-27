@@ -348,26 +348,16 @@ class CasaStockExit(models.Model):
             total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
             
             if rec.qty > total_available:
-                # Build diagnostic string
-                diag = f"Product: {rec.product_id.name}\n"
-                diag += f"Recherche: Lot='{rec.lot or ''}' DUM='{rec.dum or ''}' Calibre='{rec.calibre or ''}' Ville='{rec.ville or ''}' Frigo='{rec.frigo or ''}' Ste='{rec.ste_id.name or ''}' wt={rec.weight}\n"
-
-                Stock = self.env['casa.stock.stock']
-                domain = [('product_id', '=', rec.product_id.id)]
-                stocks = Stock.search(domain, order='id desc', limit=10)
-                diag += f"Stock Existant (10 lignes max):\n"
-                for s in stocks:
-                    diag += f" - lot='{s.lot or ''}' dum='{s.dum or ''}' cal='{s.calibre or ''}' ville='{s.ville or ''}' frigo='{s.frigo or ''}' ste='{s.ste_id.name or ''}' wt={s.weight} price={s.price} qty={s.quantity}\n"
-
+                total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
                 raise UserError(_(
-                    "Stock insuffisant !\n"
+                    "Stock insuffisant pour l'article %(product)s !\n"
                     "Au prix %(price)s MAD : Disponible %(avail)s, Demandé %(req)s\n"
-                    "Total disponible (tous prix) : %(total)s\n\n"
-                    "--- DIAGNOSTIC ---\n%(diag)s"
+                    "Total disponible (tous prix confondus) : %(total)s\n\n"
+                    "Vérifiez que le Poids (wt), Lot, DUM, Calibre et Ville correspondent bien au stock actuel."
                 ) % {
+                    'product': rec.product_id.name,
                     'price': rec.price_purchase,
                     'avail': total_available,
                     'req': rec.qty,
-                    'total': total_any_price,
-                    'diag': diag
+                    'total': total_any_price
                 })

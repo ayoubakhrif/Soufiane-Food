@@ -120,7 +120,12 @@ class PortnetEntry(models.Model):
 
     def _check_valeur(self):
         """Block the Domicilier transition when valeur differs from the
-        article's reference value stored in company.article.value."""
+        article's reference value stored in company.article.value,
+        based on user groups:
+        - Admin: Always allowed
+        - Manager: Allowed if valeur <= ref_value
+        - User: Allowed only if valeur == ref_value
+        """
         for rec in self:
             if not rec.article_id:
                 continue
@@ -129,11 +134,31 @@ class PortnetEntry(models.Model):
                 continue
             ref_value = company_article.value
             # Only enforce when a reference value has been set (> 0)
-            if ref_value and rec.valeur != ref_value:
+            if not ref_value:
+                continue
+
+            # 1. Admins: Always allowed
+            if self.env.user.has_group('portnet.group_portnet_admin'):
+                continue
+
+            # 2. Managers: Allowed if <= ref_value
+            if self.env.user.has_group('portnet.group_portnet_manager'):
+                if rec.valeur > ref_value:
+                    raise ValidationError(
+                        "En tant que Responsable Portnet, vous ne pouvez pas domicilier "
+                        "une valeur (%.2f) strictement supérieure à la valeur "
+                        "de référence de l'article \"%s\" (%.2f).\n"
+                        "Veuillez corriger la valeur ou demander à un administrateur."
+                        % (rec.valeur, company_article.display_name, ref_value)
+                    )
+                continue
+
+            # 3. Normal Users: Allowed ONLY if == ref_value
+            if rec.valeur != ref_value:
                 raise ValidationError(
-                    "La valeur saisie (%.2f) est strictement supérieure à la valeur "
+                    "La valeur saisie (%.2f) doit être égale à la valeur "
                     "de référence de l'article \"%s\" (%.2f).\n"
-                    "Veuillez corriger la valeur avant de domicilier."
+                    "Veuillez corriger la valeur pour domicilier."
                     % (rec.valeur, company_article.display_name, ref_value)
                 )
 

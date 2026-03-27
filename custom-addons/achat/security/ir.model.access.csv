@@ -16,6 +16,20 @@ access_logistique_shipping_purchase_manager,logistique.shipping.purchase.manager
 access_achat_article_price_user,achat.article.price user,model_achat_article_price,achat.group_purchase_user,1,1,1,0
 access_achat_article_price_manager,achat.article.price user,model_achat_article_price,achat.group_purchase_manager,1,1,1,1
 access_achat_contract_user,achat.contract user,model_achat_contract,achat.group_purchase_user,1,0,0,0
+access_achat_contract_correcteur,achat.contract correcteur,model_achat_contract,achat.group_achat_article_correcteur,1,1,0,0
+access_logistique_entry_correcteur_read,logistique.entry correcteur read,logistique.model_logistique_entry,achat.group_achat_article_correcteur,1,0,0,0
+access_achat_article_correcteur_read,achat.article correcteur read,model_achat_article,achat.group_achat_article_correcteur,1,0,0,0
+access_logistique_supplier_correcteur_read,logistique.supplier correcteur read,logistique.model_logistique_supplier,achat.group_achat_article_correcteur,1,0,0,0
+access_logistique_ste_correcteur_read,logistique.ste correcteur read,logistique.model_logistique_ste,achat.group_achat_article_correcteur,1,0,0,0
+access_achat_contract_advance_correcteur_read,achat.contract.advance correcteur read,model_achat_contract_advance,achat.group_achat_article_correcteur,1,0,0,0
+access_achat_contract_manager,achat.contract manager,model_achat_contract,achat.group_purchase_manager,1,1,1,1
+access_logistique_entry_document_purchase_user,logistique.entry.document.purchase.user,model_logistique_entry_document,group_purchase_user,1,1,1,0
+access_logistique_entry_document_purchase_manager,logistique.entry.document.purchase.manager,model_logistique_entry_document,group_purchase_manager,1,1,1,1
+access_achat_article_user,achat.article.user,model_achat_article,group_purchase_user,1,1,1,0
+access_achat_article_manager,achat.article.manager,model_achat_article,group_purchase_manager,1,1,1,1
+access_achat_reclamation_dhl_user,achat.reclamation.dhl.user,model_achat_reclamation_dhl,group_purchase_user,1,1,1,0
+access_achat_reclamation_dhl_manager,achat.reclamation.dhl.manager,model_achat_reclamation_dhl,group_purchase_manager,1,1,1,1
+access_achat_origin_user,achat.origin.user,model_achat_origin,group_purchase_user,1,1,1,0
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_logistique_entry_purchase_user,logistique.entry.purchase.user,logistique.model_logistique_entry,group_purchase_user,1,1,1,0
 access_logistique_entry_purchase_manager,logistique.entry.purchase.manager,logistique.model_logistique_entry,group_purchase_manager,1,1,1,1

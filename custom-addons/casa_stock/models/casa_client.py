@@ -227,7 +227,7 @@ class CasaClient(models.Model):
             # 1️⃣ Récupérer les sorties NON annulées du client
             exits = self.env['casa.stock.exit'].search([
                 ('client_id', '=', client.id),
-                ('state', '!=', 'cancel'),
+                ('state', '=', 'done'),
             ], order='date asc')
 
             if not exits:

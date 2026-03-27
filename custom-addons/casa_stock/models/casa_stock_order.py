@@ -129,12 +129,19 @@ class CasaStockOrder(models.Model):
 
     def action_draft_with_exits(self):
         for order in self:
-            if order.state in ('confirmed', 'done'):
-                # Cancel and draft all generated exits
-                for exit_record in order.exit_ids:
-                    if exit_record.state in ('confirmed', 'done'):
-                        exit_record.action_cancel()
-                    exit_record.write({'state': 'draft'})
+            if order.state not in ('confirmed', 'done'):
+                continue
+
+            # Step 1: Cancel confirmed/done exits to restore stock via reversal moves
+            for exit_record in order.exit_ids:
+                if exit_record.state in ('confirmed', 'done'):
+                    exit_record.action_cancel()
+
+            # Step 2: Delete ALL exits linked to this order (including draft and cancelled)
+            # This prevents duplicates when re-confirming creates fresh exits from order lines
+            order.exit_ids.unlink()
+
+            # Step 3: Set order back to draft so lines can be edited/added
             order.write({'state': 'draft'})
 
 class CasaStockOrderLine(models.Model):

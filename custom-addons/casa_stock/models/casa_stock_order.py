@@ -159,7 +159,7 @@ class CasaStockOrderLine(models.Model):
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo')
     
-    price_sale = fields.Float(string='Prix Vente')
+    price_sale = fields.Float(string='Prix Vente', required=True)
     poids = fields.Char(string='Poids', compute='_compute_poids')
 
     @api.depends('weight')

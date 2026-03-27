@@ -21,14 +21,14 @@ class CasaStockEntry(models.Model):
     )
     
     date = fields.Date(string='Date', required=True)
-    lot = fields.Char(string='Lot')
-    dum = fields.Char(string='DUM')
-    calibre = fields.Char(string='Calibre')
+    lot = fields.Char(string='Lot', required=True)
+    dum = fields.Char(string='DUM', required=True)
+    calibre = fields.Char(string='Calibre', required=True)
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True, default='casa')
+    ], string='Ville', required=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),

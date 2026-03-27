@@ -87,8 +87,6 @@ class CasaStockStock(models.Model):
                     m.state = 'done'
                 GROUP BY
                     m.product_id, m.lot, m.dum, m.ville, m.frigo, m.ste_id, m.weight, m.price_purchase, m.calibre
-                HAVING
-                    sum(m.qty) != 0
             )
         """ % self._table)
 

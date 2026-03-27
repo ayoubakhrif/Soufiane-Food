@@ -158,6 +158,7 @@
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>

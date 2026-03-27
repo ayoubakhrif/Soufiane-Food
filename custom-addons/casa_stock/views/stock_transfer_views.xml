@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_casa_stock_transfer_list" model="ir.ui.view">
+        <field name="name">casa.stock.transfer.list</field>
+        <field name="model">casa.stock.transfer</field>
+        <field name="arch" type="xml">
+            <tree string="Transferts" decoration-success="state == 'done'" decoration-muted="state == 'cancel'" decoration-info="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="qty"/>
+                <field name="source_ville"/>
+                <field name="source_frigo"/>
+                <field name="dest_ville"/>
+                <field name="dest_frigo"/>
+                <field name="state" widget="badge"
+                    decoration-info="state == 'draft'"
+                    decoration-success="state == 'done'"
+                    decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_casa_stock_transfer_form" model="ir.ui.view">
+        <field name="name">casa.stock.transfer.form</field>
+        <field name="model">casa.stock.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Transfert de Stock">
+                <header>
+                    <button name="action_validate" string="Valider le Transfert" type="object"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Annuler" type="object"
+                            invisible="state != 'done'"/>
+                    <button name="action_reset_draft" string="Remettre en Brouillon" type="object"
+                            invisible="state != 'cancel'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="date" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+
+                    <group string="Source">
+                        <group>
+                            <field name="source_stock_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="available_qty"/>
+                            <field name="qty" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="lot"/>
+                            <field name="dum"/>
+                            <field name="calibre"/>
+                            <field name="weight"/>
+                            <field name="price_purchase"/>
+                            <field name="source_ville"/>
+                            <field name="source_frigo"/>
+                            <field name="source_ste_id"/>
+                        </group>
+                    </group>
+
+                    <group string="Destination">
+                        <group>
+                            <field name="dest_ville" readonly="state != 'draft'"/>
+                            <field name="dest_frigo" readonly="state != 'draft'"/>
+                            <field name="dest_ste_id" readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <group string="Notes">
+                        <field name="note" nolabel="1" readonly="state != 'draft'"/>
+                    </group>
+
+                    <group string="Traçabilité" invisible="state == 'draft'">
+                        <group>
+                            <field name="move_out_id" readonly="1"/>
+                            <field name="move_in_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="move_cancel_out_id" readonly="1" invisible="state != 'cancel'"/>
+                            <field name="move_cancel_in_id" readonly="1" invisible="state != 'cancel'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_casa_stock_transfer_search" model="ir.ui.view">
+        <field name="name">casa.stock.transfer.search</field>
+        <field name="model">casa.stock.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Transferts">
+                <field name="name"/>
+                <field name="product_id"/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Effectué" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Annulé" name="cancel" domain="[('state', '=', 'cancel')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Ville Source" name="group_source_ville" context="{'group_by': 'source_ville'}"/>
+                    <filter string="Ville Destination" name="group_dest_ville" context="{'group_by': 'dest_ville'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_casa_stock_transfer" model="ir.actions.act_window">
+        <field name="name">Transferts</field>
+        <field name="res_model">casa.stock.transfer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_casa_stock_transfer_search"/>
+        <field name="context">{'search_default_draft': 1}</field>
+    </record>
+</odoo>

@@ -64,3 +64,7 @@ access_casa_client_unpaid_user,casa.client.unpaid.user,model_casa_client_unpaid,
 access_casa_client_unpaid_manager,casa.client.unpaid.manager,model_casa_client_unpaid,group_manager,1,1,1,0
 access_casa_client_unpaid_admin,casa.client.unpaid.admin,model_casa_client_unpaid,group_admin,1,1,1,1
 access_casa_client_unpaid_viewer,casa.client.unpaid.viewer,model_casa_client_unpaid,group_viewer,1,0,0,0
+access_casa_stock_transfer_user,casa.stock.transfer.user,model_casa_stock_transfer,group_user,1,1,1,0
+access_casa_stock_transfer_manager,casa.stock.transfer.manager,model_casa_stock_transfer,group_manager,1,1,1,0
+access_casa_stock_transfer_admin,casa.stock.transfer.admin,model_casa_stock_transfer,group_admin,1,1,1,1
+access_casa_stock_transfer_viewer,casa.stock.transfer.viewer,model_casa_stock_transfer,group_viewer,1,0,0,0

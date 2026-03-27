@@ -12,3 +12,4 @@ from . import casa_stock_order
 from . import casa_stock_discount
 from . import casa_client_advance
 from . import casa_client_unpaid
+from . import casa_stock_transfer

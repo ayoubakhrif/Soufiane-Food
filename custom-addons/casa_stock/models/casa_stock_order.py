@@ -127,6 +127,16 @@ class CasaStockOrder(models.Model):
                         exit_record.action_cancel()
             order.write({'state': 'cancel'})
 
+    def action_draft_with_exits(self):
+        for order in self:
+            if order.state in ('confirmed', 'done'):
+                # Cancel and draft all generated exits
+                for exit_record in order.exit_ids:
+                    if exit_record.state in ('confirmed', 'done'):
+                        exit_record.action_cancel()
+                    exit_record.write({'state': 'draft'})
+            order.write({'state': 'draft'})
+
 class CasaStockOrderLine(models.Model):
     _name = 'casa.stock.order.line'
     _description = 'Ligne de Commande Stock Casa'

@@ -25,6 +25,7 @@
                 <field name="frigo"/>
                 <field name="not_delivered" widget="boolean_toggle" optional="show"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+                <button name="action_validate" type="object" string="Valider" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
             </tree>
         </field>
     </record>

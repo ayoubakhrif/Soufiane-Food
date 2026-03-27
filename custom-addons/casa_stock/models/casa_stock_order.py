@@ -11,6 +11,11 @@ class CasaStockOrder(models.Model):
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
     
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+    ], string='Ville', required=True, default='casa')
+    
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmée'),

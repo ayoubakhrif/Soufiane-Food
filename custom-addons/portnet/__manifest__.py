@@ -10,7 +10,7 @@
         - Liaison avec les sociétés et factures
     """,
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'achat', 'logistique'],
+    'depends': ['base', 'achat', 'logistique', 'mail'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

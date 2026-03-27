@@ -54,7 +54,7 @@ class CasaStockOrder(models.Model):
                 
             vals['name'] = f'Commande {dd_mm} {new_seq:02d}'
             
-        return super(CasaStockOrder, self).create(vals)
+        return super().create(vals)
 
     def write(self, vals):
         for rec in self:
@@ -62,7 +62,7 @@ class CasaStockOrder(models.Model):
                 forbidden_fields = ['client_id', 'date', 'driver_id', 'order_line_ids']
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Vous ne pouvez pas modifier une commande confirmée ou validée."))
-        return super(CasaStockOrder, self).write(vals)
+        return super().write(vals)
 
     def action_confirm(self):
         for order in self:
@@ -78,6 +78,7 @@ class CasaStockOrder(models.Model):
             for line in order.order_line_ids:
                 exit_vals = {
                     'order_id': order.id,
+                    'order_line_id': line.id,
                     'client_id': order.client_id.id,
                     'driver_id': order.driver_id.id,
                     'ste_id': line.ste_id.id,

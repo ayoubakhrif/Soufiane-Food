@@ -4,6 +4,7 @@ from odoo.exceptions import ValidationError
 
 class PortnetEntry(models.Model):
     _name = 'portnet.entry'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Entrée Portnet'
     _order = 'id desc'
 
@@ -18,6 +19,7 @@ class PortnetEntry(models.Model):
         'achat.article',
         string='Article',
         required=True,
+        tracking=True,
     )
 
     origin_id = fields.Many2one(
@@ -74,8 +76,8 @@ class PortnetEntry(models.Model):
 
     gross = fields.Float(string='Poids brut (kg)', required=True)
     net = fields.Float(string='Poids net (kg)', required=True)
-    valeur = fields.Float(string='Valeur', required=True)
-    nomenclature = fields.Char(string='Nomenclature')
+    valeur = fields.Float(string='Valeur', required=True, tracking=True)
+    nomenclature = fields.Char(string='Nomenclature', tracking=True)
     avance = fields.Float(string='Avance')
 
     total_fob = fields.Float(string='Total FOB', required=True)

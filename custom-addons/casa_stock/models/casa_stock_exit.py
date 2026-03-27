@@ -98,6 +98,7 @@ class CasaStockExit(models.Model):
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
     order_id = fields.Many2one('casa.stock.order', string='Origine (Commande)', readonly=True, ondelete='set null')
+    order_line_id = fields.Many2one('casa.stock.order.line', string='Ligne de Commande', readonly=True, ondelete='set null')
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
     def _compute_is_cancel_hidden(self):
@@ -170,16 +171,28 @@ class CasaStockExit(models.Model):
         return super().create(vals)
 
     def write(self, vals):
+        # 1. Security check: prevent modification of confirmed/done records for sensitive fields
         for rec in self:
             if rec.state in ('confirmed', 'done'):
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
                     'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
-                # 'not_delivered' is EXPLICITLY ALLOWED to be changed
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ou validées ne peuvent pas être modifiées. Utilisez 'Annuler'."))
-        return super().write(vals)
+        
+        # 2. Perform the write
+        res = super().write(vals)
+        
+        # 3. Sync changes back to Commande if in draft
+        sync_fields = ['qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'frigo', 'ste_id']
+        if any(f in vals for f in sync_fields):
+            for rec in self:
+                if rec.order_line_id and rec.state == 'draft':
+                    line_vals = {f: vals[f] for f in sync_fields if f in vals}
+                    if line_vals:
+                        rec.order_line_id.write(line_vals)
+        return res
 
     def action_confirm(self):
         for rec in self:

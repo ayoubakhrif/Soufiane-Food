@@ -15,7 +15,6 @@
                 <field name="image_1920"/>
                 <field name="weight"/>
                 <field name="dum"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
 
                 <templates>
@@ -93,9 +92,6 @@
                                     <div>
                                         ⚖️ <b>Poids :</b> <field name="poids"/> (Tonnage: <field name="total_weight"/> Kg)
                                     </div>
-                                    <div>
-                                        📍 <b>Frigo :</b> <field name="frigo"/>
-                                    </div>
                                 </div>
 
                                 <hr style="margin:8px 0; border:none; border-top:1px dashed #e5e7eb;"/>
@@ -136,7 +132,6 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
                 <field name="poids"/>
@@ -172,7 +167,6 @@
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="ville"/>
-                            <field name="frigo"/>
                             <field name="ste_id"/>
                             <field name="price"/>
                             <field name="mt_achat"/>
@@ -192,7 +186,6 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="date"/>
                 <group expand="0" string="Grouper par">
@@ -200,7 +193,6 @@
                     <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
-                    <filter string="Frigo" name="group_frigo" context="{'group_by': 'frigo'}"/>
                     <filter string="Poids" name="group_poids" context="{'group_by': 'poids'}"/>
                 </group>
             </search>

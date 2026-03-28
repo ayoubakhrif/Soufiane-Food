@@ -19,6 +19,12 @@
               action="action_casa_stock_order"
               sequence="35"/>
 
+    <menuitem id="menu_casa_other_sale"
+              name="Autres Ventes"
+              parent="menu_casa_stock_root"
+              action="action_casa_other_sale"
+              sequence="38"/>
+
     <menuitem id="menu_casa_stock_return"
               name="Retours Clients"
               parent="menu_casa_stock_root"

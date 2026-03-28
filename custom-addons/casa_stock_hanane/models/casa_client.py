@@ -41,6 +41,12 @@ class CasaClient(models.Model):
         string='Impayés',
     )
 
+    other_sale_ids = fields.One2many(
+        'casa_hanane.other.sale',
+        'client_id',
+        string='Autres Ventes',
+    )
+
     exits_to_discount_ids = fields.One2many(
         'casa_hanane.stock.exit',
         'client_id',
@@ -168,12 +174,15 @@ class CasaClient(models.Model):
         for rec in self:
             rec.exit_count = len(rec.exit_ids.filtered(lambda s: s.state == 'done'))
 
-    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'compte_initial', 'advance_ids.amount', 'unpaid_ids.amount')
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente_final', 'compte_initial', 'advance_ids.amount', 'unpaid_ids.amount')
     def _compute_totals(self):
         for client in self:
             commandes = client.exit_ids.filtered(lambda s: s.state == 'done')
-            total_ventes = sum(commandes.mapped('mt_vente'))
-            total_discounts = sum(commandes.mapped('discount_amount'))
+            otras = client.other_sale_ids.filtered(lambda s: s.state == 'done')
+            
+            total_ventes = sum(commandes.mapped('mt_vente')) + sum(otras.mapped('mt_vente'))
+            total_discounts = sum(commandes.mapped('discount_amount')) + sum(otras.mapped('discount_amount'))
+            
             total_advances = sum(client.advance_ids.mapped('amount'))
             total_impayes = sum(client.unpaid_ids.mapped('amount'))
 
@@ -304,19 +313,27 @@ class CasaClient(models.Model):
     def _compute_sorties_grouped_html(self):
         for client in self:
 
-            # 1️⃣ Récupérer les sorties NON annulées du client
+            # 1️⃣ Récupérer les sorties et autres ventes NON annulées du client
             exits = self.env['casa_hanane.stock.exit'].search([
                 ('client_id', '=', client.id),
                 ('state', '=', 'done'),
-            ], order='date asc')
+            ])
+            
+            others = self.env['casa_hanane.other.sale'].search([
+                ('client_id', '=', client.id),
+                ('state', '=', 'done'),
+            ])
 
-            if not exits:
+            # Merge and Sort
+            all_records = sorted(list(exits) + list(others), key=lambda r: r.date if r.date else fields.Date.today())
+
+            if not all_records:
                 client.sorties_grouped_html = "<p style='padding:10px;'>Aucune commande.</p>"
                 continue
 
             # 2️⃣ Grouper par semaine
             grouped = defaultdict(list)
-            for e in exits:
+            for e in all_records:
                 if e.date:
                     week = e.date.isocalendar()[1]
                 else:
@@ -390,12 +407,15 @@ class CasaClient(models.Model):
                 """
 
                 for r in records:
+                    is_other = r._name == 'casa_hanane.other.sale'
+                    type_label = "<span style='font-size:10px;color:#6b7280;margin-left:5px;'>(Autre)</span>" if is_other else ""
+                    
                     montant = (r.tonnage or 0) * (r.price_sale or 0)
                     reduction = r.discount_amount or 0.0
                     montant_final = montant - reduction
                     html += f"""
                     <div class="row">
-                        <div>{r.product_id.name if r.product_id else ''}</div>
+                        <div>{r.product_id.name if r.product_id else ''} {type_label}</div>
                         <div>{r.qty}</div>
                         <div>{r.price_sale:.2f}</div>
                         <div style="font-weight:700;color:#2563eb;">

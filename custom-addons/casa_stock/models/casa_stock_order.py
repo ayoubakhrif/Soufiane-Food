@@ -74,7 +74,7 @@ class CasaStockOrder(models.Model):
                     line_msgs.append(f"{product.name if product else 'Inconnu'} ({line_vals.get('qty', 0)})")
             
             if line_msgs:
-                order.message_post(body=f"Lignes initiales: {', '.join(line_msgs)}")
+                order.message_post(body="Lignes initiales:\n" + "\n".join(line_msgs))
                 
         return order
 
@@ -138,19 +138,18 @@ class CasaStockOrder(models.Model):
 
             # Lines Tracking
             if 'order_line_ids' in vals:
-                line_changes = []
                 for command in vals['order_line_ids']:
                     if command[0] == 0: # Create
                         line_vals = command[2]
                         product = self.env['casa.product'].browse(line_vals.get('product_id'))
                         if not product and 'stock_id' in line_vals:
                             product = self.env['casa.stock.stock'].browse(line_vals['stock_id']).product_id
-                        line_changes.append(f"Ligne ajoutée: {product.name if product else 'Inconnu'} (Qté: {line_vals.get('qty', 0)})")
+                        all_changes.append(f"Ligne ajoutée: {product.name if product else 'Inconnu'} (Qté: {line_vals.get('qty', 0)})")
                     
                     elif command[0] == 2: # Delete
                         line_id = command[1]
                         line_rec = self.env['casa.stock.order.line'].browse(line_id)
-                        line_changes.append(f"Ligne supprimée: {line_rec.product_id.name} (Qté: {line_rec.qty})")
+                        all_changes.append(f"Ligne supprimée: {line_rec.product_id.name} (Qté: {line_rec.qty})")
                         
                     elif command[0] == 1: # Update
                         line_id = command[1]
@@ -162,10 +161,7 @@ class CasaStockOrder(models.Model):
                         if 'price_sale' in line_vals and line_rec.price_sale != line_vals['price_sale']:
                              line_sub_changes.append(f"Prix: {line_rec.price_sale} -> {line_vals['price_sale']}")
                         if line_sub_changes:
-                            line_changes.append(f"{line_rec.product_id.name}: {', '.join(line_sub_changes)}")
-
-                if line_changes:
-                    all_changes.append(f"Détails lignes: {'; '.join(line_changes)}")
+                            all_changes.append(f"{line_rec.product_id.name}: {', '.join(line_sub_changes)}")
 
             if all_changes:
                 order.message_post(body='\n'.join(all_changes))

@@ -111,6 +111,27 @@
                             </field>
                         </page>
 
+                        <page string="Entrer les réductions" name="discount_entry">
+                            <header>
+                                <button name="action_apply_discounts" 
+                                        type="object" 
+                                        string="Appliquer les réductions" 
+                                        class="btn-primary"
+                                        confirm="Êtes-vous sûr de vouloir appliquer ces réductions ? Cela va créer des enregistrements confirmés pour chaque commande."/>
+                            </header>
+                            <field name="exits_to_discount_ids" nolabel="1">
+                                <tree editable="bottom" create="false" delete="false">
+                                    <field name="date" readonly="1"/>
+                                    <field name="order_id" string="Commande" readonly="1"/>
+                                    <field name="product_id" string="Produit" readonly="1"/>
+                                    <field name="qty" string="Qté" readonly="1"/>
+                                    <field name="tonnage" string="Tonnage" readonly="1"/>
+                                    <field name="price_sale" string="Prix Initial" readonly="1"/>
+                                    <field name="price_sale_corrected" string="Nouveau Prix" class="bg-info-light" style="font-weight: bold;"/>
+                                </tree>
+                            </field>
+                        </page>
+
                         <!-- ✏️ (optionnel) saisie ailleurs -->
                     </notebook>
                 </sheet>

@@ -1,5 +1,6 @@
 from collections import defaultdict
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 class CasaClient(models.Model):
     _name = 'casa.client'
@@ -39,6 +40,85 @@ class CasaClient(models.Model):
         'client_id',
         string='Impayés',
     )
+
+    exits_to_discount_ids = fields.One2many(
+        'casa.stock.exit',
+        'client_id',
+        string='Sorties à Réduire',
+        domain=[('state', '=', 'done'), ('discount_amount', '=', 0)],
+    )
+
+    def action_apply_discounts(self):
+        """
+        Process exits that have a price_sale_corrected set.
+        Group them by order_id, create a discount record per order, 
+        and confirm it.
+        """
+        self.ensure_one()
+        # Find all exits with a corrected price
+        exits = self.exits_to_discount_ids.filtered(lambda e: e.price_sale_corrected > 0)
+        
+        if not exits:
+            raise UserError(_("Veuillez saisir un 'Nouveau Prix de Vente' pour au moins une sortie avant d'appliquer les réductions."))
+
+        # 1. Validation check for order_id
+        missing_order = exits.filtered(lambda e: not e.order_id)
+        if missing_order:
+            raise UserError(_(
+                "Certaines sorties ne sont pas liées à une commande. "
+                "Veuillez vous assurer que toutes les sorties sont associées à une commande valide avant d'appliquer les réductions."
+            ))
+
+        # 2. Group exits by order_id
+        orders_exits = {}
+        for ex in exits:
+            if ex.order_id not in orders_exits:
+                orders_exits[ex.order_id] = []
+            orders_exits[ex.order_id].append(ex)
+
+        # 3. Create and confirm discounts
+        for order, group_exits in orders_exits.items():
+            # Create the main discount record
+            discount_vals = {
+                'order_id': order.id,
+                'client_id': self.id,
+                'date': fields.Date.context_today(self),
+                'discount_type': 'amount',
+                'distribution_type': 'manual',
+                'reason': _('Réduction appliquée via le formulaire client (Correction de prix)'),
+            }
+            discount = self.env['casa.stock.discount'].create(discount_vals)
+
+            # Create lines
+            line_vals_list = []
+            for ex in group_exits:
+                # amount = (initial_price - corrected_price) * tonnage
+                discount_amount = (ex.price_sale - ex.price_sale_corrected) * (ex.tonnage or 0.0)
+                line_vals_list.append((0, 0, {
+                    'discount_id': discount.id,
+                    'exit_id': ex.id,
+                    'discount_value': discount_amount,
+                }))
+            
+            discount.write({'line_ids': line_vals_list})
+            
+            # Confirm the discount
+            discount.action_confirm()
+
+            # Clear the temporary corrected price on exits
+            for ex in group_exits:
+                ex.write({'price_sale_corrected': 0.0})
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Réductions Appliquées'),
+                'message': _('Les réductions ont été créées et confirmées pour %s commandes.') % len(orders_exits),
+                'sticky': False,
+                'type': 'success',
+            }
+        }
 
     total_commandes = fields.Float(
         string='Total commandes',

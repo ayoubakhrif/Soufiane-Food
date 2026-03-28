@@ -17,6 +17,7 @@ class CasaStockExit(models.Model):
     stock_id = fields.Many2one('casa.stock.stock', string='Changer d\'Article Stock')
     
     price_sale = fields.Float(string='Prix Vente', tracking=True)
+    price_sale_corrected = fields.Float(string='Nouveau Prix de Vente', tracking=True)
     price_purchase = fields.Float(
         string='Prix Achat',
         compute='_compute_price_purchase',
@@ -56,12 +57,13 @@ class CasaStockExit(models.Model):
         ('done', 'Validé'),
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True, tracking=True)
+    
     mt_vente = fields.Float(
         string='Montant Vente',
         compute='_compute_amounts',
         store=True
     )
-
+    
     # Discount traceability fields (written by casa.stock.discount on confirmation)
     discount_amount = fields.Float(string='Réduction', default=0.0, tracking=True)
     validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
@@ -71,6 +73,7 @@ class CasaStockExit(models.Model):
     def _compute_poids(self):
         for rec in self:
             rec.poids = f"{rec.weight or 0.0}Kg"
+
     price_sale_final = fields.Float(
         string='Prix Vente Final',
         compute='_compute_final_price', store=True,
@@ -88,6 +91,7 @@ class CasaStockExit(models.Model):
                 rec.price_sale_final = rec.mt_vente_final / rec.tonnage
             else:
                 rec.price_sale_final = rec.price_sale or 0.0
+
     returned_qty = fields.Float(
         string='Qté Retournée',
         compute='_compute_returned_qty'
@@ -232,6 +236,14 @@ class CasaStockExit(models.Model):
                     elif rec.state == 'confirmed' and 'price_sale' in vals:
                         rec.order_line_id.write({'price_sale': vals['price_sale']})
         return res
+
+    @api.constrains('price_sale_corrected', 'price_sale')
+    def _check_corrected_price(self):
+        for rec in self:
+            if rec.price_sale_corrected > 0 and rec.price_sale_corrected > rec.price_sale:
+                raise UserError(_(
+                    "Le nouveau prix de vente (%s) pour le produit %s ne peut pas être supérieur au prix initial (%s)."
+                ) % (rec.price_sale_corrected, rec.product_id.name, rec.price_sale))
 
     def action_confirm(self):
         for rec in self:

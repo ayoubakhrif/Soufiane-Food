@@ -68,3 +68,4 @@ access_casa_stock_transfer_user,casa.stock.transfer.user,model_casa_stock_transf
 access_casa_stock_transfer_manager,casa.stock.transfer.manager,model_casa_stock_transfer,group_manager,1,1,1,0
 access_casa_stock_transfer_admin,casa.stock.transfer.admin,model_casa_stock_transfer,group_admin,1,1,1,1
 access_casa_stock_transfer_viewer,casa.stock.transfer.viewer,model_casa_stock_transfer,group_viewer,1,0,0,0
+access_casa_client_invoice_wizard,casa.client.invoice.wizard,model_casa_client_invoice_wizard,group_user,1,1,1,1

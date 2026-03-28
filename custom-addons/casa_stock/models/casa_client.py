@@ -410,3 +410,79 @@ class CasaClient(models.Model):
                 html += "</div>"
 
             client.sorties_grouped_html = html
+
+    # ==============================
+    #  🧮 Utilitaire pour le rapport
+    # ==============================
+
+    def _get_week_data(self, week):
+        """
+        Retourne un dict avec tous les totaux pour une semaine donnée.
+        week : string au format 'YYYY-Www' (ex: '2025-W48')
+        Utilisé par le rapport (QWeb).
+        """
+        from datetime import datetime, timedelta
+        
+        self.ensure_one()
+
+        # 1️⃣ Filtrer sorties de la semaine
+        sorties = self.exit_ids.filtered(lambda s: s.week == week and s.state == 'done')
+        total_sorties = sum((s.mt_vente or 0.0) for s in sorties)
+        total_discounts = sum((s.discount_amount or 0.0) for s in sorties)
+        total_net_sorties = total_sorties - total_discounts
+
+        # 2️⃣ Filtrer avances de la semaine (en se basant sur la date)
+        avances = self.advance_ids.filtered(
+            lambda a: a.date and a.date.strftime("%Y-W%W") == week
+        )
+        total_avances = sum(avances.mapped('amount'))
+
+        # 3️⃣ Filtrer impayés de la semaine
+        impayes = self.unpaid_ids.filtered(
+            lambda u: u.date and u.date.strftime("%Y-W%W") == week
+        )
+        total_impayes = sum(impayes.mapped('amount'))
+
+        # 4️⃣ Compte de la semaine
+        compte_semaine = total_net_sorties + total_impayes - total_avances
+
+        # 5️⃣ Calculer les dates de début et fin de semaine
+        start_date = None
+        end_date = None
+        
+        try:
+            # Parser le format 'YYYY-Www' (ex: '2025-W48')
+            year, week_num = week.split('-W')
+            year = int(year)
+            week_num = int(week_num)
+            
+            # Trouver le premier jour de la semaine (Lundi)
+            # ISO: semaine commence le lundi
+            jan_4 = datetime(year, 1, 4)
+            week_1_monday = jan_4 - timedelta(days=jan_4.weekday())
+            start_date_obj = week_1_monday + timedelta(weeks=week_num - 1)
+            
+            # Calculer le dernier jour (Dimanche)
+            end_date_obj = start_date_obj + timedelta(days=6)
+            
+            # Formater les dates
+            start_date = start_date_obj.strftime('%d/%m/%Y')
+            end_date = end_date_obj.strftime('%d/%m/%Y')
+        except:
+            pass
+
+        return {
+            'week': week,
+            'start_date': start_date,
+            'end_date': end_date,
+            'sorties': sorties,
+            'avances': avances,
+            'impayes': impayes,
+            'total_sorties': total_sorties,
+            'total_discounts': total_discounts,
+            'total_net_sorties': total_net_sorties,
+            'total_avances': total_avances,
+            'total_impayes': total_impayes,
+            'compte_semaine': compte_semaine,
+            'compte_total': self.compte_total,
+        }

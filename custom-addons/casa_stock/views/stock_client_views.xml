@@ -20,6 +20,14 @@
 
                     <!-- ✅ SMART BUTTON EN HAUT À DROITE -->
                     <div class="oe_button_box" name="button_box">
+                        <button name="%(casa_stock.casa_client_facture_wizard_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-print">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture</span>
+                            </div>
+                        </button>
                         <button name="%(filtered_exit_action)d"
                                 type="action"
                                 class="oe_stat_button"

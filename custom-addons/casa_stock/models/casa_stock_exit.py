@@ -68,6 +68,15 @@ class CasaStockExit(models.Model):
     discount_amount = fields.Float(string='Réduction', default=0.0, tracking=True)
     validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
     poids = fields.Char(string='Poids', compute='_compute_poids')
+    week = fields.Char(string='Semaine', compute='_compute_week', store=True)
+
+    @api.depends('date')
+    def _compute_week(self):
+        for record in self:
+            if record.date:
+                record.week = record.date.strftime("%Y-W%W")
+            else:
+                record.week = False
 
     @api.depends('weight')
     def _compute_poids(self):

@@ -6,13 +6,14 @@ class CasaStockTransfer(models.Model):
     _name = 'casa.stock.transfer'
     _description = 'Transfert de Stock Casa'
     _order = 'date desc, id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
+    date = fields.Date(string='Date', required=True, default=fields.Date.context_today, tracking=True)
     note = fields.Text(string='Notes')
 
     # Source
-    source_stock_id = fields.Many2one('casa.stock.stock', string='Stock Source', required=True)
+    source_stock_id = fields.Many2one('casa.stock.stock', string='Stock Source', required=True, tracking=True)
     product_id = fields.Many2one('casa.product', string='Produit')
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
@@ -32,25 +33,25 @@ class CasaStockTransfer(models.Model):
     available_qty = fields.Float(string='Qté Disponible')
 
     # Transfer quantity
-    qty = fields.Float(string='Quantité à transférer', required=True)
+    qty = fields.Float(string='Quantité à transférer', required=True, tracking=True)
 
     # Destination
     dest_ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville Destination', required=True)
+    ], string='Ville Destination', required=True, tracking=True)
     dest_frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock Casa'),
-    ], string='Frigo Destination', required=True)
-    dest_ste_id = fields.Many2one('casa.ste', string='Société Destination')
+    ], string='Frigo Destination', required=True, tracking=True)
+    dest_ste_id = fields.Many2one('casa.ste', string='Société Destination', tracking=True)
 
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('done', 'Effectué'),
         ('cancel', 'Annulé'),
-    ], string='État', default='draft', required=True)
+    ], string='État', default='draft', required=True, tracking=True)
 
     # Ledger move tracking
     move_out_id = fields.Many2one('casa.stock.move', string='Mouvement Sortie', readonly=True)

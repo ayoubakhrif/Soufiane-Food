@@ -6,44 +6,45 @@ class CasaStockEntry(models.Model):
     _name = 'casa.stock.entry'
     _description = 'Entrée Stock Casa'
     _order = 'date desc, id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    product_id = fields.Many2one('casa.product', string='Produit', required=True)
-    qty = fields.Float(string='Quantité', required=True)
-    weight = fields.Float(string='Poids (Kg)')
+    product_id = fields.Many2one('casa.product', string='Produit', required=True, tracking=True)
+    qty = fields.Float(string='Quantité', required=True, tracking=True)
+    weight = fields.Float(string='Poids (Kg)', tracking=True)
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
-    price_purchase = fields.Float(string='Prix Achat')
+    price_purchase = fields.Float(string='Prix Achat', tracking=True)
     mt_achat = fields.Float(
         string='Montant Achat',
         compute='_compute_amounts',
         store=True
     )
     
-    date = fields.Date(string='Date', required=True)
-    lot = fields.Char(string='Lot', required=True)
-    dum = fields.Char(string='DUM', required=True)
-    calibre = fields.Char(string='Calibre')
+    date = fields.Date(string='Date', required=True, tracking=True)
+    lot = fields.Char(string='Lot', required=True, tracking=True)
+    dum = fields.Char(string='DUM', required=True, tracking=True)
+    calibre = fields.Char(string='Calibre', tracking=True)
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True)
+    ], string='Ville', required=True, tracking=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock Casa'),
-    ], string='Frigo', default='stock_casa')
+    ], string='Frigo', default='stock_casa', tracking=True)
     charge_transport = fields.Float(
         string='Charge transport',
         compute='_compute_charge_transport',
         store=True
     )
     
-    provider_id = fields.Many2one('casa.provider', string='Fournisseur')
-    driver_id = fields.Many2one('casa.driver', string='Chauffeur')
-    ste_id = fields.Many2one('casa.ste', string='Société')
+    provider_id = fields.Many2one('casa.provider', string='Fournisseur', tracking=True)
+    driver_id = fields.Many2one('casa.driver', string='Chauffeur', tracking=True)
+    ste_id = fields.Many2one('casa.ste', string='Société', tracking=True)
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
     
     state = fields.Selection([
@@ -51,7 +52,7 @@ class CasaStockEntry(models.Model):
         ('confirmed', 'Confirmé'),
         ('done', 'Validé'),
         ('cancel', 'Annulé'),
-    ], string='État', default='draft', required=True)
+    ], string='État', default='draft', required=True, tracking=True)
     driver_phone = fields.Char(
         string='Téléphone chauffeur',
         related='driver_id.phone',

@@ -5,25 +5,26 @@ class CasaStockOrder(models.Model):
     _name = 'casa.stock.order'
     _description = 'Commande de Stock Casa'
     _order = 'date desc, id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    client_id = fields.Many2one('casa.client', string='Client', required=True)
-    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
-    driver_id = fields.Many2one('casa.driver', string='Chauffeur')
+    client_id = fields.Many2one('casa.client', string='Client', required=True, tracking=True)
+    date = fields.Date(string='Date', required=True, default=fields.Date.context_today, tracking=True)
+    driver_id = fields.Many2one('casa.driver', string='Chauffeur', tracking=True)
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True, default='casa')
+    ], string='Ville', required=True, default='casa', tracking=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmée'),
         ('done', 'Validée'),
         ('cancel', 'Annulée'),
-    ], string='État', default='draft', required=True)
+    ], string='État', default='draft', required=True, tracking=True)
     
-    order_line_ids = fields.One2many('casa.stock.order.line', 'order_id', string='Lignes de Commande')
+    order_line_ids = fields.One2many('casa.stock.order.line', 'order_id', string='Lignes de Commande', tracking=True)
     exit_ids = fields.One2many('casa.stock.exit', 'order_id', string='Sorties Générées', readonly=True)
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
@@ -194,6 +195,35 @@ class CasaStockOrderLine(models.Model):
             self.ville = self.stock_id.ville
             self.frigo = self.stock_id.frigo
             self.weight = self.stock_id.weight
+
+    def write(self, vals):
+        # Deep audit: log line changes to parent order chatter
+        tracking_fields = {
+            'qty': _('Quantité'),
+            'price_sale': _('Prix Vente'),
+            'stock_id': _('Stock/Produit'),
+        }
+        
+        for rec in self:
+            changes = []
+            for field, label in tracking_fields.items():
+                if field in vals:
+                    old_val = rec[field]
+                    new_val = vals[field]
+                    if old_val != new_val:
+                        # For Many2one, get names
+                        if field == 'stock_id':
+                            old_name = old_val.display_name if old_val else 'None'
+                            new_name = self.env['casa.stock.stock'].browse(new_val).display_name if new_val else 'None'
+                            changes.append(f"<li><b>{label}</b>: {old_name} &rarr; {new_name}</li>")
+                        else:
+                            changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val}</li>")
+            
+            if changes and rec.order_id:
+                msg = f"<b>Ligne de commande modifiée (Produit: {rec.product_id.name}):</b><ul>{''.join(changes)}</ul>"
+                rec.order_id.message_post(body=msg)
+                
+        return super().write(vals)
 
     @api.constrains('qty')
     def _check_qty_positive(self):

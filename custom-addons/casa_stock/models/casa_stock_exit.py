@@ -5,22 +5,24 @@ class CasaStockExit(models.Model):
     _name = 'casa.stock.exit'
     _description = 'Sortie Stock Casa'
     _order = 'date desc, id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    product_id = fields.Many2one('casa.product', string='Produit', required=True)
-    qty = fields.Float(string='Quantité', required=True)
-    weight = fields.Float(string='Poids unit (Kg)')
+    product_id = fields.Many2one('casa.product', string='Produit', required=True, tracking=True)
+    qty = fields.Float(string='Quantité', required=True, tracking=True)
+    weight = fields.Float(string='Poids unit (Kg)', tracking=True)
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     is_from_stock = fields.Boolean(string='Depuis Stock', default=False)
     
     stock_id = fields.Many2one('casa.stock.stock', string='Changer d\'Article Stock')
     
-    price_sale = fields.Float(string='Prix Vente')
+    price_sale = fields.Float(string='Prix Vente', tracking=True)
     price_purchase = fields.Float(
         string='Prix Achat',
         compute='_compute_price_purchase',
         store=True,
-        readonly=False
+        readonly=False,
+        tracking=True
     )
     mt_achat = fields.Float(
         string='Montant Achat',
@@ -28,32 +30,32 @@ class CasaStockExit(models.Model):
         store=True
     )
     
-    date = fields.Date(string='Date', required=True)
-    lot = fields.Char(string='Lot')
-    dum = fields.Char(string='DUM')
-    calibre = fields.Char(string='Calibre')
+    date = fields.Date(string='Date', required=True, tracking=True)
+    lot = fields.Char(string='Lot', tracking=True)
+    dum = fields.Char(string='DUM', tracking=True)
+    calibre = fields.Char(string='Calibre', tracking=True)
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True)
+    ], string='Ville', required=True, tracking=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock Casa'),
-    ], string='Frigo')
+    ], string='Frigo', tracking=True)
     
-    client_id = fields.Many2one('casa.client', string='Client')
-    driver_id = fields.Many2one('casa.driver', string='Chauffeur')
-    ste_id = fields.Many2one('casa.ste', string='Société')
+    client_id = fields.Many2one('casa.client', string='Client', tracking=True)
+    driver_id = fields.Many2one('casa.driver', string='Chauffeur', tracking=True)
+    ste_id = fields.Many2one('casa.ste', string='Société', tracking=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmé'),
         ('done', 'Validé'),
         ('cancel', 'Annulé'),
-    ], string='État', default='draft', required=True)
+    ], string='État', default='draft', required=True, tracking=True)
     mt_vente = fields.Float(
         string='Montant Vente',
         compute='_compute_amounts',
@@ -61,7 +63,7 @@ class CasaStockExit(models.Model):
     )
 
     # Discount traceability fields (written by casa.stock.discount on confirmation)
-    discount_amount = fields.Float(string='Réduction', default=0.0)
+    discount_amount = fields.Float(string='Réduction', default=0.0, tracking=True)
     validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
     poids = fields.Char(string='Poids', compute='_compute_poids')
 

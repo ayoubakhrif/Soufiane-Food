@@ -5,7 +5,7 @@ class CasaStockStock(models.Model):
     _description = 'Stock Casa (Aggregation)'
     _auto = False
     _log_access = False
-    _order = 'product_id'
+    _order = 'quantity desc, product_id'
 
     product_id = fields.Many2one('casa.product', string='Produit', readonly=True)
     lot = fields.Char(string='Lot', readonly=True)
@@ -44,6 +44,11 @@ class CasaStockStock(models.Model):
                 name_parts.append(f"DUM: {rec.dum}")
             if rec.price:
                 name_parts.append(f"{rec.price} MAD")
+            
+            # Show availability in name
+            qty_str = f"{rec.quantity} ({rec.total_weight:.2f}T)"
+            name_parts.append(f"Dispo: {qty_str}")
+            
             if rec.create_date:
                 name_parts.append(rec.create_date.strftime('%Y-%m-%d'))
                 

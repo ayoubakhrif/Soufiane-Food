@@ -183,7 +183,7 @@ class CasaStockExit(models.Model):
                 else:
                     domain.append(('calibre', 'in', [False, '']))
 
-                stock_records = Stock.search(domain)
+                stock_records = Stock.search(domain, order='quantity desc')
                 
                 if stock_records:
                 # Keep current price if it's valid for this stock group

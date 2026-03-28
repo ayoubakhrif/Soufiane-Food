@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_casa_stock_root"
+              name="Stock Casa (Hanane)"
+              web_icon="casa_stock_hanane,static/description/icon.png"
+              sequence="2"/>
+
+    <menuitem id="menu_casa_stock_data"
+              name="Données"
+              parent="menu_casa_stock_root"
+              sequence="50"/>
+
+    <menuitem id="menu_casa_stock_audit"
+              name="Audit Ledger"
+              parent="menu_casa_stock_root"
+              groups="casa_stock_hanane.group_admin"
+              sequence="100"/>
+</odoo>

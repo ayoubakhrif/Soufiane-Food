@@ -104,11 +104,4 @@
         <field name="context">{'create': True}</field>
     </record>
 
-    <menuitem
-        id="menu_casa_stock_return"
-        name="Retours Clients"
-        parent="casa_stock_hanane.menu_casa_stock_root"
-        action="action_casa_stock_return"
-        sequence="35"
-    />
 </odoo>

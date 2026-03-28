@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_casa_stock_root"
-              name="Stock Casa (Hanane)"
-              web_icon="casa_stock_hanane,static/description/icon.png"
-              sequence="2"/>
-
+    <!-- References menu_casa_stock_root from views/root_menu.xml -->
     <menuitem id="menu_casa_stock_stock"
               name="Stock"
               parent="menu_casa_stock_root"
@@ -22,6 +18,12 @@
               parent="menu_casa_stock_root"
               action="action_casa_stock_order"
               sequence="35"/>
+
+    <menuitem id="menu_casa_stock_return"
+              name="Retours Clients"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_return"
+              sequence="36"/>
 
     <menuitem id="menu_casa_stock_exit"
               name="Sorties"
@@ -41,23 +43,11 @@
               action="action_casa_stock_discount"
               sequence="40"/>
 
-    <menuitem id="menu_casa_stock_audit"
-              name="Audit Ledger"
-              parent="menu_casa_stock_root"
-              groups="casa_stock_hanane.group_admin"
-              sequence="100"/>
-
     <menuitem id="menu_casa_stock_move"
               name="Mouvements"
               parent="menu_casa_stock_audit"
               action="action_casa_stock_move"
               sequence="10"/>
-
-    <!-- Restructuring Master Data under "Données" -->
-    <menuitem id="menu_casa_stock_data"
-              name="Données"
-              parent="menu_casa_stock_root"
-              sequence="50"/>
 
     <menuitem id="menu_casa_stock_product"
               name="Produits"

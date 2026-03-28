@@ -200,10 +200,16 @@ class CasaStockOrderLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         lines = super().create(vals_list)
+        order_msgs = {}
         for line in lines:
             if line.order_id:
-                msg = f"<span class='text-success'><b>Ligne ajoutée</b></span>: <b>{line.product_id.name}</b> (Qté: {line.qty})"
-                line.order_id.message_post(body=msg)
+                if line.order_id not in order_msgs:
+                    order_msgs[line.order_id] = []
+                order_msgs[line.order_id].append(
+                    f"<li><span style='color: green;'><b>Ligne ajoutée</b></span>: <b>{line.product_id.name}</b> (Qté: {line.qty})</li>"
+                )
+        for order, msgs in order_msgs.items():
+            order.message_post(body=f"<ul>{''.join(msgs)}</ul>")
         return lines
 
     def write(self, vals):
@@ -238,10 +244,16 @@ class CasaStockOrderLine(models.Model):
         return super().write(vals)
 
     def unlink(self):
+        order_msgs = {}
         for rec in self:
             if rec.order_id:
-                msg = f"<span class='text-danger'><b>Ligne supprimée</b></span>: <b>{rec.product_id.name}</b> (Qté: {rec.qty})"
-                rec.order_id.message_post(body=msg)
+                if rec.order_id not in order_msgs:
+                    order_msgs[rec.order_id] = []
+                order_msgs[rec.order_id].append(
+                    f"<li><span style='color: red;'><b>Ligne supprimée</b></span>: <b>{rec.product_id.name}</b> (Qté: {rec.qty})</li>"
+                )
+        for order, msgs in order_msgs.items():
+            order.message_post(body=f"<ul>{''.join(msgs)}</ul>")
         return super().unlink()
 
     @api.constrains('qty')

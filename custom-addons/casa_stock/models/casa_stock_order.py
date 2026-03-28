@@ -15,7 +15,7 @@ class CasaStockOrder(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True, default='casa')
+    ], string='Ville', required=True, default='casa', tracking=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -252,7 +252,7 @@ class CasaStockOrderLine(models.Model):
     
     stock_id = fields.Many2one('casa.stock.stock', string='Stock', required=True)
     product_id = fields.Many2one('casa.product', string='Produit', related='stock_id.product_id', store=True)
-    ste_id = fields.Many2one('casa.ste', string='Société')
+    ste_id = fields.Many2one('casa.ste', string='Société', tracking=True)
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(
         string='Poids unit (Kg)',
@@ -268,7 +268,7 @@ class CasaStockOrderLine(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville')
+    ], string='Ville', tracking=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),

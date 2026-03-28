@@ -13,23 +13,23 @@ class CasaStockTransfer(models.Model):
 
     # Source
     source_stock_id = fields.Many2one('casa.stock.stock', string='Stock Source', required=True)
-    product_id = fields.Many2one('casa.product', string='Produit', readonly=True)
-    lot = fields.Char(string='Lot', readonly=True)
-    dum = fields.Char(string='DUM', readonly=True)
-    calibre = fields.Char(string='Calibre', readonly=True)
-    weight = fields.Float(string='Poids unit (Kg)', readonly=True)
-    price_purchase = fields.Float(string='Prix Achat', readonly=True)
+    product_id = fields.Many2one('casa.product', string='Produit')
+    lot = fields.Char(string='Lot')
+    dum = fields.Char(string='DUM')
+    calibre = fields.Char(string='Calibre')
+    weight = fields.Float(string='Poids unit (Kg)')
+    price_purchase = fields.Float(string='Prix Achat')
     source_ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville Source', readonly=True)
+    ], string='Ville Source')
     source_frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
         ('stock_casa', 'Stock Casa'),
-    ], string='Frigo Source', readonly=True)
-    source_ste_id = fields.Many2one('casa.ste', string='Société Source', readonly=True)
-    available_qty = fields.Float(string='Qté Disponible', readonly=True)
+    ], string='Frigo Source')
+    source_ste_id = fields.Many2one('casa.ste', string='Société Source')
+    available_qty = fields.Float(string='Qté Disponible')
 
     # Transfer quantity
     qty = fields.Float(string='Quantité à transférer', required=True)
@@ -98,28 +98,43 @@ class CasaStockTransfer(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
+            # Always read fresh values from source_stock_id to avoid onchange save issues
+            src = rec.source_stock_id
+            if not src:
+                raise UserError(_("Veuillez sélectionner un stock source."))
+
+            product_id = src.product_id.id
+            lot = src.lot
+            dum = src.dum
+            calibre = src.calibre
+            weight = src.weight
+            price_purchase = src.price
+            source_ville = src.ville
+            source_frigo = src.frigo
+            source_ste_id = src.ste_id.id if src.ste_id else False
+
             # Stock availability check
-            if rec.qty > (rec.source_stock_id.quantity or 0.0):
+            if rec.qty > (src.quantity or 0.0):
                 raise UserError(_(
                     "Stock insuffisant pour le transfert!\n"
                     "Disponible: %s, Demandé: %s"
-                ) % (rec.source_stock_id.quantity, rec.qty))
+                ) % (src.quantity, rec.qty))
 
             now = fields.Datetime.now()
             ref = rec.name
 
             # EXIT move from source
             move_out = self.env['casa.stock.move'].create({
-                'product_id': rec.product_id.id,
-                'lot': rec.lot,
-                'dum': rec.dum,
-                'ville': rec.source_ville,
-                'frigo': rec.source_frigo,
-                'ste_id': rec.source_ste_id.id,
+                'product_id': product_id,
+                'lot': lot,
+                'dum': dum,
+                'ville': source_ville,
+                'frigo': source_frigo,
+                'ste_id': source_ste_id,
                 'qty': -rec.qty,
-                'weight': rec.weight,
-                'calibre': rec.calibre,
-                'price_purchase': rec.price_purchase,
+                'weight': weight,
+                'calibre': calibre,
+                'price_purchase': price_purchase,
                 'move_type': 'exit',
                 'state': 'done',
                 'date': now,
@@ -130,16 +145,16 @@ class CasaStockTransfer(models.Model):
 
             # ENTRY move to destination
             move_in = self.env['casa.stock.move'].create({
-                'product_id': rec.product_id.id,
-                'lot': rec.lot,
-                'dum': rec.dum,
+                'product_id': product_id,
+                'lot': lot,
+                'dum': dum,
                 'ville': rec.dest_ville,
                 'frigo': rec.dest_frigo,
                 'ste_id': rec.dest_ste_id.id if rec.dest_ste_id else False,
                 'qty': rec.qty,
-                'weight': rec.weight,
-                'calibre': rec.calibre,
-                'price_purchase': rec.price_purchase,
+                'weight': weight,
+                'calibre': calibre,
+                'price_purchase': price_purchase,
                 'move_type': 'entry',
                 'state': 'done',
                 'date': now,
@@ -152,6 +167,16 @@ class CasaStockTransfer(models.Model):
                 'state': 'done',
                 'move_out_id': move_out.id,
                 'move_in_id': move_in.id,
+                # Also persist source details for use in cancellation
+                'product_id': product_id,
+                'lot': lot,
+                'dum': dum,
+                'calibre': calibre,
+                'weight': weight,
+                'price_purchase': price_purchase,
+                'source_ville': source_ville,
+                'source_frigo': source_frigo,
+                'source_ste_id': source_ste_id,
             })
 
     def action_cancel(self):

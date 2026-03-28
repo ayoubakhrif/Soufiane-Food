@@ -190,20 +190,35 @@ class CasaStockExit(models.Model):
         return super().create(vals)
 
     def write(self, vals):
-        # 1. Security check: prevent modification of confirmed/done records for sensitive fields
+        # 1. Security check: prevent modification of sensitive fields
         for rec in self:
-            if rec.state in ('confirmed', 'done'):
+            if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
                     'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Les opérations confirmées ou validées ne peuvent pas être modifiées. Utilisez 'Annuler'."))
+                    raise UserError(_("Les opérations validées ne peuvent pas être modifiées."))
+            
+            elif rec.state == 'confirmed':
+                # Allow price_sale, but block everything else
+                forbidden_fields = [
+                    'product_id', 'qty', 'weight',
+                    'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
+                ]
+                if any(f in vals for f in forbidden_fields):
+                    raise UserError(_("Seul le prix de vente peut être modifié sur une sortie confirmée. Pour le reste, utilisez 'Remettre en brouillon'."))
         
         # 2. Perform the write
         res = super().write(vals)
         
-        # 3. Sync changes back to Commande if in draft
+        # 3. If price_sale changed on a confirmed exit, sync to the move ledger
+        if 'price_sale' in vals:
+            for rec in self:
+                if rec.state == 'confirmed' and rec.move_id:
+                    rec.move_id.write({'price_sale': vals['price_sale']})
+
+        # 4. Sync changes back to Commande if in draft (for backwards compatibility if needed)
         sync_fields = ['product_id', 'qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'frigo', 'ste_id']
         if any(f in vals for f in sync_fields):
             for rec in self:

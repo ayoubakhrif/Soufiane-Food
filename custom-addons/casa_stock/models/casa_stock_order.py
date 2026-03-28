@@ -64,10 +64,30 @@ class CasaStockOrder(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state in ('confirmed', 'done'):
+            if rec.state == 'done':
                 forbidden_fields = ['client_id', 'date', 'driver_id', 'order_line_ids']
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Vous ne pouvez pas modifier une commande confirmée ou validée."))
+                    raise UserError(_("Vous ne pouvez pas modifier une commande validée."))
+            
+            elif rec.state == 'confirmed':
+                # Allow order_line_ids if we're only updating price_sale on existing lines
+                # But block other header fields
+                header_forbidden = ['client_id', 'date', 'driver_id']
+                if any(f in vals for f in header_forbidden):
+                    raise UserError(_("Vous ne pouvez pas modifier le client, la date ou le chauffeur d'une commande confirmée."))
+                
+                # Check order_line_ids commands
+                if 'order_line_ids' in vals:
+                    for command in vals['order_line_ids']:
+                        # command is (code, id, vals)
+                        if command[0] == 0: # Create
+                            raise UserError(_("Vous ne pouvez pas ajouter de nouvelles lignes à une commande confirmée."))
+                        if command[0] == 2: # Delete
+                            raise UserError(_("Vous ne pouvez pas supprimer de lignes d'une commande confirmée."))
+                        if command[0] == 1: # Update
+                            line_vals = command[2]
+                            if any(f != 'price_sale' for f in line_vals):
+                                raise UserError(_("Seul le prix de vente peut être modifié sur une commande confirmée."))
         return super().write(vals)
 
     def action_confirm(self):

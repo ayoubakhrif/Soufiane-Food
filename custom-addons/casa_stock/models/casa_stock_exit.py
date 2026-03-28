@@ -218,14 +218,19 @@ class CasaStockExit(models.Model):
                 if rec.state == 'confirmed' and rec.move_id:
                     rec.move_id.write({'price_sale': vals['price_sale']})
 
-        # 4. Sync changes back to Commande if in draft (for backwards compatibility if needed)
+        # 4. Sync changes back to Commande
         sync_fields = ['product_id', 'qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'frigo', 'ste_id']
         if any(f in vals for f in sync_fields):
             for rec in self:
-                if rec.order_line_id and rec.state == 'draft':
-                    line_vals = {f: vals[f] for f in sync_fields if f in vals}
-                    if line_vals:
-                        rec.order_line_id.write(line_vals)
+                if rec.order_line_id:
+                    # Sensitive fields still only sync in draft
+                    # But price_sale can now sync in confirmed state too
+                    if rec.state == 'draft':
+                        line_vals = {f: vals[f] for f in sync_fields if f in vals}
+                        if line_vals:
+                            rec.order_line_id.write(line_vals)
+                    elif rec.state == 'confirmed' and 'price_sale' in vals:
+                        rec.order_line_id.write({'price_sale': vals['price_sale']})
         return res
 
     def action_confirm(self):

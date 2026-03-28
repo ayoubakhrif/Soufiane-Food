@@ -8,7 +8,6 @@ class CasaStockOrder(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    name = fields.Char(string='Référence', readonly=True, default='/')
     client_id = fields.Many2one('casa.client', string='Client', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
@@ -61,7 +60,23 @@ class CasaStockOrder(models.Model):
                 
             vals['name'] = f'Commande {dd_mm} {new_seq:02d}'
             
-        return super().create(vals)
+        order = super().create(vals)
+        
+        # Consolidation for create: log all lines added initially
+        if 'order_line_ids' in vals:
+            line_msgs = []
+            for command in vals['order_line_ids']:
+                if command[0] == 0: # Create command
+                    line_vals = command[2]
+                    product = self.env['casa.product'].browse(line_vals.get('product_id'))
+                    if not product and 'stock_id' in line_vals:
+                        product = self.env['casa.stock.stock'].browse(line_vals['stock_id']).product_id
+                    line_msgs.append(f"<li><span style='color: green;'><b>Ligne ajoutée</b></span>: <b>{product.name if product else 'Inconnu'}</b> (Qté: {line_vals.get('qty', 0)})</li>")
+            
+            if line_msgs:
+                order.message_post(body=f"<b>Lignes de commande initiales:</b><ul>{''.join(line_msgs)}</ul>")
+                
+        return order
 
     def write(self, vals):
         header_tracking = {
@@ -90,56 +105,70 @@ class CasaStockOrder(models.Model):
                             if any(f != 'price_sale' for f in command[2]):
                                 raise UserError(_("Seul le prix de vente peut être modifié sur une commande confirmée."))
 
-            # 2. Manual Custom Header Tracking
-            changes = []
+            # 2. Manual Custom Tracking (Combined Header + Lines)
+            all_changes = []
+            
+            # Header Tracking
+            header_changes = []
             for field, label in header_tracking.items():
                 if field in vals:
                     old_val = order[field]
                     new_val_raw = vals[field]
-                    
-                    # Formatting values for selection and many2one
                     if field == 'state':
                         old_txt = dict(self._fields['state'].selection).get(old_val, old_val)
                         new_txt = dict(self._fields['state'].selection).get(new_val_raw, new_val_raw)
                         if old_val != new_val_raw:
-                            changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+                            header_changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
                     elif field in ('client_id', 'driver_id'):
                         old_name = old_val.name if old_val else 'None'
                         new_name = self.env[self._fields[field].comodel_name].browse(new_val_raw).name if new_val_raw else 'None'
                         if old_val.id != new_val_raw:
-                            changes.append(f"<li><b>{label}</b>: {old_name} &rarr; {new_name}</li>")
+                            header_changes.append(f"<li><b>{label}</b>: {old_name} &rarr; {new_name}</li>")
                     elif field == 'date':
                         if str(old_val) != str(new_val_raw):
-                            changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val_raw}</li>")
+                            header_changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val_raw}</li>")
                     elif field == 'ville':
                         old_txt = dict(self._fields['ville'].selection).get(old_val, old_val)
                         new_txt = dict(self._fields['ville'].selection).get(new_val_raw, new_val_raw)
                         if old_val != new_val_raw:
-                            changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+                            header_changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+            
+            if header_changes:
+                all_changes.append(f"<b>Modifications de l'entête:</b><ul>{''.join(header_changes)}</ul>")
 
-            if changes:
-                order.message_post(body=f"<b>Modifications de l'entête:</b><ul>{''.join(changes)}</ul>")
-
-            # 3. Batch Line Updates within this order
+            # Lines Tracking
             if 'order_line_ids' in vals:
                 line_changes = []
                 for command in vals['order_line_ids']:
-                    if command[0] == 1: # Update
+                    if command[0] == 0: # Create
+                        line_vals = command[2]
+                        product = self.env['casa.product'].browse(line_vals.get('product_id'))
+                        if not product and 'stock_id' in line_vals:
+                            product = self.env['casa.stock.stock'].browse(line_vals['stock_id']).product_id
+                        line_changes.append(f"<li><span style='color: green;'><b>Ligne ajoutée</b></span>: <b>{product.name if product else 'Inconnu'}</b> (Qté: {line_vals.get('qty', 0)})</li>")
+                    
+                    elif command[0] == 2: # Delete
+                        line_id = command[1]
+                        line_rec = self.env['casa.stock.order.line'].browse(line_id)
+                        line_changes.append(f"<li><span style='color: red;'><b>Ligne supprimée</b></span>: <b>{line_rec.product_id.name}</b> (Qté: {line_rec.qty})</li>")
+                        
+                    elif command[0] == 1: # Update
                         line_id = command[1]
                         line_vals = command[2]
                         line_rec = self.env['casa.stock.order.line'].browse(line_id)
-                        
                         line_sub_changes = []
                         if 'qty' in line_vals and line_rec.qty != line_vals['qty']:
                              line_sub_changes.append(f"Qté: {line_rec.qty} &rarr; {line_vals['qty']}")
                         if 'price_sale' in line_vals and line_rec.price_sale != line_vals['price_sale']:
                              line_sub_changes.append(f"Prix: {line_rec.price_sale} &rarr; {line_vals['price_sale']}")
-                        
                         if line_sub_changes:
                             line_changes.append(f"<li><b>{line_rec.product_id.name}</b>: {', '.join(line_sub_changes)}</li>")
-                
+
                 if line_changes:
-                    order.message_post(body=f"<b>Prix/Quantités modifiés:</b><ul>{''.join(line_changes)}</ul>")
+                    all_changes.append(f"<b>Détails des lignes:</b><ul>{''.join(line_changes)}</ul>")
+
+            if all_changes:
+                order.message_post(body=f"{''.join(all_changes)}")
 
         return super().write(vals)
 
@@ -269,34 +298,6 @@ class CasaStockOrderLine(models.Model):
             self.ville = self.stock_id.ville
             self.frigo = self.stock_id.frigo
             self.weight = self.stock_id.weight
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        lines = super().create(vals_list)
-        order_msgs = {}
-        for line in lines:
-            if line.order_id:
-                if line.order_id not in order_msgs:
-                    order_msgs[line.order_id] = []
-                order_msgs[line.order_id].append(
-                    f"<li><span style='color: green;'><b>Ligne ajoutée</b></span>: <b>{line.product_id.name}</b> (Qté: {line.qty})</li>"
-                )
-        for order, msgs in order_msgs.items():
-            order.message_post(body=f"<ul>{''.join(msgs)}</ul>")
-        return lines
-
-    def unlink(self):
-        order_msgs = {}
-        for rec in self:
-            if rec.order_id:
-                if rec.order_id not in order_msgs:
-                    order_msgs[rec.order_id] = []
-                order_msgs[rec.order_id].append(
-                    f"<li><span style='color: red;'><b>Ligne supprimée</b></span>: <b>{rec.product_id.name}</b> (Qté: {rec.qty})</li>"
-                )
-        for order, msgs in order_msgs.items():
-            order.message_post(body=f"<ul>{''.join(msgs)}</ul>")
-        return super().unlink()
 
     @api.constrains('qty')
     def _check_qty_positive(self):

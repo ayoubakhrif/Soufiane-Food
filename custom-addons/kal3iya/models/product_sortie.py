@@ -202,6 +202,16 @@ class ProductExit(models.Model):
             rec.price_gap = (rec.selling_price_final or rec.selling_price) - rec.selling_price
             rec.tonnage_gap = (rec.tonnage_final or rec.tonnage) - rec.tonnage
 
+    @api.constrains('selling_price', 'selling_price_final')
+    def _check_selling_prices(self):
+        for rec in self:
+            if rec.selling_price <= 0:
+                raise UserError("Le prix de vente doit être strictement positif.")
+            # selling_price_final is initialized to selling_price in create
+            # so it should always be > 0. If they change it, enforce positivity.
+            if rec.selling_price_final <= 0:
+                raise UserError("Le prix final doit être strictement positif.")
+        
     @api.depends('selling_price', 'selling_price_final', 'tonnage', 'tonnage_final')
     def _compute_mt_vente_final(self):
         for rec in self:

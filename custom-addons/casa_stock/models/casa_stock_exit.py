@@ -238,12 +238,18 @@ class CasaStockExit(models.Model):
         return res
 
     @api.constrains('price_sale_corrected', 'price_sale')
-    def _check_corrected_price(self):
+    def _check_sale_prices(self):
         for rec in self:
-            if rec.price_sale_corrected > 0 and rec.price_sale_corrected > rec.price_sale:
-                raise UserError(_(
-                    "Le nouveau prix de vente (%s) pour le produit %s ne peut pas être supérieur au prix initial (%s)."
-                ) % (rec.price_sale_corrected, rec.product_id.name, rec.price_sale))
+            if rec.price_sale <= 0:
+                raise UserError(_("Le prix de vente de %s doit être strictement positif.") % rec.product_id.name)
+            if rec.price_sale_corrected > 0:
+                if rec.price_sale_corrected > rec.price_sale:
+                    raise UserError(_(
+                        "Le nouveau prix de vente (%s) pour le produit %s ne peut pas être supérieur au prix initial (%s)."
+                    ) % (rec.price_sale_corrected, rec.product_id.name, rec.price_sale))
+            elif 'price_sale_corrected' in self.env.context: # If being set
+                 if rec.price_sale_corrected < 0:
+                     raise UserError(_("Le nouveau prix de vente doit être positif."))
 
     def action_confirm(self):
         for rec in self:

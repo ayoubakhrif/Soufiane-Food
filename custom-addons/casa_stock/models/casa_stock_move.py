@@ -48,6 +48,12 @@ class CasaStockMove(models.Model):
     price_purchase = fields.Float(string='Prix Achat')
     price_sale = fields.Float(string='Prix Vente')
     weight = fields.Float(string='Poids (Kg)')
+
+    @api.constrains('price_sale')
+    def _check_price_sale(self):
+        for rec in self:
+            if rec.move_type in ('exit', 'return') and rec.price_sale <= 0:
+                 raise UserError(_("Le prix de vente doit être strictement positif (%s).") % rec.product_id.name)
     calibre = fields.Char(string='Calibre')
     
     client_id = fields.Many2one('casa.client', string='Client')

@@ -301,6 +301,12 @@ class CasaStockOrderLine(models.Model):
             if line.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
                 
+    @api.constrains('price_sale')
+    def _check_price_sale_positive(self):
+        for line in self:
+            if line.price_sale <= 0:
+                raise UserError(_("Le prix de vente doit être strictement positif (%s).") % line.product_id.name)
+
     @api.constrains('qty', 'stock_id')
     def _check_stock_availability(self):
         for line in self:

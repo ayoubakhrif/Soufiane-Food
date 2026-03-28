@@ -111,7 +111,7 @@
                             </field>
                         </page>
 
-                        <page string="Entrer les réductions" name="discount_entry" groups="casa_stock.group_admin,casa_stock.group_valid_admin">
+                        <page string="Entrer les réductions" name="discount_entry">
                             <header>
                                 <button name="action_apply_discounts" 
                                         type="object" 

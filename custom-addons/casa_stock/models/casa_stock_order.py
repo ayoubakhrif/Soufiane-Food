@@ -140,7 +140,8 @@ class CasaStockOrder(models.Model):
 
             # Step 2: Delete ALL exits linked to this order (including draft and cancelled)
             # This prevents duplicates when re-confirming creates fresh exits from order lines
-            order.exit_ids.unlink()
+            # We use sudo() because we want to allow managers to reset orders without giving them general unlink access on exits
+            order.exit_ids.sudo().unlink()
 
             # Step 3: Set order back to draft so lines can be edited/added
             order.write({'state': 'draft'})

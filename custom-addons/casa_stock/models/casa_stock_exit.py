@@ -432,19 +432,46 @@ class CasaStockExit(models.Model):
                 continue
                 
             total_available = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=rec.price_purchase)
-            total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
             
             if rec.qty > total_available:
+                # Audit: Where is the rest of the stock?
+                all_stock_found = []
+                # Search across all frigos and ste_ids for this product/lot/weight
+                domain_audit = [
+                    ('product_id', '=', rec.product_id.id),
+                    ('state', '=', 'done'),
+                    ('weight', '>=', (rec.weight or 0.0) - 0.01),
+                    ('weight', '<=', (rec.weight or 0.0) + 0.01),
+                ]
+                if rec.lot: domain_audit.append(('lot', '=', rec.lot))
+                if rec.dum: domain_audit.append(('dum', '=', rec.dum))
+                
+                moves = self.env['casa.stock.move'].read_group(domain_audit, ['qty', 'frigo', 'ste_id', 'ville'], ['frigo', 'ste_id', 'ville'], lazy=False)
+                for move in moves:
+                    if move['qty'] > 0:
+                        frigo_name = dict(self._fields['frigo'].selection).get(move['frigo'], move['frigo'])
+                        ville_name = dict(self._fields['ville'].selection).get(move['ville'], move['ville'])
+                        ste_name = self.env['casa.ste'].browse(move['ste_id'][0]).name if move['ste_id'] else 'Aucune'
+                        all_stock_found.append(f"- {move['qty']} unités à {ville_name}/{frigo_name} (Sté: {ste_name})")
+
+                audit_msg = "\n".join(all_stock_found) if all_stock_found else "Aucun stock trouvé avec ces caractéristiques (Lot, DUM, Poids)."
+                
                 total_any_price = self.env['casa.stock.entry']._get_current_stock_qty(rec, price=None)
                 raise UserError(_(
-                    "Stock insuffisant pour l'article %(product)s !\n"
+                    "Stock insuffisant pour l'article %(product)s !\n\n"
+                    "Cible actuelle : %(ville)s / %(frigo)s (Sté: %(ste)s)\n"
                     "Au prix %(price)s MAD : Disponible %(avail)s, Demandé %(req)s\n"
-                    "Total disponible (tous prix confondus) : %(total)s\n\n"
-                    "Vérifiez que le Poids (wt), Lot, DUM, Calibre et Ville correspondent bien au stock actuel."
+                    "Total disponible (tous prix confondus) pour cette cible : %(total)s\n\n"
+                    "Inventaire trouvé ailleurs :\n%(audit)s\n\n"
+                    "Vérifiez que la Ville, Frigo et Société correspondent bien à votre besoin."
                 ) % {
                     'product': rec.product_id.name,
                     'price': rec.price_purchase,
                     'avail': total_available,
                     'req': rec.qty,
-                    'total': total_any_price
+                    'total': total_any_price,
+                    'audit': audit_msg,
+                    'ville': dict(self._fields['ville'].selection).get(rec.ville, rec.ville),
+                    'frigo': dict(self._fields['frigo'].selection).get(rec.frigo, rec.frigo),
+                    'ste': rec.ste_id.name or 'Aucune'
                 })

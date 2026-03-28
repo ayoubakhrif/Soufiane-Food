@@ -8,21 +8,22 @@ class CasaStockOrder(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    client_id = fields.Many2one('casa.client', string='Client', required=True, tracking=True)
-    date = fields.Date(string='Date', required=True, default=fields.Date.context_today, tracking=True)
-    driver_id = fields.Many2one('casa.driver', string='Chauffeur', tracking=True)
+    name = fields.Char(string='Référence', readonly=True, default='/')
+    client_id = fields.Many2one('casa.client', string='Client', required=True)
+    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
+    driver_id = fields.Many2one('casa.driver', string='Chauffeur')
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True, default='casa', tracking=True)
+    ], string='Ville', required=True, default='casa')
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmée'),
         ('done', 'Validée'),
         ('cancel', 'Annulée'),
-    ], string='État', default='draft', required=True, tracking=True)
+    ], string='État', default='draft', required=True)
     
     order_line_ids = fields.One2many('casa.stock.order.line', 'order_id', string='Lignes de Commande')
     exit_ids = fields.One2many('casa.stock.exit', 'order_id', string='Sorties Générées', readonly=True)
@@ -63,31 +64,83 @@ class CasaStockOrder(models.Model):
         return super().create(vals)
 
     def write(self, vals):
-        for rec in self:
-            if rec.state == 'done':
+        header_tracking = {
+            'state': _('État'),
+            'client_id': _('Client'),
+            'driver_id': _('Chauffeur'),
+            'date': _('Date'),
+            'ville': _('Ville'),
+        }
+        
+        for order in self:
+            # 1. Security check
+            if order.state == 'done':
                 forbidden_fields = ['client_id', 'date', 'driver_id', 'order_line_ids']
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Vous ne pouvez pas modifier une commande validée."))
-            
-            elif rec.state == 'confirmed':
-                # Allow order_line_ids if we're only updating price_sale on existing lines
-                # But block other header fields
+            elif order.state == 'confirmed':
                 header_forbidden = ['client_id', 'date', 'driver_id']
                 if any(f in vals for f in header_forbidden):
                     raise UserError(_("Vous ne pouvez pas modifier le client, la date ou le chauffeur d'une commande confirmée."))
-                
-                # Check order_line_ids commands
                 if 'order_line_ids' in vals:
                     for command in vals['order_line_ids']:
-                        # command is (code, id, vals)
-                        if command[0] == 0: # Create
-                            raise UserError(_("Vous ne pouvez pas ajouter de nouvelles lignes à une commande confirmée."))
-                        if command[0] == 2: # Delete
-                            raise UserError(_("Vous ne pouvez pas supprimer de lignes d'une commande confirmée."))
-                        if command[0] == 1: # Update
-                            line_vals = command[2]
-                            if any(f != 'price_sale' for f in line_vals):
+                        if command[0] == 0: raise UserError(_("Vous ne pouvez pas ajouter de lignes à une commande confirmée."))
+                        if command[0] == 2: raise UserError(_("Vous ne pouvez pas supprimer de lignes d'une commande confirmée."))
+                        if command[0] == 1:
+                            if any(f != 'price_sale' for f in command[2]):
                                 raise UserError(_("Seul le prix de vente peut être modifié sur une commande confirmée."))
+
+            # 2. Manual Custom Header Tracking
+            changes = []
+            for field, label in header_tracking.items():
+                if field in vals:
+                    old_val = order[field]
+                    new_val_raw = vals[field]
+                    
+                    # Formatting values for selection and many2one
+                    if field == 'state':
+                        old_txt = dict(self._fields['state'].selection).get(old_val, old_val)
+                        new_txt = dict(self._fields['state'].selection).get(new_val_raw, new_val_raw)
+                        if old_val != new_val_raw:
+                            changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+                    elif field in ('client_id', 'driver_id'):
+                        old_name = old_val.name if old_val else 'None'
+                        new_name = self.env[self._fields[field].comodel_name].browse(new_val_raw).name if new_val_raw else 'None'
+                        if old_val.id != new_val_raw:
+                            changes.append(f"<li><b>{label}</b>: {old_name} &rarr; {new_name}</li>")
+                    elif field == 'date':
+                        if str(old_val) != str(new_val_raw):
+                            changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val_raw}</li>")
+                    elif field == 'ville':
+                        old_txt = dict(self._fields['ville'].selection).get(old_val, old_val)
+                        new_txt = dict(self._fields['ville'].selection).get(new_val_raw, new_val_raw)
+                        if old_val != new_val_raw:
+                            changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+
+            if changes:
+                order.message_post(body=f"<b>Modifications de l'entête:</b><ul>{''.join(changes)}</ul>")
+
+            # 3. Batch Line Updates within this order
+            if 'order_line_ids' in vals:
+                line_changes = []
+                for command in vals['order_line_ids']:
+                    if command[0] == 1: # Update
+                        line_id = command[1]
+                        line_vals = command[2]
+                        line_rec = self.env['casa.stock.order.line'].browse(line_id)
+                        
+                        line_sub_changes = []
+                        if 'qty' in line_vals and line_rec.qty != line_vals['qty']:
+                             line_sub_changes.append(f"Qté: {line_rec.qty} &rarr; {line_vals['qty']}")
+                        if 'price_sale' in line_vals and line_rec.price_sale != line_vals['price_sale']:
+                             line_sub_changes.append(f"Prix: {line_rec.price_sale} &rarr; {line_vals['price_sale']}")
+                        
+                        if line_sub_changes:
+                            line_changes.append(f"<li><b>{line_rec.product_id.name}</b>: {', '.join(line_sub_changes)}</li>")
+                
+                if line_changes:
+                    order.message_post(body=f"<b>Prix/Quantités modifiés:</b><ul>{''.join(line_changes)}</ul>")
+
         return super().write(vals)
 
     def action_confirm(self):
@@ -231,37 +284,6 @@ class CasaStockOrderLine(models.Model):
         for order, msgs in order_msgs.items():
             order.message_post(body=f"<ul>{''.join(msgs)}</ul>")
         return lines
-
-    def write(self, vals):
-        # Deep audit: log line changes to parent order chatter
-        tracking_fields = {
-            'qty': _('Quantité'),
-            'price_sale': _('Prix Vente'),
-            'stock_id': _('Stock/Produit'),
-        }
-        
-        for rec in self:
-            changes = []
-            for field, label in tracking_fields.items():
-                if field in vals:
-                    old_val = rec[field]
-                    new_val = vals[field]
-                    if old_val != new_val:
-                        # For Many2one, get names
-                        if field == 'stock_id':
-                            old_name = old_val.display_name if old_val else 'None'
-                            new_name = self.env['casa.stock.stock'].browse(new_val).display_name if new_val else 'None'
-                            changes.append(f"<li><b>{label}</b>: {old_name} &rarr; {new_name}</li>")
-                        else:
-                            changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val}</li>")
-            
-            if changes and rec.order_id:
-                # Get a fresh name in case it changed in this transaction
-                prod_name = rec.product_id.name
-                msg = f"<b>Ligne modifiée ({prod_name}):</b><ul>{''.join(changes)}</ul>"
-                rec.order_id.message_post(body=msg)
-                
-        return super().write(vals)
 
     def unlink(self):
         order_msgs = {}

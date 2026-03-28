@@ -69,3 +69,7 @@ access_casa_stock_transfer_manager,casa.stock.transfer.manager,model_casa_stock_
 access_casa_stock_transfer_admin,casa.stock.transfer.admin,model_casa_stock_transfer,group_admin,1,1,1,1
 access_casa_stock_transfer_viewer,casa.stock.transfer.viewer,model_casa_stock_transfer,group_viewer,1,0,0,0
 access_casa_client_invoice_wizard,casa.client.invoice.wizard,model_casa_client_invoice_wizard,group_user,1,1,1,1
+access_casa_other_sale_user,casa.other.sale.user,model_casa_other_sale,group_user,1,1,1,0
+access_casa_other_sale_manager,casa.other.sale.manager,model_casa_other_sale,group_manager,1,1,1,0
+access_casa_other_sale_admin,casa.other.sale.admin,model_casa_other_sale,group_admin,1,1,1,1
+access_casa_other_sale_viewer,casa.other.sale.viewer,model_casa_other_sale,group_viewer,1,0,0,0

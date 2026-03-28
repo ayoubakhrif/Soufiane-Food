@@ -111,12 +111,13 @@
                             </field>
                         </page>
 
-                        <page string="Entrer les réductions" name="discount_entry">
+                        <page string="Entrer les réductions" name="discount_entry" groups="casa_stock.group_admin,casa_stock.group_valid_admin">
                             <header>
                                 <button name="action_apply_discounts" 
                                         type="object" 
                                         string="Appliquer les réductions" 
                                         class="btn-primary"
+                                        groups="casa_stock.group_admin,casa_stock.group_valid_admin"
                                         confirm="Êtes-vous sûr de vouloir appliquer ces réductions ? Cela va créer des enregistrements confirmés pour chaque commande."/>
                             </header>
                             <field name="exits_to_discount_ids" nolabel="1">

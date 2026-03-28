@@ -254,6 +254,7 @@ class CasaStockExit(models.Model):
             })
 
     def action_validate(self):
+        orders_to_check = self.env['casa.stock.order']
         for rec in self:
             if rec.state != 'confirmed':
                 continue
@@ -261,6 +262,13 @@ class CasaStockExit(models.Model):
                 'state': 'done',
                 'validation_user_id': self.env.user.id
             })
+            if rec.order_id:
+                orders_to_check |= rec.order_id
+        
+        # Auto-validate parent orders if all their exits are now 'done'
+        for order in orders_to_check:
+            if order.state == 'confirmed' and all(ex.state == 'done' for ex in order.exit_ids):
+                order.write({'state': 'done'})
 
     def action_cancel(self):
         for rec in self:

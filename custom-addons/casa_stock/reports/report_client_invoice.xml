@@ -17,6 +17,7 @@
                 <t t-set="week_data" t-value="client._get_week_data(wizard.week)"/>
                 
                 <div class="page">
+                    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
                     <style>
                         .invoice-header {
                             text-align: center;
@@ -108,7 +109,7 @@
                         <div class="client-info"><strong>Client:</strong> <t t-esc="client.name"/></div>
                         <div class="client-info"><strong>Semaine:</strong> <t t-esc="week_data['week']"/></div>
                         <div class="client-info">
-                            <strong>Période:</strong> Du <t t-esc="week_data['start_date']"/> au <t t-esc="week_data['end_date']"/>
+                            <strong>Periode:</strong> Du <t t-esc="week_data['start_date']"/> au <t t-esc="week_data['end_date']"/>
                         </div>
                     </div>
 
@@ -120,12 +121,12 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Produit</th>
-                                    <th>Quantité</th>
+                                    <th>Quantite</th>
                                     <th>Tonnage</th>
                                     <th>Prix Unitaire</th>
                                     <th class="amount">Montant</th>
-                                    <th class="amount">Réduction</th>
-                                    <th class="amount">Net à Payer</th>
+                                    <th class="amount">Reduction</th>
+                                    <th class="amount">Net a Payer</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -178,9 +179,9 @@
                         </table>
                     </t>
 
-                    <!-- Section Impayés -->
+                    <!-- Section Impayes -->
                     <t t-if="week_data['impayes']">
-                        <div class="section-title section-impayes"> IMPAYÉS DE LA SEMAINE</div>
+                        <div class="section-title section-impayes"> IMPAYES DE LA SEMAINE</div>
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -198,7 +199,7 @@
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="2" style="text-align: right;">TOTAL IMPAYÉS:</td>
+                                    <td colspan="2" style="text-align: right;">TOTAL IMPAYES:</td>
                                     <td class="amount"><t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</td>
                                 </tr>
                             </tbody>
@@ -213,7 +214,7 @@
                             <span><t t-esc="wizard.format_amount(week_data['total_net_sorties'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
-                            <span>Total Impayés:</span>
+                            <span>Total Impayes:</span>
                             <span>+ <t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
@@ -231,7 +232,7 @@
                     </div>
 
                     <div class="footer-note">
-                        Document généré automatiquement le <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                        Document genere automatiquement le <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y a %H:%M')"/>
                     </div>
                 </div>
             </t>

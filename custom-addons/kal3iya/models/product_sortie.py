@@ -72,6 +72,8 @@ class ProductExit(models.Model):
     price_gap = fields.Float(string="Écart prix", compute="_compute_gaps", store=True)
     tonnage_gap = fields.Float(string="Écart tonnage", compute="_compute_gaps", store=True)
     mt_vente_final = fields.Float(string='Mt.Vente', compute='_compute_mt_vente_final', store=True)
+    not_delivered = fields.Boolean(string='Pointé', default=False, tracking=True)
+
 
     # ------------------------------------------------------------
     # BADGE VISUEL

@@ -101,7 +101,7 @@ class CasaStockExit(models.Model):
         compute='_compute_amounts',
         store=True
     )
-    not_delivered = fields.Boolean(string='Non Livré', default=False, tracking=True)
+    not_delivered = fields.Boolean(string='Pointé', default=False, tracking=True)
 
     move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)

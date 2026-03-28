@@ -56,6 +56,7 @@
                 <field name="frigo" optional="1"/>
                 <field name="ste_id" optional="1"/>
                 <field name="provider_id" optional="1"/>
+                <field name="not_delivered" widget="boolean_toggle" optional="show"/>
             </tree>
         </field>
     </record>

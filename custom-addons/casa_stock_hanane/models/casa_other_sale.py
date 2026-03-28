@@ -10,6 +10,7 @@ class CasaOtherSale(models.Model):
     name = fields.Char(string='Référence', readonly=True, default='/')
     client_id = fields.Many2one('casa_hanane.client', string='Client', required=True, tracking=True)
     product_id = fields.Many2one('casa_hanane.product', string='Produit', required=True, tracking=True)
+    de_qui = fields.Char(string='De qui', tracking=True)
     
     qty = fields.Float(string='Quantité', default=1.0, tracking=True)
     weight = fields.Float(string='Poids (Kg)', default=1.0, tracking=True)

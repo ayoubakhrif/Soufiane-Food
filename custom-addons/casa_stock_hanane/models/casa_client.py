@@ -408,7 +408,7 @@ class CasaClient(models.Model):
 
                 for r in records:
                     is_other = r._name == 'casa_hanane.other.sale'
-                    type_label = "<span style='font-size:10px;color:#6b7280;margin-left:5px;'>(Autre)</span>" if is_other else ""
+                    type_label = f"<span style='font-size:10px;color:#6b7280;margin-left:5px;'>({r.de_qui or 'Autre'})</span>" if is_other else ""
                     
                     montant = (r.tonnage or 0) * (r.price_sale or 0)
                     reduction = r.discount_amount or 0.0

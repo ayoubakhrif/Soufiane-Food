@@ -71,10 +71,10 @@ class CasaStockOrder(models.Model):
                     product = self.env['casa.product'].browse(line_vals.get('product_id'))
                     if not product and 'stock_id' in line_vals:
                         product = self.env['casa.stock.stock'].browse(line_vals['stock_id']).product_id
-                    line_msgs.append(f"<li><span style='color: green;'><b>Ligne ajoutée</b></span>: <b>{product.name if product else 'Inconnu'}</b> (Qté: {line_vals.get('qty', 0)})</li>")
+                    line_msgs.append(f"{product.name if product else 'Inconnu'} ({line_vals.get('qty', 0)})")
             
             if line_msgs:
-                order.message_post(body=f"<b>Lignes de commande initiales:</b><ul>{''.join(line_msgs)}</ul>")
+                order.message_post(body=f"Lignes initiales: {', '.join(line_msgs)}")
                 
         return order
 
@@ -118,23 +118,23 @@ class CasaStockOrder(models.Model):
                         old_txt = dict(self._fields['state'].selection).get(old_val, old_val)
                         new_txt = dict(self._fields['state'].selection).get(new_val_raw, new_val_raw)
                         if old_val != new_val_raw:
-                            header_changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+                            header_changes.append(f"{label}: {old_txt} -> {new_txt}")
                     elif field in ('client_id', 'driver_id'):
                         old_name = old_val.name if old_val else 'None'
                         new_name = self.env[self._fields[field].comodel_name].browse(new_val_raw).name if new_val_raw else 'None'
                         if old_val.id != new_val_raw:
-                            header_changes.append(f"<li><b>{label}</b>: {old_name} &rarr; {new_name}</li>")
+                            header_changes.append(f"{label}: {old_name} -> {new_name}")
                     elif field == 'date':
                         if str(old_val) != str(new_val_raw):
-                            header_changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val_raw}</li>")
+                            header_changes.append(f"{label}: {old_val} -> {new_val_raw}")
                     elif field == 'ville':
                         old_txt = dict(self._fields['ville'].selection).get(old_val, old_val)
                         new_txt = dict(self._fields['ville'].selection).get(new_val_raw, new_val_raw)
                         if old_val != new_val_raw:
-                            header_changes.append(f"<li><b>{label}</b>: {old_txt} &rarr; {new_txt}</li>")
+                            header_changes.append(f"{label}: {old_txt} -> {new_txt}")
             
             if header_changes:
-                all_changes.append(f"<b>Modifications de l'entête:</b><ul>{''.join(header_changes)}</ul>")
+                all_changes.append(f"Modifications: {', '.join(header_changes)}")
 
             # Lines Tracking
             if 'order_line_ids' in vals:
@@ -145,12 +145,12 @@ class CasaStockOrder(models.Model):
                         product = self.env['casa.product'].browse(line_vals.get('product_id'))
                         if not product and 'stock_id' in line_vals:
                             product = self.env['casa.stock.stock'].browse(line_vals['stock_id']).product_id
-                        line_changes.append(f"<li><span style='color: green;'><b>Ligne ajoutée</b></span>: <b>{product.name if product else 'Inconnu'}</b> (Qté: {line_vals.get('qty', 0)})</li>")
+                        line_changes.append(f"Ligne ajoutée: {product.name if product else 'Inconnu'} (Qté: {line_vals.get('qty', 0)})")
                     
                     elif command[0] == 2: # Delete
                         line_id = command[1]
                         line_rec = self.env['casa.stock.order.line'].browse(line_id)
-                        line_changes.append(f"<li><span style='color: red;'><b>Ligne supprimée</b></span>: <b>{line_rec.product_id.name}</b> (Qté: {line_rec.qty})</li>")
+                        line_changes.append(f"Ligne supprimée: {line_rec.product_id.name} (Qté: {line_rec.qty})")
                         
                     elif command[0] == 1: # Update
                         line_id = command[1]
@@ -158,17 +158,17 @@ class CasaStockOrder(models.Model):
                         line_rec = self.env['casa.stock.order.line'].browse(line_id)
                         line_sub_changes = []
                         if 'qty' in line_vals and line_rec.qty != line_vals['qty']:
-                             line_sub_changes.append(f"Qté: {line_rec.qty} &rarr; {line_vals['qty']}")
+                             line_sub_changes.append(f"Qté: {line_rec.qty} -> {line_vals['qty']}")
                         if 'price_sale' in line_vals and line_rec.price_sale != line_vals['price_sale']:
-                             line_sub_changes.append(f"Prix: {line_rec.price_sale} &rarr; {line_vals['price_sale']}")
+                             line_sub_changes.append(f"Prix: {line_rec.price_sale} -> {line_vals['price_sale']}")
                         if line_sub_changes:
-                            line_changes.append(f"<li><b>{line_rec.product_id.name}</b>: {', '.join(line_sub_changes)}</li>")
+                            line_changes.append(f"{line_rec.product_id.name}: {', '.join(line_sub_changes)}")
 
                 if line_changes:
-                    all_changes.append(f"<b>Détails des lignes:</b><ul>{''.join(line_changes)}</ul>")
+                    all_changes.append(f"Détails lignes: {'; '.join(line_changes)}")
 
             if all_changes:
-                order.message_post(body=f"{''.join(all_changes)}")
+                order.message_post(body='\n'.join(all_changes))
 
         return super().write(vals)
 

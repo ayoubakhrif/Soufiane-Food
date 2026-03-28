@@ -24,7 +24,7 @@ class CasaStockOrder(models.Model):
         ('cancel', 'Annulée'),
     ], string='État', default='draft', required=True, tracking=True)
     
-    order_line_ids = fields.One2many('casa.stock.order.line', 'order_id', string='Lignes de Commande', tracking=True)
+    order_line_ids = fields.One2many('casa.stock.order.line', 'order_id', string='Lignes de Commande')
     exit_ids = fields.One2many('casa.stock.exit', 'order_id', string='Sorties Générées', readonly=True)
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
@@ -197,6 +197,15 @@ class CasaStockOrderLine(models.Model):
             self.frigo = self.stock_id.frigo
             self.weight = self.stock_id.weight
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        for line in lines:
+            if line.order_id:
+                msg = f"<span class='text-success'><b>Ligne ajoutée</b></span>: <b>{line.product_id.name}</b> (Qté: {line.qty})"
+                line.order_id.message_post(body=msg)
+        return lines
+
     def write(self, vals):
         # Deep audit: log line changes to parent order chatter
         tracking_fields = {
@@ -221,10 +230,19 @@ class CasaStockOrderLine(models.Model):
                             changes.append(f"<li><b>{label}</b>: {old_val} &rarr; {new_val}</li>")
             
             if changes and rec.order_id:
-                msg = f"<b>Ligne de commande modifiée (Produit: {rec.product_id.name}):</b><ul>{''.join(changes)}</ul>"
+                # Get a fresh name in case it changed in this transaction
+                prod_name = rec.product_id.name
+                msg = f"<b>Ligne modifiée ({prod_name}):</b><ul>{''.join(changes)}</ul>"
                 rec.order_id.message_post(body=msg)
                 
         return super().write(vals)
+
+    def unlink(self):
+        for rec in self:
+            if rec.order_id:
+                msg = f"<span class='text-danger'><b>Ligne supprimée</b></span>: <b>{rec.product_id.name}</b> (Qté: {rec.qty})"
+                rec.order_id.message_post(body=msg)
+        return super().unlink()
 
     @api.constrains('qty')
     def _check_qty_positive(self):

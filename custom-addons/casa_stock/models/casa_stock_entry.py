@@ -200,7 +200,8 @@ class CasaStockEntry(models.Model):
             ('ste_id', '=', rec.ste_id.id),
             ('state', '=', 'done')
         ]
-        domain.append(('weight', '=', rec.weight or 0.0))
+        domain.append(('weight', '>=', (rec.weight or 0.0) - 0.01))
+        domain.append(('weight', '<=', (rec.weight or 0.0) + 0.01))
         
         if rec.lot:
             domain.append(('lot', '=', rec.lot))
@@ -218,7 +219,8 @@ class CasaStockEntry(models.Model):
             domain.append(('calibre', 'in', [False, '']))
 
         if price is not None:
-             domain.append(('price_purchase', '=', price))
+             domain.append(('price_purchase', '>=', price - 0.01))
+             domain.append(('price_purchase', '<=', price + 0.01))
 
         res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
         return res[0]['qty'] if res and res[0]['qty'] else 0.0

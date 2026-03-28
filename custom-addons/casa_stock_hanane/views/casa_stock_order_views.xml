@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View Tree: Orders -->
+    <record id="view_casa_stock_order_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.stock.order.tree</field>
+        <field name="model">casa_hanane.stock.order</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="state == 'cancel'" decoration-info="state == 'draft'" decoration-warning="state == 'confirmed'" decoration-success="state == 'done'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="client_id"/>
+                <field name="driver_id"/>
+                <field name="state" widget="badge"/>
+                <button name="action_validate" type="object" string="Valider" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock_hanane.group_valid_admin"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action definition for the stat button -->
+    <record id="action_casa_stock_exit_for_order" model="ir.actions.act_window">
+        <field name="name">Sorties de la Commande</field>
+        <field name="res_model">casa_hanane.stock.exit</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('order_id', '=', active_id)]</field>
+        <field name="context">{'default_order_id': active_id}</field>
+    </record>
+
+    <!-- View Form: Orders -->
+    <record id="view_casa_stock_order_form" model="ir.ui.view">
+        <field name="name">casa_hanane.stock.order.form</field>
+        <field name="model">casa_hanane.stock.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock_hanane.group_valid_admin"/>
+                    <button name="action_draft_with_exits" string="Remettre for ajouter" type="object" class="btn-warning" invisible="state == 'draft'"/>
+                    <button name="action_cancel" string="Annuler" type="object" invisible="is_cancel_hidden or state == 'cancel'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <field name="is_cancel_hidden" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="action" icon="fa-truck" 
+                                name="%(casa_stock_hanane.action_casa_stock_exit_for_order)d"
+                                invisible="state == 'draft'">
+                            <field string="Sorties Générées" name="exit_ids" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="client_id" readonly="state == 'done'"/>
+                            <field name="driver_id" readonly="state == 'done'"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="state == 'done'"/>
+                            <field name="ville" readonly="state == 'done'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lignes de Commande" name="order_lines">
+                            <field name="order_line_ids" readonly="state in ('confirmed', 'done')">
+                                <tree editable="bottom">
+                                    <field name="stock_id" domain="parent.ville and [('ville', '=', parent.ville)] or []" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="product_id" column_invisible="True"/>
+                                    <field name="ste_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="ville"/>
+                                    <field name="frigo"/>
+                                    <field name="qty"/>
+                                    <field name="weight" string="Poids (Kg)"/>
+                                    <field name="poids" column_invisible="True"/>
+                                    <field name="lot"/>
+                                    <field name="dum"/>
+                                    <field name="calibre"/>
+                                    <field name="price_sale"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action definition for the main order menu -->
+    <record id="action_casa_stock_order" model="ir.actions.act_window">
+        <field name="name">Commandes</field>
+        <field name="res_model">casa_hanane.stock.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle commande.
+            </p>
+            <p>
+                Les commandes validées généreront automatiquement les sorties en stock.
+            </p>
+        </field>
+    </record>
+</odoo>

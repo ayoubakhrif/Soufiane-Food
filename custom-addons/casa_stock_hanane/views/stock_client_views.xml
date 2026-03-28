@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- 📋 FORM VIEW : Casa Client -->
+    <!-- ========================= -->
+    <record id="filtered_exit_action" model="ir.actions.act_window">
+        <field name="name">Sorties du client</field>
+        <field name="res_model">casa_hanane.stock.exit</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('client_id', '=', active_id), ('state', '!=', 'cancel')]</field>
+    </record>
+    
+    <record id="view_casa_client_form" model="ir.ui.view">
+        <field name="name">casa_hanane.client.form</field>
+        <field name="model">casa_hanane.client</field>
+        <field name="arch" type="xml">
+            <form string="Client Casa">
+                <sheet>
+
+                    <!-- ✅ SMART BUTTON EN HAUT À DROITE -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(casa_stock_hanane.casa_client_facture_wizard_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-print">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture</span>
+                            </div>
+                        </button>
+                        <button name="%(filtered_exit_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-truck">
+                            <field name="exit_count" 
+                                   widget="statinfo" 
+                                   string="Commandes"/>
+                        </button>
+                    </div>
+
+                    <!-- TITRE -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du client..."/>
+                        </h1>
+                        
+                        <div style="margin-top:10px;">
+                            <span style="
+                                font-size:22px;
+                                font-weight:700;
+                                color:#4c51bf;
+                                background:#ebf4ff;
+                                padding:10px 20px;
+                                border-radius:12px;
+                                border:2px solid #4c51bf;
+                            ">
+                                💰 Compte total :
+                                <field name="compte_total" widget="monetary"
+                                    options="{'currency_field': 'company_currency_id'}"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- INFORMATIONS SIMPLES -->
+                    <group>
+                        <group string="Informations Client">
+                            <field name="name"/>
+                            <field name="compte_initial"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <!-- 👁️ Lecture -->
+                        <page string="Historique des commandes">
+                            <field name="sorties_grouped_html"
+                                nolabel="1"
+                                readonly="1"/>
+                        </page>
+
+                        <page string="Réductions">
+                            <field name="discount_ids" readonly="1">
+                                <tree>
+                                    <field name="name" string="Référence"/>
+                                    <field name="order_id" string="Commande"/>
+                                    <field name="date"/>
+                                    <field name="reason" string="Motif"/>
+                                    <field name="total_before_discount" string="Montant Avant" sum="Total Avant"/>
+                                    <field name="total_discount" string="Réduction" sum="Total Réduction"/>
+                                    <field name="total_after_discount" string="Montant Final" sum="Total Après"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'draft'"
+                                           decoration-success="state == 'done'"
+                                           decoration-danger="state == 'cancel'"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Résumé Client">
+                            <field name="summary_html" nolabel="1" readonly="1"/>
+                        </page>
+
+                        <page string="Avances">
+                            <field name="advance_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="payment_mode"/>
+                                    <field name="amount" sum="Total Avances"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Impayées">
+                            <field name="unpaid_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total Impayés"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Entrer les réductions" name="discount_entry">
+                            <header>
+                                <button name="action_apply_discounts" 
+                                        type="object" 
+                                        string="Appliquer les réductions" 
+                                        class="btn-primary"
+                                        groups="casa_stock_hanane.group_admin,casa_stock_hanane.group_valid_admin"
+                                        confirm="Êtes-vous sûr de vouloir appliquer ces réductions ? Cela va créer des enregistrements confirmés pour chaque commande."/>
+                            </header>
+                            <field name="exits_to_discount_ids" nolabel="1">
+                                <tree editable="bottom" create="false" delete="false">
+                                    <field name="date" readonly="1"/>
+                                    <field name="order_id" string="Commande" readonly="1"/>
+                                    <field name="product_id" string="Produit" readonly="1"/>
+                                    <field name="qty" string="Qté" readonly="1"/>
+                                    <field name="tonnage" string="Tonnage" readonly="1"/>
+                                    <field name="price_sale" string="Prix Initial" readonly="1"/>
+                                    <field name="price_sale_corrected" string="Nouveau Prix" class="bg-info-light" style="font-weight: bold;"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- ✏️ (optionnel) saisie ailleurs -->
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🌳 TREE VIEW : Casa Client -->
+    <!-- ========================= -->
+    <record id="view_casa_client_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.client.tree</field>
+        <field name="model">casa_hanane.client</field>
+        <field name="arch" type="xml">
+            <tree string="Clients Casa">
+                <field name="name"/>
+                <field name="exit_count" string="Nb. Commandes"/>
+                <field name="compte_total" sum="Total Solde"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🔍 SEARCH VIEW -->
+    <!-- ========================= -->
+    <record id="view_casa_client_search" model="ir.ui.view">
+        <field name="name">casa_hanane.client.search</field>
+        <field name="model">casa_hanane.client</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Client">
+                <field name="name" 
+                       string="Client" 
+                       filter_domain="[('name','ilike',self)]"/>
+                
+                <separator/>
+                
+                <filter string="Avec commandes" 
+                        name="with_orders" 
+                        domain="[('exit_count','>',0)]"/>
+                
+                <filter string="Sans commandes" 
+                        name="without_orders" 
+                        domain="[('exit_count','=',0)]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_casa_client_pivot" model="ir.ui.view">
+        <field name="name">casa_hanane.client.pivot</field>
+        <field name="model">casa_hanane.client</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Clients">
+                <field name="name" type="row"/>
+                <field name="exit_count" type="measure"/>
+                <field name="total_client_discounts" type="measure"/>
+                <field name="compte_total" type="measure"/>
+                <field name="total_profit" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 🚀 ACTION -->
+    <!-- ========================= -->
+    <record id="action_casa_stock_client" model="ir.actions.act_window">
+        <field name="name">Clients Casa (Hanane)</field>
+        <field name="res_model">casa_hanane.client</field>
+        <field name="view_mode">tree,form,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier client Casa
+            </p>
+            <p>
+                Les clients sont liés aux sorties de stock.
+            </p>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- 📁 MENU ITEM -->
+    <!-- ========================= -->
+
+
+</odoo>

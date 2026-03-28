@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_casa_stock_hanane_entry" model="ir.sequence">
+            <field name="name">Entrée Stock Casa (Hanane)</field>
+            <field name="code">casa_hanane.stock.entry</field>
+            <field name="prefix">H-ENTRY/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_casa_stock_hanane_exit" model="ir.sequence">
+            <field name="name">Sortie Stock Casa (Hanane)</field>
+            <field name="code">casa_hanane.stock.exit</field>
+            <field name="prefix">H-EXIT/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_casa_stock_hanane_transfer" model="ir.sequence">
+            <field name="name">Transfert Stock Casa (Hanane)</field>
+            <field name="code">casa_hanane.stock.transfer</field>
+            <field name="prefix">H-TRANS/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

@@ -31,6 +31,7 @@ class CasaStockStock(models.Model):
     image_1920 = fields.Image(related='product_id.image_1920', readonly=True)
     write_date = fields.Datetime(string='Last Update', readonly=True)
     create_date = fields.Datetime(string='Creation Date', readonly=True)
+    date = fields.Date(string='Date', readonly=True)
 
     total_weight = fields.Float(string='Tonnage', readonly=True)
 
@@ -85,7 +86,8 @@ class CasaStockStock(models.Model):
                     ((sum(m.qty) * m.weight) * m.price_purchase) as mt_achat,
                     AVG(NULLIF(m.price_sale, 0)) as average_sale_price,
                     max(m.date) as write_date,
-                    min(m.date) as create_date
+                    min(m.date) as create_date,
+                    min(m.date) as date
                 FROM
                     casa_stock_move m
                 WHERE

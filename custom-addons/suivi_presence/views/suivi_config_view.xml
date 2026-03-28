@@ -18,6 +18,10 @@
                             <field name="official_check_in_casa" widget="float_time"/>
                             <field name="official_check_out_casa" widget="float_time"/>
                         </group>
+                        <group string="Agadir">
+                            <field name="official_check_in_agadir" widget="float_time"/>
+                            <field name="official_check_out_agadir" widget="float_time"/>
+                        </group>
                         <group string="Paramètres Généraux">
                             <field name="active" invisible="1"/>
                             <field name="delay_tolerance"/>

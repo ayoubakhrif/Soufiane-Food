@@ -51,6 +51,8 @@
                                 <field name="salary_mediouna"/>
                                 <field name="hours_casa"/>
                                 <field name="salary_casa"/>
+                                <field name="hours_agadir"/>
+                                <field name="salary_agadir"/>
                             </group>
                         </page>
                     </notebook>

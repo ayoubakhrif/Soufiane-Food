@@ -32,6 +32,8 @@ class SuiviSalary(models.Model):
     salary_mediouna = fields.Float(string='Salaire Mediouna', compute='_compute_salary_details', store=True)
     hours_casa = fields.Float(string='Heures Casa', compute='_compute_salary_details', store=True)
     salary_casa = fields.Float(string='Salaire Casa', compute='_compute_salary_details', store=True)
+    hours_agadir = fields.Float(string='Heures Agadir', compute='_compute_salary_details', store=True)
+    salary_agadir = fields.Float(string='Salaire Agadir', compute='_compute_salary_details', store=True)
 
     final_salary = fields.Float(string='Salaire Final', compute='_compute_final_salary', store=True)
     
@@ -97,7 +99,7 @@ class SuiviSalary(models.Model):
                 day_records[p_date].append(p)
 
             t_norm = t_over = t_miss = t_holi = 0.0
-            h_med = s_med = h_casa = s_casa = 0.0
+            h_med = s_med = h_casa = s_casa = h_aga = s_aga = 0.0
             
             # Fetch config
             # Default values if config missing
@@ -105,6 +107,8 @@ class SuiviSalary(models.Model):
             off_out_med = config.official_check_out_mediouna if config else 17
             off_in_casa = config.official_check_in_casa if config else 9.5
             off_out_casa = config.official_check_out_casa if config else 17.5
+            off_in_agadir = config.official_check_in_agadir if config else 9
+            off_out_agadir = config.official_check_out_agadir if config else 17
             
             tolerance_min = config.delay_tolerance if config else 0
             ot_coeff = config.overtime_coefficient if config else 1.0
@@ -150,6 +154,9 @@ class SuiviSalary(models.Model):
                     if rec.employee_id.payroll_site == 'casa':
                          h_casa += daily_hours
                          s_casa += cost
+                    elif rec.employee_id.payroll_site == 'agadir':
+                         h_aga += daily_hours
+                         s_aga += cost
                     else:
                          h_med += daily_hours
                          s_med += cost
@@ -191,6 +198,9 @@ class SuiviSalary(models.Model):
                     if p_site == 'casa':
                         c_off_in = off_in_casa
                         c_off_out = off_out_casa
+                    elif p_site == 'agadir':
+                        c_off_in = off_in_agadir
+                        c_off_out = off_out_agadir
                     else:
                         c_off_in = off_in_med
                         c_off_out = off_out_med
@@ -240,6 +250,9 @@ class SuiviSalary(models.Model):
                     if p_site == 'casa':
                         h_casa += pair_hours
                         s_casa += pair_cost
+                    elif p_site == 'agadir':
+                        h_aga += pair_hours
+                        s_aga += pair_cost
                     else:
                         h_med += pair_hours
                         s_med += pair_cost
@@ -270,6 +283,8 @@ class SuiviSalary(models.Model):
             rec.salary_mediouna = round(s_med, 2)
             rec.hours_casa = round(h_casa, 2)
             rec.salary_casa = round(s_casa, 2)
+            rec.hours_agadir = round(h_aga, 2)
+            rec.salary_agadir = round(s_aga, 2)
 
     total_advances = fields.Float(string='Avances', compute='_compute_final_salary', store=True)
 
@@ -280,7 +295,7 @@ class SuiviSalary(models.Model):
         
         for rec in self:
             # 1. Base Salary from Hours (Splits)
-            gross_salary = rec.salary_mediouna + rec.salary_casa
+            gross_salary = rec.salary_mediouna + rec.salary_casa + rec.salary_agadir
             
             # 2. Calculate Advances
             domain = [

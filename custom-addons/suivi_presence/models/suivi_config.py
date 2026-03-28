@@ -17,6 +17,9 @@ class SuiviConfig(models.Model):
     official_check_in_casa = fields.Float(string='Entrée (Casa)', default=9.5, required=True)
     official_check_out_casa = fields.Float(string='Sortie (Casa)', default=17.5, required=True)
 
+    official_check_in_agadir = fields.Float(string='Entrée (Agadir)', default=9, required=True)
+    official_check_out_agadir = fields.Float(string='Sortie (Agadir)', default=17, required=True)
+
     delay_tolerance = fields.Integer(string='Tolérance de retard (Minutes)', default=0, help="Minutes tolérées avant retard")
     overtime_coefficient = fields.Float(string='Coefficient HS', default=1.0, required=True)
     

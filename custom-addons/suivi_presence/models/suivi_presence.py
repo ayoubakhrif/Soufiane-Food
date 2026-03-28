@@ -24,7 +24,8 @@ class SuiviPresence(models.Model):
 
     site = fields.Selection([
         ('mediouna', 'Mediouna'),
-        ('casa', 'Casa')
+        ('casa', 'Casa'),
+        ('agadir', 'Agadir')
     ], string='Site de Travail', required=True, default='mediouna')
 
     state = fields.Selection([

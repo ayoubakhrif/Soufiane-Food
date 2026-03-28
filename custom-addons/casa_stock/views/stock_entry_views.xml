@@ -58,6 +58,13 @@
                         <group>
                             <field name="price_purchase" groups="casa_stock.group_manager"/>
                             <field name="date"/>
+                            <field name="lot"/>
+                            <label for="dum"/>
+                            <div class="o_row">
+                                <field name="dum"/>
+                                <button name="action_open_dum" string="Ouvrir DUM" type="object" icon="fa-external-link" class="btn-sm btn-link" invisible="not dum"/>
+                            </div>
+                            <field name="scan_dum" widget="url" invisible="not scan_dum"/>
                         </group>
                     </group>
 

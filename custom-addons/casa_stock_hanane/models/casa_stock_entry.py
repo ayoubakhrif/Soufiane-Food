@@ -46,6 +46,78 @@ class CasaStockEntry(models.Model):
     driver_id = fields.Many2one('casa_hanane.driver', string='Chauffeur', tracking=True)
     ste_id = fields.Many2one('casa_hanane.ste', string='Société', tracking=True)
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
+    scan_dum = fields.Char(string='Scan DUM (Drive)', help="Poser le lien vers le scan de la DUM")
+
+    def _get_drive_credentials_path(self):
+        return "/srv/google_credentials/service_account.json"
+
+    def _get_drive_service(self):
+        from google.oauth2 import service_account
+        from googleapiclient.discovery import build
+        creds_path = self._get_drive_credentials_path()
+        try:
+            scopes = ['https://www.googleapis.com/auth/drive.readonly']
+            creds = service_account.Credentials.from_service_account_file(creds_path, scopes=scopes)
+            return build('drive', 'v3', credentials=creds)
+        except Exception as e:
+            raise UserError(f"Erreur de connexion Google Drive: {str(e)}")
+
+    def action_open_dum(self):
+        self.ensure_one()
+        if not self.dum:
+            return False
+
+        if self.scan_dum:
+             return {
+                'type': 'ir.actions.act_url',
+                'url': self.scan_dum,
+                'target': 'new',
+            }
+
+        # 1. Connect to Drive
+        service = self._get_drive_service()
+        folder_id = '1i9kzO4Pk7X2hFJG2hyh828Sq5uAbarIA'
+        
+        # 2. Sanitize DUM
+        safe_dum = self.dum.replace("'", "\\'")
+        
+        # 3. Build Query
+        query = (
+            "mimeType='application/pdf' "
+            f"and name contains '{safe_dum}' "
+            f"and '{folder_id}' in parents "
+            "and trashed=false"
+        )
+        
+        try:
+            # 4. Execute Search
+            results = service.files().list(
+                q=query,
+                fields="files(id, name, webViewLink, createdTime)",
+                orderBy="createdTime desc",
+                pageSize=1
+            ).execute()
+            
+            files = results.get('files', [])
+            
+            if not files:
+                raise UserError(f"Aucun fichier PDF trouvé pour le DUM '{self.dum}' dans le dossier spécifié.")
+                
+            # 5. Get Link
+            file_url = files[0].get('webViewLink')
+
+            # 6. Save Link
+            self.write({'scan_dum': file_url})
+
+            return {
+                'type': 'ir.actions.act_url',
+                'url': file_url,
+                'target': 'new',
+            }
+        except UserError:
+            raise
+        except Exception as e:
+            raise UserError(f"Erreur lors de la recherche Drive: {str(e)}")
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -135,6 +207,7 @@ class CasaStockEntry(models.Model):
                 'price_purchase': rec.price_purchase,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
+                'scan_dum': rec.scan_dum,
                 'provider_id': rec.provider_id.id,
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,

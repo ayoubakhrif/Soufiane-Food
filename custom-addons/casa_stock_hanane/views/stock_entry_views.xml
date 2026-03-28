@@ -68,7 +68,12 @@
                             <field name="frigo"/>
                             <field name="ste_id" options="{'no_create_edit': True}"/>
                             <field name="lot"/>
-                            <field name="dum"/>
+                            <label for="dum"/>
+                            <div class="o_row">
+                                <field name="dum"/>
+                                <button name="action_open_dum" string="Ouvrir DUM" type="object" icon="fa-external-link" class="btn-sm btn-link" invisible="not dum"/>
+                            </div>
+                            <field name="scan_dum" widget="url" invisible="not scan_dum"/>
                         </group>
                         <group>
                             <field name="calibre"/>

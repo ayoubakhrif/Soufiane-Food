@@ -16,6 +16,7 @@
                 <field name="weight"/>
                 <field name="dum"/>
                 <field name="ste_id"/>
+                <field name="scan_dum"/>
 
                 <templates>
                     <t t-name="kanban-box">
@@ -163,7 +164,12 @@
                             <field name="total_weight"/>
                             <field name="calibre"/>
                             <field name="lot"/>
-                            <field name="dum"/>
+                            <label for="dum"/>
+                            <div class="o_row">
+                                <field name="dum"/>
+                                <button name="action_open_dum" string="Ouvrir DUM" type="object" icon="fa-external-link" class="btn-sm btn-link" invisible="not dum"/>
+                            </div>
+                            <field name="scan_dum" widget="url" invisible="not scan_dum"/>
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="ville"/>

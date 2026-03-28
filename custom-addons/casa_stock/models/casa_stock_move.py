@@ -10,6 +10,7 @@ class CasaStockMove(models.Model):
     product_id = fields.Many2one('casa.product', string='Produit', required=True, ondelete='restrict')
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
+    scan_dum = fields.Char(string='Scan DUM (Drive)')
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),

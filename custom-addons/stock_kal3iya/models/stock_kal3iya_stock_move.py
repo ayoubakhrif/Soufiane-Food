@@ -64,5 +64,5 @@ class StockKal3iyaMove(models.Model):
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
 
-    def unlink(self):
-        raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
+    #def unlink(self):
+    #    raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))

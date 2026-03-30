@@ -183,7 +183,7 @@ class CasaClient(models.Model):
             total_ventes = sum(commandes.mapped('mt_vente')) + sum(otras.mapped('mt_vente'))
             total_discounts = sum(commandes.mapped('discount_amount')) + sum(otras.mapped('discount_amount'))
             
-            total_advances = sum(client.advance_ids.mapped('amount'))
+            total_advances = sum(client.advance_ids.filtered(lambda a: a.state == 'confirmed').mapped('amount'))
             total_impayes = sum(client.unpaid_ids.mapped('amount'))
 
             client.total_commandes = total_ventes

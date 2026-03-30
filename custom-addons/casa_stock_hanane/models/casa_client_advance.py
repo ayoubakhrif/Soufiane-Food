@@ -17,3 +17,12 @@ class CasaClientAdvance(models.Model):
     ], string='Type', required=True, default='espece')
     
     comment = fields.Char(string='Commentaire')
+
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('confirmed', 'Validé'),
+    ], string='État', required=True, default='draft', readonly=True)
+
+    def action_confirm(self):
+        for rec in self:
+            rec.state = 'confirmed'

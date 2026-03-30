@@ -90,19 +90,18 @@ class StockKal3iyaTransfer(models.Model):
             # Search strictly first
             stock_line = self.env['stock.kal3iya.stock'].search(domain, limit=1)
             
+            if not stock_line:
+                raise UserError(_("Aucun stock trouvé pour ce produit, lot et poids dans le garage source."))
+            
+            if rec.qty > stock_line.quantity:
+                raise UserError(_(
+                    "Stock insuffisant pour le transfert!\n"
+                    "Disponible: %s, Demandé: %s"
+                ) % (stock_line.quantity, rec.qty))
+
             val_dum = rec.dum
             val_ste_id = rec.ste_id.id
-            val_weight = rec.weight # We use the transfer's weight, which matched the stock line
-            
-            if stock_line:
-                if not val_dum:
-                    val_dum = stock_line.dum
-                if not val_ste_id:
-                    val_ste_id = stock_line.ste_id.id
-                # Weight matches, so we don't need to "fill" it from stock line, 
-                # but valid to ensure we have it if transfer was 0 but matched 0? 
-                # If transfer has weight 0, and we found a line with weight 0, then val_weight is 0.
-                # If transfer has weight 10, found line with 10, val_weight is 10.
+            val_weight = rec.weight
             
             # 1. Create Move OUT
             move_out = self.env['stock.kal3iya.move'].create({

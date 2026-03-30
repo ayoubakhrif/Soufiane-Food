@@ -100,11 +100,18 @@
 
                         <page string="Avances">
                             <field name="advance_ids" nolabel="1">
-                                <tree editable="bottom">
+                                <tree editable="bottom" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'">
                                     <field name="date"/>
                                     <field name="payment_mode"/>
                                     <field name="amount" sum="Total Avances"/>
                                     <field name="comment"/>
+                                    <field name="state" widget="badge" 
+                                           decoration-success="state == 'confirmed'" 
+                                           decoration-info="state == 'draft'"/>
+                                    <button name="action_confirm" string="Valider" type="object" 
+                                            icon="fa-check" 
+                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                                            invisible="state == 'confirmed'"/>
                                 </tree>
                             </field>
                         </page>

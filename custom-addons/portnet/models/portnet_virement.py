@@ -42,6 +42,10 @@ class PortnetVirement(models.Model):
         string='Conteneurs',
     )
 
+    amount_virement = fields.Float(
+        string='Montant Virement',
+    )
+
     @api.constrains('invoice', 'ste_id')
     def _check_invoice_ste(self):
         for rec in self:

@@ -21,6 +21,7 @@
                             <field name="article_id" options="{'no_create': True}"/>
                             <field name="supplier_id" options="{'no_create': True}"/>
                             <field name="total"/>
+                            <field name="amount_virement"/>
                         </group>
                     </group>
                     <notebook>
@@ -48,6 +49,7 @@
                 <field name="ste_id"/>
                 <field name="article_id"/>
                 <field name="supplier_id"/>
+                <field name="amount_virement" sum="Montant Virement"/>
                 <field name="total" sum="Total"/>
             </tree>
         </field>

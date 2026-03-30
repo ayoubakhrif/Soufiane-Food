@@ -16,7 +16,11 @@ class PortnetVirement(models.Model):
         string='Facture',
         required=True,
     )
-
+    
+    engagement = fields.Char(
+        string='Num d\'engagement d\'importation',
+    )
+    
     ste_id = fields.Many2one(
         'logistique.ste',
         string='Société',

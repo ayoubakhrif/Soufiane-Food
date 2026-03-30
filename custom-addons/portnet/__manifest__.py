@@ -15,6 +15,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/portnet_entry_view.xml',
+        'views/portnet_virement_view.xml',
         'views/menu.xml',
     ],
     'installable': True,

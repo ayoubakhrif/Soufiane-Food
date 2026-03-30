@@ -11,4 +11,10 @@
               parent="menu_portnet_root"
               action="action_portnet_entry"
               sequence="1"/>
+
+    <menuitem id="menu_portnet_virements"
+              name="Ordres de virement"
+              parent="menu_portnet_root"
+              action="action_portnet_virement"
+              sequence="2"/>
 </odoo>

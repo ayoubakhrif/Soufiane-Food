@@ -47,6 +47,7 @@ class CasaStockEntry(models.Model):
     ste_id = fields.Many2one('casa_hanane.ste', string='Société', tracking=True)
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
     scan_dum = fields.Char(string='Scan DUM (Drive)', help="Poser le lien vers le scan de la DUM")
+    stock_soufiane = fields.Boolean(string='Stock Soufiane', default=False, tracking=True)
 
     def _get_drive_credentials_path(self):
         return "/srv/google_credentials/service_account.json"
@@ -208,6 +209,7 @@ class CasaStockEntry(models.Model):
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'scan_dum': rec.scan_dum,
+                'stock_soufiane': rec.stock_soufiane,
                 'provider_id': rec.provider_id.id,
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
@@ -249,6 +251,7 @@ class CasaStockEntry(models.Model):
                     'price_purchase': rec.price_purchase,
                     'weight': rec.weight,
                     'calibre': rec.calibre,
+                    'stock_soufiane': rec.stock_soufiane,
                     'provider_id': rec.provider_id.id,
                     'driver_id': rec.driver_id.id,
                     'res_model': 'casa_hanane.stock.entry',

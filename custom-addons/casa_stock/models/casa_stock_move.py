@@ -40,6 +40,7 @@ class CasaStockMove(models.Model):
     date = fields.Datetime(string='Date', default=fields.Datetime.now, required=True)
     reference = fields.Char(string='Référence')
     user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user)
+    stock_soufiane = fields.Boolean(string='Stock Soufiane', default=False)
 
     # Origin Tracking
     res_model = fields.Char(string='Modèle d\'Origine', readonly=True)

@@ -80,6 +80,17 @@
                                         font-size:12px;">
                                         Calibre <field name="calibre"/>
                                     </span>
+
+                                    <span t-if="record.stock_soufiane.raw_value" style="
+                                        background:#fdf2f8;
+                                        color:#9d174d;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;
+                                        font-weight:bold;
+                                        margin-right:6px;">
+                                        SOUFIANE
+                                    </span>
                                 </div>
 
                                 <!-- Stock -->
@@ -148,6 +159,7 @@
                 <field name="dum"/>
                 <field name="ville"/>
                 <field name="ste_id"/>
+                <field name="stock_soufiane" optional="show"/>
                 <field name="quantity" sum="Total Quantité"/>
                 <field name="poids"/>
                 <field name="total_weight" sum="Total Poids"/>
@@ -178,6 +190,7 @@
                             <field name="total_weight"/>
                             <field name="calibre"/>
                             <field name="lot"/>
+                            <field name="stock_soufiane"/>
                             <label for="dum"/>
                             <div class="o_row">
                                 <field name="dum"/>
@@ -208,11 +221,15 @@
                 <field name="ville"/>
                 <field name="ste_id"/>
                 <field name="date"/>
+                <separator/>
+                <filter string="Stock Soufiane" name="stock_soufiane" domain="[('stock_soufiane', '=', True)]"/>
+                <separator/>
                 <group expand="0" string="Grouper par">
                     <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
                     <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
+                    <filter string="Stock Soufiane" name="group_stock_soufiane" context="{'group_by': 'stock_soufiane'}"/>
                     <filter string="Poids" name="group_poids" context="{'group_by': 'poids'}"/>
                 </group>
             </search>

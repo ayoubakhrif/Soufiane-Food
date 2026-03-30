@@ -58,6 +58,7 @@
                         <group>
                             <field name="price_purchase" groups="casa_stock_hanane.group_manager"/>
                             <field name="date"/>
+                            <field name="stock_soufiane"/>
                         </group>
                     </group>
 
@@ -112,10 +113,13 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="provider_id"/>
+                <field name="stock_soufiane"/>
                 <separator/>
                 <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter string="Validé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Stock Soufiane" name="stock_soufiane" domain="[('stock_soufiane', '=', True)]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
@@ -124,6 +128,7 @@
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Fournisseur" name="group_provider" context="{'group_by': 'provider_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Stock Soufiane" name="group_stock_soufiane" context="{'group_by': 'stock_soufiane'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>

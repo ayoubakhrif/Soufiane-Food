@@ -23,6 +23,7 @@
                     decoration-danger="margin &lt; 0"/>
                 <field name="ville"/>
                 <field name="frigo"/>
+                <field name="stock_soufiane" optional="show"/>
                 <field name="not_delivered" widget="boolean_toggle" optional="show"/>
                 <button name="action_validate" type="object" string="Valider" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock_hanane.group_valid_admin"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
@@ -78,6 +79,7 @@
                             <field name="ville" readonly="1" force_save="1"/>
                             <field name="frigo" readonly="1" force_save="1"/>
                             <field name="ste_id" readonly="1" force_save="1" options="{'no_create_edit': True}"/>
+                            <field name="stock_soufiane" readonly="1" force_save="1"/>
                         </group>
                         <group string="Quantités &amp; Prix">
                             <field name="qty"/>
@@ -155,8 +157,10 @@
                 <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter string="Validé" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
-                <filter string="Non Livré" name="not_delivered" domain="[('not_delivered', '=', True)]"/>
-                <separator/>
+                 <filter string="Non Livré" name="not_delivered" domain="[('not_delivered', '=', True)]"/>
+                 <separator/>
+                 <filter string="Stock Soufiane" name="stock_soufiane" domain="[('stock_soufiane', '=', True)]"/>
+                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
                 <group expand="0" string="Grouper par">
@@ -164,8 +168,9 @@
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
-                    <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
-                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                     <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
+                     <filter string="Stock Soufiane" name="group_stock_soufiane" context="{'group_by': 'stock_soufiane'}"/>
+                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
         </field>

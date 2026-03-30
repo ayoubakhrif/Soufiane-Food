@@ -35,6 +35,7 @@ class CasaStockExit(models.Model):
     lot = fields.Char(string='Lot', tracking=True)
     dum = fields.Char(string='DUM', tracking=True)
     calibre = fields.Char(string='Calibre', tracking=True)
+    stock_soufiane = fields.Boolean(string='Stock Soufiane', default=False, tracking=True)
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),
@@ -130,6 +131,7 @@ class CasaStockExit(models.Model):
             self.ste_id = self.stock_id.ste_id.id
             self.weight = self.stock_id.weight
             self.price_purchase = self.stock_id.price
+            self.stock_soufiane = self.stock_id.stock_soufiane
             # Clear it so it doesn't linger visually if not needed, or keep it.
             # We keep it so user can see what they selected before saving.
 
@@ -288,6 +290,7 @@ class CasaStockExit(models.Model):
                 'price_sale': rec.price_sale,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
+                'stock_soufiane': rec.stock_soufiane,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
@@ -337,6 +340,7 @@ class CasaStockExit(models.Model):
                 'price_sale': rec.price_sale,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
+                'stock_soufiane': rec.stock_soufiane,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
@@ -370,6 +374,7 @@ class CasaStockExit(models.Model):
                     'price_sale': rec.price_sale,
                     'weight': rec.weight,
                     'calibre': rec.calibre,
+                    'stock_soufiane': rec.stock_soufiane,
                     'client_id': rec.client_id.id,
                     'driver_id': rec.driver_id.id,
                     'ste_id': rec.ste_id.id,

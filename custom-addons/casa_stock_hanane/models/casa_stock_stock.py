@@ -34,6 +34,7 @@ class CasaStockStock(models.Model):
     create_date = fields.Datetime(string='Creation Date', readonly=True)
     date = fields.Date(string='Date', readonly=True)
     scan_dum = fields.Char(string='Scan DUM (Drive)', readonly=True)
+    stock_soufiane = fields.Boolean(string='Stock Soufiane', readonly=True)
 
     total_weight = fields.Float(string='Tonnage', readonly=True)
 
@@ -160,6 +161,7 @@ class CasaStockStock(models.Model):
                     m.weight,
                     m.weight || 'Kg' as poids,
                     m.price_purchase as price,
+                    m.stock_soufiane,
                     sum(m.qty) as quantity,
                     (sum(m.qty) * m.weight) as total_weight,
                     ((sum(m.qty) * m.weight) * m.price_purchase) as mt_achat,
@@ -173,7 +175,7 @@ class CasaStockStock(models.Model):
                 WHERE
                     m.state = 'done'
                 GROUP BY
-                    m.product_id, m.lot, m.dum, m.ville, m.frigo, m.ste_id, m.weight, m.price_purchase, m.calibre
+                    m.product_id, m.lot, m.dum, m.ville, m.frigo, m.weight, m.price_purchase, m.calibre
             )
         """ % self._table)
 
@@ -195,6 +197,7 @@ class CasaStockStock(models.Model):
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 
                 'default_price_purchase': self.price,
+                'default_stock_soufiane': self.stock_soufiane,
                 'default_is_from_stock': True,
             }
         }

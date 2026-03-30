@@ -96,6 +96,21 @@ class LogisticsEntry(models.Model):
             if rec.price_unit <= 0:
                 raise ValidationError("Le prix unitaire (P.U) doit être strictement supérieur à 0.")
 
+    @api.constrains('invoice_number', 'ste_id')
+    def _check_invoice_ste_achat(self):
+        for rec in self:
+            if not rec.invoice_number:
+                continue
+            # Search for other entries with the same invoice
+            domain = [('invoice_number', '=', rec.invoice_number), ('id', '!=', rec.id)]
+            other_entries = self.search(domain)
+            for other in other_entries:
+                if other.ste_id != rec.ste_id:
+                    raise ValidationError(
+                        "L'invoice \"%s\" est déjà utilisé par une autre société (%s) dans un autre dossier!"
+                        % (rec.invoice_number, other.ste_id.name)
+                    )
+
     def action_confirm_purchase(self):
         # FIX: Allow regular purchase users to confirm too
         if not self.env.user.has_group('achat.group_purchase_user'):

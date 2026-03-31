@@ -174,7 +174,7 @@ class CasaClient(models.Model):
         for rec in self:
             rec.exit_count = len(rec.exit_ids.filtered(lambda s: s.state == 'done'))
 
-    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente_final', 'compte_initial', 'advance_ids.amount', 'unpaid_ids.amount')
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente', 'other_sale_ids.discount_amount', 'compte_initial', 'advance_ids.amount', 'advance_ids.state', 'unpaid_ids.amount')
     def _compute_totals(self):
         for client in self:
             commandes = client.exit_ids.filtered(lambda s: s.state == 'done')

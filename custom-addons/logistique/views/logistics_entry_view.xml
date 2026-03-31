@@ -171,7 +171,7 @@
                         </page>
                         <page string="Sutra" name="sutra">
                             <field name="sutra_ids"
-                                   context="{'default_entry_id': active_id, 'default_dossier_id': dossier_id}">
+                                   context="{'default_entry_id': id, 'default_dossier_id': dossier_id}">
                                 <tree editable="bottom">
                                     <field name="amount"/>
                                     <field name="invoice"/>

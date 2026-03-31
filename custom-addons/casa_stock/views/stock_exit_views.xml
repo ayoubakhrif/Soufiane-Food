@@ -22,7 +22,6 @@
                     decoration-success="margin &gt; 0"
                     decoration-danger="margin &lt; 0"/>
                 <field name="ville"/>
-                <field name="stock_soufiane" optional="show"/>
                 <field name="not_delivered" widget="boolean_toggle" optional="show"/>
                 <button name="action_validate" type="object" string="Valider" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>

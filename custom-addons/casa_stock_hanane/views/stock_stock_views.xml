@@ -164,7 +164,6 @@
                 <field name="ville"/>
                 <field name="frigo"/>
                 <field name="ste_id"/>
-                <field name="stock_soufiane" optional="show"/>
                 <field name="quantity" sum="Total Quantité"/>
                 <field name="poids"/>
                 <field name="total_weight" sum="Total Poids"/>

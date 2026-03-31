@@ -116,6 +116,10 @@
                                             icon="fa-check" 
                                             groups="casa_stock.group_admin,casa_stock.group_valid_admin"
                                             invisible="state == 'confirmed'"/>
+                                    <button name="action_draft" string="Remettre en brouillon" type="object" 
+                                            icon="fa-undo" 
+                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                                            invisible="state == 'draft'"/>
                                 </tree>
                             </field>
                         </page>

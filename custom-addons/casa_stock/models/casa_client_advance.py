@@ -1,4 +1,5 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 class CasaClientAdvance(models.Model):
     _name = 'casa.client.advance'
@@ -26,3 +27,13 @@ class CasaClientAdvance(models.Model):
     def action_confirm(self):
         for rec in self:
             rec.state = 'confirmed'
+
+    def action_draft(self):
+        for rec in self:
+            rec.state = 'draft'
+
+    def unlink(self):
+        for rec in self:
+            if rec.state == 'confirmed':
+                raise UserError(_("Vous ne pouvez pas supprimer une avance validée. Veuillez d'abord la remettre en brouillon."))
+        return super(CasaClientAdvance, self).unlink()

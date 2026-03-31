@@ -7,8 +7,10 @@ class LogistiqueDossierSutra(models.Model):
     dossier_id = fields.Many2one(
         'logistique.dossier',
         string='Dossier',
-        ondelete='cascade',
-        required=True
+        compute='_compute_dossier_id',
+        store=True,
+        readonly=False,
+        ondelete='cascade'
     )
     entry_id = fields.Many2one(
         'logistique.entry',
@@ -31,6 +33,12 @@ class LogistiqueDossierSutra(models.Model):
     def _onchange_entry_id(self):
         if self.entry_id and self.entry_id.dossier_id:
             self.dossier_id = self.entry_id.dossier_id
+
+    @api.depends('entry_id')
+    def _compute_dossier_id(self):
+        for rec in self:
+            if rec.entry_id:
+                rec.dossier_id = rec.entry_id.dossier_id
     amount = fields.Float(string='Montant', required=True)
     invoice = fields.Char(string='Facture')
     date = fields.Date(string='Date', default=fields.Date.context_today)

@@ -18,6 +18,9 @@
                 <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="scan_dum"/>
+                <field name="stock_soufiane"/>
+                <field name="poids"/>
+                <field name="total_weight"/>
 
                 <templates>
                     <t t-name="kanban-box">

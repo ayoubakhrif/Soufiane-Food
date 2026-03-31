@@ -118,7 +118,7 @@
                                             invisible="state == 'confirmed'"/>
                                     <button name="action_draft" string="Remettre en brouillon" type="object" 
                                             icon="fa-undo" 
-                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                                            groups="casa_stock.group_admin"
                                             invisible="state == 'draft'"/>
                                 </tree>
                             </field>
@@ -238,8 +238,98 @@
     </record>
 
     <!-- ========================= -->
-    <!-- 📁 MENU ITEM -->
+    <!-- ========================= -->
+    <!-- 📄 ADVANCE VIEWS -->
     <!-- ========================= -->
 
+    <record id="view_casa_client_advance_tree" model="ir.ui.view">
+        <field name="name">casa.client.advance.tree</field>
+        <field name="model">casa.client.advance</field>
+        <field name="arch" type="xml">
+            <tree string="Avances Clients" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'" multi_edit="1">
+                <field name="date"/>
+                <field name="client_id"/>
+                <field name="payment_mode"/>
+                <field name="amount" sum="Total Avances"/>
+                <field name="comment"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'confirmed'" 
+                       decoration-info="state == 'draft'"/>
+                <button name="action_confirm" string="Valider" type="object" 
+                        icon="fa-check" 
+                        groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                        invisible="state == 'confirmed'"/>
+                <button name="action_draft" string="Remettre en brouillon" type="object" 
+                        icon="fa-undo" 
+                        groups="casa_stock.group_admin"
+                        invisible="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_casa_client_advance_form" model="ir.ui.view">
+        <field name="name">casa.client.advance.form</field>
+        <field name="model">casa.client.advance</field>
+        <field name="arch" type="xml">
+            <form string="Avance Client">
+                <header>
+                    <button name="action_confirm" string="Valider" type="object" class="btn-primary" 
+                            groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                            invisible="state == 'confirmed'"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" 
+                            groups="casa_stock.group_admin"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="client_id"/>
+                            <field name="amount"/>
+                            <field name="payment_mode"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="comment"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_casa_client_advance_search" model="ir.ui.view">
+        <field name="name">casa.client.advance.search</field>
+        <field name="model">casa.client.advance</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Avances">
+                <field name="client_id"/>
+                <field name="comment"/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Validé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <separator/>
+                <filter string="Date" name="date" date="date"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Mode de paiement" name="group_payment_mode" context="{'group_by': 'payment_mode'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_casa_client_advance" model="ir.actions.act_window">
+        <field name="name">Avances Clients</field>
+        <field name="res_model">casa.client.advance</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_casa_client_advance_search"/>
+        <field name="context">{'search_default_draft': 1, 'search_default_group_client': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Enregistrez une nouvelle avance client.
+            </p>
+        </field>
+    </record>
 
 </odoo>

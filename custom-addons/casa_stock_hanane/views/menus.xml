@@ -67,6 +67,12 @@
               action="action_casa_stock_client"
               sequence="45"/>
 
+    <menuitem id="menu_casa_stock_advance"
+              name="Avances"
+              parent="menu_casa_stock_root"
+              action="action_casa_client_advance"
+              sequence="46"/>
+
     <menuitem id="menu_casa_stock_provider"
               name="Fournisseurs"
               parent="menu_casa_stock_data"

@@ -138,6 +138,12 @@ class CasaClient(models.Model):
         store=True
     )
 
+    total_advances = fields.Float(
+        string='Total Avances',
+        compute='_compute_totals',
+        store=True
+    )
+
     sorties_grouped_html = fields.Html(
         string="Historique des commandes",
         compute="_compute_sorties_grouped_html",
@@ -187,6 +193,7 @@ class CasaClient(models.Model):
             total_impayes = sum(client.unpaid_ids.mapped('amount'))
 
             client.total_commandes = total_ventes
+            client.total_advances = total_advances
             client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes - total_discounts - total_advances
 
     @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'exit_ids.margin')

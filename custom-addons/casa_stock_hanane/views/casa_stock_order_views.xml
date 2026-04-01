@@ -91,11 +91,35 @@
         </field>
     </record>
 
+    <record id="view_casa_stock_order_search" model="ir.ui.view">
+        <field name="name">casa_hanane.stock.order.search</field>
+        <field name="model">casa_hanane.stock.order</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Commandes">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="driver_id"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Validé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Non Annulé" name="not_cancelled" domain="[('state', '!=', 'cancel')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Etat" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Action definition for the main order menu -->
     <record id="action_casa_stock_order" model="ir.actions.act_window">
         <field name="name">Commandes</field>
         <field name="res_model">casa_hanane.stock.order</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_not_cancelled': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créer une nouvelle commande.

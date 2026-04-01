@@ -119,6 +119,8 @@
                 <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter string="Validé" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
+                <filter string="Non Annulé" name="not_cancelled" domain="[('state', '!=', 'cancel')]"/>
+                <separator/>
                 <filter string="Stock Soufiane" name="stock_soufiane" domain="[('stock_soufiane', '=', True)]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
@@ -139,5 +141,6 @@
         <field name="name">Entrées Stock Casa</field>
         <field name="res_model">casa.stock.entry</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_not_cancelled': 1}</field>
     </record>
 </odoo>

@@ -154,6 +154,8 @@
                 <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter string="Validé" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
+                <filter string="Non Annulé" name="not_cancelled" domain="[('state', '!=', 'cancel')]"/>
+                <separator/>
                  <filter string="Non Livré" name="not_delivered" domain="[('not_delivered', '=', True)]"/>
                  <separator/>
                  <filter string="Stock Soufiane" name="stock_soufiane" domain="[('stock_soufiane', '=', True)]"/>
@@ -177,5 +179,6 @@
         <field name="name">Sorties Stock Casa</field>
         <field name="res_model">casa.stock.exit</field>
         <field name="view_mode">tree,form,pivot</field>
+        <field name="context">{'search_default_not_cancelled': 1}</field>
     </record>
 </odoo>

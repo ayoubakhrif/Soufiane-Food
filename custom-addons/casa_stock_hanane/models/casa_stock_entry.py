@@ -31,11 +31,6 @@ class CasaStockEntry(models.Model):
         ('casa', 'Casa'),
     ], string='Ville', required=True, tracking=True)
     
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo', default='stock_casa', tracking=True)
     charge_transport = fields.Float(
         string='Charge transport',
         compute='_compute_charge_transport',
@@ -174,7 +169,7 @@ class CasaStockEntry(models.Model):
             if rec.state in ('confirmed', 'done'):
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_purchase',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'provider_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'ville', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations confirmées ou validées ne peuvent pas être modifiées. Utilisez 'Annuler'."))
@@ -199,7 +194,6 @@ class CasaStockEntry(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'entry',
                 'state': 'done',
@@ -242,7 +236,6 @@ class CasaStockEntry(models.Model):
                     'lot': rec.lot,
                     'dum': rec.dum,
                     'ville': rec.ville,
-                    'frigo': rec.frigo,
                     'qty': -rec.qty,
                     'move_type': 'cancel_entry',
                     'state': 'done',
@@ -272,7 +265,6 @@ class CasaStockEntry(models.Model):
         domain = [
             ('product_id', '=', rec.product_id.id),
             ('ville', '=', rec.ville),
-            ('frigo', '=', rec.frigo),
             ('ste_id', '=', rec.ste_id.id),
             ('state', '=', 'done')
         ]

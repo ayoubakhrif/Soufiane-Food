@@ -42,11 +42,6 @@ class CasaStockExit(models.Model):
         ('casa', 'Casa'),
     ], string='Ville', required=True, tracking=True)
     
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo', tracking=True)
     
     client_id = fields.Many2one('casa_hanane.client', string='Client', tracking=True)
     driver_id = fields.Many2one('casa_hanane.driver', string='Chauffeur', tracking=True)
@@ -127,7 +122,6 @@ class CasaStockExit(models.Model):
             self.dum = self.stock_id.dum
             self.calibre = self.stock_id.calibre
             self.ville = self.stock_id.ville
-            self.frigo = self.stock_id.frigo
             self.ste_id = self.stock_id.ste_id.id
             self.weight = self.stock_id.weight
             self.price_purchase = self.stock_id.price
@@ -155,7 +149,7 @@ class CasaStockExit(models.Model):
             rec.mt_vente = mt_vente
             rec.margin = mt_vente - mt_achat
 
-    @api.depends('product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id', 'weight', 'calibre')
+    @api.depends('product_id', 'lot', 'dum', 'ville', 'ste_id', 'weight', 'calibre')
     def _compute_price_purchase(self):
         Stock = self.env['casa_hanane.stock.stock']
         for rec in self:
@@ -164,7 +158,6 @@ class CasaStockExit(models.Model):
                 domain = [
                     ('product_id', '=', rec.product_id.id),
                     ('ville', '=', rec.ville),
-                    ('frigo', '=', rec.frigo),
                     ('ste_id', '=', rec.ste_id.id),
                 ]
                 
@@ -210,7 +203,7 @@ class CasaStockExit(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_sale',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'ville', 'client_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations validées ne peuvent pas être modifiées."))
@@ -219,7 +212,7 @@ class CasaStockExit(models.Model):
                 # Allow price_sale, but block everything else
                 forbidden_fields = [
                     'product_id', 'qty', 'weight',
-                    'date', 'lot', 'dum', 'ville', 'frigo', 'client_id', 'driver_id', 'ste_id'
+                    'date', 'lot', 'dum', 'ville', 'client_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Seul le prix de vente peut être modifié sur une sortie confirmée. Pour le reste, utilisez 'Remettre en brouillon'."))
@@ -234,7 +227,7 @@ class CasaStockExit(models.Model):
                     rec.move_id.write({'price_sale': vals['price_sale']})
 
         # 4. Sync changes back to Commande
-        sync_fields = ['product_id', 'qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'frigo', 'ste_id']
+        sync_fields = ['product_id', 'qty', 'price_sale', 'weight', 'lot', 'dum', 'calibre', 'ville', 'ste_id']
         if any(f in vals for f in sync_fields):
             for rec in self:
                 if rec.order_line_id:
@@ -281,7 +274,6 @@ class CasaStockExit(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'exit',
                 'state': 'done',
@@ -331,7 +323,6 @@ class CasaStockExit(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'cancel_exit',
                 'state': 'done',
@@ -365,7 +356,6 @@ class CasaStockExit(models.Model):
                     'lot': rec.lot,
                     'dum': rec.dum,
                     'ville': rec.ville,
-                    'frigo': rec.frigo,
                     'qty': rec.qty,
                     'move_type': 'cancel_exit',
                     'state': 'done',
@@ -419,7 +409,6 @@ class CasaStockExit(models.Model):
                 'default_driver_id': self.driver_id.id,
                 'default_lot': self.lot,
                 'default_dum': self.dum,
-                'default_frigo': self.frigo,
                 'default_calibre': self.calibre,
             }
         }
@@ -430,7 +419,7 @@ class CasaStockExit(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
-    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'frigo', 'ste_id', 'weight', 'calibre', 'price_purchase')
+    @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'ste_id', 'weight', 'calibre', 'price_purchase')
     def _check_stock_availability(self):
         for rec in self:
             if rec.state != 'draft':
@@ -441,7 +430,7 @@ class CasaStockExit(models.Model):
             if rec.qty > total_available:
                 # Audit: Where is the rest of the stock?
                 all_stock_found = []
-                # Search across all frigos and ste_ids for this product/lot/weight
+                # Search across all ste_ids for this product/lot/weight
                 domain_audit = [
                     ('product_id', '=', rec.product_id.id),
                     ('state', '=', 'done'),
@@ -451,24 +440,19 @@ class CasaStockExit(models.Model):
                 if rec.lot: domain_audit.append(('lot', '=', rec.lot))
                 if rec.dum: domain_audit.append(('dum', '=', rec.dum))
                 
-                moves = self.env['casa_hanane.stock.move'].read_group(domain_audit, ['qty', 'frigo', 'ste_id', 'ville'], ['frigo', 'ste_id', 'ville'], lazy=False)
+                moves = self.env['casa_hanane.stock.move'].read_group(domain_audit, ['qty', 'ste_id', 'ville'], ['ste_id', 'ville'], lazy=False)
                 for move in moves:
                     if move['qty'] > 0:
-                        frigo_name = dict(self._fields['frigo'].selection).get(move['frigo'], move['frigo'])
                         ville_name = dict(self._fields['ville'].selection).get(move['ville'], move['ville'])
                         ste_name = self.env['casa_hanane.ste'].browse(move['ste_id'][0]).name if move['ste_id'] else 'Aucune'
-                        all_stock_found.append(f"- {move['qty']} unités à {ville_name}/{frigo_name} (Sté: {ste_name})")
+                        all_stock_found.append(f"- {move['qty']} unités à {ville_name} (Sté: {ste_name})")
 
                 audit_msg = "\n".join(all_stock_found) if all_stock_found else "Aucun stock trouvé avec ces caractéristiques (Lot, DUM, Poids)."
                 
                 total_any_price = self.env['casa_hanane.stock.entry']._get_current_stock_qty(rec, price=None)
                 raise UserError(_(
                     "Stock insuffisant pour l'article %(product)s !\n\n"
-                    "Cible actuelle : %(ville)s / %(frigo)s (Sté: %(ste)s)\n"
-                    "Au prix %(price)s MAD : Disponible %(avail)s, Demandé %(req)s\n"
-                    "Total disponible (tous prix confondus) pour cette cible : %(total)s\n\n"
-                    "Inventaire trouvé ailleurs :\n%(audit)s\n\n"
-                    "Vérifiez que la Ville, Frigo et Société correspondent bien à votre besoin."
+                    "Vérifiez que la Ville et Société correspondent bien à votre besoin."
                 ) % {
                     'product': rec.product_id.name,
                     'price': rec.price_purchase,
@@ -477,6 +461,5 @@ class CasaStockExit(models.Model):
                     'total': total_any_price,
                     'audit': audit_msg,
                     'ville': dict(self._fields['ville'].selection).get(rec.ville, rec.ville),
-                    'frigo': dict(self._fields['frigo'].selection).get(rec.frigo, rec.frigo),
                     'ste': rec.ste_id.name or 'Aucune'
                 })

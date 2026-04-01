@@ -15,11 +15,6 @@ class CasaStockStock(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Ville', readonly=True)
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo', readonly=True)
     ste_id = fields.Many2one('casa_hanane.ste', string='Société', readonly=True)
     
     quantity = fields.Float(string='Quantité', readonly=True)
@@ -155,7 +150,6 @@ class CasaStockStock(models.Model):
                     m.lot,
                     m.dum,
                     m.ville,
-                    m.frigo,
                     max(m.ste_id) as ste_id,
                     m.calibre,
                     m.weight,
@@ -175,7 +169,7 @@ class CasaStockStock(models.Model):
                 WHERE
                     m.state = 'done'
                 GROUP BY
-                    m.product_id, m.lot, m.dum, m.ville, m.frigo, m.weight, m.price_purchase, m.calibre
+                    m.product_id, m.lot, m.dum, m.ville, m.weight, m.price_purchase, m.calibre
             )
         """ % self._table)
 
@@ -192,7 +186,6 @@ class CasaStockStock(models.Model):
                 'default_lot': self.lot,
                 'default_dum': self.dum,
                 'default_ville': self.ville,
-                'default_frigo': self.frigo,
                 'default_weight': self.weight,
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 

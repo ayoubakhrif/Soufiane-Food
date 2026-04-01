@@ -22,7 +22,6 @@
                     decoration-success="margin &gt; 0"
                     decoration-danger="margin &lt; 0"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="not_delivered" widget="boolean_toggle" optional="show"/>
                 <button name="action_validate" type="object" string="Valider" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock_hanane.group_valid_admin"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
@@ -76,7 +75,6 @@
                             <field name="lot" readonly="state != 'draft'" force_save="1"/>
                             <field name="dum" readonly="1" force_save="1"/>
                             <field name="ville" readonly="1" force_save="1"/>
-                            <field name="frigo" readonly="1" force_save="1"/>
                             <field name="ste_id" readonly="1" force_save="1" options="{'no_create_edit': True}"/>
                             <field name="stock_soufiane" readonly="1" force_save="1"/>
                         </group>

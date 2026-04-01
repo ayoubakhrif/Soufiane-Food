@@ -11,9 +11,7 @@
                 <field name="product_id"/>
                 <field name="qty"/>
                 <field name="source_ville"/>
-                <field name="source_frigo"/>
                 <field name="dest_ville"/>
-                <field name="dest_frigo"/>
                 <field name="state" widget="badge"
                     decoration-info="state == 'draft'"
                     decoration-success="state == 'done'"
@@ -64,7 +62,6 @@
                             <field name="weight"/>
                             <field name="price_purchase"/>
                             <field name="source_ville"/>
-                            <field name="source_frigo"/>
                             <field name="source_ste_id"/>
                         </group>
                     </group>
@@ -72,7 +69,6 @@
                     <group string="Destination">
                         <group>
                             <field name="dest_ville" readonly="state != 'draft'"/>
-                            <field name="dest_frigo" readonly="state != 'draft'"/>
                             <field name="dest_ste_id" readonly="state != 'draft'"
                                    options="{'no_create': True}"/>
                         </group>

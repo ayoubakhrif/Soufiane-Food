@@ -14,8 +14,6 @@
                 <field name="ville"/>
                 <field name="image_1920"/>
                 <field name="weight"/>
-                <field name="dum"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="scan_dum"/>
                 <field name="stock_soufiane"/>
@@ -98,20 +96,17 @@
                                 </div>
 
                                 <!-- Stock -->
-                                <div style="font-size:13px; color:#374151; line-height:1.6;">
-                                    <div>
-                                        📦 <b>Quantité :</b>
-                                        <span style="color:#059669;">
-                                            <field name="quantity"/>
-                                        </span>
+                                    <div style="font-size:13px; color:#374151; line-height:1.6;">
+                                        <div>
+                                            📦 <b>Quantité :</b>
+                                            <span style="color:#059669;">
+                                                <field name="quantity"/>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            ⚖️ <b>Poids :</b> <field name="poids"/> (Tonnage: <field name="total_weight"/> Kg)
+                                        </div>
                                     </div>
-                                    <div>
-                                        ⚖️ <b>Poids :</b> <field name="poids"/> (Tonnage: <field name="total_weight"/> Kg)
-                                    </div>
-                                    <div>
-                                        📍 <b>Frigo :</b> <field name="frigo"/>
-                                    </div>
-                                </div>
 
                                 <hr style="margin:8px 0; border:none; border-top:1px dashed #e5e7eb;"/>
 
@@ -165,7 +160,6 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
                 <field name="poids"/>
@@ -207,7 +201,6 @@
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="ville"/>
-                            <field name="frigo"/>
                             <field name="ste_id"/>
                             <field name="price"/>
                             <field name="mt_achat"/>
@@ -224,10 +217,7 @@
         <field name="arch" type="xml">
             <search string="Recherche Stock">
                 <field name="product_id"/>
-                <field name="lot"/>
-                <field name="dum"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
                 <field name="date"/>
                 <group expand="0" string="Grouper par">
@@ -235,7 +225,6 @@
                     <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
-                    <filter string="Frigo" name="group_frigo" context="{'group_by': 'frigo'}"/>
                     <filter string="Stock Soufiane" name="group_stock_soufiane" context="{'group_by': 'stock_soufiane'}"/>
                     <filter string="Poids" name="group_poids" context="{'group_by': 'poids'}"/>
                 </group>

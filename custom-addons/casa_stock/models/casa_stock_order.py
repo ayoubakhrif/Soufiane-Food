@@ -195,7 +195,6 @@ class CasaStockOrder(models.Model):
                     'dum': line.dum,
                     'calibre': line.calibre,
                     'ville': line.ville,
-                    'frigo': line.frigo,
                     'price_purchase': line.stock_id.price,
                 }
                 new_exit = self.env['casa.stock.exit'].create(exit_vals)
@@ -270,11 +269,10 @@ class CasaStockOrderLine(models.Model):
         ('casa', 'Casa'),
     ], string='Ville', tracking=True)
     
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo')
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+    ], string='Ville', tracking=True)
     
     price_sale = fields.Float(string='Prix Vente', required=True)
     poids = fields.Char(string='Poids', compute='_compute_poids')
@@ -292,7 +290,6 @@ class CasaStockOrderLine(models.Model):
             self.dum = self.stock_id.dum
             self.calibre = self.stock_id.calibre
             self.ville = self.stock_id.ville
-            self.frigo = self.stock_id.frigo
             self.weight = self.stock_id.weight
 
     @api.constrains('qty')

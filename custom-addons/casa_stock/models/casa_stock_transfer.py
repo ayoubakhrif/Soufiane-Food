@@ -24,11 +24,6 @@ class CasaStockTransfer(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Ville Source')
-    source_frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo Source')
     source_ste_id = fields.Many2one('casa.ste', string='Société Source')
     available_qty = fields.Float(string='Qté Disponible')
 
@@ -40,11 +35,6 @@ class CasaStockTransfer(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Ville Destination', required=True, tracking=True)
-    dest_frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo Destination', required=True, tracking=True)
     dest_ste_id = fields.Many2one('casa.ste', string='Société Destination', tracking=True)
 
     state = fields.Selection([
@@ -76,7 +66,6 @@ class CasaStockTransfer(models.Model):
             self.weight = s.weight
             self.price_purchase = s.price
             self.source_ville = s.ville
-            self.source_frigo = s.frigo
             self.source_ste_id = s.ste_id.id
             self.available_qty = s.quantity
         else:
@@ -87,7 +76,6 @@ class CasaStockTransfer(models.Model):
             self.weight = 0.0
             self.price_purchase = 0.0
             self.source_ville = False
-            self.source_frigo = False
             self.source_ste_id = False
             self.available_qty = 0.0
 
@@ -111,7 +99,6 @@ class CasaStockTransfer(models.Model):
             weight = src.weight
             price_purchase = src.price
             source_ville = src.ville
-            source_frigo = src.frigo
             source_ste_id = src.ste_id.id if src.ste_id else False
 
             # Stock availability check
@@ -130,7 +117,6 @@ class CasaStockTransfer(models.Model):
                 'lot': lot,
                 'dum': dum,
                 'ville': source_ville,
-                'frigo': source_frigo,
                 'ste_id': source_ste_id,
                 'qty': -rec.qty,
                 'weight': weight,
@@ -150,7 +136,6 @@ class CasaStockTransfer(models.Model):
                 'lot': lot,
                 'dum': dum,
                 'ville': rec.dest_ville,
-                'frigo': rec.dest_frigo,
                 'ste_id': rec.dest_ste_id.id if rec.dest_ste_id else False,
                 'qty': rec.qty,
                 'weight': weight,
@@ -176,7 +161,6 @@ class CasaStockTransfer(models.Model):
                 'weight': weight,
                 'price_purchase': price_purchase,
                 'source_ville': source_ville,
-                'source_frigo': source_frigo,
                 'source_ste_id': source_ste_id,
             })
 
@@ -194,7 +178,6 @@ class CasaStockTransfer(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.source_ville,
-                'frigo': rec.source_frigo,
                 'ste_id': rec.source_ste_id.id,
                 'qty': rec.qty,
                 'weight': rec.weight,
@@ -214,7 +197,6 @@ class CasaStockTransfer(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.dest_ville,
-                'frigo': rec.dest_frigo,
                 'ste_id': rec.dest_ste_id.id if rec.dest_ste_id else False,
                 'qty': -rec.qty,
                 'weight': rec.weight,

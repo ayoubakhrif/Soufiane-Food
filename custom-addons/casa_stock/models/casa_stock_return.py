@@ -16,7 +16,6 @@ class CasaStockReturn(models.Model):
     lot = fields.Char(related='exit_id.lot', store=True, string='Lot')
     dum = fields.Char(related='exit_id.dum', store=True, string='DUM')
     ville = fields.Selection(related='exit_id.ville', store=True, string='Ville')
-    frigo = fields.Selection(related='exit_id.frigo', store=True, string='Frigo')
     client_id = fields.Many2one('casa.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('casa.ste', related='exit_id.ste_id', store=True, string='Société')
     calibre = fields.Char(related='exit_id.calibre', store=True, string='Calibre')
@@ -85,7 +84,6 @@ class CasaStockReturn(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': rec.qty,  # Positive quantity adds to stock
                 'move_type': 'return',
                 'state': 'done',
@@ -127,7 +125,6 @@ class CasaStockReturn(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'cancel_return', 
                 'state': 'done',

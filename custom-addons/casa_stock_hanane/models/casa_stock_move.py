@@ -15,11 +15,6 @@ class CasaStockMove(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Ville', required=True)
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo')
     
     qty = fields.Float(string='Quantité', required=True)
     

@@ -61,6 +61,26 @@
         </field>
     </record>
 
+    <record id="view_finance_marglory_payment_search" model="ir.ui.view">
+        <field name="name">finance.marglory.payment.search</field>
+        <field name="model">finance.marglory.payment</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Paiements Marglory">
+                <field name="physical_cheque_id"/>
+                <field name="date"/>
+                <field name="marglory_ids" string="Réglement N°" filter_domain="[('marglory_ids.dossier_reglement', 'ilike', self)]"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmé" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Chèque" name="group_by_cheque" context="{'group_by':'physical_cheque_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by':'date'}"/>
+                    <filter string="État" name="group_by_state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_finance_marglory_payment" model="ir.actions.act_window">
         <field name="name">Paiements Marglory</field>
         <field name="res_model">finance.marglory.payment</field>

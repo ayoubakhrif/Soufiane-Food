@@ -17,6 +17,7 @@
                 <field name="tonnage"/>
                 <field name="price_purchase"/>
                 <field name="ville"/>
+                <field name="stock_soufiane" optional="show"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>

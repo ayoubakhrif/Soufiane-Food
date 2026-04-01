@@ -151,6 +151,8 @@ class PortnetEntry(models.Model):
 
             # 1. Admins: Always allowed
             if self.env.user.has_group('portnet.group_portnet_admin'):
+                if rec.valeur != ref_value:
+                    rec.message_post(body="Domiciliation effectuée par un administrateur malgré une différence de valeur par rapport aux données société.")
                 continue
 
             # 2. Managers: Allowed if <= ref_value

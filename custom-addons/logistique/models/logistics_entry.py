@@ -22,7 +22,7 @@ class LogisticsEntry(models.Model):
     
     # Automatic display of dossier-related data (read-only)
     container_ids = fields.One2many('logistique.container', 'entry_id', string='Conteneurs')
-    cheque_ids = fields.One2many(related='dossier_id.cheque_ids', string='Chèques', readonly=False, tracking=True)
+    cheque_ids = fields.One2many('logistique.dossier.cheque', 'entry_id', string='Chèques', tracking=True)
     
     # Finance numbers (from dossier, readonly for logistics)
     prov_number = fields.Char(related='dossier_id.prov_number', string='N° Prov', readonly=True, store=False)
@@ -258,30 +258,57 @@ class LogisticsEntry(models.Model):
     consolidator_id = fields.Many2one('logistique.consolidator', string='FFW')
     surestarie_amount = fields.Float(
         string="Surestarie",
-        related="dossier_id.surestarie_amount",
-        readonly=True,
-        store=True
+        compute="_compute_charges",
+        store=True,
+        readonly=True
     )
     comment = fields.Char(string='Comments')
     fret = fields.Float(
         string='Fret',
-        related='dossier_id.fret_amount',
+        compute="_compute_charges",
         store=True,
         readonly=True
     )
     thc_amount = fields.Float(
         string="THC",
-        related="dossier_id.thc_amount",
-        readonly=True,
-        store=True
+        compute="_compute_charges",
+        store=True,
+        readonly=True
     )
 
     magasinage_amount = fields.Float(
         string="Magasinage",
-        related="dossier_id.magasinage_amount",
-        readonly=True,
-        store=True
+        compute="_compute_charges",
+        store=True,
+        readonly=True
     )
+
+    @api.depends(
+        'cheque_ids.amount', 'cheque_ids.type',
+        'deduction_ids.amount', 'deduction_ids.type',
+        'transfer_ids.amount', 'transfer_ids.type',
+    )
+    def _compute_charges(self):
+        for rec in self:
+            surestarie_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'surestarie')
+            thc_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'thc')
+            magasinage_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'magasinage')
+            fret_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'fret')
+
+            surestarie_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'surestarie')
+            thc_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'thc')
+            magasinage_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'magasinage')
+            fret_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'fret')
+
+            surestarie_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'surestarie')
+            thc_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'thc')
+            magasinage_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'magasinage')
+            fret_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'fret')
+
+            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers
+            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers
+            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers
+            rec.fret = fret_cheques + fret_deductions + fret_transfers
 
     def action_move_to_draft(self):
         self.write({'purchase_state': 'draft'})
@@ -324,10 +351,15 @@ class LogisticsEntry(models.Model):
 
     cheque_count = fields.Integer(
         string="Nb Chèques",
-        related="dossier_id.cheque_count",
+        compute="_compute_cheque_count",
         readonly=True,
-        store=False
+        store=True
     )
+
+    @api.depends('cheque_ids')
+    def _compute_cheque_count(self):
+        for rec in self:
+            rec.cheque_count = len(rec.cheque_ids)
     deduction_ids = fields.One2many(
         'logistique.dossier.deduction',
         'entry_id',

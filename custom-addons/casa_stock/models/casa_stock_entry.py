@@ -43,6 +43,7 @@ class CasaStockEntry(models.Model):
     image_1920 = fields.Image(related='product_id.image_1920', readonly=False)
     scan_dum = fields.Char(string='Scan DUM (Drive)', help="Poser le lien vers le scan de la DUM")
     stock_soufiane = fields.Boolean(string='Stock Soufiane', default=False, tracking=True)
+    validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
 
     def _get_drive_credentials_path(self):
         return "/srv/google_credentials/service_account.json"
@@ -212,7 +213,8 @@ class CasaStockEntry(models.Model):
             })
             rec.write({
                 'state': 'done',
-                'move_id': move.id
+                'move_id': move.id,
+                'validation_user_id': self.env.user.id
             })
 
     def action_cancel(self):

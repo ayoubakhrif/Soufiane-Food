@@ -26,6 +26,7 @@ class CasaStockOrder(models.Model):
     
     order_line_ids = fields.One2many('casa_hanane.stock.order.line', 'order_id', string='Lignes de Commande')
     exit_ids = fields.One2many('casa_hanane.stock.exit', 'order_id', string='Sorties Générées', readonly=True)
+    validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
     def _compute_is_cancel_hidden(self):
@@ -214,7 +215,10 @@ class CasaStockOrder(models.Model):
             
             # Validate generated exits
             order.exit_ids.action_validate()
-            order.write({'state': 'done'})
+            order.write({
+                'state': 'done',
+                'validation_user_id': self.env.user.id
+            })
 
     def action_cancel(self):
         for order in self:

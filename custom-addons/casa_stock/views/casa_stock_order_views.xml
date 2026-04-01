@@ -10,6 +10,7 @@
                 <field name="date"/>
                 <field name="client_id"/>
                 <field name="driver_id"/>
+                <field name="validation_user_id" string="Validé par" widget="many2one_avatar_user"/>
                 <field name="state" widget="badge"/>
                 <button name="action_validate" type="object" string="Valider" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
             </tree>

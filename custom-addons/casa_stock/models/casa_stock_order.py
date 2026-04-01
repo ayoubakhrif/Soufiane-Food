@@ -15,7 +15,7 @@ class CasaStockOrder(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-    ], string='Ville', required=True, default='casa', tracking=True)
+    ], string='Ville', required=True, tracking=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -263,11 +263,6 @@ class CasaStockOrderLine(models.Model):
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
-    
-    ville = fields.Selection([
-        ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-    ], string='Ville', tracking=True)
     
     ville = fields.Selection([
         ('tanger', 'Tanger'),

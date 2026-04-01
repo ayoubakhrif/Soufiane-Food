@@ -13,6 +13,7 @@ class PortnetEntry(models.Model):
         required=True,
         copy=False,
         default='/',
+        tracking=True,
     )
 
     article_id = fields.Many2one(
@@ -26,12 +27,14 @@ class PortnetEntry(models.Model):
         'achat.origin',
         string='Origine',
         required=True,
+        tracking=True,
     )
 
     supplier_id = fields.Many2one(
         'logistique.supplier',
         string='Fournisseur',
         required=True,
+        tracking=True,
     )
 
     incoterm = fields.Selection(
@@ -42,27 +45,32 @@ class PortnetEntry(models.Model):
         ],
         string='Incoterm',
         required=True,
+        tracking=True,
     )
 
     invoice = fields.Char(
         string='Facture',
         required=True,
+        tracking=True,
     )
 
     ste_id = fields.Many2one(
         'logistique.ste',
         string='Société',
         required=True,
+        tracking=True,
     )
 
     note = fields.Text(
         string='Notes',
+        tracking=True,
     )
 
     provenance = fields.Many2one(
         'achat.origin',
         string='Provenance',
         required=True,
+        tracking=True,
     )
 
     device = fields.Selection(
@@ -72,25 +80,27 @@ class PortnetEntry(models.Model):
         ],
         string='Devise',
         required=True,
+        tracking=True,
     )
 
-    gross = fields.Float(string='Poids brut (kg)', required=True)
-    net = fields.Float(string='Poids net (kg)', required=True)
+    gross = fields.Float(string='Poids brut (kg)', required=True, tracking=True)
+    net = fields.Float(string='Poids net (kg)', required=True, tracking=True)
     valeur = fields.Float(string='Valeur', required=True, tracking=True)
     nomenclature = fields.Char(string='Nomenclature', tracking=True)
-    avance = fields.Float(string='Avance')
+    avance = fields.Float(string='Avance', tracking=True)
 
-    total_fob = fields.Float(string='Total FOB', required=True)
-    total_freight = fields.Float(string='Total Freight')  # required only when incoterm=cfr (enforced in view)
+    total_fob = fields.Float(string='Total FOB', required=True, tracking=True)
+    total_freight = fields.Float(string='Total Freight', tracking=True)  # required only when incoterm=cfr (enforced in view)
 
     total_cfr = fields.Float(
         string='Total CFR',
         compute='_compute_total_cfr',
         store=True,
+        tracking=True,
     )
 
-    payment_terms = fields.Boolean(string='Payment terms')
-    date_invoice = fields.Date(string='Date facture', required=True)
+    payment_terms = fields.Boolean(string='Payment terms', tracking=True)
+    date_invoice = fields.Date(string='Date facture', required=True, tracking=True)
 
     state = fields.Selection(
         selection=[

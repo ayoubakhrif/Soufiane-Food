@@ -14,6 +14,7 @@
                 <field name="ville"/>
                 <field name="image_1920"/>
                 <field name="weight"/>
+                <field name="dum"/>
                 <field name="ste_id"/>
                 <field name="scan_dum"/>
                 <field name="stock_soufiane"/>
@@ -176,7 +177,7 @@
         <field name="arch" type="xml">
             <form string="Ligne de Stock" create="false" edit="false">
                 <header>
-                    <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary"/>
+                    <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary" groups="casa_stock_hanane.group_admin"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -217,6 +218,8 @@
         <field name="arch" type="xml">
             <search string="Recherche Stock">
                 <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
                 <field name="ville"/>
                 <field name="ste_id"/>
                 <field name="date"/>

@@ -4,12 +4,14 @@ from odoo.exceptions import UserError
 
 class CasaClient(models.Model):
     _name = 'casa_hanane.client'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Clients Casa (Hanane)'
 
-    name = fields.Char(string='Nom', required=True)
+    name = fields.Char(string='Nom', required=True, tracking=True)
     compte_initial = fields.Float(
         string='Compte initial',
-        help="Solde du client avant l'utilisation du système"
+        help="Solde du client avant l'utilisation du système",
+        tracking=True,
     )
 
     # Champ computed pour le nombre de commandes
@@ -17,6 +19,7 @@ class CasaClient(models.Model):
         string='Commandes',
         compute='_compute_exit_count',
         store=True,
+        tracking=True,
     )
 
     exit_ids = fields.One2many(
@@ -129,19 +132,22 @@ class CasaClient(models.Model):
     total_commandes = fields.Float(
         string='Total commandes',
         compute='_compute_totals',
-        store=True
+        store=True,
+        tracking=True
     )
 
     compte_total = fields.Float(
         string='Compte total',
         compute='_compute_totals',
-        store=True
+        store=True,
+        tracking=True
     )
 
     total_advances = fields.Float(
         string='Total Avances',
         compute='_compute_totals',
-        store=True
+        store=True,
+        tracking=True
     )
 
     sorties_grouped_html = fields.Html(
@@ -153,19 +159,19 @@ class CasaClient(models.Model):
     # --- Résumé Client ---
     total_orders_amount = fields.Float(
         string='Total Commandes (Avant Réductions)',
-        compute='_compute_client_summary', store=True,
+        compute='_compute_client_summary', store=True, tracking=True,
     )
     total_client_discounts = fields.Float(
         string='Total Réductions',
-        compute='_compute_client_summary', store=True,
+        compute='_compute_client_summary', store=True, tracking=True,
     )
     discount_rate = fields.Float(
         string='Taux de Réduction (%)',
-        compute='_compute_client_summary', store=True,
+        compute='_compute_client_summary', store=True, tracking=True,
     )
     total_profit = fields.Float(
         string='Total Profit',
-        compute='_compute_client_summary', store=True,
+        compute='_compute_client_summary', store=True, tracking=True,
     )
 
     summary_html = fields.Html(

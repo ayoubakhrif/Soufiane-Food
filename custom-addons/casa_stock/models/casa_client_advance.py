@@ -4,6 +4,7 @@ from odoo.exceptions import UserError
 class CasaClientAdvance(models.Model):
     _name = 'casa.client.advance'
     _description = 'Avance Client Casa'
+    _order = 'state desc, id desc'
 
     client_id = fields.Many2one('casa.client', string='Client', required=True, ondelete='cascade')
     amount = fields.Float(string='Montant', required=True)

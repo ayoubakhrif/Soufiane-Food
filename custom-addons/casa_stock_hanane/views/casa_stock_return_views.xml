@@ -12,6 +12,8 @@
                 <field name="product_id"/>
                 <field name="client_id"/>
                 <field name="qty"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>

@@ -100,6 +100,8 @@ class LogistiqueDossier(models.Model):
         'deduction_ids.type',
         'transfer_ids.amount',
         'transfer_ids.type',
+        'sutra_ids.amount',
+        'sutra_ids.type',
     )
     def _compute_charges(self):
         for rec in self:
@@ -135,14 +137,26 @@ class LogistiqueDossier(models.Model):
                 t.amount for t in rec.transfer_ids if t.type == 'magasinage'
             )
 
+            # --- Sutra ---
+            surestarie_sutra = sum(
+                s.amount for s in rec.sutra_ids if s.type == 'surestarie'
+            )
+            thc_sutra = sum(
+                s.amount for s in rec.sutra_ids if s.type == 'thc'
+            )
+            magasinage_sutra = sum(
+                s.amount for s in rec.sutra_ids if s.type == 'magasinage'
+            )
+
             # --- Totaux finaux ---
-            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers
-            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers
-            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers
+            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers + surestarie_sutra
+            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers + thc_sutra
+            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers + magasinage_sutra
             
             # --- FRET ---
             rec.fret_amount = (
                 sum(c.amount for c in rec.cheque_ids if c.type == 'fret') +
                 sum(d.amount for d in rec.deduction_ids if d.type == 'fret') +
-                sum(t.amount for t in rec.transfer_ids if t.type == 'fret')
+                sum(t.amount for t in rec.transfer_ids if t.type == 'fret') +
+                sum(s.amount for s in rec.sutra_ids if s.type == 'fret')
             )

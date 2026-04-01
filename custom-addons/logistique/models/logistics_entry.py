@@ -287,6 +287,7 @@ class LogisticsEntry(models.Model):
         'cheque_ids.amount', 'cheque_ids.type',
         'deduction_ids.amount', 'deduction_ids.type',
         'transfer_ids.amount', 'transfer_ids.type',
+        'sutra_ids.amount', 'sutra_ids.type',
     )
     def _compute_charges(self):
         for rec in self:
@@ -305,10 +306,15 @@ class LogisticsEntry(models.Model):
             magasinage_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'magasinage')
             fret_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'fret')
 
-            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers
-            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers
-            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers
-            rec.fret = fret_cheques + fret_deductions + fret_transfers
+            surestarie_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'surestarie')
+            thc_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'thc')
+            magasinage_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'magasinage')
+            fret_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'fret')
+
+            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers + surestarie_sutra
+            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers + thc_sutra
+            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers + magasinage_sutra
+            rec.fret = fret_cheques + fret_deductions + fret_transfers + fret_sutra
 
     def action_move_to_draft(self):
         self.write({'purchase_state': 'draft'})

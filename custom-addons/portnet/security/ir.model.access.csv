@@ -20,3 +20,4 @@ access_portnet_logistique_ste_admin,logistique_ste_portnet_admin,logistique.mode
 access_portnet_virement_user,portnet.virement.user,model_portnet_virement,portnet.group_portnet_user,1,1,1,0
 access_portnet_virement_manager,portnet.virement.manager,model_portnet_virement,portnet.group_portnet_manager,1,1,1,1
 access_portnet_virement_admin,portnet.virement.admin,model_portnet_virement,portnet.group_portnet_admin,1,1,1,1
+access_portnet_confirm_wizard_admin,portnet.confirm.wizard.admin,model_portnet_confirm_wizard,portnet.group_portnet_admin,1,1,1,1

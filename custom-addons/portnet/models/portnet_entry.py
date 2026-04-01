@@ -179,6 +179,24 @@ class PortnetEntry(models.Model):
     # ── State transitions ─────────────────────────────────────────────────────
 
     def action_domicilier(self):
+        self.ensure_one()
+        if self.env.user.has_group('portnet.group_portnet_admin'):
+            if not self.env.context.get('bypass_valeur_wizard'):
+                if self.article_id and self.article_id.company_article_id:
+                    ref_value = self.article_id.company_article_id.value
+                    if ref_value and self.valeur != ref_value:
+                        return {
+                            'name': 'Confirmation Domiciliation',
+                            'type': 'ir.actions.act_window',
+                            'res_model': 'portnet.confirm.wizard',
+                            'view_mode': 'form',
+                            'target': 'new',
+                            'context': {
+                                'default_entry_id': self.id,
+                                'default_message': "La valeur saisie (%.2f) est différente de la valeur de référence de l'article (%.2f).\nVoulez-vous vraiment domicilier ce dossier ?" % (self.valeur, ref_value)
+                            }
+                        }
+        
         self._check_valeur()
         self.write({'state': 'domicilied'})
 

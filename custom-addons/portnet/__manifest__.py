@@ -14,6 +14,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'wizard/portnet_confirm_wizard_view.xml',
         'views/portnet_entry_view.xml',
         'views/portnet_virement_view.xml',
         'views/menu.xml',

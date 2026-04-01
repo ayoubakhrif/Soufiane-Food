@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_portnet_confirm_wizard_form" model="ir.ui.view">
+        <field name="name">portnet.confirm.wizard.form</field>
+        <field name="model">portnet.confirm.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirmation Domiciliation">
+                <group>
+                    <field name="entry_id" invisible="1"/>
+                    <div class="alert alert-warning" role="alert">
+                        <field name="message" nolabel="1"/>
+                    </div>
+                </group>
+                <footer>
+                    <button string="Confirmer" name="action_confirm" type="object" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

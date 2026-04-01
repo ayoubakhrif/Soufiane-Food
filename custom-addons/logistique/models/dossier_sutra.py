@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class LogistiqueDossierSutra(models.Model):
     _name = 'logistique.dossier.sutra'
@@ -70,3 +71,9 @@ class LogistiqueDossierSutra(models.Model):
     def _compute_ste_id(self):
         for rec in self:
             rec.ste_id = rec.dossier_id.ste_id if rec.dossier_id else False
+
+    @api.constrains('entry_id', 'amount', 'type', 'date', 'beneficiary_id')
+    def _check_entry_status(self):
+        for rec in self:
+            if rec.entry_id and rec.entry_id.status == 'in_progress':
+                raise ValidationError("Vous ne pouvez pas ajouter ou modifier des lignes Sutra tant que le dossier est 'En cours'. Veuillez d'abord le passer en 'Gate Out'.")

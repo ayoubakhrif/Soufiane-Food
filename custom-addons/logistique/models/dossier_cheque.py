@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class LogistiqueDossierCheque(models.Model):
     _name = 'logistique.dossier.cheque'
@@ -108,3 +109,9 @@ class LogistiqueDossierCheque(models.Model):
             if rec.entry_id:
                 rec.ste_id = rec.entry_id.ste_id
                 rec.dossier_id = rec.entry_id.dossier_id
+
+    @api.constrains('entry_id', 'amount', 'type', 'date', 'beneficiary_id')
+    def _check_entry_status(self):
+        for rec in self:
+            if rec.entry_id and rec.entry_id.status == 'in_progress':
+                raise ValidationError("Vous ne pouvez pas ajouter ou modifier des paiements tant que le dossier est 'En cours'. Veuillez d'abord le passer en 'Gate Out'.")

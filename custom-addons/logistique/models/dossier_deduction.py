@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class LogistiqueDossierDeduction(models.Model):
     _name = 'logistique.dossier.deduction'
@@ -70,3 +71,9 @@ class LogistiqueDossierDeduction(models.Model):
                 'beneficiary_id': entry.shipping_id.id if entry.shipping_id else False,
             })
         return res
+
+    @api.constrains('entry_id', 'amount', 'type', 'date', 'beneficiary_id')
+    def _check_entry_status(self):
+        for rec in self:
+            if rec.entry_id and rec.entry_id.status == 'in_progress':
+                raise ValidationError("Vous ne pouvez pas ajouter ou modifier des déductions tant que le dossier est 'En cours'. Veuillez d'abord le passer en 'Gate Out'.")

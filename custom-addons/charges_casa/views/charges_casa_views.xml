@@ -36,8 +36,11 @@
                         </group>
                         <group>
                             <field name="amount"/>
-                            <field name="user_id"/>
+                            <field name="user_id" readonly="1"/>
                         </group>
+                    </group>
+                    <group string="Commentaires">
+                        <field name="commentaires" nolabel="1" placeholder="Ajouter un commentaire..."/>
                     </group>
                 </sheet>
                 <div class="oe_chatter">

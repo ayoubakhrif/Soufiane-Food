@@ -23,6 +23,7 @@ class FinanceEffet(models.Model):
     
     ste_id = fields.Many2one('finance.ste', string='Société', required=True, tracking=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', required=True, tracking=True)
+    talon_id = fields.Many2one('finance.talon', string='Talon', tracking=True, domain="[('ste_id', '=', ste_id)]")
     
     montant = fields.Float(string='Montant', required=True, tracking=True)
     comment = fields.Text(string='Commentaire', tracking=True)
@@ -41,6 +42,114 @@ class FinanceEffet(models.Model):
                 rec.state = 'encaisse'
             else:
                 rec.state = 'non_encaisse'
+
+    # -------------------------------------------------------------------
+    # Calculate TALON
+    # -------------------------------------------------------------------
+    def _find_talon_logic(self):
+        self.ensure_one()
+        if not self.serie or not self.ste_id:
+            return False
+            
+        if not self.serie.isdigit():
+            return False
+
+        serie_num = int(self.serie)
+
+        talons = self.env['finance.talon'].search([
+            ('ste_id', '=', self.ste_id.id),
+            ('num_chq', '>', 0),
+            ('name', '!=', False),
+        ])
+
+        for talon in talons:
+            if not talon.name or not talon.name.isdigit():
+                continue
+
+            start = int(talon.name)
+            end = start + talon.num_chq - 1
+
+            if start <= serie_num <= end:
+                return talon
+        return False
+
+    @api.onchange('serie', 'ste_id')
+    def _onchange_find_talon(self):
+        """Détecte automatiquement le talon en fonction de la société + numéro de série."""
+        for rec in self:
+            rec.talon_id = rec._find_talon_logic()
+
+    @api.model
+    def cron_find_all_talons(self):
+        """Met à jour les talons pour tous les effets."""
+        records = self.search([])
+        for rec in records:
+            found = rec._find_talon_logic()
+            if found and rec.talon_id != found:
+                rec.talon_id = found
+
+    # -------------------------------------------------------------------
+    # SEQUENCE INTEGRITY CHECK
+    # -------------------------------------------------------------------
+    def _check_sequence_integrity(self, vals):
+        """
+        Ensures that effets are created in strict sequence (N+1).
+        Blocks creation if there is a gap or backward numbering.
+        """
+        serie_str = vals.get('serie')
+        ste_id = vals.get('ste_id')
+
+        if not serie_str or not ste_id or not str(serie_str).isdigit():
+            return 
+
+        serie_num = int(serie_str)
+
+        talons = self.env['finance.talon'].search([
+            ('ste_id', '=', ste_id),
+            ('num_chq', '>', 0),
+            ('name', '!=', False),
+        ])
+        
+        target_talon = False
+        for talon in talons:
+            if not talon.name.isdigit(): continue
+            start = int(talon.name)
+            end = start + talon.num_chq - 1
+            if start <= serie_num <= end:
+                target_talon = talon
+                break
+        
+        if not target_talon:
+             return 
+
+        last_effet = self.search([
+            ('talon_id', '=', target_talon.id),
+            ('serie', '!=', False)
+        ], order='serie desc', limit=1)
+
+        if not last_effet:
+            return 
+
+        last_num = int(last_effet.serie)
+        expected_num = last_num + 1
+
+        if serie_num <= last_num:
+            return
+        
+        if serie_num != expected_num:
+             raise ValidationError(
+                 f"Dernier effet saisi : {last_num}\n"
+                 f"Attention🚫 Effet attendu : {expected_num}\n"
+                 f"Effet saisi actuelle : {serie_num}\n\n"
+                 f"Veuillez sasir d'abord l'effet : {expected_num}\n\n"
+                 "Veuillez saisir les effets dans l'ordre strict, sans saut numéro."
+             )
+
+    @api.model
+    def create(self, vals):
+        self._check_sequence_integrity(vals)
+        return super().create(vals)
+
 
     # Constraints
     @api.constrains('montant')

@@ -22,6 +22,7 @@
                 <field name="emitter"/>
                 <field name="ste_id"/>
                 <field name="benif_id"/>
+                <field name="talon_id" optional="show"/>
                 <field name="date_emission"/>
                 <field name="date_echeance"/>
                 <field name="date_encaissement"/>
@@ -49,6 +50,7 @@
                             <field name="emitter"/>
                             <field name="ste_id"/>
                             <field name="benif_id"/>
+                            <field name="talon_id"/>
                         </group>
                         <group>
                             <field name="date_emission"/>
@@ -79,11 +81,13 @@
                 <field name="emitter"/>
                 <field name="ste_id"/>
                 <field name="benif_id"/>
+                <field name="talon_id"/>
                 <filter string="Encaissé" name="encaisse" domain="[('state', '=', 'encaisse')]"/>
                 <filter string="Non Encaissé" name="non_encaisse" domain="[('state', '=', 'non_encaisse')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Bénéficiaire" name="group_by_benif" context="{'group_by': 'benif_id'}"/>
+                    <filter string="Talon" name="group_by_talon" context="{'group_by': 'talon_id'}"/>
                     <filter string="Émetteur" name="group_by_emitter" context="{'group_by': 'emitter'}"/>
                     <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>
                 </group>

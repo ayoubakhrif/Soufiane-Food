@@ -171,6 +171,7 @@
                         <group>
                             <field name="facture"/>
                             <field name="serie" invisible="facture in ['m', 'bureau']"/>
+                            <field name="chq_bank"/>
                         </group>
                     </group>
 

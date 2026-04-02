@@ -16,7 +16,7 @@ class ChargesCasa(models.Model):
     
     partner_id = fields.Many2one('res.partner', string='Bénéficiaire', tracking=True)
     user_id = fields.Many2one('res.users', string='Saisi par', default=lambda self: self.env.user, tracking=True, readonly=True)
-    commentaires = fields.Text(string='Commentaires')
+    commentaires = fields.Char(string='Commentaires')
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmé')

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_charges_casa_tree" model="ir.ui.view">
+        <field name="name">charges.casa.tree</field>
+        <field name="model">charges.casa</field>
+        <field name="arch" type="xml">
+            <tree string="Charges">
+                <field name="date"/>
+                <field name="type"/>
+                <field name="partner_id"/>
+                <field name="amount" sum="Total"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_charges_casa_form" model="ir.ui.view">
+        <field name="name">charges.casa.form</field>
+        <field name="model">charges.casa</field>
+        <field name="arch" type="xml">
+            <form string="Charge">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_draft" string="Remettre en Brouillon" type="object" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="type"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_charges_casa_search" model="ir.ui.view">
+        <field name="name">charges.casa.search</field>
+        <field name="model">charges.casa</field>
+        <field name="arch" type="xml">
+            <search string="Charges">
+                <field name="type"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="group_by_type" context="{'group_by':'type'}"/>
+                    <filter string="Mois" name="group_by_date" context="{'group_by':'date:month'}"/>
+                    <filter string="Statut" name="group_by_state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_charges_casa" model="ir.actions.act_window">
+        <field name="name">Charges Casa</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">charges.casa</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle charge
+            </p>
+        </field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_charges_casa_root" name="Charges Casa" sequence="50"/>
+    <menuitem id="menu_charges_casa_main" name="Charges" parent="menu_charges_casa_root" action="action_charges_casa" sequence="10"/>
+</odoo>

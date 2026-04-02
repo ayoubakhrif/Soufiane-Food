@@ -28,6 +28,7 @@ class FinanceTalon(models.Model):
     usage_percentage = fields.Float(string='% Utilisation', compute='_compute_usage_percentage', store=True)
     
     cheque_ids = fields.One2many('datacheque', 'talon_id', string='Chèques')
+    effet_ids = fields.One2many('finance.effet', 'talon_id', string='Effets')
 
     progress_html = fields.Html(string="Progression", compute="_compute_progress", sanitize=False)
     summary_card = fields.Html(string="Résumé", compute="_compute_card", sanitize=False)
@@ -80,12 +81,16 @@ class FinanceTalon(models.Model):
             else:
                 rec.etat = 'actif'
 
-    @api.depends('cheque_ids.chq')
+    @api.depends('cheque_ids.chq', 'effet_ids.serie')
     def _compute_last_used_chq(self):
         for rec in self:
             numeric_chqs = []
             for chq in rec.cheque_ids:
                 raw = (chq.chq or "").strip()
+                if raw.isdigit():
+                    numeric_chqs.append(int(raw))
+            for effet in rec.effet_ids:
+                raw = (effet.serie or "").strip()
                 if raw.isdigit():
                     numeric_chqs.append(int(raw))
 
@@ -346,7 +351,7 @@ class FinanceTalon(models.Model):
     # -------------------------------------------------------------------
     # Déterminer le nombre des chqs absents
     # -------------------------------------------------------------------
-    @api.depends('cheque_ids.chq', 'name')
+    @api.depends('cheque_ids.chq', 'name', 'effet_ids.serie')
     def _compute_missing_chqs(self):
         for talon in self:
             # sécurité
@@ -361,13 +366,18 @@ class FinanceTalon(models.Model):
                 int(c.chq) for c in talon.cheque_ids
                 if c.chq and c.chq.strip().isdigit()
             ]
+            effets = [
+                int(e.serie) for e in talon.effet_ids
+                if e.serie and e.serie.strip().isdigit()
+            ]
 
-            if not chqs:
+            all_used = chqs + effets
+            if not all_used:
                 talon.missing_chqs = 0
                 continue
 
-            max_chq = max(chqs)
-            used = len(chqs)
+            max_chq = max(all_used)
+            used = len(set(all_used))
 
             missing = (max_chq - talon_start + 1) - used
             talon.missing_chqs = max(missing, 0)
@@ -383,12 +393,13 @@ class FinanceTalon(models.Model):
             else:
                 rec.usage_percentage = 0.0
 
-    @api.depends('cheque_ids', 'num_chq')
+    @api.depends('cheque_ids', 'effet_ids', 'num_chq')
     def _compute_counts(self):
         for rec in self:
             # Count unique check numbers
             unique_chqs = {c.chq for c in rec.cheque_ids if c.chq}
-            rec.used_chqs = len(unique_chqs)
+            unique_effets = {e.serie for e in rec.effet_ids if e.serie}
+            rec.used_chqs = len(unique_chqs.union(unique_effets))
             rec.unused_chqs = rec.num_chq - rec.used_chqs
 
     # -------------------------------------------------------------------
@@ -415,6 +426,12 @@ class FinanceTalon(models.Model):
                 existing_numbers.add(int(raw_chq))
             except (ValueError, TypeError):
                 continue
+        for effet in self.effet_ids:
+            raw_serie = (effet.serie or "").strip()
+            try:
+                existing_numbers.add(int(raw_serie))
+            except (ValueError, TypeError):
+                continue
 
         # 👉 S’il n’y a encore aucun chèque saisi, on n’affiche rien
         if not existing_numbers:
@@ -430,7 +447,7 @@ class FinanceTalon(models.Model):
         ]
         return missing
 
-    @api.depends('cheque_ids.chq', 'num_chq', 'name', 'ste_id')
+    @api.depends('cheque_ids.chq', 'effet_ids.serie', 'num_chq', 'name', 'ste_id')
     def _compute_missing_cheques_html(self):
         for talon in self:
             # --- Validation robuste du talon ---
@@ -469,10 +486,10 @@ class FinanceTalon(models.Model):
                 continue
             
             # --- Check if any cheques exist (simple check to avoid loading logic if empty) ---
-            if not talon.cheque_ids:
+            if not talon.cheque_ids and not talon.effet_ids:
                  talon.missing_cheques_html = """
                     <div style="padding: 16px; color: #6c757d; font-style: italic;">
-                        ℹ️ Aucun chèque encore saisi pour ce talon
+                        ℹ️ Aucun chèque/effet encore saisi pour ce talon
                     </div>
                 """
                  continue
@@ -485,11 +502,13 @@ class FinanceTalon(models.Model):
             existing_count = 0 
             for c in talon.cheque_ids: 
                 if c.chq and c.chq.strip().isdigit(): existing_count += 1
+            for e in talon.effet_ids:
+                if e.serie and e.serie.strip().isdigit(): existing_count += 1
             
             if existing_count == 0:
                  talon.missing_cheques_html = """
                     <div style="padding: 16px; color: #6c757d; font-style: italic;">
-                        ℹ️ Aucun chèque encore saisi pour ce talon
+                        ℹ️ Aucun chèque/effet encore saisi pour ce talon
                     </div>
                 """
                  continue

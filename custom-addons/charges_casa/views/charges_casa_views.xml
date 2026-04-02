@@ -36,7 +36,7 @@
                         </group>
                         <group>
                             <field name="amount"/>
-                            <field name="commentaires" nolabel="1" placeholder="Ajouter un commentaire..."/>
+                            <field name="commentaires" placeholder="Ajouter un commentaire..."/>
                             <field name="user_id" readonly="1"/>
                         </group>
                     </group>

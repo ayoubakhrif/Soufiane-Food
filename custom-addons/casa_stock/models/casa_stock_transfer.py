@@ -75,7 +75,6 @@ class CasaStockTransfer(models.Model):
             self.calibre = False
             self.weight = 0.0
             self.price_purchase = 0.0
-            self.source_ville = False
             self.source_ste_id = False
             self.available_qty = 0.0
 

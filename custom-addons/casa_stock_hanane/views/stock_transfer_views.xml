@@ -43,6 +43,7 @@
                     <group>
                         <group string="Informations Générales">
                             <field name="date" readonly="state != 'draft'"/>
+                            <field name="source_ville" readonly="state != 'draft'"/>
                         </group>
                     </group>
 
@@ -50,7 +51,8 @@
                         <group>
                             <field name="source_stock_id"
                                    readonly="state != 'draft'"
-                                   options="{'no_create': True, 'no_open': True}"/>
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('ville', '=', source_ville)]"/>
                             <field name="available_qty"/>
                             <field name="qty" readonly="state != 'draft'"/>
                         </group>
@@ -61,7 +63,6 @@
                             <field name="calibre"/>
                             <field name="weight"/>
                             <field name="price_purchase"/>
-                            <field name="source_ville"/>
                             <field name="source_ste_id"/>
                         </group>
                     </group>

@@ -23,8 +23,8 @@
         <field name="arch" type="xml">
             <form string="Charge">
                 <header>
-                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <button name="action_draft" string="Remettre en Brouillon" type="object" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_draft" string="Remettre en Brouillon" type="object" invisible="state != 'confirmed'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                 </header>
                 <sheet>

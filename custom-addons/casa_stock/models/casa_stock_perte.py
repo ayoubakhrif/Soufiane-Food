@@ -17,11 +17,7 @@ class CasaStockPerte(models.Model):
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
     ], string='Ville', tracking=True)
-    frigo = fields.Selection([
-        ('frigo1', 'Frigo 1'),
-        ('frigo2', 'Frigo 2'),
-        ('stock_casa', 'Stock Casa'),
-    ], string='Frigo', tracking=True)
+
     ste_id = fields.Many2one('casa.ste', string='Société', tracking=True)
     weight = fields.Float(string='Poids (Kg)', tracking=True)
     calibre = fields.Char(string='Calibre', tracking=True)
@@ -56,7 +52,7 @@ class CasaStockPerte(models.Model):
             self.lot = self.stock_id.lot
             self.dum = self.stock_id.dum
             self.ville = self.stock_id.ville
-            self.frigo = self.stock_id.frigo
+
             self.ste_id = self.stock_id.ste_id
             self.weight = self.stock_id.weight
             self.calibre = self.stock_id.calibre

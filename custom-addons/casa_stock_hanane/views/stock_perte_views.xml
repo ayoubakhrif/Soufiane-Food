@@ -58,7 +58,7 @@
                         </group>
                         <group>
                             <field name="ville" readonly="1"/>
-                            <field name="frigo" readonly="1"/>
+
                             <field name="ste_id" readonly="1"/>
                             <field name="price_purchase" readonly="1"/>
                             <field name="stock_soufiane" readonly="1"/>

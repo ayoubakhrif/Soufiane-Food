@@ -26,6 +26,7 @@ class DataCheque(models.Model):
 
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
     chq_bank = fields.Boolean(string='Chq de banque', tracking=True)
+    chq_certifie = fields.Boolean(string='Chq certifié', tracking=True)
     is_manager = fields.Boolean(compute='_compute_is_manager', string="Is Manager")
     def _compute_is_manager(self):
         for rec in self:

@@ -18,6 +18,8 @@
                 <field name="price_purchase"/>
                 <field name="ville"/>
                 <field name="stock_soufiane" optional="show"/>
+                <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
+                <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>

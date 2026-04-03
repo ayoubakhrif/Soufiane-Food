@@ -10,12 +10,12 @@
                 <!-- STATE BAR -->
                 <header>
                     <button name="action_domicilier"
-                            string="Domicilier"
+                            string="Valider"
                             type="object"
                             class="btn-primary"
                             invisible="state != 'new'"/>
                     <button name="action_regler"
-                            string="Régler"
+                            string="Domicilier"
                             type="object"
                             class="btn-primary"
                             invisible="state != 'domicilied'"/>

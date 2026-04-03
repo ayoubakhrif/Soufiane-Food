@@ -209,7 +209,6 @@ class CasaStockStock(models.Model):
                 'default_lot': self.lot,
                 'default_dum': self.dum,
                 'default_ville': self.ville,
-                'default_frigo': self.frigo,
                 'default_weight': self.weight,
                 'default_calibre': self.calibre,
                 'default_ste_id': self.ste_id.id, 

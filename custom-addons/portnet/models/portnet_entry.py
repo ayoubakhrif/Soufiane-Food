@@ -105,8 +105,8 @@ class PortnetEntry(models.Model):
     state = fields.Selection(
         selection=[
             ('new', 'Nouveau'),
-            ('domicilied', 'Domicilié'),
-            ('regle', 'Réglé'),
+            ('domicilied', 'Validé'),
+            ('regle', 'Domicilié'),
             ('annule', 'Annulé'),
         ],
         string='État',

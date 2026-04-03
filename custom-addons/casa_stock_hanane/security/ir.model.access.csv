@@ -23,6 +23,9 @@ access_casa_stock_exit_admin_hanane,casa_hanane.stock.exit.admin,model_casa_hana
 access_casa_stock_return_user_hanane,access.casa_hanane.stock.return.user,model_casa_hanane_stock_return,group_user,1,1,1,0
 access_casa_stock_return_manager_hanane,access.casa_hanane.stock.return.manager,model_casa_hanane_stock_return,group_manager,1,1,1,0
 access_casa_stock_return_admin_hanane,access.casa_hanane.stock.return.admin,model_casa_hanane_stock_return,group_admin,1,1,1,1
+access_casa_stock_perte_user_hanane,casa_hanane.stock.perte.user,model_casa_hanane_stock_perte,group_user,1,1,1,0
+access_casa_stock_perte_manager_hanane,casa_hanane.stock.perte.manager,model_casa_hanane_stock_perte,group_manager,1,1,1,0
+access_casa_stock_perte_admin_hanane,casa_hanane.stock.perte.admin,model_casa_hanane_stock_perte,group_admin,1,1,1,1
 access_casa_stock_move_user_hanane,casa_hanane.stock.move.user,model_casa_hanane_stock_move,group_user,1,0,1,0
 access_casa_stock_move_manager_hanane,casa_hanane.stock.move.manager,model_casa_hanane_stock_move,group_manager,1,1,1,0
 access_casa_stock_move_admin_hanane,casa_hanane.stock.move.admin,model_casa_hanane_stock_move,group_admin,1,1,1,1

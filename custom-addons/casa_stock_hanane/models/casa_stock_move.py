@@ -26,6 +26,7 @@ class CasaStockMove(models.Model):
         ('cancel_exit', 'Annulation Sortie'),
         ('cancel_return', 'Annulation Retour'),
         ('adjustment', 'Ajustement'),
+        ('perte', 'Perte'),
     ], string='Type de mouvement', required=True)
     
     state = fields.Selection([

@@ -194,3 +194,26 @@ class CasaStockStock(models.Model):
                 'default_is_from_stock': True,
             }
         }
+
+    def action_new_perte(self):
+        self.ensure_one()
+        return {
+            'name': _('Déclarer une Perte'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'casa.stock.perte',
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {
+                'default_stock_id': self.id,
+                'default_product_id': self.product_id.id,
+                'default_lot': self.lot,
+                'default_dum': self.dum,
+                'default_ville': self.ville,
+                'default_frigo': self.frigo,
+                'default_weight': self.weight,
+                'default_calibre': self.calibre,
+                'default_ste_id': self.ste_id.id, 
+                'default_price_purchase': self.price,
+                'default_stock_soufiane': self.stock_soufiane,
+            }
+        }

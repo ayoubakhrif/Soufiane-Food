@@ -23,6 +23,9 @@ access_casa_stock_exit_admin,casa.stock.exit.admin,model_casa_stock_exit,group_a
 access_casa_stock_return_user,access.casa.stock.return.user,model_casa_stock_return,group_user,1,1,1,0
 access_casa_stock_return_manager,access.casa.stock.return.manager,model_casa_stock_return,group_manager,1,1,1,0
 access_casa_stock_return_admin,access.casa.stock.return.admin,model_casa_stock_return,group_admin,1,1,1,1
+access_casa_stock_perte_user,casa.stock.perte.user,model_casa_stock_perte,group_user,1,1,1,0
+access_casa_stock_perte_manager,casa.stock.perte.manager,model_casa_stock_perte,group_manager,1,1,1,0
+access_casa_stock_perte_admin,casa.stock.perte.admin,model_casa_stock_perte,group_admin,1,1,1,1
 access_casa_stock_move_user,casa.stock.move.user,model_casa_stock_move,group_user,1,0,1,0
 access_casa_stock_move_manager,casa.stock.move.manager,model_casa_stock_move,group_manager,1,1,1,0
 access_casa_stock_move_admin,casa.stock.move.admin,model_casa_stock_move,group_admin,1,1,1,1

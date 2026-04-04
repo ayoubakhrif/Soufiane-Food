@@ -48,7 +48,7 @@ access_casa_stock_order_manager_hanane,casa_hanane.stock.order.manager,model_cas
 access_casa_stock_order_admin_hanane,casa_hanane.stock.order.admin,model_casa_hanane_stock_order,group_admin,1,1,1,1
 access_casa_stock_order_viewer_hanane,casa_hanane.stock.order.viewer,model_casa_hanane_stock_order,group_viewer,1,0,0,0
 access_casa_stock_order_line_user_hanane,casa_hanane.stock.order.line.user,model_casa_hanane_stock_order_line,group_user,1,1,1,0
-access_casa_stock_order_line_manager_hanane,casa_hanane.stock.order.line.manager,model_casa_hanane_stock_order_line,group_manager,1,1,1,0
+access_casa_stock_order_line_manager_hanane,casa_hanane.stock.order.line.manager,model_casa_hanane_stock_order_line,group_manager,1,1,1,1
 access_casa_stock_order_line_admin_hanane,casa_hanane.stock.order.line.admin,model_casa_hanane_stock_order_line,group_admin,1,1,1,1
 access_casa_stock_order_line_viewer_hanane,casa_hanane.stock.order.line.viewer,model_casa_hanane_stock_order_line,group_viewer,1,0,0,0
 access_casa_stock_discount_user_hanane,casa_hanane.stock.discount.user,model_casa_hanane_stock_discount,group_user,1,1,1,0

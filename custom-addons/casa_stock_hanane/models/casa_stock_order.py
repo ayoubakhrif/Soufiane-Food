@@ -329,3 +329,12 @@ class CasaStockOrderLine(models.Model):
                     req=line.qty,
                     avail=line.stock_id.quantity
                 ))
+
+    def unlink(self):
+        is_manager = self.env.user.has_group('casa_stock_hanane.group_manager')
+        for line in self:
+            if line.order_id.state != 'draft':
+                raise UserError(_("Vous ne pouvez supprimer des lignes que sur une commande en brouillon."))
+            if not is_manager:
+                raise UserError(_("Seuls les responsables peuvent supprimer des lignes de commande."))
+        return super().unlink()

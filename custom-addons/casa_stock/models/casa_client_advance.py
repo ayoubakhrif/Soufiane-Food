@@ -33,8 +33,14 @@ class CasaClientAdvance(models.Model):
         for rec in self:
             rec.state = 'draft'
 
+    def write(self, vals):
+        for rec in self:
+            if rec.state == 'confirmed' and any(f != 'state' for f in vals):
+                 raise UserError(_("Vous ne pouvez pas modifier une avance validée. Veuillez d'abord la remettre en brouillon."))
+        return super().write(vals)
+
     def unlink(self):
         for rec in self:
             if rec.state == 'confirmed':
                 raise UserError(_("Vous ne pouvez pas supprimer une avance validée. Veuillez d'abord la remettre en brouillon."))
-        return super(CasaClientAdvance, self).unlink()
+        return super().unlink()

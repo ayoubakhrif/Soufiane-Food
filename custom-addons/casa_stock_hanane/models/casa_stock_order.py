@@ -29,6 +29,13 @@ class CasaStockOrder(models.Model):
     validation_user_id = fields.Many2one('res.users', string='Validé par', readonly=True, tracking=True)
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
+    total_mt_vente = fields.Float(string='Total Montant Vente', compute='_compute_total_mt_vente', store=True)
+
+    @api.depends('order_line_ids.mt_vente')
+    def _compute_total_mt_vente(self):
+        for rec in self:
+            rec.total_mt_vente = sum(line.mt_vente for line in rec.order_line_ids)
+
     def _compute_is_cancel_hidden(self):
         is_manager = self.env.user.has_group('casa_stock_hanane.group_manager')
         hidden = not is_manager
@@ -276,6 +283,13 @@ class CasaStockOrderLine(models.Model):
     
     price_sale = fields.Float(string='Prix Vente', required=True)
     poids = fields.Char(string='Poids', compute='_compute_poids')
+    mt_vente = fields.Float(string='Montant Vente', compute='_compute_mt_vente', store=True)
+
+    @api.depends('qty', 'weight', 'price_sale')
+    def _compute_mt_vente(self):
+        for line in self:
+            tonnage = (line.qty * line.weight) if line.weight else 0.0
+            line.mt_vente = tonnage * line.price_sale
 
     @api.depends('weight')
     def _compute_poids(self):

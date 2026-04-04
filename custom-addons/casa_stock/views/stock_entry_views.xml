@@ -16,6 +16,7 @@
                 <field name="poids"/>
                 <field name="tonnage"/>
                 <field name="price_purchase"/>
+                <field name="mt_achat" sum="Total Montant Achat"/>
                 <field name="ville"/>
                 <field name="stock_soufiane" optional="show"/>
                 <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>

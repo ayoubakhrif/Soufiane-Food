@@ -21,6 +21,11 @@ class CasaStockEntry(models.Model):
         store=True
     )
     
+    @api.depends('tonnage', 'price_purchase')
+    def _compute_amounts(self):
+        for rec in self:
+            rec.mt_achat = rec.tonnage * rec.price_purchase
+    
     date = fields.Date(string='Date', required=True, tracking=True)
     lot = fields.Char(string='Lot', required=True, tracking=True)
     dum = fields.Char(string='DUM', required=True, tracking=True)

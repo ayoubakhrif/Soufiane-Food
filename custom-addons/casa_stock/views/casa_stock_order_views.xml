@@ -61,6 +61,7 @@
                         <group>
                             <field name="date" readonly="state == 'done'"/>
                             <field name="ville" readonly="state == 'done'"/>
+                            <field name="total_mt_vente"/>
                         </group>
                     </group>
                     <notebook>
@@ -78,6 +79,7 @@
                                     <field name="dum"/>
                                     <field name="calibre"/>
                                     <field name="price_sale"/>
+                                    <field name="mt_vente" sum="Total"/>
                                 </tree>
                             </field>
                         </page>

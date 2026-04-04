@@ -11,3 +11,5 @@ access_buffet_composant_line_user,buffet.composant.line,model_buffet_composant_l
 access_buffet_composant_line_manager,buffet.composant.line,model_buffet_composant_line,group_gestion_buffets_manager,1,1,1,1
 access_buffet_charge_user,buffet.charge,model_buffet_charge,group_gestion_buffets_user,1,1,1,0
 access_buffet_charge_manager,buffet.charge,model_buffet_charge,group_gestion_buffets_manager,1,1,1,1
+access_buffet_division_user,buffet.division,model_buffet_division,group_gestion_buffets_user,1,1,1,0
+access_buffet_division_manager,buffet.division,model_buffet_division,group_gestion_buffets_manager,1,1,1,1

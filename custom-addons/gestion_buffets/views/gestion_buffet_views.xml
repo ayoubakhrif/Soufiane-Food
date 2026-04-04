@@ -73,6 +73,15 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Division">
+                            <field name="division_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="percentage"/>
+                                    <field name="amount" sum="Total Part"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                     
                     <group class="oe_subtotal_footer oe_right" colspan="2" name="buffet_total">

@@ -26,6 +26,7 @@ class GestionBuffet(models.Model):
 
     composant_ids = fields.One2many('buffet.composant.line', 'buffet_id', string='Composants')
     charge_ids = fields.One2many('buffet.charge', 'buffet_id', string='Charges')
+    division_ids = fields.One2many('buffet.division', 'buffet_id', string='Division')
 
     # Computed KPIs
     total_revenu = fields.Float(string='Revenu Total', compute='_compute_totals', store=True, tracking=True)
@@ -85,7 +86,7 @@ class BuffetCharge(models.Model):
     _description = 'Charge de Buffet'
 
     buffet_id = fields.Many2one('gestion.buffet', string='Buffet', ondelete='cascade')
-    name = fields.Char(string='Commentaire', required=True)
+    name = fields.Char(string='Commentaire')
     categorie = fields.Selection([
         ('buvette', 'Buvette'),
         ('fournisseur', 'Fournisseur'),
@@ -94,3 +95,17 @@ class BuffetCharge(models.Model):
         ('transport', 'Transport'),
     ], string='Catégorie', required=True)
     amount = fields.Float(string='Prix', required=True, default=0.0)
+
+class BuffetDivision(models.Model):
+    _name = 'buffet.division'
+    _description = 'Division du Bénéfice'
+
+    buffet_id = fields.Many2one('gestion.buffet', string='Buffet', ondelete='cascade')
+    name = fields.Char(string='Bénéficiaire', required=True)
+    percentage = fields.Float(string='Pourcentage (%)', required=True, default=0.0)
+    amount = fields.Float(string='Part (Montant)', compute='_compute_amount', store=True)
+
+    @api.depends('percentage', 'buffet_id.benefice')
+    def _compute_amount(self):
+        for line in self:
+            line.amount = (line.percentage / 100.0) * line.buffet_id.benefice

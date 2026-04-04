@@ -81,15 +81,16 @@
                         </page>
 
                         <page string="Réductions">
-                            <field name="discount_ids" readonly="1">
+                            <field name="discount_line_ids" readonly="1">
                                 <tree>
-                                    <field name="name" string="Référence"/>
-                                    <field name="order_id" string="Commande"/>
-                                    <field name="date"/>
-                                    <field name="reason" string="Motif"/>
-                                    <field name="total_before_discount" string="Montant Avant" sum="Total Avant"/>
-                                    <field name="total_discount" string="Réduction" sum="Total Réduction"/>
-                                    <field name="total_after_discount" string="Montant Final" sum="Total Après"/>
+                                    <field name="discount_id" string="Réf. Réduction"/>
+                                    <field name="exit_id" string="Sortie"/>
+                                    <field name="product_id" string="Produit"/>
+                                    <field name="qty" string="Qté"/>
+                                    <field name="price_sale" string="Prix Initial"/>
+                                    <field name="initial_amount" string="Montant Initial" sum="Total Initial"/>
+                                    <field name="discount_amount" string="Montant Réduction" sum="Total Réduction"/>
+                                    <field name="final_amount" string="Montant Final" sum="Total Final"/>
                                     <field name="state" widget="badge"
                                            decoration-info="state == 'draft'"
                                            decoration-success="state == 'done'"

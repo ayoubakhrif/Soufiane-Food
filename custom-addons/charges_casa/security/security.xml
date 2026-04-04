@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_charges_casa_category" model="ir.module.category">
+        <field name="name">Charges Casa</field>
+        <field name="sequence">22</field>
+    </record>
+
+    <record id="group_charges_casa_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_charges_casa_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_charges_casa_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_charges_casa_category"/>
+        <field name="implied_ids" eval="[(4, ref('group_charges_casa_user'))]"/>
+    </record>
+</odoo>

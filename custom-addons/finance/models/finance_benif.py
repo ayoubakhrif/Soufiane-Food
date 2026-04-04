@@ -80,8 +80,8 @@ class Cal3iyaClient(models.Model):
         from odoo import fields as odoo_fields
         sheet.set_column(7, 7, 18)
         sheet.set_column(8, 8, 15)
-        sheet.write('H1', 'Date de relevé', header_style)
-        sheet.write('I1', odoo_fields.Date.today().strftime('%d/%m/%Y'), cell_style)
+        sheet.write('H3', 'Date de relevé', header_style)
+        sheet.write('I3', odoo_fields.Date.today().strftime('%d/%m/%Y'), cell_style)
 
         row = 2
 

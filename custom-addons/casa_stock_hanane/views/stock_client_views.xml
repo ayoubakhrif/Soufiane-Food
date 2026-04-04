@@ -88,6 +88,7 @@
                                     <field name="product_id" string="Produit"/>
                                     <field name="qty" string="Qté"/>
                                     <field name="price_sale" string="Prix Initial"/>
+                                    <field name="price_sale_final" string="Prix Final"/>
                                     <field name="initial_amount" string="Montant Initial" sum="Total Initial"/>
                                     <field name="discount_amount" string="Montant Réduction" sum="Total Réduction"/>
                                     <field name="final_amount" string="Montant Final" sum="Total Final"/>

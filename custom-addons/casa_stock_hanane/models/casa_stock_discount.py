@@ -231,6 +231,10 @@ class CasaStockDiscountLine(models.Model):
         string='Montant Final',
         compute='_compute_amounts', store=True,
     )
+    price_sale_final = fields.Float(
+        string='Prix Vente Final',
+        compute='_compute_amounts', store=True,
+    )
 
     @api.depends('tonnage', 'price_sale', 'discount_value', 'discount_id.discount_type')
     def _compute_amounts(self):
@@ -241,3 +245,4 @@ class CasaStockDiscountLine(models.Model):
             else:
                 line.discount_amount = line.discount_value or 0.0
             line.final_amount = line.initial_amount - line.discount_amount
+            line.price_sale_final = (line.final_amount / line.tonnage) if line.tonnage else line.price_sale

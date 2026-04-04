@@ -206,6 +206,33 @@
                         </table>
                     </t>
 
+                    <!-- Section Sorties Supp -->
+                    <t t-if="week_data['sorties_supp']">
+                        <div class="section-title" style="background:#4b5563;"> SORTIES SUPPLEMENTAIRES</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['sorties_supp']" t-as="supp">
+                                    <tr>
+                                        <td><t t-esc="supp.date"/></td>
+                                        <td><t t-esc="supp.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(supp.amount)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">TOTAL SORTIES SUPP:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
                     <!-- Recapitulatif -->
                     <div class="section-title section-recap"> RECAPITULATIF FINANCIER</div>
                     <div class="recap-box">
@@ -216,6 +243,10 @@
                         <div class="recap-line">
                             <span>Total Impayes:</span>
                             <span>+ <t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Sorties Supp:</span>
+                            <span>+ <t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
                             <span>Total Avances:</span>

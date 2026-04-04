@@ -50,6 +50,12 @@ class CasaClient(models.Model):
         string='Autres Ventes',
     )
 
+    sortie_supp_ids = fields.One2many(
+        'casa_hanane.sortie.supp',
+        'client_id',
+        string='Sorties Supplémentaires',
+    )
+
     exits_to_discount_ids = fields.One2many(
         'casa_hanane.stock.exit',
         'client_id',
@@ -186,7 +192,7 @@ class CasaClient(models.Model):
         for rec in self:
             rec.exit_count = len(rec.exit_ids.filtered(lambda s: s.state == 'done'))
 
-    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente', 'other_sale_ids.discount_amount', 'compte_initial', 'advance_ids.amount', 'advance_ids.state', 'unpaid_ids.amount')
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente', 'other_sale_ids.discount_amount', 'sortie_supp_ids.amount', 'compte_initial', 'advance_ids.amount', 'advance_ids.state', 'unpaid_ids.amount')
     def _compute_totals(self):
         for client in self:
             commandes = client.exit_ids.filtered(lambda s: s.state == 'done')
@@ -197,10 +203,11 @@ class CasaClient(models.Model):
             
             total_advances = sum(client.advance_ids.filtered(lambda a: a.state == 'confirmed').mapped('amount'))
             total_impayes = sum(client.unpaid_ids.mapped('amount'))
+            total_sorties_supp = sum(client.sortie_supp_ids.mapped('amount'))
 
             client.total_commandes = total_ventes
             client.total_advances = total_advances
-            client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes - total_discounts - total_advances
+            client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes + total_sorties_supp - total_discounts - total_advances
 
     @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'exit_ids.margin')
     def _compute_client_summary(self):
@@ -476,8 +483,14 @@ class CasaClient(models.Model):
         )
         total_impayes = sum(impayes.mapped('amount'))
 
-        # 4️⃣ Compte de la semaine
-        compte_semaine = total_net_sorties + total_impayes - total_avances
+        # 4️⃣ Filtrer sorties supplémentaires de la semaine
+        sorties_supp = self.sortie_supp_ids.filtered(
+            lambda s: s.date and s.date.strftime("%Y-W%W") == week
+        )
+        total_sorties_supp = sum(sorties_supp.mapped('amount'))
+
+        # 5️⃣ Compte de la semaine
+        compte_semaine = total_net_sorties + total_impayes + total_sorties_supp - total_avances
 
         # 5️⃣ Calculer les dates de début et fin de semaine
         start_date = None
@@ -511,11 +524,13 @@ class CasaClient(models.Model):
             'sorties': sorties,
             'avances': avances,
             'impayes': impayes,
+            'sorties_supp': sorties_supp,
             'total_sorties': total_sorties,
             'total_discounts': total_discounts,
             'total_net_sorties': total_net_sorties,
             'total_avances': total_avances,
             'total_impayes': total_impayes,
+            'total_sorties_supp': total_sorties_supp,
             'compte_semaine': compte_semaine,
             'compte_total': self.compte_total,
         }

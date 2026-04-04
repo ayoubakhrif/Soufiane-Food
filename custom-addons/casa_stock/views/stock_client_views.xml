@@ -133,6 +133,15 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Sorties supp">
+                            <field name="sortie_supp_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total Sorties Supp"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
 
                         <page string="Entrer les réductions" name="discount_entry">
                             <header>

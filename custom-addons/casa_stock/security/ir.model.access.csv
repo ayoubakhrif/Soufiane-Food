@@ -76,3 +76,7 @@ access_casa_other_sale_user,casa.other.sale.user,model_casa_other_sale,group_use
 access_casa_other_sale_manager,casa.other.sale.manager,model_casa_other_sale,group_manager,1,1,1,0
 access_casa_other_sale_admin,casa.other.sale.admin,model_casa_other_sale,group_admin,1,1,1,1
 access_casa_other_sale_viewer,casa.other.sale.viewer,model_casa_other_sale,group_viewer,1,0,0,0
+access_casa_sortie_supp_user,casa.sortie.supp.user,model_casa_sortie_supp,group_user,1,1,1,0
+access_casa_sortie_supp_manager,casa.sortie.supp.manager,model_casa_sortie_supp,group_manager,1,1,1,0
+access_casa_sortie_supp_admin,casa.sortie.supp.admin,model_casa_sortie_supp,group_admin,1,1,1,1
+access_casa_sortie_supp_viewer,casa.sortie.supp.viewer,model_casa_sortie_supp,group_viewer,1,0,0,0

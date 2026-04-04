@@ -14,7 +14,14 @@ class ChargesCasa(models.Model):
         ('autres', 'Autres')
     ], string='Type', required=True, tracking=True)
     
-    partner_id = fields.Many2one('res.partner', string='Bénéficiaire', tracking=True)
+    client_id = fields.Many2one('casa.client', string='Client', tracking=True)
+    ville = fields.Selection([
+        ('agadir', 'Agadir'),
+        ('tanger', 'Tanger'),
+        ('marrakech', 'Marrakech'),
+        ('kenitra', 'Kenitra'),
+        ('casa', 'Casa')
+    ], string='Ville', tracking=True)
     user_id = fields.Many2one('res.users', string='Saisi par', default=lambda self: self.env.user, tracking=True, readonly=True)
     commentaires = fields.Char(string='Commentaires')
     state = fields.Selection([

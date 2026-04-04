@@ -7,7 +7,7 @@
         Module pour la gestion des charges pour Casa.
     """,
     'author': 'Gestia',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'casa_stock'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

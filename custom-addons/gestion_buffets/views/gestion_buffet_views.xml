@@ -120,10 +120,70 @@
         </field>
     </record>
 
+    <!-- View: gestion.buffet Kanban -->
+    <record id="view_gestion_buffet_kanban" model="ir.ui.view">
+        <field name="name">gestion.buffet.kanban</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="client_name"/>
+                <field name="date"/>
+                <field name="total_revenu"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click shadow-sm rounded-lg border-light mb-3">
+                            <div class="o_kanban_record_top mb-2">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title" style="font-size: 1.1rem; color: #2c3e50;">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <span class="badge rounded-pill" t-attf-class="bg-#{record.state.raw_value == 'done' ? 'success' : (record.state.raw_value == 'confirmed' ? 'warning' : (record.state.raw_value == 'cancel' ? 'danger' : 'info'))}">
+                                    <field name="state"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="mb-1">
+                                    <i class="fa fa-user mr-2" style="color: #7f8c8d;"/> <strong><field name="client_name"/></strong>
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    <i class="fa fa-calendar mr-2"/> <field name="date"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
+                                <div class="oe_kanban_bottom_left">
+                                    <span class="font-weight-bold text-primary" style="font-size: 1rem;">
+                                        <field name="total_revenu" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- View: gestion.buffet Pivot -->
+    <record id="view_gestion_buffet_pivot" model="ir.ui.view">
+        <field name="name">gestion.buffet.pivot</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Buffets" sample="1">
+                <field name="date" type="row" interval="month"/>
+                <field name="total_revenu" type="measure"/>
+                <field name="benefice" type="measure"/>
+                <field name="nbr_personne" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_gestion_buffet" model="ir.actions.act_window">
         <field name="name">Buffets</field>
         <field name="res_model">gestion.buffet</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,kanban,form,pivot</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créer un nouveau buffet

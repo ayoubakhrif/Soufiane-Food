@@ -38,7 +38,7 @@ class GestionBuffet(models.Model):
     def create(self, vals):
         if vals.get('name', _('Nouveau')) == _('Nouveau'):
             vals['name'] = self.env['ir.sequence'].next_by_code('gestion.buffet') or _('Nouveau')
-        return super(GestionBuffet, self).create(vals)
+        return super().create(vals)
 
     @api.onchange('pack_id')
     def _onchange_pack_id(self):

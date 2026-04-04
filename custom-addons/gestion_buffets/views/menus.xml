@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_gestion_buffets_root" name="Gestion Buffets" sequence="40"/>
+
+    <!-- Main Menus -->
+    <menuitem id="menu_gestion_buffets_main" name="Buffets" parent="menu_gestion_buffets_root" action="action_gestion_buffet" sequence="10"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_gestion_buffets_config" name="Configuration" parent="menu_gestion_buffets_root" sequence="100"/>
+    
+    <menuitem id="menu_buffets_packs" name="Packs" parent="menu_gestion_buffets_config" action="action_buffet_pack" sequence="10"/>
+    <menuitem id="menu_buffets_places" name="Lieux" parent="menu_gestion_buffets_config" action="action_buffet_place" sequence="20"/>
+</odoo>

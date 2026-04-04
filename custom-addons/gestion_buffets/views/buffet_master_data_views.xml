@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pack Views -->
+    <record id="view_buffet_pack_tree" model="ir.ui.view">
+        <field name="name">buffet.pack.tree</field>
+        <field name="model">buffet.pack</field>
+        <field name="arch" type="xml">
+            <tree string="Packs" editable="bottom">
+                <field name="name"/>
+                <field name="price_person"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_buffet_pack" model="ir.actions.act_window">
+        <field name="name">Packs</field>
+        <field name="res_model">buffet.pack</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Place Views -->
+    <record id="view_buffet_place_tree" model="ir.ui.view">
+        <field name="name">buffet.place.tree</field>
+        <field name="model">buffet.place</field>
+        <field name="arch" type="xml">
+            <tree string="Lieux" editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_buffet_place" model="ir.actions.act_window">
+        <field name="name">Lieux</field>
+        <field name="res_model">buffet.place</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

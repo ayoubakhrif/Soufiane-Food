@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_buffet_pack,buffet.pack,model_buffet_pack,,1,1,1,1
+access_buffet_place,buffet.place,model_buffet_place,,1,1,1,1
+access_gestion_buffet,gestion.buffet,model_gestion_buffet,,1,1,1,1
+access_buffet_composant,buffet.composant,model_buffet_composant,,1,1,1,1
+access_buffet_charge,buffet.charge,model_buffet_charge,,1,1,1,1

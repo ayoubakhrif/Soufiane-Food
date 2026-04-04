@@ -61,8 +61,6 @@
                                 <tree editable="bottom">
                                     <field name="composant_id"/>
                                     <field name="qty"/>
-                                    <field name="price_unit"/>
-                                    <field name="price_total" sum="Total Composants"/>
                                 </tree>
                             </field>
                         </page>
@@ -79,9 +77,8 @@
                     <group class="oe_subtotal_footer oe_right" colspan="2" name="buffet_total">
                         <field name="total_revenu"/>
                         <field name="avance"/>
-                        <field name="reste_a_payer" class="oe_subtotal_footer_separator"/>
-                        <field name="total_composants"/>
                         <field name="total_charges"/>
+                        <field name="reste_a_payer" class="oe_subtotal_footer_separator"/>
                         <field name="benefice" class="oe_subtotal_footer_separator"/>
                     </group>
                 </sheet>

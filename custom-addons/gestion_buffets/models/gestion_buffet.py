@@ -30,7 +30,6 @@ class GestionBuffet(models.Model):
     # Computed KPIs
     total_revenu = fields.Float(string='Revenu Total', compute='_compute_totals', store=True, tracking=True)
     reste_a_payer = fields.Float(string='Reste à Payer', compute='_compute_totals', store=True)
-    total_composants = fields.Float(string='Coût Composants', compute='_compute_totals', store=True)
     total_charges = fields.Float(string='Coût Charges', compute='_compute_totals', store=True)
     benefice = fields.Float(string='Bénéfice', compute='_compute_totals', store=True, tracking=True)
 
@@ -45,18 +44,16 @@ class GestionBuffet(models.Model):
         if self.pack_id:
             self.prix_personne = self.pack_id.price_person
 
-    @api.depends('nbr_personne', 'prix_personne', 'avance', 'composant_ids.price_total', 'charge_ids.amount')
+    @api.depends('nbr_personne', 'prix_personne', 'avance', 'charge_ids.amount')
     def _compute_totals(self):
         for rec in self:
             revenu = rec.nbr_personne * rec.prix_personne
-            composants = sum(rec.composant_ids.mapped('price_total'))
             charges = sum(rec.charge_ids.mapped('amount'))
             
             rec.total_revenu = revenu
             rec.reste_a_payer = revenu - rec.avance
-            rec.total_composants = composants
             rec.total_charges = charges
-            rec.benefice = revenu - composants - charges
+            rec.benefice = revenu - charges
 
     def action_confirm(self):
         for rec in self:
@@ -82,18 +79,6 @@ class BuffetComposantLine(models.Model):
     buffet_id = fields.Many2one('gestion.buffet', string='Buffet', ondelete='cascade')
     composant_id = fields.Many2one('buffet.composant', string='Composant', required=True)
     qty = fields.Float(string='Nombre', required=True, default=1.0)
-    price_unit = fields.Float(string='Prix unitaire', required=True, default=0.0)
-    price_total = fields.Float(string='Montant', compute='_compute_price_total', store=True)
-
-    @api.onchange('composant_id')
-    def _onchange_composant_id(self):
-        if self.composant_id:
-            self.price_unit = self.composant_id.price
-
-    @api.depends('qty', 'price_unit')
-    def _compute_price_total(self):
-        for line in self:
-            line.price_total = line.qty * line.price_unit
 
 class BuffetCharge(models.Model):
     _name = 'buffet.charge'

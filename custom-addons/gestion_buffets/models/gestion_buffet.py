@@ -254,23 +254,28 @@ class BuffetChargeJour(models.Model):
     _description = 'Charge Journalière'
 
     date = fields.Date(string='Date', required=True, copy=False)
-    amount = fields.Float(string='Montant Total', required=True, default=0.0)
-    buffet_count = fields.Integer(string='Nombre de Buffets', compute='_compute_buffet_count', store=True)
-    amount_per_buffet = fields.Float(string='Part par Buffet', compute='_compute_buffet_count', store=True)
-
-    _sql_constraints = [
-        ('date_uniq', 'unique(date)', 'Il ne peut y avoir qu\'un seul enregistrement de charge par date !'),
-    ]
+    name = fields.Char(string='Description', default='Frais du jour')
+    amount = fields.Float(string='Montant', required=True, default=0.0)
+    
+    # Information displays
+    buffet_count = fields.Integer(string='Nombre de Buffets (J)', compute='_compute_totals_jour')
+    total_jour = fields.Float(string='Total Journée', compute='_compute_totals_jour')
+    amount_per_buffet = fields.Float(string='Part par Buffet', compute='_compute_totals_jour')
 
     @api.depends('date', 'amount')
-    def _compute_buffet_count(self):
+    def _compute_totals_jour(self):
         for rec in self:
             if rec.date:
                 buffets = self.env['gestion.buffet'].search([('date', '=', rec.date)])
+                all_charges = self.search([('date', '=', rec.date)])
+                total_amount = sum(all_charges.mapped('amount'))
+                
                 rec.buffet_count = len(buffets)
-                rec.amount_per_buffet = rec.amount / rec.buffet_count if rec.buffet_count > 0 else 0.0
+                rec.total_jour = total_amount
+                rec.amount_per_buffet = total_amount / rec.buffet_count if rec.buffet_count > 0 else 0.0
             else:
                 rec.buffet_count = 0
+                rec.total_jour = 0.0
                 rec.amount_per_buffet = 0.0
 
     @api.model
@@ -295,11 +300,12 @@ class BuffetChargeJour(models.Model):
             return
         
         for date in set(dates):
-            charge_jour = self.search([('date', '=', date)], limit=1)
+            charges_jour = self.search([('date', '=', date)])
             buffets = self.env['gestion.buffet'].search([('date', '=', date)])
             
-            if charge_jour:
-                amount_per = charge_jour.amount_per_buffet
+            if charges_jour:
+                total_amount = sum(charges_jour.mapped('amount'))
+                amount_per = total_amount / len(buffets) if buffets else 0.0
                 for buffet in buffets:
                     existing_charge = buffet.charge_ids.filtered(lambda c: c.categorie == 'charges_journalieres')
                     if existing_charge:

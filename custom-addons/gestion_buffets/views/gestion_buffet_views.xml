@@ -207,7 +207,9 @@
         <field name="arch" type="xml">
             <tree string="Charges Journalières">
                 <field name="date"/>
-                <field name="amount"/>
+                <field name="name"/>
+                <field name="amount" sum="Total"/>
+                <field name="total_jour" optional="show"/>
                 <field name="buffet_count"/>
                 <field name="amount_per_buffet"/>
             </tree>
@@ -225,9 +227,11 @@
                     </div>
                     <group>
                         <group>
+                            <field name="name"/>
                             <field name="amount"/>
                         </group>
                         <group>
+                            <field name="total_jour"/>
                             <field name="buffet_count"/>
                             <field name="amount_per_buffet"/>
                         </group>

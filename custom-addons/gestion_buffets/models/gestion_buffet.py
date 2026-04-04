@@ -38,7 +38,27 @@ class GestionBuffet(models.Model):
     def create(self, vals):
         if vals.get('name', _('Nouveau')) == _('Nouveau'):
             vals['name'] = self.env['ir.sequence'].next_by_code('gestion.buffet') or _('Nouveau')
-        return super().create(vals)
+        res = super().create(vals)
+        res._sync_daily_charges()
+        return res
+
+    def write(self, vals):
+        old_dates = self.mapped('date')
+        res = super().write(vals)
+        if 'date' in vals:
+            self.env['buffet.charge.jour']._update_daily_charges(old_dates)
+            self._sync_daily_charges()
+        return res
+
+    def unlink(self):
+        dates = self.mapped('date')
+        res = super().unlink()
+        self.env['buffet.charge.jour']._update_daily_charges(dates)
+        return res
+
+    def _sync_daily_charges(self):
+        dates = self.mapped('date')
+        self.env['buffet.charge.jour']._update_daily_charges(dates)
 
     @api.onchange('pack_id')
     def _onchange_pack_id(self):
@@ -211,6 +231,7 @@ class BuffetCharge(models.Model):
         ('hamala', 'Hamala'),
         ('serviants', 'Serviants'),
         ('transport', 'Transport'),
+        ('charges_journalieres', 'Charges Journalières'),
     ], string='Catégorie', required=True)
     amount = fields.Float(string='Prix', required=True, default=0.0)
 
@@ -227,3 +248,71 @@ class BuffetDivision(models.Model):
     def _compute_amount(self):
         for line in self:
             line.amount = (line.percentage / 100.0) * line.buffet_id.benefice
+
+class BuffetChargeJour(models.Model):
+    _name = 'buffet.charge.jour'
+    _description = 'Charge Journalière'
+
+    date = fields.Date(string='Date', required=True, copy=False)
+    amount = fields.Float(string='Montant Total', required=True, default=0.0)
+    buffet_count = fields.Integer(string='Nombre de Buffets', compute='_compute_buffet_count', store=True)
+    amount_per_buffet = fields.Float(string='Part par Buffet', compute='_compute_buffet_count', store=True)
+
+    _sql_constraints = [
+        ('date_uniq', 'unique(date)', 'Il ne peut y avoir qu\'un seul enregistrement de charge par date !'),
+    ]
+
+    @api.depends('date', 'amount')
+    def _compute_buffet_count(self):
+        for rec in self:
+            if rec.date:
+                buffets = self.env['gestion.buffet'].search([('date', '=', rec.date)])
+                rec.buffet_count = len(buffets)
+                rec.amount_per_buffet = rec.amount / rec.buffet_count if rec.buffet_count > 0 else 0.0
+            else:
+                rec.buffet_count = 0
+                rec.amount_per_buffet = 0.0
+
+    @api.model
+    def create(self, vals):
+        res = super().create(vals)
+        res._sync_to_buffets()
+        return res
+
+    def write(self, vals):
+        res = super().write(vals)
+        self._sync_to_buffets()
+        return res
+
+    def _sync_to_buffets(self):
+        for rec in self:
+            self._update_daily_charges([rec.date])
+
+    @api.model
+    def _update_daily_charges(self, dates):
+        dates = [d for d in dates if d]
+        if not dates:
+            return
+        
+        for date in set(dates):
+            charge_jour = self.search([('date', '=', date)], limit=1)
+            buffets = self.env['gestion.buffet'].search([('date', '=', date)])
+            
+            if charge_jour:
+                amount_per = charge_jour.amount_per_buffet
+                for buffet in buffets:
+                    existing_charge = buffet.charge_ids.filtered(lambda c: c.categorie == 'charges_journalieres')
+                    if existing_charge:
+                        existing_charge.amount = amount_per
+                    else:
+                        self.env['buffet.charge'].create({
+                            'buffet_id': buffet.id,
+                            'categorie': 'charges_journalieres',
+                            'name': 'Charge du jour',
+                            'amount': amount_per,
+                        })
+            else:
+                for buffet in buffets:
+                    existing_charge = buffet.charge_ids.filtered(lambda c: c.categorie == 'charges_journalieres')
+                    if existing_charge:
+                        existing_charge.unlink()

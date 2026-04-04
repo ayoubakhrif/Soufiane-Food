@@ -200,4 +200,48 @@
         </field>
     </record>
 
+    <!-- Vues pour Charges Journalières -->
+    <record id="view_buffet_charge_jour_tree" model="ir.ui.view">
+        <field name="name">buffet.charge.jour.tree</field>
+        <field name="model">buffet.charge.jour</field>
+        <field name="arch" type="xml">
+            <tree string="Charges Journalières">
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="buffet_count"/>
+                <field name="amount_per_buffet"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_buffet_charge_jour_form" model="ir.ui.view">
+        <field name="name">buffet.charge.jour.form</field>
+        <field name="model">buffet.charge.jour</field>
+        <field name="arch" type="xml">
+            <form string="Charge Journalière">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Charges du <field name="date" required="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="amount"/>
+                        </group>
+                        <group>
+                            <field name="buffet_count"/>
+                            <field name="amount_per_buffet"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_buffet_charge_jour" model="ir.actions.act_window">
+        <field name="name">Charges Par Jour</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">buffet.charge.jour</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
 </odoo>

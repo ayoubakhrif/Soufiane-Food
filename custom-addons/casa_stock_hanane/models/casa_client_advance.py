@@ -13,6 +13,7 @@ class CasaClientAdvance(models.Model):
     payment_mode = fields.Selection([
         ('espece', 'Espèces'),
         ('versement', 'Versement'),
+        ('virement', 'Virement'),
         ('cheque', 'Chèques'),
         ('charge', 'Charges'),
         ('transport', 'Transport'),

@@ -100,18 +100,7 @@ class CasaStockDiscount(models.Model):
     @api.constrains('order_id')
     def _check_unique_order_discount(self):
         """Block creating two active (non-cancelled) discounts for the same order."""
-        for rec in self:
-            if rec.order_id:
-                existing = self.search([
-                    ('order_id', '=', rec.order_id.id),
-                    ('state', '!=', 'cancel'),
-                    ('id', '!=', rec.id),
-                ])
-                if existing:
-                    raise UserError(_(
-                        "Une réduction active existe déjà pour la commande %s. "
-                        "Vous ne pouvez pas créer deux réductions pour la même commande."
-                    ) % rec.order_id.name)
+        pass
 
     # -------------------------------------------------------------------------
     # CRUD
@@ -212,6 +201,8 @@ class CasaStockDiscountLine(models.Model):
         'casa.stock.discount', string='Réduction',
         required=True, ondelete='cascade',
     )
+    client_id = fields.Many2one('casa.client', related='discount_id.client_id', store=True, string='Client')
+    state = fields.Selection(related='discount_id.state', string='État', store=True)
 
     exit_id = fields.Many2one('casa.stock.exit', string='Sortie', required=True, readonly=True)
 

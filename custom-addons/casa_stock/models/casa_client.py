@@ -33,6 +33,11 @@ class CasaClient(models.Model):
         'client_id',
         string='Réductions',
     )
+    discount_line_ids = fields.One2many(
+        'casa.stock.discount.line',
+        'client_id',
+        string='Lignes de réduction',
+    )
     advance_ids = fields.One2many(
         'casa.client.advance',
         'client_id',

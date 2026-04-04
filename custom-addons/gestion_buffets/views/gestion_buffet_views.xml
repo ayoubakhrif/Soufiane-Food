@@ -29,6 +29,7 @@
         <field name="arch" type="xml">
             <form string="Buffet">
                 <header>
+                    <button name="action_generate_excel" string="Générer Rapport Excel" type="object" class="oe_highlight" icon="fa-file-excel-o"/>
                     <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_done" string="Marquer comme Terminé" type="object" class="oe_highlight" invisible="state != 'confirmed'"/>
                     <button name="action_draft" string="Remettre en Brouillon" type="object" invisible="state not in ['cancel', 'confirmed']"/>

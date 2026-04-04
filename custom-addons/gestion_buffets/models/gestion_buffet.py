@@ -72,6 +72,124 @@ class GestionBuffet(models.Model):
         for rec in self:
             rec.state = 'draft'
 
+    def action_generate_excel(self):
+        self.ensure_one()
+        import io
+        import base64
+        try:
+            import xlsxwriter
+        except ImportError:
+            from odoo.exceptions import UserError
+            raise UserError(_('La bibliothèque xlsxwriter est requise.'))
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        sheet = workbook.add_worksheet('Détails Buffet')
+
+        # Formats
+        bold = workbook.add_format({'bold': True})
+        header_fmt = workbook.add_format({'bold': True, 'bg_color': '#D3D3D3', 'border': 1})
+        money_fmt = workbook.add_format({'num_format': '#,##0.00'})
+
+        # Informations Générales
+        sheet.write(0, 0, 'Référence', bold)
+        sheet.write(0, 1, self.name)
+        sheet.write(1, 0, 'Client', bold)
+        sheet.write(1, 1, self.client_name)
+        sheet.write(2, 0, 'Date', bold)
+        sheet.write(2, 1, str(self.date))
+        sheet.write(3, 0, 'Lieu', bold)
+        sheet.write(3, 1, self.place_id.name if self.place_id else '')
+        sheet.write(4, 0, 'Pack', bold)
+        sheet.write(4, 1, self.pack_id.name if self.pack_id else '')
+
+        # Détails Financiers (Head)
+        sheet.write(0, 3, 'Nombre de personnes', bold)
+        sheet.write(0, 4, self.nbr_personne)
+        sheet.write(1, 3, 'Prix par personne', bold)
+        sheet.write(1, 4, self.prix_personne, money_fmt)
+        sheet.write(2, 3, 'Avance', bold)
+        sheet.write(2, 4, self.avance, money_fmt)
+
+        row = 6
+
+        # Composants
+        sheet.write(row, 0, '--- COMPOSANTS ---', bold)
+        row += 1
+        sheet.write(row, 0, 'Composant', header_fmt)
+        sheet.write(row, 1, 'Quantité', header_fmt)
+        row += 1
+        for comp in self.composant_ids:
+            sheet.write(row, 0, comp.composant_id.name if comp.composant_id else '')
+            sheet.write(row, 1, comp.qty)
+            row += 1
+
+        row += 1
+
+        # Charges
+        sheet.write(row, 0, '--- CHARGES ---', bold)
+        row += 1
+        sheet.write(row, 0, 'Catégorie', header_fmt)
+        sheet.write(row, 1, 'Commentaire', header_fmt)
+        sheet.write(row, 2, 'Montant', header_fmt)
+        row += 1
+        for charge in self.charge_ids:
+            sheet.write(row, 0, getattr(charge, 'categorie', ''))
+            sheet.write(row, 1, charge.name or '')
+            sheet.write(row, 2, charge.amount, money_fmt)
+            row += 1
+
+        row += 1
+
+        # Division
+        if self.division_ids:
+            sheet.write(row, 0, '--- DIVISION DU BÉNÉFICE ---', bold)
+            row += 1
+            sheet.write(row, 0, 'Bénéficiaire', header_fmt)
+            sheet.write(row, 1, 'Pourcentage (%)', header_fmt)
+            sheet.write(row, 2, 'Part (Montant)', header_fmt)
+            row += 1
+            for div in self.division_ids:
+                sheet.write(row, 0, div.name or '')
+                sheet.write(row, 1, div.percentage)
+                sheet.write(row, 2, div.amount, money_fmt)
+                row += 1
+            row += 1
+
+        # Totaux
+        sheet.write(row, 0, '--- RÉSUMÉ FIXE ---', bold)
+        row += 1
+        sheet.write(row, 0, 'Revenu Total', bold)
+        sheet.write(row, 1, self.total_revenu, money_fmt)
+        row += 1
+        sheet.write(row, 0, 'Total Charges', bold)
+        sheet.write(row, 1, self.total_charges, money_fmt)
+        row += 1
+        sheet.write(row, 0, 'Reste à Payer', bold)
+        sheet.write(row, 1, self.reste_a_payer, money_fmt)
+        row += 1
+        sheet.write(row, 0, 'BÉNÉFICE NET', bold)
+        sheet.write(row, 1, self.benefice, money_fmt)
+
+        workbook.close()
+        output.seek(0)
+        file_data = base64.b64encode(output.read())
+
+        attachment = self.env['ir.attachment'].create({
+            'name': f'Report_{self.name.replace("/", "_")}.xlsx',
+            'type': 'binary',
+            'datas': file_data,
+            'res_model': 'gestion.buffet',
+            'res_id': self.id,
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'new',
+        }
+
 
 class BuffetComposantLine(models.Model):
     _name = 'buffet.composant.line'

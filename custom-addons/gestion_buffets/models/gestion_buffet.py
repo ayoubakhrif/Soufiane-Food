@@ -24,7 +24,7 @@ class GestionBuffet(models.Model):
     prix_personne = fields.Float(string='Prix par personne', required=True, tracking=True)
     avance = fields.Float(string='Avance', tracking=True)
 
-    composant_ids = fields.One2many('buffet.composant', 'buffet_id', string='Composants')
+    composant_ids = fields.One2many('buffet.composant.line', 'buffet_id', string='Composants')
     charge_ids = fields.One2many('buffet.charge', 'buffet_id', string='Charges')
 
     # Computed KPIs
@@ -75,15 +75,20 @@ class GestionBuffet(models.Model):
             rec.state = 'draft'
 
 
-class BuffetComposant(models.Model):
-    _name = 'buffet.composant'
-    _description = 'Composant de Buffet'
+class BuffetComposantLine(models.Model):
+    _name = 'buffet.composant.line'
+    _description = 'Ligne Composant'
 
     buffet_id = fields.Many2one('gestion.buffet', string='Buffet', ondelete='cascade')
-    name = fields.Char(string='Composant', required=True)
+    composant_id = fields.Many2one('buffet.composant', string='Composant', required=True)
     qty = fields.Float(string='Nombre', required=True, default=1.0)
     price_unit = fields.Float(string='Prix unitaire', required=True, default=0.0)
     price_total = fields.Float(string='Montant', compute='_compute_price_total', store=True)
+
+    @api.onchange('composant_id')
+    def _onchange_composant_id(self):
+        if self.composant_id:
+            self.price_unit = self.composant_id.price
 
     @api.depends('qty', 'price_unit')
     def _compute_price_total(self):

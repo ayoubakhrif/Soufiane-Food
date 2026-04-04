@@ -59,7 +59,7 @@
                         <page string="Composants">
                             <field name="composant_ids">
                                 <tree editable="bottom">
-                                    <field name="name"/>
+                                    <field name="composant_id"/>
                                     <field name="qty"/>
                                     <field name="price_unit"/>
                                     <field name="price_total" sum="Total Composants"/>

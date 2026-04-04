@@ -10,6 +10,7 @@
     'author': 'Soufiane-Food',
     'depends': ['base', 'mail'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/sequence.xml',
         'views/buffet_master_data_views.xml',

@@ -5,6 +5,7 @@
 
     <!-- Main Menus -->
     <menuitem id="menu_gestion_buffets_main" name="Buffets" parent="menu_gestion_buffets_root" action="action_gestion_buffet" sequence="10"/>
+    <menuitem id="menu_gestion_buffet_charge_jour" name="Charges par Jour" parent="menu_gestion_buffets_root" action="action_buffet_charge_jour" sequence="20"/>
 
     <!-- Configuration Menu -->
     <menuitem id="menu_gestion_buffets_config" name="Configuration" parent="menu_gestion_buffets_root" sequence="100"/>

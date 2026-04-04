@@ -86,4 +86,11 @@ class BuffetCharge(models.Model):
 
     buffet_id = fields.Many2one('gestion.buffet', string='Buffet', ondelete='cascade')
     name = fields.Char(string='Commentaire', required=True)
+    categorie = fields.Selection([
+        ('buvette', 'Buvette'),
+        ('fournisseur', 'Fournisseur'),
+        ('hamala', 'Hamala'),
+        ('serviants', 'Serviants'),
+        ('transport', 'Transport'),
+    ], string='Catégorie', required=True)
     amount = fields.Float(string='Prix', required=True, default=0.0)

@@ -67,6 +67,7 @@
                         <page string="Charges">
                             <field name="charge_ids">
                                 <tree editable="bottom">
+                                    <field name="categorie"/>
                                     <field name="name"/>
                                     <field name="amount" sum="Total Charges"/>
                                 </tree>
@@ -110,6 +111,7 @@
                 <group expand="0" string="Grouper par">
                     <filter string="Client" name="group_client" context="{'group_by':'client_name'}"/>
                     <filter string="Date" name="group_date" context="{'group_by':'date'}"/>
+                    <filter string="Lieu" name="group_place" context="{'group_by':'place_id'}"/>
                     <filter string="Pack" name="group_pack" context="{'group_by':'pack_id'}"/>
                     <filter string="Statut" name="group_state" context="{'group_by':'state'}"/>
                 </group>

@@ -409,7 +409,7 @@ class CasaClient(models.Model):
 
             for week, records in grouped.items():
                 total_week = sum(
-                    (r.tonnage or 0) * (r.price_sale or 0)
+                    ((r.tonnage or 0) * (r.price_sale or 0)) - (r.discount_amount or 0.0)
                     for r in records
                 )
 

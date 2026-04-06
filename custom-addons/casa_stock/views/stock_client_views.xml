@@ -116,7 +116,7 @@
                                            decoration-info="state == 'draft'"/>
                                     <button name="action_confirm" string="Valider" type="object" 
                                             icon="fa-check" 
-                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                                             invisible="state == 'confirmed'"/>
                                     <button name="action_draft" string="Remettre en brouillon" type="object" 
                                             icon="fa-undo" 
@@ -268,7 +268,7 @@
                        decoration-info="state == 'draft'"/>
                 <button name="action_confirm" string="Valider" type="object" 
                         icon="fa-check" 
-                        groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                        groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                         invisible="state == 'confirmed'"/>
                 <button name="action_draft" string="Remettre en brouillon" type="object" 
                         icon="fa-undo" 
@@ -285,7 +285,7 @@
             <form string="Avance Client">
                 <header>
                     <button name="action_confirm" string="Valider" type="object" class="btn-primary" 
-                            groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                             invisible="state == 'confirmed'"/>
                     <button name="action_draft" string="Remettre en brouillon" type="object" 
                             groups="casa_stock.group_admin"

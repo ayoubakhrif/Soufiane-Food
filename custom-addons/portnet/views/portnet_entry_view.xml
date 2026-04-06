@@ -148,11 +148,11 @@
         <field name="model">portnet.entry</field>
         <field name="arch" type="xml">
             <search string="Recherche Portnet">
+                <field name="invoice"/>
                 <field name="name"/>
                 <field name="article_id"/>
                 <field name="supplier_id"/>
                 <field name="ste_id"/>
-                <field name="invoice"/>
                 <separator/>
                 <filter name="filter_new" string="Nouveau" domain="[('state','=','new')]"/>
                 <filter name="filter_domicilied" string="Domicilié" domain="[('state','=','domicilied')]"/>

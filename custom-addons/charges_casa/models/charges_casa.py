@@ -1,5 +1,20 @@
 from odoo import models, fields, api
 
+
+class ChargesCasaLine(models.Model):
+    _name = 'charges.casa.line'
+    _description = 'Ligne de Charge Casa'
+
+    charge_id = fields.Many2one('charges.casa', string='Charge', required=True, ondelete='cascade')
+    type = fields.Selection([
+        ('transport', 'Transport'),
+        ('salaires', 'Salaires'),
+        ('autres', 'Autres'),
+    ], string='Type', required=True)
+    amount = fields.Float(string='Montant', required=True)
+    comment = fields.Char(string='Commentaire')
+
+
 class ChargesCasa(models.Model):
     _name = 'charges.casa'
     _description = 'Charges Casa'
@@ -7,27 +22,28 @@ class ChargesCasa(models.Model):
     _order = 'date desc, id desc'
 
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today, tracking=True)
-    amount = fields.Float(string='Montant', required=True, tracking=True)
-    type = fields.Selection([
-        ('transport', 'Transport'),
-        ('salaires', 'Salaires'),
-        ('autres', 'Autres')
-    ], string='Type', required=True, tracking=True)
-    
     client_id = fields.Many2one('casa.client', string='Client', tracking=True)
     ville = fields.Selection([
         ('agadir', 'Agadir'),
         ('tanger', 'Tanger'),
         ('marrakech', 'Marrakech'),
         ('kenitra', 'Kenitra'),
-        ('casa', 'Casa')
+        ('casa', 'Casa'),
     ], string='Ville', tracking=True)
     user_id = fields.Many2one('res.users', string='Saisi par', default=lambda self: self.env.user, tracking=True, readonly=True)
-    commentaires = fields.Char(string='Commentaires')
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('confirmed', 'Confirmé')
+        ('confirmed', 'Confirmé'),
     ], string='Statut', default='draft', tracking=True)
+
+    line_ids = fields.One2many('charges.casa.line', 'charge_id', string='Lignes de Charges')
+
+    total_amount = fields.Float(string='Total', compute='_compute_total_amount', store=True)
+
+    @api.depends('line_ids.amount')
+    def _compute_total_amount(self):
+        for record in self:
+            record.total_amount = sum(record.line_ids.mapped('amount'))
 
     def action_confirm(self):
         for record in self:
@@ -42,7 +58,7 @@ class ChargesCasa(models.Model):
         records = super().create(vals_list)
         for record in records:
             if record.client_id:
-                record._create_client_advance()
+                record._create_client_advances()
         return records
 
     def write(self, vals):
@@ -51,17 +67,18 @@ class ChargesCasa(models.Model):
             res = super().write(vals)
             for rec in self:
                 if rec.client_id and rec.client_id != old_clients.get(rec.id):
-                    rec._create_client_advance()
+                    rec._create_client_advances()
             return res
         return super().write(vals)
 
-    def _create_client_advance(self):
+    def _create_client_advances(self):
         self.ensure_one()
-        self.env['casa.client.advance'].create({
-            'client_id': self.client_id.id,
-            'amount': self.amount,
-            'date': self.date,
-            'payment_mode': 'charge',
-            'comment': self.commentaires,
-            'state': 'draft',
-        })
+        for line in self.line_ids:
+            self.env['casa.client.advance'].create({
+                'client_id': self.client_id.id,
+                'amount': line.amount,
+                'date': self.date,
+                'payment_mode': 'charge',
+                'comment': line.comment,
+                'state': 'draft',
+            })

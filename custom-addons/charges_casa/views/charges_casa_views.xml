@@ -7,12 +7,13 @@
         <field name="arch" type="xml">
             <tree string="Charges">
                 <field name="date"/>
-                <field name="type"/>
                 <field name="client_id"/>
                 <field name="ville"/>
-                <field name="amount" sum="Total"/>
+                <field name="total_amount" sum="Total"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
-                <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-info="state == 'draft'"/>
             </tree>
         </field>
     </record>
@@ -24,24 +25,35 @@
         <field name="arch" type="xml">
             <form string="Charge">
                 <header>
-                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_draft" string="Remettre en Brouillon" type="object" invisible="state != 'confirmed'"/>
+                    <button name="action_confirm" string="Confirmer" type="object"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_draft" string="Remettre en Brouillon" type="object"
+                            invisible="state != 'confirmed'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                 </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="date"/>
-                            <field name="type"/>
                             <field name="client_id"/>
                             <field name="ville"/>
                         </group>
                         <group>
-                            <field name="amount"/>
-                            <field name="commentaires" placeholder="Ajouter un commentaire..."/>
                             <field name="user_id" readonly="1"/>
+                            <field name="total_amount" readonly="1"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Charges">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="type"/>
+                                    <field name="amount"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
@@ -58,12 +70,12 @@
         <field name="model">charges.casa</field>
         <field name="arch" type="xml">
             <search string="Charges">
-                <field name="type"/>
                 <field name="client_id"/>
                 <field name="ville"/>
                 <field name="user_id"/>
                 <group expand="0" string="Group By">
-                    <filter string="Type" name="group_by_type" context="{'group_by':'type'}"/>
+                    <filter string="Client" name="group_by_client" context="{'group_by':'client_id'}"/>
+                    <filter string="Ville" name="group_by_ville" context="{'group_by':'ville'}"/>
                     <filter string="Mois" name="group_by_date" context="{'group_by':'date:month'}"/>
                     <filter string="Statut" name="group_by_state" context="{'group_by':'state'}"/>
                 </group>
@@ -86,5 +98,6 @@
 
     <!-- Menus -->
     <menuitem id="menu_charges_casa_root" name="Charges Casa" sequence="50"/>
-    <menuitem id="menu_charges_casa_main" name="Charges" parent="menu_charges_casa_root" action="action_charges_casa" sequence="10"/>
+    <menuitem id="menu_charges_casa_main" name="Charges" parent="menu_charges_casa_root"
+              action="action_charges_casa" sequence="10"/>
 </odoo>

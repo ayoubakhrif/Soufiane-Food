@@ -74,14 +74,12 @@ class Cal3iyaClient(models.Model):
         sheet.set_column(6, 6, 18)  # Débit
 
         # Titre Principal
-        sheet.merge_range('A1:G1', f"Détails du Bénéficiaire: {self.name}", title_style)
+        sheet.merge_range('A1:G1', f"Situation du Bénéficiaire : {self.name}", title_style)
 
         # Date de relevé à droite
         from odoo import fields as odoo_fields
-        sheet.set_column(7, 7, 18)
-        sheet.set_column(8, 8, 15)
-        sheet.write('H3', 'Date de relevé', header_style)
-        sheet.write('I3', odoo_fields.Date.today().strftime('%d/%m/%Y'), cell_style)
+        sheet.write('F4', 'Date', header_style)
+        sheet.write('G4', odoo_fields.Date.today().strftime('%d/%m/%Y'), cell_style)
 
         row = 2
 

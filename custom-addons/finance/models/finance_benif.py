@@ -70,8 +70,9 @@ class Cal3iyaClient(models.Model):
         sheet.set_column(2, 2, 18)  # Date d'émission
         sheet.set_column(3, 3, 18)  # Date d'échéance
         sheet.set_column(4, 4, 18)  # Date d'encaissement
-        sheet.set_column(5, 5, 18)  # Crédit
-        sheet.set_column(6, 6, 18)  # Débit
+        sheet.set_column(5, 5, 25)  # Facture
+        sheet.set_column(6, 6, 18)  # Crédit
+        sheet.set_column(7, 7, 18)  # Débit
 
         # Titre Principal
         sheet.merge_range('A1:G1', f"Situation du Bénéficiaire : {self.name}", title_style)
@@ -110,15 +111,19 @@ class Cal3iyaClient(models.Model):
         # -------------------------
         # Bloc Liste des Chèques
         # -------------------------
-        sheet.merge_range(row, 0, row, 6, "Chèques Physiques", section_style)
+        sheet.merge_range(row, 0, row, 7, "Chèques Physiques", section_style)
         row += 1
+
+        wrap_style = workbook.add_format({'border': 1, 'text_wrap': True, 'valign': 'top'})
 
         headers = [
             "N° Chèque", "Société", "Date d'émission", "Date d'échéance",
-            "Date d'encaissement", "Crédit", "Débit"
+            "Date d'encaissement", "Facture", "Crédit", "Débit"
         ]
         sheet.write_row(row, 0, headers, header_style)
         row += 1
+
+        facture_labels = {'m': 'M', 'bureau': 'Bureau', 'annule': 'Annulé'}
 
         for chq in self.physical_chq_ids:
             # Numéro
@@ -139,9 +144,18 @@ class Cal3iyaClient(models.Model):
             if dt_enc: sheet.write_datetime(row, 4, dt_enc, date_style)
             else: sheet.write(row, 4, "", cell_style)
 
+            # Factures (toutes les lignes datacheque)
+            facture_lines = []
+            for dc in chq.datacheque_ids:
+                if dc.facture == 'fact':
+                    facture_lines.append(dc.serie or 'F/')
+                else:
+                    facture_lines.append(facture_labels.get(dc.facture, dc.facture or ''))
+            sheet.write(row, 5, '\n'.join(facture_lines), wrap_style)
+
             # Montants
-            sheet.write_number(row, 5, float(chq.credit or 0.0), money_style)
-            sheet.write_number(row, 6, float(chq.debit or 0.0), money_style)
+            sheet.write_number(row, 6, float(chq.credit or 0.0), money_style)
+            sheet.write_number(row, 7, float(chq.debit or 0.0), money_style)
 
             row += 1
 

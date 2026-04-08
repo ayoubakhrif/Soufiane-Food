@@ -64,6 +64,7 @@
                                     <field name="type"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="facture"/>
+                                    <field name="serie" string="Série de facture"/>
                                     <field name="state"/>
                                 </tree>
                             </field>

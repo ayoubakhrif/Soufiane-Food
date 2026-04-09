@@ -1,7 +1,7 @@
 {
-    'name': 'Contacts Casa',
+    'name': 'Contacts SF',
     'version': '1.0',
-    'summary': 'Gestion des contacts personnalisés',
+    'summary': 'Gestion des contacts SF',
     'category': 'Custom',
     'author': 'Casa',
     'license': 'LGPL-3',

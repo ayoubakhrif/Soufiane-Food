@@ -2,7 +2,7 @@
 <odoo>
     <!-- ACTION -->
     <record id="action_contacts_casa" model="ir.actions.act_window">
-        <field name="name">Contacts</field>
+        <field name="name">Contacts SF</field>
         <field name="res_model">contacts.casa</field>
         <field name="view_mode">tree,form</field>
     </record>
@@ -10,7 +10,7 @@
     <!-- MENU -->
     <menuitem
         id="menu_contacts_casa_root"
-        name="Contacts"
+        name="Contacts SF"
         sequence="90"
         web_icon="contacts_casa,static/description/icon.png"
         action="action_contacts_casa"

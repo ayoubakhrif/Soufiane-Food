@@ -49,6 +49,20 @@
                     <button name="action_close" string="Clôturé" type="object"
                             invisible="state != 'resolved'"
                             groups="claims.group_claims_manager"/>
+                            
+                    <!-- Buttons for returning to previous state -->
+                    <button name="action_previous_state" string="Retour à Initial" type="object"
+                            invisible="state != 'received'"
+                            groups="claims.group_claims_manager"/>
+                    <button name="action_previous_state" string="Retour à Reçu" type="object"
+                            invisible="state != 'waiting'"
+                            groups="claims.group_claims_manager"/>
+                    <button name="action_previous_state" string="Retour à En Attente" type="object"
+                            invisible="state not in ('resolved', 'refused')"
+                            groups="claims.group_claims_manager"/>
+                    <button name="action_previous_state" string="Retour à Résolu" type="object"
+                            invisible="state != 'closed'"
+                            groups="claims.group_claims_manager"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
                 </header>

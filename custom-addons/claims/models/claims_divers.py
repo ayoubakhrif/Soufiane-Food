@@ -186,6 +186,20 @@ class ClaimsDivers(models.Model):
                 'target': 'new',
             }
 
+    def action_previous_state(self):
+        """Action for Admin to revert the claim to the previous state."""
+        if not self.env.user.has_group('claims.group_claims_manager'):
+            raise UserError("Only Administrators can turn claims to the previous state.")
+        for rec in self:
+            if rec.state == 'received':
+                rec.write({'state': 'initial', 'date_received': False})
+            elif rec.state == 'waiting':
+                rec.write({'state': 'received', 'date_waiting': False})
+            elif rec.state in ['resolved', 'refused']:
+                rec.write({'state': 'waiting', 'date_resolved': False, 'date_refused': False})
+            elif rec.state == 'closed':
+                rec.write({'state': 'resolved', 'date_closed': False})
+
 class ClaimsDiversCharge(models.Model):
     _name = 'claims.divers.charge'
     _description = 'Divers Claim Charge'

@@ -67,6 +67,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_confirm_emission"
+                            string="Confirmer l'Émission"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'reserve'"/>
                     <button name="action_request_edit"
                             string="Demander une authorisation"
                             type="object"

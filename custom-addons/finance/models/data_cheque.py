@@ -52,10 +52,11 @@ class DataCheque(models.Model):
     journal = fields.Integer(string='Journal N°', required=True, default=None)
     facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False, optional=True)
     state = fields.Selection([
+        ('reserve', 'Réserve'),
         ('actif', 'Actif'),
         ('annule', 'Annulé'),
         ('bureau', 'Bureau'),
-    ], string='État', default='actif', tracking=True, store=True)
+    ], string='État', default='reserve', tracking=True, store=True)
     type = fields.Selection([
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
@@ -110,12 +111,16 @@ class DataCheque(models.Model):
             else:
                 rec.unlock_until_label = ""
 
-    @api.depends('unlock_until')
+    @api.depends('unlock_until', 'state')
     def _compute_is_locked(self):
         """Compute if cheque is locked for current user."""
         for rec in self:
             # Managers are never locked
             if self.env.user.has_group('finance.group_finance_user'):
+                rec.is_locked = False
+                continue
+            
+            if rec.state == 'reserve':
                 rec.is_locked = False
                 continue
             
@@ -741,6 +746,14 @@ class DataCheque(models.Model):
                 'default_cheque_id': self.id,
             }
         }
+
+    # ------------------------------------------------------------
+    # Action : Confirmer l'Émission
+    # ------------------------------------------------------------
+    def action_confirm_emission(self):
+        for rec in self:
+            if rec.state == 'reserve':
+                rec.state = 'actif'
 
     # 7) Helper to force state relation logic in backend
     def _force_state_logic(self, vals):

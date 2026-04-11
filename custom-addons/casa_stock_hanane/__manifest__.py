@@ -9,7 +9,7 @@ Stock Casa
 This module provides a robust stock management system based on an immutable movement ledger.
     """,
     'author': 'Ayoub',
-    'depends': ['base', 'web', 'mail', 'company_data', 'custom_employee'],
+    'depends': ['base', 'web', 'mail', 'company_data', 'custom_employee', 'casa_stock'],
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',

@@ -72,4 +72,24 @@
               action="action_casa_hanane_client_difference"
               sequence="20"/>
 
+    <!-- ============================================== -->
+    <!--     INJECTION INTO CASA STOCK MAIN MODULE      -->
+    <!-- ============================================== -->
+    <menuitem id="menu_casa_stock_difference_root_in_casa"
+              name="Différence"
+              parent="casa_stock.menu_casa_stock_root"
+              sequence="65"/>
+
+    <menuitem id="menu_casa_stock_stock_difference_in_casa"
+              name="Différence produits"
+              parent="menu_casa_stock_difference_root_in_casa"
+              action="action_casa_hanane_stock_difference"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_client_difference_in_casa"
+              name="Différence clients"
+              parent="menu_casa_stock_difference_root_in_casa"
+              action="action_casa_hanane_client_difference"
+              sequence="20"/>
+
 </odoo>

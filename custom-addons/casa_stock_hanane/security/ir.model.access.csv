@@ -80,3 +80,8 @@ access_casa_sortie_supp_user_hanane,casa_hanane.sortie.supp.user,model_casa_hana
 access_casa_sortie_supp_manager_hanane,casa_hanane.sortie.supp.manager,model_casa_hanane_sortie_supp,group_manager,1,1,1,0
 access_casa_sortie_supp_admin_hanane,casa_hanane.sortie.supp.admin,model_casa_hanane_sortie_supp,group_admin,1,1,1,1
 access_casa_sortie_supp_viewer_hanane,casa_hanane.sortie.supp.viewer,model_casa_hanane_sortie_supp,group_viewer,1,0,0,0
+
+access_casa_stock_difference_user_hanane,casa_hanane.stock.difference.user,model_casa_hanane_stock_difference,group_user,1,0,0,0
+access_casa_stock_difference_manager_hanane,casa_hanane.stock.difference.manager,model_casa_hanane_stock_difference,group_manager,1,0,0,0
+access_casa_stock_difference_admin_hanane,casa_hanane.stock.difference.admin,model_casa_hanane_stock_difference,group_admin,1,0,0,0
+access_casa_stock_difference_viewer_hanane,casa_hanane.stock.difference.viewer,model_casa_hanane_stock_difference,group_viewer,1,0,0,0

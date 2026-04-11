@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View -->
+    <record id="view_casa_hanane_stock_difference_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.stock.difference.tree</field>
+        <field name="model">casa_hanane.stock.difference</field>
+        <field name="arch" type="xml">
+            <tree string="Différence de stock" create="false" edit="false" delete="false">
+                <field name="article_id"/>
+                <field name="quantity_casa"/>
+                <field name="quantity_hanane"/>
+                <field name="difference"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_casa_hanane_stock_difference" model="ir.actions.act_window">
+        <field name="name">Différence de stock</field>
+        <field name="res_model">casa_hanane.stock.difference</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Il n'y a aucune différence de stock pour le moment.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item (Under Audit) -->
+    <menuitem id="menu_casa_hanane_stock_difference"
+              name="Différence de stock"
+              parent="menu_casa_stock_audit"
+              action="action_casa_hanane_stock_difference"
+              sequence="20"/>
+</odoo>

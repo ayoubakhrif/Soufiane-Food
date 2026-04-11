@@ -24,7 +24,15 @@ class CasaStockClientDifference(models.Model):
                     COALESCE(c2.compte_total, 0) AS compte_total_hanane,
                     (COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS difference,
                     ABS(COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS abs_difference
-                FROM casa_client c1
-                FULL OUTER JOIN casa_hanane_client c2 ON LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name))
+                FROM (
+                    SELECT LOWER(TRIM(name)) as match_name, MAX(name) as name, SUM(compte_total) as compte_total
+                    FROM casa_client
+                    GROUP BY LOWER(TRIM(name))
+                ) c1
+                FULL OUTER JOIN (
+                    SELECT LOWER(TRIM(name)) as match_name, MAX(name) as name, SUM(compte_total) as compte_total
+                    FROM casa_hanane_client
+                    GROUP BY LOWER(TRIM(name))
+                ) c2 ON c1.match_name = c2.match_name
             )
         """ % self._table)

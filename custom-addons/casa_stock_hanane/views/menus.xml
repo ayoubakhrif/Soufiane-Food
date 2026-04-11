@@ -19,17 +19,22 @@
               action="action_casa_stock_order"
               sequence="35"/>
 
+    <menuitem id="menu_casa_stock_autres"
+              name="Autres"
+              parent="menu_casa_stock_root"
+              sequence="60"/>
+
     <menuitem id="menu_casa_other_sale"
               name="Autres Ventes"
-              parent="menu_casa_stock_root"
+              parent="menu_casa_stock_autres"
               action="action_casa_other_sale"
-              sequence="38"/>
+              sequence="10"/>
 
     <menuitem id="menu_casa_stock_return"
               name="Retours Clients"
-              parent="menu_casa_stock_root"
+              parent="menu_casa_stock_autres"
               action="action_casa_stock_return"
-              sequence="36"/>
+              sequence="20"/>
 
     <menuitem id="menu_casa_stock_exit"
               name="Sorties"
@@ -39,13 +44,13 @@
 
     <menuitem id="menu_casa_stock_transfer"
               name="Transferts"
-              parent="menu_casa_stock_root"
+              parent="menu_casa_stock_autres"
               action="action_casa_stock_transfer"
-              sequence="33"/>
+              sequence="30"/>
 
     <menuitem id="menu_casa_stock_discount"
               name="Réductions"
-              parent="menu_casa_stock_root"
+              parent="menu_casa_stock_autres"
               action="action_casa_stock_discount"
               sequence="40"/>
 

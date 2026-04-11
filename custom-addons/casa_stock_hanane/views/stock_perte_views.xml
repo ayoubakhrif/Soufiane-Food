@@ -114,7 +114,7 @@
 
     <menuitem id="menu_casa_stock_perte_hanane" 
               name="Pertes Hanane" 
-              parent="menu_casa_stock_root" 
+              parent="menu_casa_stock_autres" 
               action="action_casa_stock_perte_hanane" 
               sequence="50"/>
 </odoo>

@@ -23,6 +23,8 @@ class CasaStockClientDifference(models.Model):
                     (COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS difference
                 FROM casa_client c1
                 FULL OUTER JOIN casa_hanane_client c2 ON LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name))
-                WHERE (COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) != 0
+                WHERE ((COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) != 0
+                       OR c1.name IS NULL 
+                       OR c2.name IS NULL)
             )
         """ % self._table)

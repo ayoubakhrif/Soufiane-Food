@@ -5,11 +5,13 @@ class CasaStockClientDifference(models.Model):
     _description = 'Différence de soldes clients (Casa vs Hanane)'
     _auto = False
     _log_access = False
+    _order = 'abs_difference DESC'
 
     client_name = fields.Char(string='Client', readonly=True)
     compte_total_casa = fields.Float(string='Solde Total (Casa)', readonly=True)
     compte_total_hanane = fields.Float(string='Solde Total (Hanane)', readonly=True)
     difference = fields.Float(string='Différence', readonly=True)
+    abs_difference = fields.Float(string='Différence absolue', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -20,11 +22,9 @@ class CasaStockClientDifference(models.Model):
                     COALESCE(c1.name, c2.name) AS client_name,
                     COALESCE(c1.compte_total, 0) AS compte_total_casa,
                     COALESCE(c2.compte_total, 0) AS compte_total_hanane,
-                    (COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS difference
+                    (COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS difference,
+                    ABS(COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS abs_difference
                 FROM casa_client c1
                 FULL OUTER JOIN casa_hanane_client c2 ON LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name))
-                WHERE ((COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) != 0
-                       OR c1.name IS NULL 
-                       OR c2.name IS NULL)
             )
         """ % self._table)

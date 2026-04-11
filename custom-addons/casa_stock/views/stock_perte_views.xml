@@ -113,11 +113,4 @@
         </field>
     </record>
 
-    <!-- Menu Item (Assuming there is a 'menu_casa_stock_operations' or similar parent menu) -->
-    <!-- Typically 'menu_casa_stock_root' is the parent in such modules, let's link under the main operations menu -->
-    <menuitem id="menu_casa_stock_perte" 
-              name="Pertes" 
-              parent="menu_casa_stock_autres" 
-              action="action_casa_stock_perte" 
-              sequence="50"/>
 </odoo>

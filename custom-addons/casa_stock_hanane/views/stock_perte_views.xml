@@ -96,7 +96,6 @@
         </field>
     </record>
 
-    <!-- Action -->
     <record id="action_casa_stock_perte_hanane" model="ir.actions.act_window">
         <field name="name">Pertes de Stock Hanane</field>
         <field name="res_model">casa_hanane.stock.perte</field>
@@ -112,9 +111,4 @@
         </field>
     </record>
 
-    <menuitem id="menu_casa_stock_perte_hanane" 
-              name="Pertes Hanane" 
-              parent="menu_casa_stock_autres" 
-              action="action_casa_stock_perte_hanane" 
-              sequence="50"/>
 </odoo>

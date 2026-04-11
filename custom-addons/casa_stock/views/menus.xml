@@ -111,4 +111,10 @@
               parent="menu_casa_stock_data"
               action="action_casa_stock_ste"
               sequence="50"/>
+
+    <menuitem id="menu_casa_stock_perte" 
+              name="Pertes" 
+              parent="menu_casa_stock_autres" 
+              action="action_casa_stock_perte" 
+              sequence="50"/>
 </odoo>

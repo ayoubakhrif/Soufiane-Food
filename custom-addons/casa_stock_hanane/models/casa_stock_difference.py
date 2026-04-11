@@ -5,11 +5,13 @@ class CasaStockDifference(models.Model):
     _description = 'Différence de stock'
     _auto = False
     _log_access = False
+    _order = 'abs_difference DESC'
 
     article_id = fields.Many2one('company.article', string='Article (Company)', readonly=True)
     quantity_casa = fields.Float(string='Quantité (Casa)', readonly=True)
     quantity_hanane = fields.Float(string='Quantité (Hanane)', readonly=True)
     difference = fields.Float(string='Différence', readonly=True)
+    abs_difference = fields.Float(string='Différence absolue', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -20,7 +22,8 @@ class CasaStockDifference(models.Model):
                     a.id as article_id,
                     COALESCE(casa_stock.quantity, 0) as quantity_casa,
                     COALESCE(hanane_stock.quantity, 0) as quantity_hanane,
-                    (COALESCE(casa_stock.quantity, 0) - COALESCE(hanane_stock.quantity, 0)) as difference
+                    (COALESCE(casa_stock.quantity, 0) - COALESCE(hanane_stock.quantity, 0)) as difference,
+                    ABS(COALESCE(casa_stock.quantity, 0) - COALESCE(hanane_stock.quantity, 0)) as abs_difference
                 FROM company_article a
                 LEFT JOIN (
                     SELECT p.article_id, sum(m.qty) as quantity
@@ -36,6 +39,5 @@ class CasaStockDifference(models.Model):
                     WHERE m.state = 'done'
                     GROUP BY p.article_id
                 ) hanane_stock ON hanane_stock.article_id = a.id
-                WHERE (COALESCE(casa_stock.quantity, 0) - COALESCE(hanane_stock.quantity, 0)) != 0
             )
         """ % self._table)

@@ -853,8 +853,8 @@ class DataCheque(models.Model):
 
     def write(self, vals):
         # Check edit lock BEFORE any modifications
-        # Skip lock check if user is manager
-        if not self.env.user.has_group('finance.group_finance_user'):
+        # Skip lock check if user is manager or if bypassed by context
+        if not self.env.user.has_group('finance.group_finance_user') and not self.env.context.get('bypass_edit_lock'):
             for rec in self:
                 # Check lock status directly (field is already computed)
                 # Do NOT call _compute_is_locked() here - it causes recursion

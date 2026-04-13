@@ -11,6 +11,7 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
+                <field name="container_count" string="Nb of Containers" optional="show"/>
                 <field name="eta"/>
                 <field name="date_booking" optional="show"/>
                 <field name="date_docs_received" optional="show"/>
@@ -107,6 +108,7 @@
                     <group>
                         <group string="Informations Générales">
                             <field name="eta"/>
+                            <field name="container_count" string="Nb of Containers" readonly="1"/>
                             
                             <!-- For non-admins: readonly when confirmed -->
                             <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/> 

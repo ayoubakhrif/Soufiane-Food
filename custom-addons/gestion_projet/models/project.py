@@ -21,8 +21,8 @@ class ProjectTaskLine(models.Model):
     start_date = fields.Date(string='Start Date')
     end_date = fields.Date(string='End Date')
     complexity = fields.Selection([
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
+        ('low', 'Faible'),
+        ('medium', 'Moyen'),
+        ('high', 'Élevé'),
     ], string='Complexity')
     project_id = fields.Many2one('project.management', string='Project', required=True, ondelete='cascade')

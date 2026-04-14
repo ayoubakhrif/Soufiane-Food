@@ -101,17 +101,17 @@
                                         </td>
                                         <td style="padding: 9px 14px; text-align: center;">
                                             <!-- Badge Complexité -->
-                                            <t t-if="task.complexity == 'Low'">
+                                            <t t-if="task.complexity == 'faible'">
                                                 <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; background-color: #e6f4ea; color: #1e7e34; border: 1px solid #a8d5b5;">
                                                     Faible
                                                 </span>
                                             </t>
-                                            <t t-elif="task.complexity == 'Medium'">
+                                            <t t-elif="task.complexity == 'moyen'">
                                                 <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; background-color: #fff8e1; color: #b07a00; border: 1px solid #ffe082;">
                                                     Moyenne
                                                 </span>
                                             </t>
-                                            <t t-elif="task.complexity == 'High'">
+                                            <t t-elif="task.complexity == 'eleve'">
                                                 <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; background-color: #fce8e6; color: #c0392b; border: 1px solid #f5b7b1;">
                                                     Élevée
                                                 </span>

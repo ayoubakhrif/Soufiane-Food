@@ -14,79 +14,136 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
-                    <div class="page" style="font-family: 'Helvetica', sans-serif; color: #333;">
-                        
-                        <div class="row mb-4" style="border-bottom: 3px solid #714B67; padding-bottom: 10px;">
-                            <div class="col-8">
-                                <h2 style="color: #714B67; font-weight: bold; text-transform: uppercase; margin: 0;">
-                                    Rapport de Projet : <span t-field="doc.name"/>
-                                </h2>
-                            </div>
-                            <div class="col-4 text-end align-bottom">
-                                <span class="text-muted" style="font-size: 0.9em;">
-                                    Émis le : <span t-esc="datetime.datetime.now().strftime('%d/%m/%Y')"/>
-                                </span>
+                    <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2d2d2d; font-size: 11pt; line-height: 1.5;">
+
+                        <!-- ══ EN-TÊTE ══ -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border-bottom: 3px solid #714B67;">
+                            <tr>
+                                <td style="padding-bottom: 12px;">
+                                    <div style="font-size: 8pt; font-weight: bold; letter-spacing: 1.5px; color: #714B67; text-transform: uppercase; margin-bottom: 4px;">
+                                        Rapport de Projet
+                                    </div>
+                                    <div style="font-size: 18pt; font-weight: bold; color: #1a1a2e;">
+                                        <span t-field="doc.name"/>
+                                    </div>
+                                </td>
+                                <td style="text-align: right; vertical-align: bottom; padding-bottom: 14px;">
+                                    <div style="font-size: 8pt; color: #888; text-transform: uppercase; letter-spacing: 1px;">Date d'émission</div>
+                                    <div style="font-size: 10pt; font-weight: bold; color: #2d2d2d;">
+                                        <span t-esc="datetime.datetime.now().strftime('%d/%m/%Y')"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ══ CARTES RÉSUMÉ ══ -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
+                            <tr>
+                                <!-- Carte Responsable -->
+                                <td style="width: 48%; padding: 14px 18px; background-color: #714B67; border-radius: 6px; vertical-align: top;">
+                                    <div style="font-size: 7.5pt; font-weight: bold; letter-spacing: 1.2px; color: #f2d9ec; text-transform: uppercase; margin-bottom: 5px;">
+                                        Responsable du projet
+                                    </div>
+                                    <div style="font-size: 13pt; font-weight: bold; color: #ffffff;">
+                                        <span t-field="doc.manager_id.name"/>
+                                    </div>
+                                </td>
+                                <td style="width: 4%;"></td>
+                                <!-- Carte Statistiques -->
+                                <td style="width: 48%; padding: 14px 18px; background-color: #f5f0f4; border-left: 4px solid #714B67; border-radius: 0 6px 6px 0; vertical-align: top;">
+                                    <div style="font-size: 7.5pt; font-weight: bold; letter-spacing: 1.2px; color: #714B67; text-transform: uppercase; margin-bottom: 5px;">
+                                        Nombre de tâches
+                                    </div>
+                                    <div style="font-size: 22pt; font-weight: bold; color: #1a1a2e; line-height: 1;">
+                                        <span t-esc="len(doc.task_ids)"/>
+                                    </div>
+                                    <div style="font-size: 9pt; color: #666; margin-top: 3px;">tâche(s) enregistrée(s)</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ══ TITRE SECTION TÂCHES ══ -->
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 11pt; font-weight: bold; color: #714B67; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 2px solid #714B67; padding-bottom: 4px;">
+                                Liste des Tâches
                             </div>
                         </div>
 
-                        <div class="row mt-4 mb-4">
-                            <div class="col-6">
-                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; border-left: 5px solid #714B67; height: 100%;">
-                                    <strong style="color: #714B67; text-transform: uppercase; font-size: 0.8em;">Responsable du Projet</strong>
-                                    <p class="mb-0" style="font-size: 1.2em; font-weight: 500;" t-field="doc.manager_id.name"/>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; border-left: 5px solid #dee2e6; height: 100%;">
-                                    <strong style="color: #666; text-transform: uppercase; font-size: 0.8em;">Statistiques</strong>
-                                    <p class="mb-0" style="font-size: 1.2em;">
-                                        <span t-esc="len(doc.task_ids)"/> Tâche(s) enregistrée(s)
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h4 class="mt-4 mb-3" style="color: #714B67; font-weight: bold;">
-                            <i class="fa fa-tasks" style="margin-right: 10px;"/>Liste des Tâches
-                        </h4>
-                        
-                        <table class="table table-sm o_main_table" style="border: 1px solid #dee2e6;">
-                            <thead style="background-color: #714B67; color: white;">
-                                <tr>
-                                    <th class="text-start" style="padding: 10px;">Désignation de la Tâche</th>
-                                    <th class="text-center" style="padding: 10px;">Responsable</th>
-                                    <th class="text-center" style="padding: 10px;">Période</th>
-                                    <th class="text-center" style="padding: 10px;">Complexité</th>
+                        <!-- ══ TABLEAU DES TÂCHES ══ -->
+                        <table class="table table-sm o_main_table" style="width: 100%; border-collapse: collapse; font-size: 10pt;">
+                            <thead>
+                                <tr style="background-color: #1a1a2e; color: #ffffff;">
+                                    <th style="padding: 10px 14px; text-align: left; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase; border-radius: 4px 0 0 0;">#</th>
+                                    <th style="padding: 10px 14px; text-align: left; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase;">Désignation de la tâche</th>
+                                    <th style="padding: 10px 14px; text-align: center; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase;">Responsable</th>
+                                    <th style="padding: 10px 14px; text-align: center; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase;">Date début</th>
+                                    <th style="padding: 10px 14px; text-align: center; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase;">Date fin</th>
+                                    <th style="padding: 10px 14px; text-align: center; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase; border-radius: 0 4px 0 0;">Complexité</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <t t-foreach="doc.task_ids" t-as="task">
-                                    <tr style="border-bottom: 1px solid #eee;">
-                                        <td class="align-middle" style="padding: 8px;">
-                                            <span t-field="task.name" style="font-weight: 500;"/>
+                                    <tr t-attf-style="background-color: {{ '#ffffff' if task_index % 2 == 0 else '#faf7f9' }}; border-bottom: 1px solid #e8e0e6;">
+                                        <td style="padding: 9px 14px; color: #999; font-size: 9pt; font-weight: bold; text-align: left;">
+                                            <span t-esc="task_index + 1"/>
                                         </td>
-                                        <td class="text-center align-middle">
+                                        <td style="padding: 9px 14px; font-weight: 600; color: #1a1a2e;">
+                                            <span t-field="task.name"/>
+                                        </td>
+                                        <td style="padding: 9px 14px; text-align: center; color: #444;">
                                             <span t-field="task.manager_id.name"/>
                                         </td>
-                                        <td class="text-center align-middle" style="white-space: nowrap;">
-                                            <div style="font-size: 0.9em;">
-                                                <span t-field="task.start_date"/> 
-                                                <i class="fa fa-long-arrow-right" style="margin: 0 5px; color: #714B67;"/> 
-                                                <span t-field="task.end_date"/>
-                                            </div>
+                                        <td style="padding: 9px 14px; text-align: center; color: #555; font-size: 9.5pt;">
+                                            <span t-field="task.start_date"/>
                                         </td>
-                                        <td class="text-center align-middle">
-                                            <t t-set="bg_color" t-value="'#6c757d'"/>
-                                            <t t-if="task.complexity == 'Low'" t-set="bg_color" t-value="'#28a745'"/> <t t-if="task.complexity == 'Medium'" t-set="bg_color" t-value="'#ffc107'"/> <t t-if="task.complexity == 'High'" t-set="bg_color" t-value="'#dc3545'"/> <span t-field="task.complexity" 
-                                                  t-attf-style="background-color: {{bg_color}}; color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; display: inline-block; min-width: 70px;"/>
+                                        <td style="padding: 9px 14px; text-align: center; color: #555; font-size: 9.5pt;">
+                                            <span t-field="task.end_date"/>
+                                        </td>
+                                        <td style="padding: 9px 14px; text-align: center;">
+                                            <!-- Badge Complexité -->
+                                            <t t-if="task.complexity == 'Low'">
+                                                <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; background-color: #e6f4ea; color: #1e7e34; border: 1px solid #a8d5b5;">
+                                                    Faible
+                                                </span>
+                                            </t>
+                                            <t t-elif="task.complexity == 'Medium'">
+                                                <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; background-color: #fff8e1; color: #b07a00; border: 1px solid #ffe082;">
+                                                    Moyenne
+                                                </span>
+                                            </t>
+                                            <t t-elif="task.complexity == 'High'">
+                                                <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; background-color: #fce8e6; color: #c0392b; border: 1px solid #f5b7b1;">
+                                                    Élevée
+                                                </span>
+                                            </t>
+                                            <t t-else="">
+                                                <span style="display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 8pt; font-weight: bold; background-color: #f0f0f0; color: #666;">
+                                                    <span t-field="task.complexity"/>
+                                                </span>
+                                            </t>
                                         </td>
                                     </tr>
                                 </t>
                             </tbody>
                         </table>
 
-                        <div class="footer text-center text-muted" style="font-size: 0.8em; margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px;">
-                            <p>Document généré par le module Gestion de Projet Odoo - Soufiane Food.</p>
+                        <!-- ══ LÉGENDE ══ -->
+                        <table style="width: 100%; margin-top: 16px; border-collapse: collapse;">
+                            <tr>
+                                <td style="font-size: 8pt; color: #999; padding-top: 4px;">
+                                    <span style="font-weight: bold; color: #714B67;">Légende — Complexité : </span>
+                                    <span style="background-color: #e6f4ea; color: #1e7e34; border: 1px solid #a8d5b5; padding: 1px 8px; border-radius: 10px; margin-right: 6px; font-size: 7.5pt; font-weight: bold;">Faible</span>
+                                    <span style="background-color: #fff8e1; color: #b07a00; border: 1px solid #ffe082; padding: 1px 8px; border-radius: 10px; margin-right: 6px; font-size: 7.5pt; font-weight: bold;">Moyenne</span>
+                                    <span style="background-color: #fce8e6; color: #c0392b; border: 1px solid #f5b7b1; padding: 1px 8px; border-radius: 10px; font-size: 7.5pt; font-weight: bold;">Élevée</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ══ PIED DE PAGE ══ -->
+                        <div style="margin-top: 40px; border-top: 1px solid #e0d6e8; padding-top: 14px; text-align: center;">
+                            <span style="font-size: 8pt; color: #aaa; letter-spacing: 0.5px;">
+                                Document généré par le module Gestion de Projet — Soufiane Food
+                            </span>
                         </div>
 
                     </div>

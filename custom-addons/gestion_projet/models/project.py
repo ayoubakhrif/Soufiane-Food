@@ -5,7 +5,7 @@ class ProjectManagement(models.Model):
     _description = 'Project Management'
 
     name = fields.Char(string='Project Name', required=True)
-    manager_id = fields.Many2one('custom_employee', string='Manager')
+    manager_id = fields.Many2one('core.employee', string='Manager')
     task_ids = fields.One2many('project.task.line', 'project_id', string='Tasks Notebook')
 
     def action_generate_report(self):
@@ -17,7 +17,7 @@ class ProjectTaskLine(models.Model):
     _description = 'Project Task Line'
 
     name = fields.Char(string='Task Name')
-    manager_id = fields.Many2one('custom_employee', string='Task Manager')
+    manager_id = fields.Many2one('core.employee', string='Task Manager')
     start_date = fields.Date(string='Start Date')
     end_date = fields.Date(string='End Date')
     complexity = fields.Selection([

@@ -1,5 +1,11 @@
 from odoo import models, fields, api, tools, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+import base64
+import io
+try:
+    import xlsxwriter
+except ImportError:
+    xlsxwriter = None
 
 class CasaStockStock(models.Model):
     _name = 'casa_hanane.stock.stock'
@@ -215,4 +221,94 @@ class CasaStockStock(models.Model):
                 'default_price_purchase': self.price,
                 'default_stock_soufiane': self.stock_soufiane,
             }
+        }
+    def action_export_stock_excel(self):
+        # If called from a list view with selection, use selected records.
+        # Otherwise, export all stock with quantity != 0
+        records = self if self else self.search([('quantity', '!=', 0)])
+        
+        if not xlsxwriter:
+            raise ValidationError("La bibliothèque xlsxwriter n'est pas installée.")
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        
+        # Styles
+        title_style = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'bg_color': '#D7E4BC', 'border': 1})
+        header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'})
+        cell_style = workbook.add_format({'border': 1})
+        date_style = workbook.add_format({'border': 1, 'num_format': 'dd/mm/yyyy'})
+        money_style = workbook.add_format({'border': 1, 'num_format': '#,##0.00'})
+        float_style = workbook.add_format({'border': 1, 'num_format': '#,##0.000'})
+
+        sheet = workbook.add_worksheet("Stock Casa (Hanane)")
+        
+        # Headers
+        headers = [
+            "Date", "Produit", "Lot", "DUM", "Ville", 
+            "Quantité", "Poids (Kg)", "Tonnage (T)", "Prix Achat", "Mt Achat"
+        ]
+        
+        # Set column widths
+        sheet.set_column(0, 0, 12)  # Date
+        sheet.set_column(1, 1, 35)  # Produit
+        sheet.set_column(2, 3, 15)  # Lot, DUM
+        sheet.set_column(4, 4, 12)  # Ville
+        sheet.set_column(5, 7, 12)  # Qty, Poids, Tonnage
+        sheet.set_column(8, 9, 15)  # Prix, Mt Achat
+
+        # Title
+        sheet.merge_range('A1:J1', f"État du Stock Casa (Hanane) - {fields.Date.today()}", title_style)
+        
+        # Write Headers
+        for col, header in enumerate(headers):
+            sheet.write(2, col, header, header_style)
+            
+        row = 3
+        for rec in records:
+            # Date
+            if rec.date:
+                from datetime import datetime, time
+                d = datetime.combine(rec.date, time.min)
+                sheet.write_datetime(row, 0, d, date_style)
+            else:
+                sheet.write(row, 0, "", cell_style)
+                
+            sheet.write(row, 1, rec.product_id.name or "", cell_style)
+            sheet.write(row, 2, rec.lot or "", cell_style)
+            sheet.write(row, 3, rec.dum or "", cell_style)
+            sheet.write(row, 4, dict(self._fields['ville'].selection).get(rec.ville, "") if rec.ville else "", cell_style)
+            
+            sheet.write_number(row, 5, rec.quantity or 0.0, float_style)
+            sheet.write_number(row, 6, rec.weight or 0.0, float_style)
+            sheet.write_number(row, 7, rec.total_weight or 0.0, float_style)
+            sheet.write_number(row, 8, rec.price or 0.0, money_style)
+            sheet.write_number(row, 9, rec.mt_achat or 0.0, money_style)
+            
+            row += 1
+            
+        # Add totals
+        sheet.write(row, 4, "TOTAL", header_style)
+        sheet.write_formula(row, 5, f'=SUM(F4:F{row})', float_style)
+        sheet.write_formula(row, 7, f'=SUM(H4:H{row})', float_style)
+        sheet.write_formula(row, 9, f'=SUM(J4:J{row})', money_style)
+
+        workbook.close()
+        output.seek(0)
+        
+        file_data = base64.b64encode(output.read())
+        output.close()
+        
+        filename = f"Stock_Casa_Hanane_{fields.Date.today()}.xlsx"
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': file_data,
+            'type': 'binary',
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+        
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'new',
         }

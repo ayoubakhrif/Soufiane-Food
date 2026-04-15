@@ -60,7 +60,7 @@ access_casa_stock_discount_line_manager_hanane,casa_hanane.stock.discount.line.m
 access_casa_stock_discount_line_admin_hanane,casa_hanane.stock.discount.line.admin,model_casa_hanane_stock_discount_line,group_admin,1,1,1,1
 access_casa_stock_discount_line_viewer_hanane,casa_hanane.stock.discount.line.viewer,model_casa_hanane_stock_discount_line,group_viewer,1,0,0,0
 access_casa_client_advance_user_hanane,casa_hanane.client.advance.user,model_casa_hanane_client_advance,group_user,1,1,1,0
-access_casa_client_advance_manager_hanane,casa_hanane.client.advance.manager,model_casa_hanane_client_advance,group_manager,1,1,1,0
+access_casa_client_advance_manager_hanane,casa_hanane.client.advance.manager,model_casa_hanane_client_advance,group_manager,1,1,1,1
 access_casa_client_advance_admin_hanane,casa_hanane.client.advance.admin,model_casa_hanane_client_advance,group_admin,1,1,1,1
 access_casa_client_advance_viewer_hanane,casa_hanane.client.advance.viewer,model_casa_hanane_client_advance,group_viewer,1,0,0,0
 access_casa_client_unpaid_user_hanane,casa_hanane.client.unpaid.user,model_casa_hanane_client_unpaid,group_user,1,1,1,0

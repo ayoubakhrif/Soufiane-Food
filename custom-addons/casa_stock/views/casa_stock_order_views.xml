@@ -61,7 +61,8 @@
                         <group>
                             <field name="date" readonly="state == 'done'"/>
                             <field name="ville" readonly="state == 'done'"/>
-                            <field name="total_mt_vente"/>
+                            <field name="total_mt_vente" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="total_mt_achat" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                         </group>
                     </group>
                     <notebook>
@@ -79,7 +80,8 @@
                                     <field name="dum"/>
                                     <field name="calibre"/>
                                     <field name="price_sale"/>
-                                    <field name="mt_vente" sum="Total"/>
+                                    <field name="mt_vente" sum="Total Vente"/>
+                                    <field name="mt_achat" sum="Total Achat"/>
                                 </tree>
                             </field>
                         </page>

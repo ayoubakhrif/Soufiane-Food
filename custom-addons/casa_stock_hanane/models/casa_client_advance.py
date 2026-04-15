@@ -42,7 +42,8 @@ class CasaClientAdvance(models.Model):
         return super().write(vals)
 
     def unlink(self):
+        is_manager = self.env.user.has_group('casa_stock_hanane.group_manager')
         for rec in self:
-            if rec.state == 'confirmed':
+            if rec.state == 'confirmed' and not is_manager:
                 raise UserError(_("Vous ne pouvez pas supprimer une avance validée. Veuillez d'abord la remettre en brouillon."))
         return super().unlink()

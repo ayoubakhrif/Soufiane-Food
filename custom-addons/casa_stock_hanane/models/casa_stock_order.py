@@ -30,11 +30,13 @@ class CasaStockOrder(models.Model):
     is_cancel_hidden = fields.Boolean(compute='_compute_is_cancel_hidden')
 
     total_mt_vente = fields.Float(string='Total Montant Vente', compute='_compute_total_mt_vente', store=True)
+    total_mt_achat = fields.Float(string='Total Montant Achat', compute='_compute_total_mt_vente', store=True)
 
-    @api.depends('order_line_ids.mt_vente')
+    @api.depends('order_line_ids.mt_vente', 'order_line_ids.mt_achat')
     def _compute_total_mt_vente(self):
         for rec in self:
             rec.total_mt_vente = sum(line.mt_vente for line in rec.order_line_ids)
+            rec.total_mt_achat = sum(line.mt_achat for line in rec.order_line_ids)
 
     def _compute_is_cancel_hidden(self):
         is_manager = self.env.user.has_group('casa_stock_hanane.group_manager')
@@ -282,14 +284,17 @@ class CasaStockOrderLine(models.Model):
     
     
     price_sale = fields.Float(string='Prix Vente', required=True)
+    price_purchase = fields.Float(string='Prix Achat', related='stock_id.price', store=True)
     poids = fields.Char(string='Poids', compute='_compute_poids')
     mt_vente = fields.Float(string='Montant Vente', compute='_compute_mt_vente', store=True)
+    mt_achat = fields.Float(string='Montant Achat', compute='_compute_mt_vente', store=True)
 
-    @api.depends('qty', 'weight', 'price_sale')
+    @api.depends('qty', 'weight', 'price_sale', 'price_purchase')
     def _compute_mt_vente(self):
         for line in self:
             tonnage = (line.qty * line.weight) if line.weight else 0.0
             line.mt_vente = tonnage * line.price_sale
+            line.mt_achat = tonnage * line.price_purchase
 
     @api.depends('weight')
     def _compute_poids(self):

@@ -358,60 +358,76 @@ class CasaStockStock(models.Model):
         sheet = workbook.add_worksheet("Rapport Produit")
         
         # Column setup
-        sheet.set_column(0, 0, 30) # Qualibre
-        sheet.set_column(1, 1, 30) # Merged space
-        sheet.set_column(2, 2, 15) # Qté global
-        sheet.set_column(3, 3, 10) # Poids
-        sheet.set_column(4, 4, 15) # Tonnage
-        sheet.set_column(5, 5, 15) # Prix
-        sheet.set_column(6, 6, 20) # Total
+        sheet.set_column(0, 0, 25) # Qualibre
+        sheet.set_column(1, 1, 15) # Qté global
+        sheet.set_column(2, 2, 10) # Poids
+        sheet.set_column(3, 3, 15) # Tonnage
+        sheet.set_column(4, 4, 15) # Prix
+        sheet.set_column(5, 5, 20) # Total
 
-        # Header Row (Row 3 in image style)
-        row = 2
+        # Header Row
+        row = 1
         today_str = fields.Date.today().strftime('%d/%m/%y')
         sheet.write(row, 0, today_str, yellow_style)
-        sheet.merge_range(row, 1, row, 5, product.name, pink_style)
+        sheet.merge_range(row, 1, row, 4, product.name, pink_style)
         
-        # City - get first record's city
-        city_raw = self[0].ville
-        city_label = dict(self._fields['ville'].selection).get(city_raw, city_raw or "")
-        sheet.write(row, 6, city_label.lower() if city_label else "", yellow_style)
+        row += 2
         
-        row += 1
+        # Group records by city
+        cities = ['tanger', 'casa']
+        records_by_city = {city: self.filtered(lambda r: r.ville == city) for city in cities}
         
-        # Table Headers
-        headers = ["Qualibre", "", "Qté global", "Poids", "Tonnage", "Prix", "Total"]
-        sheet.write_row(row, 0, headers, table_header_style)
-        
-        row += 1
-        
-        # Aggregate data by calibre and weight
-        # Odoo records are already grouped by these in the view, but the user selection might span multiple.
-        # We re-aggregate to be safe.
-        aggregated = {}
-        for rec in self:
-            key = (rec.calibre or "", rec.weight or 0.0, rec.price or 0.0)
-            if key not in aggregated:
-                aggregated[key] = {'qty': 0, 'tonnage': 0, 'total': 0}
-            aggregated[key]['qty'] += rec.quantity
-            aggregated[key]['tonnage'] += rec.total_weight
-            aggregated[key]['total'] += rec.mt_achat
-            
-        grand_total = 0
-        for (calibre, weight, price), data in aggregated.items():
-            sheet.write(row, 0, calibre or "", blue_style)
-            sheet.merge_range(row, 1, row, 2, data['qty'], orange_style)
-            sheet.write_number(row, 3, weight, cell_style)
-            sheet.write_number(row, 4, data['tonnage'], cell_style)
-            sheet.write_number(row, 5, price, float_style)
-            sheet.write_number(row, 6, data['total'], cell_style)
-            grand_total += data['total']
+        for city_code in cities:
+            records = records_by_city[city_code]
+            if not records:
+                continue
+                
+            # City Header
+            city_label = dict(self._fields['ville'].selection).get(city_code, city_code).upper()
+            sheet.merge_range(row, 0, row, 5, city_label, yellow_style)
             row += 1
             
-        # Grand Total
-        sheet.write_number(row, 6, grand_total, cyan_style)
+            # Table Headers
+            headers = ["Qualibre", "Qté global", "Poids", "Tonnage", "Prix", "Total"]
+            sheet.write_row(row, 0, headers, table_header_style)
+            row += 1
+            
+            # Aggregate data for this city
+            aggregated = {}
+            for rec in records:
+                key = (rec.calibre or "", rec.weight or 0.0, rec.price or 0.0)
+                if key not in aggregated:
+                    aggregated[key] = {'qty': 0, 'tonnage': 0, 'total': 0}
+                aggregated[key]['qty'] += rec.quantity
+                aggregated[key]['tonnage'] += rec.total_weight
+                aggregated[key]['total'] += rec.mt_achat
+                
+            city_qty_total = 0
+            city_mt_total = 0
+            
+            for (calibre, weight, price), data in aggregated.items():
+                sheet.write(row, 0, calibre or "", blue_style)
+                sheet.write_number(row, 1, data['qty'], orange_style)
+                sheet.write_number(row, 2, weight, cell_style)
+                sheet.write_number(row, 3, data['tonnage'], float_style)
+                sheet.write_number(row, 4, price, money_style)
+                sheet.write_number(row, 5, data['total'], money_style)
+                
+                city_qty_total += data['qty']
+                city_mt_total += data['total']
+                row += 1
+                
+            # City Totals
+            sheet.write(row, 0, "TOTAL " + city_label, blue_style)
+            sheet.write_number(row, 1, city_qty_total, orange_style)
+            sheet.write(row, 2, "", cell_style)
+            sheet.write(row, 3, "", cell_style)
+            sheet.write(row, 4, "", cell_style)
+            sheet.write_number(row, 5, city_mt_total, cyan_style)
+            
+            row += 2 # Space between tables
 
-        row += 2
+        row += 1
         
         # Gestia Branding
         sheet.write(row, 0, "This file is generated by Gestia", workbook.add_format({'italic': True, 'font_size': 10}))

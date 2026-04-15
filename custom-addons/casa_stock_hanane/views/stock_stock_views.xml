@@ -287,6 +287,7 @@
         <field name="code">
             action = model.action_export_stock_excel()
         </field>
+        <field name="groups_id" eval="[(4, ref('casa_stock_hanane.group_user'))]"/>
     </record>
 
     <!-- Server Action: Detailed Product Report -->
@@ -299,6 +300,7 @@
         <field name="code">
             action = records.action_export_product_report_excel()
         </field>
+        <field name="groups_id" eval="[(4, ref('casa_stock_hanane.group_user'))]"/>
     </record>
 
 </odoo>

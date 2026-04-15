@@ -312,3 +312,109 @@ class CasaStockStock(models.Model):
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'new',
         }
+
+    def action_export_product_report_excel(self):
+        if not self:
+            raise UserError(_("Veuillez sélectionner au moins un enregistrement."))
+            
+        product = self[0].product_id
+        if any(rec.product_id != product for rec in self):
+            raise UserError(_("Tous les enregistrements sélectionnés doivent appartenir au même produit."))
+
+        if not xlsxwriter:
+            raise ValidationError("La bibliothèque xlsxwriter n'est pas installée.")
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        
+        # Styles
+        header_base = {'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter', 'font_size': 20}
+        yellow_style = workbook.add_format({**header_base, 'bg_color': '#FCE9DA'})
+        pink_style = workbook.add_format({**header_base, 'bg_color': '#FF00FF'})
+        
+        table_header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#FCE9DA', 'font_size': 12})
+        
+        blue_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#6DA9DC', 'font_size': 12})
+        orange_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#FF9900', 'font_size': 12, 'num_format': '#,##0'})
+        
+        cell_style = workbook.add_format({'border': 1, 'align': 'center', 'font_size': 12})
+        money_style = workbook.add_format({'border': 1, 'align': 'center', 'font_size': 12, 'num_format': '#,##0.00'})
+        float_style = workbook.add_format({'border': 1, 'align': 'center', 'font_size': 12, 'num_format': '#,##0.0'})
+        
+        cyan_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'right', 'bg_color': '#00FFFF', 'font_size': 14, 'num_format': '#,##0.00'})
+
+        sheet = workbook.add_worksheet("Rapport Produit")
+        
+        # Column setup
+        sheet.set_column(0, 0, 30) # Qualibre
+        sheet.set_column(1, 1, 30) # Merged space
+        sheet.set_column(2, 2, 15) # Qté global
+        sheet.set_column(3, 3, 10) # Poids
+        sheet.set_column(4, 4, 15) # Tonnage
+        sheet.set_column(5, 5, 15) # Prix
+        sheet.set_column(6, 6, 20) # Total
+
+        # Header Row (Row 3 in image style)
+        row = 2
+        today_str = fields.Date.today().strftime('%d/%m/%y')
+        sheet.write(row, 0, today_str, yellow_style)
+        sheet.merge_range(row, 1, row, 5, product.name, pink_style)
+        
+        # City - get first record's city
+        city_raw = self[0].ville
+        city_label = dict(self._fields['ville'].selection).get(city_raw, city_raw or "")
+        sheet.write(row, 6, city_label.lower() if city_label else "", yellow_style)
+        
+        row += 1
+        
+        # Table Headers
+        headers = ["Qualibre", "", "Qté global", "Poids", "Tonnage", "Prix", "Total"]
+        sheet.write_row(row, 0, headers, table_header_style)
+        
+        row += 1
+        
+        # Aggregate data by calibre and weight
+        # Odoo records are already grouped by these in the view, but the user selection might span multiple.
+        # We re-aggregate to be safe.
+        aggregated = {}
+        for rec in self:
+            key = (rec.calibre or "", rec.weight or 0.0, rec.price or 0.0)
+            if key not in aggregated:
+                aggregated[key] = {'qty': 0, 'tonnage': 0, 'total': 0}
+            aggregated[key]['qty'] += rec.quantity
+            aggregated[key]['tonnage'] += rec.total_weight
+            aggregated[key]['total'] += rec.mt_achat
+            
+        grand_total = 0
+        for (calibre, weight, price), data in aggregated.items():
+            sheet.write(row, 0, calibre or product.name, blue_style)
+            sheet.merge_range(row, 1, row, 2, data['qty'], orange_style)
+            sheet.write_number(row, 3, weight, cell_style)
+            sheet.write_number(row, 4, data['tonnage'], cell_style)
+            sheet.write_number(row, 5, price, float_style)
+            sheet.write_number(row, 6, data['total'], cell_style)
+            grand_total += data['total']
+            row += 1
+            
+        # Grand Total
+        sheet.write_number(row, 6, grand_total, cyan_style)
+        
+        workbook.close()
+        output.seek(0)
+        
+        file_data = base64.b64encode(output.read())
+        output.close()
+        
+        filename = f"Rapport_{product.name}_{fields.Date.today()}.xlsx"
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': file_data,
+            'type': 'binary',
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+        
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'new',
+        }

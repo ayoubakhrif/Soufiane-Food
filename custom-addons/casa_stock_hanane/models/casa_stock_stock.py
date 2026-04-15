@@ -403,6 +403,7 @@ class CasaStockStock(models.Model):
                 aggregated[key]['total'] += rec.mt_achat
                 
             city_qty_total = 0
+            city_tonnage_total = 0
             city_mt_total = 0
             
             for (calibre, weight, price), data in aggregated.items():
@@ -414,6 +415,7 @@ class CasaStockStock(models.Model):
                 sheet.write_number(row, 5, data['total'], money_style)
                 
                 city_qty_total += data['qty']
+                city_tonnage_total += data['tonnage']
                 city_mt_total += data['total']
                 row += 1
                 
@@ -421,7 +423,7 @@ class CasaStockStock(models.Model):
             sheet.write(row, 0, "TOTAL " + city_label, blue_style)
             sheet.write_number(row, 1, city_qty_total, orange_style)
             sheet.write(row, 2, "", cell_style)
-            sheet.write(row, 3, "", cell_style)
+            sheet.write_number(row, 3, city_tonnage_total, float_style)
             sheet.write(row, 4, "", cell_style)
             sheet.write_number(row, 5, city_mt_total, cyan_style)
             

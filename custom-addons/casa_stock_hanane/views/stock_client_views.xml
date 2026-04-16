@@ -44,15 +44,28 @@
                             <field name="name" placeholder="Nom du client..."/>
                         </h1>
                         
-                        <div style="margin-top:10px;">
+                        <div style="margin-top:10px; display: flex; gap: 15px; flex-wrap: wrap;">
                             <span style="
-                                font-size:22px;
+                                font-size:18px;
                                 font-weight:700;
                                 color:#4c51bf;
                                 background:#ebf4ff;
-                                padding:10px 20px;
-                                border-radius:12px;
+                                padding:8px 15px;
+                                border-radius:10px;
                                 border:2px solid #4c51bf;
+                            ">
+                                📋 Solde Provisoire :
+                                <field name="compte_provisoire" widget="monetary"
+                                    options="{'currency_field': 'company_currency_id'}"/>
+                            </span>
+                            <span style="
+                                font-size:18px;
+                                font-weight:700;
+                                color:#059669;
+                                background:#ecfdf5;
+                                padding:8px 15px;
+                                border-radius:10px;
+                                border:2px solid #059669;
                             ">
                                 💰 Compte total :
                                 <field name="compte_total" widget="monetary"
@@ -184,6 +197,7 @@
             <tree string="Clients Casa">
                 <field name="name"/>
                 <field name="exit_count" string="Nb. Commandes"/>
+                <field name="compte_provisoire" sum="Total Provisoire"/>
                 <field name="compte_total" sum="Total Solde"/>
             </tree>
         </field>
@@ -225,6 +239,7 @@
                 <field name="name" type="row"/>
                 <field name="exit_count" type="measure"/>
                 <field name="total_client_discounts" type="measure"/>
+                <field name="compte_provisoire" type="measure"/>
                 <field name="compte_total" type="measure"/>
                 <field name="total_profit" type="measure"/>
             </pivot>

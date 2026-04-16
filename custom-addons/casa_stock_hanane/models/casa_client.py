@@ -154,6 +154,14 @@ class CasaClient(models.Model):
         tracking=True
     )
 
+    compte_provisoire = fields.Float(
+        string='Compte Provisoire',
+        compute='_compute_totals',
+        store=True,
+        help="Solde incluant les commandes confirmées non encore validées.",
+        tracking=True
+    )
+
     total_advances = fields.Float(
         string='Total Avances',
         compute='_compute_totals',
@@ -200,6 +208,7 @@ class CasaClient(models.Model):
     @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente', 'other_sale_ids.discount_amount', 'sortie_supp_ids.amount', 'compte_initial', 'advance_ids.amount', 'advance_ids.state', 'unpaid_ids.amount')
     def _compute_totals(self):
         for client in self:
+            # Official totals (Valide/Done only)
             commandes = client.exit_ids.filtered(lambda s: s.state == 'done')
             otras = client.other_sale_ids.filtered(lambda s: s.state == 'done')
             
@@ -213,6 +222,16 @@ class CasaClient(models.Model):
             client.total_commandes = total_ventes
             client.total_advances = total_advances
             client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes + total_sorties_supp - total_discounts - total_advances
+            
+            # Provisional totals (Confirmed + Done)
+            # As per user request: only count validated advances, so total_advances remains the same.
+            commandes_prov = client.exit_ids.filtered(lambda s: s.state in ('confirmed', 'done'))
+            otras_prov = client.other_sale_ids.filtered(lambda s: s.state in ('confirmed', 'done'))
+            
+            total_ventes_prov = sum(commandes_prov.mapped('mt_vente')) + sum(otras_prov.mapped('mt_vente'))
+            total_discounts_prov = sum(commandes_prov.mapped('discount_amount')) + sum(otras_prov.mapped('discount_amount'))
+            
+            client.compte_provisoire = (client.compte_initial or 0.0) + total_ventes_prov + total_impayes + total_sorties_supp - total_discounts_prov - total_advances
 
     @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'exit_ids.margin')
     def _compute_client_summary(self):
@@ -251,13 +270,13 @@ class CasaClient(models.Model):
             <style>
                 .kpi-grid {{
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                    gap: 20px;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
                     padding: 20px 0;
                 }}
                 .kpi-card {{
                     border-radius: 16px;
-                    padding: 24px;
+                    padding: 20px;
                     text-align: center;
                     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
                     transition: transform 0.2s;
@@ -267,28 +286,36 @@ class CasaClient(models.Model):
                     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
                 }}
                 .kpi-icon {{
-                    font-size: 32px;
+                    font-size: 28px;
                     margin-bottom: 8px;
                 }}
                 .kpi-label {{
-                    font-size: 13px;
+                    font-size: 12px;
                     font-weight: 600;
                     text-transform: uppercase;
                     letter-spacing: 1px;
                     margin-bottom: 8px;
                 }}
                 .kpi-value {{
-                    font-size: 28px;
+                    font-size: 24px;
                     font-weight: 800;
                     line-height: 1.2;
                 }}
                 .kpi-unit {{
-                    font-size: 14px;
+                    font-size: 13px;
                     font-weight: 400;
                     opacity: 0.7;
                 }}
             </style>
             <div class="kpi-grid">
+                <div class="kpi-card" style="background: #ebf4ff; border: 2px solid #4c51bf;">
+                    <div class="kpi-icon">📋</div>
+                    <div class="kpi-label" style="color: #4c51bf;">Solde Provisoire</div>
+                    <div class="kpi-value" style="color: #4c51bf;">
+                        {compte_provisoire:,.2f}
+                        <span class="kpi-unit">Dh</span>
+                    </div>
+                </div>
                 <div class="kpi-card" style="background: #eff6ff; border: 2px solid #93c5fd;">
                     <div class="kpi-icon">&#x1F4E6;</div>
                     <div class="kpi-label" style="color: #1e40af;">Total Commandes</div>
@@ -323,6 +350,7 @@ class CasaClient(models.Model):
                 </div>
             </div>
             """.format(
+                compte_provisoire=client.compte_provisoire or 0.0,
                 total_orders=client.total_orders_amount or 0.0,
                 total_discounts=client.total_client_discounts or 0.0,
                 rate=client.discount_rate or 0.0,

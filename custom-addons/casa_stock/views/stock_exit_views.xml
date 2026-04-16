@@ -37,7 +37,7 @@
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'" groups="casa_stock.group_manager"/>
                     <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'" groups="casa_stock.group_valid_admin"/>
-                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state != 'done'"/>
+                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state not in ('confirmed', 'done')"/>
                     <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="is_cancel_hidden or state not in ('confirmed', 'done')"/>
                     <button name="action_draft" string="Remettre en brouillon" type="object" class="btn-warning" invisible="state == 'draft'" groups="casa_stock.group_admin"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>

@@ -133,7 +133,7 @@
                                     <tr>
                                         <td class="calibre-cell"><t t-esc="line['calibre']"/></td>
                                         <td class="qty-cell"><t t-esc="'{0:,.0f}'.format(line['qty'])"/></td>
-                                        <td><t t-esc="'{0:,.0f}'.format(line['weight'])"/></td>
+                                        <td><t t-esc="'{0:,.2f}'.format(line['weight'])"/></td>
                                         <td><t t-esc="'{0:,.1f}'.format(line['tonnage'])"/></td>
                                         <td><t t-esc="'{0:,.2f}'.format(line['price'])"/></td>
                                         <td><t t-esc="'{0:,.2f}'.format(line['total'])"/></td>

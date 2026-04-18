@@ -475,7 +475,7 @@ class CasaStockStock(models.Model):
             # Aggregate data for this city
             aggregated = {}
             for rec in records:
-                key = (rec.calibre or "", rec.weight or 0.0, rec.price or 0.0)
+                key = (rec.product_id.name, rec.calibre or "", rec.weight or 0.0, rec.price or 0.0)
                 if key not in aggregated:
                     aggregated[key] = {'qty': 0, 'tonnage': 0, 'total': 0}
                 aggregated[key]['qty'] += rec.quantity
@@ -487,9 +487,10 @@ class CasaStockStock(models.Model):
             city_tonnage_total = 0
             city_mt_total = 0
             
-            for (calibre, weight, price), data in aggregated.items():
+            for (prod_name, calibre, weight, price), data in aggregated.items():
+                display_calibre = f"{prod_name} - {calibre}" if calibre else prod_name
                 lines.append({
-                    'calibre': calibre or "",
+                    'calibre': display_calibre,
                     'qty': data['qty'],
                     'weight': weight,
                     'tonnage': data['tonnage'],

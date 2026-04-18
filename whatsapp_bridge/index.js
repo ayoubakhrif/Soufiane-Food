@@ -12,7 +12,7 @@ const fs = require('fs');
 const pino = require('pino');
 
 // CONFIGURATION
-const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock";
+const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 const TARGET_GROUP_ID = "120363403203705514@g.us";
 
@@ -77,6 +77,7 @@ async function connectToWhatsApp() {
 
             try {
                 // APPEL À ODOO
+                console.log(`Appel à Odoo pour : "${text}"`);
                 const response = await axios.post(ODOO_URL, {
                     jsonrpc: "2.0",
                     params: {
@@ -90,11 +91,17 @@ async function connectToWhatsApp() {
                     }
                 });
 
+                if (response.data.error) {
+                    console.error("Erreur Odoo (JSON-RPC) :", JSON.stringify(response.data.error, null, 2));
+                    return;
+                }
+
                 const result = response.data.result;
+                console.log("Résultat Odoo :", result ? result.status : "AUCUN RESULTAT", result ? (result.message || "") : "");
 
-                if (result.status === 'success') {
+                if (result && result.status === 'success') {
                     console.log(`Produit identifié : ${result.product_name}. Envoi du PDF...`);
-
+                    
                     // Envoi du PDF
                     await sock.sendMessage(from, {
                         document: Buffer.from(result.pdf_base64, 'base64'),
@@ -102,12 +109,19 @@ async function connectToWhatsApp() {
                         fileName: result.file_name,
                         caption: `Voici le rapport de stock pour *${result.product_name}*.`
                     });
-                } else if (result.status === 'not_found') {
+                } else if (result && result.status === 'not_found') {
+                    console.log(`Non trouvé : ${result.message}`);
                     await sock.sendMessage(from, { text: result.message });
+                } else {
+                    console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
                 }
 
             } catch (error) {
-                console.error("Erreur lors de l'appel à Odoo :", error.message);
+                console.error("Erreur d'appel Odoo :", error.message);
+                if (error.response) {
+                    console.error("Status Erreur :", error.response.status);
+                    console.error("Data Erreur :", error.response.data);
+                }
             }
         }
     });

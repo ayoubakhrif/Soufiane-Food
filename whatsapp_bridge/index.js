@@ -12,7 +12,7 @@ const fs = require('fs');
 const pino = require('pino');
 
 // CONFIGURATION
-const ODOO_URL = "https://gestia-soufianefoods.cloud/stock_test?db=soufianefoods";
+const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 const TARGET_GROUP_ID = "120363405648854156@g.us"; 
 

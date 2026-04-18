@@ -12,6 +12,10 @@
 
     <template id="report_stock_product_template">
         <t t-call="web.html_container">
+            <!-- Force UTF-8 explicitly for wkhtmltopdf -->
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta charset="utf-8" />
+            
             <t t-set="data" t-value="docs._get_product_report_data()"/>
             <t t-set="product_name" t-value="data.get('product_name', 'Stock')"/>
             

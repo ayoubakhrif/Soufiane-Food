@@ -42,7 +42,7 @@ access_casa_stock_exit_viewer_hanane,casa_hanane.stock.exit.viewer,model_casa_ha
 access_casa_stock_return_viewer_hanane,casa_hanane.stock.return.viewer,model_casa_hanane_stock_return,group_viewer,1,0,0,0
 access_casa_stock_move_viewer_hanane,casa_hanane.stock.move.viewer,model_casa_hanane_stock_move,group_viewer,1,0,0,0
 access_casa_stock_stock_viewer_hanane,casa_hanane.stock.stock.viewer,model_casa_hanane_stock_stock,group_viewer,1,0,0,0
-access_company_article_user_stock_hanane,company.article,company_data.model_company_article,group_user,1,0,0,0
+access_company_article_user_stock_hanane,company.article,company_data.model_company_article,group_user,1,1,1,0
 access_casa_stock_order_user_hanane,casa_hanane.stock.order.user,model_casa_hanane_stock_order,group_user,1,1,1,0
 access_casa_stock_order_manager_hanane,casa_hanane.stock.order.manager,model_casa_hanane_stock_order,group_manager,1,1,1,0
 access_casa_stock_order_admin_hanane,casa_hanane.stock.order.admin,model_casa_hanane_stock_order,group_admin,1,1,1,1

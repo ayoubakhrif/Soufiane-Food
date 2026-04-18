@@ -56,8 +56,16 @@ class WhatsAppStockController(http.Controller):
         # Handle comma-separated list of matches from OpenAI
         extracted_list = [name.strip() for name in extracted_str.split(',')]
         
-        # Determine all corresponding articles
-        articles = request.env['company.article'].sudo().search([('name', 'in', extracted_list)])
+        # Determine all corresponding articles using ILIKE for each keyword
+        domain = []
+        for name in extracted_list:
+            domain.append(('name', 'ilike', name))
+        
+        # Join with OR operator if there are multiple elements
+        for i in range(len(extracted_list) - 1):
+            domain.insert(0, '|')
+            
+        articles = request.env['company.article'].sudo().search(domain)
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{extracted_str}'."}
 
@@ -117,14 +125,15 @@ class WhatsAppStockController(http.Controller):
         db_names = ", ".join(article_names_list) if article_names_list else "Aucun article disponible"
         
         prompt = (
-            "Tu es un assistant logistique. Ta tâche est de trouver LES articles correspondants à la demande WhatsApp.\n"
-            "Voici la liste stricte des articles existant en base de données :\n"
+            "Tu es un assistant logistique. Ta tâche est d'identifier le nom correct de l'article demandé.\n"
+            "Voici la liste stricte des articles de la base de données pour t'aider :\n"
             f"[{db_names}]\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
-            "1. Si le message (même mal orthographié, ex: 'popcurn' au lieu de 'Popcorn') correspond à une famille générique (ex: 'Poivre', 'Maïs'), liste TOUS les articles correspondants de la liste (ex: 'Poivre B1, Poivre Asta, Poivre blanc').\n"
-            "2. Si le message demande un produit précis, renvoie juste ce nom.\n"
-            "Retourne UNIQUEMENT les noms exacts séparés par des virgules (sans guillemets, sans aucun autre texte). Si aucun ne correspond, réponds 'None'."
+            "1. Comprends ce que le client demande : corrige les fautes et TRADUIS les mots en Darija vers le français standard (ex: 'ibzar' -> 'Poivre', 'louz' -> 'Amande', 'popcurn' -> 'Popcorn'). Tu peux te baser sur la liste fournie pour trouver le mot qui correspond.\n"
+            "2. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact ('Poivre B1').\n"
+            "3. Si la demande est globale (ex: 'poivre', 'ibzar', 'ch7al dyal poivre'), renvoie UNIQUEMENT LE TERME COURT (ex: 'Poivre', 'Amande') ! Ne m'énumère surtout pas les variantes. Je veux juste le mot racine pour chercher moi-même.\n"
+            "Retourne UNIQUEMENT le mot trouvé (sans guillemets, sans rien de plus). Si aucun ne correspond, réponds 'None'."
         )
         data = {
             "model": "gpt-4o-mini",

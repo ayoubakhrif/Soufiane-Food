@@ -112,12 +112,37 @@
                                 color: #6b7280;
                                 font-size: 10px;
                             }
+                            .solde-card {
+                                background: #1e3a8a;
+                                color: white;
+                                padding: 20px;
+                                border-radius: 12px;
+                                display: inline-block;
+                                min-width: 300px;
+                                margin-top: 15px;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            }
+                            .solde-card .label {
+                                font-size: 14px;
+                                text-transform: uppercase;
+                                letter-spacing: 1px;
+                                opacity: 0.9;
+                                margin-bottom: 5px;
+                            }
+                            .solde-card .value {
+                                font-size: 36px;
+                                font-weight: 800;
+                            }
                         </style>
 
                         <div class="invoice-header">
                             <div class="invoice-title"> RELEVE DE COMPTE DETAILLE (CASA)</div>
-                            <div class="client-info"><strong>Client:</strong> <t t-esc="client.name"/></div>
-                            <div class="client-info"><strong>Solde Actuel:</strong> <t t-esc="'{:,.2f}'.format(client.compte_total).replace(',', ' ')"/> Dh</div>
+                            <div class="client-info" style="font-size: 20px;"><strong>Client:</strong> <t t-esc="client.name"/></div>
+                            
+                            <div class="solde-card">
+                                <div class="label">SOLDE ACTUEL DU COMPTE</div>
+                                <div class="value"><t t-esc="'{:,.2f}'.format(client.compte_total).replace(',', ' ')"/> <small style="font-size: 16px;">DH</small></div>
+                            </div>
                         </div>
 
                         <t t-foreach="all_weeks" t-as="week">

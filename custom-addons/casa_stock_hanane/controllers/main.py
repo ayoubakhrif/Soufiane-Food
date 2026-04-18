@@ -117,12 +117,14 @@ class WhatsAppStockController(http.Controller):
         db_names = ", ".join(article_names_list) if article_names_list else "Aucun article disponible"
         
         prompt = (
-            "Tu es un assistant logistique. Ta tâche est de trouver l'article de la base de données qui correspond à la demande WhatsApp.\n"
+            "Tu es un assistant logistique. Ta tâche est de trouver LES articles correspondants à la demande WhatsApp.\n"
             "Voici la liste stricte des articles existant en base de données :\n"
             f"[{db_names}]\n\n"
             "Message WhatsApp : " + text + "\n\n"
-            "Trouve l'article de la liste qui correspond le mieux au message, en tenant compte des fautes d'orthographe (ex: 'Popcurn' -> 'Popcorn', ou 'amendes' -> 'Amande'). "
-            "Retourne UNIQUEMENT le nom de cet article exact de la liste (au caractère près), rien d'autre. Si aucun article ne correspond, réponds 'None'."
+            "Règles strictes :\n"
+            "1. Si le message (même mal orthographié, ex: 'popcurn' au lieu de 'Popcorn') correspond à une famille générique (ex: 'Poivre', 'Maïs'), liste TOUS les articles correspondants de la liste (ex: 'Poivre B1, Poivre Asta, Poivre blanc').\n"
+            "2. Si le message demande un produit précis, renvoie juste ce nom.\n"
+            "Retourne UNIQUEMENT les noms exacts séparés par des virgules (sans guillemets, sans aucun autre texte). Si aucun ne correspond, réponds 'None'."
         )
         data = {
             "model": "gpt-4o-mini",

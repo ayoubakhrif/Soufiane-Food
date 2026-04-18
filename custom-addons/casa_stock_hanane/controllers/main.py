@@ -9,11 +9,12 @@ _logger = logging.getLogger(__name__)
 
 class WhatsAppStockController(http.Controller):
 
-    @http.route('/whatsapp/health', type='http', auth='none', methods=['GET'], csrf=False)
+    @http.route(['/whatsapp/health', '/whatsapp/test'], type='http', auth='none', methods=['GET', 'POST'], csrf=False)
     def whatsapp_health(self):
+        _logger.info("Health check called")
         return "Odoo API is ALIVE"
 
-    @http.route('/whatsapp/stock', type='http', auth='none', methods=['POST'], csrf=False)
+    @http.route('/stock_test', type='http', auth='none', methods=['GET', 'POST'], csrf=False)
     def whatsapp_stock(self, **kwargs):
         # En mode auth='none', on force la base de données
         db_name = request.httprequest.args.get('db') or 'soufianefoods'

@@ -9,6 +9,10 @@ _logger = logging.getLogger(__name__)
 
 class WhatsAppStockController(http.Controller):
 
+    @http.route('/whatsapp/health', type='http', auth='none', methods=['GET'], csrf=False)
+    def whatsapp_health(self):
+        return "Odoo API is ALIVE"
+
     @http.route('/api/whatsapp/stock', type='json', auth='public', methods=['POST'], csrf=False)
     def whatsapp_stock(self, **kwargs):
         # 1. Verification of API Key

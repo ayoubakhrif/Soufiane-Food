@@ -14,7 +14,7 @@ const pino = require('pino');
 // CONFIGURATION
 const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
-const TARGET_GROUP_ID = "120363403203705514@g.us";
+const TARGET_GROUP_ID = "120363405648854156@g.us"; 
 
 async function connectToWhatsApp() {
     const { version, isLatest } = await fetchLatestBaileysVersion();

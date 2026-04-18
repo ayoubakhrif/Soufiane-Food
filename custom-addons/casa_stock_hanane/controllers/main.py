@@ -31,7 +31,7 @@ class WhatsAppStockController(http.Controller):
 
         # 2. Extract data from request
         try:
-            data = request.jsonrequest
+            data = kwargs
             message_text = data.get('message', '')
             group_id = data.get('group_id', '')
         except Exception as e:

@@ -70,10 +70,13 @@ async function connectToWhatsApp() {
 
             if (!text) continue;
 
-            // FILTRE : On ne répond qu'au groupe spécifique
-            if (from !== TARGET_GROUP_ID) continue;
+            console.log(`Message de ${from} : "${text}"`);
 
-            console.log(`Message reçu dans le groupe : "${text}"`);
+            // FILTRE : On ne répond qu'au groupe spécifique
+            if (from !== TARGET_GROUP_ID) {
+                console.log(`Ignoré (destinataire différent de ${TARGET_GROUP_ID})`);
+                continue;
+            }
 
             try {
                 // APPEL À ODOO

@@ -44,25 +44,38 @@ class WhatsAppClientController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Client Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Client Account Group.'}
 
-        # 4. Call OpenAI to extract client name
-        openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
-        if not openai_key:
-            return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo (parameter: whatsapp_stock.openai_key)'}
-
-        # Fetch all client names to guide the AI
-        all_clients = request.env['casa.client'].sudo().search([])
-        client_names_list = [c.name for c in all_clients if c.name]
+        # 4. Handle Exact Match First (Bypass OpenAI for menu selections)
+        exact_client = request.env['casa.client'].sudo().search([('name', '=ilike', message_text)], limit=1)
         
-        extracted_name = self._extract_client_name(message_text, openai_key, client_names_list)
-        
-        if not extracted_name or extracted_name.lower() == 'none':
-            return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
+        if exact_client:
+            clients = exact_client
+            extracted_name = exact_client.name
+        else:
+            # 5. Call OpenAI to extract client name
+            openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+            if not openai_key:
+                return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo (parameter: whatsapp_stock.openai_key)'}
 
-        # Handle exact or partial match
-        clients = request.env['casa.client'].sudo().search([('name', 'ilike', extracted_name)])
+            # Fetch all client names to guide the AI
+            all_clients = request.env['casa.client'].sudo().search([])
+            client_names_list = [c.name for c in all_clients if c.name]
+            
+            extracted_name = self._extract_client_name(message_text, openai_key, client_names_list)
+            
+            if not extracted_name or extracted_name.lower() == 'none':
+                return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
+
+            # Handle partial match via search
+            clients = request.env['casa.client'].sudo().search([('name', 'ilike', extracted_name)])
 
         if not clients:
             return {'status': 'not_found', 'message': f"Aucun client trouvé pour : '{extracted_name}'."}
+
+        # Check for absolute exact match among multiple results to break loops
+        if len(clients) > 1:
+            absolute_match = clients.filtered(lambda c: c.name.lower() == extracted_name.lower())
+            if absolute_match:
+                clients = absolute_match[0]
 
         if len(clients) == 1:
             # UNIQUE CLIENT -> GENERATE PDF (ALL WEEKS)

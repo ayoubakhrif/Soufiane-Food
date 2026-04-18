@@ -82,6 +82,12 @@ class WhatsAppStockController(http.Controller):
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{extracted_str}'."}
 
+        # Check for absolute exact match among multiple results to break selection loops
+        if len(articles) > 1:
+            absolute_match = articles.filtered(lambda a: a.name.lower() == extracted_str.lower())
+            if absolute_match:
+                articles = absolute_match[0]
+
         products = request.env['casa_hanane.product'].sudo().search([('article_id', 'in', articles.ids)])
         
         # Check stock globally for these products (Strictly positive stock)

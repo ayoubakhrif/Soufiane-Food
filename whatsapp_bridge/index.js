@@ -12,8 +12,8 @@ const fs = require('fs');
 const pino = require('pino');
 
 // CONFIGURATION
-const ODOO_URL = "http://localhost:8069/api/whatsapp/stock"; // Modifier si nécessaire
-const API_KEY = "default-secret-key"; // Doit correspondre à whatsapp_stock.api_key dans Odoo
+const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock"; 
+const API_KEY = "votre_cle_secrete_ici"; // À définir dans Odoo (Paramètres système)
 const TARGET_GROUP_ID = "120363403203705514@g.us"; 
 
 async function connectToWhatsApp() {

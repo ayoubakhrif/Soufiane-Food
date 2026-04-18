@@ -65,8 +65,8 @@ class WhatsAppStockController(http.Controller):
             return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{article.name}'."}
 
         # 6. Generate PDF Report
-        report = request.env.ref('casa_stock_hanane.action_report_casa_stock_product').sudo()
-        pdf_content, _ = report._render_qweb_pdf(stock_records.ids)
+        report_action = request.env['ir.actions.report'].sudo()
+        pdf_content, _ = report_action._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_records.ids)
         pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
         return {

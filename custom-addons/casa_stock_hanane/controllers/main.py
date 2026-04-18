@@ -45,7 +45,11 @@ class WhatsAppStockController(http.Controller):
         if not openai_key:
             return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo'}
 
-        product_name = self._extract_product_name(message_text, openai_key)
+        # Fetch all article names to guide the AI
+        all_articles = request.env['company.article'].sudo().search([])
+        article_names_list = list(set([a.name for a in all_articles if a.name]))
+
+        product_name = self._extract_product_name(message_text, openai_key, article_names_list)
         if not product_name or product_name.lower() == 'none':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
 
@@ -80,19 +84,24 @@ class WhatsAppStockController(http.Controller):
             'file_name': f"Rapport_Stock_{product_name.replace(' ', '_')}.pdf"
         }
 
-    def _extract_product_name(self, text, api_key):
+    def _extract_product_name(self, text, api_key, article_names_list):
         """Use OpenAI to extract the product name from a natural language sentence."""
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
+        
+        # Convert list to string for the prompt
+        db_names = ", ".join(article_names_list) if article_names_list else "Aucun article disponible"
+        
         prompt = (
-            "Tu es un assistant logistique. Ta tâche est d'extraire uniquement le nom du produit (l'article générique) mentionné "
-            "dans un message WhatsApp demandant le stock. Corrige les fautes d'orthographe (par exemple 'popcurn' -> 'Popcorn', ou les mots en darija). "
-            "Ne donne QUE le nom corrigé, rien d'autre. Exemple: 'Stock de Pomme Gala' -> 'Pomme Gala'. "
-            "Si aucun produit n'est identifié, réponds 'None'. "
-            "Message : " + text
+            "Tu es un assistant logistique. Ta tâche est de trouver l'article de la base de données qui correspond à la demande WhatsApp.\n"
+            "Voici la liste stricte des articles existant en base de données :\n"
+            f"[{db_names}]\n\n"
+            "Message WhatsApp : " + text + "\n\n"
+            "Trouve l'article de la liste qui correspond le mieux au message, en tenant compte des fautes d'orthographe (ex: 'Popcurn' -> 'Popcorn', ou 'amendes' -> 'Amande'). "
+            "Retourne UNIQUEMENT le nom de cet article exact de la liste (au caractère près), rien d'autre. Si aucun article ne correspond, réponds 'None'."
         )
         data = {
             "model": "gpt-4o-mini",

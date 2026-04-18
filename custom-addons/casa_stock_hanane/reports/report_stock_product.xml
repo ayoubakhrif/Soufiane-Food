@@ -132,7 +132,7 @@
                                 <t t-foreach="city['lines']" t-as="line">
                                     <tr>
                                         <td class="calibre-cell"><t t-esc="line['calibre']"/></td>
-                                        <td class="qty-cell"><t t-esc="'{0:,.0f}'.format(line['qty'])"/></td>
+                                        <td class="qty-cell"><t t-esc="'{0:,.2f}'.format(line['qty'])"/></td>
                                         <td><t t-esc="'{0:,.2f}'.format(line['weight'])"/></td>
                                         <td><t t-esc="'{0:,.1f}'.format(line['tonnage'])"/></td>
                                         <td><t t-esc="'{0:,.2f}'.format(line['price'])"/></td>
@@ -141,7 +141,7 @@
                                 </t>
                                 <tr class="total-city-row">
                                     <td class="total-city-label">TOTAL <t t-esc="city['name']"/></td>
-                                    <td class="total-city-qty"><t t-esc="'{0:,.0f}'.format(city['total_qty'])"/></td>
+                                    <td class="total-city-qty"><t t-esc="'{0:,.2f}'.format(city['total_qty'])"/></td>
                                     <td></td>
                                     <td><t t-esc="'{0:,.1f}'.format(city['total_tonnage'])"/></td>
                                     <td></td>

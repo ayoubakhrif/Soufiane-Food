@@ -49,40 +49,61 @@ class WhatsAppStockController(http.Controller):
         all_articles = request.env['company.article'].sudo().search([])
         article_names_list = list(set([a.name for a in all_articles if a.name]))
 
-        product_name = self._extract_product_name(message_text, openai_key, article_names_list)
-        if not product_name or product_name.lower() == 'none':
+        extracted_str = self._extract_product_name(message_text, openai_key, article_names_list)
+        if not extracted_str or extracted_str.lower() == 'none':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
 
-        # 4. Search for Products (by name or article name)
-        products = request.env['casa_hanane.product'].sudo().search([
-            '|',
-            ('name', 'ilike', product_name),
-            ('article_id.name', 'ilike', product_name)
-        ])
+        # Handle comma-separated list of matches from OpenAI
+        extracted_list = [name.strip() for name in extracted_str.split(',')]
         
-        if not products:
-            return {'status': 'not_found', 'message': f"Aucun produit ou article trouvé pour '{product_name}' dans la base de données."}
+        # Determine all corresponding articles
+        articles = request.env['company.article'].sudo().search([('name', 'in', extracted_list)])
+        if not articles:
+            return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{extracted_str}'."}
 
-        # 5. Get stock records and generate PDF
+        products = request.env['casa_hanane.product'].sudo().search([('article_id', 'in', articles.ids)])
+        
+        # Check stock globally for these products
         stock_records = request.env['casa_hanane.stock.stock'].sudo().search([
             ('product_id', 'in', products.ids), 
             ('quantity', '!=', 0)
         ])
         
         if not stock_records:
-            return {'status': 'not_found', 'message': f"Aucun stock disponible pour les variantes de '{product_name}'."}
+            return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{extracted_str}'."}
 
-        # 6. Generate PDF Report
-        report_action = request.env['ir.actions.report'].sudo()
-        pdf_content, _ = report_action._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_records.ids)
-        pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+        # Which distinct articles actually have positive stock?
+        articles_in_stock = stock_records.mapped('product_id.article_id')
+        
+        if len(articles_in_stock) == 0:
+            return {'status': 'not_found', 'message': "Aucun stock disponible actuellement."}
+            
+        elif len(articles_in_stock) == 1:
+            # ONLY ONE VARIETY HAS STOCK -> GENERATE PDF
+            stock_for_pdf = stock_records.filtered(lambda r: r.product_id.article_id.id == articles_in_stock[0].id)
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_for_pdf.ids)
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-        return {
-            'status': 'success',
-            'product_name': product_name,
-            'pdf_base64': pdf_base64,
-            'file_name': f"Rapport_Stock_{product_name.replace(' ', '_')}.pdf"
-        }
+            return {
+                'status': 'success',
+                'product_name': articles_in_stock[0].name,
+                'pdf_base64': pdf_base64,
+                'file_name': f"Rapport_Stock_{articles_in_stock[0].name.replace(' ', '_')}.pdf"
+            }
+            
+        else:
+            # MORE THAN 1 VARIETY HAS STOCK => PROMPT THE USER WITH NUMBERS!
+            varieties = [a.name for a in articles_in_stock]
+            choices_text = "Veuillez choisir le produit que vous voulez consulter :\n"
+            for i, v in enumerate(varieties, 1):
+                choices_text += f"{i}- {v}\n"
+                
+            return {
+                'status': 'multiple_choices',
+                'message': choices_text,
+                'choices': varieties
+            }
 
     def _extract_product_name(self, text, api_key, article_names_list):
         """Use OpenAI to extract the product name from a natural language sentence."""

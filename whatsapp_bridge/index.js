@@ -17,6 +17,7 @@ const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètre
 const TARGET_GROUP_ID = "120363405648854156@g.us"; 
 
 let odooSessionCookie = '';
+const pendingChoices = new Map(); // Garde en mémoire les menus interactifs par groupe
 
 async function connectToWhatsApp() {
     const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -73,11 +74,29 @@ async function connectToWhatsApp() {
             if (!text) continue;
 
             console.log(`Message de ${from} : "${text}"`);
+            let realMessage = text;
 
             // FILTRE : On ne répond qu'au groupe spécifique
             if (from !== TARGET_GROUP_ID) {
                 console.log(`Ignoré (destinataire différent de ${TARGET_GROUP_ID})`);
                 continue;
+            }
+
+            // GESTION DU MENU INTERACTIF
+            if (pendingChoices.has(from)) {
+                const choices = pendingChoices.get(from);
+                const choiceNum = parseInt(text.trim());
+                if (!isNaN(choiceNum) && choiceNum > 0 && choiceNum <= choices.length) {
+                    realMessage = choices[choiceNum - 1];
+                    console.log(`Sélection utilisateur : Option ${choiceNum} -> "${realMessage}"`);
+                    pendingChoices.delete(from); // Clear menu once selected
+                } else if (!isNaN(choiceNum)) {
+                    await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par le bon numéro." });
+                    continue; // Skip Odoo call
+                } else {
+                    // L'utilisateur a tapé une phrase, le menu est abandonné
+                    pendingChoices.delete(from);
+                }
             }
 
             try {
@@ -101,11 +120,11 @@ async function connectToWhatsApp() {
                 }
 
                 // APPEL À ODOO
-                console.log(`Appel à Odoo pour : "${text}"`);
+                console.log(`Appel à Odoo pour : "${realMessage}"`);
                 const response = await axios.post(ODOO_URL, {
                     jsonrpc: "2.0",
                     params: {
-                        message: text,
+                        message: realMessage,
                         group_id: from
                     }
                 }, {
@@ -124,7 +143,12 @@ async function connectToWhatsApp() {
                 const result = response.data.result;
                 console.log("Résultat Odoo :", result ? result.status : "AUCUN RESULTAT", result ? (result.message || "") : "");
 
-                if (result && result.status === 'success') {
+                if (result && result.status === 'multiple_choices') {
+                    // C'est un menu de sélection
+                    pendingChoices.set(from, result.choices);
+                    await sock.sendMessage(from, { text: result.message });
+                }
+                else if (result && result.status === 'success') {
                     console.log(`Produit identifié : ${result.product_name}. Envoi du PDF...`);
                     
                     // Envoi du PDF

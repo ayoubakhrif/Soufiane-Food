@@ -49,20 +49,24 @@ class WhatsAppStockController(http.Controller):
         if not product_name or product_name.lower() == 'none':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
 
-        # 4. Search for Article in Odoo
-        article = request.env['company.article'].sudo().search([('name', 'ilike', product_name)], limit=1)
-        if not article:
-            return {'status': 'not_found', 'message': f"Article '{product_name}' non trouvé dans la base de données."}
-
-        # Get all Hanane products for this article
-        products = request.env['casa_hanane.product'].sudo().search([('article_id', '=', article.id)])
+        # 4. Search for Products (by name or article name)
+        products = request.env['casa_hanane.product'].sudo().search([
+            '|',
+            ('name', 'ilike', product_name),
+            ('article_id.name', 'ilike', product_name)
+        ])
+        
         if not products:
-            return {'status': 'not_found', 'message': f"Aucun produit spécifique trouvé pour l'article '{article.name}'."}
+            return {'status': 'not_found', 'message': f"Aucun produit ou article trouvé pour '{product_name}' dans la base de données."}
 
         # 5. Get stock records and generate PDF
-        stock_records = request.env['casa_hanane.stock.stock'].sudo().search([('product_id', 'in', products.ids), ('quantity', '!=', 0)])
+        stock_records = request.env['casa_hanane.stock.stock'].sudo().search([
+            ('product_id', 'in', products.ids), 
+            ('quantity', '!=', 0)
+        ])
+        
         if not stock_records:
-            return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{article.name}'."}
+            return {'status': 'not_found', 'message': f"Aucun stock disponible pour les variantes de '{product_name}'."}
 
         # 6. Generate PDF Report
         report_action = request.env['ir.actions.report'].sudo()
@@ -71,9 +75,9 @@ class WhatsAppStockController(http.Controller):
 
         return {
             'status': 'success',
-            'product_name': article.name,
+            'product_name': product_name,
             'pdf_base64': pdf_base64,
-            'file_name': f"Rapport_Stock_{article.name.replace(' ', '_')}.pdf"
+            'file_name': f"Rapport_Stock_{product_name.replace(' ', '_')}.pdf"
         }
 
     def _extract_product_name(self, text, api_key):

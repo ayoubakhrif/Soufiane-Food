@@ -1,7 +1,7 @@
-const { 
-    makeWASocket, 
-    useMultiFileAuthState, 
-    DisconnectReason, 
+const {
+    makeWASocket,
+    useMultiFileAuthState,
+    DisconnectReason,
     getContentType,
     fetchLatestBaileysVersion
 } = require('@whiskeysockets/baileys');
@@ -12,9 +12,9 @@ const fs = require('fs');
 const pino = require('pino');
 
 // CONFIGURATION
-const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock"; 
-const API_KEY = "votre_cle_secrete_ici"; // À définir dans Odoo (Paramètres système)
-const TARGET_GROUP_ID = "120363403203705514@g.us"; 
+const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock";
+const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
+const TARGET_GROUP_ID = "120363403203705514@g.us";
 
 async function connectToWhatsApp() {
     const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -35,18 +35,18 @@ async function connectToWhatsApp() {
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
-        
+
         if (qr) {
             console.log('--- SCANNEZ LE QR CODE CI-DESSOUS ---');
             qrcode.generate(qr, { small: true });
         }
-        
+
         if (connection === 'close') {
-            const statusCode = (lastDisconnect.error instanceof Boom) ? 
+            const statusCode = (lastDisconnect.error instanceof Boom) ?
                 lastDisconnect.error.output.statusCode : 0;
-            
+
             console.log(`Connexion fermée (Code: ${statusCode})...`);
-            
+
             if (statusCode !== DisconnectReason.loggedOut) {
                 console.log('Reconnexion en cours...');
                 setTimeout(() => connectToWhatsApp(), 5000); // Attendre 5s avant de retenter
@@ -60,13 +60,13 @@ async function connectToWhatsApp() {
 
     sock.ev.on('messages.upsert', async (m) => {
         if (m.type !== 'notify') return;
-        
+
         for (const msg of m.messages) {
             if (!msg.message || msg.key.fromMe) continue;
 
             const from = msg.key.remoteJid;
-            const text = (getContentType(msg.message) === 'conversation') ? msg.message.conversation : 
-                         (getContentType(msg.message) === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : '';
+            const text = (getContentType(msg.message) === 'conversation') ? msg.message.conversation :
+                (getContentType(msg.message) === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : '';
 
             if (!text) continue;
 
@@ -94,7 +94,7 @@ async function connectToWhatsApp() {
 
                 if (result.status === 'success') {
                     console.log(`Produit identifié : ${result.product_name}. Envoi du PDF...`);
-                    
+
                     // Envoi du PDF
                     await sock.sendMessage(from, {
                         document: Buffer.from(result.pdf_base64, 'base64'),

@@ -49,15 +49,20 @@ class WhatsAppStockController(http.Controller):
         if not product_name or product_name.lower() == 'none':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
 
-        # 4. Search for product in Odoo (Hanane Stock)
-        product = request.env['casa_hanane.product'].sudo().search([('name', 'ilike', product_name)], limit=1)
-        if not product:
-            return {'status': 'not_found', 'message': f"Produit '{product_name}' non trouvé dans la base de données."}
+        # 4. Search for Article in Odoo
+        article = request.env['company.article'].sudo().search([('name', 'ilike', product_name)], limit=1)
+        if not article:
+            return {'status': 'not_found', 'message': f"Article '{product_name}' non trouvé dans la base de données."}
+
+        # Get all Hanane products for this article
+        products = request.env['casa_hanane.product'].sudo().search([('article_id', '=', article.id)])
+        if not products:
+            return {'status': 'not_found', 'message': f"Aucun produit spécifique trouvé pour l'article '{article.name}'."}
 
         # 5. Get stock records and generate PDF
-        stock_records = request.env['casa_hanane.stock.stock'].sudo().search([('product_id', '=', product.id), ('quantity', '!=', 0)])
+        stock_records = request.env['casa_hanane.stock.stock'].sudo().search([('product_id', 'in', products.ids), ('quantity', '!=', 0)])
         if not stock_records:
-            return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{product.name}'."}
+            return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{article.name}'."}
 
         # 6. Generate PDF Report
         report = request.env.ref('casa_stock_hanane.action_report_casa_stock_product').sudo()
@@ -66,9 +71,9 @@ class WhatsAppStockController(http.Controller):
 
         return {
             'status': 'success',
-            'product_name': product.name,
+            'product_name': article.name,
             'pdf_base64': pdf_base64,
-            'file_name': f"Rapport_Stock_{product.name.replace(' ', '_')}.pdf"
+            'file_name': f"Rapport_Stock_{article.name.replace(' ', '_')}.pdf"
         }
 
     def _extract_product_name(self, text, api_key):
@@ -79,9 +84,9 @@ class WhatsAppStockController(http.Controller):
             "Authorization": f"Bearer {api_key}"
         }
         prompt = (
-            "Tu es un assistant logistique. Ta tâche est d'extraire uniquement le nom du produit mentionné "
-            "dans un message WhatsApp demandant le stock. "
-            "Exemple: 'Stock de Pomme Gala' -> 'Pomme Gala'. "
+            "Tu es un assistant logistique. Ta tâche est d'extraire uniquement le nom du produit (l'article générique) mentionné "
+            "dans un message WhatsApp demandant le stock. Corrige les fautes d'orthographe (par exemple 'popcurn' -> 'Popcorn', ou les mots en darija). "
+            "Ne donne QUE le nom corrigé, rien d'autre. Exemple: 'Stock de Pomme Gala' -> 'Pomme Gala'. "
             "Si aucun produit n'est identifié, réponds 'None'. "
             "Message : " + text
         )

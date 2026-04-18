@@ -121,8 +121,10 @@ class WhatsAppClientController(http.Controller):
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
             "1. Identifie le nom du client mentionné.\n"
-            "2. Retourne UNIQUEMENT le nom du client tel qu'il apparaît dans la liste (sans guillemets, sans rien de plus).\n"
-            "3. Si aucun client ne correspond, réponds 'None'."
+            "2. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
+            "3. IMPORTANT : Si la demande est globale ou partielle (ex: 'taggada') et que plusieurs clients de la liste correspondent, renvoie UNIQUEMENT le terme commun (ex: 'taggada'). Ne choisis pas un client au hasard si la demande est vague !\n"
+            "4. Si aucun client ne correspond du tout, réponds 'None'.\n"
+            "Retourne UNIQUEMENT le texte identifié (sans guillemets, sans rien de plus)."
         )
         data = {
             "model": "gpt-4o-mini",

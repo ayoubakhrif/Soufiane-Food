@@ -117,7 +117,6 @@
                         <div class="invoice-header">
                             <div class="invoice-title"> RELEVE DE COMPTE DETAILLE (CASA)</div>
                             <div class="client-info"><strong>Client:</strong> <t t-esc="client.name"/></div>
-                            <div class="client-info"><strong>Solde Initial:</strong> <t t-esc="client.compte_initial"/> Dh</div>
                             <div class="client-info"><strong>Solde Actuel:</strong> <t t-esc="'{:,.2f}'.format(client.compte_total).replace(',', ' ')"/> Dh</div>
                         </div>
 

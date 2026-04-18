@@ -16,6 +16,8 @@ const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufi
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 const TARGET_GROUP_ID = "120363405648854156@g.us"; 
 
+let odooSessionCookie = '';
+
 async function connectToWhatsApp() {
     const { version, isLatest } = await fetchLatestBaileysVersion();
     console.log(`Utilisation de la version WA v${version.join('.')} (Est la plus récente : ${isLatest})`);
@@ -79,6 +81,25 @@ async function connectToWhatsApp() {
             }
 
             try {
+                // AUTHENTIFICATION ODOO (pour contourner le DB Proxy 404)
+                if (!odooSessionCookie) {
+                    console.log("Demande de session (Cookie) à Odoo...");
+                    const authRes = await axios.post("https://gestia-soufianefoods.cloud/web/session/authenticate", {
+                        jsonrpc: "2.0",
+                        params: {
+                            db: "soufianefoods",
+                            login: "ai_whatsapp_bot@soufianefoods.com",
+                            password: "0000"
+                        }
+                    });
+                    if (authRes.headers['set-cookie']) {
+                        odooSessionCookie = authRes.headers['set-cookie'].find(c => c.startsWith('session_id='));
+                        console.log("Session Odoo activée.");
+                    } else {
+                        console.log("Impossible d'obtenir la session Odoo.");
+                    }
+                }
+
                 // APPEL À ODOO
                 console.log(`Appel à Odoo pour : "${text}"`);
                 const response = await axios.post(ODOO_URL, {
@@ -90,7 +111,8 @@ async function connectToWhatsApp() {
                 }, {
                     headers: {
                         'X-Api-Key': API_KEY,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Cookie': odooSessionCookie || ''
                     }
                 });
 

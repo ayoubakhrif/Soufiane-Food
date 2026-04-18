@@ -448,3 +448,75 @@ class CasaStockStock(models.Model):
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'new',
         }
+
+    def _get_product_report_data(self):
+        """Prepare data for the QWeb PDF report, mimicking the Excel aggregation."""
+        if not self:
+            return {'cities': []}
+            
+        product = self[0].product_id
+        cities_selection = dict(self._fields['ville'].selection)
+        cities_to_process = ['tanger', 'casa']
+        
+        records_by_city = {city: self.filtered(lambda r: r.ville == city) for city in cities_to_process}
+        
+        report_data = {
+            'product_name': product.name,
+            'cities': []
+        }
+        
+        for city_code in cities_to_process:
+            records = records_by_city[city_code]
+            if not records:
+                continue
+                
+            city_label = cities_selection.get(city_code, city_code).upper()
+            
+            # Aggregate data for this city
+            aggregated = {}
+            for rec in records:
+                key = (rec.calibre or "", rec.weight or 0.0, rec.price or 0.0)
+                if key not in aggregated:
+                    aggregated[key] = {'qty': 0, 'tonnage': 0, 'total': 0}
+                aggregated[key]['qty'] += rec.quantity
+                aggregated[key]['tonnage'] += rec.total_weight
+                aggregated[key]['total'] += rec.mt_achat
+                
+            lines = []
+            city_qty_total = 0
+            city_tonnage_total = 0
+            city_mt_total = 0
+            
+            for (calibre, weight, price), data in aggregated.items():
+                lines.append({
+                    'calibre': calibre or "",
+                    'qty': data['qty'],
+                    'weight': weight,
+                    'tonnage': data['tonnage'],
+                    'price': price,
+                    'total': data['total']
+                })
+                city_qty_total += data['qty']
+                city_tonnage_total += data['tonnage']
+                city_mt_total += data['total']
+                
+            report_data['cities'].append({
+                'name': city_label,
+                'lines': lines,
+                'total_qty': city_qty_total,
+                'total_tonnage': city_tonnage_total,
+                'total_amount': city_mt_total
+            })
+            
+        return report_data
+
+    def action_export_product_report_pdf(self):
+        """Trigger the PDF report."""
+        if not self:
+            raise UserError(_("Veuillez sélectionner au moins un enregistrement."))
+            
+        product = self[0].product_id
+        if any(rec.product_id != product for rec in self):
+            raise UserError(_("Tous les enregistrements sélectionnés doivent appartenir au même produit."))
+            
+        return self.env.ref('casa_stock_hanane.action_report_casa_stock_product').report_action(self)

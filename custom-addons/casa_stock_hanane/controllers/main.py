@@ -2,7 +2,7 @@ import base64
 import json
 import logging
 import requests
-from odoo import http
+from odoo import http, SUPERUSER_ID
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -13,8 +13,13 @@ class WhatsAppStockController(http.Controller):
     def whatsapp_health(self):
         return "Odoo API is ALIVE"
 
-    @http.route('/api/whatsapp/stock', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/whatsapp/stock', type='json', auth='none', methods=['POST'], csrf=False)
     def whatsapp_stock(self, **kwargs):
+        # En mode auth='none', on force la base de données
+        db_name = request.httprequest.args.get('db') or 'soufianefoods'
+        request.session.db = db_name
+        request.update_env(user=SUPERUSER_ID)
+        
         # 1. Verification of API Key
         headers = request.httprequest.headers
         api_key = headers.get('X-Api-Key')

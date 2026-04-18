@@ -51,7 +51,9 @@ class WhatsAppStockController(http.Controller):
 
         # If the user selected from a menu, the exact article name is sent. Bypass OpenAI.
         exact_article = request.env['company.article'].sudo().search([('name', '=ilike', message_text)], limit=1)
+        
         if exact_article:
+            articles = exact_article
             extracted_str = exact_article.name
         else:
             # Fetch Dynamic Darija Dictionary from Article Aliases
@@ -60,22 +62,23 @@ class WhatsAppStockController(http.Controller):
             
             extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
             
-        if not extracted_str or extracted_str.lower() == 'none':
-            return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
+            if not extracted_str or extracted_str.lower() == 'none':
+                return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
 
-        # Handle comma-separated list of matches from OpenAI
-        extracted_list = [name.strip() for name in extracted_str.split(',')]
-        
-        # Determine all corresponding articles using ILIKE for each keyword
-        domain = []
-        for name in extracted_list:
-            domain.append(('name', 'ilike', name))
-        
-        # Join with OR operator if there are multiple elements
-        for i in range(len(extracted_list) - 1):
-            domain.insert(0, '|')
+            # Handle comma-separated list of matches from OpenAI
+            extracted_list = [name.strip() for name in extracted_str.split(',')]
             
-        articles = request.env['company.article'].sudo().search(domain)
+            # Determine all corresponding articles using ILIKE for each keyword
+            domain = []
+            for name in extracted_list:
+                domain.append(('name', 'ilike', name))
+            
+            # Join with OR operator if there are multiple elements
+            for i in range(len(extracted_list) - 1):
+                domain.insert(0, '|')
+                
+            articles = request.env['company.article'].sudo().search(domain)
+
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{extracted_str}'."}
 

@@ -491,6 +491,27 @@ class CasaClient(models.Model):
     #  🧮 Utilitaire pour le rapport
     # ==============================
 
+    def get_all_weeks_list(self):
+        """Return a sorted list of all unique weeks for this client."""
+        weeks = set()
+        
+        def date_to_week(d):
+            return d.strftime("%Y-W%W") if d else False
+            
+        # Sorties
+        for s in self.exit_ids:
+            if s.week: weeks.add(s.week)
+        
+        # Avances
+        for a in self.advance_ids:
+            if a.date: weeks.add(date_to_week(a.date))
+            
+        # Impayés
+        for u in self.unpaid_ids:
+            if u.date: weeks.add(date_to_week(u.date))
+            
+        return sorted(list(weeks), reverse=True)
+
     def _get_week_data(self, week):
         """
         Retourne un dict avec tous les totaux pour une semaine donnée.

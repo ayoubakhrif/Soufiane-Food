@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_casa_client_history" model="ir.actions.report">
+        <field name="name">Historique Complet Client (Casa)</field>
+        <field name="model">casa.client</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">casa_stock.report_casa_client_history_document</field>
+        <field name="report_file">casa_stock.report_casa_client_history_document</field>
+        <field name="binding_model_id" ref="model_casa_client"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_casa_client_history_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="client">
+                <t t-set="all_weeks" t-value="client.get_all_weeks_list()"/>
+                
+                <div class="page">
+                    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+                    <style>
+                        .invoice-header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            border-bottom: 3px solid #2563eb;
+                            padding-bottom: 20px;
+                        }
+                        .invoice-title {
+                            font-size: 28px;
+                            font-weight: bold;
+                            color: #1e3a8a;
+                            margin-bottom: 10px;
+                        }
+                        .client-info {
+                            font-size: 16px;
+                            color: #1f2937;
+                            margin: 5px 0;
+                        }
+                        .week-container {
+                            margin-bottom: 50px;
+                            page-break-inside: avoid;
+                        }
+                        .section-title {
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: white;
+                            padding: 8px 12px;
+                            margin-top: 20px;
+                            margin-bottom: 10px;
+                            border-radius: 6px;
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        .section-sorties { background: #2563eb; }
+                        .section-avances { background: #059669; }
+                        .section-recap { background: #1f2937; }
+                        
+                        .data-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 15px;
+                        }
+                        .data-table th {
+                            background: #f3f4f6;
+                            padding: 8px;
+                            text-align: left;
+                            font-size: 12px;
+                            font-weight: bold;
+                            border: 1px solid #e5e7eb;
+                        }
+                        .data-table td {
+                            padding: 6px 8px;
+                            border: 1px solid #f3f4f6;
+                            font-size: 11px;
+                        }
+                        .total-row {
+                            background: #f9fafb !important;
+                            font-weight: bold;
+                            font-size: 12px;
+                        }
+                        .amount { text-align: right; font-weight: bold; }
+                        
+                        .recap-box {
+                            background: #fefce8;
+                            border: 1px solid #fef08a;
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-top: 20px;
+                        }
+                        .recap-line {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 4px 0;
+                            font-size: 14px;
+                        }
+                        .recap-total {
+                            border-top: 2px solid #2563eb;
+                            margin-top: 8px;
+                            padding-top: 8px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            color: #2563eb;
+                        }
+                        .footer-note {
+                            text-align: center;
+                            margin-top: 40px;
+                            padding-top: 20px;
+                            border-top: 1px solid #e5e7eb;
+                            color: #6b7280;
+                            font-size: 10px;
+                        }
+                    </style>
+
+                    <div class="invoice-header">
+                        <div class="invoice-title"> RELEVE DE COMPTE DETAILLE (CASA)</div>
+                        <div class="client-info"><strong>Client:</strong> <t t-esc="client.name"/></div>
+                        <div class="client-info"><strong>Solde Initial:</strong> <t t-esc="client.compte_initial"/> Dh</div>
+                        <div class="client-info"><strong>Solde Actuel:</strong> <t t-esc="'{:,.2f}'.format(client.compte_total).replace(',', ' ')"/> Dh</div>
+                    </div>
+
+                    <t t-foreach="all_weeks" t-as="week">
+                        <t t-set="week_data" t-value="client._get_week_data(week)"/>
+                        
+                        <div class="week-container">
+                            <div style="background:#4b5563; color:white; padding:10px; border-radius:8px; margin-top:30px;">
+                                <h3 style="margin:0;">📅 SEMAINE <t t-esc="week_data['week']"/> (DU <t t-esc="week_data['start_date']"/> AU <t t-esc="week_data['end_date']"/>)</h3>
+                            </div>
+
+                            <!-- Section Sorties -->
+                            <t t-if="week_data['sorties']">
+                                <div class="section-title section-sorties"> 
+                                    <span>COMMANDES</span>
+                                    <span>Total: <t t-esc="'{:,.2f}'.format(week_data['total_net_sorties']).replace(',', ' ')"/> Dh</span>
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Produit</th>
+                                            <th>Qté</th>
+                                            <th>Tonnage</th>
+                                            <th class="amount">P.U</th>
+                                            <th class="amount">Brut</th>
+                                            <th class="amount">Réd.</th>
+                                            <th class="amount">Net</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="week_data['sorties']" t-as="sortie">
+                                            <tr>
+                                                <td><t t-esc="sortie.date"/></td>
+                                                <td><t t-esc="sortie.product_id.name"/></td>
+                                                <td><t t-esc="sortie.qty"/></td>
+                                                <td><t t-esc="sortie.tonnage"/></td>
+                                                <td class="amount"><t t-esc="'{:,.2f}'.format(sortie.price_sale).replace(',', ' ')"/></td>
+                                                <td class="amount"><t t-esc="'{:,.2f}'.format(sortie.mt_vente).replace(',', ' ')"/></td>
+                                                <td class="amount" style="color:#dc2626;"><t t-esc="'{:,.2f}'.format(sortie.discount_amount).replace(',', ' ')"/></td>
+                                                <td class="amount" style="color:#059669;"><t t-esc="'{:,.2f}'.format(sortie.mt_vente_final).replace(',', ' ')"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </t>
+
+                            <!-- Section Avances -->
+                            <t t-if="week_data['avances']">
+                                <div class="section-title section-avances"> 
+                                    <span>AVANCES</span>
+                                    <span>Total: <t t-esc="'{:,.2f}'.format(week_data['total_avances']).replace(',', ' ')"/> Dh</span>
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Mode</th>
+                                            <th>Commentaire</th>
+                                            <th class="amount">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="week_data['avances']" t-as="avance">
+                                            <tr>
+                                                <td><t t-esc="avance.date"/></td>
+                                                <td><t t-esc="dict(avance._fields['payment_mode'].selection).get(avance.payment_mode, '-')"/></td>
+                                                <td><t t-esc="avance.comment or '-'"/></td>
+                                                <td class="amount"><t t-esc="'{:,.2f}'.format(avance.amount).replace(',', ' ')"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </t>
+
+                            <!-- Section Recap Semaine -->
+                            <div class="recap-box">
+                                <div class="recap-line" style="font-weight:bold;">
+                                    <span>SOLDE DE LA SEMAINE :</span>
+                                    <span t-attf-style="color: {{ 'red' if week_data['compte_semaine'] > 0 else '#059669' }}">
+                                        <t t-esc="'{:,.2f}'.format(week_data['compte_semaine']).replace(',', ' ')"/> Dh
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <div class="footer-note">
+                        Document généré automatiquement le <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

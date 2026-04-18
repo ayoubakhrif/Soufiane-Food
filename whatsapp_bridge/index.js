@@ -12,9 +12,13 @@ const fs = require('fs');
 const pino = require('pino');
 
 // CONFIGURATION
-const ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
+const ARTICLE_GROUP_ID = "120363405648854156@g.us"; 
+const CLIENT_GROUP_ID = "120363426234155722@g.us";
+
+const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
+const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
+
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
-const TARGET_GROUP_ID = "120363405648854156@g.us"; 
 
 let odooSessionCookie = '';
 const pendingChoices = new Map(); // Garde en mémoire les menus interactifs par groupe
@@ -76,9 +80,18 @@ async function connectToWhatsApp() {
             console.log(`Message de ${from} : "${text}"`);
             let realMessage = text;
 
-            // FILTRE : On ne répond qu'au groupe spécifique
-            if (from !== TARGET_GROUP_ID) {
-                console.log(`Ignoré (destinataire différent de ${TARGET_GROUP_ID})`);
+            // DETERMINATION DU TYPE DE REQUÊTE SELON LE GROUPE
+            let targetOdooUrl = "";
+            let isClientRequest = false;
+
+            if (from === ARTICLE_GROUP_ID) {
+                targetOdooUrl = ARTICLE_ODOO_URL;
+                isClientRequest = false;
+            } else if (from === CLIENT_GROUP_ID) {
+                targetOdooUrl = CLIENT_ODOO_URL;
+                isClientRequest = true;
+            } else {
+                console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
             }
 
@@ -120,8 +133,8 @@ async function connectToWhatsApp() {
                 }
 
                 // APPEL À ODOO
-                console.log(`Appel à Odoo pour : "${realMessage}"`);
-                const response = await axios.post(ODOO_URL, {
+                console.log(`Appel à Odoo (${isClientRequest ? 'CLIENT' : 'ARTICLE'}) pour : "${realMessage}"`);
+                const response = await axios.post(targetOdooUrl, {
                     jsonrpc: "2.0",
                     params: {
                         message: realMessage,
@@ -149,14 +162,16 @@ async function connectToWhatsApp() {
                     await sock.sendMessage(from, { text: result.message });
                 }
                 else if (result && result.status === 'success') {
-                    console.log(`Produit identifié : ${result.product_name}. Envoi du PDF...`);
+                    const identifier = isClientRequest ? result.client_name : result.product_name;
+                    const reportType = isClientRequest ? "de compte" : "de stock";
+                    console.log(`${isClientRequest ? 'Client' : 'Produit'} identifié : ${identifier}. Envoi du PDF...`);
                     
                     // Envoi du PDF
                     await sock.sendMessage(from, {
                         document: Buffer.from(result.pdf_base64, 'base64'),
                         mimetype: 'application/pdf',
                         fileName: result.file_name,
-                        caption: `Voici le rapport de stock pour *${result.product_name}*.`
+                        caption: `Voici le rapport ${reportType} pour *${identifier}*.`
                     });
                 } else if (result && result.status === 'not_found') {
                     console.log(`Non trouvé : ${result.message}`);

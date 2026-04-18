@@ -49,7 +49,13 @@ class WhatsAppStockController(http.Controller):
         all_articles = request.env['company.article'].sudo().search([])
         article_names_list = list(set([a.name for a in all_articles if a.name]))
 
-        extracted_str = self._extract_product_name(message_text, openai_key, article_names_list)
+        # If the user selected from a menu, the exact article name is sent. Bypass OpenAI.
+        exact_article = request.env['company.article'].sudo().search([('name', '=ilike', message_text)], limit=1)
+        if exact_article:
+            extracted_str = exact_article.name
+        else:
+            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list)
+            
         if not extracted_str or extracted_str.lower() == 'none':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
 
@@ -71,10 +77,10 @@ class WhatsAppStockController(http.Controller):
 
         products = request.env['casa_hanane.product'].sudo().search([('article_id', 'in', articles.ids)])
         
-        # Check stock globally for these products
+        # Check stock globally for these products (Strictly positive stock)
         stock_records = request.env['casa_hanane.stock.stock'].sudo().search([
             ('product_id', 'in', products.ids), 
-            ('quantity', '!=', 0)
+            ('quantity', '>', 0)
         ])
         
         if not stock_records:

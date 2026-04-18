@@ -18,3 +18,4 @@ from . import casa_stock_perte
 from . import casa_sortie_supp
 from . import casa_stock_difference
 from . import casa_stock_client_difference
+from . import casa_article_alias

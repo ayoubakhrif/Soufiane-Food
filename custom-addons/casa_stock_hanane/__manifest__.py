@@ -32,6 +32,7 @@ This module provides a robust stock management system based on an immutable move
         'views/stock_perte_views.xml',
         'views/stock_difference_views.xml',
         'views/menus.xml',
+        'views/casa_article_alias_views.xml',
     ],
     'installable': True,
     'application': True,

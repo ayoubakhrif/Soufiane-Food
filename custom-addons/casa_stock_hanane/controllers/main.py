@@ -54,7 +54,11 @@ class WhatsAppStockController(http.Controller):
         if exact_article:
             extracted_str = exact_article.name
         else:
-            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list)
+            # Fetch Dynamic Darija Dictionary from Article Aliases
+            aliases = request.env['casa_hanane.article.alias'].sudo().search([])
+            darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in aliases if a.article_id]
+            
+            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
             
         if not extracted_str or extracted_str.lower() == 'none':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le produit dans votre message."}
@@ -119,7 +123,7 @@ class WhatsAppStockController(http.Controller):
                 'choices': varieties
             }
 
-    def _extract_product_name(self, text, api_key, article_names_list):
+    def _extract_product_name(self, text, api_key, article_names_list, darija_aliases=None):
         """Use OpenAI to extract the product name from a natural language sentence."""
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
@@ -129,16 +133,19 @@ class WhatsAppStockController(http.Controller):
         
         # Convert list to string for the prompt
         db_names = ", ".join(article_names_list) if article_names_list else "Aucun article disponible"
+        synonyms = "\n".join(darija_aliases) if darija_aliases else "Aucun synonyme défini."
         
         prompt = (
             "Tu es un assistant logistique. Ta tâche est d'identifier le nom correct de l'article demandé.\n"
-            "Voici la liste stricte des articles de la base de données pour t'aider :\n"
+            "Voici la liste stricte des articles de la base de données :\n"
             f"[{db_names}]\n\n"
+            "Voici un dictionnaire de synonymes/Darija spécifique à l'entreprise pour t'aider :\n"
+            f"{synonyms}\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
-            "1. Comprends ce que le client demande : corrige les fautes et TRADUIS les mots en Darija vers le français standard (ex: 'ibzar' -> 'Poivre', 'louz' -> 'Amande', 'popcurn' -> 'Popcorn'). Tu peux te baser sur la liste fournie pour trouver le mot qui correspond.\n"
+            "1. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus pour identifier le produit correct.\n"
             "2. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact ('Poivre B1').\n"
-            "3. Si la demande est globale (ex: 'poivre', 'ibzar', 'ch7al dyal poivre'), renvoie UNIQUEMENT LE TERME COURT (ex: 'Poivre', 'Amande') ! Ne m'énumère surtout pas les variantes. Je veux juste le mot racine pour chercher moi-même.\n"
+            "3. Si la demande est globale (ex: 'poivre', 'ibzar'), renvoie UNIQUEMENT LE TERME COURT (ex: 'Poivre') ! Ne m'énumère surtout pas les variantes.\n"
             "Retourne UNIQUEMENT le mot trouvé (sans guillemets, sans rien de plus). Si aucun ne correspond, réponds 'None'."
         )
         data = {

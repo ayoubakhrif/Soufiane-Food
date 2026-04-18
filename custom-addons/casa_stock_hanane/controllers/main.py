@@ -13,7 +13,7 @@ class WhatsAppStockController(http.Controller):
     def whatsapp_health(self):
         return "Odoo API is ALIVE"
 
-    @http.route('/api/whatsapp/stock', type='http', auth='none', methods=['POST'], csrf=False)
+    @http.route('/whatsapp/stock', type='http', auth='none', methods=['POST'], csrf=False)
     def whatsapp_stock(self, **kwargs):
         # En mode auth='none', on force la base de données
         db_name = request.httprequest.args.get('db') or 'soufianefoods'

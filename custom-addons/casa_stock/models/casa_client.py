@@ -591,3 +591,26 @@ class CasaClient(models.Model):
             'compte_semaine': compte_semaine,
             'compte_total': self.compte_total,
         }
+    def _get_total_clients_report_data(self):
+        """Prepare data for the Global Client Balance Summary report."""
+        # Find all clients with a non-zero balance
+        clients = self.search([('compte_total', '!=', 0)])
+        if not clients:
+            return {'clients': [], 'grand_total': 0}
+
+        # Sort by balance descending
+        clients = clients.sorted(key=lambda c: c.compte_total, reverse=True)
+        
+        report_data = {
+            'report_date': fields.Date.today().strftime('%d/%m/%y'),
+            'clients': [],
+            'grand_total': sum(clients.mapped('compte_total'))
+        }
+        
+        for client in clients:
+            report_data['clients'].append({
+                'name': client.name,
+                'compte_total': client.compte_total
+            })
+            
+        return report_data

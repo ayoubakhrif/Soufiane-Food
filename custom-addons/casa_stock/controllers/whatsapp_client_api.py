@@ -37,6 +37,28 @@ class WhatsAppClientController(http.Controller):
         if not message_text:
             return {'status': 'error', 'message': 'Empty message'}
 
+        # --- NEW: Check for Global Client Report trigger ---
+        client_total_triggers = ['client total', 'total client', 'solde total', 'situation globale', 'situation generale']
+        if any(trigger in message_text.lower() for trigger in client_total_triggers):
+            report_action = request.env.ref('casa_stock.action_report_casa_clients_total').sudo()
+            # Use current date via odoo.fields
+            from odoo import fields
+            
+            # The report method searches all clients with balance != 0
+            dummy_record = request.env['casa.client'].sudo().search([('compte_total', '!=', 0)], limit=1)
+            if not dummy_record:
+                return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun solde client à afficher."}
+            
+            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
+            
+            return {
+                'status': 'success',
+                'message': "Voici la situation globale des comptes clients.",
+                'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
+                'file_name': f"Situation_Globale_Clients_{fields.Date.today()}.pdf"
+            }
+        # ----------------------------------------------------
+
         # 3. Security: Check Group ID
         # Only handle requests from the Director's Client Group
         DIRECTOR_GROUP_ID = '120363426234155722@g.us'

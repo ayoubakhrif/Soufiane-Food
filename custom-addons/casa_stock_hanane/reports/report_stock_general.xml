@@ -88,12 +88,12 @@
                 </style>
 
                 <div class="report-title">
-                    SITUATION GÉNÉRALE DU STOCK
+                    SITUATION GENERALE DU STOCK
                 </div>
 
                 <div class="info-header">
                     <span>Date : <t t-esc="data['report_date']"/></span>
-                    <span>Document : Stock Consolidé</span>
+                    <span>Document : Stock Consolide</span>
                 </div>
 
                 <t t-foreach="data['cities']" t-as="city">
@@ -103,9 +103,9 @@
                             <thead>
                                 <tr>
                                     <th style="width: 40%;">Produit</th>
-                                    <th class="text-center" style="width: 20%;">Quantité Totale</th>
+                                    <th class="text-center" style="width: 20%;">Quantite Totale</th>
                                     <th class="text-center" style="width: 20%;">Tonnage (T)</th>
-                                    <th class="text-right" style="width: 20%;">Valeur Estimée</th>
+                                    <th class="text-right" style="width: 20%;">Valeur Estimee</th>
                                 </tr>
                             </thead>
                             <tbody>

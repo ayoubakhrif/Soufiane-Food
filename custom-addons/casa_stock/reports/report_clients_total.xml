@@ -78,13 +78,18 @@
                     }
                 </style>
 
-                <div class="report-title">
-                    SITUATION GLOBALE DES COMPTES CLIENTS
+                <div class="info-header">
+                    <div style="flex: 1;">
+                        <img src="/gestia_branding/static/src/img/Gestia_logo.png" style="max-height: 80px;"/>
+                    </div>
+                    <div style="flex: 1; text-align: right; padding-top: 20px;">
+                        <span>Date : <t t-esc="data['report_date']"/></span><br/>
+                        <span>Document : Inventaire des Soldes</span>
+                    </div>
                 </div>
 
-                <div class="info-header">
-                    <span>Date : <t t-esc="data['report_date']"/></span>
-                    <span>Document : Inventaire des Soldes</span>
+                <div class="report-title">
+                    SITUATION GLOBALE DES COMPTES CLIENTS
                 </div>
 
                 <table class="client-table">
@@ -102,7 +107,7 @@
                                 <td class="text-center"><t t-esc="counter"/></td>
                                 <td><t t-esc="client['name']"/></td>
                                 <td class="text-right font-bold">
-                                    <t t-esc="'{0:,.2f}'.format(client['compte_total'])"/> Dh
+                                    <t t-esc="'{0:,.2f}'.format(client['compte_provisoire'])"/> Dh
                                 </td>
                             </tr>
                             <t t-set="counter" t-value="counter + 1"/>

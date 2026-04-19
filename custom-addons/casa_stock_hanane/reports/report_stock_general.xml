@@ -87,13 +87,18 @@
                     }
                 </style>
 
-                <div class="report-title">
-                    SITUATION GENERALE DU STOCK
+                <div class="info-header">
+                    <div style="flex: 1;">
+                        <img src="/gestia_branding/static/src/img/Gestia_logo.png" style="max-height: 80px;"/>
+                    </div>
+                    <div style="flex: 1; text-align: right; padding-top: 20px;">
+                        <span>Date : <t t-esc="data['report_date']"/></span><br/>
+                        <span>Document : Stock Consolide</span>
+                    </div>
                 </div>
 
-                <div class="info-header">
-                    <span>Date : <t t-esc="data['report_date']"/></span>
-                    <span>Document : Stock Consolide</span>
+                <div class="report-title">
+                    SITUATION GENERALE DU STOCK
                 </div>
 
                 <t t-foreach="data['cities']" t-as="city">

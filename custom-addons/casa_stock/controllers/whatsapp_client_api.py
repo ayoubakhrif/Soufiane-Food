@@ -38,7 +38,7 @@ class WhatsAppClientController(http.Controller):
             return {'status': 'error', 'message': 'Empty message'}
 
         # --- NEW: Check for Global Client Report trigger ---
-        client_total_triggers = ['client total', 'total client', 'solde total', 'situation globale', 'situation generale']
+        client_total_triggers = ['total', 'clients', 'client total', 'total client', 'solde total', 'situation globale', 'situation generale']
         if any(trigger in message_text.lower() for trigger in client_total_triggers):
             report_action = request.env.ref('casa_stock.action_report_casa_clients_total').sudo()
             # Use current date via odoo.fields

@@ -49,7 +49,7 @@ class WhatsAppStockController(http.Controller):
             if not dummy_record:
                 return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
             
-            pdf_content, _ = report_action._render_qweb_pdf(res_ids=dummy_record.ids)
+            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
             from odoo import fields
             return {
                 'status': 'success',

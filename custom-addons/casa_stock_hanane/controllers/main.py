@@ -52,41 +52,35 @@ class WhatsAppStockController(http.Controller):
         # 1. Start with articles matching the message directly (exact name)
         articles = request.env['company.article'].sudo().search([('name', '=ilike', message_text)])
         
-        # 2. Check for manual aliases matching the message text exactly
-        alias_matches = request.env['casa_hanane.article.alias'].sudo().search([('name', '=ilike', message_text)])
-        if alias_matches:
-            articles |= alias_matches.mapped('article_id')
+        # 2. Advanced Alias Search: Split message into words and check each against the alias table
+        # This ensures "Donne moi le stock de rouz" finds all articles linked to "rouz"
+        words = [w.strip() for w in message_text.split() if len(w.strip()) > 2]
+        for word in words:
+            alias_matches = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', word)])
+            if alias_matches:
+                articles |= alias_matches.mapped('article_id')
 
-        # 3. Use OpenAI for intelligent extraction
-        # Fetch Dynamic Darija Dictionary for context
+        # 3. Use OpenAI for intelligent extraction (fallback and refinement)
         all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
         darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
         
-        if not articles:
-            # If no direct match, rely fully on AI
-            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
-        else:
-            # If we found something, AI can still help confirm or find more variants
-            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
+        extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
 
         if extracted_str and extracted_str.lower() != 'none':
-            # Handle comma-separated list of matches from OpenAI
             extracted_list = [name.strip() for name in extracted_str.split(',')]
-            
-            # Build domain for AI results
             ai_domain = []
             for name in extracted_list:
                 ai_domain.append(('name', 'ilike', name))
-                # ALSO search in aliases for the string extracted by AI!
-                ai_domain.append(('id', 'in', request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', name)]).mapped('article_id').ids))
+                # Search by Alias for the extracted name too
+                alias_ids = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', name)]).mapped('article_id').ids
+                if alias_ids:
+                    ai_domain.append(('id', 'in', alias_ids))
             
-            # Join with OR operator
-            for i in range(len(ai_domain) - 1):
-                ai_domain.insert(0, '|')
-                
-            articles |= request.env['company.article'].sudo().search(ai_domain)
+            if ai_domain:
+                for i in range(len(ai_domain) - 1):
+                    ai_domain.insert(0, '|')
+                articles |= request.env['company.article'].sudo().search(ai_domain)
         
-        # Use message_text or extracted_str for display
         final_extracted_str = extracted_str if extracted_str and extracted_str.lower() != 'none' else message_text
 
         if not articles:

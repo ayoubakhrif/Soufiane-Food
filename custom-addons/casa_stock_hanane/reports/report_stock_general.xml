@@ -130,7 +130,7 @@
 
                 <div class="global-summary">
                     <div style="font-size: 18px; font-weight: bold; border-bottom: 1px solid black; margin-bottom: 10px;">
-                        RÉSUMÉ TOUTES VILLES
+                        RESUME TOUTES VILLES
                     </div>
                     <table style="width: 100%;">
                         <tr>
@@ -140,7 +140,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="width: 50%; font-size: 16px;">Valeur Globale Estimée (Achat) :</td>
+                            <td style="width: 50%; font-size: 16px;">Valeur Globale Estimee (Achat) :</td>
                             <td style="width: 50%; font-size: 18px; font-weight: bold; color: #d00;" class="text-right">
                                 <t t-esc="'{0:,.2f}'.format(data['global_amount'])"/> Dh
                             </td>
@@ -149,7 +149,7 @@
                 </div>
 
                 <div class="footer-note">
-                    Ce document est généré automatiquement par le système d'IA de Gestion Stock.
+                    Ce document est genere automatiquement par Gestia erp.
                 </div>
             </div>
         </t>

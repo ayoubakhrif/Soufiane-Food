@@ -49,48 +49,45 @@ class WhatsAppStockController(http.Controller):
         all_articles = request.env['company.article'].sudo().search([])
         article_names_list = list(set([a.name for a in all_articles if a.name]))
 
-        # 1. Start with articles matching the message directly (exact name)
+        # Step 1: Check for an exact name match (Menu selection or precise input)
+        # We start with '=' match to be very specific first
         articles = request.env['company.article'].sudo().search([('name', '=ilike', message_text)])
         
-        # 2. Advanced Alias Search: Split message into words and check each against the alias table
-        # This ensures "Donne moi le stock de rouz" finds all articles linked to "rouz"
-        words = [w.strip() for w in message_text.split() if len(w.strip()) > 2]
-        for word in words:
-            alias_matches = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', word)])
-            if alias_matches:
-                articles |= alias_matches.mapped('article_id')
+        final_extracted_str = message_text
 
-        # 3. Use OpenAI for intelligent extraction (fallback and refinement)
-        all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
-        darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
-        
-        extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
+        # Step 2: If no single exact match, perform broader searches
+        if len(articles) != 1:
+            # Check for manual aliases matching the message words
+            words = [w.strip() for w in message_text.split() if len(w.strip()) > 2]
+            for word in words:
+                alias_matches = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', word)])
+                if alias_matches:
+                    articles |= alias_matches.mapped('article_id')
 
-        if extracted_str and extracted_str.lower() != 'none':
-            extracted_list = [name.strip() for name in extracted_str.split(',')]
-            ai_domain = []
-            for name in extracted_list:
-                ai_domain.append(('name', 'ilike', name))
-                # Search by Alias for the extracted name too
-                alias_ids = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', name)]).mapped('article_id').ids
-                if alias_ids:
-                    ai_domain.append(('id', 'in', alias_ids))
+            # Step 3: Use OpenAI for intelligent extraction
+            all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
+            darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
             
-            if ai_domain:
-                for i in range(len(ai_domain) - 1):
-                    ai_domain.insert(0, '|')
-                articles |= request.env['company.article'].sudo().search(ai_domain)
-        
-        final_extracted_str = extracted_str if extracted_str and extracted_str.lower() != 'none' else message_text
+            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
 
+            if extracted_str and extracted_str.lower() != 'none':
+                final_extracted_str = extracted_str
+                extracted_list = [name.strip() for name in extracted_str.split(',')]
+                ai_domain = []
+                for name in extracted_list:
+                    ai_domain.append(('name', 'ilike', name))
+                    # Also lookup by alias in case AI returns an alias keyword
+                    alias_ids = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', name)]).mapped('article_id').ids
+                    if alias_ids:
+                        ai_domain.append(('id', 'in', alias_ids))
+                
+                if ai_domain:
+                    for i in range(len(ai_domain) - 1):
+                        ai_domain.insert(0, '|')
+                    articles |= request.env['company.article'].sudo().search(ai_domain)
+        
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{final_extracted_str}'."}
-
-        # Check for absolute exact match among multiple results to break selection loops
-        if len(articles) > 1:
-            absolute_match = articles.filtered(lambda a: a.name.lower() == extracted_str.lower())
-            if absolute_match:
-                articles = absolute_match[0]
 
         products = request.env['casa_hanane.product'].sudo().search([('article_id', 'in', articles.ids)])
         

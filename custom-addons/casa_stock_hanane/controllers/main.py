@@ -40,6 +40,25 @@ class WhatsAppStockController(http.Controller):
         if not message_text:
             return {'status': 'error', 'message': 'Empty message'}
 
+        # --- NEW: Check for General Stock Report trigger ---
+        general_triggers = ['stock général', 'stock general', 'situation générale', 'situation generale', 'stock total']
+        if any(trigger in message_text.lower() for trigger in general_triggers):
+            report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
+            # The report method searches all stock [quantity > 0] regardless of the record ID passed
+            dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
+            if not dummy_record:
+                return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
+            
+            pdf_content, _ = report_action._render_qweb_pdf(res_ids=dummy_record.ids)
+            from odoo import fields
+            return {
+                'status': 'success',
+                'message': "Voici la situation générale du stock consolidée par ville (Quantités, Tonnages et Valeurs Totales).",
+                'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
+                'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
+            }
+        # ----------------------------------------------------
+
         # 3. Call OpenAI to extract product name
         openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not openai_key:

@@ -521,3 +521,77 @@ class CasaStockStock(models.Model):
             raise UserError(_("Tous les enregistrements sélectionnés doivent appartenir au même produit."))
             
         return self.env.ref('casa_stock_hanane.action_report_casa_stock_product').report_action(self)
+    def _get_general_report_data(self):
+        """Prepare data for the Global Stock Summary report."""
+        # Find all stock entries with positive quantity
+        all_stock = self.search([('quantity', '>', 0)])
+        if not all_stock:
+            return {'cities': []}
+
+        cities_selection = dict(self._fields['ville'].selection)
+        cities_to_process = ['tanger', 'casa']
+        
+        report_data = {
+            'report_date': fields.Date.today().strftime('%d/%m/%y'),
+            'cities': []
+        }
+        
+        total_global_tonnage = 0
+        total_global_amount = 0
+
+        for city_code in cities_to_process:
+            city_records = all_stock.filtered(lambda r: r.ville == city_code)
+            if not city_records:
+                continue
+                
+            city_label = cities_selection.get(city_code, city_code).upper()
+            
+            # Aggregate by product name
+            aggregated = {}
+            for rec in city_records:
+                prod_name = rec.product_id.name
+                if prod_name not in aggregated:
+                    aggregated[prod_name] = {'qty': 0, 'tonnage': 0, 'total': 0}
+                aggregated[prod_name]['qty'] += rec.quantity
+                aggregated[prod_name]['tonnage'] += rec.total_weight
+                aggregated[prod_name]['total'] += rec.mt_achat
+                
+            lines = []
+            city_qty_total = 0
+            city_tonnage_total = 0
+            city_mt_total = 0
+            
+            # Sort products alphabetically
+            sorted_products = sorted(aggregated.keys())
+            
+            for prod_name in sorted_products:
+                data = aggregated[prod_name]
+                lines.append({
+                    'product': prod_name,
+                    'qty': data['qty'],
+                    'tonnage': data['tonnage'],
+                    'total': data['total']
+                })
+                city_qty_total += data['qty']
+                city_tonnage_total += data['tonnage']
+                city_mt_total += data['total']
+                
+            report_data['cities'].append({
+                'name': city_label,
+                'lines': lines,
+                'total_qty': city_qty_total,
+                'total_tonnage': city_tonnage_total,
+                'total_amount': city_mt_total
+            })
+            
+            total_global_tonnage += city_tonnage_total
+            total_global_amount += city_mt_total
+
+        report_data['global_tonnage'] = total_global_tonnage
+        report_data['global_amount'] = total_global_amount
+            
+        return report_data
+
+    def action_export_general_report_pdf(self):
+        """Trigger the Global Stock Summary PDF report."""
+        return self.env.ref('casa_stock_hanane.action_report_casa_stock_general').report_action(self)

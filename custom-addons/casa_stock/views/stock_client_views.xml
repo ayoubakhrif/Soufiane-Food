@@ -25,7 +25,15 @@
                                 class="oe_stat_button"
                                 icon="fa-print">
                             <div class="o_stat_info">
-                                <span class="o_stat_text">Facture</span>
+                                <span class="o_stat_text">Facture Hebdo.</span>
+                            </div>
+                        </button>
+                        <button name="%(casa_stock.action_report_casa_client_history)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture total</span>
                             </div>
                         </button>
                         <button name="%(filtered_exit_action)d"

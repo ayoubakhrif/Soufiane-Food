@@ -18,6 +18,9 @@
         <field name="model">casa_hanane.product</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_generate_product_report" string="Stock Produit" type="object" class="oe_highlight"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>

@@ -34,14 +34,14 @@ Format de réponse pour "stock_order_validation":
 {
   "intent": "stock_order_validation",
   "items": [
-    {"qty": 100, "product": "utilise le nom EXACT depuis la liste ci-dessus", "garage": "stok X ou saha", "lot": "numéro brute"},
+    {"qty": 100, "product": "nom du produit (utilise le nom EXACT de la liste si possible, sinon garde le nom du message)", "garage": "stok X ou saha", "lot": "numéro brute"},
     ...
   ]
 }
 
 Exemples :
 - "Combien d'amande?" → {"intent": "stock_check", "product": "Amande Douce", "garage": null, "lot": null}
-- "100 amande stok 1 lot 123" → {"intent": "stock_order_validation", "items": [{"qty": 100, "product": "Amande Douce", "garage": "stok 1", "lot": "123"}]}
+- "100 lwz mkrkb stok 1 lot 123" → {"intent": "stock_order_validation", "items": [{"qty": 100, "product": "lwz mkrkb", "garage": "stok 1", "lot": "123"}]}
 
 Pour le garage individuel (stock_check), normalise :
 - "garage 1", "stok 1", "g1" → "garage1"
@@ -269,74 +269,85 @@ class StockKal3iyaChatbot(models.AbstractModel):
 
     @api.model
     def _validate_order_line(self, item):
-        """Perform similarity-based validation strategy for a single line."""
+        """Perform Lot-First validation strategy for a single line."""
         qty = item.get('qty')
-        product_name = item.get('product')
+        product_name = item.get('product') or 'Produit inconnu'
         garage_raw = item.get('garage')
         lot_raw = str(item.get('lot', '')).strip() if item.get('lot') else ''
 
         # 1. Map Garage
         garage_key = self._map_garage_name(garage_raw)
         
-        # 2. Resolve Product (AI should have already resolved it, but we double check)
+        # 2. Check if Lot is specified
+        if not lot_raw or lot_raw.lower() == 'null':
+            return f"{qty} {product_name} {garage_raw} -> Lot s'il vous plait"
+
+        Stock = self.env['stock.kal3iya.stock'].sudo()
+
+        # ---------------------------------------------------------
+        # STRATÉGIE 1 : RECHERCHE PAR LOT (GLOBAL)
+        # ---------------------------------------------------------
+        # On cherche ce lot partout dans la base (quantité > 0)
+        domain = [('lot', '=ilike', lot_raw), ('quantity', '>', 0)]
+        lot_matches = Stock.search(domain)
+
+        if lot_matches:
+            # Si on a plusieurs produits avec le même lot, on essaie de filtrer par nom
+            if len(lot_matches) > 1:
+                # Filtrage simple par ressemblance de nom
+                best_match = lot_matches.filtered(lambda s: product_name.lower() in s.product_id.name.lower())
+                record = best_match[0] if best_match else lot_matches[0]
+            else:
+                record = lot_matches[0]
+
+            # Vérification du garage
+            if record.garage == garage_key:
+                return "Bien"
+            else:
+                correct_garage = self._get_garage_label(record.garage)
+                return f"{qty} {record.product_id.name} {garage_raw} lot {lot_raw} -> Correction Garage: {correct_garage}"
+
+        # ---------------------------------------------------------
+        # STRATÉGIE 2 : LOT NON TROUVÉ -> RECHERCHE PAR PRODUIT + SIMILARITÉ
+        # ---------------------------------------------------------
+        # On essaie de résoudre le produit (soit nom exact, soit fuzzy)
         Product = self.env['stock.kal3iya.product'].sudo()
         product = Product.search([('name', '=', product_name)], limit=1)
         if not product:
-            # Fallback to fuzzy resolving if AI returned a slightly off name
             res = self._resolve_product(product_name)
             if res['status'] == 'found':
                 product = res['product']
             else:
-                return f"{qty} {product_name} {garage_raw} -> Produit non reconnu"
+                return f"{qty} {product_name} {garage_raw} lot {lot_raw} -> Lot non trouvé (Produit non reconnu)"
 
-        # 3. Check Lot
-        if not lot_raw or lot_raw.lower() == 'null':
-            return f"{qty} {product.name} {garage_raw} -> Lot s'il vous plait"
-
-        Stock = self.env['stock.kal3iya.stock'].sudo()
-        
-        # A. Perfect Match (Exact or normalized)
-        # We allow exact match for this product + lot (quantity > 0)
-        domain = [('product_id', '=', product.id), ('lot', '=ilike', lot_raw), ('quantity', '>', 0)]
-        if garage_key:
-            domain.append(('garage', '=', garage_key))
-        
-        match = Stock.search(domain, limit=1)
-        if match:
-            return "Bien"
-
-        # B. Lot existing elsewhere? (To check if garage is just wrong)
-        other_garage_match = Stock.search([
-            ('product_id', '=', product.id),
-            ('lot', '=ilike', lot_raw),
-            ('quantity', '>', 0)
-        ], limit=1)
-        if other_garage_match:
-            correct_garage = self._get_garage_label(other_garage_match.garage)
-            return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Correction Garage: {correct_garage}"
-
-        # C. Lot not found -> Search similarity or List all in target garage
+        # Dans le garage cible, quels sont les lots disponibles pour ce produit ?
         if garage_key:
             available_stocks = Stock.search([
                 ('product_id', '=', product.id),
                 ('garage', '=', garage_key),
                 ('quantity', '>', 0)
             ])
-            if not available_stocks:
-                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Pas de stock dans ce garage"
             
+            if not available_stocks:
+                # Chercher si le produit existe AILLEURS pour aider l'utilisateur
+                other_stocks = Stock.search([('product_id', '=', product.id), ('quantity', '>', 0)])
+                if other_stocks:
+                    garages = ", ".join(set(self._get_garage_label(s.garage) for s in other_stocks))
+                    return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lot non trouvé (Disponible dans : {garages})"
+                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Pas de stock trouvé"
+
             all_lots = available_stocks.mapped('lot')
             
-            # Try Similarity Match (Levenshtein)
+            # Recherche de similarité (typo dans le lot)
             matches = difflib.get_close_matches(lot_raw, all_lots, n=1, cutoff=0.6)
             if matches:
                 return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Correction Lot: {matches[0]}"
             else:
-                # Totally different -> List all available
+                # Lot totalement différent -> Lister tout
                 lots_str = ", ".join(all_lots)
                 return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lots disponibles: {lots_str}"
-        
-        return f"{qty} {product_name} {garage_raw} lot {lot_raw} -> Lot non trouvé"
+
+        return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lot non trouvé"
 
     @api.model
     def _process_order_validation(self, intent_data):

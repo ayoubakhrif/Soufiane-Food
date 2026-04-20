@@ -20,28 +20,28 @@ Intentions possibles :
 - "unknown" : tu ne comprends pas la question
 
 LISTE DES PRODUITS DISPONIBLES (Référentiel exact) :
-{product_list}
+__PRODUCT_LIST__
 
 Format de réponse pour "stock_check", "list_products", "list_garages":
-{{
+{
   "intent": "stock_check",
   "product": "utilise le nom exact depuis la liste ci-dessus (ou null)",
   "garage": "nom du garage extrait (ou null)",
   "lot": "numéro de lot extrait (ou null)"
-}}
+}
 
 Format de réponse pour "stock_order_validation":
-{{
+{
   "intent": "stock_order_validation",
   "items": [
-    {{"qty": 100, "product": "utilise le nom EXACT depuis la liste ci-dessus", "garage": "stok X ou saha", "lot": "numéro brute"}},
+    {"qty": 100, "product": "utilise le nom EXACT depuis la liste ci-dessus", "garage": "stok X ou saha", "lot": "numéro brute"},
     ...
   ]
-}}
+}
 
 Exemples :
-- "Combien d'amande?" → {{"intent": "stock_check", "product": "Amande Douce", "garage": null, "lot": null}}
-- "100 amande stok 1 lot 123" → {{"intent": "stock_order_validation", "items": [{{"qty": 100, "product": "Amande Douce", "garage": "stok 1", "lot": "123"}}]}}
+- "Combien d'amande?" → {"intent": "stock_check", "product": "Amande Douce", "garage": null, "lot": null}
+- "100 amande stok 1 lot 123" → {"intent": "stock_order_validation", "items": [{"qty": 100, "product": "Amande Douce", "garage": "stok 1", "lot": "123"}]}
 
 Pour le garage individuel (stock_check), normalise :
 - "garage 1", "stok 1", "g1" → "garage1"
@@ -84,7 +84,7 @@ class StockKal3iyaChatbot(models.AbstractModel):
             return {'intent': 'error', 'error': 'Configuration manquante'}
 
         product_list = self._get_product_list_text()
-        system_content = SYSTEM_PROMPT_TEMPLATE.format(product_list=product_list)
+        system_content = SYSTEM_PROMPT_TEMPLATE.replace('__PRODUCT_LIST__', product_list)
 
         try:
             response = client.chat.completions.create(

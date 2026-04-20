@@ -167,6 +167,11 @@ async function connectToWhatsApp() {
                     pendingChoices.set(from, result.choices);
                     await sock.sendMessage(from, { text: result.message });
                 }
+                else if (result && result.response) {
+                    // C'est une réponse textuelle simple (ex: chatbot stock)
+                    console.log(`Réponse textuelle : ${result.response}`);
+                    await sock.sendMessage(from, { text: result.response });
+                }
                 else if (result && result.status === 'success') {
                     const identifier = isClientRequest ? result.client_name : result.product_name;
                     const reportType = isClientRequest ? "de compte" : "de stock";
@@ -182,10 +187,6 @@ async function connectToWhatsApp() {
                 } else if (result && result.status === 'not_found') {
                     console.log(`Non trouvé : ${result.message}`);
                     await sock.sendMessage(from, { text: result.message });
-                } else if (result && result.response) {
-                    // C'est une réponse textuelle simple (ex: chatbot stock)
-                    console.log(`Réponse textuelle : ${result.response}`);
-                    await sock.sendMessage(from, { text: result.response });
                 } else {
                     console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
                 }

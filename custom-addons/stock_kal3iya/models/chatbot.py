@@ -368,7 +368,7 @@ class StockKal3iyaChatbot(models.AbstractModel):
         Flow: Parse intent (OpenAI) → Resolve product (DB) → Query stock (DB) → Format
         """
         # Group filtering for order validation
-        STOCK_GROUP_ID = '120363403203705514@g.us'
+        STOCK_GROUP_ID = '120363426857783962@g.us'
         
         # 1. Parse intent via OpenAI
         intent_data = self._parse_intent(message)

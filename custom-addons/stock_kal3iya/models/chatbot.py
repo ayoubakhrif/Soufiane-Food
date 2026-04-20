@@ -273,6 +273,14 @@ class StockKal3iyaChatbot(models.AbstractModel):
         return selection.get(key, key)
 
     @api.model
+    def _normalize_lot(self, lot_str):
+        """Remove all non-alphanumeric characters and lowercase for comparison."""
+        if not lot_str:
+            return ""
+        # Remove anything that isn't a letter or a digit
+        return re.sub(r'[^a-zA-Z0-9]', '', lot_str).lower()
+
+    @api.model
     def _validate_order_line(self, item):
         """Perform Lot-First validation strategy for a single line."""
         qty = item.get('qty')
@@ -288,13 +296,19 @@ class StockKal3iyaChatbot(models.AbstractModel):
             return f"{qty} {product_name} {garage_raw} -> ⚠️ Lot s'il vous plait"
 
         Stock = self.env['stock.kal3iya.stock'].sudo()
+        lot_norm = self._normalize_lot(lot_raw)
 
         # ---------------------------------------------------------
         # STRATÉGIE 1 : RECHERCHE PAR LOT (GLOBAL)
         # ---------------------------------------------------------
-        # On cherche ce lot partout dans la base (quantité > 0)
+        # On cherche d'abord par match exact (rapide)
         domain = [('lot', '=ilike', lot_raw), ('quantity', '>', 0)]
         lot_matches = Stock.search(domain)
+
+        # Si pas d'exact, on cherche par match normalisé (plus lent mais flexible)
+        if not lot_matches:
+            all_active_stocks = Stock.search([('quantity', '>', 0)])
+            lot_matches = all_active_stocks.filtered(lambda s: self._normalize_lot(s.lot) == lot_norm)
 
         if lot_matches:
             # Si on a plusieurs produits avec le même lot, on essaie de filtrer par nom
@@ -402,6 +416,18 @@ class StockKal3iyaChatbot(models.AbstractModel):
         if intent == 'error':
             response = "Erreur de configuration. Veuillez contacter l'administrateur."
 
+        elif intent == 'unknown':
+            # Skip response for very short messages or if intent is truly unknown
+            # This prevents responding to ".", "ok", etc.
+            if len(message) < 4:
+                _logger.info("Ignoring short/unknown message: %s", message)
+                return False
+            
+            response = ("Je suis l'assistant stock. Vous pouvez me demander :\n"
+                        "- La quantité d'un produit (ex: \"Combien d'amande ?\")\n"
+                        "- Analyser une commande multi-ligne\n"
+                        "- La liste des produits en stock")
+
         elif intent == 'stock_order_validation':
             # Check Group ID or sender for specific validation
             if sender != STOCK_GROUP_ID and sender != 'unknown': # Allow unknown for test/direct
@@ -439,13 +465,11 @@ class StockKal3iyaChatbot(models.AbstractModel):
                     qty = self._query_stock(product, garage=garage, lot=lot)
                     response = self._format_stock_response(qty)
         else:
-            # unknown intent
-            response = ("Je suis l'assistant stock. Vous pouvez me demander :\n"
-                        "- La quantité d'un produit (ex: \"Combien d'amande ?\")\n"
-                        "- Analyser une commande multi-ligne\n"
-                        "- La liste des produits en stock")
+            # Should not happen as we handled 'unknown' above
+            return False
 
         # 3. Log interaction
-        self._log_interaction(sender, message, response)
+        if response:
+            self._log_interaction(sender, message, response)
 
         return response

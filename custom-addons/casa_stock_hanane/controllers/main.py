@@ -40,26 +40,17 @@ class WhatsAppStockController(http.Controller):
         if not message_text:
             return {'status': 'error', 'message': 'Empty message'}
 
-        # --- NEW: Check for General Stock Report trigger ---
-        general_triggers = ['stock général', 'stock general', 'situation générale', 'situation generale', 'stock total']
-        if any(trigger in message_text.lower() for trigger in general_triggers):
-            report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
-            # The report method searches all stock [quantity > 0] regardless of the record ID passed
-            dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
-            if not dummy_record:
-                return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
-            
-            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
-            from odoo import fields
-            return {
-                'status': 'success',
-                'message': "Voici la situation générale du stock consolidée par ville (Quantités, Tonnages et Valeurs Totales).",
-                'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
-                'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
-            }
-        # ----------------------------------------------------
-
-        # 3. Call OpenAI to extract product name
+        # --- NEW: Check for General Stock Report trigger (with more flexibility for typos) ---
+        general_triggers = [
+            'stock général', 'stock general', 'situation générale', 'situation generale', 
+            'stock total', 'stok general', 'stok génial', 'stok genial', 'total stock'
+        ]
+        message_clean = message_text.lower().strip()
+        
+        # 1. Quick check with hardcoded list
+        is_general = any(trigger in message_clean for trigger in general_triggers)
+        
+        # 3. Call OpenAI to extract product name (with a rule for Global Report)
         openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not openai_key:
             return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo'}
@@ -67,14 +58,36 @@ class WhatsAppStockController(http.Controller):
         # Fetch all article names to guide the AI
         all_articles = request.env['company.article'].sudo().search([])
         article_names_list = list(set([a.name for a in all_articles if a.name]))
+        
+        # We call AI if it's not obviously a general trigger or if we want extra flexibility
+        all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
+        darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
+        
+        extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
 
-        # Step 1: Check for an exact name match (Menu selection or precise input)
-        # We start with '=' match to be very specific first
+        # 2. Check if AI identified it as a global report request
+        if is_general or (extracted_str and extracted_str.upper() == 'GLOBAL_STOCK_REPORT'):
+            report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
+            dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
+            
+            if not dummy_record:
+                return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
+            
+            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
+            from odoo import fields
+            return {
+                'status': 'success',
+                'message': "Information : J'ai identifié une demande de situation globale.\nVoici l'état consolidé du stock (Quantités, Tonnages et Valeurs).",
+                'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
+                'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
+            }
+
+        # Step 1: Check for an exact name match (after confirming it's not a global report)
         articles = request.env['company.article'].sudo().search([('name', '=ilike', message_text)])
         
         final_extracted_str = message_text
-
-        # Step 2: If no single exact match, perform broader searches
+        
+        # Step 2: If no single exact match
         if len(articles) != 1:
             # Check for manual aliases matching the message words
             words = [w.strip() for w in message_text.split() if len(w.strip()) > 2]
@@ -172,10 +185,11 @@ class WhatsAppStockController(http.Controller):
             f"{synonyms}\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
-            "1. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus pour identifier le produit correct.\n"
-            "2. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact ('Poivre B1').\n"
-            "3. Si la demande est globale (ex: 'poivre', 'ibzar'), renvoie UNIQUEMENT LE TERME COURT (ex: 'Poivre') ! Ne m'énumère surtout pas les variantes.\n"
-            "Retourne UNIQUEMENT le mot trouvé (sans guillemets, sans rien de plus). Si aucun ne correspond, réponds 'None'."
+            "1. Si l'utilisateur demande une situation globale, le stock général ou le stock total (même avec des fautes comme 'stok genial'), réponds UNIQUEMENT 'GLOBAL_STOCK_REPORT'.\n"
+            "2. Sinon, identifie le nom de l'article. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus.\n"
+            "3. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact.\n"
+            "4. Si la demande est globale par type (ex: 'poivre'), renvoie UNIQUEMENT LE TERME COURT (ex: 'Poivre').\n"
+            "Retourne UNIQUEMENT le mot trouvé (ou GLOBAL_STOCK_REPORT). Si aucun ne correspond, réponds 'None'."
         )
         data = {
             "model": "gpt-4o-mini",

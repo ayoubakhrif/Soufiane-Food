@@ -280,7 +280,7 @@ class StockKal3iyaChatbot(models.AbstractModel):
         
         # 2. Check if Lot is specified
         if not lot_raw or lot_raw.lower() == 'null':
-            return f"{qty} {product_name} {garage_raw} -> Lot s'il vous plait"
+            return f"{qty} {product_name} {garage_raw} -> ⚠️ Lot s'il vous plait"
 
         Stock = self.env['stock.kal3iya.stock'].sudo()
 
@@ -318,7 +318,8 @@ class StockKal3iyaChatbot(models.AbstractModel):
             if res['status'] == 'found':
                 product = res['product']
             else:
-                return f"{qty} {product_name} {garage_raw} lot {lot_raw} -> Lot non trouvé (Produit non reconnu)"
+                product_name_display = product.name if product else product_name
+                return f"{qty} {product_name_display} {garage_raw} lot {lot_raw} -> ⚠️ Lot non trouvé (Produit non reconnu)"
 
         # Dans le garage cible, quels sont les lots disponibles pour ce produit ?
         if garage_key:
@@ -333,8 +334,8 @@ class StockKal3iyaChatbot(models.AbstractModel):
                 other_stocks = Stock.search([('product_id', '=', product.id), ('quantity', '>', 0)])
                 if other_stocks:
                     garages = ", ".join(set(self._get_garage_label(s.garage) for s in other_stocks))
-                    return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lot non trouvé (Disponible dans : {garages})"
-                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Pas de stock trouvé"
+                    return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> ⚠️ Lot non trouvé (Disponible dans : {garages})"
+                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> ⚠️ Pas de stock trouvé"
 
             all_lots = available_stocks.mapped('lot')
             
@@ -346,27 +347,34 @@ class StockKal3iyaChatbot(models.AbstractModel):
                 # Lot totalement différent -> Lister tout
                 lots_str = ", ".join(all_lots)
                 return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lots disponibles: {lots_str}"
-        return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lot non trouvé"
+        return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> ⚠️ Lot non trouvé"
 
     @api.model
     def _process_order_validation(self, intent_data):
-        """Process all items and return a report where every line is commented."""
+        """Process all items and return a report with headers and emojis."""
         items = intent_data.get('items', [])
         results = []
+        has_errors = False
         
         for item in items:
             res = self._validate_order_line(item)
-            if res == "Bien":
+            if "Bien" not in res: # Si la ligne n'est pas marquée comme "Bien"
+                has_errors = True
+                results.append(res)
+            else:
                 # Reconstruct the line for a positive feedback
                 qty = item.get('qty', '')
                 prod = item.get('product', '')
                 gar = item.get('garage', '')
                 lot = item.get('lot', '')
                 results.append(f"{qty} {prod} {gar} lot {lot} -> Bien")
-            else:
-                results.append(res)
             
-        return "\n".join(results)
+        final_report = "\n".join(results)
+        
+        if has_errors:
+            return f"*Correction*\n🔍🔍🔍\n\n{final_report}"
+        else:
+            return final_report
 
     # -------------------------------------------------------------------------
     # Main Orchestrator

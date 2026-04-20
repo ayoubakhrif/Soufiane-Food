@@ -81,7 +81,7 @@ class StockKal3iyaChatbot(models.AbstractModel):
         """Use OpenAI to parse user message into structured intent JSON."""
         client = self._get_openai_client()
         if not client:
-            return {'intent': 'error', 'error': 'Configuration manquante'}
+            return {'intent': 'error', 'error': 'OpenAI client non initialisé (clé manquante?)'}
 
         product_list = self._get_product_list_text()
         system_content = SYSTEM_PROMPT_TEMPLATE.replace('__PRODUCT_LIST__', product_list)
@@ -376,7 +376,7 @@ class StockKal3iyaChatbot(models.AbstractModel):
 
         # 2. Handle by intent
         if intent == 'error':
-            response = "Erreur de configuration. Veuillez contacter l'administrateur."
+            response = "Erreur configuration: " + str(intent_data.get('error', 'Inconnue'))
 
         elif intent == 'stock_order_validation':
             # Check Group ID or sender for specific validation

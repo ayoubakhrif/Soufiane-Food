@@ -14,7 +14,7 @@ const pino = require('pino');
 // CONFIGURATION
 const ARTICLE_GROUP_ID = "120363405648854156@g.us";
 const CLIENT_GROUP_ID = "120363426234155722@g.us";
-const STOCK_VALIDATION_GROUP_ID = "120363426857783962@g.us";
+const STOCK_VALIDATION_GROUP_ID = "120363403203705514@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";

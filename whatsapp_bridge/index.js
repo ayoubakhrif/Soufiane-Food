@@ -114,7 +114,7 @@ async function connectToWhatsApp() {
                     console.log(`Sélection utilisateur : Option ${choiceNum} -> "${realMessage}"`);
                     pendingChoices.delete(from); // Clear menu once selected
                 } else if (!isNaN(choiceNum)) {
-                    await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par le bon numéro." }, { quoted: m });
+                    await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par le bon numéro." }, { quoted: msg });
                     continue; // Skip Odoo call
                 } else {
                     // L'utilisateur a tapé une phrase, le menu est abandonné
@@ -175,12 +175,12 @@ async function connectToWhatsApp() {
                 if (result && result.status === 'multiple_choices') {
                     // C'est un menu de sélection
                     pendingChoices.set(from, result.choices);
-                    await sock.sendMessage(from, { text: result.message }, { quoted: m });
+                    await sock.sendMessage(from, { text: result.message }, { quoted: msg });
                 }
                 else if (result && result.response) {
                     // C'est une réponse textuelle simple (ex: chatbot stock)
                     console.log(`Réponse textuelle : ${result.response}`);
-                    await sock.sendMessage(from, { text: result.response }, { quoted: m });
+                    await sock.sendMessage(from, { text: result.response }, { quoted: msg });
                 }
                 else if (result && result.status === 'success') {
                     // Extract identifier (it might be in client_name or product_name depending on the controller result)
@@ -198,10 +198,10 @@ async function connectToWhatsApp() {
                         mimetype: 'application/pdf',
                         fileName: result.file_name,
                         caption: `Voici le rapport ${reportType} pour *${identifier}*.`
-                    }, { quoted: m });
+                    }, { quoted: msg });
                 } else if (result && result.status === 'not_found') {
                     console.log(`Non trouvé : ${result.message}`);
-                    await sock.sendMessage(from, { text: result.message }, { quoted: m });
+                    await sock.sendMessage(from, { text: result.message }, { quoted: msg });
                 } else {
                     console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
                 }

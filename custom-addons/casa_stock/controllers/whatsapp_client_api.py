@@ -39,25 +39,8 @@ class WhatsAppClientController(http.Controller):
 
         # --- NEW: Check for Global Client Report trigger ---
         client_total_triggers = ['total', 'clients', 'client total', 'total client', 'solde total', 'situation globale', 'situation generale']
-        if any(trigger in message_text.lower() for trigger in client_total_triggers):
-            report_action = request.env.ref('casa_stock.action_report_casa_clients_total').sudo()
-            # Use current date via odoo.fields
-            from odoo import fields
-            
-            # The report method searches all clients with balance != 0
-            dummy_record = request.env['casa.client'].sudo().search([('compte_total', '!=', 0)], limit=1)
-            if not dummy_record:
-                return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun solde client à afficher."}
-            
-            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
-            
-            return {
-                'status': 'success',
-                'message': "Voici la situation globale des comptes clients.",
-                'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
-                'file_name': f"Situation_Globale_Clients_{fields.Date.today()}.pdf"
-            }
-        # ----------------------------------------------------
+        message_clean = message_text.lower().strip()
+        is_general = any(trigger in message_clean for trigger in client_total_triggers)
 
         # 3. Security: Check Group ID
         # Only handle requests from the Director's Client Group
@@ -65,6 +48,9 @@ class WhatsAppClientController(http.Controller):
         if group_id != DIRECTOR_GROUP_ID:
             _logger.info(f"Ignoring request from group {group_id} in Client Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Client Account Group.'}
+
+        # 4. Handle exact triggers or call AI to check intent
+        # (We call AI below if exact triggers don't match, but we move the logic to handle both)
 
         # 4. Handle Exact Match First (Bypass OpenAI for menu selections)
         exact_client = request.env['casa.client'].sudo().search([('name', '=ilike', message_text)], limit=1)
@@ -86,6 +72,22 @@ class WhatsAppClientController(http.Controller):
             
             if not extracted_name or extracted_name.lower() == 'none':
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
+
+            # 6. Check if AI identified a Global Report request
+            if is_general or (extracted_name and extracted_name.upper() == 'GLOBAL_CLIENT_REPORT'):
+                report_action = request.env.ref('casa_stock.action_report_casa_clients_total').sudo()
+                from odoo import fields
+                dummy_record = request.env['casa.client'].sudo().search([('compte_total', '!=', 0)], limit=1)
+                if not dummy_record:
+                    return {'status': 'not_found', 'message': "Désolé, aucun solde client n'est actuellement disponible."}
+                
+                pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
+                return {
+                    'status': 'success',
+                    'message': "Information : J'ai identifié une demande de situation globale des clients.\nVoici l'état actuel des comptes.",
+                    'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
+                    'file_name': f"Situation_Globale_Clients_{fields.Date.today()}.pdf"
+                }
 
             # Handle partial match via search
             clients = request.env['casa.client'].sudo().search([('name', 'ilike', extracted_name)])
@@ -142,11 +144,12 @@ class WhatsAppClientController(http.Controller):
             f"[{db_names}]\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
-            "1. Identifie le nom du client mentionné.\n"
-            "2. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
-            "3. IMPORTANT : Si la demande est globale ou partielle (ex: 'taggada') et que plusieurs clients de la liste correspondent, renvoie UNIQUEMENT le terme commun (ex: 'taggada'). Ne choisis pas un client au hasard si la demande est vague !\n"
-            "4. Si aucun client ne correspond du tout, réponds 'None'.\n"
-            "Retourne UNIQUEMENT le texte identifié (sans guillemets, sans rien de plus)."
+            "1. Si l'utilisateur demande une situation globale des clients, le solde total ou le grand livre (ex: 'client total', 'total', 'situation'), réponds UNIQUEMENT 'GLOBAL_CLIENT_REPORT'.\n"
+            "2. Sinon, identifie le nom du client mentionné.\n"
+            "3. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
+            "4. IMPORTANT : Si la demande est vague (ex: 'taggada'), renvoie UNIQUEMENT le terme commun.\n"
+            "5. Si aucun client ne correspond, réponds 'None'.\n"
+            "Retourne UNIQUEMENT le résultat (ou GLOBAL_CLIENT_REPORT)."
         )
         data = {
             "model": "gpt-4o-mini",

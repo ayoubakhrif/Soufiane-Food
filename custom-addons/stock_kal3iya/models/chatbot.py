@@ -34,14 +34,19 @@ Format de réponse pour "stock_order_validation":
 {
   "intent": "stock_order_validation",
   "items": [
-    {"qty": 100, "product": "nom du produit (utilise le nom EXACT de la liste si possible, sinon garde le nom du message)", "garage": "stok X ou saha", "lot": "numéro brute"},
+    {"qty": 100, "product": "nom du produit", "garage": "stok X ou saha", "lot": "numéro brute (ex: '1warehouse', 'Gacp/122025', '225-25 B')"},
     ...
   ]
 }
 
+Règles d'extraction du Lot :
+- Le lot peut suivre "lot:", "lot ", "lot", "L:", "L ".
+- Il n'y a pas toujours d'espace après "lot:" (ex: "lot:123" -> lot is "123").
+- Le lot est souvent ALPHANUMÉRIQUE et peut contenir des caractères comme "/", "-", " ". Capture TOUT le lot.
+
 Exemples :
-- "Combien d'amande?" → {"intent": "stock_check", "product": "Amande Douce", "garage": null, "lot": null}
-- "100 lwz mkrkb stok 1 lot 123" → {"intent": "stock_order_validation", "items": [{"qty": 100, "product": "lwz mkrkb", "garage": "stok 1", "lot": "123"}]}
+- "100 amande lot:Gacp/123" → {"intent": "stock_order_validation", "items": [{"qty": 100, "product": "amande", "garage": null, "lot": "Gacp/123"}]}
+- "50 lwz stok 1 lot 225-B mp-07" → {"intent": "stock_order_validation", "items": [{"qty": 100, "product": "lwz", "garage": "stok 1", "lot": "225-B mp-07"}]}
 
 Pour le garage individuel (stock_check), normalise :
 - "garage 1", "stok 1", "g1" → "garage1"

@@ -417,16 +417,9 @@ class StockKal3iyaChatbot(models.AbstractModel):
             response = "Erreur de configuration. Veuillez contacter l'administrateur."
 
         elif intent == 'unknown':
-            # Skip response for very short messages or if intent is truly unknown
-            # This prevents responding to ".", "ok", etc.
-            if len(message) < 4:
-                _logger.info("Ignoring short/unknown message: %s", message)
-                return False
-            
-            response = ("Je suis l'assistant stock. Vous pouvez me demander :\n"
-                        "- La quantité d'un produit (ex: \"Combien d'amande ?\")\n"
-                        "- Analyser une commande multi-ligne\n"
-                        "- La liste des produits en stock")
+            # Silence for unknown intents as requested
+            _logger.info("Ignoring message with unknown intent: %s", message)
+            return False
 
         elif intent == 'stock_order_validation':
             # Check Group ID or sender for specific validation

@@ -13,7 +13,7 @@ This module provides a robust stock management system based on an immutable move
 - Reversal moves for cancellations.
     """,
     'author': 'Soufiane-Food',
-    'depends': ['base', 'web', 'mail', 'custom_employee'],
+    'depends': ['base', 'web', 'mail', 'company_data', 'custom_employee', 'casa_stock_hanane'],
     'external_dependencies': {
         'python': ['openai'],
     },

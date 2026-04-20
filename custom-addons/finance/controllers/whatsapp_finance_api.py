@@ -82,10 +82,19 @@ class WhatsAppFinanceController(http.Controller):
             pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
+            stats = benif.get_cheque_stats()
+            summary_msg = f"Voici le rapport financier pour *{benif.name}*.\n\n"
+            summary_msg += f"📊 *Analyse des Chèques* :\n"
+            summary_msg += f"• Total: {stats['total']}\n"
+            summary_msg += f"• Encaissés: {stats['encaisse']}\n"
+            summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
+            summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
+
             from odoo import fields
             return {
                 'status': 'success',
-                'product_name': benif.name, # Using 'product_name' for compatibility with bridge JS mapping if needed, or update JS
+                'product_name': benif.name,
+                'message': summary_msg,
                 'pdf_base64': pdf_base64,
                 'file_name': f"Rapport_Finance_{benif.name.replace(' ', '_')}_{fields.Date.today()}.pdf"
             }

@@ -68,6 +68,21 @@
                             </tr>
                         </table>
 
+                        <!-- Cheque Counts Summary -->
+                        <t t-set="stats" t-value="o.get_cheque_stats()"/>
+                        <table class="summary-table" style="margin-top: -10px;">
+                            <tr>
+                                <td class="label-peach" style="width: 33%;">NB TOTAL CHÈQUES</td>
+                                <td class="label-peach" style="width: 33%;">NB CHÈQUES ENCAISSÉS</td>
+                                <td class="label-peach" style="width: 33%;">NB CHÈQUES RESTANTS</td>
+                            </tr>
+                            <tr>
+                                <td class="val-blue"><t t-esc="stats['total']"/></td>
+                                <td class="val-orange"><t t-esc="stats['encaisse']"/></td>
+                                <td class="val-cyan"><t t-esc="stats['non_encaisse']"/></td>
+                            </tr>
+                        </table>
+
                         <!-- Breakdown Section -->
                         <div class="section-header">
                             DÉTAIL PAR SOCIÉTÉ
@@ -77,30 +92,36 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Société</th>
-                                    <th>Total Encaissé</th>
-                                    <th>Total Non Encaissé</th>
-                                    <th>Total Global</th>
+                                    <th rowspan="2">Société</th>
+                                    <th colspan="2">Encaissés</th>
+                                    <th colspan="2">Non Encaissés</th>
+                                    <th colspan="2">Global</th>
+                                </tr>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Montant</th>
+                                    <th>Nombre</th>
+                                    <th>Montant</th>
+                                    <th>Nombre</th>
+                                    <th>Montant</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <t t-foreach="breakdown" t-as="line">
                                     <tr>
-                                        <td class="ste-cell"><t t-esc="line['ste']"/></td>
+                                        <td class="ste-cell" style="text-align: left;"><t t-esc="line['ste']"/></td>
+                                        <td style="background-color: #f2f2f2;"><t t-esc="line['count_encaisse']"/></td>
                                         <td class="amount-cell"><t t-esc="'{:,.2f}'.format(line['encaisse']).replace(',', ' ')"/> DH</td>
+                                        <td style="background-color: #f2f2f2;"><t t-esc="line['count_non_encaisse']"/></td>
                                         <td><t t-esc="'{:,.2f}'.format(line['non_encaisse']).replace(',', ' ')"/> DH</td>
+                                        <td class="total-cell"><t t-esc="line['count_total']"/></td>
                                         <td class="total-cell"><t t-esc="'{:,.2f}'.format(line['total']).replace(',', ' ')"/> DH</td>
                                     </tr>
                                 </t>
                             </tbody>
                         </table>
 
-                        <!-- Statistics -->
-                        <div style="margin-top: 20px; font-size: 14px; font-weight: bold; border: 1px solid black; padding: 10px; background-color: #FCE9DA; display: inline-block;">
-                            NOMBRE DE CHÈQUES NON ENCAISSÉS : <t t-esc="o.get_non_encaisse_count()"/>
-                        </div>
-
-                        <div class="footer">
+<div class="footer">
                             Généré par Gestia ERP - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%H:%M:%S')"/>
                         </div>
                     </div>

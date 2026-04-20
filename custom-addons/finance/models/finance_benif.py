@@ -42,19 +42,26 @@ class Cal3iyaClient(models.Model):
     def get_financial_breakdown(self):
         """
         Returns a list of dicts for the report:
-        [{'ste': 'Company Name', 'encaisse': 100.0, 'non_encaisse': 50.0}]
+        [{'ste': 'Company Name', 'encaisse': 100.0, 'non_encaisse': 50.0, 'count_encaisse': 1, 'count_non_encaisse': 1}]
         """
         self.ensure_one()
         breakdown = {}
         for chq in self.physical_chq_ids:
             ste_name = chq.ste_id.name or 'Inconnue'
             if ste_name not in breakdown:
-                breakdown[ste_name] = {'encaisse': 0.0, 'non_encaisse': 0.0}
+                breakdown[ste_name] = {
+                    'encaisse': 0.0, 
+                    'non_encaisse': 0.0,
+                    'count_encaisse': 0,
+                    'count_non_encaisse': 0
+                }
             
             if chq.date_encaissement:
                 breakdown[ste_name]['encaisse'] += chq.amount_total
+                breakdown[ste_name]['count_encaisse'] += 1
             else:
                 breakdown[ste_name]['non_encaisse'] += chq.amount_total
+                breakdown[ste_name]['count_non_encaisse'] += 1
         
         # Convert to list for easier iteration in QWeb
         result = []
@@ -63,9 +70,24 @@ class Cal3iyaClient(models.Model):
                 'ste': ste,
                 'encaisse': values['encaisse'],
                 'non_encaisse': values['non_encaisse'],
-                'total': values['encaisse'] + values['non_encaisse']
+                'count_encaisse': values['count_encaisse'],
+                'count_non_encaisse': values['count_non_encaisse'],
+                'total': values['encaisse'] + values['non_encaisse'],
+                'count_total': values['count_encaisse'] + values['count_non_encaisse']
             })
         return result
+
+    def get_cheque_stats(self):
+        """Returns global statistics about cheque counts."""
+        self.ensure_one()
+        total_chqs = len(self.physical_chq_ids)
+        encaisse_chqs = len(self.physical_chq_ids.filtered(lambda c: c.date_encaissement))
+        non_encaisse_chqs = total_chqs - encaisse_chqs
+        return {
+            'total': total_chqs,
+            'encaisse': encaisse_chqs,
+            'non_encaisse': non_encaisse_chqs
+        }
 
     def get_non_encaisse_count(self):
         self.ensure_one()

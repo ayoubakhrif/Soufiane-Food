@@ -78,9 +78,16 @@ class StockKal3iyaChatbot(models.AbstractModel):
 
     @api.model
     def _get_product_list_text(self):
-        """Fetch all product names to feed the OpenAI prompt."""
+        """Fetch all product names and their aliases to feed the OpenAI prompt."""
         products = self.env['stock.kal3iya.product'].sudo().search([])
-        return ", ".join(products.mapped('name'))
+        lines = []
+        for p in products:
+            if p.alias_ids:
+                aliases = ", ".join(p.alias_ids.mapped('name'))
+                lines.append(f"{p.name} ({aliases})")
+            else:
+                lines.append(p.name)
+        return ", ".join(lines)
 
     @api.model
     def _parse_intent(self, message):
@@ -128,17 +135,12 @@ class StockKal3iyaChatbot(models.AbstractModel):
 
         Product = self.env['stock.kal3iya.product'].sudo()
         products = Product.search([('name', 'ilike', product_name)])
+        
+        # If not found by name, try searching in Aliases
+        if len(products) == 0:
+            products = Product.search([('alias_ids.name', 'ilike', product_name)])
 
         if len(products) == 0:
-            # Try alias table as fallback
-            alias = self.env['ai.alias'].sudo().search([
-                ('model_name', '=', 'stock.kal3iya.product'),
-                ('input_text', '=ilike', product_name),
-            ], limit=1)
-            if alias:
-                product = Product.browse(alias.record_id)
-                if product.exists():
-                    return {'status': 'found', 'product': product}
             return {'status': 'not_found'}
 
         if len(products) == 1:

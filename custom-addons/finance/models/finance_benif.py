@@ -39,6 +39,38 @@ class Cal3iyaClient(models.Model):
             rec.total_debit = sum(rec.physical_chq_ids.mapped('debit'))
             rec.solde = rec.total_credit - rec.total_debit
 
+    def get_financial_breakdown(self):
+        """
+        Returns a list of dicts for the report:
+        [{'ste': 'Company Name', 'encaisse': 100.0, 'non_encaisse': 50.0}]
+        """
+        self.ensure_one()
+        breakdown = {}
+        for chq in self.physical_chq_ids:
+            ste_name = chq.ste_id.name or 'Inconnue'
+            if ste_name not in breakdown:
+                breakdown[ste_name] = {'encaisse': 0.0, 'non_encaisse': 0.0}
+            
+            if chq.encours == 'encaisse':
+                breakdown[ste_name]['encaisse'] += chq.amount_total
+            else:
+                breakdown[ste_name]['non_encaisse'] += chq.amount_total
+        
+        # Convert to list for easier iteration in QWeb
+        result = []
+        for ste, values in breakdown.items():
+            result.append({
+                'ste': ste,
+                'encaisse': values['encaisse'],
+                'non_encaisse': values['non_encaisse'],
+                'total': values['encaisse'] + values['non_encaisse']
+            })
+        return result
+
+    def get_non_encaisse_count(self):
+        self.ensure_one()
+        return len(self.physical_chq_ids.filtered(lambda c: c.encours != 'encaisse'))
+
     def action_export_excel(self):
         self.ensure_one()
         if not xlsxwriter:

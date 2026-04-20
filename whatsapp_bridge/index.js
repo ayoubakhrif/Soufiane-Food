@@ -15,10 +15,12 @@ const pino = require('pino');
 const ARTICLE_GROUP_ID = "120363405648854156@g.us";
 const CLIENT_GROUP_ID = "120363426234155722@g.us";
 const STOCK_VALIDATION_GROUP_ID = "120363403203705514@g.us";
+const FINANCE_GROUP_ID = "120363428965532100@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
 const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_kal3iya/chat";
+const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -95,6 +97,9 @@ async function connectToWhatsApp() {
             } else if (from === STOCK_VALIDATION_GROUP_ID) {
                 targetOdooUrl = STOCK_VALIDATION_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === FINANCE_GROUP_ID) {
+                targetOdooUrl = FINANCE_ODOO_URL;
+                isClientRequest = false; // Finance uses report flow similar to client but JS uses isClientRequest for caption logic
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -173,9 +178,14 @@ async function connectToWhatsApp() {
                     await sock.sendMessage(from, { text: result.response }, { quoted: m });
                 }
                 else if (result && result.status === 'success') {
-                    const identifier = isClientRequest ? result.client_name : result.product_name;
-                    const reportType = isClientRequest ? "de compte" : "de stock";
-                    console.log(`${isClientRequest ? 'Client' : 'Produit'} identifié : ${identifier}. Envoi du PDF...`);
+                    // Extract identifier (it might be in client_name or product_name depending on the controller result)
+                    const identifier = result.client_name || result.product_name || "Bénéficiaire";
+                    
+                    let reportType = "de stock";
+                    if (from === CLIENT_GROUP_ID) reportType = "de compte";
+                    if (from === FINANCE_GROUP_ID) reportType = "financier";
+
+                    console.log(`Entité identifiée : ${identifier}. Envoi du PDF...`);
 
                     // Envoi du PDF
                     await sock.sendMessage(from, {

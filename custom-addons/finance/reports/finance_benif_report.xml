@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_finance_benif_summary" model="ir.actions.report">
+        <field name="name">Rapport Financier Bénéficiaire</field>
+        <field name="model">finance.benif</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance.report_finance_benif_summary_template</field>
+        <field name="report_file">finance.report_finance_benif_summary_template</field>
+        <field name="binding_model_id" ref="model_finance_benif"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_finance_benif_summary_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <style>
+                            body {
+                                font-family: 'Helvetica', 'Arial', sans-serif;
+                                color: #333;
+                            }
+                            .header-container {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                border-bottom: 2px solid #1a237e;
+                                padding-bottom: 20px;
+                                margin-bottom: 30px;
+                            }
+                            .logo {
+                                max-height: 80px;
+                            }
+                            .report-title {
+                                text-align: right;
+                            }
+                            .report-title h1 {
+                                color: #1a237e;
+                                margin: 0;
+                                font-size: 24px;
+                                font-weight: bold;
+                                text-transform: uppercase;
+                            }
+                            .report-title p {
+                                margin: 5px 0 0;
+                                color: #666;
+                                font-size: 14px;
+                            }
+                            .main-info {
+                                margin-bottom: 40px;
+                            }
+                            .beneficiary-name {
+                                font-size: 28px;
+                                font-weight: bold;
+                                color: #1a237e;
+                                margin-bottom: 10px;
+                            }
+                            
+                            /* Summary Cards */
+                            .summary-cards {
+                                display: flex;
+                                justify-content: space-between;
+                                gap: 20px;
+                                margin-bottom: 40px;
+                            }
+                            .card {
+                                flex: 1;
+                                padding: 20px;
+                                border-radius: 12px;
+                                color: white;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            }
+                            .card-credit { background: linear-gradient(135deg, #3949ab, #1a237e); }
+                            .card-encaisse { background: linear-gradient(135deg, #43a047, #1b5e20); }
+                            .card-solde { background: linear-gradient(135deg, #f4511e, #bf360c); }
+                            
+                            .card-label {
+                                font-size: 12px;
+                                text-transform: uppercase;
+                                opacity: 0.9;
+                                margin-bottom: 8px;
+                            }
+                            .card-value {
+                                font-size: 24px;
+                                font-weight: bold;
+                            }
+
+                            /* Tables */
+                            .section-title {
+                                border-left: 4px solid #1a237e;
+                                padding-left: 10px;
+                                margin-bottom: 15px;
+                                color: #1a237e;
+                                font-weight: bold;
+                                font-size: 18px;
+                            }
+                            .data-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 30px;
+                            }
+                            .data-table th {
+                                background-color: #f5f5f5;
+                                border-bottom: 2px solid #ddd;
+                                padding: 12px;
+                                text-align: left;
+                                font-weight: bold;
+                                font-size: 13px;
+                            }
+                            .data-table td {
+                                padding: 12px;
+                                border-bottom: 1px solid #eee;
+                                font-size: 13px;
+                            }
+                            .amount {
+                                text-align: right;
+                            }
+                            .text-bold { font-weight: bold; }
+                            
+                            .footer {
+                                margin-top: 50px;
+                                border-top: 1px solid #eee;
+                                padding-top: 10px;
+                                font-size: 10px;
+                                color: #999;
+                                text-align: center;
+                            }
+                        </style>
+
+                        <!-- Header -->
+                        <div class="header-container">
+                            <img src="/custom_login_logo/static/src/img/logo.png" class="logo"/>
+                            <div class="report-title">
+                                <h1>Situation Financière</h1>
+                                <p>Date: <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></p>
+                            </div>
+                        </div>
+
+                        <!-- Beneficiary -->
+                        <div class="main-info">
+                            <div class="beneficiary-name"><t t-esc="o.name"/></div>
+                            <p>Type: <t t-esc="dict(o._fields['type'].selection).get(o.type)"/></p>
+                        </div>
+
+                        <!-- Cards -->
+                        <div class="summary-cards">
+                            <div class="card card-credit">
+                                <div class="card-label">Total Crédit</div>
+                                <div class="card-value"><t t-esc="'{:,.2f}'.format(o.total_credit).replace(',', ' ')"/> <small>DH</small></div>
+                            </div>
+                            <div class="card card-encaisse">
+                                <div class="card-label">Total Encaissé</div>
+                                <div class="card-value"><t t-esc="'{:,.2f}'.format(o.total_debit).replace(',', ' ')"/> <small>DH</small></div>
+                            </div>
+                            <div class="card card-solde">
+                                <div class="card-label">Solde à ce jour</div>
+                                <div class="card-value"><t t-esc="'{:,.2f}'.format(o.solde).replace(',', ' ')"/> <small>DH</small></div>
+                            </div>
+                        </div>
+
+                        <!-- Breakdown by Company -->
+                        <div class="section-title">Détail par Société</div>
+                        <t t-set="breakdown" t-value="o.get_financial_breakdown()"/>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Société</th>
+                                    <th class="amount">Total Encaissé</th>
+                                    <th class="amount">Total Non Encaissé</th>
+                                    <th class="amount">Total Global</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="breakdown" t-as="line">
+                                    <tr>
+                                        <td class="text-bold"><t t-esc="line['ste']"/></td>
+                                        <td class="amount" style="color: #1b5e20;"><t t-esc="'{:,.2f}'.format(line['encaisse']).replace(',', ' ')"/> DH</td>
+                                        <td class="amount" style="color: #bf360c;"><t t-esc="'{:,.2f}'.format(line['non_encaisse']).replace(',', ' ')"/> DH</td>
+                                        <td class="amount text-bold"><t t-esc="'{:,.2f}'.format(line['total']).replace(',', ' ')"/> DH</td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Additional Info -->
+                        <div style="margin-top: 20px;">
+                            <p><strong>Nombre de chèques non encaissés :</strong> <t t-esc="o.get_non_encaisse_count()"/></p>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="footer">
+                            Document confidentiel - Généré par Gestia AI.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

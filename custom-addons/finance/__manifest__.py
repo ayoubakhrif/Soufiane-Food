@@ -28,6 +28,7 @@
         'views/finance_marglory_payment_view.xml',
         'views/finance_logistics_reconciliation_views.xml',
         'reports/cheque_request_report.xml',
+        'reports/finance_benif_report.xml',
         'data/cron.xml',
     ],
     'assets': {

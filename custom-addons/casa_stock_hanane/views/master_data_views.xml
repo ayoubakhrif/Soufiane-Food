@@ -34,7 +34,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Traductions" name="traductions">
+                        <page string="Traductions" name="traductions" groups="casa_stock_hanane.group_user,casa_stock_hanane.group_viewer">
                              <div class="alert alert-info" role="alert" style="margin-bottom: 20px;">
                                 <i class="fa fa-info-circle"/> 
                                 <strong>Note:</strong> Ces traductions sont partagées par tous les calibres de cet article.

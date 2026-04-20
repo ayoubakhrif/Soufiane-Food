@@ -91,3 +91,5 @@ access_casa_stock_client_difference_manager_hanane,casa_hanane.client.difference
 access_casa_stock_client_difference_admin_hanane,casa_hanane.client.difference.admin,model_casa_hanane_client_difference,group_admin,1,0,0,0
 access_casa_stock_client_difference_viewer_hanane,casa_hanane.client.difference.viewer,model_casa_hanane_client_difference,group_viewer,1,0,0,0
 access_casa_article_alias_user_hanane,casa_hanane.article.alias.user,model_casa_hanane_article_alias,group_user,1,1,1,1
+access_casa_article_alias_viewer_hanane,casa_hanane.article.alias.viewer,model_casa_hanane_article_alias,group_viewer,1,0,0,0
+

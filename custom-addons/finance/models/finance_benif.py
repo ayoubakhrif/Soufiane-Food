@@ -51,7 +51,7 @@ class Cal3iyaClient(models.Model):
             if ste_name not in breakdown:
                 breakdown[ste_name] = {'encaisse': 0.0, 'non_encaisse': 0.0}
             
-            if chq.encours == 'encaisse':
+            if chq.date_encaissement:
                 breakdown[ste_name]['encaisse'] += chq.amount_total
             else:
                 breakdown[ste_name]['non_encaisse'] += chq.amount_total
@@ -69,7 +69,7 @@ class Cal3iyaClient(models.Model):
 
     def get_non_encaisse_count(self):
         self.ensure_one()
-        return len(self.physical_chq_ids.filtered(lambda c: c.encours != 'encaisse'))
+        return len(self.physical_chq_ids.filtered(lambda c: not c.date_encaissement))
 
     def action_export_excel(self):
         self.ensure_one()

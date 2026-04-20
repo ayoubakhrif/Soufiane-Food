@@ -68,7 +68,7 @@ class FinanceChequePhysical(models.Model):
             total_debit = 0.0
             if rec.datacheque_ids:
                 for split in rec.datacheque_ids:
-                    if split.date_encaissement or split.encours == 'encaisse':
+                    if split.date_encaissement:
                         total_debit += split.amount
             rec.debit = total_debit
 
@@ -80,8 +80,8 @@ class FinanceChequePhysical(models.Model):
             # If it's split, all splits should share the same status technically.
             # We take the status of the first one found that is encaisse, or default to non_encaisse
             
-            # Logic: If any datacheque is 'encaisse', then physical is 'encaisse'
-            if any(d.encours == 'encaisse' for d in rec.datacheque_ids):
+            # Logic: If any datacheque has date_encaissement, then physical is 'encaisse'
+            if any(d.date_encaissement for d in rec.datacheque_ids):
                 rec.encours = 'encaisse'
             else:
                 rec.encours = 'non_encaisse'

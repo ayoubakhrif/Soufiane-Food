@@ -100,3 +100,6 @@ class CasaProduct(models.Model):
             from odoo.exceptions import UserError
             raise UserError("Aucun stock disponible pour ce produit.")
         return self.env.ref('casa_stock_hanane.action_report_casa_stock_product').report_action(stock_records)
+
+    def action_generate_general_report(self):
+        return self.env.ref('casa_stock_hanane.action_report_casa_stock_general').report_action(None)

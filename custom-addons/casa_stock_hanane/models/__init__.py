@@ -1,5 +1,4 @@
 from . import casa_product
-from . import casa_product_inherited
 from . import casa_provider
 from . import casa_ste
 from . import casa_client

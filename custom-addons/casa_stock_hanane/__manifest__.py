@@ -27,7 +27,6 @@ This module provides a robust stock management system based on an immutable move
         'views/stock_stock_views.xml',
         'views/stock_client_views.xml',
         'views/master_data_views.xml',
-        'views/casa_stock_product_views.xml',
         'views/stock_transfer_views.xml',
         'views/casa_stock_discount_views.xml',
         'views/other_sale_views.xml',

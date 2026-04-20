@@ -90,3 +90,17 @@ class CasaProduct(models.Model):
                 pattern = r'(?:^|\W)' + re.escape(b_short) + r'(?:$|\W)'
                 if re.search(pattern, b_long):
                     raise ValidationError(f"Le nom '{record.name}' contient une partie identique au produit existant '{p.name}' sans ajout descriptif.")
+
+    def action_generate_product_report(self):
+        self.ensure_one()
+        stock_records = self.env['casa.stock.stock'].search([
+            ('product_id', '=', self.id),
+            ('quantity', '>', 0)
+        ])
+        if not stock_records:
+            from odoo.exceptions import UserError
+            raise UserError("Aucun stock disponible pour ce produit.")
+        return self.env.ref('casa_stock.action_report_casa_stock_product').report_action(stock_records)
+
+    def action_generate_general_report(self):
+        return self.env.ref('casa_stock.action_report_casa_stock_general').report_action(None)

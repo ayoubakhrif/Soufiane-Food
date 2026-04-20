@@ -1,11 +1,13 @@
 import json
 import logging
+import difflib
+import re
 
 from odoo import models, api
 
 _logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """Tu es un assistant qui analyse des messages utilisateur liés à la gestion de stock.
+SYSTEM_PROMPT_TEMPLATE = """Tu es un assistant qui analyse des messages utilisateur liés à la gestion de stock.
 Tu dois extraire l'intention et les paramètres de la question.
 
 Réponds UNIQUEMENT en JSON valide, sans aucun texte autour.
@@ -14,28 +16,36 @@ Intentions possibles :
 - "stock_check" : l'utilisateur veut connaître la quantité d'un produit
 - "list_products" : l'utilisateur veut la liste des produits en stock
 - "list_garages" : l'utilisateur veut la liste des garages
+- "stock_order_validation" : l'utilisateur envoie un message multi-ligne avec des articles, quantités, garages et lots à vérifier.
 - "unknown" : tu ne comprends pas la question
 
-Format de réponse :
-{
+LISTE DES PRODUITS DISPONIBLES (Référentiel exact) :
+{product_list}
+
+Format de réponse pour "stock_check", "list_products", "list_garages":
+{{
   "intent": "stock_check",
-  "product": "nom du produit extrait (ou null)",
+  "product": "utilise le nom exact depuis la liste ci-dessus (ou null)",
   "garage": "nom du garage extrait (ou null)",
   "lot": "numéro de lot extrait (ou null)"
-}
+}}
+
+Format de réponse pour "stock_order_validation":
+{{
+  "intent": "stock_order_validation",
+  "items": [
+    {{"qty": 100, "product": "utilise le nom EXACT depuis la liste ci-dessus", "garage": "stok X ou saha", "lot": "numéro brute"}},
+    ...
+  ]
+}}
 
 Exemples :
-- "Combien d'amande?" → {"intent": "stock_check", "product": "amande", "garage": null, "lot": null}
-- "Stock amande garage 1" → {"intent": "stock_check", "product": "amande", "garage": "garage1", "lot": null}
-- "Liste des produits" → {"intent": "list_products", "product": null, "garage": null, "lot": null}
-- "Quels garages?" → {"intent": "list_garages", "product": null, "garage": null, "lot": null}
-- "Bonjour" → {"intent": "unknown", "product": null, "garage": null, "lot": null}
+- "Combien d'amande?" → {{"intent": "stock_check", "product": "Amande Douce", "garage": null, "lot": null}}
+- "100 amande stok 1 lot 123" → {{"intent": "stock_order_validation", "items": [{{"qty": 100, "product": "Amande Douce", "garage": "stok 1", "lot": "123"}}]}}
 
-Pour le garage, normalise le nom :
-- "garage 1", "Garage 1", "g1" → "garage1"
-- "garage 2" → "garage2" ... jusqu'à "garage8"
-- "terrasse" → "terrasse"
-- "fenidek" → "fenidek"
+Pour le garage individuel (stock_check), normalise :
+- "garage 1", "stok 1", "g1" → "garage1"
+- "terrasse", "saha" → "terrasse"
 """
 
 
@@ -61,21 +71,30 @@ class StockKal3iyaChatbot(models.AbstractModel):
             return None
 
     @api.model
+    def _get_product_list_text(self):
+        """Fetch all product names to feed the OpenAI prompt."""
+        products = self.env['stock.kal3iya.product'].sudo().search([])
+        return ", ".join(products.mapped('name'))
+
+    @api.model
     def _parse_intent(self, message):
         """Use OpenAI to parse user message into structured intent JSON."""
         client = self._get_openai_client()
         if not client:
             return {'intent': 'error', 'error': 'Configuration manquante'}
 
+        product_list = self._get_product_list_text()
+        system_content = SYSTEM_PROMPT_TEMPLATE.format(product_list=product_list)
+
         try:
             response = client.chat.completions.create(
                 model='gpt-4o-mini',
                 messages=[
-                    {'role': 'system', 'content': SYSTEM_PROMPT},
+                    {'role': 'system', 'content': system_content},
                     {'role': 'user', 'content': message},
                 ],
                 temperature=0,
-                max_tokens=200,
+                max_tokens=1000,
             )
             raw = response.choices[0].message.content.strip()
             return json.loads(raw)
@@ -212,6 +231,133 @@ class StockKal3iyaChatbot(models.AbstractModel):
             _logger.warning("Failed to log chatbot interaction: %s", str(e))
 
     # -------------------------------------------------------------------------
+    # Order Validation Logic
+    # -------------------------------------------------------------------------
+    @api.model
+    def _map_garage_name(self, raw_garage):
+        """Map flexible garage names to Odoo selection keys."""
+        if not raw_garage:
+            return False
+        
+        raw = raw_garage.lower().strip()
+        # Flexibilité demandée: "saha", "errasse", "terase" -> terrasse
+        if any(x in raw for x in ['saha', 'errasse', 'terase', 'terrasse']):
+            return 'terrasse'
+        
+        # Flexibilité demandée: "stok", "stopk", "stock" + chiffre -> garageN
+        match = re.search(r'(stok|stopk|stock|garage|g)\s*(\d+)', raw)
+        if match:
+            return f'garage{match.group(2)}'
+        
+        # Fallback search in labels
+        Stock = self.env['stock.kal3iya.stock'].sudo()
+        selection = Stock.fields_get(['garage'])['garage']['selection']
+        for key, label in selection:
+            if raw == key.lower() or raw == label.lower():
+                return key
+        return False
+
+    @api.model
+    def _get_garage_label(self, key):
+        """Get human readable label for garage key."""
+        if not key:
+            return "Inconnu"
+        Stock = self.env['stock.kal3iya.stock'].sudo()
+        selection = dict(Stock.fields_get(['garage'])['garage']['selection'])
+        return selection.get(key, key)
+
+    @api.model
+    def _validate_order_line(self, item):
+        """Perform similarity-based validation strategy for a single line."""
+        qty = item.get('qty')
+        product_name = item.get('product')
+        garage_raw = item.get('garage')
+        lot_raw = str(item.get('lot', '')).strip() if item.get('lot') else ''
+
+        # 1. Map Garage
+        garage_key = self._map_garage_name(garage_raw)
+        
+        # 2. Resolve Product (AI should have already resolved it, but we double check)
+        Product = self.env['stock.kal3iya.product'].sudo()
+        product = Product.search([('name', '=', product_name)], limit=1)
+        if not product:
+            # Fallback to fuzzy resolving if AI returned a slightly off name
+            res = self._resolve_product(product_name)
+            if res['status'] == 'found':
+                product = res['product']
+            else:
+                return f"{qty} {product_name} {garage_raw} -> Produit non reconnu"
+
+        # 3. Check Lot
+        if not lot_raw or lot_raw.lower() == 'null':
+            return f"{qty} {product.name} {garage_raw} -> Lot s'il vous plait"
+
+        Stock = self.env['stock.kal3iya.stock'].sudo()
+        
+        # A. Perfect Match (Exact or normalized)
+        # We allow exact match for this product + lot (quantity > 0)
+        domain = [('product_id', '=', product.id), ('lot', '=ilike', lot_raw), ('quantity', '>', 0)]
+        if garage_key:
+            domain.append(('garage', '=', garage_key))
+        
+        match = Stock.search(domain, limit=1)
+        if match:
+            return "Bien"
+
+        # B. Lot existing elsewhere? (To check if garage is just wrong)
+        other_garage_match = Stock.search([
+            ('product_id', '=', product.id),
+            ('lot', '=ilike', lot_raw),
+            ('quantity', '>', 0)
+        ], limit=1)
+        if other_garage_match:
+            correct_garage = self._get_garage_label(other_garage_match.garage)
+            return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Correction Garage: {correct_garage}"
+
+        # C. Lot not found -> Search similarity or List all in target garage
+        if garage_key:
+            available_stocks = Stock.search([
+                ('product_id', '=', product.id),
+                ('garage', '=', garage_key),
+                ('quantity', '>', 0)
+            ])
+            if not available_stocks:
+                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Pas de stock dans ce garage"
+            
+            all_lots = available_stocks.mapped('lot')
+            
+            # Try Similarity Match (Levenshtein)
+            matches = difflib.get_close_matches(lot_raw, all_lots, n=1, cutoff=0.6)
+            if matches:
+                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Correction Lot: {matches[0]}"
+            else:
+                # Totally different -> List all available
+                lots_str = ", ".join(all_lots)
+                return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lots disponibles: {lots_str}"
+        
+        return f"{qty} {product_name} {garage_raw} lot {lot_raw} -> Lot non trouvé"
+
+    @api.model
+    def _process_order_validation(self, intent_data):
+        """Process multiple items and format response according to special rules."""
+        items = intent_data.get('items', [])
+        results = []
+        has_errors = False
+        
+        for item in items:
+            res = self._validate_order_line(item)
+            if res != "Bien":
+                has_errors = True
+            results.append(res)
+            
+        if not has_errors:
+            return "Bien"
+        
+        # "Si il y a des erreurs on ne corrige que les erreurs on ne parle pas des lignes correctes"
+        error_lines = [r for r in results if r != "Bien"]
+        return "\n".join(error_lines)
+
+    # -------------------------------------------------------------------------
     # Main Orchestrator
     # -------------------------------------------------------------------------
     @api.model
@@ -221,6 +367,9 @@ class StockKal3iyaChatbot(models.AbstractModel):
 
         Flow: Parse intent (OpenAI) → Resolve product (DB) → Query stock (DB) → Format
         """
+        # Group filtering for order validation
+        STOCK_GROUP_ID = '120363403203705514@g.us'
+        
         # 1. Parse intent via OpenAI
         intent_data = self._parse_intent(message)
         intent = intent_data.get('intent', 'unknown')
@@ -228,6 +377,14 @@ class StockKal3iyaChatbot(models.AbstractModel):
         # 2. Handle by intent
         if intent == 'error':
             response = "Erreur de configuration. Veuillez contacter l'administrateur."
+
+        elif intent == 'stock_order_validation':
+            # Check Group ID or sender for specific validation
+            if sender != STOCK_GROUP_ID and sender != 'unknown': # Allow unknown for test/direct
+                 _logger.info("Ignoring order validation from unauthorized sender: %s", sender)
+                 return "Désolé, cette fonction est réservée au groupe de gestion de stock."
+            
+            response = self._process_order_validation(intent_data)
 
         elif intent == 'list_products':
             response = self._list_products_in_stock()
@@ -251,7 +408,9 @@ class StockKal3iyaChatbot(models.AbstractModel):
 
                 elif result['status'] == 'found':
                     product = result['product']
-                    garage = intent_data.get('garage')
+                    # Individual check logic: normalise garage
+                    garage_raw = intent_data.get('garage')
+                    garage = self._map_garage_name(garage_raw) if garage_raw else None
                     lot = intent_data.get('lot')
                     qty = self._query_stock(product, garage=garage, lot=lot)
                     response = self._format_stock_response(qty)
@@ -259,8 +418,8 @@ class StockKal3iyaChatbot(models.AbstractModel):
             # unknown intent
             response = ("Je suis l'assistant stock. Vous pouvez me demander :\n"
                         "- La quantité d'un produit (ex: \"Combien d'amande ?\")\n"
-                        "- La liste des produits en stock\n"
-                        "- La liste des garages")
+                        "- Analyser une commande multi-ligne\n"
+                        "- La liste des produits en stock")
 
         # 3. Log interaction
         self._log_interaction(sender, message, response)

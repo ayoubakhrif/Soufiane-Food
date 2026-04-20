@@ -78,8 +78,8 @@ class WhatsAppFinanceController(http.Controller):
         if len(benifs) == 1:
             # UNIQUE BENEFICIARY -> GENERATE PDF
             benif = benifs[0]
-            report_action = request.env.ref('finance.action_report_finance_benif_summary').sudo()
-            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=benif.ids)
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
             from odoo import fields

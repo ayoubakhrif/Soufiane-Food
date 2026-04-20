@@ -81,7 +81,7 @@ class WhatsAppClientController(http.Controller):
                 if not dummy_record:
                     return {'status': 'not_found', 'message': "Désolé, aucun solde client n'est actuellement disponible."}
                 
-                pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
+                pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock.action_report_casa_clients_total', res_ids=dummy_record.ids)
                 return {
                     'status': 'success',
                     'message': "Information : J'ai identifié une demande de situation globale des clients.\nVoici l'état actuel des comptes.",

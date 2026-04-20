@@ -99,7 +99,7 @@ async function connectToWhatsApp() {
                 isClientRequest = false;
             } else if (from === FINANCE_GROUP_ID) {
                 targetOdooUrl = FINANCE_ODOO_URL;
-                isClientRequest = false; // Finance uses report flow similar to client but JS uses isClientRequest for caption logic
+                isClientRequest = true; // Use true to reuse the identifier/caption logic in bridge
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -143,7 +143,12 @@ async function connectToWhatsApp() {
                 }
 
                 // APPEL À ODOO
-                console.log(`Appel à Odoo (${from === STOCK_VALIDATION_GROUP_ID ? 'STOCK_VAL' : (isClientRequest ? 'CLIENT' : 'ARTICLE')}) pour : "${realMessage}"`);
+                let typeStr = "ARTICLE";
+                if (from === STOCK_VALIDATION_GROUP_ID) typeStr = "STOCK_VAL";
+                else if (from === CLIENT_GROUP_ID) typeStr = "CLIENT";
+                else if (from === FINANCE_GROUP_ID) typeStr = "FINANCE";
+
+                console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 const response = await axios.post(targetOdooUrl, {
                     jsonrpc: "2.0",
                     params: {

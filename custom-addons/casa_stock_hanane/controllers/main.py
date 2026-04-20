@@ -73,7 +73,7 @@ class WhatsAppStockController(http.Controller):
             if not dummy_record:
                 return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
             
-            pdf_content, _ = report_action._render_qweb_pdf(report_action.id, res_ids=dummy_record.ids)
+            pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_general', res_ids=dummy_record.ids)
             from odoo import fields
             return {
                 'status': 'success',
@@ -142,7 +142,7 @@ class WhatsAppStockController(http.Controller):
             # ONLY ONE VARIETY HAS STOCK -> GENERATE PDF
             stock_for_pdf = stock_records.filtered(lambda r: r.product_id.article_id.id == articles_in_stock[0].id)
             report_action = request.env['ir.actions.report'].sudo()
-            pdf_content, _ = report_action._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_for_pdf.ids)
+            pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_for_pdf.ids)
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
             return {

@@ -161,24 +161,23 @@ class StockKal3iyaController(http.Controller):
     @http.route('/api/stock_kal3iya/chat', type='json', auth='public', methods=['POST'], csrf=False)
     def chat(self, **kwargs):
         """WhatsApp chatbot endpoint. Receives a message, returns a stock-related answer."""
-        # 1. Security Check (Token)
+        # 1. Security Check (Token / API Key)
+        # We accept either Bearer Token (original) or X-Api-Key (bridge standard)
         expected_token = request.env['ir.config_parameter'].sudo().get_param('stock_kal3iya.api_token')
+        expected_api_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.api_key', 'whatsapp_direct_quantity')
+        
         auth_header = request.httprequest.headers.get('Authorization')
-
-        if not expected_token:
-            _logger.warning("Chat API attempted but 'stock_kal3iya.api_token' is not set.")
-            return request.make_response(
-                json.dumps({'error': 'Server configuration error (Token)'}),
-                headers={'Content-Type': 'application/json'},
-                status=500
-            )
-
-        if auth_header != f"Bearer {expected_token}":
-            return request.make_response(
-                json.dumps({'error': 'Unauthorized'}),
-                headers={'Content-Type': 'application/json'},
-                status=401
-            )
+        x_api_key = request.httprequest.headers.get('X-Api-Key')
+        
+        is_authorized = False
+        if expected_token and auth_header == f"Bearer {expected_token}":
+            is_authorized = True
+        if x_api_key == expected_api_key:
+            is_authorized = True
+            
+        if not is_authorized:
+            _logger.warning("Unauthorized access to Stock Kal3iya API (X-Api-Key: %s)", x_api_key)
+            return {'status': 'error', 'message': 'Unauthorized'}
 
         message = kwargs.get('message', '').strip()
         sender = kwargs.get('sender', 'unknown')

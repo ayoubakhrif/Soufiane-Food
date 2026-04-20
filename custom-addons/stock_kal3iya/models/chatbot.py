@@ -346,28 +346,27 @@ class StockKal3iyaChatbot(models.AbstractModel):
                 # Lot totalement différent -> Lister tout
                 lots_str = ", ".join(all_lots)
                 return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lots disponibles: {lots_str}"
-
         return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> Lot non trouvé"
 
     @api.model
     def _process_order_validation(self, intent_data):
-        """Process multiple items and format response according to special rules."""
+        """Process all items and return a report where every line is commented."""
         items = intent_data.get('items', [])
         results = []
-        has_errors = False
         
         for item in items:
             res = self._validate_order_line(item)
-            if res != "Bien":
-                has_errors = True
-            results.append(res)
+            if res == "Bien":
+                # Reconstruct the line for a positive feedback
+                qty = item.get('qty', '')
+                prod = item.get('product', '')
+                gar = item.get('garage', '')
+                lot = item.get('lot', '')
+                results.append(f"{qty} {prod} {gar} lot {lot} -> Bien")
+            else:
+                results.append(res)
             
-        if not has_errors:
-            return "Bien"
-        
-        # "Si il y a des erreurs on ne corrige que les erreurs on ne parle pas des lignes correctes"
-        error_lines = [r for r in results if r != "Bien"]
-        return "\n".join(error_lines)
+        return "\n".join(results)
 
     # -------------------------------------------------------------------------
     # Main Orchestrator

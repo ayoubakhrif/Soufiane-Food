@@ -14,9 +14,11 @@ const pino = require('pino');
 // CONFIGURATION
 const ARTICLE_GROUP_ID = "120363405648854156@g.us"; 
 const CLIENT_GROUP_ID = "120363426234155722@g.us";
+const STOCK_VALIDATION_GROUP_ID = "120363403203705514@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
+const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_kal3iya/chat";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -90,6 +92,9 @@ async function connectToWhatsApp() {
             } else if (from === CLIENT_GROUP_ID) {
                 targetOdooUrl = CLIENT_ODOO_URL;
                 isClientRequest = true;
+            } else if (from === STOCK_VALIDATION_GROUP_ID) {
+                targetOdooUrl = STOCK_VALIDATION_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -133,12 +138,13 @@ async function connectToWhatsApp() {
                 }
 
                 // APPEL À ODOO
-                console.log(`Appel à Odoo (${isClientRequest ? 'CLIENT' : 'ARTICLE'}) pour : "${realMessage}"`);
+                console.log(`Appel à Odoo (${from === STOCK_VALIDATION_GROUP_ID ? 'STOCK_VAL' : (isClientRequest ? 'CLIENT' : 'ARTICLE')}) pour : "${realMessage}"`);
                 const response = await axios.post(targetOdooUrl, {
                     jsonrpc: "2.0",
                     params: {
                         message: realMessage,
-                        group_id: from
+                        sender: from, // Used by stock_kal3iya
+                        group_id: from // Used by others
                     }
                 }, {
                     headers: {
@@ -176,6 +182,10 @@ async function connectToWhatsApp() {
                 } else if (result && result.status === 'not_found') {
                     console.log(`Non trouvé : ${result.message}`);
                     await sock.sendMessage(from, { text: result.message });
+                } else if (result && result.response) {
+                    // C'est une réponse textuelle simple (ex: chatbot stock)
+                    console.log(`Réponse textuelle : ${result.response}`);
+                    await sock.sendMessage(from, { text: result.response });
                 } else {
                     console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
                 }

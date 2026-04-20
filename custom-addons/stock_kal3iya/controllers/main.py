@@ -158,8 +158,8 @@ class StockKal3iyaController(http.Controller):
             headers={'Content-Type': 'application/json'}
         )
 
-    @http.route('/api/stock_kal3iya/chat', type='http', auth='public', methods=['POST'], csrf=False)
-    def chat(self, **post):
+    @http.route('/api/stock_kal3iya/chat', type='json', auth='public', methods=['POST'], csrf=False)
+    def chat(self, **kwargs):
         """WhatsApp chatbot endpoint. Receives a message, returns a stock-related answer."""
         # 1. Security Check (Token)
         expected_token = request.env['ir.config_parameter'].sudo().get_param('stock_kal3iya.api_token')
@@ -180,25 +180,11 @@ class StockKal3iyaController(http.Controller):
                 status=401
             )
 
-        # 2. Parse Body
-        try:
-            data = json.loads(request.httprequest.data)
-        except Exception:
-            return request.make_response(
-                json.dumps({'error': 'Invalid JSON format'}),
-                headers={'Content-Type': 'application/json'},
-                status=400
-            )
-
-        message = data.get('message', '').strip()
-        sender = data.get('sender', 'unknown')
+        message = kwargs.get('message', '').strip()
+        sender = kwargs.get('sender', 'unknown')
 
         if not message:
-            return request.make_response(
-                json.dumps({'error': 'No message provided'}),
-                headers={'Content-Type': 'application/json'},
-                status=400
-            )
+            return {'status': 'error', 'message': 'No message provided'}
 
         # 3. Process via Chatbot Engine
         try:
@@ -209,7 +195,4 @@ class StockKal3iyaController(http.Controller):
             response_text = "Erreur interne. Veuillez réessayer."
 
         # 4. Return Response
-        return request.make_response(
-            json.dumps({'response': response_text}),
-            headers={'Content-Type': 'application/json'}
-        )
+        return {'status': 'success', 'response': response_text}

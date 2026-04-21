@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_recap_category" model="ir.module.category">
+        <field name="name">Recap Balance</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <record id="group_recap_user" model="res.groups">
+        <field name="name">Utilisateur Recap</field>
+        <field name="category_id" ref="module_recap_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_recap_manager" model="res.groups">
+        <field name="name">Manager Recap</field>
+        <field name="category_id" ref="module_recap_category"/>
+        <field name="implied_ids" eval="[(4, ref('group_recap_user'))]"/>
+    </record>
+</odoo>

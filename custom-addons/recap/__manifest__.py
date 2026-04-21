@@ -15,6 +15,7 @@
     'author': 'Gestia',
     'depends': ['casa_stock', 'charges_casa'],
     'data': [
+        'security/groups.xml',
         'security/ir.model.access.csv',
         'views/casa_recap_view.xml',
     ],

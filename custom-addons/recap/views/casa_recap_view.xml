@@ -148,7 +148,7 @@
         </field>
     </record>
 
-    <menuitem id="menu_recap_root" name="Recap" sequence="50" web_icon="recap,static/description/icon.png"/>
+    <menuitem id="menu_recap_root" name="Recap" sequence="50" web_icon="recap,static/description/icon.png" groups="group_recap_user"/>
     <menuitem id="menu_recap_main" name="Récapitulatif" parent="menu_recap_root" action="action_casa_recap" sequence="10"/>
 
 </odoo>

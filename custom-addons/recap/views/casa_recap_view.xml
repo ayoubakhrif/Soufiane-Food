@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
     <record id="view_casa_recap_tree" model="ir.ui.view">
         <name>casa.recap.tree</name>
         <model>casa.recap</model>
         <arch type="xml">
             <tree string="Récapitulatifs">
                 <field name="date"/>
-                <field name="total_stock_casa" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="total_stock_tanger" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="total_benefices" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="total_perte" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="total_charges" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="credits_clients" sum="Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="currency_id" invisible="1"/>
+                <field name="total_stock_casa" sum="Total"/>
+                <field name="total_stock_tanger" sum="Total"/>
+                <field name="total_benefices" sum="Total"/>
+                <field name="total_perte" sum="Total"/>
+                <field name="total_charges" sum="Total"/>
+                <field name="credits_clients" sum="Total"/>
             </tree>
         </arch>
     </record>
@@ -26,7 +24,6 @@
                 <header>
                 </header>
                 <sheet>
-                    <field name="currency_id" invisible="1"/>
                     <div class="oe_title">
                         <h1>
                             <field name="name" readonly="1"/>
@@ -44,7 +41,7 @@
                         <div style="background: #f0f7ff; padding: 20px; border-radius: 12px; border: 1px solid #d1e9ff; text-align: center;">
                             <div style="color: #007bff; font-size: 14px; font-weight: bold; margin-bottom: 10px;">STOCK CASA</div>
                             <div style="font-size: 24px; font-weight: 800; color: #0056b3;">
-                                <field name="total_stock_casa" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_stock_casa"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
@@ -52,7 +49,7 @@
                         <div style="background: #f0f7ff; padding: 20px; border-radius: 12px; border: 1px solid #d1e9ff; text-align: center;">
                             <div style="color: #007bff; font-size: 14px; font-weight: bold; margin-bottom: 10px;">STOCK TANGER</div>
                             <div style="font-size: 24px; font-weight: 800; color: #0056b3;">
-                                <field name="total_stock_tanger" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_stock_tanger"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
@@ -60,7 +57,7 @@
                         <div style="background: #f6ffed; padding: 20px; border-radius: 12px; border: 1px solid #b7eb8f; text-align: center;">
                             <div style="color: #52c41a; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL BÉNÉFICES</div>
                             <div style="font-size: 24px; font-weight: 800; color: #237804;">
-                                <field name="total_benefices" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_benefices"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
@@ -68,7 +65,7 @@
                         <div style="background: #fff1f0; padding: 20px; border-radius: 12px; border: 1px solid #ffa39e; text-align: center;">
                             <div style="color: #f5222d; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL PERTES</div>
                             <div style="font-size: 24px; font-weight: 800; color: #a8071a;">
-                                <field name="total_perte" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_perte"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
@@ -76,7 +73,7 @@
                         <div style="background: #fffbe6; padding: 20px; border-radius: 12px; border: 1px solid #ffe58f; text-align: center;">
                             <div style="color: #faad14; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL CHARGES</div>
                             <div style="font-size: 24px; font-weight: 800; color: #ad6800;">
-                                <field name="total_charges" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_charges"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
@@ -84,7 +81,7 @@
                         <div style="background: #f9f0ff; padding: 20px; border-radius: 12px; border: 1px solid #d3adf7; text-align: center;">
                             <div style="color: #722ed1; font-size: 14px; font-weight: bold; margin-bottom: 10px;">CRÉDITS CLIENTS</div>
                             <div style="font-size: 24px; font-weight: 800; color: #391085;">
-                                <field name="credits_clients" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="credits_clients"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
@@ -98,7 +95,7 @@
                                     <field name="ville"/>
                                     <field name="client_id"/>
                                     <field name="total_amount" sum="Total"/>
-                                    <field name="state" widget="badge" decoration-info="state == 'confirmed'"/>
+                                    <field name="state" widget="badge"/>
                                 </tree>
                             </field>
                         </page>
@@ -154,5 +151,5 @@
 
     <menuitem id="menu_recap_root" name="Recap" sequence="50" web_icon="recap,static/description/icon.png"/>
     <menuitem id="menu_recap_main" name="Récapitulatif" parent="menu_recap_root" action="action_casa_recap" sequence="10"/>
-    </data>
+
 </odoo>

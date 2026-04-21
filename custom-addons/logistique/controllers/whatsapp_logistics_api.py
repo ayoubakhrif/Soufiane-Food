@@ -162,7 +162,7 @@ class WhatsAppLogisticsController(http.Controller):
                 upcoming[eta_str] = upcoming.get(eta_str, 0) + cnt
 
         # 8. Format Response
-        response = f"🚢 *LOGISTIQUE - {article.name.upper()}*\n"
+        response = f"🚢 *LOGISTIQUE - {target_name.upper()}*\n"
         response += f"━━━━━━━━━━━━━━━━━━\n\n"
 
         if not at_port and not upcoming:

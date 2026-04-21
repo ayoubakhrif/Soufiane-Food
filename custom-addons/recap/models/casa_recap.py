@@ -83,21 +83,40 @@ class CasaRecap(models.Model):
             rec.total_stock_casa = stock_casa
             rec.total_stock_tanger = stock_tanger
 
-            # 2. Total Bénéfices (Today) - Splitted
+            # 2 & 3. Total Bénéfices et Pertes des sorties (Vente - Réduction - Achat)
             exits = self.env['casa.stock.exit'].search([
                 ('date', '=', recap_date),
                 ('state', '=', 'done')
             ])
-            rec.total_benefice_casa = sum(exits.filtered(lambda x: x.ville == 'casa').mapped('margin'))
-            rec.total_benefice_tanger = sum(exits.filtered(lambda x: x.ville == 'tanger').mapped('margin'))
+            
+            benef_c = 0.0
+            perte_c_ventes = 0.0
+            for e in exits.filtered(lambda x: x.ville == 'casa'):
+                margin = (e.mt_vente - getattr(e, 'discount_amount', 0.0) - e.mt_achat)
+                if margin > 0:
+                    benef_c += margin
+                else:
+                    perte_c_ventes += abs(margin)
+            
+            benef_t = 0.0
+            perte_t_ventes = 0.0
+            for e in exits.filtered(lambda x: x.ville == 'tanger'):
+                margin = (e.mt_vente - getattr(e, 'discount_amount', 0.0) - e.mt_achat)
+                if margin > 0:
+                    benef_t += margin
+                else:
+                    perte_t_ventes += abs(margin)
 
-            # 3. Total Pertes (Today) - Splitted
+            rec.total_benefice_casa = benef_c
+            rec.total_benefice_tanger = benef_t
+
+            # 3. Total Pertes (Explicit Pertes Stock + Pertes sur sorties)
             pertes = self.env['casa.stock.perte'].search([
                 ('date', '=', recap_date),
                 ('state', '=', 'done')
             ])
-            perte_c = 0.0
-            perte_t = 0.0
+            perte_c = perte_c_ventes
+            perte_t = perte_t_ventes
             for p in pertes:
                 val = p.qty * (p.weight or 0.0) * (p.price_purchase or 0.0)
                 if p.ville == 'casa':

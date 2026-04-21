@@ -91,6 +91,7 @@
                         <group string="Totaux Financiers">
                             <field name="total_commandes" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                             <field name="total_advances" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="total_retours" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                         </group>
                     </group>
                     <notebook>

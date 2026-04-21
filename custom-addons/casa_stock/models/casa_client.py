@@ -174,6 +174,13 @@ class CasaClient(models.Model):
         tracking=True
     )
 
+    total_retours = fields.Float(
+        string='Total Retours',
+        compute='_compute_totals',
+        store=True,
+        tracking=True
+    )
+
     sorties_grouped_html = fields.Html(
         string="Historique des commandes",
         compute="_compute_sorties_grouped_html",
@@ -233,6 +240,7 @@ class CasaClient(models.Model):
 
             client.total_commandes = total_ventes
             client.total_advances = total_advances
+            client.total_retours = total_retours
             client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes + total_sorties_supp - total_discounts - total_advances - total_retours
             
             # Provisional totals (Confirmed + Done)

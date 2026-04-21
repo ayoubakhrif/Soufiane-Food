@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_casa_stock_general" model="ir.actions.report">
+        <field name="name">Situation Générale du Stock (PDF)</field>
+        <field name="model">casa_hanane.stock.stock</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">casa_stock_hanane.report_stock_general_template</field>
+        <field name="report_file">casa_stock_hanane.report_stock_general_template</field>
+        <field name="binding_model_id" ref="model_casa_hanane_stock_stock"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_stock_general_template">
+        <t t-call="web.html_container">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            
+            <t t-set="data" t-value="docs._get_general_report_data()"/>
+            
+            <div class="page">
+                <style>
+                    .report-title {
+                        background-color: #FF00FF;
+                        color: black;
+                        text-align: center;
+                        padding: 15px;
+                        font-size: 24px;
+                        font-weight: bold;
+                        border: 2px solid black;
+                        margin-bottom: 20px;
+                    }
+                    .info-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 20px;
+                        font-size: 16px;
+                    }
+                    .city-section {
+                        margin-top: 30px;
+                    }
+                    .city-name {
+                        background-color: #FCE9DA;
+                        border: 1px solid black;
+                        padding: 8px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        text-align: center;
+                        text-transform: uppercase;
+                    }
+                    .stock-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                    }
+                    .stock-table th {
+                        background-color: #FCE9DA;
+                        border: 1px solid black;
+                        padding: 8px;
+                        text-align: left;
+                        font-size: 13px;
+                    }
+                    .stock-table td {
+                        border: 1px solid black;
+                        padding: 8px;
+                        font-size: 13px;
+                    }
+                    .text-right { text-align: right; }
+                    .text-center { text-align: center; }
+                    .bg-blue { background-color: #6DA9DC; font-weight: bold; }
+                    .bg-orange { background-color: #FF9900; font-weight: bold; }
+                    .bg-cyan { background-color: #00FFFF; font-weight: bold; }
+                    
+                    .total-row {
+                        font-weight: bold;
+                        background-color: #f2f2f2;
+                    }
+                    .footer-note {
+                        margin-top: 40px;
+                        font-style: italic;
+                        font-size: 10px;
+                        color: #666;
+                    }
+                    .global-summary {
+                        margin-top: 30px;
+                        border: 2px solid black;
+                        padding: 15px;
+                        background-color: #f9f9f9;
+                    }
+                </style>
+
+                <div class="info-header">
+                    <div style="flex: 1;">
+                        <img src="/gestia_branding/static/src/img/Gestia_logo.png" style="max-height: 80px;"/>
+                    </div>
+                    <div style="flex: 1; text-align: right; padding-top: 20px;">
+                        <span>Date : <t t-esc="data['report_date']"/></span><br/>
+                        <span>Document : Stock Consolide</span>
+                    </div>
+                </div>
+
+                <div class="report-title">
+                    SITUATION GENERALE DU STOCK
+                </div>
+
+                <t t-foreach="data['cities']" t-as="city">
+                    <div class="city-section">
+                        <div class="city-name">STOCK <t t-esc="city['name']"/></div>
+                        <table class="stock-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Produit</th>
+                                    <th class="text-center" style="width: 20%;">Quantite Totale</th>
+                                    <th class="text-center" style="width: 20%;">Tonnage (T)</th>
+                                    <th class="text-right" style="width: 20%;">Valeur Estimee</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="city['lines']" t-as="line">
+                                    <tr>
+                                        <td><t t-esc="line['product']"/></td>
+                                        <td class="text-center bg-orange"><t t-esc="'{0:,.0f}'.format(line['qty'])"/></td>
+                                        <td class="text-center"><t t-esc="'{0:,.2f}'.format(line['tonnage'])"/></td>
+                                        <td class="text-right"><t t-esc="'{0:,.2f}'.format(line['total'])"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td class="bg-blue">TOTAL <t t-esc="city['name']"/></td>
+                                    <td class="text-center bg-orange"><t t-esc="'{0:,.0f}'.format(city['total_qty'])"/></td>
+                                    <td class="text-center"><t t-esc="'{0:,.2f}'.format(city['total_tonnage'])"/></td>
+                                    <td class="text-right bg-cyan"><t t-esc="'{0:,.2f}'.format(city['total_amount'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+
+                <div class="global-summary">
+                    <div style="font-size: 18px; font-weight: bold; border-bottom: 1px solid black; margin-bottom: 10px;">
+                        RESUME TOUTES VILLES
+                    </div>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 50%; font-size: 16px;">Tonnage Global en Stock :</td>
+                            <td style="width: 50%; font-size: 16px; font-weight: bold;" class="text-right">
+                                <t t-esc="'{0:,.2f}'.format(data['global_tonnage'])"/> T
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 50%; font-size: 16px;">Valeur Globale Estimee (Achat) :</td>
+                            <td style="width: 50%; font-size: 18px; font-weight: bold; color: #d00;" class="text-right">
+                                <t t-esc="'{0:,.2f}'.format(data['global_amount'])"/> Dh
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="footer-note">
+                    Ce document est genere automatiquement par Gestia erp.
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

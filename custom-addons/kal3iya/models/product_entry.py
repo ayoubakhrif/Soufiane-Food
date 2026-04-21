@@ -151,6 +151,22 @@ class ProductEntry(models.Model):
             if rec.state == 'retour' and rec.return_id and rec.quantity > rec.return_id.quantity:
                 raise ValidationError("La quantité retournée ne peut pas dépasser la quantité sortie.")
 
+    @api.constrains('quantity', 'state')
+    def _check_entry_quantity(self):
+        for rec in self:
+            if rec.state == 'entree':
+                stock = self.env['kal3iya.stock'].sudo().search([('entry_id', '=', rec.id)], limit=1)
+                if stock:
+                    sorties_qty = sum(self.env['kal3iyasortie'].search([('entry_id', '=', stock.id)]).mapped('quantity'))
+                    returns_qty = sum(self.env['kal3iyaentry'].search([('state', '=', 'retour'), ('return_id.entry_id', '=', stock.id)]).mapped('quantity'))
+                    stock_restant = rec.quantity + returns_qty - sorties_qty
+                    if stock_restant < 0:
+                        raise ValidationError(
+                            f"Opération bloquée ! Vous avez essayé de baisser la quantité d'entrée à {rec.quantity}.\n"
+                            f"Cependant, il y a déjà {sorties_qty} sortis depuis cette ligne (et {returns_qty} retournés).\n"
+                            f"Cela ferait tomber le stock dans le négatif ({stock_restant})."
+                        )
+
     _sql_constraints = [
         ('unique_lot_dum_frigo_ville_state',
          'unique(lot, dum, ville, frigo, state)',

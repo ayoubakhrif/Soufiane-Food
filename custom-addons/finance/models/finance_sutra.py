@@ -15,7 +15,7 @@ class FinanceSutra(models.Model):
         'logistique.entry',
         string='Dossier Douane (BL)',
         required=True,
-        ondelete='restrict',
+        ondelete='cascade',
         tracking=True,
         index=True
     )
@@ -66,16 +66,16 @@ class FinanceSutra(models.Model):
     payment_id = fields.Many2one('finance.sutra.payment', string='Paiement', readonly=True, tracking=True)
     
     cheque_id = fields.Many2one(
-        related='payment_id.cheque_id',
+        related='payment_id.physical_cheque_id',
         string='Chèque',
         readonly=True,
-        store=True
+        store=False
     )
     
     # Read-only from Cheque
     cheque_date_emission = fields.Date(related='cheque_id.date_emission', string="Date d'émission", readonly=True)
     cheque_date_echeance = fields.Date(related='cheque_id.date_echeance', string="Date d'échéance", readonly=True)
-    cheque_number = fields.Char(related='cheque_id.chq', string="N° Chèque", readonly=True)
+    cheque_number = fields.Char(related='cheque_id.name', string="N° Chèque", readonly=True)
     
     # Encaissement Status (from DataCheque)
     is_encaisse = fields.Boolean(string='Encaissé', compute='_compute_is_encaisse', store=True)
@@ -110,8 +110,15 @@ class FinanceSutra(models.Model):
             else:
                 rec.scan_sutra_url = False
 
+    def init(self):
+        # Drop the old strict constraint if it exists so the new one can be applied
+        try:
+            self.env.cr.execute("ALTER TABLE finance_sutra DROP CONSTRAINT IF EXISTS finance_sutra_douane_id_uniq")
+        except Exception:
+            pass
+
     _sql_constraints = [
-        ('douane_id_uniq', 'unique (douane_id)', 'Un dossier Sutra existe déjà pour ce dossier Douane !')
+        ('douane_regime_uniq', 'unique (douane_id, regime)', 'Un dossier Sutra existe déjà pour ce Regime dans ce dossier Douane !')
     ]
 
     @api.depends('honoraires', 'temsa', 'autres', 'ste_id.is_zone_franche')

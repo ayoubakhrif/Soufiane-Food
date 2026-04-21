@@ -1,0 +1,23 @@
+{
+    'name': 'Trésorerie',
+    'version': '1.0',
+    'summary': 'Gestion interne de la trésorerie et des paiements',
+    'description': 'Module spécifique pour gérer les paiements internes indépendamment des partenaires standards.',
+    'category': 'Accounting/Localizations',
+    'author': 'Your Company',
+    'depends': ['base'],
+    'data': [
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'views/menu_views.xml',
+        'views/client_views.xml',
+        'views/effets_owner_views.xml',
+        'views/paiement_views.xml',
+        'views/sortie_views.xml',
+        'views/analyse_report_views.xml',
+    ],
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+    'license': 'LGPL-3',
+}

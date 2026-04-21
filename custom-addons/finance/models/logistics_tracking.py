@@ -13,7 +13,18 @@ class FinanceLogisticsTracking(models.Model):
     def_number = fields.Char(related='dossier_id.def_number', string='N° Def', readonly=False, store=True)
     
     # Automatic display of dossier-related data (read-only)
-    container_ids = fields.One2many(related='dossier_id.container_ids', string='Conteneurs', readonly=True)
+    container_ids = fields.Many2many(
+        'logistique.container',
+        string='Conteneurs',
+        compute='_compute_container_ids',
+        readonly=True,
+    )
+
+    @api.depends('dossier_id.entry_ids.container_ids')
+    def _compute_container_ids(self):
+        for rec in self:
+            rec.container_ids = rec.dossier_id.entry_ids.mapped('container_ids')
+
     cheque_ids = fields.One2many(related='dossier_id.cheque_ids', string='Chèques', readonly=True)
     entry_ids = fields.One2many(related='dossier_id.entry_ids', string='Entrées Logistiques', readonly=True)
     
@@ -27,7 +38,7 @@ class FinanceLogisticsTracking(models.Model):
     # Display fields - computed from related logistics entries
     ste_id = fields.Many2one('logistique.ste', string='Société', compute='_compute_entry_data', store=False)
     supplier_id = fields.Many2one('logistique.supplier', string='Fournisseur', compute='_compute_entry_data', store=False)
-    article_id = fields.Many2one('logistique.article', string='Article', compute='_compute_entry_data', store=False)
+    article_id = fields.Many2one('achat.article', string='Article', compute='_compute_entry_data', store=False)
     shipping_id = fields.Many2one('logistique.shipping', string='Compagnie Maritime', compute='_compute_entry_data', store=False)
     week = fields.Char(string='Semaine', compute='_compute_entry_data', store=False)
     invoice_number = fields.Char(string='Facture', compute='_compute_entry_data', store=False)

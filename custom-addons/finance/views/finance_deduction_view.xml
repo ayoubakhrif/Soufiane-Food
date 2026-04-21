@@ -196,19 +196,26 @@
 
 
     <menuitem 
+        id="menu_finance_deduction_root"
+        name="Déductions"
+        parent="finance.finance_root_menu"
+        sequence="15"
+    />
+
+    <menuitem 
         id="menu_finance_deduction_payment"
         name="Par déduction"
-        parent="finance.data_cheque_menu"
+        parent="menu_finance_deduction_root"
         action="action_finance_deduction_payment"
-        sequence="2"
+        sequence="1"
     />
 
     <menuitem 
         id="menu_finance_deduction_account"
         name="Comptes de déduction"
-        parent="finance.data_finance_menu"
+        parent="menu_finance_deduction_root"
         action="action_finance_deduction_account"
-        sequence="50"
+        sequence="2"
         groups="finance.group_finance_user"
     />
 

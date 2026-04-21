@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_casa_other_sale_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.other.sale.tree</field>
+        <field name="model">casa_hanane.other.sale</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="de_qui"/>
+                <field name="product_id"/>
+                <field name="qty"/>
+                <field name="weight"/>
+                <field name="tonnage" sum="Total Tonnage"/>
+                <field name="price_sale"/>
+                <field name="mt_vente" sum="Total Vente"/>
+                <field name="discount_amount" sum="Total Réduction"/>
+                <field name="mt_vente_final" sum="Total Net" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_casa_other_sale_form" model="ir.ui.view">
+        <field name="name">casa_hanane.other.sale.form</field>
+        <field name="model">casa_hanane.other.sale</field>
+        <field name="arch" type="xml">
+            <form string="Autre Vente Casa">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Valider" type="object" class="btn-success" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Annuler" type="object" class="btn-danger" invisible="state not in ('confirmed', 'done')"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" class="btn-warning" invisible="state == 'draft'" groups="casa_stock_hanane.group_admin"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Client &amp; Date">
+                            <field name="client_id" options="{'no_create_edit': True}"/>
+                            <field name="de_qui"/>
+                            <field name="date"/>
+                        </group>
+                        <group string="Produit">
+                            <field name="product_id" options="{'no_create_edit': True}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Quantités">
+                            <field name="qty"/>
+                            <field name="weight"/>
+                            <field name="tonnage" readonly="1" force_save="1"/>
+                        </group>
+                        <group string="Prix &amp; Réduction">
+                            <field name="price_sale"/>
+                            <field name="discount_amount"/>
+                            <field name="mt_vente" readonly="1"/>
+                            <field name="mt_vente_final" readonly="1" style="font-weight: bold; color: #1d4ed8; font-size: 1.2em;"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_casa_other_sale_search" model="ir.ui.view">
+        <field name="name">casa_hanane.other.sale.search</field>
+        <field name="model">casa_hanane.other.sale</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Autres Ventes">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="product_id"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_casa_other_sale" model="ir.actions.act_window">
+        <field name="name">Autres Ventes</field>
+        <field name="res_model">casa_hanane.other.sale</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_casa_other_sale_search"/>
+    </record>
+</odoo>

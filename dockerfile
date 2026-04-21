@@ -20,9 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies for Google Drive integration
-RUN pip3 install --no-cache-dir \
+RUN pip3 install --no-cache-dir --upgrade \
     google-auth \
     google-auth-oauthlib \
-    google-api-python-client
+    google-api-python-client \
+    urllib3 \
+    pyOpenSSL
 
 USER odoo

@@ -11,13 +11,13 @@
         sequence="1"
         web_icon="finance,static/description/icon.svg"
         action="finance_app_action"
-        groups="finance.group_finance_employee"
+        groups="finance.group_finance_viewer,finance.group_finance_employee"
     />
 
     <record id="data_cheque_action" model="ir.actions.act_window">
         <field name="name">Saisie</field>
         <field name="res_model">datacheque</field>
-        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="view_mode">tree,form,pivot,graph,calendar</field>
     </record>
 
     <menuitem 
@@ -44,6 +44,7 @@
                 <field name="chq"/>
                 <field name="talon_id"/>
                 <field name="benif_id"/>
+                <field name="serie" optional="1"/>
                 <field name="date_emission"/>
                 <field name="week"/>
                 <field name="journal"/>
@@ -66,6 +67,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_confirm_emission"
+                            string="Confirmer l'Émission"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'reserve'"/>
                     <button name="action_request_edit"
                             string="Demander une authorisation"
                             type="object"
@@ -157,7 +163,7 @@
 
                     <group string="Échéances et montant">
                         <group>
-                            <field name="date_echeance" readonly="benif_type == 'import' or state in ['bureau', 'annule']" required="state not in ['bureau', 'annule']"/>
+                            <field name="date_echeance" required="state not in ['bureau', 'annule']"/>
                             <field name="date_encaissement" readonly="1" invisible="not date_encaissement"/>
                         </group>
                         <group>
@@ -170,6 +176,8 @@
                         <group>
                             <field name="facture"/>
                             <field name="serie" invisible="facture in ['m', 'bureau']"/>
+                            <field name="chq_bank"/>
+                            <field name="chq_certifie"/>
                         </group>
                     </group>
 
@@ -198,11 +206,19 @@
             <search>
                 <field name="chq"/>
                 <field name="week"/>
+                <field name="serie"/>
                 <field name="facture"/>
                 <field name="talon_id"/>
                 <field name="benif_id"/>
+                <field name="chq_bank"/>
+                <field name="chq_certifie"/>
+                <separator/>
+                <filter name="filter_chq_bank" string="Chq de banque" domain="[('chq_bank', '=', True)]"/>
+                <filter name="filter_chq_certifie" string="Chq certifié" domain="[('chq_certifie', '=', True)]"/>
                 <filter name="encours" string="Cheques in progress" domain="[('encours', '=', 'non_encaisse')]"/>
                 <filter name="no_pdf" string="Liens inexistants" domain="['|', '|', ('chq_pdf_url', '=', False), ('dem_pdf_url', '=', False), ('doc_pdf_url', '=', False)]"/>
+                <separator/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
             </search>
         </field>
     </record>
@@ -231,6 +247,16 @@
                 <field name="week" />
                 <field name="benif_id" />
             </graph>
+        </field>
+    </record>
+
+    <record id="datachq_view_calendar" model="ir.ui.view">
+        <field name="name">datachq calendar</field>
+        <field name="model">datacheque</field>
+        <field name="arch" type="xml">
+            <calendar string="Chèques par Date d'échéance" date_start="date_echeance" color="benif_id" mode="month">
+                <field name="benif_id" invisible="1"/>
+            </calendar>
         </field>
     </record>
 </odoo>

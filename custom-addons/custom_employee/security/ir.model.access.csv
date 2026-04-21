@@ -21,3 +21,15 @@ access_core_vehicle_notification_manager,access.core.vehicle.notification.manage
 access_core_vehicle_notification_user,access.core.vehicle.notification.user,model_core_vehicle_notification,group_core_employee_user,1,1,1,0
 access_core_ste_user,core.ste.user,model_core_ste,group_core_employee_user,1,0,0,0
 access_core_ste_manager,core.ste.manager,model_core_ste,group_core_employee_manager,1,1,1,1
+access_core_employee_viewer,core.employee.viewer,model_core_employee,group_core_employee_viewer,1,0,0,0
+access_core_employee_document_viewer,core.employee.document.viewer,model_core_employee_document,group_core_employee_viewer,1,0,0,0
+access_core_department_viewer,core.department.viewer,model_core_department,group_core_employee_viewer,1,0,0,0
+access_core_job_position_viewer,core.job.position.viewer,model_core_job_position,group_core_employee_viewer,1,0,0,0
+access_core_employee_job_history_viewer,core.employee.job.history.viewer,model_core_employee_job_history,group_core_employee_viewer,1,0,0,0
+access_core_employee_salary_history_viewer,core.employee.salary.history.viewer,model_core_employee_salary_history,group_core_employee_viewer,1,0,0,0
+access_core_employee_notification_viewer,core.employee.notification.viewer,model_core_employee_notification,group_core_employee_viewer,1,0,0,0
+access_core_vehicle_viewer,access.core.vehicle.viewer,model_core_vehicle,group_core_employee_viewer,1,0,0,0
+access_core_vehicle_document_viewer,access.core.vehicle.document.viewer,model_core_vehicle_document,group_core_employee_viewer,1,0,0,0
+access_core_vehicle_notification_viewer,access.core.vehicle.notification.viewer,model_core_vehicle_notification,group_core_employee_viewer,1,0,0,0
+access_core_ste_viewer,core.ste.viewer,model_core_ste,group_core_employee_viewer,1,0,0,0
+

@@ -209,12 +209,6 @@ class FinanceDeductionDeposit(models.Model):
     ], string='Référence', required=True)
     comment = fields.Text(string='Commentaire')
 
-    @api.constrains('amount')
-    def _check_amount(self):
-        for rec in self:
-            if rec.amount <= 0:
-                raise ValidationError("Le montant du dépôt doit être positif.")
-
 
 class FinanceDeductionPayment(models.Model):
     _name = 'finance.deduction.payment'
@@ -238,6 +232,7 @@ class FinanceDeductionPayment(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'THC'),
         ('inspection', 'Inspection'),
+        ('avoir', "Avoir"),
     ], string='Type', required=True, tracking=True)
 
     bl_id = fields.Many2one(
@@ -247,11 +242,18 @@ class FinanceDeductionPayment(models.Model):
         tracking=True
     )
 
-    container_ids = fields.One2many(
-        related='bl_id.container_ids',
+    container_ids = fields.Many2many(
+        'logistique.container',
         string='Conteneurs',
-        readonly=True
+        compute='_compute_container_ids',
+        readonly=True,
     )
+
+    @api.depends('bl_id.entry_ids.container_ids')
+    def _compute_container_ids(self):
+        for rec in self:
+            rec.container_ids = rec.bl_id.entry_ids.mapped('container_ids') if rec.bl_id else []
+
 
     @api.depends('ste_id', 'benif_id')
     def _compute_account_id(self):
@@ -273,7 +275,7 @@ class FinanceDeductionPayment(models.Model):
         amount = vals.get('amount', 0)
 
         # Basic Checks
-        if amount <= 0:
+        if amount <= 0 and vals.get('type') != 'avoir':
             raise ValidationError("Le montant de la déduction doit être strictement positif.")
 
         # Find Account
@@ -288,18 +290,7 @@ class FinanceDeductionPayment(models.Model):
             benif_name = self.env['finance.benif'].browse(benif_id).name
             raise ValidationError(f"Aucun compte de déduction trouvé pour {ste_name} ↔ {benif_name}.\nVeuillez d'abord créer ce compte et y ajouter des fonds.")
 
-        # 2. Strict Balance Check
-        # Available = Balance (Stored)
-        # Ideally we compute current balance from DB to be checking against most recent state.
-        
-        if account.balance < amount:
-            raise ValidationError(
-                f"🚫 Solde insuffisant pour ce paiement.\n\n"
-                f"Compte : {account.display_name}\n"
-                f"Solde disponible : {account.balance:,.2f}\n"
-                f"Montant demandé : {amount:,.2f}\n\n"
-                "Veuillez créditer le compte avant de passer ce paiement."
-            )
+        # 2. Balance Check Removed (User Request to allow negative balance)
 
         return super().create(vals)
 

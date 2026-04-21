@@ -5,7 +5,7 @@
         <field name="name">stock.kal3iya.transfer.tree</field>
         <field name="model">stock.kal3iya.transfer</field>
         <field name="arch" type="xml">
-            <tree string="Transferts Stock" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
+            <tree string="Transferts Stock" create="false" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="product_id"/>
@@ -23,7 +23,7 @@
         <field name="name">stock.kal3iya.transfer.form</field>
         <field name="model">stock.kal3iya.transfer</field>
         <field name="arch" type="xml">
-            <form string="Transfert Stock">
+            <form string="Transfert Stock" create="false">
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                     <button name="action_cancel" string="Annuler" type="object" invisible="state != 'done'"/>
@@ -36,18 +36,26 @@
                         </h1>
                     </div>
                     <group>
-                        <group string="Détails du Transfert">
-                            <field name="date" readonly="state != 'draft'"/>
-                            <field name="garage_from" readonly="state != 'draft'"/>
-                            <field name="garage_to" readonly="state != 'draft'"/>
-                            <field name="ste_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        <group string="Origine (Fixe)">
+                            <field name="product_id" options="{'no_create': True}" readonly="1" force_save="1"/>
+                            <field name="garage_from" readonly="1" force_save="1"/>
                         </group>
-                        <group string="Produit">
-                            <field name="product_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        <group string="Destination">
+                            <field name="garage_to" readonly="state != 'draft'"/>
                             <field name="qty" readonly="state != 'draft'"/>
-                            <field name="lot" readonly="state != 'draft'"/>
-                            <field name="dum" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
                             <field name="driver_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <group string="Détails du Lot (Auto-rempli)">
+                        <group>
+                            <field name="lot" readonly="1" force_save="1"/>
+                            <field name="dum" readonly="1" force_save="1"/>
+                            <field name="ste_id" options="{'no_create': True}" readonly="1" force_save="1"/>
+                        </group>
+                        <group>
+                            <field name="weight" readonly="1" force_save="1"/>
+                            <field name="calibre" readonly="1" force_save="1"/>
                         </group>
                     </group>
                     <notebook>

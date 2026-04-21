@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Search View -->
+        <record id="view_surestarie_magasinage_report_search" model="ir.ui.view">
+            <field name="name">surestarie.magasinage.report.search</field>
+            <field name="model">surestarie.magasinage.report</field>
+            <field name="arch" type="xml">
+                <search string="Analyses Surestarie &amp; Magasinage">
+                    <field name="bl_number"/>
+                    <field name="article_id"/>
+                    <field name="supplier_id"/>
+                    <field name="bad_date"/>
+                    <field name="week"/>
+                    
+                    <filter name="this_year" string="Cette Année" domain="[('bad_date', '&gt;=', context_today().strftime('%Y-01-01'))]"/>
+                    
+                    <group expand="1" string="Regrouper par">
+                        <filter string="Date BAD: Mois" name="group_bad_date" context="{'group_by':'bad_date:month'}"/>
+                        <filter string="Semaine" name="group_week" context="{'group_by':'week'}"/>
+                        <filter string="Article" name="group_article" context="{'group_by':'article_id'}"/>
+                        <filter string="Fournisseur" name="group_supplier" context="{'group_by':'supplier_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Tree View -->
+        <record id="view_surestarie_magasinage_report_tree" model="ir.ui.view">
+            <field name="name">surestarie.magasinage.report.tree</field>
+            <field name="model">surestarie.magasinage.report</field>
+            <field name="arch" type="xml">
+                <tree string="Rapport Surestarie &amp; Magasinage" decoration-danger="total_charges > 0">
+                    <field name="bad_date"/>
+                    <field name="week" optional="show"/>
+                    <field name="bl_number"/>
+                    <field name="article_id" optional="show"/>
+                    <field name="supplier_id" optional="show"/>
+                    <field name="container_count" sum="Total Conteneurs"/>
+                    <field name="surestarie_amount" sum="Total Surestarie" optional="show"/>
+                    <field name="magasinage_amount" sum="Total Magasinage"/>
+                    <field name="total_charges" sum="Total Charges Brut"/>
+                    <field name="claims_amount" sum="Total Claims" optional="show"/>
+                    <field name="total_charges_net" sum="Total Charges Nettes"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Pivot View -->
+        <record id="view_surestarie_magasinage_report_pivot" model="ir.ui.view">
+            <field name="name">surestarie.magasinage.report.pivot</field>
+            <field name="model">surestarie.magasinage.report</field>
+            <field name="arch" type="xml">
+                <pivot string="Analyse Coûts Logistiques" disable_linking="True">
+                    <field name="container_count" type="measure"/>
+                    <field name="surestarie_amount" type="measure"/>
+                    <field name="magasinage_amount" type="measure"/>
+                    <field name="total_charges" type="measure"/>
+                    <field name="claims_amount" type="measure"/>
+                    <field name="total_charges_net" type="measure"/>
+                    <field name="average_cost" type="measure"/>
+                    <field name="average_surestarie" type="measure"/>
+                    <field name="average_magasinage" type="measure"/>
+                    <field name="average_cost_net" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- Graph View -->
+        <record id="view_surestarie_magasinage_report_graph" model="ir.ui.view">
+            <field name="name">surestarie.magasinage.report.graph</field>
+            <field name="model">surestarie.magasinage.report</field>
+            <field name="arch" type="xml">
+                <graph string="Analyse Coûts Logistiques" type="bar">
+                    <field name="bad_date" interval="month"/>
+                    <field name="total_charges" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_surestarie_magasinage_report" model="ir.actions.act_window">
+            <field name="name">Rapport Surestaries &amp; Magasinage</field>
+            <field name="res_model">surestarie.magasinage.report</field>
+            <field name="view_mode">pivot,tree,graph</field>
+            <field name="context">{'search_default_group_bad_date': 1}</field>
+            <field name="search_view_id" ref="view_surestarie_magasinage_report_search"/>
+        </record>
+
+        <!-- Menu Item -->
+        <!-- Assuming a parent menu exists for dashboards or logistique. Let's put it under Dashboards main menu for now, or new menu. -->
+        <!-- Since dashboards module seems to have its own structure, I'll check if I should attach it effectively. -->
+        <!-- For now, creating a top level menu or attaching to existing one if known. -->
+        <!-- The user said "in dashboards module named ...". -->
+        
+        <menuitem id="menu_surest_mag_category"
+                  name="Surestarie &amp; Magasinage"
+                  parent="dashboards.menu_dashboards_root"
+                  sequence="20"/>
+
+        <menuitem id="menu_surestarie_magasinage_report"
+                  name="Rapport"
+                  parent="menu_surest_mag_category"
+                  action="action_surestarie_magasinage_report"
+                  sequence="1"/>
+
+    </data>
+</odoo>

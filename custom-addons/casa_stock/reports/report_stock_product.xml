@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_casa_stock_product" model="ir.actions.report">
+        <field name="name">Situation Stock (PDF)</field>
+        <field name="model">casa.stock.stock</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">casa_stock.report_stock_product_template</field>
+        <field name="report_file">casa_stock.report_stock_product_template</field>
+        <field name="binding_model_id" ref="model_casa_stock_stock"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_stock_product_template">
+        <t t-call="web.html_container">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta charset="utf-8" />
+            
+            <t t-set="data" t-value="docs._get_product_report_data()"/>
+            <t t-set="product_name" t-value="data.get('product_name', 'Stock')"/>
+            
+            <div class="page">
+                    <style>
+                        .report-header { margin-bottom: 20px; }
+                        .header-row { display: flex; align-items: stretch; margin-bottom: 10px; }
+                        .date-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; width: 20%; text-align: center; }
+                        .product-box { background-color: #FF00FF; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; color: black; flex-grow: 1; text-align: center; }
+                        .city-header { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; text-align: center; text-transform: uppercase; margin-top: 20px; }
+                        .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+                        .data-table th { background-color: #FCE9DA; border: 1px solid black; padding: 5px; text-align: center; font-size: 12px; font-weight: bold; }
+                        .data-table td { border: 1px solid black; padding: 5px; text-align: center; font-size: 12px; }
+                        .calibre-cell { background-color: #6DA9DC; font-weight: bold; }
+                        .qty-cell { background-color: #FF9900; font-weight: bold; }
+                        .total-city-row { font-weight: bold; }
+                        .total-city-label { background-color: #6DA9DC; text-align: left !important; }
+                        .total-city-qty { background-color: #FF9900; }
+                        .total-city-amount { background-color: #00FFFF; text-align: right !important; }
+                        .footer { margin-top: 30px; font-style: italic; font-size: 10px; }
+                    </style>
+
+                    <div class="report-header">
+                        <div class="header-row">
+                            <div class="date-box">
+                                <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%y')"/>
+                            </div>
+                            <div class="product-box">
+                                <t t-esc="product_name"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <t t-foreach="data['cities']" t-as="city">
+                        <div class="city-header">
+                            <t t-esc="city['name']"/>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Qualibre</th>
+                                    <th>Qté global</th>
+                                    <th>Poids</th>
+                                    <th>Tonnage</th>
+                                    <th>Prix</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="city['lines']" t-as="line">
+                                    <tr>
+                                        <td class="calibre-cell"><t t-esc="line['calibre']"/></td>
+                                        <td class="qty-cell"><t t-esc="'{0:,.2f}'.format(line['qty'])"/></td>
+                                        <td><t t-esc="'{0:,.2f}'.format(line['weight'])"/></td>
+                                        <td><t t-esc="'{0:,.1f}'.format(line['tonnage'])"/></td>
+                                        <td><t t-esc="'{0:,.2f}'.format(line['price'])"/></td>
+                                        <td><t t-esc="'{0:,.2f}'.format(line['total'])"/></td>
+                                    </tr>
+                                </t>
+                                <tr class="total-city-row">
+                                    <td class="total-city-label">TOTAL <t t-esc="city['name']"/></td>
+                                    <td class="total-city-qty"><t t-esc="'{0:,.2f}'.format(city['total_qty'])"/></td>
+                                    <td></td>
+                                    <td><t t-esc="'{0:,.1f}'.format(city['total_tonnage'])"/></td>
+                                    <td></td>
+                                    <td class="total-city-amount"><t t-esc="'{0:,.2f}'.format(city['total_amount'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <div class="footer">
+                        Generated by Gestia ERP
+                    </div>
+                </div>
+        </t>
+    </template>
+</odoo>

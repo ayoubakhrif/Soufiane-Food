@@ -24,8 +24,29 @@ class SuiviPresence(models.Model):
 
     site = fields.Selection([
         ('mediouna', 'Mediouna'),
-        ('casa', 'Casa')
+        ('casa', 'Casa'),
+        ('agadir', 'Agadir')
     ], string='Site de Travail', required=True, default='mediouna')
+
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('confirmed', 'Confirmé')
+    ], string='Statut', default='draft', tracking=True)
+
+    is_admin = fields.Boolean(compute='_compute_is_admin', string='Is Admin')
+
+    @api.depends_context('uid')
+    def _compute_is_admin(self):
+        for rec in self:
+            rec.is_admin = self.env.user.has_group('suivi_presence.group_suivi_admin')
+
+    def action_confirm(self):
+        for rec in self:
+            rec.state = 'confirmed'
+
+    def action_draft(self):
+        for rec in self:
+             rec.state = 'draft'
 
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
@@ -33,64 +54,89 @@ class SuiviPresence(models.Model):
             self.site = self.employee_id.payroll_site
 
     @api.constrains('employee_id', 'type', 'datetime')
-    def _check_unique_entry(self):
+    def _check_presence_constraints(self):
         for rec in self:
-            if rec.type in ['entree', 'absent']:
-                # Convert to date to check "Same Day"
-                user_tz = pytz.timezone('Africa/Casablanca')
-                # Ensure we handle naive datetimes (though stored ones are usually UTC)
-                dt = rec.datetime
-                if not dt.tzinfo:
-                    dt = pytz.utc.localize(dt)
-                    
-                rec_dt = dt.astimezone(user_tz)
-                start_of_day = rec_dt.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.utc)
-                end_of_day = rec_dt.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.utc)
+            # Bypass for admins and special users
+            if self.env.user.has_group('suivi_presence.group_suivi_admin') or self.env.user.has_group('suivi_presence.group_suivi_user_special'):
+                continue
 
+            # Timezone setup
+            user_tz = pytz.timezone('Africa/Casablanca')
+            dt = rec.datetime
+            if not dt.tzinfo:
+                dt = pytz.utc.localize(dt)
+            
+            rec_dt = dt.astimezone(user_tz)
+            start_of_day = rec_dt.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.utc)
+            end_of_day = rec_dt.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.utc)
+
+            # 1. ABSENT EXCLUSIVITY & DOUBLE RECORDS
+            if rec.type == 'absent':
+                # If marking as absent, no other records (entree, sortie, or another absent) should exist
                 domain = [
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('datetime', '>=', start_of_day),
+                    ('datetime', '<=', end_of_day),
+                    ('id', '!=', rec.id)
+                ]
+                if self.search_count(domain) > 0:
+                    raise exceptions.ValidationError(f"Impossible de marquer l'employé comme 'Absent' car il a déjà des enregistrements pour ce jour.")
+            else:
+                # If type is entree or sortie, check if there's an 'absent' record
+                domain_absent = [
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('type', '=', 'absent'),
+                    ('datetime', '>=', start_of_day),
+                    ('datetime', '<=', end_of_day),
+                    ('id', '!=', rec.id)
+                ]
+                if self.search_count(domain_absent) > 0:
+                    raise exceptions.ValidationError(f"L'employé est déjà marqué comme 'Absent' pour ce jour. Aucun autre type d'enregistrement n'est autorisé.")
+
+                # 2. UNIQUE ENTREE/SORTIE
+                domain_unique = [
                     ('employee_id', '=', rec.employee_id.id),
                     ('type', '=', rec.type),
                     ('datetime', '>=', start_of_day),
                     ('datetime', '<=', end_of_day),
                     ('id', '!=', rec.id)
                 ]
-                if self.search_count(domain) > 0:
-                    raise exceptions.ValidationError(f"Cet employé a déjà un enregistrement de type '{rec.type}' pour ce jour.")
+                if self.search_count(domain_unique) > 0:
+                     raise exceptions.ValidationError(f"Cet employé a déjà un enregistrement de type '{rec.type}' pour ce jour.")
 
-    @api.onchange('employee_id', 'type', 'datetime')
-    def _onchange_check_duplicate_exit(self):
-        if self.type == 'sortie' and self.employee_id and self.datetime:
-            try:
-                user_tz = pytz.timezone('Africa/Casablanca')
-                dt = self.datetime
-                if not dt.tzinfo:
-                    dt = pytz.utc.localize(dt)
-                
-                rec_dt = dt.astimezone(user_tz)
-                start_of_day = rec_dt.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.utc)
-                end_of_day = rec_dt.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.utc)
-                
-                domain = [
-                    ('employee_id', '=', self.employee_id.id),
-                    ('type', '=', 'sortie'),
+            # 3. SORTIE REQUIREMENTS
+            if rec.type == 'sortie':
+                # Must have an 'entree' record today
+                domain_entree = [
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('type', '=', 'entree'),
                     ('datetime', '>=', start_of_day),
                     ('datetime', '<=', end_of_day),
                 ]
-                if self._origin.id:
-                    domain.append(('id', '!=', self._origin.id))
+                if self.search_count(domain_entree) == 0:
+                    raise exceptions.ValidationError("Vous ne pouvez pas enregistrer une sortie sans avoir d'entrée pour le même jour.")
 
-                if self.search_count(domain) > 0:
-                    return {
-                        'warning': {
-                            'title': "Attention",
-                            'message': "Attention vous avez déjà rentré la sortie de cet employé ce jour là"
-                        }
-                    }
-            except Exception as e:
-                # Log error if needed, but don't crash
-                import logging
-                _logger = logging.getLogger(__name__)
-                _logger.error(f"Error in onchange check duplicate exit: {str(e)}")
+                # Check previous day for missing sortie
+                from datetime import timedelta
+                prev_day_dt = rec_dt - timedelta(days=1)
+                start_prev_day = prev_day_dt.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.utc)
+                end_prev_day = prev_day_dt.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.utc)
+
+                domain_prev_entree = [
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('type', '=', 'entree'),
+                    ('datetime', '>=', start_prev_day),
+                    ('datetime', '<=', end_prev_day),
+                ]
+                if self.search_count(domain_prev_entree) > 0:
+                    domain_prev_sortie = [
+                        ('employee_id', '=', rec.employee_id.id),
+                        ('type', '=', 'sortie'),
+                        ('datetime', '>=', start_prev_day),
+                        ('datetime', '<=', end_prev_day),
+                    ]
+                    if self.search_count(domain_prev_sortie) == 0:
+                        raise exceptions.ValidationError("L'employé a un enregistrement d'entrée pour le jour précédent mais n'a pas de sortie correspondante. La sortie d'aujourd'hui est bloquée.")
 
     @api.model
     def create(self, vals):
@@ -122,8 +168,14 @@ class SuiviPresence(models.Model):
         
         Allowed: Admins bypass all rules.
         """
-        if self.env.user.has_group('suivi_presence.group_suivi_admin'):
+        if self.env.user.has_group('suivi_presence.group_suivi_admin') or self.env.user.has_group('suivi_presence.group_suivi_user_special'):
             return
+
+        # ALLOW EXCEPTION: Status Change (Confirmation)
+        # If the only thing being changed is the state (e.g. to 'confirmed'), we allow it even after 10am.
+        # This allows managers to confirm 'Entrée' records late, but not modify the start time.
+        if set(vals.keys()) == {'state'}:
+             return
 
         # ---------------------------------------------------------
         # 1. SETUP: Get Current System Time in Casablanca
@@ -225,4 +277,3 @@ class SuiviPresence(models.Model):
                     'state': 'draft',
                 })
                 leave.action_approve()
-

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Projet Item Views -->
+    <record id="view_projet_item_tree" model="ir.ui.view">
+        <field name="name">projet.item.tree</field>
+        <field name="model">projet.item</field>
+        <field name="arch" type="xml">
+            <tree string="Articles">
+                <field name="name"/>
+                <field name="color_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_projet_item_form" model="ir.ui.view">
+        <field name="name">projet.item.form</field>
+        <field name="model">projet.item</field>
+        <field name="arch" type="xml">
+            <form string="Article">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom de l'article"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page string="Couleurs">
+                            <field name="color_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="image" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_projet_item" model="ir.actions.act_window">
+        <field name="name">Catalogue Articles</field>
+        <field name="res_model">projet.item</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_projet_item"
+              name="Articles"
+              parent="menu_projet_configuration"
+              action="action_projet_item"
+              sequence="10"/>
+</odoo>

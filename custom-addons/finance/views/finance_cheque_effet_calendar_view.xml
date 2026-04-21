@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="finance_cheque_effet_calendar_action" model="ir.actions.act_window">
+        <field name="name">Aperçu Global (Chèques &amp; Effets)</field>
+        <field name="res_model">finance.cheque.effet.calendar</field>
+        <field name="view_mode">calendar,tree,pivot,graph</field>
+    </record>
+
+    <menuitem 
+        id="finance_cheque_effet_calendar_menu"
+        name="Aperçu Global (Chèques &amp; Effets)"
+        parent="finance.data_cheque_menu"
+        action="finance_cheque_effet_calendar_action"
+        sequence="5"
+    />
+
+    <record id="view_finance_cheque_effet_calendar_tree" model="ir.ui.view">
+        <field name="name">finance.cheque.effet.calendar.tree</field>
+        <field name="model">finance.cheque.effet.calendar</field>
+        <field name="arch" type="xml">
+            <tree string="Aperçu Global" create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="type_doc"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="date_echeance"/>
+                <field name="amount" sum="Total"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_cheque_effet_calendar_calendar" model="ir.ui.view">
+        <field name="name">finance.cheque.effet.calendar.calendar</field>
+        <field name="model">finance.cheque.effet.calendar</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendrier Global" date_start="date_echeance" color="type_doc" mode="month" event_open_popup="true">
+                <field name="name"/>
+                <field name="amount"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="type_doc" filters="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_finance_cheque_effet_calendar_search" model="ir.ui.view">
+        <field name="name">finance.cheque.effet.calendar.search</field>
+        <field name="model">finance.cheque.effet.calendar</field>
+        <field name="arch" type="xml">
+            <search string="Aperçu Global">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="type_doc"/>
+                <field name="state"/>
+                <filter name="type_cheque" string="Chèques" domain="[('type_doc', '=', 'cheque')]"/>
+                <filter name="type_effet" string="Effets" domain="[('type_doc', '=', 'effet')]"/>
+                <separator/>
+                <filter name="encaisse" string="Encaissés" domain="[('state', '=', 'encaisse')]"/>
+                <filter name="en_cours" string="En cours" domain="[('state', '=', 'non_encaisse')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_type" string="Type" context="{'group_by':'type_doc'}"/>
+                    <filter name="group_by_ste" string="Société" context="{'group_by':'ste_id'}"/>
+                    <filter name="group_by_benif" string="Bénéficiaire" context="{'group_by':'benif_id'}"/>
+                    <filter name="group_by_state" string="État" context="{'group_by':'state'}"/>
+                    <filter name="group_by_month" string="Mois d'échéance" context="{'group_by':'date_echeance:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_finance_cheque_effet_calendar_pivot" model="ir.ui.view">
+        <field name="name">finance.cheque.effet.calendar.pivot</field>
+        <field name="model">finance.cheque.effet.calendar</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Globale" disable_linking="True">
+                <field name="amount" type="measure"/>
+                <field name="type_doc" type="col"/>
+                <field name="date_echeance" type="row" interval="month"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_finance_cheque_effet_calendar_graph" model="ir.ui.view">
+        <field name="name">finance.cheque.effet.calendar.graph</field>
+        <field name="model">finance.cheque.effet.calendar</field>
+        <field name="arch" type="xml">
+            <graph string="Graphique Global" type="bar" disable_linking="True">
+                <field name="date_echeance" interval="month"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+</odoo>

@@ -8,3 +8,11 @@ from . import casa_stock_entry
 from . import casa_stock_exit
 from . import casa_stock_stock
 from . import casa_stock_return
+from . import casa_stock_order
+from . import casa_stock_discount
+from . import casa_client_advance
+from . import casa_client_unpaid
+from . import casa_stock_transfer
+from . import casa_other_sale
+from . import casa_stock_perte
+from . import casa_sortie_supp

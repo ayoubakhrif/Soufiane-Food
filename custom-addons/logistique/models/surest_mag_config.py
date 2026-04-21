@@ -21,7 +21,7 @@ class SurestMagConfig(models.Model):
 
     _sql_constraints = [
         ('uniq_config', 'unique(shipping_id, container_type, container_size)', 
-         'A configuration already exists for this combination of Shipping Company, Type, and Size!')
+         'Une configuration existe déjà pour cette combinaison de Shipping Company, Type, et Size!')
     ]
     
     def name_get(self):
@@ -30,6 +30,61 @@ class SurestMagConfig(models.Model):
             name = f"{rec.shipping_id.name} - {rec.container_type} - {rec.container_size}"
             result.append((rec.id, name))
         return result
+
+    def calculate_amounts(self, days_magasinage, days_surestarie, free_surestarie_days, container_count=1):
+        self.ensure_one()
+        lines = []
+        total_surestarie_ht = 0.0
+        total_magasinage_ht = 0.0
+
+        if not days_magasinage and not days_surestarie:
+            return {'surestarie_ht': 0.0, 'magasinage_ht': 0.0, 'lines': lines}
+
+        current_day_index = 1
+        phases = self.phase_ids.sorted(key=lambda p: p.sequence)
+        free_until_day = free_surestarie_days
+
+        for phase in phases:
+            phase_start = current_day_index
+            phase_end = float('inf') if phase.is_beyond else phase_start + phase.days - 1
+
+            mag_overlap_start = max(phase_start, 1)
+            mag_overlap_end = min(phase_end, days_magasinage)
+            days_mag_spent_in_phase = (mag_overlap_end - mag_overlap_start + 1) if mag_overlap_end >= mag_overlap_start else 0
+
+            sur_overlap_start = max(phase_start, free_until_day + 1)
+            sur_overlap_end = min(phase_end, days_surestarie)
+            days_sur_billed_in_phase = (sur_overlap_end - sur_overlap_start + 1) if sur_overlap_end >= sur_overlap_start else 0
+
+            if days_mag_spent_in_phase > 0 or days_sur_billed_in_phase > 0:
+                cnt = container_count or 1
+                surest_sub = days_sur_billed_in_phase * phase.surestarie_rate * cnt
+                mag_sub = days_mag_spent_in_phase * phase.magasinage_rate * cnt
+                
+                total_surestarie_ht += surest_sub
+                total_magasinage_ht += mag_sub
+
+                line_vals = {
+                    'phase_name': f"Beyond (Rate: {phase.surestarie_rate}/{phase.magasinage_rate})" if phase.is_beyond else f"Phase {phase.sequence} ({phase.days} days)",
+                    'days_magasinage': days_mag_spent_in_phase,
+                    'days_surestarie_billed': days_sur_billed_in_phase,
+                    'surestarie_rate': phase.surestarie_rate,
+                    'magasinage_rate': phase.magasinage_rate,
+                    'surestarie_subtotal': surest_sub,
+                    'magasinage_subtotal': mag_sub,
+                }
+                lines.append(line_vals)
+
+            if phase.is_beyond:
+                break
+            else:
+                current_day_index += phase.days
+
+        return {
+            'surestarie_ht': total_surestarie_ht,
+            'magasinage_ht': total_magasinage_ht,
+            'lines': lines
+        }
 
 class SurestMagPhase(models.Model):
     _name = 'logistique.surest_mag.phase'

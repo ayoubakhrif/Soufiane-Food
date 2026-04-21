@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Action -->
+    <record id="action_tanger_med_entry" model="ir.actions.act_window">
+        <field name="name">Tanger Med</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('port_status', '=', 'exited')]</field>
+        <field name="search_view_id" ref="view_tanger_med_entry_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_tanger_med_entry_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_tanger_med_entry_form')})]"/>
+    </record>
+
+    <!-- Root Menu -->
+    <menuitem id="menu_tanger_med_root"
+              name="Tanger Med"
+              sequence="15"/>
+
+    <!-- Sub Menu -->
+    <menuitem id="menu_tanger_med_entries"
+              name="Dossiers Tanger Med"
+              parent="menu_tanger_med_root"
+              action="action_tanger_med_entry"
+              sequence="10"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_tanger_med_config"
+              name="Configuration"
+              parent="menu_tanger_med_root"
+              sequence="100"/>
+
+    <menuitem id="menu_tanger_med_destinations"
+              name="Destinations"
+              parent="menu_tanger_med_config"
+              action="action_tanger_med_destination"
+              sequence="10"/>
+
+</odoo>

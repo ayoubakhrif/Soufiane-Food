@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_contacts_casa_viewer,contacts.casa.viewer,model_contacts_casa,contacts_casa.group_contacts_sf_viewer,1,0,0,0
+access_contacts_casa_user,contacts.casa.user,model_contacts_casa,contacts_casa.group_contacts_sf_user,1,1,1,0
+access_contacts_casa_admin,contacts.casa.admin,model_contacts_casa,contacts_casa.group_contacts_sf_admin,1,1,1,1

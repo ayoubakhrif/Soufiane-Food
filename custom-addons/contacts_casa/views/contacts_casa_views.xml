@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ACTION -->
+    <record id="action_contacts_casa" model="ir.actions.act_window">
+        <field name="name">Contacts SF</field>
+        <field name="res_model">contacts.casa</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem
+        id="menu_contacts_casa_root"
+        name="Contacts SF"
+        sequence="90"
+        web_icon="contacts_casa,static/description/icon.png"
+        action="action_contacts_casa"
+    />
+
+    <!-- TREE -->
+    <record id="view_contacts_casa_tree" model="ir.ui.view">
+        <field name="name">contacts.casa.tree</field>
+        <field name="model">contacts.casa</field>
+        <field name="arch" type="xml">
+            <tree string="Contacts">
+                <field name="name"/>
+                <field name="ste"/>
+                <field name="telephone"/>
+                <field name="gmail"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_contacts_casa_form" model="ir.ui.view">
+        <field name="name">contacts.casa.form</field>
+        <field name="model">contacts.casa</field>
+        <field name="arch" type="xml">
+            <form string="Contact">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du contact"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ste"/>
+                            <field name="telephone"/>
+                            <field name="gmail"/>
+                        </group>
+                    </group>
+                    <group string="Commentaire">
+                        <field name="commentaire" nolabel="1" placeholder="Ajouter un commentaire..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_contacts_casa_search" model="ir.ui.view">
+        <field name="name">contacts.casa.search</field>
+        <field name="model">contacts.casa</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Contacts">
+                <field name="name"/>
+                <field name="ste"/>
+                <field name="telephone"/>
+                <field name="gmail"/>
+            </search>
+        </field>
+    </record>
+</odoo>

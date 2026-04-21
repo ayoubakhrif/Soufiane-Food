@@ -70,6 +70,7 @@ class WeekUpdateLine(models.TransientModel):
     # Related fields for display
     product_id = fields.Many2one(related='sortie_id.product_id', readonly=True)
     client_id = fields.Many2one(related='sortie_id.client_id', readonly=True)
+    date_exit = fields.Date(related='sortie_id.date_exit', readonly=True, string='Date sortie')
     tonnage_initial = fields.Float(related='sortie_id.tonnage', string='Tonnage Init.', readonly=True)
     price_initial = fields.Float(related='sortie_id.selling_price', string='Prix Init.', readonly=True)
     

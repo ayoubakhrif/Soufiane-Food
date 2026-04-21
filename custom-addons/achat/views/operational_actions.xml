@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Custom Tree View for Operational Exit -->
+    <record id="view_achat_dossiers_to_exit_tree" model="ir.ui.view">
+        <field name="name">achat.dossiers.to.exit.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Dossiers à Sortir" create="false" delete="false">
+                <field name="dossier_id" invisible="1"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="invoice_number"/>
+                <field name="achat_article_id"/>
+                <field name="details"/>
+                <field name="weight" sum="Total Poids"/>
+                <field name="price_unit" string="UP"/>
+                <field name="amount_total" sum="Total Montant" widget="monetary"/>
+                <field name="incoterm"/>
+                <field name="free_time" string="Franchise"/>
+                <field name="container_names" string="Conteneurs"/>
+                <field name="eta"/>
+                <field name="exit_comment" string="Commentaire Sortie"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Custom Form View for Operational Exit (Inherits Achat Form) -->
+    <record id="view_achat_dossiers_to_exit_form" model="ir.ui.view">
+        <field name="name">achat.dossiers.to.exit.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="achat.view_purchase_entry_form"/>
+        <field name="arch" type="xml">
+            <!-- Hide Standard Buttons -->
+            <xpath expr="//header/button[@name='action_move_to_draft']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_confirm_purchase']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <!-- Hide Statusbar -->
+            <xpath expr="//header/field[@name='purchase_state']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Add Sortie Port Button -->
+            <xpath expr="//header" position="inside">
+                <button name="action_exit_port" string="Sortie Port" type="object" class="oe_highlight" 
+                        invisible="port_status == 'exited'"
+                        groups="achat.group_purchase_user"/>
+            </xpath>
+            
+            <!-- Add Operational Status Field (Optional, for visibility) -->
+            <xpath expr="//sheet/div[@class='oe_title']" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <!-- Smart buttons if any -->
+                </div>
+                <widget name="web_ribbon" title="Exited" bg_color="bg-success" invisible="port_status != 'exited'"/>
+            </xpath>
+            
+             <xpath expr="//group" position="before">
+                <group string="Statut Opérationnel">
+                        <field name="port_status" readonly="1" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
+                        <field name="exit_date" readonly="1"/>
+                        <field name="exit_comment" placeholder="Commentaire spécifique à la sortie..."/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Dedicated Search View for Dossiers à Sortir -->
+    <record id="view_achat_dossiers_to_exit_search" model="ir.ui.view">
+        <field name="name">achat.dossiers.to.exit.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Dossiers à Sortir">
+                <field name="bl_number"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <field name="achat_article_id"/>
+
+                <!-- Filter: ETA <= next Thursday, evaluated server-side via computed field -->
+                <filter name="eta_semaine"
+                        string="ETA cette semaine (≤ jeudi)"
+                        domain="[('eta_this_week', '=', True)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Fournisseur" name="group_by_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Société"     name="group_by_ste"      context="{'group_by': 'ste_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action for "Dossiers à Sortir" (ETA <= next Thursday & on_port) -->
+    <record id="action_achat_dossiers_to_exit_window" model="ir.actions.act_window">
+        <field name="name">Dossiers à Sortir</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('port_status', '=', 'on_port')]</field>
+        <field name="context">{'create': False, 'search_default_eta_semaine': 1, 'search_default_group_by_supplier': 1}</field>
+        <field name="search_view_id" ref="view_achat_dossiers_to_exit_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_achat_dossiers_to_exit_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_achat_dossiers_to_exit_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun dossier à sortir cette semaine.
+            </p>
+        </field>
+    </record>
+
+    <!-- Dedicated Tree View for Tanger Med -->
+    <record id="view_achat_tanger_med_tree" model="ir.ui.view">
+        <field name="name">achat.tanger.med.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Tanger Med" create="false" delete="false"
+                  decoration-success="is_non_change == False"
+                  decoration-muted="is_non_change == True">
+                <field name="dossier_id" invisible="1"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="invoice_number"/>
+                <field name="achat_article_id"/>
+                <field name="details"/>
+                <field name="weight" sum="Total Poids"/>
+                <field name="price_unit" string="UP"/>
+                <field name="amount_total" sum="Total Montant" widget="monetary"/>
+                <field name="incoterm"/>
+                <field name="free_time" string="Franchise"/>
+                <field name="container_names" string="Conteneurs"/>
+                <field name="eta"/>
+                <field name="exit_comment" string="Commentaire Sortie"/>
+                <field name="is_non_change" string="Non Changé" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Window Action for "Tanger Med" (Exited Dossiers)-->
+    <record id="action_achat_tanger_med" model="ir.actions.act_window">
+        <field name="name">Tanger Med</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('port_status', '=', 'exited')]</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_achat_tanger_med_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_achat_dossiers_to_exit_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun dossier sorti pour le moment.
+            </p>
+        </field>
+    </record>
+
+    <!-- Export Excel Action for Dossiers à Sortir -->
+    <record id="action_export_dossiers_excel" model="ir.actions.server">
+        <field name="name">Export Dossiers à Sortir (Excel)</field>
+        <field name="model_id" ref="logistique.model_logistique_entry"/>
+        <field name="binding_model_id" ref="logistique.model_logistique_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                action = records.action_generate_excel_dossiers_to_exit()
+        </field>
+    </record>
+
+</odoo>

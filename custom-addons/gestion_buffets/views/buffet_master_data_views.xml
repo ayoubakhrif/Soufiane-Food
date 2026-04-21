@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pack Views -->
+    <record id="view_buffet_pack_tree" model="ir.ui.view">
+        <field name="name">buffet.pack.tree</field>
+        <field name="model">buffet.pack</field>
+        <field name="arch" type="xml">
+            <tree string="Packs" editable="bottom">
+                <field name="name"/>
+                <field name="price_person"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_buffet_pack" model="ir.actions.act_window">
+        <field name="name">Packs</field>
+        <field name="res_model">buffet.pack</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Place Views -->
+    <record id="view_buffet_place_tree" model="ir.ui.view">
+        <field name="name">buffet.place.tree</field>
+        <field name="model">buffet.place</field>
+        <field name="arch" type="xml">
+            <tree string="Lieux" editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_buffet_place" model="ir.actions.act_window">
+        <field name="name">Lieux</field>
+        <field name="res_model">buffet.place</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Composant Views -->
+    <record id="view_buffet_composant_tree" model="ir.ui.view">
+        <field name="name">buffet.composant.tree</field>
+        <field name="model">buffet.composant</field>
+        <field name="arch" type="xml">
+            <tree string="Composants">
+                <field name="name"/>
+                <field name="price"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_buffet_composant_form" model="ir.ui.view">
+        <field name="name">buffet.composant.form</field>
+        <field name="model">buffet.composant</field>
+        <field name="arch" type="xml">
+            <form string="Composant">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du composant..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="price"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_buffet_composant" model="ir.actions.act_window">
+        <field name="name">Composants</field>
+        <field name="res_model">buffet.composant</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -57,11 +57,12 @@ class StockKal3iyaMove(models.Model):
     calibre = fields.Char(string='Calibre')
     soufiane_client = fields.Selection([
         ('soufiane', 'Soufiane'),
+        ('hamza', 'Hamza'),
     ], string='Soufiane?')
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')
     provider_id = fields.Many2one('stock.kal3iya.provider', string='Fournisseur')
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
 
-    def unlink(self):
-        raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
+    #def unlink(self):
+    #    raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))

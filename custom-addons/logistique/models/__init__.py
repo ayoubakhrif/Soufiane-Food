@@ -4,10 +4,12 @@ from . import article
 from . import shipping
 from . import container
 from . import dossier
-from . import dossier_cheque
+from . import dossier_sutra
 from . import logistics_entry
+from . import dossier_cheque
 from . import consolidator
 from . import dossier_deduction
 from . import dossier_transfer
 from . import surest_mag_config
 from . import surest_mag_simulation
+from . import logistics_document

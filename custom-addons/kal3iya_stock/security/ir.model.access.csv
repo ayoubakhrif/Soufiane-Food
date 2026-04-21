@@ -14,3 +14,14 @@ access_kal3iya_stock_stock_stock_user,kal3iya.stock.stock,model_kal3iya_stock_st
 access_kal3iya_stock_stock_stock_manager,kal3iya.stock.stock,model_kal3iya_stock_stock,group_manager,1,0,0,0
 access_kal3iya_stock_return_user,kal3iya.stock.return,model_kal3iya_stock_return,group_user,1,1,1,0
 access_kal3iya_stock_return_manager,kal3iya.stock.return,model_kal3iya_stock_return,group_manager,1,1,1,0
+access_kal3iya_stock_product_viewer,kal3iya.stock.product,model_kal3iya_stock_product,group_viewer,1,0,0,0
+access_kal3iya_stock_provider_viewer,kal3iya.stock.provider,model_kal3iya_stock_provider,group_viewer,1,0,0,0
+access_kal3iya_stock_client_viewer,kal3iya.stock.client,model_kal3iya_stock_client,group_viewer,1,0,0,0
+access_kal3iya_stock_driver_viewer,kal3iya.stock.driver,model_kal3iya_stock_driver,group_viewer,1,0,0,0
+access_kal3iya_stock_ste_viewer,kal3iya.stock.ste,model_kal3iya_stock_ste,group_viewer,1,0,0,0
+access_kal3iya_stock_stock_move_viewer,kal3iya.stock.move,model_kal3iya_stock_move,group_viewer,1,0,0,0
+access_kal3iya_stock_stock_entry_viewer,kal3iya.stock.entry,model_kal3iya_stock_entry,group_viewer,1,0,0,0
+access_kal3iya_stock_stock_exit_viewer,kal3iya.stock.exit,model_kal3iya_stock_exit,group_viewer,1,0,0,0
+access_kal3iya_stock_stock_stock_viewer,kal3iya.stock.stock,model_kal3iya_stock_stock,group_viewer,1,0,0,0
+access_kal3iya_stock_return_viewer,kal3iya.stock.return,model_kal3iya_stock_return,group_viewer,1,0,0,0
+

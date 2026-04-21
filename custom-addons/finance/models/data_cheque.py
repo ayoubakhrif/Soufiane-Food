@@ -8,11 +8,25 @@ from markupsafe import Markup
 class DataCheque(models.Model):
     _name = 'datacheque'
     _description = 'Data chèque'
-    _description = 'Data chèque'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'chq'
 
+    active = fields.Boolean(default=True, tracking=True)
+
+    @api.depends('chq', 'benif_id.name', 'ste_id.name', 'amount')
+    def _compute_display_name(self):
+        for rec in self:
+            chq = rec.chq or ""
+            benif = rec.benif_id.name if rec.benif_id else ""
+            ste = rec.ste_id.name if rec.ste_id else ""
+            amount = rec.amount or 0.0
+            rec.display_name = f"({chq} - {benif} - {ste} - {amount} MAD)"
+
+    physical_cheque_id = fields.Many2one('finance.cheque.physical', string="Chèque Physique", readonly=True, index=True)
+
     chq = fields.Char(string='Chèque', tracking=True, size=7, required=True)
+    chq_bank = fields.Boolean(string='Chq de banque', tracking=True)
+    chq_certifie = fields.Boolean(string='Chq certifié', tracking=True)
     is_manager = fields.Boolean(compute='_compute_is_manager', string="Is Manager")
     def _compute_is_manager(self):
         for rec in self:
@@ -24,7 +38,7 @@ class DataCheque(models.Model):
     date_emission = fields.Date(string='Date d’émission', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
-    date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True)
+    date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True, readonly=False)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
@@ -38,16 +52,19 @@ class DataCheque(models.Model):
     journal = fields.Integer(string='Journal N°', required=True, default=None)
     facture_tag = fields.Html(string='Facture', compute='_compute_facture_tag', sanitize=False, optional=True)
     state = fields.Selection([
+        ('reserve', 'Réserve'),
         ('actif', 'Actif'),
         ('annule', 'Annulé'),
         ('bureau', 'Bureau'),
-    ], string='État', default='actif', tracking=True, store=True)
+    ], string='État', default='reserve', tracking=True, store=True)
     type = fields.Selection([
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
+        ('fret', 'Fret'),
         ('divers', 'Divers'),
-    ], store=True, string='Type', tracking=True)
+        ('reserve', 'Reserve'),
+    ], store=True, string='Type', tracking=True, required=True)
     
     # New Fields
     bl = fields.Char(string='BL', tracking=True)
@@ -94,12 +111,16 @@ class DataCheque(models.Model):
             else:
                 rec.unlock_until_label = ""
 
-    @api.depends('unlock_until')
+    @api.depends('unlock_until', 'state')
     def _compute_is_locked(self):
         """Compute if cheque is locked for current user."""
         for rec in self:
             # Managers are never locked
             if self.env.user.has_group('finance.group_finance_user'):
+                rec.is_locked = False
+                continue
+            
+            if rec.state == 'reserve':
                 rec.is_locked = False
                 continue
             
@@ -543,14 +564,18 @@ class DataCheque(models.Model):
     # ------------------------------------------------------------
     # Chemin vers le JSON
     def _get_drive_credentials_path(self):
-        return "/srv/google_credentials/odoo_drive_service.json"
+        return "/srv/google_credentials/service_account.json"
 
     # 1) Connexion API Google Drive
     def _get_drive_service(self):
         creds_path = self._get_drive_credentials_path()
-        scopes = ['https://www.googleapis.com/auth/drive.readonly']
-        creds = service_account.Credentials.from_service_account_file(creds_path, scopes=scopes)
-        return build('drive', 'v3', credentials=creds)
+        try:
+            scopes = ['https://www.googleapis.com/auth/drive.readonly']
+            creds = service_account.Credentials.from_service_account_file(creds_path, scopes=scopes)
+            return build('drive', 'v3', credentials=creds)
+        except Exception:
+            # Prevent blocking creation if credentials are not found (e.g. locally)
+            return None
 
     # 2) Recherche dossier exact
     def _find_folder_exact(self, service, folder_name, parent_id):
@@ -597,6 +622,8 @@ class DataCheque(models.Model):
             return False
 
         service = self._get_drive_service()
+        if not service:
+            return False
 
         # Dossier Société
         ste_folder_id = self._find_folder_exact(service, self.ste_id.name, root_id)
@@ -643,6 +670,31 @@ class DataCheque(models.Model):
             rec.dem_exist = 'dem_exists' if rec.dem_pdf_url else 'dem_not_exists'
             rec.doc_exist = 'doc_exists' if rec.doc_pdf_url else 'doc_not_exists'
 
+
+    # ------------------------------------------------------------
+    # PHYSICAL CHEQUE SYNC
+    # ------------------------------------------------------------
+    def _sync_physical_cheque(self):
+        """Finds or creates the physical cheque grouping."""
+        PhysicalCheque = self.env['finance.cheque.physical']
+        for rec in self:
+            if not rec.chq or not rec.ste_id:
+                continue
+                
+            # Search for existing physical cheque
+            phys = PhysicalCheque.search([
+                ('name', '=', rec.chq),
+                ('ste_id', '=', rec.ste_id.id)
+            ], limit=1)
+            
+            if not phys:
+                phys = PhysicalCheque.create({
+                    'name': rec.chq,
+                    'ste_id': rec.ste_id.id,
+                })
+            
+            if rec.physical_cheque_id != phys:
+                rec.physical_cheque_id = phys
 
     # ------------------------------------------------------------
     # DELETION REQUEST
@@ -694,6 +746,14 @@ class DataCheque(models.Model):
                 'default_cheque_id': self.id,
             }
         }
+
+    # ------------------------------------------------------------
+    # Action : Confirmer l'Émission
+    # ------------------------------------------------------------
+    def action_confirm_emission(self):
+        for rec in self:
+            if rec.state == 'reserve':
+                rec.state = 'actif'
 
     # 7) Helper to force state relation logic in backend
     def _force_state_logic(self, vals):
@@ -759,6 +819,7 @@ class DataCheque(models.Model):
         self._check_sequence_integrity(vals)
         
         rec = super().create(vals)
+        rec._sync_physical_cheque()
         rec._onchange_find_talon()
         rec._sync_pdf_url()
         
@@ -792,8 +853,8 @@ class DataCheque(models.Model):
 
     def write(self, vals):
         # Check edit lock BEFORE any modifications
-        # Skip lock check if user is manager
-        if not self.env.user.has_group('finance.group_finance_user'):
+        # Skip lock check if user is manager or if bypassed by context
+        if not self.env.user.has_group('finance.group_finance_user') and not self.env.context.get('bypass_edit_lock'):
             for rec in self:
                 # Check lock status directly (field is already computed)
                 # Do NOT call _compute_is_locked() here - it causes recursion
@@ -816,6 +877,7 @@ class DataCheque(models.Model):
         if "chq" in vals or "ste_id" in vals:
             self._onchange_find_talon()
             self._sync_pdf_url()
+            self._sync_physical_cheque()
         return res
 
     # 8) Bouton ouverture PDF
@@ -967,4 +1029,42 @@ class DataCheque(models.Model):
         ])
         if expired_cheques:
             expired_cheques.write({'unlock_until': False})
+        return True
+
+    # ------------------------------------------------------------
+    # MIGRATION : Sync all physical cheques
+    # ------------------------------------------------------------
+    @api.model
+    def cron_migrate_physical_cheques(self):
+        """Creates physical cheques for all existing datacheques (Migration)."""
+        # 1. Sync Physical Cheques
+        records = self.search([
+            ('physical_cheque_id', '=', False),
+            ('chq', '!=', False),
+            ('ste_id', '!=', False)
+        ])
+        if records:
+            records._sync_physical_cheque()
+            
+        # 2. Sync Payments (Marglory)
+        marglory_payments = self.env['finance.marglory.payment'].search([
+            ('physical_cheque_id', '=', False),
+            ('cheque_id', '!=', False)
+        ])
+        for pay in marglory_payments:
+             # Ensure the datacheque has a physical cheque
+             if not pay.cheque_id.physical_cheque_id:
+                 pay.cheque_id._sync_physical_cheque()
+             pay.physical_cheque_id = pay.cheque_id.physical_cheque_id
+
+        # 3. Sync Payments (Sutra)
+        sutra_payments = self.env['finance.sutra.payment'].search([
+            ('physical_cheque_id', '=', False),
+            ('cheque_id', '!=', False)
+        ])
+        for pay in sutra_payments:
+             if not pay.cheque_id.physical_cheque_id:
+                 pay.cheque_id._sync_physical_cheque()
+             pay.physical_cheque_id = pay.cheque_id.physical_cheque_id
+             
         return True

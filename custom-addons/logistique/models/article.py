@@ -5,3 +5,8 @@ class LogistiqueArticle(models.Model):
     _description = 'Article'
 
     name = fields.Char(string='Nom', required=True)
+
+    company_article_id = fields.Many2one(
+        'company.article',
+        string='Article Société',
+    )

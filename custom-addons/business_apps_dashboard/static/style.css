@@ -51,3 +51,34 @@
     transform: translateY(-2px);
     transition: all 0.2s ease;
 }
+
+/* =========================================================
+   Hide apps from main app switchers (Navbar & Home Menu)
+   ========================================================= */
+
+/* Hide everything by default in the App Switcher Dropdown (Community) and Home Menu (Enterprise) */
+.o_navbar_apps_menu .dropdown-menu .o_app,
+.o_home_menu .o_app {
+    display: none !important;
+}
+
+/* Explicitly show only 'Applications', 'Discuss', 'Settings' (paramètres), and 'Apps' */
+.o_navbar_apps_menu .dropdown-menu .o_app[data-menu-xmlid="business_apps_dashboard.menu_business_apps_root"],
+.o_navbar_apps_menu .dropdown-menu .o_app[data-menu-xmlid="mail.menu_root_discuss"],
+.o_navbar_apps_menu .dropdown-menu .o_app[data-menu-xmlid="base.menu_administration"],
+.o_navbar_apps_menu .dropdown-menu .o_app[data-menu-xmlid="base.menu_management"],
+.o_home_menu .o_app[data-menu-xmlid="business_apps_dashboard.menu_business_apps_root"],
+.o_home_menu .o_app[data-menu-xmlid="mail.menu_root_discuss"],
+.o_home_menu .o_app[data-menu-xmlid="base.menu_administration"],
+.o_home_menu .o_app[data-menu-xmlid="base.menu_management"] {
+    display: block !important;
+}
+
+/* For Enterprise home menu, the default display is usually flex or inline-block, we can use block or flex. 
+   Odoo 17 Community dropdown items use block. */
+.o_home_menu .o_app[data-menu-xmlid="business_apps_dashboard.menu_business_apps_root"],
+.o_home_menu .o_app[data-menu-xmlid="mail.menu_root_discuss"],
+.o_home_menu .o_app[data-menu-xmlid="base.menu_administration"],
+.o_home_menu .o_app[data-menu-xmlid="base.menu_management"] {
+    display: flex !important;
+}

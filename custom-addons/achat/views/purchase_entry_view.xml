@@ -10,14 +10,48 @@
                 <field name="bl_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="article_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
+                <field name="container_count" string="Nb of Containers" optional="show"/>
                 <field name="eta"/>
                 <field name="date_booking" optional="show"/>
                 <field name="date_docs_received" optional="show"/>
                 <field name="date_docs_confirmed" optional="show"/>
                 <field name="purchase_state" widget="badge" decoration-info="purchase_state == 'initial'" decoration-success="purchase_state == 'confirmed'" decoration-muted="purchase_state == 'closed'"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- Inherit Logistique Views to show Achat Article instead of base article -->
+    <record id="inherit_logistique_entry_tree_article" model="ir.ui.view">
+        <field name="name">logistique.entry.tree.inherit.article</field>
+        <field name="model">logistique.entry</field>
+        <field name="inherit_id" ref="logistique.view_logistique_entry_tree"/>
+        <field name="arch" type="xml">
+            <field name="article_id" position="replace">
+                <field name="achat_article_id" string="Article"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="inherit_logistique_entry_form_article" model="ir.ui.view">
+        <field name="name">logistique.entry.form.inherit.article</field>
+        <field name="model">logistique.entry</field>
+        <field name="inherit_id" ref="logistique.view_logistique_entry_form"/>
+        <field name="arch" type="xml">
+            <field name="article_id" position="replace">
+                <field name="achat_article_id" string="Article" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="inherit_logistique_entry_search_article" model="ir.ui.view">
+        <field name="name">logistique.entry.search.inherit.article</field>
+        <field name="model">logistique.entry</field>
+        <field name="inherit_id" ref="logistique.view_logistique_entry_search"/>
+        <field name="arch" type="xml">
+            <field name="article_id" position="replace">
+                <field name="achat_article_id" string="Article"/>
+            </field>
         </field>
     </record>
 
@@ -31,6 +65,28 @@
                 <header>
                     <button name="action_move_to_draft" string="Move to Draft" type="object" class="oe_highlight" invisible="purchase_state != 'initial'"/>
                     <button name="action_confirm_purchase" string="Confirm" type="object" class="oe_highlight" invisible="purchase_state != 'draft'"/>
+                    <!-- Admin-only reset buttons -->
+                    <button name="action_reset_to_initial"
+                            string="⟲ Remettre en Initial"
+                            type="object"
+                            class="btn-warning"
+                            invisible="purchase_state == 'initial'"
+                            groups="achat.group_purchase_admin"
+                            confirm="Remettre ce dossier en statut Initial ?"/>
+                    <button name="action_reset_to_draft"
+                            string="⟲ Remettre en Draft"
+                            type="object"
+                            class="btn-warning"
+                            invisible="purchase_state != 'confirmed'"
+                            groups="achat.group_purchase_admin"
+                            confirm="Remettre ce dossier en statut Draft ?"/>
+                    <!-- Terminal49 Buttons -->
+                    <button name="action_terminal49_register" string="T49 Register" type="object" 
+                            invisible="terminal49_shipment_id != False"
+                            groups="achat.group_purchase_user"/>
+                    <button name="action_terminal49_update_eta" string="T49 Sync ETA" type="object" 
+                            invisible="terminal49_shipment_id == False"
+                            groups="achat.group_purchase_user"/>
                     <field name="purchase_state" widget="statusbar" statusbar_visible="initial,draft,confirmed"/>
                 </header>
                 <sheet>
@@ -52,40 +108,41 @@
                     <group>
                         <group string="Informations Générales">
                             <field name="eta"/>
+                            <field name="container_count" string="Nb of Containers" readonly="1"/>
                             
                             <!-- For non-admins: readonly when confirmed -->
                             <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/> 
-                            <field name="ste_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="supplier_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="shipping_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="origin_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="ste_id"      options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="supplier_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="shipping_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="origin_id"   options="{'no_create': True, 'no_create_edit': True}" groups="!achat.group_purchase_admin"/>
                             <field name="incoterm" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <!-- date_booking readonly if draft (interpreted as locked from draft onwards) -->                            
                             <!-- For admins: always editable -->
                             <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" groups="achat.group_purchase_admin"/> 
-                            <field name="ste_id" groups="achat.group_purchase_admin"/>
-                            <field name="supplier_id" groups="achat.group_purchase_admin"/>
-                            <field name="shipping_id" groups="achat.group_purchase_admin"/>
-                            <field name="origin_id" groups="achat.group_purchase_admin"/>
+                            <field name="ste_id"      options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="supplier_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="shipping_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
+                            <field name="origin_id"   options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
                             <field name="incoterm" groups="achat.group_purchase_admin"/>
                         </group>
                         <group string="Détails Marchandise">
                             <!-- For non-admins: readonly when confirmed -->
-                            <field name="article_id" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="achat_article_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="details" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="lot" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="lot" groups="!achat.group_purchase_admin"/>
                             <field name="invoice_number" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="weight" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
-                            <field name="price_unit" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
+                            <field name="price_unit" required="1" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="amount_total" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             
                             <!-- For admins: always editable -->
-                            <field name="article_id" groups="achat.group_purchase_admin"/>
+                            <field name="achat_article_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
                             <field name="details" groups="achat.group_purchase_admin"/>
                             <field name="lot" groups="achat.group_purchase_admin"/>
                             <field name="invoice_number" groups="achat.group_purchase_admin"/>
                             <field name="weight" groups="achat.group_purchase_admin"/>
-                            <field name="price_unit" groups="achat.group_purchase_admin"/>
+                            <field name="price_unit" required="1" groups="achat.group_purchase_admin"/>
                             <field name="amount_total" groups="achat.group_purchase_admin"/>
                             
                             <label for="free_time" string="Free Time (Nego / Conf)" invisible="incoterm == 'emirate'"/>
@@ -107,6 +164,10 @@
                         </group>
                         <group string="Document's comments">
                             <field name="comment"/>
+                        </group>
+                        <group string="Terminal49">
+                            <field name="terminal49_shipment_id" readonly="1"/>
+                            <field name="last_terminal49_sync" readonly="1"/>
                         </group>
                     </group>
                     
@@ -150,14 +211,91 @@
         </field>
     </record>
 
+    <!-- PURCHASE CALENDAR VIEW -->
+    <record id="view_purchase_entry_calendar" model="ir.ui.view">
+        <field name="name">purchase.entry.calendar</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <calendar string="Dossiers Achat" date_start="eta" color="supplier_id" mode="month">
+                <field name="calendar_label"/>
+                <field name="bl_number"/>
+                <field name="container_names"/>
+                <field name="invoice_number"/>
+            </calendar>
+        </field>
+    </record>
+
+
+    <!-- PURCHASE SEARCH VIEW -->
+    <record id="view_purchase_entry_search" model="ir.ui.view">
+        <field name="name">purchase.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Search Purchase Dossiers">
+                <field name="bl_number" filter_domain="[('bl_number', 'ilike', self)]"/>
+                <field name="contract_id"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <field name="achat_article_id"/>
+                <field name="invoice_number"/>
+                <field name="lot"/>
+                
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('purchase_state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('purchase_state', '=', 'confirmed')]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Supplier" name="group_by_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'purchase_state'}"/>
+                    <filter string="Article" name="group_by_article" context="{'group_by': 'achat_article_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- PURCHASE PIVOT VIEW -->
+    <record id="view_purchase_entry_pivot" model="ir.ui.view">
+        <field name="name">purchase.entry.pivot</field>
+        <field name="model">logistique.entry</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Dossiers Achat">
+                <field name="supplier_id" type="row"/>
+                <field name="achat_article_id"  type="row"/>
+                <field name="ste_id"      type="col"/>
+                <field name="weight"       type="measure" string="Poids (T)"/>
+                <field name="amount_total" type="measure" string="Montant Total"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- PURCHASE GRAPH VIEW -->
+    <record id="view_purchase_entry_graph" model="ir.ui.view">
+        <field name="name">purchase.entry.graph</field>
+        <field name="model">logistique.entry</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <graph string="Analyse Dossiers Achat" type="bar" stacked="True">
+                <field name="supplier_id" type="row"/>
+                <field name="achat_article_id"  type="row"/>
+                <field name="amount_total" type="measure" string="Montant Total"/>
+            </graph>
+        </field>
+    </record>
+
     <!-- ACTION PURCHASE -->
     <record id="action_purchase_entry" model="ir.actions.act_window">
         <field name="name">Dossiers Achat</field>
         <field name="res_model">logistique.entry</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,calendar,pivot,graph</field>
+        <field name="search_view_id" ref="view_purchase_entry_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_purchase_entry_tree')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('view_purchase_entry_form')})]"/>
+            (0, 0, {'view_mode': 'tree',  'view_id': ref('view_purchase_entry_tree')}),
+            (0, 0, {'view_mode': 'form',  'view_id': ref('view_purchase_entry_form')}),
+            (0, 0, {'view_mode': 'calendar', 'view_id': ref('view_purchase_entry_calendar')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_purchase_entry_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_purchase_entry_graph')})]" />
         <field name="domain">[]</field>
         <field name="context">{}</field>
     </record>

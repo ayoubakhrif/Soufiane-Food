@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FORM VIEW -->
+    <record id="view_portnet_entry_form" model="ir.ui.view">
+        <field name="name">portnet.entry.form</field>
+        <field name="model">portnet.entry</field>
+        <field name="arch" type="xml">
+            <form string="Entrée Portnet">
+
+                <!-- STATE BAR -->
+                <header>
+                    <button name="action_domicilier"
+                            string="Valider"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'new'"/>
+                    <button name="action_regler"
+                            string="Domicilier"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'domicilied'"/>
+                    <button name="action_annuler"
+                            string="Annuler"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state in ('annule', 'regle')"/>
+                    <button name="action_reset_new"
+                            string="Remettre en Nouveau"
+                            type="object"
+                            groups="base.group_system"
+                            invisible="state not in ('annule',)"/>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="new,domicilied,regle"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- ROW 1: Identification + Société / Provenance -->
+                    <group>
+                        <group string="Identification">
+                            <field name="article_id"
+                                   options="{'no_create': True}"
+                                   placeholder="Choisir un article"/>
+                            <field name="origin_id"
+                                   options="{'no_create': True}"
+                                   placeholder="Choisir une origine"/>
+                            <field name="supplier_id"
+                                   options="{'no_create': True}"
+                                   placeholder="Choisir un fournisseur"/>
+                            <field name="ste_id"
+                                   options="{'no_create': True}"
+                                   placeholder="Choisir une société"/>
+                        </group>
+                        <group string="Détails">
+                            <field name="incoterm"/>
+                            <field name="invoice"
+                                   placeholder="Numéro de facture"/>
+                            <field name="date_invoice"/>
+                            <field name="provenance"/>
+                            <field name="device"/>
+                            <field name="payment_terms"/>
+                        </group>
+                    </group>
+
+                    <!-- ROW 2: Poids + Valeur -->
+                    <group string="Marchandise">
+                        <group>
+                            <field name="nomenclature"/>
+                            <field name="valeur"/>
+                            <field name="avance"/>
+                        </group>
+                        <group>
+                            <field name="gross"/>
+                            <field name="net"/>
+                        </group>
+                    </group>
+
+                    <!-- ROW 3: Montants — conditional on incoterm -->
+                    <group string="Montants">
+                        <group>
+                            <field name="total_fob"/>
+                            <!-- total_freight only visible+required when incoterm = cfr -->
+                            <field name="total_freight"
+                                   invisible="incoterm != 'cfr'"
+                                   required="incoterm == 'cfr'"/>
+                        </group>
+                        <group>
+                            <!-- total_cfr only visible when incoterm = cfr -->
+                            <field name="total_cfr"
+                                   readonly="1"
+                                   invisible="incoterm != 'cfr'"/>
+                        </group>
+                    </group>
+
+                    <group string="Notes">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- TREE VIEW -->
+    <record id="view_portnet_entry_tree" model="ir.ui.view">
+        <field name="name">portnet.entry.tree</field>
+        <field name="model">portnet.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Entrées Portnet" decoration-info="state == 'new'"
+                  decoration-success="state == 'regle'"
+                  decoration-warning="state == 'domicilied'"
+                  decoration-danger="state == 'annule'">
+                <field name="name"/>
+                <field name="article_id"/>
+                <field name="origin_id"/>
+                <field name="supplier_id"/>
+                <field name="incoterm"/>
+                <field name="invoice"/>
+                <field name="date_invoice"/>
+                <field name="valeur"/>
+                <field name="avance"/>
+                <field name="total_fob"/>
+                <field name="total_cfr"/>
+                <field name="ste_id"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-info="state == 'new'"
+                       decoration-warning="state == 'domicilied'"
+                       decoration-success="state == 'regle'"
+                       decoration-danger="state == 'annule'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_portnet_entry_search" model="ir.ui.view">
+        <field name="name">portnet.entry.search</field>
+        <field name="model">portnet.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Portnet">
+                <field name="invoice"/>
+                <field name="name"/>
+                <field name="article_id"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <separator/>
+                <filter name="filter_new" string="Nouveau" domain="[('state','=','new')]"/>
+                <filter name="filter_domicilied" string="Domicilié" domain="[('state','=','domicilied')]"/>
+                <filter name="filter_regle" string="Réglé" domain="[('state','=','regle')]"/>
+                <filter name="filter_annule" string="Annulé" domain="[('state','=','annule')]"/>
+                <separator/>
+                <filter name="filter_cfr" string="CFR" domain="[('incoterm','=','cfr')]"/>
+                <filter name="filter_fob" string="FOB" domain="[('incoterm','=','fob')]"/>
+                <filter name="filter_exw" string="EXW" domain="[('incoterm','=','exw')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_supplier" string="Fournisseur" context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_incoterm" string="Incoterm" context="{'group_by': 'incoterm'}"/>
+                    <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
+                    <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- WINDOW ACTION -->
+    <record id="action_portnet_entry" model="ir.actions.act_window">
+        <field name="name">Entrées Portnet</field>
+        <field name="res_model">portnet.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle entrée Portnet
+            </p>
+        </field>
+    </record>
+</odoo>

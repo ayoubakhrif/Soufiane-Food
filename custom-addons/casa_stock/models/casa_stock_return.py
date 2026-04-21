@@ -16,7 +16,6 @@ class CasaStockReturn(models.Model):
     lot = fields.Char(related='exit_id.lot', store=True, string='Lot')
     dum = fields.Char(related='exit_id.dum', store=True, string='DUM')
     ville = fields.Selection(related='exit_id.ville', store=True, string='Ville')
-    frigo = fields.Selection(related='exit_id.frigo', store=True, string='Frigo')
     client_id = fields.Many2one('casa.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('casa.ste', related='exit_id.ste_id', store=True, string='Société')
     calibre = fields.Char(related='exit_id.calibre', store=True, string='Calibre')
@@ -46,7 +45,7 @@ class CasaStockReturn(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.return') or '/'
-        return super(CasaStockReturn, self).create(vals)
+        return super().create(vals)
 
     def write(self, vals):
         for rec in self:
@@ -54,7 +53,7 @@ class CasaStockReturn(models.Model):
                 forbidden_fields = ['exit_id', 'qty', 'date', 'driver_id']
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les retours confirmés ne peuvent pas être modifiés. Utilisez 'Annuler'."))
-        return super(CasaStockReturn, self).write(vals)
+        return super().write(vals)
 
     def action_confirm(self):
         for rec in self:
@@ -85,7 +84,6 @@ class CasaStockReturn(models.Model):
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': rec.qty,  # Positive quantity adds to stock
                 'move_type': 'return',
                 'state': 'done',
@@ -98,6 +96,7 @@ class CasaStockReturn(models.Model):
                 'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.return',
                 'res_id': rec.id,
+                'price_purchase': rec.exit_id.price_purchase,
             })
             
             rec.write({
@@ -110,13 +109,22 @@ class CasaStockReturn(models.Model):
             if rec.state != 'done':
                 raise UserError(_("Vous ne pouvez annuler que des retours confirmés."))
             
+            # Check if cancelling results in negative stock
+            # Reusing the helper from casa.stock.entry
+            current_stock = self.env['casa.stock.entry']._get_current_stock_qty(rec)
+            if current_stock < rec.qty:
+                 raise UserError(_(
+                    "Annulation impossible ! Le stock deviendrait négatif.\n"
+                    "Stock actuel : %s, Quantité à retirer : %s.\n"
+                    "Certaines quantités ont probablement déjà été vendues."
+                ) % (current_stock, rec.qty))
+
             # Reverse Move (Negative quantity)
             cancel_move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
                 'ville': rec.ville,
-                'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'cancel_return', 
                 'state': 'done',
@@ -129,6 +137,7 @@ class CasaStockReturn(models.Model):
                 'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.return',
                 'res_id': rec.id,
+                'price_purchase': rec.exit_id.price_purchase,
             })
             
             rec.write({

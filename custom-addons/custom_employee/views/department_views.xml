@@ -59,7 +59,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
+                <div class="oe_chatter" groups="custom_employee.group_core_employee_manager">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>

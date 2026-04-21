@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_portnet_category" model="ir.module.category">
+        <field name="name">Portnet</field>
+        <field name="description">Gestion des accès pour le module Portnet</field>
+        <field name="sequence">15</field>
+    </record>
+
+    <record id="group_portnet_user" model="res.groups">
+        <field name="name">Utilisateur Portnet</field>
+        <field name="category_id" ref="module_portnet_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_portnet_manager" model="res.groups">
+        <field name="name">Responsable Portnet</field>
+        <field name="category_id" ref="module_portnet_category"/>
+        <field name="implied_ids" eval="[(4, ref('group_portnet_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="group_portnet_admin" model="res.groups">
+        <field name="name">Administrateur Portnet</field>
+        <field name="category_id" ref="module_portnet_category"/>
+        <field name="implied_ids" eval="[(4, ref('group_portnet_manager'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+</odoo>

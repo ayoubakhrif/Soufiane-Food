@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_charges_casa_user,charges.casa,model_charges_casa,group_charges_casa_user,1,1,1,0
+access_charges_casa_manager,charges.casa,model_charges_casa,group_charges_casa_manager,1,1,1,1
+access_charges_casa_line_user,charges.casa.line,model_charges_casa_line,group_charges_casa_user,1,1,1,0
+access_charges_casa_line_manager,charges.casa.line,model_charges_casa_line,group_charges_casa_manager,1,1,1,1

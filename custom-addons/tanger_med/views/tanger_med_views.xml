@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med: Dedicated Tree View              -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_entry_tree" model="ir.ui.view">
+        <field name="name">tanger.med.entry.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Tanger Med" create="false" delete="false" default_order="exit_date desc">
+                <field name="bl_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="article_id"/>
+                <field name="container_count" optional="show"/>
+                <field name="container_names" string="Conteneurs" optional="show"/>
+                <field name="exit_date"/>
+                <field name="entry_date"/>
+                <field name="bad_date"/>
+                <field name="eta" optional="show"/>
+                <field name="invoice_number" optional="show"/>
+                <field name="destination_id" optional="show"/>
+                <field name="tanger_med_lot" optional="show"/>
+                <field name="tanger_med_dum" optional="show"/>
+                <field name="sur_mag_amount" sum="SUR+MAG"/>
+                <field name="sur_mag_date"/>
+                <field name="sur_mag_user" optional="show"/>
+                <field name="arrival_picture" widget="image" options="{'size': [64, 64]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med: Dedicated Form View              -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_entry_form" model="ir.ui.view">
+        <field name="name">tanger.med.entry.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <form string="Dossier Tanger Med" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informations Dossier">
+                            <field name="dossier_id" readonly="1"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="supplier_id" readonly="1"/>
+                            <field name="article_id" readonly="1"/>
+                            <field name="shipping_id" readonly="1"/>
+                            <field name="free_time" readonly="1"/>
+                            <field name="destination_id" />
+                            <field name="details" readonly="1"/>
+                            <field name="invoice_number" readonly="1"/>
+                            <field name="container_count" readonly="1"/>
+                            <field name="container_type"/>
+                            <field name="container_size"/>
+                            <field name="container_names" readonly="1"/>
+                        </group>
+                        <group string="Statut">
+                            <field name="port_status" readonly="1" widget="badge" decoration-success="port_status == 'exited'"/>
+                            <field name="status" readonly="1" widget="badge"/>
+                            <field name="incoterm" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Arrivée au Stockage">
+                        <field name="arrival_picture" widget="image" class="oe_avatar"/>
+                    </group>
+                    <notebook>
+                        <page string="Tanger Med" name="tanger_med">
+                            <group>
+                                <group string="Dates Opérationnelles">
+                                    <field name="exit_date"/>
+                                    <field name="entry_date"/>
+                                    <field name="bad_date" readonly="1"/>
+                                    <field name="eta" readonly="1"/>
+                                    <field name="tanger_med_lot"/>
+                                    <field name="tanger_med_dum"/>
+                                </group>
+                                <group string="SUR+MAG">
+                                    <field name="calculated_surestarie_ht" readonly="1"/>
+                                    <field name="calculated_magasinage_ht" readonly="1"/>
+                                    <field name="sur_mag_amount"/>
+                                    <field name="sur_mag_date" readonly="1"/>
+                                    <field name="sur_mag_user" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                    <separator string="Historique"/>
+                    <div class="oe_chatter" groups="tanger_med.group_tanger_med_manager">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- Tanger Med: Search View                      -->
+    <!-- ============================================ -->
+    <record id="view_tanger_med_entry_search" model="ir.ui.view">
+        <field name="name">tanger.med.entry.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Tanger Med">
+                <field name="bl_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="article_id"/>
+                <field name="container_names" string="Conteneur"/>
+                <group string="Regrouper par">
+                    <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
+                    <filter name="group_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_article" string="Article" context="{'group_by': 'article_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

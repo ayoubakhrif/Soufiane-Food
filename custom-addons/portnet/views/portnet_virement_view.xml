@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FORM VIEW -->
+    <record id="view_portnet_virement_form" model="ir.ui.view">
+        <field name="name">portnet.virement.form</field>
+        <field name="model">portnet.virement</field>
+        <field name="arch" type="xml">
+            <form string="Ordre de virement">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Numéro d'ordre de virement"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Identification">
+                            <field name="engagement" placeholder="Num d'engagement d'importation"/>
+                            <field name="invoice" placeholder="Numéro de facture"/>
+                            <field name="ste_id" options="{'no_create': True}" placeholder="Choisir une société"/>
+                        </group>
+                        <group string="Détails">
+                            <field name="article_id" options="{'no_create': True}"/>
+                            <field name="supplier_id" options="{'no_create': True}"/>
+                            <field name="total"/>
+                            <field name="amount_virement"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Conteneurs" name="containers">
+                            <field name="container_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- TREE VIEW -->
+    <record id="view_portnet_virement_tree" model="ir.ui.view">
+        <field name="name">portnet.virement.tree</field>
+        <field name="model">portnet.virement</field>
+        <field name="arch" type="xml">
+            <tree string="Ordres de virement">
+                <field name="name"/>
+                <field name="engagement"/>
+                <field name="invoice"/>
+                <field name="ste_id"/>
+                <field name="article_id"/>
+                <field name="supplier_id"/>
+                <field name="amount_virement" sum="Montant Virement"/>
+                <field name="total" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_portnet_virement_search" model="ir.ui.view">
+        <field name="name">portnet.virement.search</field>
+        <field name="model">portnet.virement</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Ordre de virement">
+                <field name="name"/>
+                <field name="invoice"/>
+                <field name="ste_id"/>
+                <field name="article_id"/>
+                <field name="supplier_id"/>
+                <separator/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
+                    <filter name="group_article" string="Article" context="{'group_by': 'article_id'}"/>
+                    <filter name="group_supplier" string="Fournisseur" context="{'group_by': 'supplier_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_portnet_virement" model="ir.actions.act_window">
+        <field name="name">Ordres de virement</field>
+        <field name="res_model">portnet.virement</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouvel ordre de virement
+            </p>
+        </field>
+    </record>
+</odoo>

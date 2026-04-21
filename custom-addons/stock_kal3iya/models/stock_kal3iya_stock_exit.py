@@ -36,6 +36,7 @@ class StockKal3iyaExit(models.Model):
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')
     soufiane_client = fields.Selection([
         ('soufiane', 'Soufiane'),
+        ('hamza', 'Hamza'),
     ], string='Soufiane?')
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
@@ -46,11 +47,13 @@ class StockKal3iyaExit(models.Model):
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
 
+    is_checked = fields.Boolean(string="Pointé", default=False)
+
     move_id = fields.Many2one('stock.kal3iya.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('stock.kal3iya.move', string='Mouvement d\'Annulation', readonly=True)
 
     return_ids = fields.One2many('stock.kal3iya.return', 'exit_id', string='Retours')
-    returned_qty = fields.Float(string='Quantité Retournée', compute='_compute_returned_qty', store=True)
+    returned_qty = fields.Float(string='Retour', compute='_compute_returned_qty', store=True)
 
     @api.depends('return_ids.qty', 'return_ids.state')
     def _compute_returned_qty(self):

@@ -39,6 +39,11 @@ class ClientWeekInvoiceWizard(models.TransientModel):
         for date in avances.mapped('date_paid'):
             weeks.add(date_to_week(date))
             
+        # Sorties Supp
+        sorties_supp = env['kal3iya.sortie.supp'].sudo().search([('date', '!=', False)])
+        for date in sorties_supp.mapped('date'):
+            weeks.add(date_to_week(date))
+            
         # Sort desc
         sorted_weeks = sorted(weeks, reverse=True)
         
@@ -80,6 +85,10 @@ class ClientWeekInvoiceWizard(models.TransientModel):
             if a.date_paid:
                 client_weeks.add(a.date_paid.strftime("%Y-W%W"))
                 
+        for supp in client.sortie_supp_ids:
+            if supp.date:
+                client_weeks.add(supp.date.strftime("%Y-W%W"))
+                
         sorted_client_weeks = sorted(client_weeks, reverse=True)
 
         # Set default to the most recent week for this client
@@ -87,6 +96,13 @@ class ClientWeekInvoiceWizard(models.TransientModel):
             res['week'] = sorted_client_weeks[0]
             
         return res
+
+    def format_amount(self, value):
+        """Format a number with plain space as thousand separator."""
+        try:
+            return '{:,.2f}'.format(float(value or 0)).replace(',', ' ')
+        except (ValueError, TypeError):
+            return '0.00'
 
     def action_print_invoice(self):
         """Génère le PDF pour la semaine choisie."""

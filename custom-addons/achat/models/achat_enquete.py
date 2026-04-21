@@ -20,6 +20,12 @@ class AchatArticlePrice(models.Model):
         index=True
     )
 
+    origin_id = fields.Many2one(
+        'achat.origin',
+        string='Origin',
+        index=True
+    )
+
     price = fields.Float(
         string='Price',
         required=True,
@@ -52,3 +58,13 @@ class AchatArticlePrice(models.Model):
         default=lambda self: self.env.user,
         readonly=True
     )
+
+    details = fields.Char(
+        string='Details',
+        help='Additional information or remarks'
+    )
+
+    _sql_constraints = [
+        ('article_supplier_date_uniq', 'unique(article_id, supplier_id, date)', 
+         'Ce produit existe déjà pour ce fournisseur à la même date !')
+    ]

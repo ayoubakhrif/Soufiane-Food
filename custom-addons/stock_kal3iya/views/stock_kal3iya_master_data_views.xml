@@ -6,6 +6,50 @@
         <field name="res_model">stock.kal3iya.product</field>
         <field name="view_mode">tree,form</field>
     </record>
+    
+    <!-- Product Views -->
+    <record id="view_stock_kal3iya_product_tree" model="ir.ui.view">
+        <field name="name">stock.kal3iya.product.tree</field>
+        <field name="model">stock.kal3iya.product</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="company_article_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_stock_kal3iya_product_form" model="ir.ui.view">
+        <field name="name">stock.kal3iya.product.form</field>
+        <field name="model">stock.kal3iya.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="company_article_image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Ex: Amande douce"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="company_article_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Traductions / Alias">
+                            <field name="alias_ids">
+                                <tree editable="bottom">
+                                    <field name="name" string="Alias (Darija / Arabe / Autre)"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
     <!-- Client Action -->
     <record id="action_stock_kal3iya_client" model="ir.actions.act_window">

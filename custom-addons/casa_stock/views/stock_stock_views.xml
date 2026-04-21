@@ -15,8 +15,11 @@
                 <field name="image_1920"/>
                 <field name="weight"/>
                 <field name="dum"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
+                <field name="scan_dum"/>
+                <field name="stock_soufiane"/>
+                <field name="poids"/>
+                <field name="total_weight"/>
 
                 <templates>
                     <t t-name="kanban-box">
@@ -80,6 +83,17 @@
                                         font-size:12px;">
                                         Calibre <field name="calibre"/>
                                     </span>
+
+                                    <span t-if="record.stock_soufiane.raw_value" style="
+                                        background:#fdf2f8;
+                                        color:#9d174d;
+                                        padding:2px 8px;
+                                        border-radius:999px;
+                                        font-size:12px;
+                                        font-weight:bold;
+                                        margin-right:6px;">
+                                        SOUFIANE
+                                    </span>
                                 </div>
 
                                 <!-- Stock -->
@@ -91,10 +105,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <field name="total_weight"/> Kg)
-                                    </div>
-                                    <div>
-                                        📍 <b>Frigo :</b> <field name="frigo"/>
+                                        ⚖️ <b>Poids :</b> <field name="poids"/> (Tonnage: <field name="total_weight"/> Kg)
                                     </div>
                                 </div>
 
@@ -116,6 +127,20 @@
                                     </div>
                                     <div>
                                         🏷️ <b>Lot :</b> <field name="lot"/> | <b>DUM :</b> <field name="dum"/>
+                                        <!-- DUM Indicator -->
+                                        <t t-if="record.dum.raw_value">
+                                            <t t-if="record.scan_dum.raw_value">
+                                                <span title="DUM Disponible" style="display:inline-block; width:10px; height:10px; background-color:#22c55e; border-radius:50%; margin-left:4px;"></span>
+                                            </t>
+                                            <t t-else="">
+                                                <span title="DUM Manquant (Drive)" style="display:inline-block; width:10px; height:10px; background-color:#ef4444; border-radius:50%; margin-left:4px;"></span>
+                                            </t>
+                                        </t>
+                                        <a type="object" name="action_open_dum" class="btn btn-sm btn-secondary pt-0 pb-0" 
+                                           style="font-size: 11px; margin-left:8px; height: 18px; line-height: 18px;" 
+                                           target="_blank" t-if="record.dum.raw_value">
+                                            Ouvrir DUM
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -131,14 +156,15 @@
         <field name="model">casa.stock.stock</field>
         <field name="arch" type="xml">
             <tree create="false" delete="false">
+                <field name="date"/>
                 <field name="product_id"/>
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
+                <field name="stock_soufiane" optional="show"/>
                 <field name="quantity" sum="Total Quantité"/>
-                <field name="weight"/>
+                <field name="poids"/>
                 <field name="total_weight" sum="Total Poids"/>
                 <field name="price"/>
                 <field name="mt_achat" sum="Total Mt Achat"/>
@@ -152,7 +178,8 @@
         <field name="arch" type="xml">
             <form string="Ligne de Stock" create="false" edit="false">
                 <header>
-                    <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary"/>
+                    <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary" groups="casa_stock.group_admin"/>
+                    <button name="action_new_perte" string="Déclarer Perte" type="object" class="btn-warning"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -167,11 +194,16 @@
                             <field name="total_weight"/>
                             <field name="calibre"/>
                             <field name="lot"/>
-                            <field name="dum"/>
+                            <field name="stock_soufiane"/>
+                            <label for="dum"/>
+                            <div class="o_row">
+                                <field name="dum"/>
+                                <button name="action_open_dum" string="Ouvrir DUM" type="object" icon="fa-external-link" class="btn-sm btn-link" invisible="not dum"/>
+                            </div>
+                            <field name="scan_dum" widget="url" invisible="not scan_dum"/>
                         </group>
                         <group string="Localisation &amp; Finance">
                             <field name="ville"/>
-                            <field name="frigo"/>
                             <field name="ste_id"/>
                             <field name="price"/>
                             <field name="mt_achat"/>
@@ -191,13 +223,18 @@
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>
-                <field name="frigo"/>
                 <field name="ste_id"/>
+                <field name="date"/>
+                <separator/>
+                <filter string="Stock Soufiane" name="stock_soufiane" domain="[('stock_soufiane', '=', True)]"/>
+                <separator/>
                 <group expand="0" string="Grouper par">
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
                     <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Ville" name="group_ville" context="{'group_by': 'ville'}"/>
-                    <filter string="Frigo" name="group_frigo" context="{'group_by': 'frigo'}"/>
+                    <filter string="Stock Soufiane" name="group_stock_soufiane" context="{'group_by': 'stock_soufiane'}"/>
+                    <filter string="Poids" name="group_poids" context="{'group_by': 'poids'}"/>
                 </group>
             </search>
         </field>
@@ -208,11 +245,10 @@
         <field name="model">casa.stock.stock</field>
         <field name="arch" type="xml">
             <pivot string="Analyse Stock">
+                <field name="ville" type="row"/>
                 <field name="product_id" type="row"/>
-                <field name="ste_id" type="row"/>
-                <field name="ville" type="col"/>
+                <field name="poids" type="row"/>
                 <field name="quantity" type="measure"/>
-                <field name="weight" type="measure"/>
                 <field name="total_weight" type="measure"/>
                 <field name="mt_achat" type="measure"/>
             </pivot>
@@ -223,6 +259,7 @@
         <field name="name">Stock Casa</field>
         <field name="res_model">casa.stock.stock</field>
         <field name="view_mode">kanban,tree,form,pivot</field>
+        <field name="domain">[('quantity', '!=', 0)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucun stock disponible.
@@ -243,5 +280,31 @@
         </field>
     </record>
 
+
+    <!-- Server Action: Export Stock to Excel -->
+    <record id="action_export_stock_excel" model="ir.actions.server">
+        <field name="name">Exporter Stock (Excel)</field>
+        <field name="model_id" ref="model_casa_stock_stock"/>
+        <field name="binding_model_id" ref="model_casa_stock_stock"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_export_stock_excel()
+        </field>
+        <field name="groups_id" eval="[(4, ref('casa_stock.group_user'))]"/>
+    </record>
+
+    <!-- Server Action: Detailed Product Report -->
+    <record id="action_export_product_report_excel" model="ir.actions.server">
+        <field name="name">Rapport Détaillé Produit</field>
+        <field name="model_id" ref="model_casa_stock_stock"/>
+        <field name="binding_model_id" ref="model_casa_stock_stock"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.action_export_product_report_excel()
+        </field>
+        <field name="groups_id" eval="[(4, ref('casa_stock.group_user'))]"/>
+    </record>
 
 </odoo>

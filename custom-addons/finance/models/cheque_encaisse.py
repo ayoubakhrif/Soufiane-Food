@@ -81,7 +81,7 @@ class FinanceChequeEncaisse(models.Model):
                  
             # Use sudo to ensure update even if user has restricted access on datacheque write
             # Sync BOTH date_encaissement and amount
-            record.cheque_id.sudo().write({
+            record.cheque_id.sudo().with_context(bypass_edit_lock=True).write({
                 'date_encaissement': record.date_encaissement,
                 'amount': record.amount
             })
@@ -93,7 +93,7 @@ class FinanceChequeEncaisse(models.Model):
         for rec in self:
             if rec.cheque_id:
                 # Clear the date on the original cheque AND revert amount
-                rec.cheque_id.sudo().write({
+                rec.cheque_id.sudo().with_context(bypass_edit_lock=True).write({
                     'date_encaissement': False,
                     'amount': rec.original_amount if rec.original_amount else rec.cheque_id.amount
                 })
@@ -116,6 +116,6 @@ class FinanceChequeEncaisse(models.Model):
                     updates['date_encaissement'] = rec.date_encaissement
 
                 if updates:
-                    rec.cheque_id.sudo().write(updates)
+                    rec.cheque_id.sudo().with_context(bypass_edit_lock=True).write(updates)
 
         return res

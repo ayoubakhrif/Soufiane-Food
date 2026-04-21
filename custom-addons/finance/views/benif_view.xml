@@ -13,6 +13,9 @@
         <field name="model">finance.benif</field>
         <field name="arch" type="xml">
             <form string="Bénificiaires">
+                <header>
+                    <button name="action_export_excel" string="Exporter Excel" type="object" class="btn-primary" icon="fa-file-excel-o"/>
+                </header>
                 <sheet>
                     <group>
                         <field name="name"/>
@@ -20,6 +23,26 @@
                         <field name="type"/>
                         <field name="benif_deduction"/>
                     </group>
+                    <notebook>
+                        <page string="Chèques">
+                            <field name="physical_chq_ids" readonly="1">
+                                <tree>
+                                    <field name="name" string="Chèque"/>
+                                    <field name="ste_id"/>
+                                    <field name="date_emission"/>
+                                    <field name="date_echeance"/>
+                                    <field name="date_encaissement"/>
+                                    <field name="credit" sum="Total Crédit"/>
+                                    <field name="debit" sum="Total encaissé"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_credit"/>
+                                <field name="total_debit"/>
+                                <field name="solde" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -30,11 +53,12 @@
         <field name="name">finance.benif.tree</field>
         <field name="model">finance.benif</field>
         <field name="arch" type="xml">
-            <tree editable="top">
+            <tree>
                 <field name="name"/>
                 <field name="type"/>
-                <field name="days"/>
-                <field name="benif_deduction"/>
+                <field name="total_credit"/>
+                <field name="total_debit"/>
+                <field name="solde"/>
             </tree>
         </field>
     </record>

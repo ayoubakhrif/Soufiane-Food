@@ -12,12 +12,13 @@ class SuiviEmployee(models.Model):
     # Related fields from Core Employee
     name = fields.Char(related='core_employee_id.name', store=True)
     phone = fields.Char(related='core_employee_id.phone', readonly=True)
-    monthly_salary = fields.Float(related='core_employee_id.monthly_salary', string='Salaire mensuel', readonly=True, store=True)
+    monthly_salary = fields.Float(string='Salaire mensuel', tracking=True)
     
     # Editable fields specific to this module
     payroll_site = fields.Selection([
         ('mediouna', 'Mediouna'),
-        ('casa', 'Casa')
+        ('casa', 'Casa'),
+        ('agadir', 'Agadir')
     ], string='Site de Paie', default='mediouna', required=True, tracking=True)
     
     # Relations

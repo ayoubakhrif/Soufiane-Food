@@ -26,3 +26,12 @@ class CompanyArticle(models.Model):
         string='Catégorie',
         required=True
     )
+
+    value = fields.Float(
+        string='Valeur',
+        required=True
+    )
+
+    nomenclature = fields.Char(
+        string='Nomenclature'
+    )

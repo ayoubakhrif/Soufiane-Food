@@ -87,7 +87,8 @@
         <field name="name">transport.trip.tree</field>
         <field name="model">transport.trip</field>
         <field name="arch" type="xml">
-            <tree string="Transport Trips" decoration-success="is_paid" decoration-info="not is_paid">
+            <tree string="Transport Trips" decoration-success="is_paid" decoration-info="is_checked">
+                <field name="is_checked" widget="boolean_toggle"/>
                 <field name="date"/>
                 <field name="driver_id"/>
                 <field name="client_id"/>
@@ -101,6 +102,7 @@
                 <field name="charge_mixed"/>
                 <field name="total_amount" sum="Total charges"/>
                 <field name="profit" sum="Bénéfice"/>
+                <field name="create_date" string="Date de création" optional="show"/>
                 <field name="is_paid" widget="boolean_toggle" decoration-success="is_paid" decoration-danger="not is_paid"/>
             </tree>
         </field>

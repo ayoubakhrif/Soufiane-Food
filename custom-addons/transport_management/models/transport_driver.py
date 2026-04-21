@@ -11,6 +11,8 @@ class TransportDriver(models.Model):
         domain="[('job_position_id.name', 'ilike', 'Chauffeur')]",
         help="Linked HR Employee. Filtered by job position 'Chauffeur'."
     )
+    remorque = fields.Boolean(string='Remorque', default=False)
+
     
     current_monthly_salary = fields.Float(
         string='Salaire Actuel', 

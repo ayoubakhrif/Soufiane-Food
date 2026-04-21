@@ -50,7 +50,7 @@
                             <field name="week"/>
                             <field name="regime"/>
                             <field name="facture_sutra"/>
-                            <field name="scan_sutra" widget="url"/>
+                            <field name="scan_sutra"/>
                             <separator string="Charges"/>
                             <field name="honoraires"/>
                             <field name="temsa"/>
@@ -77,7 +77,7 @@
                         </group>
                     </group>
                     <separator string="Historique"/>
-                        <div class="oe_chatter">
+                    <div class="oe_chatter" groups="finance.group_finance_user">
                         <field name="message_follower_ids" widget="mail_followers"/>
                         <field name="message_ids" widget="mail_thread"/>
                     </div>
@@ -125,6 +125,11 @@
     <menuitem id="menu_finance_sutra"
               name="Sutra"
               parent="menu_finance_sutra_marglory_root"
+              sequence="10"/>
+
+    <menuitem id="menu_finance_sutra_dossier"
+              name="Dossiers"
+              parent="menu_finance_sutra"
               action="action_finance_sutra"
               sequence="10"/>
 

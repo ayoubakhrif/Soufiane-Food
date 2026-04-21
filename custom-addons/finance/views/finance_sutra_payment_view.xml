@@ -6,7 +6,8 @@
         <field name="arch" type="xml">
             <tree string="Paiements Sutra" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'">
                 <field name="date"/>
-                <field name="cheque_id"/>
+                <field name="physical_cheque_id"/>
+                <field name="reglementation"/>
                 <field name="amount_total" sum="Total"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'"/>
             </tree>
@@ -26,7 +27,8 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="cheque_id" readonly="state != 'draft'" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="physical_cheque_id" readonly="state != 'draft'" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="cheque_id" invisible="1"/>
                         </h1>
                     </div>
                     <group>
@@ -36,6 +38,7 @@
                         </group>
                         <group>
                             <field name="amount_total"/>
+                            <field name="reglementation" readonly="state != 'draft'"/>
                         </group>
                     </group>
                     <notebook>
@@ -51,7 +54,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
+                 <div class="oe_chatter" groups="finance.group_finance_user">
                      <field name="message_follower_ids"/>
                      <field name="activity_ids"/>
                      <field name="message_ids"/>
@@ -68,7 +71,7 @@
 
     <menuitem id="menu_finance_sutra_payment"
               name="Paiements"
-              parent="menu_finance_sutra_marglory_root"
+              parent="menu_finance_sutra"
               action="action_finance_sutra_payment"
               sequence="20"/>
 </odoo>

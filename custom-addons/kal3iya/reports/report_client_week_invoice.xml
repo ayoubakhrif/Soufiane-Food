@@ -49,11 +49,17 @@
                         .section-sorties {
                             background: #4c51bf;
                         }
+                        .section-sorties-supp {
+                            background: #ed8936;
+                        }
                         .section-retours {
                             background: #e53e3e;
                         }
                         .section-avances {
                             background: #38a169;
+                        }
+                        .section-impayes {
+                            background: #d69e2e;
                         }
                         .section-recap {
                             background: #2d3748;
@@ -145,6 +151,7 @@
                             <thead>
                                 <tr>
                                     <th>Date</th>
+                                    <th>Stock</th>
                                     <th>Produit</th>
                                     <th>Quantite</th>
                                     <th>Poids (Kg)</th>
@@ -157,17 +164,47 @@
                                 <t t-foreach="week_data['sorties']" t-as="sortie">
                                     <tr>
                                         <td><t t-esc="sortie.date_exit"/></td>
+                                        <td><t t-esc="dict(sortie._fields['ville'].selection).get(sortie.ville, sortie.ville)"/></td>
                                         <td><t t-esc="sortie.product_id.name"/></td>
                                         <td><t t-esc="sortie.quantity"/></td>
                                         <td><t t-esc="sortie.weight"/></td>
                                         <td><t t-esc="sortie.tonnage_final or sortie.tonnage"/></td>
-                                        <td><t t-esc="sortie.selling_price_final or sortie.selling_price"/> Dh</td>
-                                        <td class="amount"><t t-esc="sortie.mt_vente_final or sortie.mt_vente"/> Dh</td>
+                                        <td><t t-esc="wizard.format_amount(sortie.selling_price_final or sortie.selling_price)"/> Dh</td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(sortie.mt_vente_final or sortie.mt_vente)"/> Dh</td>
                                     </tr>
                                 </t>
                                 <tr class="total-row">
-                                    <td colspan="6" style="text-align: right;">TOTAL SORTIES:</td>
-                                    <td class="amount"><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</td>
+                                    <td colspan="7" style="text-align: right;">TOTAL SORTIES:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_sorties'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- Section Sorties Supp -->
+                    <t t-if="week_data.get('sorties_supp')">
+                        <div class="section-title section-sorties-supp">
+                             SORTIES SUPPLEMENTAIRES
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['sorties_supp']" t-as="supp">
+                                    <tr>
+                                        <td><t t-esc="supp.date"/></td>
+                                        <td><t t-esc="supp.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(supp.amount)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">TOTAL SORTIES SUPP:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -199,12 +236,12 @@
                                         <td><t t-esc="retour.weight"/></td>
                                         <td><t t-esc="retour.tonnage"/></td>
                                         <td><t t-esc="retour.selling_price"/> Dh</td>
-                                        <td class="amount"><t t-esc="'%.2f' % (retour.selling_price * retour.tonnage)"/> Dh</td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(retour.selling_price * retour.tonnage)"/> Dh</td>
                                     </tr>
                                 </t>
                                 <tr class="total-row">
                                     <td colspan="6" style="text-align: right;">TOTAL RETOURS:</td>
-                                    <td class="amount"><t t-esc="'%.2f' % week_data['total_retours']"/> Dh</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_retours'])"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -232,48 +269,85 @@
                                         <td><t t-esc="avance.driver_id.name if avance.driver_id else '-'"/></td>
                                         <td><t t-esc="dict(avance._fields['payment_mode'].selection).get(avance.payment_mode, '-')"/></td>
                                         <td><t t-esc="avance.comment or '-'"/></td>
-                                        <td class="amount"><t t-esc="'%.2f' % avance.amount"/> Dh</td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(avance.amount)"/> Dh</td>
                                     </tr>
                                 </t>
                                 <tr class="total-row">
                                     <td colspan="4" style="text-align: right;">TOTAL AVANCES:</td>
-                                    <td class="amount"><t t-esc="'%.2f' % week_data['total_avances']"/> Dh</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_avances'])"/> Dh</td>
                                 </tr>
                             </tbody>
                         </table>
                     </t>
 
-                    <!-- Récapitulatif -->
+                    <!-- Section Impayés -->
+                    <t t-if="week_data.get('impayes')">
+                        <div class="section-title section-impayes">
+                             IMPAYÉS DE LA SEMAINE
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['impayes']" t-as="impaye">
+                                    <tr>
+                                        <td><t t-esc="impaye.date"/></td>
+                                        <td><t t-esc="impaye.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(impaye.amount)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">TOTAL IMPAYÉS:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- Recapitulatif -->
                     <div class="section-title section-recap">
                          RECAPITULATIF FINANCIER
                     </div>
                     <div class="recap-box">
                         <div class="recap-line">
                             <span>Total Sorties:</span>
-                            <span><t t-esc="'%.2f' % week_data['total_sorties']"/> Dh</span>
+                            <span><t t-esc="wizard.format_amount(week_data['total_sorties'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Total Sorties Supp:</span>
+                            <span>+ <t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Total Impayés:</span>
+                            <span>+ <t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
                             <span>Total Retours:</span>
-                            <span>- <t t-esc="'%.2f' % week_data['total_retours']"/> Dh</span>
+                            <span>- <t t-esc="wizard.format_amount(week_data['total_retours'])"/> Dh</span>
                         </div>
                         <div class="recap-line">
                             <span>Total Avances:</span>
-                            <span>- <t t-esc="'%.2f' % week_data['total_avances']"/> Dh</span>
+                            <span>- <t t-esc="wizard.format_amount(week_data['total_avances'])"/> Dh</span>
                         </div>
                         <!-- GRAND TOTAL CLIENT -->
                         <div class="big-total-box">
                             COMPTE DE LA SEMAINE :  
-                            <t t-esc="'%.2f' % week_data['compte_semaine']"/> Dh
+                            <t t-esc="wizard.format_amount(week_data['compte_semaine'])"/> Dh
                         </div>
                         <div class="recap-line recap-total">
                             <span>COMPTE TOTAL:</span>
-                            <span><t t-esc="'%.2f' % week_data['compte_total']"/> Dh</span>
+                            <span><t t-esc="wizard.format_amount(week_data['compte_total'])"/> Dh</span>
                         </div>
                     </div>
 
                     <!-- Pied de page -->
                     <div class="footer-note">
-                        Document genere automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>
+                        Document genere automatiquement - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y a %H:%M')"/>
                     </div>
                 </div>
             </t>

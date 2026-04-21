@@ -62,10 +62,37 @@
               sequence="1"/>
 
     <!-- MENU -->
-    <menuitem id="menu_management_dashboard_root"
-              name="Analyses"
+    <!-- ACTIONS FOR SPECIFIC DASHBOARDS -->
+    <record id="action_dashboard_profit_client" model="ir.actions.act_window">
+        <field name="name">Bénéfice par Client</field>
+        <field name="res_model">management.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="dashboards.dashboard_profit_client"/>
+    </record>
+
+    <record id="action_dashboard_profit_product" model="ir.actions.act_window">
+        <field name="name">Bénéfice par Produit</field>
+        <field name="res_model">management.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="dashboards.dashboard_profit_product"/>
+    </record>
+
+    <!-- MENU STRUCTURE -->
+    <menuitem id="menu_benefit_control_root"
+              name="Benefit Control"
               parent="menu_dashboards_root"
-              action="action_management_dashboard"
-              sequence="0"/>
+              sequence="10"/>
+
+    <menuitem id="menu_dashboard_profit_client"
+              name="Profit par Client"
+              parent="menu_benefit_control_root"
+              action="action_dashboard_profit_client"
+              sequence="1"/>
+
+    <menuitem id="menu_dashboard_profit_product"
+              name="Profit par Produit"
+              parent="menu_benefit_control_root"
+              action="action_dashboard_profit_product"
+              sequence="2"/>
 
 </odoo>

@@ -11,6 +11,7 @@
                 <field name="supplier_id"/>
                 <field name="ste_id"/>
                 <field name="article_id"/>
+                <field name="legacy_article_id" optional="hide"/>
                 <field name="quantity_negotiated" sum="Total Negotiated"/>
                 <field name="quantity_consumed" sum="Total Consumed"/>
                 <field name="quantity_remaining" sum="Total Remaining"/>
@@ -41,9 +42,13 @@
                             <field name="supplier_id"/>
                             <field name="ste_id"/>
                             <field name="article_id"/>
+                            <field name="legacy_article_id"/>
                             <field name="details"/>
                             <field name="incoterm"/>
                             <field name="origin_id"/>
+                            <field name="total_amount"/>
+                            <field name="amount_advanced" groups="achat.group_purchase_manager"/>
+                            <field name="amount_residual" decoration-danger="amount_residual &lt; 0"/>
                         </group>
                         <group string="Quantities &amp; Conditions">
                             <field name="quantity_negotiated"/>
@@ -56,6 +61,15 @@
                         </group>
                     </group>
                     <notebook>
+                        <page string="Advances" groups="achat.group_purchase_manager">
+                            <field name="advance_ids" readonly="1">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="document_link" widget="url" text="View Doc"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page string="Related Dossiers">
                             <field name="dossier_ids" readonly="1">
                                 <tree>

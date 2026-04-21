@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_casa_client_invoice" model="ir.actions.report">
+        <field name="name">Facture Hebdomadaire Client (Hanane)</field>
+        <field name="model">casa_hanane.client.invoice.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">casa_stock_hanane.report_casa_client_invoice_document</field>
+        <field name="report_file">casa_stock_hanane.report_casa_client_invoice_document</field>
+        <field name="binding_model_id" ref="model_casa_hanane_client_invoice_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_casa_client_invoice_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-set="client" t-value="wizard.client_id"/>
+                <t t-set="week_data" t-value="client._get_week_data(wizard.week)"/>
+                
+                <div class="page">
+                    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+                    <style>
+                        .invoice-header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            border-bottom: 3px solid #2563eb;
+                            padding-bottom: 20px;
+                        }
+                        .invoice-title {
+                            font-size: 32px;
+                            font-weight: bold;
+                            color: #2563eb;
+                            margin-bottom: 10px;
+                        }
+                        .client-info {
+                            font-size: 18px;
+                            color: #1f2937;
+                            margin: 5px 0;
+                        }
+                        .section-title {
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: white;
+                            padding: 10px 15px;
+                            margin-top: 25px;
+                            margin-bottom: 15px;
+                            border-radius: 8px;
+                        }
+                        .section-sorties { background: #2563eb; }
+                        .section-avances { background: #059669; }
+                        .section-impayes { background: #d97706; }
+                        .section-recap { background: #1f2937; }
+                        
+                        .data-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                        }
+                        .data-table th {
+                            background: #f3f4f6;
+                            padding: 10px;
+                            text-align: left;
+                            font-weight: bold;
+                            border: 1px solid #e5e7eb;
+                        }
+                        .data-table td {
+                            padding: 8px;
+                            border: 1px solid #f3f4f6;
+                        }
+                        .total-row {
+                            background: #f9fafb !important;
+                            font-weight: bold;
+                            font-size: 16px;
+                        }
+                        .amount { text-align: right; font-weight: bold; }
+                        
+                        .recap-box {
+                            background: #f9fafb;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin-top: 30px;
+                        }
+                        .recap-line {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 8px 0;
+                            font-size: 16px;
+                        }
+                        .recap-total {
+                            border-top: 3px solid #2563eb;
+                            margin-top: 10px;
+                            padding-top: 15px;
+                            font-size: 20px;
+                            font-weight: bold;
+                            color: #2563eb;
+                        }
+                        .footer-note {
+                            text-align: center;
+                            margin-top: 40px;
+                            padding-top: 20px;
+                            border-top: 1px solid #e5e7eb;
+                            color: #6b7280;
+                            font-size: 12px;
+                        }
+                    </style>
+
+                    <div class="invoice-header">
+                        <div class="invoice-title"> FACTURE HEBDOMADAIRE (HANANE)</div>
+                        <div class="client-info"><strong>Client:</strong> <t t-esc="client.name"/></div>
+                        <div class="client-info"><strong>Semaine:</strong> <t t-esc="week_data['week']"/></div>
+                        <div class="client-info">
+                            <strong>Periode:</strong> Du <t t-esc="week_data['start_date']"/> au <t t-esc="week_data['end_date']"/>
+                        </div>
+                    </div>
+
+                    <!-- Section Sorties -->
+                    <t t-if="week_data['sorties']">
+                        <div class="section-title section-sorties"> COMMANDES DE LA SEMAINE</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Produit</th>
+                                    <th>Quantite</th>
+                                    <th>Tonnage</th>
+                                    <th>Prix Unitaire</th>
+                                    <th class="amount">Montant</th>
+                                    <th class="amount">Reduction</th>
+                                    <th class="amount">Net a Payer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['sorties']" t-as="sortie">
+                                    <tr>
+                                        <td><t t-esc="sortie.date"/></td>
+                                        <td><t t-esc="sortie.product_id.name"/></td>
+                                        <td><t t-esc="sortie.qty"/></td>
+                                        <td><t t-esc="sortie.tonnage"/></td>
+                                        <td><t t-esc="wizard.format_amount(sortie.price_sale)"/> Dh</td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(sortie.mt_vente)"/> Dh</td>
+                                        <td class="amount" style="color:#dc2626;"><t t-esc="wizard.format_amount(sortie.discount_amount)"/> Dh</td>
+                                        <td class="amount" style="color:#059669;"><t t-esc="wizard.format_amount(sortie.mt_vente_final)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="7" style="text-align: right;">TOTAL NET COMMANDES:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_net_sorties'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- Section Avances -->
+                    <t t-if="week_data['avances']">
+                        <div class="section-title section-avances"> AVANCES DE LA SEMAINE</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Mode</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['avances']" t-as="avance">
+                                    <tr>
+                                        <td><t t-esc="avance.date"/></td>
+                                        <td><t t-esc="dict(avance._fields['payment_mode'].selection).get(avance.payment_mode, '-')"/></td>
+                                        <td><t t-esc="avance.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(avance.amount)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="3" style="text-align: right;">TOTAL AVANCES:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_avances'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- Section Impayes -->
+                    <t t-if="week_data['impayes']">
+                        <div class="section-title section-impayes"> IMPAYES DE LA SEMAINE</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['impayes']" t-as="impaye">
+                                    <tr>
+                                        <td><t t-esc="impaye.date"/></td>
+                                        <td><t t-esc="impaye.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(impaye.amount)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">TOTAL IMPAYES:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- Section Sorties Supp -->
+                    <t t-if="week_data['sorties_supp']">
+                        <div class="section-title" style="background:#4b5563;"> SORTIES SUPPLEMENTAIRES</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                    <th class="amount">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="week_data['sorties_supp']" t-as="supp">
+                                    <tr>
+                                        <td><t t-esc="supp.date"/></td>
+                                        <td><t t-esc="supp.comment or '-'"/></td>
+                                        <td class="amount"><t t-esc="wizard.format_amount(supp.amount)"/> Dh</td>
+                                    </tr>
+                                </t>
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">TOTAL SORTIES SUPP:</td>
+                                    <td class="amount"><t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <!-- Recapitulatif -->
+                    <div class="section-title section-recap"> RECAPITULATIF FINANCIER</div>
+                    <div class="recap-box">
+                        <div class="recap-line">
+                            <span>Commandes (Net):</span>
+                            <span><t t-esc="wizard.format_amount(week_data['total_net_sorties'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Total Impayes:</span>
+                            <span>+ <t t-esc="wizard.format_amount(week_data['total_impayes'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Sorties Supp:</span>
+                            <span>+ <t t-esc="wizard.format_amount(week_data['total_sorties_supp'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line">
+                            <span>Total Avances:</span>
+                            <span>- <t t-esc="wizard.format_amount(week_data['total_avances'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line recap-total">
+                            <span>SOLDE DE LA SEMAINE:</span>
+                            <span><t t-esc="wizard.format_amount(week_data['compte_semaine'])"/> Dh</span>
+                        </div>
+                        <div class="recap-line" style="font-weight:bold; margin-top:10px;">
+                            <span>COMPTE TOTAL CLIENT (SOLDE FINAL):</span>
+                            <span><t t-esc="wizard.format_amount(week_data['compte_total'])"/> Dh</span>
+                        </div>
+                    </div>
+
+                    <div class="footer-note">
+                        Document genere automatiquement le <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y a %H:%M')"/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

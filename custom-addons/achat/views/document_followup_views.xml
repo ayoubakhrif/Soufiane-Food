@@ -71,7 +71,7 @@
                         <field name="comment" readonly="state == 'confirmed'"/>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
+                <div class="oe_chatter" groups="achat.group_purchase_manager">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>

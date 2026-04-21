@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View Form -->
+    <record id="view_ste_change_form" model="ir.ui.view">
+        <field name="name">ste.change.form</field>
+        <field name="model">ste.change</field>
+        <field name="arch" type="xml">
+            <form string="Changement de Société">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="entry_id" options="{'no_create': True}" context="{'show_bl_number': True}"/>
+                            <field name="invoice_number"/>
+                        </group>
+                        <group string="Société">
+                            <field name="old_ste_id" force_save="1"/>
+                            <field name="new_ste_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Incoterm">
+                            <field name="old_incoterm" force_save="1"/>
+                            <field name="new_incoterm"/>
+                        </group>
+                    </group>
+                    <group string="Informations Automatiques">
+                        <group>
+                            <field name="date_change"/>
+                            <field name="supplier_id"/>
+                        </group>
+                        <group>
+                            <field name="eta"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- View Tree -->
+    <record id="view_ste_change_tree" model="ir.ui.view">
+        <field name="name">ste.change.tree</field>
+        <field name="model">ste.change</field>
+        <field name="arch" type="xml">
+            <tree string="Changements de Société / Incoterm">
+                <field name="entry_id" context="{'show_bl_number': True}"/>
+                <field name="invoice_number"/>
+                <field name="old_ste_id"/>
+                <field name="new_ste_id"/>
+                <field name="old_incoterm" optional="show"/>
+                <field name="new_incoterm" optional="show"/>
+                <field name="date_change" optional="show"/>
+                <field name="supplier_id" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- View Search -->
+    <record id="view_ste_change_search" model="ir.ui.view">
+        <field name="name">ste.change.search</field>
+        <field name="model">ste.change</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Changement de Société">
+                <field name="invoice_number"/>
+                <field name="entry_id"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_ste_change" model="ir.actions.act_window">
+        <field name="name">Ste Change</field>
+        <field name="res_model">ste.change</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau changement de société
+            </p>
+        </field>
+    </record>
+
+    <!-- MenuItem -->
+    <menuitem id="menu_ste_change"
+              name="Ste Change"
+              parent="achat.menu_achat_root"
+              action="action_ste_change"
+              groups="achat.group_purchase_manager,achat.group_achat_compta"
+              sequence="9"/>
+</odoo>

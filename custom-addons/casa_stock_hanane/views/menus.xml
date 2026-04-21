@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- References menu_casa_stock_root from views/root_menu.xml -->
+    <menuitem id="menu_casa_stock_stock"
+              name="Stock"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_stock"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_entry"
+              name="Entrées"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_entry"
+              sequence="20"/>
+
+    <menuitem id="menu_casa_stock_order"
+              name="Commandes"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_order"
+              sequence="35"/>
+
+    <menuitem id="menu_casa_stock_autres"
+              name="Autres"
+              parent="menu_casa_stock_root"
+              sequence="60"/>
+
+    <menuitem id="menu_casa_other_sale"
+              name="Autres Ventes"
+              parent="menu_casa_stock_autres"
+              action="action_casa_other_sale"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_return"
+              name="Retours Clients"
+              parent="menu_casa_stock_autres"
+              action="action_casa_stock_return"
+              sequence="20"/>
+
+    <menuitem id="menu_casa_stock_exit"
+              name="Sorties"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_exit"
+              sequence="30"/>
+
+    <menuitem id="menu_casa_stock_transfer"
+              name="Transferts"
+              parent="menu_casa_stock_autres"
+              action="action_casa_stock_transfer"
+              sequence="30"/>
+
+    <menuitem id="menu_casa_stock_discount"
+              name="Réductions"
+              parent="menu_casa_stock_autres"
+              action="action_casa_stock_discount"
+              sequence="40"/>
+
+    <menuitem id="menu_casa_stock_move"
+              name="Mouvements"
+              parent="menu_casa_stock_audit"
+              action="action_casa_stock_move"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_product"
+              name="Produits"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_product"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_client"
+              name="Clients"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_client"
+              sequence="45"/>
+
+    <menuitem id="menu_casa_stock_advance"
+              name="Avances"
+              parent="menu_casa_stock_root"
+              action="action_casa_client_advance"
+              sequence="46"/>
+
+    <menuitem id="menu_casa_stock_provider"
+              name="Fournisseurs"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_provider"
+              sequence="30"/>
+
+    <menuitem id="menu_casa_stock_driver"
+              name="Chauffeurs"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_driver"
+              sequence="40"/>
+
+    <menuitem id="menu_casa_stock_ste"
+              name="Sociétés"
+              parent="menu_casa_stock_data"
+              action="action_casa_stock_ste"
+              sequence="50"/>
+
+    <menuitem id="menu_casa_stock_perte_hanane" 
+              name="Pertes Hanane" 
+              parent="menu_casa_stock_autres" 
+              action="action_casa_stock_perte_hanane" 
+              sequence="50"/>
+</odoo>

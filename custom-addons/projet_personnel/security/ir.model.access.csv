@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_projet_item_user,projet_item_user,model_projet_item,group_user,1,1,1,0
+access_projet_item_manager,projet_item_manager,model_projet_item,group_manager,1,1,1,1
+access_projet_item_color_user,projet_item_color_user,model_projet_item_color,group_user,1,1,1,0
+access_projet_item_color_manager,projet_item_color_manager,model_projet_item_color,group_manager,1,1,1,1
+access_projet_achat_user,projet_achat_user,model_projet_achat,group_user,1,1,1,0
+access_projet_achat_manager,projet_achat_manager,model_projet_achat,group_manager,1,1,1,1
+access_projet_stock_user,projet_stock_user,model_projet_stock,group_user,1,1,1,0
+access_projet_stock_manager,projet_stock_manager,model_projet_stock,group_manager,1,1,1,1
+access_projet_vente_user,projet_vente_user,model_projet_vente,group_user,1,1,1,0
+access_projet_vente_manager,projet_vente_manager,model_projet_vente,group_manager,1,1,1,1
+access_projet_vente_line_user,projet_vente_line_user,model_projet_vente_line,group_user,1,1,1,0
+access_projet_vente_line_manager,projet_vente_line_manager,model_projet_vente_line,group_manager,1,1,1,1

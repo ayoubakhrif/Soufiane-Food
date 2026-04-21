@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_suivi_transport_root"
+              name="Suivi Transport"
+              web_icon="suivi_transport,static/description/icon.png"
+              groups="suivi_transport.group_suivi_user,suivi_transport.group_suivi_manager"
+              sequence="25"/> <!-- Positioned somewhat near transport or logistique -->
+
+    <!-- Operations Menu -->
+    <menuitem id="menu_suivi_transport_operations"
+              name="Opérations"
+              parent="menu_suivi_transport_root"
+              action="action_suivi_operation"
+              sequence="10"/>
+
+    <!-- Data Menu -->
+    <menuitem id="menu_suivi_transport_data"
+              name="Données"
+              parent="menu_suivi_transport_root"
+              sequence="20"/>
+
+    <!-- Data Sub-menus -->
+    <menuitem id="menu_suivi_chauffeurs"
+              name="Chauffeurs"
+              parent="menu_suivi_transport_data"
+              action="action_suivi_chauffeur"
+              sequence="10"/>
+
+    <menuitem id="menu_suivi_clients"
+              name="Clients"
+              parent="menu_suivi_transport_data"
+              action="action_suivi_client"
+              sequence="20"/>
+</odoo>

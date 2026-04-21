@@ -18,6 +18,7 @@ class StockKal3iyaReturn(models.Model):
     garage = fields.Selection(related='exit_id.garage', store=True, string='Garage')
     soufiane_client = fields.Selection([
         ('soufiane', 'Soufiane'),
+        ('hamza', 'Hamza'),
     ], string='Soufiane?', related='exit_id.soufiane_client')
     client_id = fields.Many2one('stock.kal3iya.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('stock.kal3iya.ste', related='exit_id.ste_id', store=True, string='Société')
@@ -28,9 +29,9 @@ class StockKal3iyaReturn(models.Model):
     date = fields.Date(string='Date de Retour', default=fields.Date.context_today, required=True)
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     qty = fields.Float(string='Quantité Retournée', required=True)
-    weight = fields.Float(related='exit_id.weight', string='Poids unit (Kg)', readonly=True)
+    weight = fields.Float(related='exit_id.weight', string='Poids unit (Kg)', readonly=True, store=True)
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
-    
+            
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('done', 'Confirmé'),

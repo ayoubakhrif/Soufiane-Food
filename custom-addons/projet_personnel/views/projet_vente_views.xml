@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Projet Vente Views -->
+    <record id="view_projet_vente_tree" model="ir.ui.view">
+        <field name="name">projet.vente.tree</field>
+        <field name="model">projet.vente</field>
+        <field name="arch" type="xml">
+            <tree string="Commandes de Vente">
+                <field name="command_number"/>
+                <field name="date"/>
+                <field name="total_prix_vente" sum="Total Vente"/>
+                <field name="total_benefice_reel" sum="Bénéfice Réel"/>
+                <field name="total_benefice_percent" avg="Bénéfice Réel %"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_projet_vente_form" model="ir.ui.view">
+        <field name="name">projet.vente.form</field>
+        <field name="model">projet.vente</field>
+        <field name="arch" type="xml">
+            <form string="Commande de Vente">
+                <header>
+                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="command_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date" readonly="state == 'done'"/>
+                        </group>
+                        <group>
+                            <field name="total_prix_vente"/>
+                            <field name="total_benefice_reel"/>
+                            <field name="total_benefice_percent" widget="percentage"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Articles Vendus">
+                            <field name="line_ids" readonly="state == 'done'">
+                                <tree editable="bottom">
+                                    <field name="stock_id" options="{'no_create': True}"/>
+                                    <field name="item_id"/>
+                                    <field name="color_id"/>
+                                    <field name="quantite"/>
+                                    <field name="prix_achat" column_invisible="True"/>
+                                    <field name="prix_vente"/>
+                                    <field name="benefice_reel"/>
+                                    <field name="benefice_percent" widget="percentage"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_projet_vente" model="ir.actions.act_window">
+        <field name="name">Commandes de Vente</field>
+        <field name="res_model">projet.vente</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_projet_vente"
+              name="Ventes"
+              parent="menu_projet_operations"
+              action="action_projet_vente"
+              sequence="20"/>
+</odoo>

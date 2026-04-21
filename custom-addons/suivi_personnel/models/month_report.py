@@ -32,7 +32,7 @@ class SuiviMonthReport(models.Model):
 
     line_ids = fields.One2many('suivi.month.report.line', 'report_id', string='Détail par Catégorie', readonly=True)
 
-    @api.depends('period_id')
+    @api.depends('period_id', 'period_id.date_start', 'period_id.date_end')
     def _compute_period_details(self):
         for rec in self:
             if rec.period_id:

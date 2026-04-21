@@ -107,19 +107,19 @@ class ProductStock(models.Model):
             # 4️⃣ Calcul FINAL
             stock.quantity = entry_qty + returns_qty - sorties_qty
 
-            # 5️⃣ Archivage automatique
-            stock.active = stock.quantity > 0
+            # 5️⃣ Archivage automatique (garder actif même si négatif pour détection d'erreurs)
+            stock.active = stock.quantity != 0
 
 
     @api.model
     def update_stock_archive_status(self):
         """Archive ou désarchive automatiquement les produits selon leur quantité"""
-        # Archiver les produits avec 0 ou moins
-        zero_stocks = self.search([('quantity', '<=', 0), ('active', '=', True)])
+        # Archiver uniquement les produits avec exactement 0 en stock
+        zero_stocks = self.search([('quantity', '=', 0), ('active', '=', True)])
         zero_stocks.write({'active': False})
 
-        # Réactiver les produits qui reviennent en stock
-        active_stocks = self.search([('quantity', '>', 0), ('active', '=', False)])
+        # Réactiver les produits qui reviennent en stock positif OU qui ont une erreur (négatif)
+        active_stocks = self.search([('quantity', '!=', 0), ('active', '=', False)])
         active_stocks.write({'active': True})
 
     @api.depends('quantity', 'weight')

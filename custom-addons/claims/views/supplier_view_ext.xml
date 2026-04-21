@@ -11,7 +11,7 @@
                         <field name="dhl_claim_ids" readonly="1">
                             <tree create="false" delete="false" edit="false">
                                 <field name="bl_id"/>
-                                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
+                                <field name="state" widget="badge" decoration-info="state in ('initial', 'received')" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
                                 <field name="responsible_id"/>
                                 <field name="eta_planned"/>
                                 <field name="eta_dhl"/>
@@ -25,7 +25,7 @@
                         <field name="franchise_claim_ids" readonly="1">
                             <tree decoration-muted="state == 'closed'">
                                 <field name="bl_id"/>
-                                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
+                                <field name="state" widget="badge" decoration-info="state in ('initial', 'received')" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'"/>
                                 <field name="responsible_id"/>
                                 <field name="franchise_confirmed"/>
                                 <field name="franchise_found"/>

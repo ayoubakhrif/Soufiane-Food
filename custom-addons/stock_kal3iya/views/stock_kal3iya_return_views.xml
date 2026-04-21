@@ -58,6 +58,7 @@
                             <field name="dum"/>
                             <field name="garage"/>
                             <field name="calibre"/>
+                            <field name="weight"/>
                         </group>
                     </group>
                 </sheet>

@@ -6,14 +6,14 @@
         <field name="arch" type="xml">
             <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
-                <field name="name"/>
-                <field name="company_article_id"/>
                 <field name="product_id"/>
+                <field name="calibre"/>
                 <field name="ste_id"/>
                 <field name="qty"/>
                 <field name="weight"/>
                 <field name="tonnage"/>
-                <field name="price_purchase"/>
+                <field name="dum"/>
+                <field name="lot"/>
                 <field name="driver_id"/>
                 <field name="garage"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
@@ -29,6 +29,7 @@
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
                     <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state != 'done'"/>
+                    <button name="action_open_dum" string="Ouvrir DUM" type="object" class="btn-secondary" invisible="not dum"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
                 </header>
                 <sheet>
@@ -87,12 +88,25 @@
         </field>
     </record>
 
+    <record id="view_stock_kal3iya_entry_pivot" model="ir.ui.view">
+        <field name="name">stock.kal3iya.entry.pivot</field>
+        <field name="model">stock.kal3iya.entry</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Entrées Stock Kal3iya">
+                <field name="date" interval="month" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="ste_id" type="col"/>
+                <field name="qty" type="measure"/>
+                <field name="weight" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="view_stock_kal3iya_entry_search" model="ir.ui.view">
         <field name="name">stock.kal3iya.entry.search</field>
         <field name="model">stock.kal3iya.entry</field>
         <field name="arch" type="xml">
             <search string="Recherche Entrées">
-                <field name="name"/>
                 <field name="product_id"/>
                 <field name="ste_id"/>
                 <field name="lot"/>
@@ -117,7 +131,7 @@
     <record id="action_stock_kal3iya_entry" model="ir.actions.act_window">
         <field name="name">Entrées Stock Kal3iya</field>
         <field name="res_model">stock.kal3iya.entry</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
     </record>
 </odoo>
 

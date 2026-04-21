@@ -17,8 +17,9 @@ class LogistiqueEntry(models.Model):
         # })
         
         # MARGLORY: Keeps auto-creation for now
-        self.env['finance.marglory'].sudo().create({
-            'douane_id': record.id,
-        })
+        # DISABLE 18/02/2026: User requested manual creation only
+        # self.env['finance.marglory'].sudo().create({
+        #     'douane_id': record.id,
+        # })
         
         return record

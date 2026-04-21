@@ -17,9 +17,10 @@
                     </group>
                     <notebook>
                         <page string="Conteneurs">
-                            <field name="container_ids" widget="one2many_list">
-                                <tree editable="bottom">
-                                    <field name="name"/>
+                            <field name="entry_ids" readonly="1">
+                                <tree>
+                                    <field name="bl_number" string="BL"/>
+                                    <field name="container_names" string="Conteneurs"/>
                                 </tree>
                             </field>
                         </page>
@@ -31,7 +32,7 @@
                                     <field name="beneficiary_id"/>
                                     <field name="type"/>
                                     <field name="amount"/>
-                                    <field name="ste_id" readonly="1"/>
+                                    <field name="ste_id"/>
                                 </tree>
                             </field>
                         </page>
@@ -44,6 +45,19 @@
                                     <field name="type"/>
                                     <field name="amount"/>
                                     <field name="ste_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Sutra">
+                            <field name="sutra_ids">
+                                <tree editable="bottom">
+                                    <field name="dossier_id" column_invisible="1"/>
+                                    <field name="amount"/>
+                                    <field name="invoice"/>
+                                    <field name="date"/>
+                                    <field name="user_id"/>
+                                    <field name="type"/>
+                                    <field name="beneficiary_id"/>
                                 </tree>
                             </field>
                         </page>
@@ -73,6 +87,7 @@
                 <field name="container_names" string="Conteneur"/>
                 <field name="prov_number"/>
                 <field name="def_number"/>
+                <field name="cheque_ids" string="Numéro Chèque" filter_domain="[('cheque_ids.cheque_serie', 'ilike', self)]"/>
             </search>
         </field>
     </record>

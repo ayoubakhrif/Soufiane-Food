@@ -1,5 +1,5 @@
-from odoo import models, fields, api
-
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 class AchatContract(models.Model):
     _name = 'achat.contract'
     _description = 'Purchase Contract'
@@ -13,7 +13,8 @@ class AchatContract(models.Model):
     ste_id = fields.Many2one('logistique.ste', string='Company', required=True)
     
     # Agreement Details
-    article_id = fields.Many2one('logistique.article', string='Article', required=True)
+    legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
+    article_id = fields.Many2one('achat.article', string='Article', required=True)
     incoterm = fields.Selection([
         ('cfr', 'CFR'),
         ('fob', 'FOB'),
@@ -29,6 +30,14 @@ class AchatContract(models.Model):
     weight_total = fields.Float(string='Total Weight')
     free_time_negotiated = fields.Integer(string='Negotiated Free Time')
     
+    # Financial Terms
+    total_amount = fields.Float(string='Total Contract Amount', digits=(16, 2))
+    
+    # Advance Tracking
+    advance_ids = fields.One2many('achat.contract.advance', 'contract_id', string='Advances')
+    amount_advanced = fields.Float(string='Total Advanced', compute='_compute_advances', store=True)
+    amount_residual = fields.Float(string='Remaining Amount', compute='_compute_advances', store=True)
+    
     # State Management
     state = fields.Selection([
         ('open', 'Open'),
@@ -42,6 +51,13 @@ class AchatContract(models.Model):
     quantity_consumed = fields.Integer(string='Consumed Containers', compute='_compute_consumption', store=True)
     quantity_remaining = fields.Integer(string='Remaining Containers', compute='_compute_consumption', store=True)
 
+    @api.depends('advance_ids.amount', 'total_amount')
+    def _compute_advances(self):
+        for rec in self:
+            total_adv = sum(adv.amount for adv in rec.advance_ids)
+            rec.amount_advanced = total_adv
+            rec.amount_residual = rec.total_amount - total_adv
+
     @api.depends('dossier_ids', 'dossier_ids.container_count', 'quantity_negotiated')
     def _compute_consumption(self):
         for rec in self:
@@ -54,7 +70,19 @@ class AchatContract(models.Model):
     @api.depends('quantity_remaining')
     def _compute_state(self):
         for rec in self:
-            # Auto-close if fully consumed, but allow manual override if user re-opens
-            if rec.quantity_remaining <= 0 and rec.state == 'open':
+            if rec.quantity_remaining <= 0:
                 rec.state = 'closed'
+            else:
+                rec.state = 'open'
             # Note: We don't auto-open because user might manually close a contract early
+
+    def write(self, vals):
+        if self.env.user.has_group('achat.group_achat_article_correcteur') and not self.env.user.has_group('achat.group_purchase_manager') and not self.env.user.has_group('achat.group_purchase_admin'):
+            allowed_fields = {'article_id'}
+            attempted_fields = set(vals.keys())
+            unauthorized_fields = attempted_fields - allowed_fields
+            
+            if unauthorized_fields:
+                raise UserError(_("En tant qu'« Article correcteur », vous n'êtes autorisé à modifier que l'article sur ce contrat."))
+
+        return super(AchatContract, self).write(vals)

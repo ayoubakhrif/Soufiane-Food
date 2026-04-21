@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tresorerie_client_user,tresorerie.client user,model_tresorerie_client,group_tresorerie_user,1,1,1,0
+access_tresorerie_client_manager,tresorerie.client manager,model_tresorerie_client,group_tresorerie_manager,1,1,1,1
+access_tresorerie_paiement_user,tresorerie.paiement user,model_tresorerie_paiement,group_tresorerie_user,1,1,1,0
+access_tresorerie_paiement_manager,tresorerie.paiement manager,model_tresorerie_paiement,group_tresorerie_manager,1,1,1,1
+access_tresorerie_sortie_user,tresorerie.sortie user,model_tresorerie_sortie,group_tresorerie_user,1,1,1,0
+access_tresorerie_sortie_manager,tresorerie.sortie manager,model_tresorerie_sortie,group_tresorerie_manager,1,1,1,1
+access_tresorerie_analyse_report_user,tresorerie.analyse.report user,model_tresorerie_analyse_report,group_tresorerie_user,1,0,0,0
+access_tresorerie_analyse_report_manager,tresorerie.analyse.report manager,model_tresorerie_analyse_report,group_tresorerie_manager,1,0,0,0
+access_tresorerie_effets_owner_user,tresorerie.effets.owner user,model_tresorerie_effets_owner,group_tresorerie_user,1,1,1,0
+access_tresorerie_effets_owner_manager,tresorerie.effets.owner manager,model_tresorerie_effets_owner,group_tresorerie_manager,1,1,1,1
+access_tresorerie_paiement_cheque_line_user,tresorerie.paiement.cheque.line user,model_tresorerie_paiement_cheque_line,group_tresorerie_user,1,1,1,0
+access_tresorerie_paiement_cheque_line_manager,tresorerie.paiement.cheque.line manager,model_tresorerie_paiement_cheque_line,group_tresorerie_manager,1,1,1,1

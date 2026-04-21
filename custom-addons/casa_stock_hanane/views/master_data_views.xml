@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Action -->
+    <!-- Product Views -->
+    <record id="view_casa_product_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.product.tree</field>
+        <field name="model">casa_hanane.product</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="article_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_casa_product_form" model="ir.ui.view">
+        <field name="name">casa_hanane.product.form</field>
+        <field name="model">casa_hanane.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_product_report" string="Stock Produit" type="object" class="oe_highlight"/>
+                    <button name="action_generate_general_report" string="Stock General" type="object"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du produit (Calibre)"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="article_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Traductions" name="traductions" groups="casa_stock_hanane.group_user,casa_stock_hanane.group_viewer">
+                             <div class="alert alert-info" role="alert" style="margin-bottom: 20px;">
+                                <i class="fa fa-info-circle"/> 
+                                <strong>Note:</strong> Ces traductions sont partagées par tous les calibres de cet article.
+                             </div>
+                             <field name="alias_ids">
+                                <tree editable="bottom">
+                                    <field name="name" string="Alias (Darija / Arabe)"/>
+                                </tree>
+                             </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_casa_stock_product" model="ir.actions.act_window">
+        <field name="name">Produits</field>
+        <field name="res_model">casa_hanane.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+    <!-- Provider Action -->
+    <record id="action_casa_stock_provider" model="ir.actions.act_window">
+        <field name="name">Fournisseurs</field>
+        <field name="res_model">casa_hanane.provider</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Driver Views -->
+    <record id="view_casa_driver_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.driver.tree</field>
+        <field name="model">casa_hanane.driver</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="phone"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_casa_stock_driver" model="ir.actions.act_window">
+        <field name="name">Chauffeurs</field>
+        <field name="res_model">casa_hanane.driver</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- STE Views -->
+    <record id="view_casa_ste_tree" model="ir.ui.view">
+        <field name="name">casa_hanane.ste.tree</field>
+        <field name="model">casa_hanane.ste</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="core_ste_id"/>
+                <field name="address"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_casa_stock_ste" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">casa_hanane.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

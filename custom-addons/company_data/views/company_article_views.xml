@@ -9,6 +9,7 @@
             <tree>
                 <field name="display_name"/>
                 <field name="name"/>
+                <field name="nomenclature"/>
             </tree>
         </field>
     </record>
@@ -24,6 +25,8 @@
                         <field name="image" widget="image"/>
                         <field name="display_name"/>
                         <field name="name"/>
+                        <field name="nomenclature"/>
+                        <field name="value"/>
                     </group>
                     <group string="Classification">
                         <field name="category_id"/>
@@ -81,7 +84,7 @@
                                 <div class="o_kanban_tags_section mb-2 flex-grow-1">
                                     <span class="badge" style="background-color: rgba(102, 126, 234, 0.1); color: #667eea; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 500;">
                                         <i class="fa fa-tag mr-1"/>
-                                        <field name="name"/>
+                                        <field name="value"/>
                                     </span>
                                 </div>
 

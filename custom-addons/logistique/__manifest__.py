@@ -1,6 +1,6 @@
 {
     'name': 'Logistique',
-    'version': '1.0',
+    'version': '1.1',
     'summary': 'Gestion des entrées logistiques et des conteneurs',
     'description': """
         Module pour gérer les dossiers logistiques et le suivi des conteneurs.
@@ -10,7 +10,7 @@
     """,
     'category': 'Operations',
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'mail', 'custom_employee'],
+    'depends': ['base', 'mail', 'custom_employee', 'company_data'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -27,6 +27,8 @@
         'views/surest_mag_views.xml',
         'views/surest_mag_menus.xml',
         'views/menus.xml',
+        'data/server_actions.xml',
+        'data/cron_terminal49.xml',
     ],
     'installable': True,
     'application': True,

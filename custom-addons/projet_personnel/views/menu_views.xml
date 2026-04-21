@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Top menu item -->
+    <menuitem id="menu_projet_personnel_root"
+              name="Projet Personnel"
+              web_icon="projet_personnel,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_projet_operations"
+              name="Opérations"
+              parent="menu_projet_personnel_root"
+              sequence="10"/>
+
+    <menuitem id="menu_projet_stock"
+              name="Stock"
+              parent="menu_projet_personnel_root"
+              sequence="20"/>
+
+    <menuitem id="menu_projet_configuration"
+              name="Configuration"
+              parent="menu_projet_personnel_root"
+              sequence="30"/>
+</odoo>

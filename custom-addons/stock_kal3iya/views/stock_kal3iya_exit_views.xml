@@ -4,12 +4,14 @@
         <field name="name">stock.kal3iya.exit.tree</field>
         <field name="model">stock.kal3iya.exit</field>
         <field name="arch" type="xml">
-            <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+            <tree create="false" decoration-info="is_checked" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+                <field name="is_checked" widget="boolean_toggle"/>
                 <field name="date"/>
                 <field name="ste_id"/>
                 <field name="product_id"/>
                 <field name="weight"/>
                 <field name="qty"/>
+                <field name="returned_qty"/>
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="soufiane_client"/>
@@ -62,6 +64,7 @@
                         </group>
                         <group string="Quantités &amp; Prix">
                             <field name="qty"/>
+                            <field name="returned_qty"/>
                             <field name="weight" readonly="1" force_save="1"/>
                             <field name="tonnage"/>
 

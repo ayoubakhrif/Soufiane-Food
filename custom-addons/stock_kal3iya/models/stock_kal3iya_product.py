@@ -21,6 +21,12 @@ class StockKal3iyaProduct(models.Model):
         readonly=True
     )
 
+    alias_ids = fields.One2many(
+        related='company_article_id.alias_ids',
+        readonly=False,
+        string='Traductions Darija'
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'Le nom interne doit être unique.')
     ]

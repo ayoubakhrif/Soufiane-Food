@@ -30,6 +30,11 @@ class ClaimsFranchiseDifference(models.Model):
         tracking=True
     )
     claim_date = fields.Date(string='Date de création', default=fields.Date.context_today, readonly=True)
+    date_received = fields.Date(string='Date Received', readonly=True, tracking=True)
+    date_waiting = fields.Date(string='Date Waiting', readonly=True, tracking=True)
+    date_refused = fields.Date(string='Date Refused', readonly=True, tracking=True)
+    date_resolved = fields.Date(string='Date Resolved', readonly=True, tracking=True)
+    date_closed = fields.Date(string='Date Closed', readonly=True, tracking=True)
 
     # Auto-filled (Read-only, from BL)
     company_id = fields.Many2one(related='bl_id.ste_id', string='Société', readonly=True, store=True)
@@ -58,6 +63,11 @@ class ClaimsFranchiseDifference(models.Model):
         required=True,
         tracking=True
     )
+
+    @api.onchange('bl_id')
+    def _onchange_bl_id(self):
+        if self.bl_id and self.bl_id.contract_id:
+             self.franchise_confirmed = self.bl_id.contract_id.free_time_negotiated
     franchise_found = fields.Float(
         string='Franchise Found',
         required=True,
@@ -104,6 +114,7 @@ class ClaimsFranchiseDifference(models.Model):
         ('initial', 'Initial'),
         ('received', 'Received'),
         ('waiting', 'Waiting Supplier Response'),
+        ('refused', 'Refusé'),
         ('resolved', 'Resolved'),
         ('closed', 'Closed'),
     ], string='Status', default='initial', required=True, tracking=True)
@@ -115,7 +126,7 @@ class ClaimsFranchiseDifference(models.Model):
     @api.depends('franchise_confirmed', 'franchise_found')
     def _compute_difference(self):
         for rec in self:
-            rec.franchise_difference = rec.franchise_found - rec.franchise_confirmed
+            rec.franchise_difference = (rec.franchise_found - rec.franchise_confirmed) + 1
 
     @api.constrains('franchise_confirmed', 'franchise_found')
     def _check_difference(self):
@@ -132,25 +143,43 @@ class ClaimsFranchiseDifference(models.Model):
         for rec in self:
             rec.responsible_id = self.env.user
             rec.state = 'received'
+            rec.date_received = fields.Date.context_today(self)
 
     def action_send_supplier(self):
         """Received -> Waiting"""
         self._check_responsibility()
-        self.write({'state': 'waiting'})
+        self.write({
+            'state': 'waiting',
+            'date_waiting': fields.Date.context_today(self)
+        })
 
     def action_resolve(self):
         """Waiting -> Resolved"""
         self._check_responsibility()
         if not self.evidence_link:
              raise ValidationError("You must provide an evidence link before resolving this claim.")
-        self.write({'state': 'resolved'})
+        self.write({
+            'state': 'resolved',
+            'date_resolved': fields.Date.context_today(self)
+        })
 
     def action_close(self):
-        """Resolved -> Closed"""
-        self._check_responsibility()
+        """Resolved -> Closed. Admin only."""
         if not self.env.user.has_group('claims.group_claims_manager'):
             raise UserError("Only Administrators can close claims.")
-        self.write({'state': 'closed'})
+        self.write({
+            'state': 'closed',
+            'date_closed': fields.Date.context_today(self)
+        })
+
+    def action_refuse(self):
+        """Waiting -> Refused. Admin only."""
+        if not self.env.user.has_group('claims.group_claims_manager'):
+            raise UserError("Only Administrators can refuse claims.")
+        self.write({
+            'state': 'refused',
+            'date_refused': fields.Date.context_today(self)
+        })
 
     def _check_responsibility(self):
         """Ensure only the responsible user can proceed."""
@@ -178,3 +207,17 @@ class ClaimsFranchiseDifference(models.Model):
                 'url': self.evidence_link,
                 'target': 'new',
             }
+
+    def action_previous_state(self):
+        """Action for Admin to revert the claim to the previous state."""
+        if not self.env.user.has_group('claims.group_claims_manager'):
+            raise UserError("Only Administrators can turn claims to the previous state.")
+        for rec in self:
+            if rec.state == 'received':
+                rec.write({'state': 'initial', 'date_received': False})
+            elif rec.state == 'waiting':
+                rec.write({'state': 'received', 'date_waiting': False})
+            elif rec.state in ['resolved', 'refused']:
+                rec.write({'state': 'waiting', 'date_resolved': False, 'date_refused': False})
+            elif rec.state == 'closed':
+                rec.write({'state': 'resolved', 'date_closed': False})

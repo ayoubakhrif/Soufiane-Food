@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_buffet_pack_user,buffet.pack,model_buffet_pack,group_gestion_buffets_user,1,0,0,0
+access_buffet_pack_manager,buffet.pack,model_buffet_pack,group_gestion_buffets_manager,1,1,1,1
+access_buffet_place_user,buffet.place,model_buffet_place,group_gestion_buffets_user,1,0,0,0
+access_buffet_place_manager,buffet.place,model_buffet_place,group_gestion_buffets_manager,1,1,1,1
+access_gestion_buffet_user,gestion.buffet,model_gestion_buffet,group_gestion_buffets_user,1,1,1,0
+access_gestion_buffet_manager,gestion.buffet,model_gestion_buffet,group_gestion_buffets_manager,1,1,1,1
+access_buffet_composant_user,buffet.composant,model_buffet_composant,group_gestion_buffets_user,1,0,0,0
+access_buffet_composant_manager,buffet.composant,model_buffet_composant,group_gestion_buffets_manager,1,1,1,1
+access_buffet_composant_line_user,buffet.composant.line,model_buffet_composant_line,group_gestion_buffets_user,1,1,1,0
+access_buffet_composant_line_manager,buffet.composant.line,model_buffet_composant_line,group_gestion_buffets_manager,1,1,1,1
+access_buffet_charge_user,buffet.charge,model_buffet_charge,group_gestion_buffets_user,1,1,1,0
+access_buffet_charge_manager,buffet.charge,model_buffet_charge,group_gestion_buffets_manager,1,1,1,1
+access_buffet_division_user,buffet.division,model_buffet_division,group_gestion_buffets_user,1,1,1,0
+access_buffet_division_manager,buffet.division,model_buffet_division,group_gestion_buffets_manager,1,1,1,1
+access_buffet_charge_jour_user,buffet.charge.jour,model_buffet_charge_jour,group_gestion_buffets_user,1,1,1,0
+access_buffet_charge_jour_manager,buffet.charge.jour,model_buffet_charge_jour,group_gestion_buffets_manager,1,1,1,1

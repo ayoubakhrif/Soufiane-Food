@@ -12,7 +12,9 @@ services:
     restart: always
 
   odoo:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile
     depends_on:
       - db
     ports:
@@ -23,6 +25,7 @@ services:
       DB_USER: odoo
       DB_PASSWORD: KB220166
     volumes:
+      - ./custom-addons:/mnt/extra-addons/custom-addons
       - ./kal3iya:/mnt/extra-addons/kal3iya
       - ./config:/etc/odoo
       - ./data:/var/lib/odoo

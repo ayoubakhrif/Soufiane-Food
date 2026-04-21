@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_finance_benif_summary" model="ir.actions.report">
+        <field name="name">Rapport Financier Bénéficiaire</field>
+        <field name="model">finance.benif</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance.report_finance_benif_summary_template</field>
+        <field name="report_file">finance.report_finance_benif_summary_template</field>
+        <field name="binding_model_id" ref="model_finance_benif"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_finance_benif_summary_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <style>
+                            .report-header { margin-bottom: 20px; }
+                            .header-row { display: flex; align-items: stretch; margin-bottom: 10px; }
+                            .date-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; width: 20%; text-align: center; }
+                            .beneficiary-box { background-color: #FF00FF; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; color: black; flex-grow: 1; text-align: center; }
+                            
+                            .section-header { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; text-align: center; text-transform: uppercase; margin-top: 20px; }
+                            
+                            .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+                            .data-table th { background-color: #FCE9DA; border: 1px solid black; padding: 8px; text-align: center; font-size: 13px; font-weight: bold; }
+                            .data-table td { border: 1px solid black; padding: 8px; text-align: center; font-size: 13px; }
+                            
+                            /* Gestia specific colors */
+                            .ste-cell { background-color: #6DA9DC; font-weight: bold; }
+                            .amount-cell { background-color: #FF9900; font-weight: bold; }
+                            .total-cell { background-color: #00FFFF; font-weight: bold; }
+                            
+                            .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            .summary-table td { border: 1px solid black; padding: 12px; text-align: center; font-size: 16px; font-weight: bold; }
+                            .label-peach { background-color: #FCE9DA; }
+                            .val-blue { background-color: #6DA9DC; }
+                            .val-orange { background-color: #FF9900; }
+                            .val-cyan { background-color: #00FFFF; }
+
+                            .footer { margin-top: 30px; font-style: italic; font-size: 10px; }
+                        </style>
+
+                        <!-- Header -->
+                        <div class="report-header">
+                            <div class="header-row">
+                                <div class="date-box">
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%y')"/>
+                                </div>
+                                <div class="beneficiary-box">
+                                    <t t-esc="o.name"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Table -->
+                        <table class="summary-table">
+                            <tr>
+                                <td class="label-peach">TOTAL CRÉDIT</td>
+                                <td class="label-peach">TOTAL ENCAISSÉ</td>
+                                <td class="label-peach">SOLDE</td>
+                            </tr>
+                            <tr>
+                                <td class="val-blue"><t t-esc="'{:,.2f}'.format(o.total_credit).replace(',', ' ')"/> DH</td>
+                                <td class="val-orange"><t t-esc="'{:,.2f}'.format(o.total_debit).replace(',', ' ')"/> DH</td>
+                                <td class="val-cyan"><t t-esc="'{:,.2f}'.format(o.solde).replace(',', ' ')"/> DH</td>
+                            </tr>
+                        </table>
+
+                        <!-- Cheque Counts Summary -->
+                        <t t-set="stats" t-value="o.get_cheque_stats()"/>
+                        <table class="summary-table" style="margin-top: -10px;">
+                            <tr>
+                                <td class="label-peach" style="width: 33%;">NB TOTAL CHÈQUES</td>
+                                <td class="label-peach" style="width: 33%;">NB CHÈQUES ENCAISSÉS</td>
+                                <td class="label-peach" style="width: 33%;">NB CHÈQUES RESTANTS</td>
+                            </tr>
+                            <tr>
+                                <td class="val-blue"><t t-esc="stats['total']"/></td>
+                                <td class="val-orange"><t t-esc="stats['encaisse']"/></td>
+                                <td class="val-cyan"><t t-esc="stats['non_encaisse']"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- Breakdown Section -->
+                        <div class="section-header">
+                            DÉTAIL PAR SOCIÉTÉ
+                        </div>
+                        
+                        <t t-set="breakdown" t-value="o.get_financial_breakdown()"/>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Société</th>
+                                    <th colspan="2">Encaissés</th>
+                                    <th colspan="2">Non Encaissés</th>
+                                    <th colspan="2">Global</th>
+                                </tr>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Montant</th>
+                                    <th>Nombre</th>
+                                    <th>Montant</th>
+                                    <th>Nombre</th>
+                                    <th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="breakdown" t-as="line">
+                                    <tr>
+                                        <td class="ste-cell" style="text-align: left;"><t t-esc="line['ste']"/></td>
+                                        <td style="background-color: #f2f2f2;"><t t-esc="line['count_encaisse']"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(line['encaisse']).replace(',', ' ')"/> DH</td>
+                                        <td style="background-color: #f2f2f2;"><t t-esc="line['count_non_encaisse']"/></td>
+                                        <td><t t-esc="'{:,.2f}'.format(line['non_encaisse']).replace(',', ' ')"/> DH</td>
+                                        <td class="total-cell"><t t-esc="line['count_total']"/></td>
+                                        <td class="total-cell"><t t-esc="'{:,.2f}'.format(line['total']).replace(',', ' ')"/> DH</td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+<div class="footer">
+                            Généré par Gestia ERP - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%H:%M:%S')"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

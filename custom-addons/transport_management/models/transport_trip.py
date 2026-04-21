@@ -43,6 +43,7 @@ class TransportTrip(models.Model):
         tracking=True
     )
     is_paid = fields.Boolean(string='Payé', default=False, tracking=True)
+    is_checked = fields.Boolean(string="Pointé", default=False)
     total_amount = fields.Float(
         string='Montant des charges',
         compute='_compute_total_amount',

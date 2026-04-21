@@ -9,13 +9,21 @@ class FinanceSutraPayment(models.Model):
 
     date = fields.Date(string='Date de paiement', default=fields.Date.context_today, required=True, tracking=True)
     
-    cheque_id = fields.Many2one(
-        'datacheque',
+    physical_cheque_id = fields.Many2one(
+        'finance.cheque.physical',
         string='Chèque',
         domain="[('benif_id.name', 'ilike', 'SUTRA')]",
-        required=True,
         tracking=True
     )
+
+    cheque_id = fields.Many2one(
+        'datacheque',
+        string='Chèque (Ancien)',
+        required=False, # Relax required to allow moving away
+        tracking=True
+    )
+
+    reglementation = fields.Char(string='Réglementation', tracking=True)
     
     sutra_ids = fields.Many2many(
         'finance.sutra',
@@ -40,7 +48,7 @@ class FinanceSutraPayment(models.Model):
         ('confirmed', 'Confirmé'),
     ], string='Status', default='draft', tracking=True)
     cheque_amount = fields.Float(
-        related='cheque_id.amount',
+        related='physical_cheque_id.amount_total',
         string='Montant du chèque',
         readonly=True,
         store=True

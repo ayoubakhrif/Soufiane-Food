@@ -15,7 +15,7 @@
                         <group>
                             <field name="type"/>
                             <field name="amount"/>
-                            <field name="ste_id" readonly="1" force_save="1"/>
+                            <field name="ste_id" force_save="1"/>
                             <field name="dossier_id" readonly="1" force_save="1"/>
                             <!-- Technical field hidden -->
                             <field name="entry_id" invisible="1"/>
@@ -36,9 +36,23 @@
                 <field name="beneficiary_id"/>
                 <field name="type"/>
                 <field name="amount"/>
-                <field name="ste_id" readonly="1"/>
+                <field name="ste_id"/>
                 <field name="dossier_id" readonly="1"/>
             </tree>
         </field>
     </record>
+    <record id="view_logistique_dossier_cheque_search" model="ir.ui.view">
+        <field name="name">logistique.dossier.cheque.search</field>
+        <field name="model">logistique.dossier.cheque</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Chèques">
+                <field name="cheque_serie"/>
+                <field name="amount"/>
+                <field name="ste_id"/>
+                <field name="dossier_id"/>
+                <field name="beneficiary_id"/>
+            </search>
+        </field>
+    </record>
+
 </odoo>

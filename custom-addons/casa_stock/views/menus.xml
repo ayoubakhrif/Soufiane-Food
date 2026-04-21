@@ -17,11 +17,46 @@
               action="action_casa_stock_entry"
               sequence="20"/>
 
+    <menuitem id="menu_casa_stock_order"
+              name="Commandes"
+              parent="menu_casa_stock_root"
+              action="action_casa_stock_order"
+              sequence="35"/>
+
+    <menuitem id="menu_casa_stock_autres"
+              name="Autres"
+              parent="menu_casa_stock_root"
+              sequence="60"/>
+
+    <menuitem id="menu_casa_other_sale"
+              name="Autres Ventes"
+              parent="menu_casa_stock_autres"
+              action="action_casa_other_sale"
+              sequence="10"/>
+
+    <menuitem id="menu_casa_stock_return"
+              name="Retours Clients"
+              parent="menu_casa_stock_autres"
+              action="action_casa_stock_return"
+              sequence="20"/>
+
     <menuitem id="menu_casa_stock_exit"
               name="Sorties"
               parent="menu_casa_stock_root"
               action="action_casa_stock_exit"
               sequence="30"/>
+
+    <menuitem id="menu_casa_stock_transfer"
+              name="Transferts"
+              parent="menu_casa_stock_autres"
+              action="action_casa_stock_transfer"
+              sequence="30"/>
+
+    <menuitem id="menu_casa_stock_discount"
+              name="Réductions"
+              parent="menu_casa_stock_autres"
+              action="action_casa_stock_discount"
+              sequence="40"/>
 
     <menuitem id="menu_casa_stock_audit"
               name="Audit Ledger"
@@ -49,9 +84,15 @@
 
     <menuitem id="menu_casa_stock_client"
               name="Clients"
-              parent="menu_casa_stock_data"
+              parent="menu_casa_stock_root"
               action="action_casa_stock_client"
-              sequence="20"/>
+              sequence="45"/>
+
+    <menuitem id="menu_casa_stock_advance"
+              name="Avances"
+              parent="menu_casa_stock_root"
+              action="action_casa_client_advance"
+              sequence="46"/>
 
     <menuitem id="menu_casa_stock_provider"
               name="Fournisseurs"
@@ -69,5 +110,11 @@
               name="Sociétés"
               parent="menu_casa_stock_data"
               action="action_casa_stock_ste"
+              sequence="50"/>
+
+    <menuitem id="menu_casa_stock_perte" 
+              name="Pertes" 
+              parent="menu_casa_stock_autres" 
+              action="action_casa_stock_perte" 
               sequence="50"/>
 </odoo>

@@ -41,15 +41,33 @@
                             invisible="state != 'received'"/>
                     <button name="action_resolve" string="Résolu" type="object"
                             invisible="state != 'waiting'"/>
+                    <button name="action_refuse" string="Refusé" type="object"
+                            invisible="state != 'waiting'"
+                            groups="claims.group_claims_manager"
+                            class="btn-danger"/>
                     <button name="action_close" string="Clôturé" type="object"
-                            invisible="state != 'resolved'"/>
+                            invisible="state != 'resolved'"
+                            groups="claims.group_claims_manager"/>
+                            
+                    <!-- Buttons for returning to previous state -->
+                    <button name="action_previous_state" string="Retour à Initial" type="object"
+                            invisible="state != 'received'"
+                            groups="claims.group_claims_manager"/>
+                    <button name="action_previous_state" string="Retour à Reçu" type="object"
+                            invisible="state != 'waiting'"
+                            groups="claims.group_claims_manager"/>
+                    <button name="action_previous_state" string="Retour à En Attente" type="object"
+                            invisible="state not in ('resolved', 'refused')"
+                            groups="claims.group_claims_manager"/>
+                    <button name="action_previous_state" string="Retour à Résolu" type="object"
+                            invisible="state != 'closed'"
+                            groups="claims.group_claims_manager"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="initial,received,waiting,resolved,closed"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_evidence" type="object" class="oe_stat_button" icon="fa-external-link" string="Open Evidence"
-                                groups="claims.group_claims_manager"
                                 invisible="not evidence_link"/>
                     </div>
                     <div class="oe_title">
@@ -71,7 +89,19 @@
                             <field name="missing_quantity" readonly="state != 'initial'"/>
                             <field name="amount_due" readonly="state in ('resolved', 'closed')"/>
                             <field name="can_see_evidence" invisible="1"/>
-                            <field name="evidence_link" widget="url" invisible="not can_see_evidence"/>
+                            <field name="evidence_link" widget="url"/>
+                        </group>
+                    </group>
+                    <group string="Dates Clés" col="2">
+                        <group>
+                            <field name="claim_date"/>
+                            <field name="date_received"/>
+                            <field name="date_waiting"/>
+                        </group>
+                        <group>
+                            <field name="date_resolved"/>
+                            <field name="date_refused"/>
+                            <field name="date_closed"/>
                         </group>
                     </group>
                     <group string="Follow-up">
@@ -81,7 +111,7 @@
                         <field name="comment_responsible" placeholder="Commentaire du responsable..." />
                     </group>
                     <separator string="Chatter"/>
-                        <div class="oe_chatter">
+                        <div class="oe_chatter" groups="claims.group_claims_manager">
                             <field name="message_follower_ids" widget="mail_followers"/>
                             <field name="message_ids" widget="mail_thread"/>
                         </div>
@@ -95,14 +125,14 @@
         <field name="name">claims.quantity.tree</field>
         <field name="model">claims.quantity</field>
         <field name="arch" type="xml">
-            <tree string="Quantity Claims" decoration-muted="state == 'closed'">
+            <tree string="Quantity Claims" decoration-muted="state == 'closed'" decoration-danger="state == 'refused'">
                 <field name="bl_id"/>
                 <field name="supplier_id"/>
                 <field name="missing_quantity"/>
                 <field name="amount_due"/>
                 <field name="create_uid" optional="hide"/>
                 <field name="responsible_id" optional="show"/>
-                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state in ('initial', 'received')" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'" decoration-danger="state == 'refused'" optional="show"/>
             </tree>
         </field>
     </record>

@@ -292,7 +292,8 @@ class Kal3iyaClient(models.Model):
                             <div class="week-total">{total_week:,.2f} Dh</div>
                         </div>
 
-                        <div class="table-header" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                        <div class="table-header" style="grid-template-columns: 0.8fr 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                            <div>Stock</div>
                             <div>Produit</div>
                             <div>Qté</div>
                             <div>Poids(Kg)</div>
@@ -305,7 +306,8 @@ class Kal3iyaClient(models.Model):
 
                 for s in records:
                     html += f"""
-                        <div class="list-row" style="grid-template-columns: 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                        <div class="list-row" style="grid-template-columns: 0.8fr 1.2fr 0.5fr 0.6fr 0.8fr 0.6fr 0.9fr 0.8fr;">
+                            <div class="col-label stock-ville">{dict(s._fields['ville'].selection).get(s.ville, s.ville)}</div>
                             <div class="col-label">{s.product_id.name}</div>
                             <div class="col-value">{s.quantity}</div>
                             <div class="col-value">{s.weight}</div>
@@ -505,8 +507,20 @@ class Kal3iyaClient(models.Model):
         )
         total_avances = sum(avances.mapped('amount'))
 
+        # 3.5️⃣ Filtrer sorties supp de la semaine
+        sorties_supp = self.sortie_supp_ids.filtered(
+            lambda s: s.date and s.date.strftime("%Y-W%W") == week
+        )
+        total_sorties_supp = sum(sorties_supp.mapped('amount'))
+
+        # 3.6️⃣ Filtrer impayés de la semaine (basé sur la date de l'impayé)
+        impayes = self.unpaid_ids.filtered(
+            lambda u: u.date and u.date.strftime("%Y-W%W") == week
+        )
+        total_impayes = sum(impayes.mapped('amount'))
+
         # 4️⃣ Compte de la semaine
-        compte_semaine = total_sorties - total_retours - total_avances
+        compte_semaine = total_sorties + total_sorties_supp + total_impayes - total_retours - total_avances
 
         # 5️⃣ Calculer les dates de début et fin de semaine
         start_date = None
@@ -541,9 +555,14 @@ class Kal3iyaClient(models.Model):
             'sorties': sorties,
             'retours': retours,
             'avances': avances,
+            'sorties_supp': sorties_supp,
+            'impayes': impayes,
             'total_sorties': total_sorties,
             'total_retours': total_retours,
             'total_avances': total_avances,
+            'total_sorties_supp': total_sorties_supp,
+            'total_impayes': total_impayes,
             'compte_semaine': compte_semaine,
             'compte_total': self.compte,
         }
+

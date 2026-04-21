@@ -16,5 +16,19 @@
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>
+        <record id="seq_casa_stock_transfer" model="ir.sequence">
+            <field name="name">Transfert Stock Casa</field>
+            <field name="code">casa.stock.transfer</field>
+            <field name="prefix">TRANS/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_casa_other_sale" model="ir.sequence">
+            <field name="name">Autre Vente Stock Casa</field>
+            <field name="code">casa.other.sale</field>
+            <field name="prefix">OTH/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
     </data>
 </odoo>

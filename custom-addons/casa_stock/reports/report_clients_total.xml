@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_casa_clients_total" model="ir.actions.report">
+        <field name="name">Situation Globale des Comptes Clients (PDF)</field>
+        <field name="model">casa.client</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">casa_stock.report_clients_total_template</field>
+        <field name="report_file">casa_stock.report_clients_total_template</field>
+        <field name="binding_model_id" ref="model_casa_client"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_clients_total_template">
+        <t t-call="web.html_container">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            
+            <t t-set="data" t-value="docs._get_total_clients_report_data()"/>
+            
+            <div class="page">
+                <style>
+                    .report-title {
+                        background-color: #4c51bf;
+                        color: white;
+                        text-align: center;
+                        padding: 15px;
+                        font-size: 24px;
+                        font-weight: bold;
+                        border: 2px solid black;
+                        margin-bottom: 20px;
+                    }
+                    .info-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 20px;
+                        font-size: 16px;
+                    }
+                    .client-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                    }
+                    .client-table th {
+                        background-color: #ebf4ff;
+                        border: 1px solid black;
+                        padding: 10px;
+                        text-align: left;
+                        font-size: 14px;
+                        color: #1a365d;
+                    }
+                    .client-table td {
+                        border: 1px solid black;
+                        padding: 8px;
+                        font-size: 14px;
+                    }
+                    .text-right { text-align: right; }
+                    .text-center { text-align: center; }
+                    .font-bold { font-weight: bold; }
+                    
+                    .grand-total-section {
+                        margin-top: 30px;
+                        border-top: 3px double black;
+                        padding-top: 10px;
+                    }
+                    .grand-total-table {
+                        width: 100%;
+                    }
+                    .total-value {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #c53030;
+                    }
+                    .footer-note {
+                        margin-top: 50px;
+                        font-style: italic;
+                        font-size: 10px;
+                        color: #718096;
+                        text-align: center;
+                    }
+                </style>
+
+                <div class="info-header">
+                    <div style="flex: 1;">
+                        <img src="/gestia_branding/static/src/img/Gestia_logo.png" style="max-height: 80px;"/>
+                    </div>
+                    <div style="flex: 1; text-align: right; padding-top: 20px;">
+                        <span>Date : <t t-esc="data['report_date']"/></span><br/>
+                        <span>Document : Inventaire des Soldes</span>
+                    </div>
+                </div>
+
+                <div class="report-title">
+                    SITUATION GLOBALE DES COMPTES CLIENTS
+                </div>
+
+                <table class="client-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">#</th>
+                            <th style="width: 55%;">Nom du Client</th>
+                            <th class="text-right" style="width: 35%;">Solde Actuel (Dh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="counter" t-value="1"/>
+                        <t t-foreach="data['clients']" t-as="client">
+                            <tr>
+                                <td class="text-center"><t t-esc="counter"/></td>
+                                <td><t t-esc="client['name']"/></td>
+                                <td class="text-right font-bold">
+                                    <t t-esc="'{0:,.2f}'.format(client['compte_provisoire'])"/> Dh
+                                </td>
+                            </tr>
+                            <t t-set="counter" t-value="counter + 1"/>
+                        </t>
+                    </tbody>
+                </table>
+
+                <div class="grand-total-section">
+                    <table class="grand-total-table">
+                        <tr>
+                            <td style="width: 60%; font-size: 18px; font-weight: bold;">SOLDE TOTAL A RECOUVRER :</td>
+                            <td style="width: 40%;" class="text-right total-value">
+                                <t t-esc="'{0:,.2f}'.format(data['grand_total'])"/> Dh
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="footer-note">
+                    Ce document est genere automatiquement par Gestia ERP.
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="article_id"/>
                 <field name="supplier_id"/>
+                <field name="origin_id"/>
                 <field name="price"/>
                 <field name="currency_id"/>
                 <field name="user_id"/>
@@ -23,7 +24,9 @@
                     <group>
                         <group string="Price Information">
                             <field name="article_id"/>
+                            <field name="details"/>
                             <field name="supplier_id"/>
+                            <field name="origin_id"/>
                             <field name="price"/>
                             <field name="currency_id"/>
                             <field name="date"/>
@@ -37,9 +40,53 @@
             </form>
         </field>
     </record>
+    <record id="view_achat_article_price_graph" model="ir.ui.view">
+        <field name="name">achat.article.price.graph</field>
+        <field name="model">achat.article.price</field>
+        <field name="arch" type="xml">
+            <graph string="Prix Fournisseurs" type="bar">
+                <field name="article_id" type="row"/>
+                <field name="supplier_id" type="col"/>
+                <field name="price" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_achat_article_price_pivot" model="ir.ui.view">
+        <field name="name">achat.article.price.pivot</field>
+        <field name="model">achat.article.price</field>
+        <field name="arch" type="xml">
+            <pivot string="Prix Fournisseurs" display_quantity="true">
+                <field name="article_id" type="row"/>
+                <field name="supplier_id" type="col"/>
+                <field name="origin_id" type="row"/>
+                <field name="price" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_achat_article_price_search" model="ir.ui.view">
+        <field name="name">achat.article.price.search</field>
+        <field name="model">achat.article.price</field>
+        <field name="arch" type="xml">
+            <search string="Supplier Prices">
+                <field name="article_id"/>
+                <field name="supplier_id"/>
+                <field name="origin_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Article" name="group_article" context="{'group_by': 'article_id'}"/>
+                    <filter string="Supplier" name="group_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Origin" name="group_origin" context="{'group_by': 'origin_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_achat_article_price" model="ir.actions.act_window">
         <field name="name">Supplier Prices</field>
         <field name="res_model">achat.article.price</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_achat_article_price_search"/>
     </record>
 </odoo>

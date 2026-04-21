@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View: gestion.buffet Tree -->
+    <record id="view_gestion_buffet_tree" model="ir.ui.view">
+        <field name="name">gestion.buffet.tree</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <tree string="Buffets">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="client_name"/>
+                <field name="place_id"/>
+                <field name="pack_id"/>
+                <field name="nbr_personne"/>
+                <field name="total_revenu" sum="Total"/>
+                <field name="benefice" sum="Bénéfice"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'confirmed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- View: gestion.buffet Form -->
+    <record id="view_gestion_buffet_form" model="ir.ui.view">
+        <field name="name">gestion.buffet.form</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <form string="Buffet">
+                <header>
+                    <button name="action_generate_excel" string="Générer Rapport Excel" type="object" class="oe_highlight" icon="fa-file-excel-o"/>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_done" string="Marquer comme Terminé" type="object" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_draft" string="Remettre en Brouillon" type="object" invisible="state not in ['cancel', 'confirmed']"/>
+                    <button name="action_cancel" string="Annuler" type="object" invisible="state in ['cancel', 'done']"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="client_name"/>
+                            <field name="date"/>
+                            <field name="place_id"/>
+                        </group>
+                        <group string="Détails du Buffet">
+                            <field name="pack_id"/>
+                            <field name="nbr_personne"/>
+                            <field name="prix_personne"/>
+                            <field name="avance"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Composants">
+                            <field name="composant_ids">
+                                <tree editable="bottom">
+                                    <field name="composant_id"/>
+                                    <field name="qty"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Charges">
+                            <field name="charge_ids">
+                                <tree editable="bottom">
+                                    <field name="categorie"/>
+                                    <field name="name"/>
+                                    <field name="amount" sum="Total Charges"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Division">
+                            <field name="division_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="percentage"/>
+                                    <field name="amount" sum="Total Part"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    
+                    <group class="oe_subtotal_footer oe_right" colspan="2" name="buffet_total">
+                        <field name="total_revenu"/>
+                        <field name="avance"/>
+                        <field name="total_charges"/>
+                        <field name="reste_a_payer" class="oe_subtotal_footer_separator"/>
+                        <field name="benefice" class="oe_subtotal_footer_separator"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- View: gestion.buffet Search -->
+    <record id="view_gestion_buffet_search" model="ir.ui.view">
+        <field name="name">gestion.buffet.search</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Buffets">
+                <field name="name"/>
+                <field name="client_name"/>
+                <field name="place_id"/>
+                <field name="pack_id"/>
+                
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmé" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <filter string="Terminé" name="done" domain="[('state','=','done')]"/>
+                
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by':'client_name'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by':'date'}"/>
+                    <filter string="Lieu" name="group_place" context="{'group_by':'place_id'}"/>
+                    <filter string="Pack" name="group_pack" context="{'group_by':'pack_id'}"/>
+                    <filter string="Statut" name="group_state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- View: gestion.buffet Kanban -->
+    <record id="view_gestion_buffet_kanban" model="ir.ui.view">
+        <field name="name">gestion.buffet.kanban</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="client_name"/>
+                <field name="date"/>
+                <field name="total_revenu"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click shadow-sm rounded-lg border-light mb-3">
+                            <div class="o_kanban_record_top mb-2">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title" style="font-size: 1.1rem; color: #2c3e50;">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <span class="badge rounded-pill" t-attf-class="bg-#{record.state.raw_value == 'done' ? 'success' : (record.state.raw_value == 'confirmed' ? 'warning' : (record.state.raw_value == 'cancel' ? 'danger' : 'info'))}">
+                                    <field name="state"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="mb-1">
+                                    <i class="fa fa-user mr-2" style="color: #7f8c8d;"/> <strong><field name="client_name"/></strong>
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    <i class="fa fa-calendar mr-2"/> <field name="date"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2 pt-2 border-top">
+                                <div class="oe_kanban_bottom_left">
+                                    <span class="font-weight-bold text-primary" style="font-size: 1rem;">
+                                        <field name="total_revenu" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- View: gestion.buffet Pivot -->
+    <record id="view_gestion_buffet_pivot" model="ir.ui.view">
+        <field name="name">gestion.buffet.pivot</field>
+        <field name="model">gestion.buffet</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Buffets" sample="1">
+                <field name="date" type="row" interval="month"/>
+                <field name="total_revenu" type="measure"/>
+                <field name="benefice" type="measure"/>
+                <field name="nbr_personne" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_gestion_buffet" model="ir.actions.act_window">
+        <field name="name">Buffets</field>
+        <field name="res_model">gestion.buffet</field>
+        <field name="view_mode">tree,kanban,form,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau buffet
+            </p>
+        </field>
+    </record>
+
+    <!-- Vues pour Charges Journalières -->
+    <record id="view_buffet_charge_jour_tree" model="ir.ui.view">
+        <field name="name">buffet.charge.jour.tree</field>
+        <field name="model">buffet.charge.jour</field>
+        <field name="arch" type="xml">
+            <tree string="Charges Journalières">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="amount" sum="Total"/>
+                <field name="total_jour" optional="show"/>
+                <field name="buffet_count"/>
+                <field name="amount_per_buffet"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_buffet_charge_jour_form" model="ir.ui.view">
+        <field name="name">buffet.charge.jour.form</field>
+        <field name="model">buffet.charge.jour</field>
+        <field name="arch" type="xml">
+            <form string="Charge Journalière">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Charges du <field name="date" required="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="amount"/>
+                        </group>
+                        <group>
+                            <field name="total_jour"/>
+                            <field name="buffet_count"/>
+                            <field name="amount_per_buffet"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_buffet_charge_jour" model="ir.actions.act_window">
+        <field name="name">Charges Par Jour</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">buffet.charge.jour</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

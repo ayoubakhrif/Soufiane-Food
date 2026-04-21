@@ -44,7 +44,9 @@ class StockKal3iyaTransfer(models.Model):
     
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société')
-
+    weight = fields.Float(string='Poids (Kg)')
+    calibre = fields.Char(string='Calibre')
+    
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('done', 'Confirmé'),
@@ -68,11 +70,44 @@ class StockKal3iyaTransfer(models.Model):
             if rec.garage_from == rec.garage_to:
                 raise UserError(_("Le garage de départ et d'arrivée doivent être différents."))
 
+            # Resolve Stock Info from Source (to ensure deduction instead of new line)
+            # Find the existing stock line to get the correct DUM, STE if not provided
+            # User REQUIRES matching by Weight as well.
+            domain = [
+                ('product_id', '=', rec.product_id.id),
+                ('lot', '=', rec.lot),
+                ('garage', '=', rec.garage_from),
+            ]
+            
+            # If weight is provided or even if 0, we try to match it if we want strict deduction.
+            # However, floating point comparison can be tricky.
+            # Let's assume strict equality for now as requested.
+            domain.append(('weight', '=', rec.weight))
+
+            if rec.dum:
+                domain.append(('dum', '=', rec.dum))
+            
+            # Search strictly first
+            stock_line = self.env['stock.kal3iya.stock'].search(domain, limit=1)
+            
+            if not stock_line:
+                raise UserError(_("Aucun stock trouvé pour ce produit, lot et poids dans le garage source."))
+            
+            if rec.qty > stock_line.quantity:
+                raise UserError(_(
+                    "Stock insuffisant pour le transfert!\n"
+                    "Disponible: %s, Demandé: %s"
+                ) % (stock_line.quantity, rec.qty))
+
+            val_dum = rec.dum
+            val_ste_id = rec.ste_id.id
+            val_weight = rec.weight
+            
             # 1. Create Move OUT
             move_out = self.env['stock.kal3iya.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
-                'dum': rec.dum,
+                'dum': val_dum,
                 'garage': rec.garage_from,
                 'qty': -rec.qty,
                 'move_type': 'transfer_out', # New Type
@@ -80,7 +115,9 @@ class StockKal3iyaTransfer(models.Model):
                 'date': rec.date,
                 'reference': rec.name,
                 'driver_id': rec.driver_id.id,
-                'ste_id': rec.ste_id.id,
+                'weight': val_weight,
+                'calibre': rec.calibre,
+                'ste_id': val_ste_id,
                 'res_model': 'stock.kal3iya.transfer',
                 'res_id': rec.id,
             })
@@ -89,15 +126,17 @@ class StockKal3iyaTransfer(models.Model):
             move_in = self.env['stock.kal3iya.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
-                'dum': rec.dum,
+                'dum': val_dum, # Keep same DUM
                 'garage': rec.garage_to,
                 'qty': rec.qty,
                 'move_type': 'transfer_in', # New Type
                 'state': 'done',
                 'date': rec.date,
                 'reference': rec.name,
+                'weight': val_weight,
+                'calibre': rec.calibre,
                 'driver_id': rec.driver_id.id,
-                'ste_id': rec.ste_id.id,
+                'ste_id': val_ste_id,
                 'res_model': 'stock.kal3iya.transfer',
                 'res_id': rec.id,
             })
@@ -131,6 +170,7 @@ class StockKal3iyaTransfer(models.Model):
                 'reference': f"{rec.name} (Annulation)",
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
+                'weight': rec.weight,
                 'res_model': 'stock.kal3iya.transfer',
                 'res_id': rec.id,
             })
@@ -148,6 +188,7 @@ class StockKal3iyaTransfer(models.Model):
                 'reference': f"{rec.name} (Annulation)",
                 'driver_id': rec.driver_id.id,
                 'ste_id': rec.ste_id.id,
+                'weight': rec.weight,
                 'res_model': 'stock.kal3iya.transfer',
                 'res_id': rec.id,
             })

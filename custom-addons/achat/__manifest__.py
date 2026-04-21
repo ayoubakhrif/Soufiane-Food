@@ -1,6 +1,6 @@
 {
     'name': 'Achat Management',
-    'version': '1.0',
+    'version': '1.4',
     'category': 'Purchase',
     'summary': 'Gestion des Achats et Dossiers Logistiques',
     'description': """
@@ -17,11 +17,15 @@
         'data/currency_data.xml',
         'views/purchase_entry_view.xml',
         'views/achat_contract_view.xml',
+        'views/ste_change_views.xml',
         'views/achat_enquete_view.xml',
         'views/achat_article_view.xml',
         'views/achat_origin_view.xml',
         'views/document_followup_views.xml',
+        'views/contract_advance_views.xml',
+        'views/operational_actions.xml',
         'views/menu.xml',
+
     ],
     'installable': True,
     'application': True,

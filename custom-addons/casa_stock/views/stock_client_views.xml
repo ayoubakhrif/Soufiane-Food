@@ -20,6 +20,22 @@
 
                     <!-- ✅ SMART BUTTON EN HAUT À DROITE -->
                     <div class="oe_button_box" name="button_box">
+                        <button name="%(casa_stock.casa_client_facture_wizard_action)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-print">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture Hebdo.</span>
+                            </div>
+                        </button>
+                        <button name="%(casa_stock.action_report_casa_client_history)d"
+                                type="action"
+                                class="oe_stat_button"
+                                icon="fa-file-pdf-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture total</span>
+                            </div>
+                        </button>
                         <button name="%(filtered_exit_action)d"
                                 type="action"
                                 class="oe_stat_button"
@@ -36,15 +52,28 @@
                             <field name="name" placeholder="Nom du client..."/>
                         </h1>
                         
-                        <div style="margin-top:10px;">
+                        <div style="margin-top:10px; display: flex; gap: 15px; flex-wrap: wrap;">
                             <span style="
-                                font-size:22px;
+                                font-size:18px;
                                 font-weight:700;
                                 color:#4c51bf;
                                 background:#ebf4ff;
-                                padding:10px 20px;
-                                border-radius:12px;
+                                padding:8px 15px;
+                                border-radius:10px;
                                 border:2px solid #4c51bf;
+                            ">
+                                📋 Solde Provisoire :
+                                <field name="compte_provisoire" widget="monetary"
+                                    options="{'currency_field': 'company_currency_id'}"/>
+                            </span>
+                            <span style="
+                                font-size:18px;
+                                font-weight:700;
+                                color:#059669;
+                                background:#ecfdf5;
+                                padding:8px 15px;
+                                border-radius:10px;
+                                border:2px solid #059669;
                             ">
                                 💰 Compte total :
                                 <field name="compte_total" widget="monetary"
@@ -57,6 +86,11 @@
                     <group>
                         <group string="Informations Client">
                             <field name="name"/>
+                            <field name="compte_initial"/>
+                        </group>
+                        <group string="Totaux Financiers">
+                            <field name="total_commandes" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="total_advances" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                         </group>
                     </group>
                     <notebook>
@@ -65,6 +99,93 @@
                             <field name="sorties_grouped_html"
                                 nolabel="1"
                                 readonly="1"/>
+                        </page>
+
+                        <page string="Réductions">
+                            <field name="discount_line_ids" readonly="1">
+                                <tree>
+                                    <field name="discount_id" string="Réf. Réduction"/>
+                                    <field name="exit_id" string="Sortie"/>
+                                    <field name="product_id" string="Produit"/>
+                                    <field name="qty" string="Qté"/>
+                                    <field name="price_sale" string="Prix Initial"/>
+                                    <field name="price_sale_final" string="Prix Final"/>
+                                    <field name="initial_amount" string="Montant Initial" sum="Total Initial"/>
+                                    <field name="discount_amount" string="Montant Réduction" sum="Total Réduction"/>
+                                    <field name="final_amount" string="Montant Final" sum="Total Final"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'draft'"
+                                           decoration-success="state == 'done'"
+                                           decoration-danger="state == 'cancel'"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Résumé Client">
+                            <field name="summary_html" nolabel="1" readonly="1"/>
+                        </page>
+
+                        <page string="Avances">
+                            <field name="advance_ids" nolabel="1">
+                                <tree editable="bottom" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'">
+                                    <field name="date"/>
+                                    <field name="payment_mode"/>
+                                    <field name="amount" sum="Total Avances"/>
+                                    <field name="comment"/>
+                                    <field name="state" widget="badge" 
+                                           decoration-success="state == 'confirmed'" 
+                                           decoration-info="state == 'draft'"/>
+                                    <button name="action_confirm" string="Valider" type="object" 
+                                            icon="fa-check" 
+                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
+                                            invisible="state == 'confirmed'"/>
+                                    <button name="action_draft" string="Remettre en brouillon" type="object" 
+                                            icon="fa-undo" 
+                                            groups="casa_stock.group_admin"
+                                            invisible="state == 'draft'"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Impayées">
+                            <field name="unpaid_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total Impayés"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Sorties supp">
+                            <field name="sortie_supp_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="Total Sorties Supp"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Entrer les réductions" name="discount_entry">
+                            <header>
+                                <button name="action_apply_discounts" 
+                                        type="object" 
+                                        string="Appliquer les réductions" 
+                                        class="btn-primary"
+                                        groups="casa_stock.group_admin,casa_stock.group_valid_admin"
+                                        confirm="Êtes-vous sûr de vouloir appliquer ces réductions ? Cela va créer des enregistrements confirmés pour chaque commande."/>
+                            </header>
+                            <field name="exits_to_discount_ids" nolabel="1">
+                                <tree editable="bottom" create="false" delete="false">
+                                    <field name="date" readonly="1"/>
+                                    <field name="order_id" string="Commande" readonly="1"/>
+                                    <field name="product_id" string="Produit" readonly="1"/>
+                                    <field name="qty" string="Qté" readonly="1"/>
+                                    <field name="tonnage" string="Tonnage" readonly="1"/>
+                                    <field name="price_sale" string="Prix Initial" readonly="1"/>
+                                    <field name="price_sale_corrected" string="Nouveau Prix" class="bg-info-light" style="font-weight: bold;"/>
+                                </tree>
+                            </field>
                         </page>
 
                         <!-- ✏️ (optionnel) saisie ailleurs -->
@@ -84,6 +205,8 @@
             <tree string="Clients Casa">
                 <field name="name"/>
                 <field name="exit_count" string="Nb. Commandes"/>
+                <field name="compte_provisoire" sum="Total Provisoire"/>
+                <field name="compte_total" sum="Total Solde"/>
             </tree>
         </field>
     </record>
@@ -109,7 +232,25 @@
                 <filter string="Sans commandes" 
                         name="without_orders" 
                         domain="[('exit_count','=',0)]"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'name'}"/>
+                </group>
             </search>
+        </field>
+    </record>
+
+    <record id="view_casa_client_pivot" model="ir.ui.view">
+        <field name="name">casa.client.pivot</field>
+        <field name="model">casa.client</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Clients">
+                <field name="name" type="row"/>
+                <field name="exit_count" type="measure"/>
+                <field name="total_client_discounts" type="measure"/>
+                <field name="compte_provisoire" type="measure"/>
+                <field name="compte_total" type="measure"/>
+                <field name="total_profit" type="measure"/>
+            </pivot>
         </field>
     </record>
 
@@ -119,7 +260,7 @@
     <record id="action_casa_stock_client" model="ir.actions.act_window">
         <field name="name">Clients Casa</field>
         <field name="res_model">casa.client</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créez votre premier client Casa
@@ -131,8 +272,98 @@
     </record>
 
     <!-- ========================= -->
-    <!-- 📁 MENU ITEM -->
+    <!-- ========================= -->
+    <!-- 📄 ADVANCE VIEWS -->
     <!-- ========================= -->
 
+    <record id="view_casa_client_advance_tree" model="ir.ui.view">
+        <field name="name">casa.client.advance.tree</field>
+        <field name="model">casa.client.advance</field>
+        <field name="arch" type="xml">
+            <tree string="Avances Clients" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'" multi_edit="1">
+                <field name="date"/>
+                <field name="client_id"/>
+                <field name="payment_mode"/>
+                <field name="amount" sum="Total Avances"/>
+                <field name="comment"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'confirmed'" 
+                       decoration-info="state == 'draft'"/>
+                <button name="action_confirm" string="Valider" type="object" 
+                        icon="fa-check" 
+                        groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
+                        invisible="state == 'confirmed'"/>
+                <button name="action_draft" string="Remettre en brouillon" type="object" 
+                        icon="fa-undo" 
+                        groups="casa_stock.group_admin"
+                        invisible="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_casa_client_advance_form" model="ir.ui.view">
+        <field name="name">casa.client.advance.form</field>
+        <field name="model">casa.client.advance</field>
+        <field name="arch" type="xml">
+            <form string="Avance Client">
+                <header>
+                    <button name="action_confirm" string="Valider" type="object" class="btn-primary" 
+                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
+                            invisible="state == 'confirmed'"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" 
+                            groups="casa_stock.group_admin"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="client_id"/>
+                            <field name="amount"/>
+                            <field name="payment_mode"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="comment"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_casa_client_advance_search" model="ir.ui.view">
+        <field name="name">casa.client.advance.search</field>
+        <field name="model">casa.client.advance</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Avances">
+                <field name="client_id"/>
+                <field name="comment"/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Validé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <separator/>
+                <filter string="Date" name="date" date="date"/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Mode de paiement" name="group_payment_mode" context="{'group_by': 'payment_mode'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_casa_client_advance" model="ir.actions.act_window">
+        <field name="name">Avances Clients</field>
+        <field name="res_model">casa.client.advance</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_casa_client_advance_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Enregistrez une nouvelle avance client.
+            </p>
+        </field>
+    </record>
 
 </odoo>

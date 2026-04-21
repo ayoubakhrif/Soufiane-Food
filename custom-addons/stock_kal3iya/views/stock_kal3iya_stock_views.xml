@@ -113,8 +113,18 @@
                                     </div>
                                     <div>
                                         🏷️ <b>Lot :</b> <field name="lot"/> | <b>DUM :</b> <field name="dum"/>
+                                        
+                                        <!-- DUM Indicator -->
+                                        <t t-if="record.dum.raw_value">
+                                            <t t-if="record.scan_dum.raw_value">
+                                                <span title="DUM Disponible" style="display:inline-block; width:10px; height:10px; background-color:#22c55e; border-radius:50%; margin-left:4px;"></span>
+                                            </t>
+                                            <t t-else="">
+                                                <span title="DUM Manquant (Drive)" style="display:inline-block; width:10px; height:10px; background-color:#ef4444; border-radius:50%; margin-left:4px;"></span>
+                                            </t>
+                                        </t>
                                         <!-- DUM Link Button -->
-                                        <t t-if="record.scan_dum.raw_value">
+                                        <t t-if="record.dum.raw_value">
                                             <a type="object" name="action_open_dum" class="btn btn-sm btn-link pt-0 pb-0" style="font-size: 12px;" target="_blank">
                                                 <i class="fa fa-external-link"/> Ouvrir DUM
                                             </a>
@@ -143,6 +153,7 @@
                 <field name="product_id"/>
                 <field name="lot"/>
                 <field name="dum"/>
+                <button name="action_open_dum" string="Ouvrir DUM" type="object" icon="fa-external-link" class="btn-sm btn-link" invisible="not dum"/>
                 <field name="garage"/>
                 <field name="ste_id"/>
                 <field name="quantity" sum="Total Quantité"/>
@@ -160,7 +171,8 @@
             <form string="Ligne de Stock" create="false" edit="false">
                 <header>
                     <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary"/>
-                    <button name="action_open_dum" string="DUM" type="object" class="btn-secondary" invisible="not scan_dum"/>
+                    <button name="action_new_transfer" string="Nouveau Transfert" type="object" class="btn-primary"/>
+                    <button name="action_open_dum" string="DUM" type="object" class="btn-secondary"/>
                     <button name="action_open_invoice" string="Facture" type="object" class="btn-secondary" invisible="not scan_invoice"/>
                 </header>
                 <sheet>

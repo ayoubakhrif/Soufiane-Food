@@ -25,19 +25,17 @@ class LogistiqueDossier(models.Model):
         store=True,
     )
 
-    @api.depends('container_ids.name')
+    @api.depends('entry_ids.container_ids.name')
     def _compute_container_names(self):
         for rec in self:
-            rec.container_names = ', '.join(
-                rec.container_ids.mapped('name')
-            )
+            containers = rec.entry_ids.mapped('container_ids')
+            rec.container_names = ', '.join(containers.mapped('name'))
     
     # DUM Info (Refactored to douane module)
     # dum = fields.Char...
     # dum_ids = fields.Char...
     
     # One2many relationships
-    container_ids = fields.One2many('logistique.container', 'dossier_id', string='Conteneurs')
     cheque_ids = fields.One2many('logistique.dossier.cheque', 'dossier_id', string='Chèques')
     entry_ids = fields.One2many('logistique.entry', 'dossier_id', string='Entrées Logistiques')
     deduction_ids = fields.One2many(
@@ -49,6 +47,11 @@ class LogistiqueDossier(models.Model):
         'logistique.dossier.transfer',
         'dossier_id',
         string='Virements'
+    )
+    sutra_ids = fields.One2many(
+        'logistique.dossier.sutra',
+        'dossier_id',
+        string='Sutra'
     )
     container_count = fields.Integer(
         string="Nb Conteneurs",
@@ -77,11 +80,17 @@ class LogistiqueDossier(models.Model):
         compute="_compute_charges",
         store=True
     )
+    fret_amount = fields.Float(
+        string="Fret",
+        compute="_compute_charges",
+        store=True
+    )
 
-    @api.depends('container_ids', 'cheque_ids')
+    @api.depends('entry_ids.container_ids', 'cheque_ids')
     def _compute_counts(self):
         for dossier in self:
-            dossier.container_count = len(dossier.container_ids)
+            all_containers = dossier.entry_ids.mapped('container_ids')
+            dossier.container_count = len(all_containers)
             dossier.cheque_count = len(dossier.cheque_ids)
 
     @api.depends(
@@ -91,6 +100,8 @@ class LogistiqueDossier(models.Model):
         'deduction_ids.type',
         'transfer_ids.amount',
         'transfer_ids.type',
+        'sutra_ids.amount',
+        'sutra_ids.type',
     )
     def _compute_charges(self):
         for rec in self:
@@ -126,7 +137,26 @@ class LogistiqueDossier(models.Model):
                 t.amount for t in rec.transfer_ids if t.type == 'magasinage'
             )
 
+            # --- Sutra ---
+            surestarie_sutra = sum(
+                s.amount for s in rec.sutra_ids if s.type == 'surestarie'
+            )
+            thc_sutra = sum(
+                s.amount for s in rec.sutra_ids if s.type == 'thc'
+            )
+            magasinage_sutra = sum(
+                s.amount for s in rec.sutra_ids if s.type == 'magasinage'
+            )
+
             # --- Totaux finaux ---
-            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers
-            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers
-            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers
+            rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers + surestarie_sutra
+            rec.thc_amount = thc_cheques + thc_deductions + thc_transfers + thc_sutra
+            rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers + magasinage_sutra
+            
+            # --- FRET ---
+            rec.fret_amount = (
+                sum(c.amount for c in rec.cheque_ids if c.type == 'fret') +
+                sum(d.amount for d in rec.deduction_ids if d.type == 'fret') +
+                sum(t.amount for t in rec.transfer_ids if t.type == 'fret') +
+                sum(s.amount for s in rec.sutra_ids if s.type == 'fret')
+            )

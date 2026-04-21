@@ -166,6 +166,14 @@
                             </field>
                         </page>
 
+                        <page string="Alias" groups="casa_stock.group_admin">
+                            <field name="alias_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+
                         <page string="Entrer les réductions" name="discount_entry">
                             <header>
                                 <button name="action_apply_discounts" 

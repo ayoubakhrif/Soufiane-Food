@@ -80,3 +80,5 @@ access_casa_sortie_supp_user,casa.sortie.supp.user,model_casa_sortie_supp,group_
 access_casa_sortie_supp_manager,casa.sortie.supp.manager,model_casa_sortie_supp,group_manager,1,1,1,0
 access_casa_sortie_supp_admin,casa.sortie.supp.admin,model_casa_sortie_supp,group_admin,1,1,1,1
 access_casa_sortie_supp_viewer,casa.sortie.supp.viewer,model_casa_sortie_supp,group_viewer,1,0,0,0
+access_casa_client_alias_user,casa.client.alias.user,model_casa_client_alias,group_user,1,0,0,0
+access_casa_client_alias_admin,casa.client.alias.admin,model_casa_client_alias,group_admin,1,1,1,1

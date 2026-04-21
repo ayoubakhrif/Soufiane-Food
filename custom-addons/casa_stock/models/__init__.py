@@ -13,6 +13,7 @@ from . import casa_stock_discount
 from . import casa_client_advance
 from . import casa_client_unpaid
 from . import casa_stock_transfer
+from . import casa_client_alias
 from . import casa_other_sale
 from . import casa_stock_perte
 from . import casa_sortie_supp

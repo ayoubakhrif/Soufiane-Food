@@ -64,11 +64,14 @@ class WhatsAppClientController(http.Controller):
             if not openai_key:
                 return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo (parameter: whatsapp_stock.openai_key)'}
 
-            # Fetch all client names to guide the AI
+            # Fetch all client names and aliases to guide the AI
             all_clients = request.env['casa.client'].sudo().search([])
             client_names_list = [c.name for c in all_clients if c.name]
             
-            extracted_name = self._extract_client_name(message_text, openai_key, client_names_list)
+            all_aliases = request.env['casa.client.alias'].sudo().search([])
+            alias_list = [f"{a.name} -> {a.client_id.name}" for a in all_aliases if a.client_id]
+            
+            extracted_name = self._extract_client_name(message_text, openai_key, client_names_list, alias_list)
             
             if not extracted_name or extracted_name.lower() == 'none':
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
@@ -128,7 +131,7 @@ class WhatsAppClientController(http.Controller):
                 'choices': choices
             }
 
-    def _extract_client_name(self, text, api_key, client_names_list):
+    def _extract_client_name(self, text, api_key, client_names_list, alias_list=None):
         """Use OpenAI to extract the client name from a natural language sentence."""
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
@@ -137,11 +140,14 @@ class WhatsAppClientController(http.Controller):
         }
         
         db_names = ", ".join(client_names_list) if client_names_list else "Aucun client disponible"
+        synonyms = "\n".join(alias_list) if alias_list else "Aucun synonyme défini."
         
         prompt = (
             "Tu es un assistant administratif. Ta tâche est d'identifier le nom correct du client demandé pour un rapport de compte.\n"
             "Voici la liste des clients de la base de données :\n"
             f"[{db_names}]\n\n"
+            "Voici un dictionnaire d'alias (synonymes) pour t'aider :\n"
+            f"{synonyms}\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
             "1. Si l'utilisateur demande une situation globale des clients, le solde total ou le grand livre (ex: 'client total', 'total', 'situation'), réponds UNIQUEMENT 'GLOBAL_CLIENT_REPORT'.\n"

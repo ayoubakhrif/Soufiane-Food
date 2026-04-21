@@ -134,8 +134,8 @@ class WhatsAppFinanceController(http.Controller):
             "Règles :\n"
             "1. Identifie le nom le plus proche dans la liste.\n"
             "2. Retourne uniquement le nom du bénéficiaire.\n"
-            "3. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de solde ou rapport financier, réponds UNIQUEMENT 'IGNORE'.\n"
-            "4. Si aucun ne correspond (et que ce n'est pas hors-sujet), réponds 'None'.\n"
+            "3. IMPORTANT : Si le message ne contient QUE des emojis (ex: '🚀🚀') ou ne contient QUE des caractères aléatoires sans sens (ex: 'qsdqsd', '...', '???'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "4. Pour tout autre message (salutations, fautes de frappe, phrases complètes), tente d'identifier le bénéficiaire ou réponds 'None' si aucun ne correspond.\n"
             "Retourne UNIQUEMENT le résultat (ou IGNORE)."
         )
         data = {

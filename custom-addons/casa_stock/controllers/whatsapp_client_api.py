@@ -158,8 +158,8 @@ class WhatsAppClientController(http.Controller):
             "2. Sinon, identifie le nom du client mentionné.\n"
             "3. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
             "4. IMPORTANT : Si la demande est vague (ex: 'taggada'), renvoie UNIQUEMENT le terme commun.\n"
-            "5. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de compte client, réponds UNIQUEMENT 'IGNORE'.\n"
-            "6. Si aucun client ne correspond et que ce n'est pas hors-sujet, réponds 'None'.\n"
+            "5. IMPORTANT : Si le message ne contient QUE des emojis (ex: '🚀🚀') ou ne contient QUE des caractères aléatoires sans sens (ex: 'qsdqsd', '...', '???'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "6. Pour tout autre message (salutations, fautes de frappe, phrases complètes), tente d'identifier le client ou réponds 'None' si aucun ne correspond.\n"
             "Retourne UNIQUEMENT le résultat (ou GLOBAL_CLIENT_REPORT ou IGNORE)."
         )
         data = {

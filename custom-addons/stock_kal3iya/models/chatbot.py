@@ -17,7 +17,7 @@ Intentions possibles :
 - "list_products" : l'utilisateur veut la liste des produits en stock
 - "list_garages" : l'utilisateur veut la liste des garages
 - "stock_order_validation" : l'utilisateur envoie un message multi-ligne avec des articles, quantités, garages et lots à vérifier.
-- "unknown" : tu ne comprends pas la question ou le message est hors-sujet (emoji seul, texte aléatoire, salutation sans demande).
+- "unknown" : le message est du "bruit" total (uniquement des emojis, ou uniquement des caractères aléatoires sans sens comme 'qsdqsd'). Si le message contient des mots ou ressemble à une salutation, ne l'ignore pas.
 
 LISTE DES PRODUITS DISPONIBLES (Référentiel exact) :
 __PRODUCT_LIST__
@@ -313,18 +313,18 @@ class StockKal3iyaChatbot(models.AbstractModel):
             lot_matches = all_active_stocks.filtered(lambda s: self._normalize_lot(s.lot) == lot_norm)
 
         if lot_matches:
-            # Si on a plusieurs produits avec le même lot, on essaie de filtrer par nom
-            if len(lot_matches) > 1:
-                # Filtrage simple par ressemblance de nom
-                best_match = lot_matches.filtered(lambda s: product_name.lower() in s.product_id.name.lower())
-                record = best_match[0] if best_match else lot_matches[0]
-            else:
-                record = lot_matches[0]
-
-            # Vérification du garage
-            if record.garage == garage_key:
+            # On filtre d'abord par ressemblance de nom (si plusieurs produits ont le même numéro de lot)
+            refined_matches = lot_matches.filtered(lambda s: product_name.lower() in s.product_id.name.lower())
+            work_set = refined_matches or lot_matches
+            
+            # Vérification : Est-ce que LE garage saisi par l'utilisateur fait partie des matches ?
+            matching_garage_record = work_set.filtered(lambda s: s.garage == garage_key)
+            
+            if matching_garage_record:
                 return "Bien"
             else:
+                # Si aucun match pour ce garage, on prend le premier disponible pour suggérer la correction
+                record = work_set[0]
                 correct_garage = self._get_garage_label(record.garage)
                 return f"{qty} {record.product_id.name} {garage_raw} lot {lot_raw} -> Correction Garage: {correct_garage}"
 

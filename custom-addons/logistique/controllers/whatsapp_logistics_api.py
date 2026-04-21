@@ -279,8 +279,8 @@ class WhatsAppLogisticsController(http.Controller):
             "Règles :\n"
             "1. Identifie l'article le plus proche parmi la liste.\n"
             "2. Retourne uniquement le nom de l'article tel qu'il est dans la liste.\n"
-            "3. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de suivi logistique/conteneur, réponds UNIQUEMENT 'IGNORE'.\n"
-            "4. Si aucun article ne correspond de façon convaincante (et que ce n'est pas hors-sujet), réponds 'None'.\n"
+            "3. IMPORTANT : Si le message ne contient QUE des emojis (ex: '🚀🚀') ou ne contient QUE des caractères aléatoires sans sens (ex: 'qsdqsd', '...', '???'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "4. Pour tout autre message (salutations, fautes de frappe, phrases complètes), tente d'identifier l'article ou réponds 'None' si aucun ne correspond.\n"
             "5. Si la demande est vague (ex: 'tournesol' pour 'HUILE DE TOURNESOL'), renvoie le nom complet de l'article.\n"
             "Retourne UNIQUEMENT le résultat (ou IGNORE)."
         )

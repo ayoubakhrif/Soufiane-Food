@@ -41,56 +41,56 @@ class WhatsAppLogisticsController(http.Controller):
             return {'status': 'ignored', 'message': 'This agent only handles the Logistics Group.'}
 
         # 4. Search for Article (Check both Logistique and Achat articles)
-        search_query = [('name', '=ilike', message_text)]
-        log_articles = request.env['logistique.article'].sudo().search(search_query)
-        achat_articles = request.env['achat.article'].sudo().search(search_query)
+        # Search using ilike first to be flexible
+        search_domain = [('name', 'ilike', message_text)]
+        log_articles = request.env['logistique.article'].sudo().search(search_domain)
+        achat_articles = request.env['achat.article'].sudo().search(search_domain)
         
-        # Merge results into a list of tuples (name, model, id, company_article_id)
+        # Build initial items
         found_items = []
         for a in log_articles:
             found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
         for a in achat_articles:
-            # Avoid duplicate names if they are already in found_items (though models differ)
             found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
 
-        # B. AI Fallback if no result
-        if not found_items:
-            openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
-            if openai_key:
-                all_names = list(set(
-                    request.env['logistique.article'].sudo().search([]).mapped('name') + 
-                    request.env['achat.article'].sudo().search([]).mapped('name')
-                ))
-                extracted_name = self._extract_product_name(message_text, openai_key, all_names)
-                if extracted_name and extracted_name.lower() != 'none':
-                    log_articles = request.env['logistique.article'].sudo().search([('name', 'ilike', extracted_name)])
-                    achat_articles = request.env['achat.article'].sudo().search([('name', 'ilike', extracted_name)])
-                    for a in log_articles:
-                        found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
-                    for a in achat_articles:
-                        found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
+        # 4.1 CASE-SENSITIVE EXACT MATCH (Break loops)
+        # If the input matches exactly one article name (case sensitive), we prioritize it to prevent loops
+        case_exact = [f for f in found_items if f['name'] == message_text]
+        if len(case_exact) == 1:
+            selected_item = case_exact[0]
+        else:
+            # B. AI Fallback if no result or many results (to clarify)
+            if not found_items:
+                openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+                if openai_key:
+                    all_names = list(set(
+                        request.env['logistique.article'].sudo().search([]).mapped('name') + 
+                        request.env['achat.article'].sudo().search([]).mapped('name')
+                    ))
+                    extracted_name = self._extract_product_name(message_text, openai_key, all_names)
+                    if extracted_name and extracted_name.lower() != 'none':
+                        log_articles = request.env['logistique.article'].sudo().search([('name', 'ilike', extracted_name)])
+                        achat_articles = request.env['achat.article'].sudo().search([('name', 'ilike', extracted_name)])
+                        for a in log_articles:
+                            found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
+                        for a in achat_articles:
+                            found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
 
-        if not found_items:
-            return {'status': 'not_found', 'message': f"Désolé, je n'ai pas trouvé l'article '{message_text}' dans les dossiers achat ou logistique."}
+            if not found_items:
+                return {'status': 'not_found', 'message': f"Désolé, je n'ai pas trouvé l'article '{message_text}' dans la logistique."}
 
-        # 5. Handle Multiple Choices
-        if len(found_items) > 1:
-            # Check for exact case-insensitive match
-            exact_matches = [f for f in found_items if f['name'].lower() == message_text.lower()]
-            if len(exact_matches) == 1:
-                selected_item = exact_matches[0]
-            else:
-                # Group by name to avoid duplicate names in the menu
-                unique_names = []
-                unique_found = []
+            # 5. Handle Multiple Choices
+            if len(found_items) > 1:
+                # Group by case-insensitive name first
+                unique_names = {}
                 for f in found_items:
-                    if f['name'] not in unique_names:
-                        unique_names.append(f['name'])
-                        unique_found.append(f)
+                    lname = f['name'].lower()
+                    if lname not in unique_names:
+                        unique_names[lname] = f
                 
-                if len(unique_found) > 1:
-                    choices = [f['name'] for f in unique_found]
-                    choices_text = "Plusieurs articles trouvés. Veuillez préciser :\n"
+                if len(unique_names) > 1:
+                    choices = [f['name'] for f in unique_names.values()]
+                    choices_text = "Plusieurs articles correspondent à votre demande. Veuillez préciser :\n"
                     for i, name in enumerate(choices, 1):
                         choices_text += f"{i}- {name}\n"
                     return {
@@ -99,11 +99,12 @@ class WhatsAppLogisticsController(http.Controller):
                         'choices': choices
                     }
                 else:
-                    selected_item = unique_found[0]
-        else:
-            selected_item = found_items[0]
+                    # They all have the same name (case-insensitive)
+                    selected_item = list(unique_names.values())[0]
+            else:
+                selected_item = found_items[0]
 
-        # 6. Process Selection & Find ALL related records via Company Article
+        # 6. Process Selection
         target_name = selected_item['name']
         company_id = selected_item['company_id']
         

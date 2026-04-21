@@ -70,7 +70,7 @@
     <menuitem id="menu_achat_article_achat"
               name="Article Achat"
               parent="menu_achat_data"
-              action="company_data.action_company_article"
+              action="action_achat_article"
               sequence="35"/>
 
     <menuitem id="menu_achat_shipping"

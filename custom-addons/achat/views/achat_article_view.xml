@@ -9,8 +9,7 @@
                     <group>
                         <group string="Informations de base">
                             <field name="company_article_id"
-                                options="{'no_create': True}"
-                                placeholder="Choisir un article société"/>
+                                options="{'no_create': True}"/>
                             <field name="name"
                                 placeholder="Nom interne utilisé par Achat"/>
                         </group>
@@ -21,9 +20,15 @@
                                 readonly="1"/>
                         </group>
                     </group>
-                    <p class="text-muted">
-                        * Note : Pour gérer les alias Darija, veuillez modifier directement l'Article Société associé.
-                    </p>
+                    <notebook>
+                        <page name="aliases" string="Aliases Darija">
+                            <field name="alias_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

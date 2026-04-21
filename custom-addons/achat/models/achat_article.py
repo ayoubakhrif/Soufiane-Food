@@ -20,3 +20,9 @@ class AchatArticle(models.Model):
         related='company_article_id.image',
         readonly=True
     )
+
+    alias_ids = fields.One2many(
+        related='company_article_id.alias_ids',
+        readonly=False,
+        string='Traductions Darija'
+    )

@@ -62,10 +62,16 @@
               sequence="20"/>
 
     <menuitem id="menu_achat_article"
-              name="Articles"
+              name="Articles (Logistique)"
               parent="menu_achat_data"
               action="logistique.action_logistique_article"
               sequence="30"/>
+
+    <menuitem id="menu_achat_article_achat"
+              name="Article Achat"
+              parent="menu_achat_data"
+              action="action_achat_article"
+              sequence="35"/>
 
     <menuitem id="menu_achat_shipping"
               name="Shipping Companies"

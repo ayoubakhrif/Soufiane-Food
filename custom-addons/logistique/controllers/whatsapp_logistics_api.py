@@ -41,7 +41,6 @@ class WhatsAppLogisticsController(http.Controller):
             return {'status': 'ignored', 'message': 'This agent only handles the Logistics Group.'}
 
         # 4. Search for Article (Filter by Active Dossiers Only)
-        # Fetch only articles that have at least one active (on_port) entry
         active_entries = request.env['logistique.entry'].sudo().search([
             ('port_status', '=', 'on_port')
         ])
@@ -49,17 +48,16 @@ class WhatsAppLogisticsController(http.Controller):
         active_achat_ids = active_entries.mapped('achat_article_id').ids
         
         # Search using ilike among ACTIVE articles
-        search_domain = [
+        log_articles = request.env['logistique.article'].sudo().search([
             ('name', 'ilike', message_text),
             ('id', 'in', active_log_ids)
-        ]
-        log_articles = request.env['logistique.article'].sudo().search(search_domain)
+        ])
         
-        achat_search_domain = [
-            ('name', 'ilike', message_text),
+        # Search Achat Articles by Name OR Alias
+        achat_articles = request.env['achat.article'].sudo().search([
+            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text),
             ('id', 'in', active_achat_ids)
-        ]
-        achat_articles = request.env['achat.article'].sudo().search(achat_search_domain)
+        ])
         
         # Build initial items
         found_items = []
@@ -86,8 +84,12 @@ class WhatsAppLogisticsController(http.Controller):
                     if active_names:
                         extracted_name = self._extract_product_name(message_text, openai_key, active_names)
                         if extracted_name and extracted_name.lower() != 'none':
+                            # Limit AI match to ACTIVE articles as well
                             log_articles = request.env['logistique.article'].sudo().search([('name', '=', extracted_name), ('id', 'in', active_log_ids)])
-                            achat_articles = request.env['achat.article'].sudo().search([('name', '=', extracted_name), ('id', 'in', active_achat_ids)])
+                            achat_articles = request.env['achat.article'].sudo().search([
+                                '|', ('name', '=', extracted_name), ('alias_ids.name', '=', extracted_name),
+                                ('id', 'in', active_achat_ids)
+                            ])
                             for a in log_articles:
                                 found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
                             for a in achat_articles:
@@ -97,7 +99,9 @@ class WhatsAppLogisticsController(http.Controller):
             if not found_items:
                 # Search in ALL articles (excluding active status)
                 all_log = request.env['logistique.article'].sudo().search([('name', 'ilike', message_text)], limit=1)
-                all_achat = request.env['achat.article'].sudo().search([('name', 'ilike', message_text)], limit=1)
+                all_achat = request.env['achat.article'].sudo().search([
+                    '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+                ], limit=1)
                 
                 if all_log or all_achat:
                     # Article exists but has no active dossiers
@@ -110,15 +114,23 @@ class WhatsAppLogisticsController(http.Controller):
                 # Check with AI in ALL articles for typo handling
                 openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
                 if openai_key:
+                    # FETCH ALL NAMES INCLUDING ALIASES FOR AI GUIDANCE
                     all_article_names = list(set(
                         request.env['logistique.article'].sudo().search([]).mapped('name') + 
-                        request.env['achat.article'].sudo().search([]).mapped('name')
+                        request.env['achat.article'].sudo().search([]).mapped('name') +
+                        request.env['achat.article.alias'].sudo().search([]).mapped('name')
                     ))
                     extracted_name = self._extract_product_name(message_text, openai_key, all_article_names)
                     if extracted_name and extracted_name.lower() != 'none':
+                        # Check if the extracted name matches an article name or an alias
+                        matched_achat = request.env['achat.article'].sudo().search([
+                            '|', ('name', '=', extracted_name), ('alias_ids.name', '=', extracted_name)
+                        ], limit=1)
+                        matched_name = matched_achat.name if matched_achat else extracted_name
+                        
                         return {
                             'status': 'response',
-                            'response': f"📋 *Logistique : {extracted_name.upper()}*\n\n✅ Cet article existe mais n'a aucun dossier 'Sur Port' actuellement."
+                            'response': f"📋 *Logistique : {matched_name.upper()}*\n\n✅ Cet article existe mais n'a aucun dossier 'Sur Port' actuellement."
                         }
 
                 return {'status': 'not_found', 'message': f"❌ Désolé, l'article '{message_text}' n'est pas reconnu par le système."}

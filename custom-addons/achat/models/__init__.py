@@ -11,3 +11,4 @@ from . import document_followup
 from . import logistique_ste_inherit
 from . import contract_advance
 from . import ste_change
+from . import achat_article_alias

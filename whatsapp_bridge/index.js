@@ -16,11 +16,13 @@ const ARTICLE_GROUP_ID = "120363405648854156@g.us";
 const CLIENT_GROUP_ID = "120363426234155722@g.us";
 const STOCK_VALIDATION_GROUP_ID = "120363403203705514@g.us";
 const FINANCE_GROUP_ID = "120363428965532100@g.us";
+const LOGISTICS_GROUP_ID = "120363427755410654@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
 const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_kal3iya/chat";
 const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance?db=soufianefoods";
+const LOGISTICS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -100,6 +102,9 @@ async function connectToWhatsApp() {
             } else if (from === FINANCE_GROUP_ID) {
                 targetOdooUrl = FINANCE_ODOO_URL;
                 isClientRequest = true; // Use true to reuse the identifier/caption logic in bridge
+            } else if (from === LOGISTICS_GROUP_ID) {
+                targetOdooUrl = LOGISTICS_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -147,6 +152,7 @@ async function connectToWhatsApp() {
                 if (from === STOCK_VALIDATION_GROUP_ID) typeStr = "STOCK_VAL";
                 else if (from === CLIENT_GROUP_ID) typeStr = "CLIENT";
                 else if (from === FINANCE_GROUP_ID) typeStr = "FINANCE";
+                else if (from === LOGISTICS_GROUP_ID) typeStr = "LOGISTICS";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 const response = await axios.post(targetOdooUrl, {

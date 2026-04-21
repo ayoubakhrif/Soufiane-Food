@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_casa_recap_tree" model="ir.ui.view">
-        <name>casa.recap.tree</name>
-        <model>casa.recap</model>
-        <arch type="xml">
+        <field name="name">casa.recap.tree</field>
+        <field name="model">casa.recap</field>
+        <field name="arch" type="xml">
             <tree string="Récapitulatifs">
                 <field name="date"/>
                 <field name="total_stock_casa" sum="Total"/>
@@ -13,13 +13,13 @@
                 <field name="total_charges" sum="Total"/>
                 <field name="credits_clients" sum="Total"/>
             </tree>
-        </arch>
+        </field>
     </record>
 
     <record id="view_casa_recap_form" model="ir.ui.view">
-        <name>casa.recap.form</name>
-        <model>casa.recap</model>
-        <arch type="xml">
+        <field name="name">casa.recap.form</field>
+        <field name="model">casa.recap</field>
+        <field name="arch" type="xml">
             <form string="Récapitulatif">
                 <header>
                 </header>
@@ -95,7 +95,6 @@
                                     <field name="ville"/>
                                     <field name="client_id"/>
                                     <field name="total_amount" sum="Total"/>
-                                    <field name="state" widget="badge"/>
                                 </tree>
                             </field>
                         </page>
@@ -135,18 +134,18 @@
                     </notebook>
                 </sheet>
             </form>
-        </arch>
+        </field>
     </record>
 
     <record id="action_casa_recap" model="ir.actions.act_window">
-        <name>Récapitulatif Quotidien</name>
-        <res_model>casa.recap</res_model>
-        <view_mode>tree,form</view_mode>
-        <help type="html">
+        <field name="name">Récapitulatif Quotidien</field>
+        <field name="res_model">casa.recap</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créez une nouvelle récapitulation quotidienne.
             </p>
-        </help>
+        </field>
     </record>
 
     <menuitem id="menu_recap_root" name="Recap" sequence="50" web_icon="recap,static/description/icon.png"/>

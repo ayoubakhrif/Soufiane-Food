@@ -49,6 +49,11 @@ class FinanceSutra(models.Model):
         ('855', '855')
     ], string='Régime', tracking=True)
     
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa')
+    ], string='Ville', default='tanger', tracking=True)
+
     facture_sutra = fields.Char(string='Facture Sutra', tracking=True)
     scan_sutra = fields.Char(string='Scan Facture (Drive)', help="Poser le lien vers le scan de la facture")
 
@@ -56,9 +61,20 @@ class FinanceSutra(models.Model):
     honoraires = fields.Float(string='Honoraires', tracking=True)
     temsa = fields.Float(string='TEMSA', tracking=True)
     autres = fields.Float(string='Autres charges', tracking=True)
-    tva = fields.Float(string='TVA', compute='_compute_tva', store=True, tracking=True)
     
-    total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
+    # New Casa Fields
+    charges_non_taxables = fields.Float(string='Charges non taxables', tracking=True)
+    frais_bancaires = fields.Float(string='Frais bancaires', tracking=True)
+    transport = fields.Float(string='Transport', tracking=True)
+    taxe_regionale = fields.Float(string='Taxes régionales', tracking=True)
+
+    # TVA Zone
+    tva_20 = fields.Float(string='TVA (20%)', compute='_compute_all_taxes', store=True)
+    tva_10 = fields.Float(string='TVA (10%)', compute='_compute_all_taxes', store=True)
+    tva_3 = fields.Float(string='TVA (3%)', compute='_compute_all_taxes', store=True)
+    tva = fields.Float(string='Total TVA', compute='_compute_all_taxes', store=True, tracking=True)
+    
+    total = fields.Float(string='Total TTC', compute='_compute_all_taxes', store=True, tracking=True)
 
     # -------------------------------------------------------------------------
     # CHEQUE MANAGEMENT (Linked to DataCheque via Payment)
@@ -121,24 +137,39 @@ class FinanceSutra(models.Model):
         ('douane_regime_uniq', 'unique (douane_id, regime)', 'Un dossier Sutra existe déjà pour ce Regime dans ce dossier Douane !')
     ]
 
-    @api.depends('honoraires', 'temsa', 'autres', 'ste_id.is_zone_franche')
-    def _compute_tva(self):
+    @api.depends(
+        'ville', 'honoraires', 'temsa', 'autres', 'frais_bancaires', 
+        'transport', 'taxe_regionale', 'charges_non_taxables', 'ste_id.is_zone_franche'
+    )
+    def _compute_all_taxes(self):
         for rec in self:
-            if rec.ste_id and rec.ste_id.is_zone_franche:
-                rec.tva = 0.0
+            if rec.ville == 'tanger':
+                # Existing Tanger Logic
+                base_20 = rec.honoraires + rec.temsa + rec.autres
+                if rec.ste_id and rec.ste_id.is_zone_franche:
+                    rec.tva_20 = 0.0
+                else:
+                    rec.tva_20 = base_20 * 0.20
+                rec.tva_10 = 0.0
+                rec.tva_3 = 0.0
+                rec.tva = rec.tva_20
+                rec.total = base_20 + rec.tva
             else:
-                rec.tva = (rec.honoraires + rec.temsa + rec.autres)*0.2
-
-    tva = fields.Float(string='TVA', compute='_compute_tva', store=True, tracking=True)
-    
-    total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
-
-    # ... existing code ...
-
-    @api.depends('honoraires', 'temsa', 'autres', 'tva', 'ste_id')
-    def _compute_total(self):
-        for rec in self:
-            rec.total = rec.honoraires + rec.temsa + rec.autres + rec.tva
+                # Casa Logic
+                base_20 = rec.honoraires + rec.temsa + rec.frais_bancaires + rec.autres
+                rec.tva_20 = base_20 * 0.20
+                rec.tva_10 = rec.transport * 0.10
+                rec.tva_3 = rec.taxe_regionale * 0.03
+                rec.tva = rec.tva_20 + rec.tva_10 + rec.tva_3
+                
+                # Total TTC Calculation
+                rec.total = (
+                    rec.charges_non_taxables + 
+                    base_20 + 
+                    rec.transport + 
+                    rec.taxe_regionale + 
+                    rec.tva
+                )
 
     def name_get(self):
         result = []

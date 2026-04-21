@@ -47,18 +47,36 @@
                         
                         <!-- FINANCE INFO -->
                         <group string="Informations Finance (Editable)">
+                            <field name="ville"/>
                             <field name="week"/>
                             <field name="regime"/>
                             <field name="facture_sutra"/>
                             <field name="scan_sutra"/>
-                            <separator string="Charges"/>
-                            <field name="honoraires"/>
-                            <field name="temsa"/>
-                            <field name="autres"/>
-                            <field name="tva"/>
-                            <field name="total" class="oe_subtotal_footer oe_right"/>
                             <field name="scan_sutra_url" widget="url" readonly="1"/>
                         </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Charges">
+                            <field name="honoraires"/>
+                            <field name="temsa"/>
+                            <field name="frais_bancaires" invisible="ville != 'casa'"/>
+                            <field name="autres"/>
+                            <field name="transport" invisible="ville != 'casa'"/>
+                            <field name="taxe_regionale" invisible="ville != 'casa'"/>
+                            <field name="charges_non_taxables" invisible="ville != 'casa'"/>
+                        </group>
+
+                        <group string="Zone TVA" invisible="ville != 'casa'">
+                            <field name="tva_20" readonly="1"/>
+                            <field name="tva_10" readonly="1"/>
+                            <field name="tva_3" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="tva" string="Total TVA" readonly="1"/>
+                        <field name="total" string="Total TTC" readonly="1"/>
                     </group>
                     
                     <group>

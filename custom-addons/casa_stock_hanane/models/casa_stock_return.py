@@ -27,6 +27,7 @@ class CasaStockReturn(models.Model):
     price_return = fields.Float(string='Prix de Retour (Achat)', required=True)
     weight = fields.Float(related='exit_id.weight', string='Poids unit (Kg)', readonly=True)
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
+    mt_retour = fields.Float(string='Montant', compute='_compute_mt_retour', store=True)
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -41,6 +42,11 @@ class CasaStockReturn(models.Model):
     def _compute_tonnage(self):
         for rec in self:
             rec.tonnage = rec.qty * rec.weight
+
+    @api.depends('tonnage', 'price_return')
+    def _compute_mt_retour(self):
+        for rec in self:
+            rec.mt_retour = (rec.price_return or 0.0) * (rec.tonnage or 0.0)
 
     @api.model
     def create(self, vals):

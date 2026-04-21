@@ -93,6 +93,12 @@
                                 readonly="1"/>
                         </page>
 
+                        <page string="Retours">
+                            <field name="retours_grouped_html"
+                                nolabel="1"
+                                readonly="1"/>
+                        </page>
+
                         <page string="Réductions">
                             <field name="discount_line_ids" readonly="1">
                                 <tree>

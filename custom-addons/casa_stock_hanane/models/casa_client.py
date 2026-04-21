@@ -27,6 +27,11 @@ class CasaClient(models.Model):
         'client_id',
         string='Sorties de ce client',
     )
+    return_ids = fields.One2many(
+        'casa_hanane.stock.return',
+        'client_id',
+        string='Retours',
+    )
 
     discount_ids = fields.One2many(
         'casa_hanane.stock.discount',
@@ -175,6 +180,12 @@ class CasaClient(models.Model):
         sanitize=False,
     )
 
+    retours_grouped_html = fields.Html(
+        string="Historique des retours",
+        compute="_compute_retours_grouped_html",
+        sanitize=False,
+    )
+
     # --- Résumé Client ---
     total_orders_amount = fields.Float(
         string='Total Commandes (Avant Réductions)',
@@ -205,7 +216,7 @@ class CasaClient(models.Model):
         for rec in self:
             rec.exit_count = len(rec.exit_ids.filtered(lambda s: s.state == 'done'))
 
-    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente', 'other_sale_ids.discount_amount', 'sortie_supp_ids.amount', 'compte_initial', 'advance_ids.amount', 'advance_ids.state', 'unpaid_ids.amount')
+    @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'other_sale_ids.state', 'other_sale_ids.mt_vente', 'other_sale_ids.discount_amount', 'sortie_supp_ids.amount', 'compte_initial', 'advance_ids.amount', 'advance_ids.state', 'unpaid_ids.amount', 'return_ids.state', 'return_ids.mt_retour')
     def _compute_totals(self):
         for client in self:
             # Official totals (Valide/Done only)
@@ -218,10 +229,11 @@ class CasaClient(models.Model):
             total_advances = sum(client.advance_ids.filtered(lambda a: a.state == 'confirmed').mapped('amount'))
             total_impayes = sum(client.unpaid_ids.mapped('amount'))
             total_sorties_supp = sum(client.sortie_supp_ids.mapped('amount'))
+            total_retours = sum(client.return_ids.filtered(lambda r: r.state == 'done').mapped('mt_retour'))
 
             client.total_commandes = total_ventes
             client.total_advances = total_advances
-            client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes + total_sorties_supp - total_discounts - total_advances
+            client.compte_total = (client.compte_initial or 0.0) + total_ventes + total_impayes + total_sorties_supp - total_discounts - total_advances - total_retours
             
             # Provisional totals (Confirmed + Done)
             # As per user request: only count validated advances, so total_advances remains the same.
@@ -231,7 +243,7 @@ class CasaClient(models.Model):
             total_ventes_prov = sum(commandes_prov.mapped('mt_vente')) + sum(otras_prov.mapped('mt_vente'))
             total_discounts_prov = sum(commandes_prov.mapped('discount_amount')) + sum(otras_prov.mapped('discount_amount'))
             
-            client.compte_provisoire = (client.compte_initial or 0.0) + total_ventes_prov + total_impayes + total_sorties_supp - total_discounts_prov - total_advances
+            client.compte_provisoire = (client.compte_initial or 0.0) + total_ventes_prov + total_impayes + total_sorties_supp - total_discounts_prov - total_advances - total_retours
 
     @api.depends('exit_ids.state', 'exit_ids.mt_vente', 'exit_ids.discount_amount', 'exit_ids.margin')
     def _compute_client_summary(self):
@@ -487,6 +499,106 @@ class CasaClient(models.Model):
 
             client.sorties_grouped_html = html
 
+    @api.depends('name')
+    def _compute_retours_grouped_html(self):
+        for client in self:
+            retours = self.env['casa_hanane.stock.return'].search([
+                ('client_id', '=', client.id),
+                ('state', '=', 'done'),
+            ])
+
+            all_records = sorted(list(retours), key=lambda r: r.date if r.date else fields.Date.today())
+
+            if not all_records:
+                client.retours_grouped_html = "<p style='padding:10px;'>Aucun retour.</p>"
+                continue
+
+            grouped = defaultdict(list)
+            for r in all_records:
+                if r.date:
+                    week = r.date.isocalendar()[1]
+                else:
+                    week = "N/A"
+                grouped[week].append(r)
+
+            html = """
+            <style>
+                .week-card-return {
+                    background: #fef2f2;
+                    border: 1px solid #fca5a5;
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-bottom: 20px;
+                    box-shadow: 0 4px 12px rgba(220,38,38,0.05);
+                }
+                .week-header-return {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 12px;
+                }
+                .week-title-return {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #991b1b;
+                }
+                .week-total-return {
+                    background: #dc2626;
+                    color: white;
+                    padding: 6px 14px;
+                    border-radius: 999px;
+                    font-weight: 700;
+                }
+                .row-return {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+                    padding: 8px 0;
+                    border-bottom: 1px dashed #fca5a5;
+                    font-size: 13px;
+                }
+                .row-return.header {
+                    font-weight: 700;
+                    border-bottom: 2px solid #fca5a5;
+                    color: #b91c1c;
+                }
+            </style>
+            """
+
+            for week, records in grouped.items():
+                total_week = sum((r.mt_retour or 0.0) for r in records)
+
+                html += f"""
+                <div class="week-card-return">
+                    <div class="week-header-return">
+                        <div class="week-title-return">📅 Semaine {week}</div>
+                        <div class="week-total-return">{total_week:,.2f} Dh</div>
+                    </div>
+
+                    <div class="row-return header">
+                        <div>Produit</div>
+                        <div>Quantité</div>
+                        <div>Prix de Retour</div>
+                        <div>Montant Deductible</div>
+                        <div>Date</div>
+                    </div>
+                """
+
+                for r in records:
+                    html += f"""
+                    <div class="row-return">
+                        <div>{r.product_id.name if r.product_id else ''}</div>
+                        <div>{r.qty}</div>
+                        <div>{r.price_return:.2f}</div>
+                        <div style="font-weight:700;color:#dc2626;">
+                            {r.mt_retour:.2f}
+                        </div>
+                        <div>{r.date}</div>
+                    </div>
+                    """
+
+                html += "</div>"
+
+            client.retours_grouped_html = html
+
     # ==============================
     #  🧮 Utilitaire pour le rapport
     # ==============================
@@ -507,9 +619,15 @@ class CasaClient(models.Model):
         total_discounts = sum((s.discount_amount or 0.0) for s in sorties)
         total_net_sorties = total_sorties - total_discounts
 
+        # 1.5️⃣ Filtrer retours de la semaine
+        retours = self.return_ids.filtered(
+            lambda r: r.date and r.date.strftime("%Y-W%W") == week and r.state == 'done'
+        )
+        total_retours = sum(retours.mapped('mt_retour'))
+
         # 2️⃣ Filtrer avances de la semaine (en se basant sur la date)
         avances = self.advance_ids.filtered(
-            lambda a: a.date and a.date.strftime("%Y-W%W") == week
+            lambda a: a.date and a.date.strftime("%Y-W%W") == week and a.state == 'confirmed'
         )
         total_avances = sum(avances.mapped('amount'))
 
@@ -526,7 +644,7 @@ class CasaClient(models.Model):
         total_sorties_supp = sum(sorties_supp.mapped('amount'))
 
         # 5️⃣ Compte de la semaine
-        compte_semaine = total_net_sorties + total_impayes + total_sorties_supp - total_avances
+        compte_semaine = total_net_sorties + total_impayes + total_sorties_supp - total_avances - total_retours
 
         # 5️⃣ Calculer les dates de début et fin de semaine
         start_date = None
@@ -560,12 +678,14 @@ class CasaClient(models.Model):
             'sorties': sorties,
             'avances': avances,
             'impayes': impayes,
+            'retours': retours,
             'sorties_supp': sorties_supp,
             'total_sorties': total_sorties,
             'total_discounts': total_discounts,
             'total_net_sorties': total_net_sorties,
             'total_avances': total_avances,
             'total_impayes': total_impayes,
+            'total_retours': total_retours,
             'total_sorties_supp': total_sorties_supp,
             'compte_semaine': compte_semaine,
             'compte_total': self.compte_total,

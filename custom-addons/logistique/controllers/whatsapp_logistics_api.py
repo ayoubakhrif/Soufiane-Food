@@ -40,11 +40,26 @@ class WhatsAppLogisticsController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Logistics Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Logistics Group.'}
 
-        # 4. Search for Article (Check both Logistique and Achat articles)
-        # Search using ilike first to be flexible
-        search_domain = [('name', 'ilike', message_text)]
+        # 4. Search for Article (Filter by Active Dossiers Only)
+        # Fetch only articles that have at least one active (on_port) entry
+        active_entries = request.env['logistique.entry'].sudo().search([
+            ('port_status', '=', 'on_port')
+        ])
+        active_log_ids = active_entries.mapped('article_id').ids
+        active_achat_ids = active_entries.mapped('achat_article_id').ids
+        
+        # Search using ilike among ACTIVE articles
+        search_domain = [
+            ('name', 'ilike', message_text),
+            ('id', 'in', active_log_ids)
+        ]
         log_articles = request.env['logistique.article'].sudo().search(search_domain)
-        achat_articles = request.env['achat.article'].sudo().search(search_domain)
+        
+        achat_search_domain = [
+            ('name', 'ilike', message_text),
+            ('id', 'in', active_achat_ids)
+        ]
+        achat_articles = request.env['achat.article'].sudo().search(achat_search_domain)
         
         # Build initial items
         found_items = []
@@ -54,30 +69,59 @@ class WhatsAppLogisticsController(http.Controller):
             found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
 
         # 4.1 CASE-SENSITIVE EXACT MATCH (Break loops)
-        # If the input matches exactly one article name (case sensitive), we prioritize it to prevent loops
         case_exact = [f for f in found_items if f['name'] == message_text]
         if len(case_exact) == 1:
             selected_item = case_exact[0]
         else:
-            # B. AI Fallback if no result or many results (to clarify)
+            # B. AI Fallback (Active Articles Only)
             if not found_items:
                 openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
                 if openai_key:
-                    all_names = list(set(
+                    active_log_recs = request.env['logistique.article'].sudo().browse(active_log_ids)
+                    active_achat_recs = request.env['achat.article'].sudo().browse(active_achat_ids)
+                    
+                    active_names = list(set(active_log_recs.mapped('name') + active_achat_recs.mapped('name')))
+                    active_names = [name for name in active_names if name]
+                    
+                    if active_names:
+                        extracted_name = self._extract_product_name(message_text, openai_key, active_names)
+                        if extracted_name and extracted_name.lower() != 'none':
+                            log_articles = request.env['logistique.article'].sudo().search([('name', '=', extracted_name), ('id', 'in', active_log_ids)])
+                            achat_articles = request.env['achat.article'].sudo().search([('name', '=', extracted_name), ('id', 'in', active_achat_ids)])
+                            for a in log_articles:
+                                found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
+                            for a in achat_articles:
+                                found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
+
+            # C. DISTINGUISH ERROR CASES: If still no result, check if article exists at all
+            if not found_items:
+                # Search in ALL articles (excluding active status)
+                all_log = request.env['logistique.article'].sudo().search([('name', 'ilike', message_text)], limit=1)
+                all_achat = request.env['achat.article'].sudo().search([('name', 'ilike', message_text)], limit=1)
+                
+                if all_log or all_achat:
+                    # Article exists but has no active dossiers
+                    art_name = all_log[0].name if all_log else all_achat[0].name
+                    return {
+                        'status': 'response',
+                        'response': f"📋 *Logistique : {art_name.upper()}*\n\n✅ Cet article n'a aucun dossier actuellement 'Sur Port' ou à venir."
+                    }
+                
+                # Check with AI in ALL articles for typo handling
+                openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+                if openai_key:
+                    all_article_names = list(set(
                         request.env['logistique.article'].sudo().search([]).mapped('name') + 
                         request.env['achat.article'].sudo().search([]).mapped('name')
                     ))
-                    extracted_name = self._extract_product_name(message_text, openai_key, all_names)
+                    extracted_name = self._extract_product_name(message_text, openai_key, all_article_names)
                     if extracted_name and extracted_name.lower() != 'none':
-                        log_articles = request.env['logistique.article'].sudo().search([('name', 'ilike', extracted_name)])
-                        achat_articles = request.env['achat.article'].sudo().search([('name', 'ilike', extracted_name)])
-                        for a in log_articles:
-                            found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
-                        for a in achat_articles:
-                            found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
+                        return {
+                            'status': 'response',
+                            'response': f"📋 *Logistique : {extracted_name.upper()}*\n\n✅ Cet article existe mais n'a aucun dossier 'Sur Port' actuellement."
+                        }
 
-            if not found_items:
-                return {'status': 'not_found', 'message': f"Désolé, je n'ai pas trouvé l'article '{message_text}' dans la logistique."}
+                return {'status': 'not_found', 'message': f"❌ Désolé, l'article '{message_text}' n'est pas reconnu par le système."}
 
             # 5. Handle Multiple Choices
             if len(found_items) > 1:
@@ -99,7 +143,6 @@ class WhatsAppLogisticsController(http.Controller):
                         'choices': choices
                     }
                 else:
-                    # They all have the same name (case-insensitive)
                     selected_item = list(unique_names.values())[0]
             else:
                 selected_item = found_items[0]

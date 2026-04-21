@@ -20,6 +20,14 @@ class CasaClientAdvance(models.Model):
         ('autre', 'Autre'),
     ], string='Type', required=True, default='espece')
     
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+        ('kenitra', 'Kenitra'),
+        ('agadir', 'Agadir'),
+        ('marrakech', 'Marrakech'),
+    ], string='Ville')
+
     comment = fields.Char(string='Commentaire')
 
     state = fields.Selection([

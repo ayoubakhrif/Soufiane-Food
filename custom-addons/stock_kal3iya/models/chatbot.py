@@ -354,8 +354,22 @@ class StockKal3iyaChatbot(models.AbstractModel):
                 # Chercher si le produit existe AILLEURS pour aider l'utilisateur
                 other_stocks = Stock.search([('product_id', '=', product.id), ('quantity', '>', 0)])
                 if other_stocks:
-                    garages = ", ".join(set(self._get_garage_label(s.garage) for s in other_stocks))
-                    return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> ⚠️ Lot non trouvé (Disponible dans : {garages})"
+                    # Group available lots by garage for better precision
+                    garage_lots = {}
+                    for s in other_stocks:
+                        g_label = self._get_garage_label(s.garage)
+                        if g_label not in garage_lots:
+                            garage_lots[g_label] = set()
+                        garage_lots[g_label].add(s.lot)
+                    
+                    garage_info = []
+                    for g_label, lots in garage_lots.items():
+                        lots_str = ", ".join(sorted(lots))
+                        garage_info.append(f"{g_label} [Lots: {lots_str}]")
+                    
+                    garages_summary = " | ".join(garage_info)
+                    return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> ⚠️ Lot non trouvé (Disponible dans : {garages_summary})"
+                
                 return f"{qty} {product.name} {garage_raw} lot {lot_raw} -> ⚠️ Pas de stock trouvé"
 
             all_lots = available_stocks.mapped('lot')
@@ -395,7 +409,8 @@ class StockKal3iyaChatbot(models.AbstractModel):
         if has_errors:
             return f"*Correction*\n🔍🔍🔍\n\n{final_report}"
         else:
-            return final_report
+            # NOUVEAU: Si tout est OK, envoyer juste un gros emoji vert
+            return "✅"
 
     # -------------------------------------------------------------------------
     # Main Orchestrator

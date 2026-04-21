@@ -22,6 +22,8 @@ class FinanceSutraPayment(models.Model):
         required=False, # Relax required to allow moving away
         tracking=True
     )
+
+    reglementation = fields.Char(string='Réglementation', tracking=True)
     
     sutra_ids = fields.Many2many(
         'finance.sutra',

@@ -59,7 +59,6 @@ class FinanceSutra(models.Model):
     tva = fields.Float(string='TVA', compute='_compute_tva', store=True, tracking=True)
     
     total = fields.Float(string='Total', compute='_compute_total', store=True, tracking=True)
-    reglementation = fields.Char(string='Réglementation', tracking=True)
 
     # -------------------------------------------------------------------------
     # CHEQUE MANAGEMENT (Linked to DataCheque via Payment)

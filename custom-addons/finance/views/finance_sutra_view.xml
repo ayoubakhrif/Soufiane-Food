@@ -15,7 +15,6 @@
                 <field name="supplier_id"/>
                 <field name="eta"/>
                 <field name="regime" optional="hide"/>
-                <field name="reglementation" optional="show"/>
                 <field name="total" sum="Total"/>
             </tree>
         </field>
@@ -51,7 +50,6 @@
                             <field name="week"/>
                             <field name="regime"/>
                             <field name="facture_sutra"/>
-                            <field name="reglementation"/>
                             <field name="scan_sutra"/>
                             <separator string="Charges"/>
                             <field name="honoraires"/>

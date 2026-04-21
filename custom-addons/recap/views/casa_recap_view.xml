@@ -113,6 +113,41 @@
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
+                        <!-- Avances Casa -->
+                        <div style="background: #e6fffa; padding: 15px; border-radius: 12px; border: 1px solid #81e6d9; text-align: center;">
+                            <div style="color: #319795; font-size: 12px; font-weight: bold; margin-bottom: 10px;">AVANCES CASA</div>
+                            <div style="font-size: 20px; font-weight: 800; color: #234e52;">
+                                <field name="total_avances_casa"/>
+                            </div>
+                        </div>
+                        <!-- Avances Tanger -->
+                        <div style="background: #e6fffa; padding: 15px; border-radius: 12px; border: 1px solid #81e6d9; text-align: center;">
+                            <div style="color: #319795; font-size: 12px; font-weight: bold; margin-bottom: 10px;">AVANCES TANGER</div>
+                            <div style="font-size: 20px; font-weight: 800; color: #234e52;">
+                                <field name="total_avances_tanger"/>
+                            </div>
+                        </div>
+                        <!-- Avances Kenitra -->
+                        <div style="background: #e6fffa; padding: 15px; border-radius: 12px; border: 1px solid #81e6d9; text-align: center;">
+                            <div style="color: #319795; font-size: 12px; font-weight: bold; margin-bottom: 10px;">AVANCES KÉNITRA</div>
+                            <div style="font-size: 20px; font-weight: 800; color: #234e52;">
+                                <field name="total_avances_kenitra"/>
+                            </div>
+                        </div>
+                        <!-- Avances Agadir -->
+                        <div style="background: #e6fffa; padding: 15px; border-radius: 12px; border: 1px solid #81e6d9; text-align: center;">
+                            <div style="color: #319795; font-size: 12px; font-weight: bold; margin-bottom: 10px;">AVANCES AGADIR</div>
+                            <div style="font-size: 20px; font-weight: 800; color: #234e52;">
+                                <field name="total_avances_agadir"/>
+                            </div>
+                        </div>
+                        <!-- Avances Marrakech -->
+                        <div style="background: #e6fffa; padding: 15px; border-radius: 12px; border: 1px solid #81e6d9; text-align: center;">
+                            <div style="color: #319795; font-size: 12px; font-weight: bold; margin-bottom: 10px;">AVANCES MARRAKECH</div>
+                            <div style="font-size: 20px; font-weight: 800; color: #234e52;">
+                                <field name="total_avances_marrakech"/>
+                            </div>
+                        </div>
                     </div>
 
                     <notebook>
@@ -132,6 +167,7 @@
                                 <tree>
                                     <field name="date"/>
                                     <field name="client_id"/>
+                                    <field name="ville"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="payment_mode"/>
                                     <field name="comment"/>
@@ -143,6 +179,7 @@
                                 <tree>
                                     <field name="date"/>
                                     <field name="client_id"/>
+                                    <field name="ville"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="payment_mode"/>
                                     <field name="comment"/>
@@ -154,6 +191,7 @@
                                 <tree>
                                     <field name="date"/>
                                     <field name="client_id"/>
+                                    <field name="ville"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="payment_mode"/>
                                     <field name="comment"/>

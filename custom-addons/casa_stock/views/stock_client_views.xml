@@ -130,6 +130,7 @@
                                 <tree editable="bottom" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'">
                                     <field name="date"/>
                                     <field name="payment_mode"/>
+                                    <field name="ville"/>
                                     <field name="amount" sum="Total Avances"/>
                                     <field name="comment"/>
                                     <field name="state" widget="badge" 
@@ -292,6 +293,7 @@
                 <field name="date"/>
                 <field name="client_id"/>
                 <field name="payment_mode"/>
+                <field name="ville"/>
                 <field name="amount" sum="Total Avances"/>
                 <field name="comment"/>
                 <field name="state" widget="badge" 
@@ -329,6 +331,7 @@
                             <field name="client_id"/>
                             <field name="amount"/>
                             <field name="payment_mode"/>
+                            <field name="ville"/>
                         </group>
                         <group>
                             <field name="date"/>

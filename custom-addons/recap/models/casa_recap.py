@@ -40,6 +40,12 @@ class CasaRecap(models.Model):
     total_charges = fields.Float(string='Total Charges Casa', compute='_compute_kpis')
     credits_clients = fields.Float(string='Crédits Clients (Prov.)', compute='_compute_kpis')
     total_avances = fields.Float(string='Total Avances du jour', compute='_compute_kpis')
+    
+    total_avances_casa = fields.Float(string='Avances Casa', compute='_compute_kpis')
+    total_avances_tanger = fields.Float(string='Avances Tanger', compute='_compute_kpis')
+    total_avances_kenitra = fields.Float(string='Avances Kénitra', compute='_compute_kpis')
+    total_avances_agadir = fields.Float(string='Avances Agadir', compute='_compute_kpis')
+    total_avances_marrakech = fields.Float(string='Avances Marrakech', compute='_compute_kpis')
 
     # --- Display Fields for Notebook ---
     charge_line_ids = fields.Many2many('charges.casa.line', compute='_compute_trans_ids', string='Détails des Charges')
@@ -66,6 +72,11 @@ class CasaRecap(models.Model):
                 rec.total_charges = 0
                 rec.credits_clients = 0
                 rec.total_avances = 0
+                rec.total_avances_casa = 0
+                rec.total_avances_tanger = 0
+                rec.total_avances_kenitra = 0
+                rec.total_avances_agadir = 0
+                rec.total_avances_marrakech = 0
                 continue
 
             recap_date = rec.date
@@ -145,6 +156,11 @@ class CasaRecap(models.Model):
                 ('state', 'in', ('draft', 'confirmed'))
             ])
             rec.total_avances = sum(avances_jour.mapped('amount'))
+            rec.total_avances_casa = sum(avances_jour.filtered(lambda a: a.ville == 'casa').mapped('amount'))
+            rec.total_avances_tanger = sum(avances_jour.filtered(lambda a: a.ville == 'tanger').mapped('amount'))
+            rec.total_avances_kenitra = sum(avances_jour.filtered(lambda a: a.ville == 'kenitra').mapped('amount'))
+            rec.total_avances_agadir = sum(avances_jour.filtered(lambda a: a.ville == 'agadir').mapped('amount'))
+            rec.total_avances_marrakech = sum(avances_jour.filtered(lambda a: a.ville == 'marrakech').mapped('amount'))
 
             # 6. Crédits Clients (Cumulative Balance as of today using Compte Provisoire logic)
             clients = self.env['casa.client'].search([])

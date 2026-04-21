@@ -60,6 +60,10 @@ class WhatsAppFinanceController(http.Controller):
             
             extracted_name = self._extract_benif_name(message_text, openai_key, benif_names_list)
             
+            if not extracted_name or extracted_name.upper() == 'IGNORE':
+                _logger.info(f"Ignoring off-topic message in Finance: {group_id}")
+                return {'status': 'ignored'}
+
             if not extracted_name or extracted_name.lower() == 'none':
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le bénéficiaire dans votre message."}
 
@@ -130,8 +134,9 @@ class WhatsAppFinanceController(http.Controller):
             "Règles :\n"
             "1. Identifie le nom le plus proche dans la liste.\n"
             "2. Retourne uniquement le nom du bénéficiaire.\n"
-            "3. Si aucun ne correspond, réponds 'None'.\n"
-            "Retourne UNIQUEMENT le résultat."
+            "3. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de solde ou rapport financier, réponds UNIQUEMENT 'IGNORE'.\n"
+            "4. Si aucun ne correspond (et que ce n'est pas hors-sujet), réponds 'None'.\n"
+            "Retourne UNIQUEMENT le résultat (ou IGNORE)."
         )
         data = {
             "model": "gpt-4o-mini",

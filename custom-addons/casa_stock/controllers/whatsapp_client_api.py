@@ -73,6 +73,10 @@ class WhatsAppClientController(http.Controller):
             
             extracted_name = self._extract_client_name(message_text, openai_key, client_names_list, alias_list)
             
+            if not extracted_name or extracted_name.upper() == 'IGNORE':
+                _logger.info(f"Ignoring off-topic message from group {group_id}")
+                return {'status': 'ignored'}
+
             if not extracted_name or extracted_name.lower() == 'none':
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
 
@@ -154,8 +158,9 @@ class WhatsAppClientController(http.Controller):
             "2. Sinon, identifie le nom du client mentionné.\n"
             "3. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
             "4. IMPORTANT : Si la demande est vague (ex: 'taggada'), renvoie UNIQUEMENT le terme commun.\n"
-            "5. Si aucun client ne correspond, réponds 'None'.\n"
-            "Retourne UNIQUEMENT le résultat (ou GLOBAL_CLIENT_REPORT)."
+            "5. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de compte client, réponds UNIQUEMENT 'IGNORE'.\n"
+            "6. Si aucun client ne correspond et que ce n'est pas hors-sujet, réponds 'None'.\n"
+            "Retourne UNIQUEMENT le résultat (ou GLOBAL_CLIENT_REPORT ou IGNORE)."
         )
         data = {
             "model": "gpt-4o-mini",

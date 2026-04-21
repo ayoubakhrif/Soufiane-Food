@@ -100,11 +100,15 @@ class WhatsAppStockController(http.Controller):
             all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
             darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
             
-            extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
+            extracted_name = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
+            
+            if not extracted_name or extracted_name.upper() == 'IGNORE':
+                _logger.info(f"Ignoring off-topic message from group {group_id}")
+                return {'status': 'ignored'}
 
-            if extracted_str and extracted_str.lower() != 'none':
-                final_extracted_str = extracted_str
-                extracted_list = [name.strip() for name in extracted_str.split(',')]
+            if extracted_name and extracted_name.lower() != 'none':
+                final_extracted_str = extracted_name
+                extracted_list = [name.strip() for name in extracted_name.split(',')]
                 ai_domain = []
                 for name in extracted_list:
                     ai_domain.append(('name', 'ilike', name))
@@ -130,7 +134,7 @@ class WhatsAppStockController(http.Controller):
         ])
         
         if not stock_records:
-            return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{extracted_str}'."}
+            return {'status': 'not_found', 'message': f"Aucun stock disponible pour '{final_extracted_str}'."}
 
         # Which distinct articles actually have positive stock?
         articles_in_stock = stock_records.mapped('product_id.article_id')
@@ -188,8 +192,9 @@ class WhatsAppStockController(http.Controller):
             "1. Si l'utilisateur demande une situation globale, le stock général ou le stock total (même avec des fautes comme 'stok genial'), réponds UNIQUEMENT 'GLOBAL_STOCK_REPORT'.\n"
             "2. Sinon, identifie le nom de l'article. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus.\n"
             "3. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact.\n"
-            "4. Si la demande est globale par type (ex: 'poivre'), renvoie UNIQUEMENT LE TERME COURT (ex: 'Poivre').\n"
-            "Retourne UNIQUEMENT le mot trouvé (ou GLOBAL_STOCK_REPORT). Si aucun ne correspond, réponds 'None'."
+            "4. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de stock de produit, réponds UNIQUEMENT 'IGNORE'.\n"
+            "5. Si aucun article ne correspond et que ce n'est pas hors-sujet, réponds 'None'.\n"
+            "Retourne UNIQUEMENT le résultat (ou GLOBAL_STOCK_REPORT ou IGNORE)."
         )
         data = {
             "model": "gpt-4o-mini",

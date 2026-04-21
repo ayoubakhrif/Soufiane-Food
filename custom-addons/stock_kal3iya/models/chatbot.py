@@ -17,7 +17,7 @@ Intentions possibles :
 - "list_products" : l'utilisateur veut la liste des produits en stock
 - "list_garages" : l'utilisateur veut la liste des garages
 - "stock_order_validation" : l'utilisateur envoie un message multi-ligne avec des articles, quantités, garages et lots à vérifier.
-- "unknown" : tu ne comprends pas la question
+- "unknown" : tu ne comprends pas la question ou le message est hors-sujet (emoji seul, texte aléatoire, salutation sans demande).
 
 LISTE DES PRODUITS DISPONIBLES (Référentiel exact) :
 __PRODUCT_LIST__

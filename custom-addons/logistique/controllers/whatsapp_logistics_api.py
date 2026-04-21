@@ -83,6 +83,11 @@ class WhatsAppLogisticsController(http.Controller):
                     
                     if active_names:
                         extracted_name = self._extract_product_name(message_text, openai_key, active_names)
+                        
+                        if not extracted_name or extracted_name.upper() == 'IGNORE':
+                            _logger.info(f"Ignoring off-topic message in Logistics: {group_id}")
+                            return {'status': 'ignored'}
+                        
                         if extracted_name and extracted_name.lower() != 'none':
                             # Limit AI match to ACTIVE articles as well
                             log_articles = request.env['logistique.article'].sudo().search([
@@ -126,6 +131,11 @@ class WhatsAppLogisticsController(http.Controller):
                         request.env['company.article.alias'].sudo().search([]).mapped('name')
                     ))
                     extracted_name = self._extract_product_name(message_text, openai_key, all_article_names)
+                    
+                    if not extracted_name or extracted_name.upper() == 'IGNORE':
+                        _logger.info(f"Ignoring off-topic message in Logistics (Global check): {group_id}")
+                        return {'status': 'ignored'}
+
                     if extracted_name and extracted_name.lower() != 'none':
                         # Check if matches article name or company alias
                         matched_achat = request.env['achat.article'].sudo().search([
@@ -269,8 +279,10 @@ class WhatsAppLogisticsController(http.Controller):
             "Règles :\n"
             "1. Identifie l'article le plus proche parmi la liste.\n"
             "2. Retourne uniquement le nom de l'article tel qu'il est dans la liste.\n"
-            "3. Si aucun ne correspond de façon convaincante, réponds 'None'.\n"
-            "4. Si la demande est vague (ex: 'tournesol' pour 'HUILE DE TOURNESOL'), renvoie le nom complet de l'article."
+            "3. IMPORTANT : Si le message est un emoji seul, une salutation sans demande (ex: 'Salut'), du texte aléatoire ou n'a aucun rapport avec une demande de suivi logistique/conteneur, réponds UNIQUEMENT 'IGNORE'.\n"
+            "4. Si aucun article ne correspond de façon convaincante (et que ce n'est pas hors-sujet), réponds 'None'.\n"
+            "5. Si la demande est vague (ex: 'tournesol' pour 'HUILE DE TOURNESOL'), renvoie le nom complet de l'article.\n"
+            "Retourne UNIQUEMENT le résultat (ou IGNORE)."
         )
         data = {
             "model": "gpt-4o-mini",

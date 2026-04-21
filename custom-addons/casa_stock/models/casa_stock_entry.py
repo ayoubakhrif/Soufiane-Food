@@ -15,6 +15,7 @@ class CasaStockEntry(models.Model):
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
     price_purchase = fields.Float(string='Prix Achat', tracking=True)
+    price_received = fields.Float(string='Prix reçu', tracking=True)
     mt_achat = fields.Float(
         string='Montant Achat',
         compute='_compute_amounts',
@@ -174,7 +175,7 @@ class CasaStockEntry(models.Model):
         for rec in self:
             if rec.state in ('confirmed', 'done'):
                 forbidden_fields = [
-                    'product_id', 'qty', 'weight', 'price_purchase',
+                    'product_id', 'qty', 'weight', 'price_purchase', 'price_received',
                     'date', 'lot', 'dum', 'ville', 'provider_id', 'driver_id', 'ste_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
@@ -206,6 +207,7 @@ class CasaStockEntry(models.Model):
                 'date': rec.date,
                 'reference': rec.name,
                 'price_purchase': rec.price_purchase,
+                'price_received': rec.price_received,
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'scan_dum': rec.scan_dum,
@@ -249,6 +251,7 @@ class CasaStockEntry(models.Model):
                     'date': fields.Datetime.now(),
                     'reference': rec.name,
                     'price_purchase': rec.price_purchase,
+                    'price_received': rec.price_received,
                     'weight': rec.weight,
                     'calibre': rec.calibre,
                     'stock_soufiane': rec.stock_soufiane,

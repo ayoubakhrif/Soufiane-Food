@@ -16,6 +16,7 @@
                 <field name="poids"/>
                 <field name="tonnage"/>
                 <field name="price_purchase"/>
+                <field name="price_received" optional="show"/>
                 <field name="mt_achat" sum="Total Montant Achat"/>
                 <field name="ville"/>
                 <field name="stock_soufiane" optional="show"/>
@@ -62,6 +63,7 @@
                         </group>
                         <group>
                             <field name="price_purchase" groups="casa_stock.group_manager"/>
+                            <field name="price_received" groups="casa_stock.group_manager"/>
                             <field name="date"/>
                             <field name="stock_soufiane"/>
                             <field name="lot"/>

@@ -43,6 +43,7 @@ class CasaStockMove(models.Model):
 
     # Optional fields for reporting
     price_purchase = fields.Float(string='Prix Achat')
+    price_received = fields.Float(string='Prix reçu')
     price_sale = fields.Float(string='Prix Vente')
     weight = fields.Float(string='Poids (Kg)')
 

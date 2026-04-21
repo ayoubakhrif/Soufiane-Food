@@ -24,10 +24,16 @@ class CasaRecap(models.Model):
     # --- KPI Fields ---
     total_stock_casa = fields.Float(string='Total Stock Casa', compute='_compute_kpis')
     total_stock_tanger = fields.Float(string='Total Stock Tanger', compute='_compute_kpis')
-    total_benefices = fields.Float(string='Total Bénéfices', compute='_compute_kpis')
-    total_perte = fields.Float(string='Total Pertes', compute='_compute_kpis')
+
+    total_benefice_casa = fields.Float(string='Bénéfices Casa', compute='_compute_kpis')
+    total_benefice_tanger = fields.Float(string='Bénéfices Tanger', compute='_compute_kpis')
+
+    total_perte_casa = fields.Float(string='Pertes Casa', compute='_compute_kpis')
+    total_perte_tanger = fields.Float(string='Pertes Tanger', compute='_compute_kpis')
+
     total_charges = fields.Float(string='Total Charges Casa', compute='_compute_kpis')
-    credits_clients = fields.Float(string='Crédits Clients', compute='_compute_kpis')
+    credits_clients = fields.Float(string='Crédits Clients (Prov.)', compute='_compute_kpis')
+    total_avances = fields.Float(string='Total Avances du jour', compute='_compute_kpis')
 
     # --- Display Fields for Notebook ---
     charge_ids = fields.Many2many('charges.casa', compute='_compute_trans_ids', string='Charges du jour')
@@ -35,19 +41,28 @@ class CasaRecap(models.Model):
     virement_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Virements du jour')
     cheque_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Chèques du jour')
 
+    def action_recalculate(self):
+        """Force simple reload to recompute non-stored fields"""
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
     def _compute_kpis(self):
         for rec in self:
             if not rec.date:
                 rec.total_stock_casa = 0
                 rec.total_stock_tanger = 0
-                rec.total_benefices = 0
-                rec.total_perte = 0
+                rec.total_benefice_casa = 0
+                rec.total_benefice_tanger = 0
+                rec.total_perte_casa = 0
+                rec.total_perte_tanger = 0
                 rec.total_charges = 0
                 rec.credits_clients = 0
+                rec.total_avances = 0
                 continue
 
             recap_date = rec.date
-            # Datetime for moves filtering (end of day)
             dt_until = datetime.combine(recap_date, time.max)
 
             # 1. Total Stock (Cumulative)
@@ -68,22 +83,29 @@ class CasaRecap(models.Model):
             rec.total_stock_casa = stock_casa
             rec.total_stock_tanger = stock_tanger
 
-            # 2. Total Bénéfices (Today)
+            # 2. Total Bénéfices (Today) - Splitted
             exits = self.env['casa.stock.exit'].search([
                 ('date', '=', recap_date),
                 ('state', '=', 'done')
             ])
-            rec.total_benefices = sum(exits.mapped('margin'))
+            rec.total_benefice_casa = sum(exits.filtered(lambda x: x.ville == 'casa').mapped('margin'))
+            rec.total_benefice_tanger = sum(exits.filtered(lambda x: x.ville == 'tanger').mapped('margin'))
 
-            # 3. Total Pertes (Today)
+            # 3. Total Pertes (Today) - Splitted
             pertes = self.env['casa.stock.perte'].search([
                 ('date', '=', recap_date),
                 ('state', '=', 'done')
             ])
-            perte_val = 0.0
+            perte_c = 0.0
+            perte_t = 0.0
             for p in pertes:
-                perte_val += p.qty * (p.weight or 0.0) * (p.price_purchase or 0.0)
-            rec.total_perte = perte_val
+                val = p.qty * (p.weight or 0.0) * (p.price_purchase or 0.0)
+                if p.ville == 'casa':
+                    perte_c += val
+                elif p.ville == 'tanger':
+                    perte_t += val
+            rec.total_perte_casa = perte_c
+            rec.total_perte_tanger = perte_t
 
             # 4. Total Charges (Today)
             charges = self.env['charges.casa'].search([
@@ -92,19 +114,23 @@ class CasaRecap(models.Model):
             ])
             rec.total_charges = sum(charges.mapped('total_amount'))
 
-            # 5. Crédits Clients (Cumulative Balance as of today)
-            # Balance = Initial + Ventes - Discounts - Advances + Impayes + SortiesSupp
+            # 5. Total Avances du Jour (Provisoire: draft + confirmed)
+            avances_jour = self.env['casa.client.advance'].search([
+                ('date', '=', recap_date),
+                ('state', 'in', ('draft', 'confirmed'))
+            ])
+            rec.total_avances = sum(avances_jour.mapped('amount'))
+
+            # 6. Crédits Clients (Cumulative Balance as of today using Compte Provisoire logic)
             clients = self.env['casa.client'].search([])
             total_credits = 0.0
             
-            # Optimization: aggregate data
-            all_exits = self.env['casa.stock.exit'].search([('date', '<=', recap_date), ('state', '=', 'done')])
+            all_exits = self.env['casa.stock.exit'].search([('date', '<=', recap_date), ('state', 'in', ('confirmed', 'done'))])
             all_discounts = self.env['casa.stock.discount'].search([('date', '<=', recap_date), ('state', '=', 'confirmed')])
-            all_advances = self.env['casa.client.advance'].search([('date', '<=', recap_date), ('state', '=', 'confirmed')])
+            all_advances = self.env['casa.client.advance'].search([('date', '<=', recap_date), ('state', 'in', ('draft', 'confirmed'))])
             all_unpaids = self.env['casa.client.unpaid'].search([('date', '<=', recap_date)])
             all_supps = self.env['casa.sortie.supp'].search([('date', '<=', recap_date)])
             
-            # Map by client
             exits_by_client = {}
             for e in all_exits:
                 exits_by_client[e.client_id.id] = exits_by_client.get(e.client_id.id, 0.0) + e.mt_vente
@@ -150,8 +176,9 @@ class CasaRecap(models.Model):
             
             advances = self.env['casa.client.advance'].search([
                 ('date', '=', rec.date),
-                ('state', '=', 'confirmed')
+                ('state', 'in', ('draft', 'confirmed'))
             ])
             rec.versement_ids = advances.filtered(lambda a: a.payment_mode == 'versement')
             rec.virement_ids = advances.filtered(lambda a: a.payment_mode == 'virement')
             rec.cheque_ids = advances.filtered(lambda a: a.payment_mode == 'cheque')
+

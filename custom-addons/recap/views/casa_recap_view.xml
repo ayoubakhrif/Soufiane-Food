@@ -8,9 +8,12 @@
                 <field name="date"/>
                 <field name="total_stock_casa" sum="Total"/>
                 <field name="total_stock_tanger" sum="Total"/>
-                <field name="total_benefices" sum="Total"/>
-                <field name="total_perte" sum="Total"/>
+                <field name="total_benefice_casa" sum="Total"/>
+                <field name="total_benefice_tanger" sum="Total"/>
+                <field name="total_perte_casa" sum="Total"/>
+                <field name="total_perte_tanger" sum="Total"/>
                 <field name="total_charges" sum="Total"/>
+                <field name="total_avances" sum="Total"/>
                 <field name="credits_clients" sum="Total"/>
             </tree>
         </field>
@@ -22,6 +25,7 @@
         <field name="arch" type="xml">
             <form string="Récapitulatif">
                 <header>
+                    <button name="action_recalculate" string="Recalculer" type="object" class="btn-secondary"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -53,25 +57,41 @@
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
-                        <!-- Bénéfices -->
+                        <!-- Bénéfices Casa -->
                         <div style="background: #f6ffed; padding: 20px; border-radius: 12px; border: 1px solid #b7eb8f; text-align: center;">
-                            <div style="color: #52c41a; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL BÉNÉFICES</div>
+                            <div style="color: #52c41a; font-size: 14px; font-weight: bold; margin-bottom: 10px;">BÉNÉFICES CASA</div>
                             <div style="font-size: 24px; font-weight: 800; color: #237804;">
-                                <field name="total_benefices"/>
+                                <field name="total_benefice_casa"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
-                        <!-- Pertes -->
+                        <!-- Bénéfices Tanger -->
+                        <div style="background: #f6ffed; padding: 20px; border-radius: 12px; border: 1px solid #b7eb8f; text-align: center;">
+                            <div style="color: #52c41a; font-size: 14px; font-weight: bold; margin-bottom: 10px;">BÉNÉFICES TANGER</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #237804;">
+                                <field name="total_benefice_tanger"/>
+                                <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
+                            </div>
+                        </div>
+                        <!-- Pertes Casa -->
                         <div style="background: #fff1f0; padding: 20px; border-radius: 12px; border: 1px solid #ffa39e; text-align: center;">
-                            <div style="color: #f5222d; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL PERTES</div>
+                            <div style="color: #f5222d; font-size: 14px; font-weight: bold; margin-bottom: 10px;">PERTES CASA</div>
                             <div style="font-size: 24px; font-weight: 800; color: #a8071a;">
-                                <field name="total_perte"/>
+                                <field name="total_perte_casa"/>
+                                <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
+                            </div>
+                        </div>
+                        <!-- Pertes Tanger -->
+                        <div style="background: #fff1f0; padding: 20px; border-radius: 12px; border: 1px solid #ffa39e; text-align: center;">
+                            <div style="color: #f5222d; font-size: 14px; font-weight: bold; margin-bottom: 10px;">PERTES TANGER</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #a8071a;">
+                                <field name="total_perte_tanger"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>
                         <!-- Charges -->
                         <div style="background: #fffbe6; padding: 20px; border-radius: 12px; border: 1px solid #ffe58f; text-align: center;">
-                            <div style="color: #faad14; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL CHARGES</div>
+                            <div style="color: #faad14; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL CHARGES CASA</div>
                             <div style="font-size: 24px; font-weight: 800; color: #ad6800;">
                                 <field name="total_charges"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
@@ -79,9 +99,17 @@
                         </div>
                         <!-- Crédits Clients -->
                         <div style="background: #f9f0ff; padding: 20px; border-radius: 12px; border: 1px solid #d3adf7; text-align: center;">
-                            <div style="color: #722ed1; font-size: 14px; font-weight: bold; margin-bottom: 10px;">CRÉDITS CLIENTS</div>
+                            <div style="color: #722ed1; font-size: 14px; font-weight: bold; margin-bottom: 10px;">CRÉDITS CLIENTS (PROV)</div>
                             <div style="font-size: 24px; font-weight: 800; color: #391085;">
                                 <field name="credits_clients"/>
+                                <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
+                            </div>
+                        </div>
+                        <!-- Total Avances -->
+                        <div style="background: #e6fffa; padding: 20px; border-radius: 12px; border: 1px solid #81e6d9; text-align: center;">
+                            <div style="color: #319795; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL AVANCES</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #234e52;">
+                                <field name="total_avances"/>
                                 <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
                             </div>
                         </div>

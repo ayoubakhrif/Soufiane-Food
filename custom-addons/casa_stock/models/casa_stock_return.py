@@ -24,6 +24,7 @@ class CasaStockReturn(models.Model):
     date = fields.Date(string='Date de Retour', default=fields.Date.context_today, required=True)
     driver_id = fields.Many2one('casa.driver', string='Chauffeur')
     qty = fields.Float(string='Quantité Retournée', required=True)
+    price_return = fields.Float(string='Prix de Retour (Achat)', required=True)
     weight = fields.Float(related='exit_id.weight', string='Poids unit (Kg)', readonly=True)
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
@@ -96,7 +97,7 @@ class CasaStockReturn(models.Model):
                 'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.return',
                 'res_id': rec.id,
-                'price_purchase': rec.exit_id.price_purchase,
+                'price_purchase': rec.price_return,
             })
             
             rec.write({
@@ -137,7 +138,7 @@ class CasaStockReturn(models.Model):
                 'ste_id': rec.ste_id.id,
                 'res_model': 'casa.stock.return',
                 'res_id': rec.id,
-                'price_purchase': rec.exit_id.price_purchase,
+                'price_purchase': rec.price_return,
             })
             
             rec.write({

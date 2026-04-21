@@ -5,6 +5,7 @@ class ChargesCasaLine(models.Model):
     _inherit = 'charges.casa.line'
     
     client_id = fields.Many2one(related='charge_id.client_id', string='Client', readonly=True)
+    ville = fields.Selection(related='charge_id.ville', string='Ville', readonly=True)
 
 class CasaRecap(models.Model):
     _name = 'casa.recap'

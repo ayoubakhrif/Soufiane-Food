@@ -123,6 +123,7 @@
                                     <field name="type"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="comment"/>
+                                    <field name="ville"/>
                                 </tree>
                             </field>
                         </page>

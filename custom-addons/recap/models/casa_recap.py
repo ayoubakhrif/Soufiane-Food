@@ -52,6 +52,11 @@ class CasaRecap(models.Model):
     versement_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Versements du jour')
     virement_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Virements du jour')
     cheque_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Chèques du jour')
+    espece_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Espèces du jour')
+    impaye_ids = fields.Many2many('casa.client.unpaid', compute='_compute_trans_ids', string='Impayés du jour')
+    benefice_exit_ids = fields.Many2many('casa.stock.exit', compute='_compute_trans_ids', string='Sorties (Bénéfices)')
+    perte_exit_ids = fields.Many2many('casa.stock.exit', compute='_compute_trans_ids', string='Sorties (Pertes)')
+    total_impayes = fields.Float(string='Total Impayés du jour', compute='_compute_kpis')
 
     def action_recalculate(self):
         """Force simple reload to recompute non-stored fields"""
@@ -77,6 +82,7 @@ class CasaRecap(models.Model):
                 rec.total_avances_kenitra = 0
                 rec.total_avances_agadir = 0
                 rec.total_avances_marrakech = 0
+                rec.total_impayes = 0
                 continue
 
             recap_date = rec.date
@@ -150,10 +156,11 @@ class CasaRecap(models.Model):
             ])
             rec.total_charges = sum(charges.mapped('total_amount'))
 
-            # 5. Total Avances du Jour (Provisoire: draft + confirmed)
+            # 5. Total Avances du Jour (Provisoire: draft + confirmed, excluding 'autre' and 'transport')
             avances_jour = self.env['casa.client.advance'].search([
                 ('date', '=', recap_date),
-                ('state', 'in', ('draft', 'confirmed'))
+                ('state', 'in', ('draft', 'confirmed')),
+                ('payment_mode', 'not in', ('autre', 'transport'))
             ])
             rec.total_avances = sum(avances_jour.mapped('amount'))
             rec.total_avances_casa = sum(avances_jour.filtered(lambda a: a.ville == 'casa').mapped('amount'))
@@ -161,6 +168,12 @@ class CasaRecap(models.Model):
             rec.total_avances_kenitra = sum(avances_jour.filtered(lambda a: a.ville == 'kenitra').mapped('amount'))
             rec.total_avances_agadir = sum(avances_jour.filtered(lambda a: a.ville == 'agadir').mapped('amount'))
             rec.total_avances_marrakech = sum(avances_jour.filtered(lambda a: a.ville == 'marrakech').mapped('amount'))
+
+            # 5.1 Total Impayés du Jour
+            impayes_jour = self.env['casa.client.unpaid'].search([
+                ('date', '=', recap_date)
+            ])
+            rec.total_impayes = sum(impayes_jour.mapped('amount'))
 
             # 6. Crédits Clients (Cumulative Balance as of today using Compte Provisoire logic)
             clients = self.env['casa.client'].search([])
@@ -211,6 +224,10 @@ class CasaRecap(models.Model):
                 rec.versement_ids = False
                 rec.virement_ids = False
                 rec.cheque_ids = False
+                rec.espece_ids = False
+                rec.impaye_ids = False
+                rec.benefice_exit_ids = False
+                rec.perte_exit_ids = False
                 continue
 
             day_charges = self.env['charges.casa'].search([('date', '=', rec.date)])
@@ -223,4 +240,25 @@ class CasaRecap(models.Model):
             rec.versement_ids = advances.filtered(lambda a: a.payment_mode == 'versement')
             rec.virement_ids = advances.filtered(lambda a: a.payment_mode == 'virement')
             rec.cheque_ids = advances.filtered(lambda a: a.payment_mode == 'cheque')
+            rec.espece_ids = advances.filtered(lambda a: a.payment_mode == 'espece')
+
+            # Impayés
+            impayes = self.env['casa.client.unpaid'].search([('date', '=', rec.date)])
+            rec.impaye_ids = impayes
+
+            # Sorties (Bénéfices et Pertes)
+            exits = self.env['casa.stock.exit'].search([
+                ('date', '=', rec.date),
+                ('state', '=', 'done')
+            ])
+            benef_ids = []
+            perte_ids = []
+            for e in exits:
+                margin = (e.mt_vente - getattr(e, 'discount_amount', 0.0) - e.mt_achat)
+                if margin > 0:
+                    benef_ids.append(e.id)
+                else:
+                    perte_ids.append(e.id)
+            rec.benefice_exit_ids = benef_ids
+            rec.perte_exit_ids = perte_ids
 

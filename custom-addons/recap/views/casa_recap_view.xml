@@ -148,6 +148,14 @@
                                 <field name="total_avances_marrakech"/>
                             </div>
                         </div>
+                        <!-- Total Impayés -->
+                        <div style="background: #fff1f0; padding: 20px; border-radius: 12px; border: 1px solid #ffccc7; text-align: center;">
+                            <div style="color: #f5222d; font-size: 14px; font-weight: bold; margin-bottom: 10px;">TOTAL IMPAYÉS</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #a8071a;">
+                                <field name="total_impayes"/>
+                                <span style="font-size: 14px; font-weight: normal; margin-left: 5px;">MAD</span>
+                            </div>
+                        </div>
                     </div>
 
                     <notebook>
@@ -195,6 +203,48 @@
                                     <field name="amount" sum="Total"/>
                                     <field name="payment_mode"/>
                                     <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Espèces" name="especes">
+                            <field name="espece_ids" readonly="1">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="client_id"/>
+                                    <field name="ville"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="payment_mode"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Impayés" name="impayes">
+                            <field name="impaye_ids" readonly="1">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="client_id"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="comment"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Sorties (Bénéfices)" name="benefices">
+                            <field name="benefice_exit_ids" readonly="1">
+                                <tree default_order="ville asc">
+                                    <field name="ville"/>
+                                    <field name="client_id"/>
+                                    <field name="mt_vente" sum="Total Vente"/>
+                                    <field name="mt_achat" sum="Total Achat"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Sorties (Pertes)" name="pertes">
+                            <field name="perte_exit_ids" readonly="1">
+                                <tree default_order="ville asc">
+                                    <field name="ville"/>
+                                    <field name="client_id"/>
+                                    <field name="mt_vente" sum="Total Vente"/>
+                                    <field name="mt_achat" sum="Total Achat"/>
                                 </tree>
                             </field>
                         </page>

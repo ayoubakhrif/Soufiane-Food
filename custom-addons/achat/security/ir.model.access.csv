@@ -105,5 +105,5 @@ access_achat_article_all_read,achat.article all read,model_achat_article,base.gr
 
 access_ste_change_purchase_manager,ste.change.purchase.manager,model_ste_change,group_purchase_manager,1,1,1,1
 access_ste_change_achat_compta,ste.change.achat.compta,model_ste_change,group_achat_compta,1,0,0,0
-access_achat_article_alias_user,achat.article.alias.user,model_achat_article_alias,group_purchase_user,1,1,1,1
-access_achat_article_alias_manager,achat.article.alias.manager,model_achat_article_alias,group_purchase_manager,1,1,1,1
+access_achat_article_alias_user,company.article.alias.user,model_company_article_alias,group_purchase_user,1,1,1,1
+access_achat_article_alias_manager,company.article.alias.manager,model_company_article_alias,group_purchase_manager,1,1,1,1

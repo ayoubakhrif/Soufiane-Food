@@ -20,6 +20,7 @@
         'views/ste_change_views.xml',
         'views/achat_enquete_view.xml',
         'views/achat_article_view.xml',
+        'views/company_article_view_ext.xml',
         'views/achat_origin_view.xml',
         'views/document_followup_views.xml',
         'views/contract_advance_views.xml',

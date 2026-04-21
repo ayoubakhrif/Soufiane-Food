@@ -47,15 +47,15 @@ class WhatsAppLogisticsController(http.Controller):
         active_log_ids = active_entries.mapped('article_id').ids
         active_achat_ids = active_entries.mapped('achat_article_id').ids
         
-        # Search using ilike among ACTIVE articles
+        # Search Logistique Articles by Name OR Alias (via company_article_id)
         log_articles = request.env['logistique.article'].sudo().search([
-            ('name', 'ilike', message_text),
+            '|', ('name', 'ilike', message_text), ('company_article_id.alias_ids.name', 'ilike', message_text),
             ('id', 'in', active_log_ids)
         ])
         
-        # Search Achat Articles by Name OR Alias
+        # Search Achat Articles by Name OR Alias (via company_article_id)
         achat_articles = request.env['achat.article'].sudo().search([
-            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text),
+            '|', ('name', 'ilike', message_text), ('company_article_id.alias_ids.name', 'ilike', message_text),
             ('id', 'in', active_achat_ids)
         ])
         
@@ -85,9 +85,12 @@ class WhatsAppLogisticsController(http.Controller):
                         extracted_name = self._extract_product_name(message_text, openai_key, active_names)
                         if extracted_name and extracted_name.lower() != 'none':
                             # Limit AI match to ACTIVE articles as well
-                            log_articles = request.env['logistique.article'].sudo().search([('name', '=', extracted_name), ('id', 'in', active_log_ids)])
+                            log_articles = request.env['logistique.article'].sudo().search([
+                                '|', ('name', '=', extracted_name), ('company_article_id.alias_ids.name', '=', extracted_name),
+                                ('id', 'in', active_log_ids)
+                            ])
                             achat_articles = request.env['achat.article'].sudo().search([
-                                '|', ('name', '=', extracted_name), ('alias_ids.name', '=', extracted_name),
+                                '|', ('name', '=', extracted_name), ('company_article_id.alias_ids.name', '=', extracted_name),
                                 ('id', 'in', active_achat_ids)
                             ])
                             for a in log_articles:
@@ -98,9 +101,11 @@ class WhatsAppLogisticsController(http.Controller):
             # C. DISTINGUISH ERROR CASES: If still no result, check if article exists at all
             if not found_items:
                 # Search in ALL articles (excluding active status)
-                all_log = request.env['logistique.article'].sudo().search([('name', 'ilike', message_text)], limit=1)
+                all_log = request.env['logistique.article'].sudo().search([
+                    '|', ('name', 'ilike', message_text), ('company_article_id.alias_ids.name', 'ilike', message_text)
+                ], limit=1)
                 all_achat = request.env['achat.article'].sudo().search([
-                    '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+                    '|', ('name', 'ilike', message_text), ('company_article_id.alias_ids.name', 'ilike', message_text)
                 ], limit=1)
                 
                 if all_log or all_achat:
@@ -118,13 +123,13 @@ class WhatsAppLogisticsController(http.Controller):
                     all_article_names = list(set(
                         request.env['logistique.article'].sudo().search([]).mapped('name') + 
                         request.env['achat.article'].sudo().search([]).mapped('name') +
-                        request.env['achat.article.alias'].sudo().search([]).mapped('name')
+                        request.env['company.article.alias'].sudo().search([]).mapped('name')
                     ))
                     extracted_name = self._extract_product_name(message_text, openai_key, all_article_names)
                     if extracted_name and extracted_name.lower() != 'none':
-                        # Check if the extracted name matches an article name or an alias
+                        # Check if matches article name or company alias
                         matched_achat = request.env['achat.article'].sudo().search([
-                            '|', ('name', '=', extracted_name), ('alias_ids.name', '=', extracted_name)
+                            '|', ('name', '=', extracted_name), ('company_article_id.alias_ids.name', '=', extracted_name)
                         ], limit=1)
                         matched_name = matched_achat.name if matched_achat else extracted_name
                         

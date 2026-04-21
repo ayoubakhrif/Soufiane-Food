@@ -40,87 +40,148 @@ class WhatsAppLogisticsController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Logistics Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Logistics Group.'}
 
-        # 4. Search for Article
-        # A. Direct Search
-        articles = request.env['logistique.article'].sudo().search([('name', '=ilike', message_text)])
+        # 4. Search for Article (Check both Logistique and Achat articles)
+        search_query = [('name', '=ilike', message_text)]
+        log_articles = request.env['logistique.article'].sudo().search(search_query)
+        achat_articles = request.env['achat.article'].sudo().search(search_query)
         
+        # Merge results into a list of tuples (name, model, id, company_article_id)
+        found_items = []
+        for a in log_articles:
+            found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
+        for a in achat_articles:
+            # Avoid duplicate names if they are already in found_items (though models differ)
+            found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
+
         # B. AI Fallback if no result
-        if not articles:
+        if not found_items:
             openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
             if openai_key:
-                # Fetch article names for AI guidance
-                all_article_names = request.env['logistique.article'].sudo().search([]).mapped('name')
-                extracted_name = self._extract_product_name(message_text, openai_key, all_article_names)
-                
+                all_names = list(set(
+                    request.env['logistique.article'].sudo().search([]).mapped('name') + 
+                    request.env['achat.article'].sudo().search([]).mapped('name')
+                ))
+                extracted_name = self._extract_product_name(message_text, openai_key, all_names)
                 if extracted_name and extracted_name.lower() != 'none':
-                    articles = request.env['logistique.article'].sudo().search([('name', 'ilike', extracted_name)])
+                    log_articles = request.env['logistique.article'].sudo().search([('name', 'ilike', extracted_name)])
+                    achat_articles = request.env['achat.article'].sudo().search([('name', 'ilike', extracted_name)])
+                    for a in log_articles:
+                        found_items.append({'name': a.name, 'model': 'logistique.article', 'id': a.id, 'company_id': a.company_article_id.id})
+                    for a in achat_articles:
+                        found_items.append({'name': a.name, 'model': 'achat.article', 'id': a.id, 'company_id': a.company_article_id.id})
 
-        if not articles:
-            return {'status': 'not_found', 'message': "Désolé, je n'ai pas trouvé cet article dans la logistique."}
+        if not found_items:
+            return {'status': 'not_found', 'message': f"Désolé, je n'ai pas trouvé l'article '{message_text}' dans les dossiers achat ou logistique."}
 
         # 5. Handle Multiple Choices
-        if len(articles) > 1:
-            # Check for exact case-insensitive match among results
-            exact_match = articles.filtered(lambda a: a.name.lower() == message_text.lower())
-            if exact_match:
-                articles = exact_match[0]
+        if len(found_items) > 1:
+            # Check for exact case-insensitive match
+            exact_matches = [f for f in found_items if f['name'].lower() == message_text.lower()]
+            if len(exact_matches) == 1:
+                selected_item = exact_matches[0]
             else:
-                choices = [a.name for a in articles]
-                choices_text = "Plusieurs articles trouvés. Veuillez préciser :\n"
-                for i, name in enumerate(choices, 1):
-                    choices_text += f"{i}- {name}\n"
-                return {
-                    'status': 'multiple_choices',
-                    'message': choices_text,
-                    'choices': choices
-                }
+                # Group by name to avoid duplicate names in the menu
+                unique_names = []
+                unique_found = []
+                for f in found_items:
+                    if f['name'] not in unique_names:
+                        unique_names.append(f['name'])
+                        unique_found.append(f)
+                
+                if len(unique_found) > 1:
+                    choices = [f['name'] for f in unique_found]
+                    choices_text = "Plusieurs articles trouvés. Veuillez préciser :\n"
+                    for i, name in enumerate(choices, 1):
+                        choices_text += f"{i}- {name}\n"
+                    return {
+                        'status': 'multiple_choices',
+                        'message': choices_text,
+                        'choices': choices
+                    }
+                else:
+                    selected_item = unique_found[0]
+        else:
+            selected_item = found_items[0]
 
-        # 6. Process Unique Article
-        article = articles[0]
-        entries = request.env['logistique.entry'].sudo().search([
-            ('article_id', '=', article.id),
-            ('port_status', '=', 'on_port')
-        ], order='eta asc')
+        # 6. Process Selection & Find ALL related records via Company Article
+        target_name = selected_item['name']
+        company_id = selected_item['company_id']
+        
+        # Find all logistique and achat articles sharing the same company ID or same name
+        all_log_ids = []
+        all_achat_ids = []
+        
+        if company_id:
+            all_log_ids = request.env['logistique.article'].sudo().search([('company_article_id', '=', company_id)]).ids
+            all_achat_ids = request.env['achat.article'].sudo().search([('company_article_id', '=', company_id)]).ids
+        else:
+            # Fallback to name if no company link
+            all_log_ids = request.env['logistique.article'].sudo().search([('name', '=', target_name)]).ids
+            all_achat_ids = request.env['achat.article'].sudo().search([('name', '=', target_name)]).ids
+
+        # Final Search in logistique.entry
+        domain = [
+            '|', '|',
+            ('achat_article_id', 'in', all_achat_ids),
+            ('article_id', 'in', all_log_ids),
+            ('achat_article_id.name', 'ilike', target_name)
+        ]
+        entries = request.env['logistique.entry'].sudo().search(domain, order='eta asc')
 
         if not entries:
             return {
                 'status': 'response',
-                'response': f"📋 *Logistique : {article.name}*\n\n✅ Aucun conteneur en cours pour cet article (tous sont sortis ou aucun dossier existant)."
+                'response': f"📋 *Logistique : {target_name}*\n\n✅ Aucun dossier trouvé en base pour cet article."
             }
 
-        # 7. Group entries by ETA
-        today = date.today()
+        # 7. Group entries
+        today = fields.Date.today()
         at_port = []
-        upcoming = {} # eta_string -> container_count
+        upcoming = {}
+        exited_count = 0
 
         for entry in entries:
+            # We filter by port_status here to show more info if nothing matches
+            if entry.port_status == 'exited':
+                exited_count += 1
+                continue
+            
             cnt = entry.container_count or 0
-            if entry.eta and entry.eta < today:
-                at_port.append(entry)
+            # Use entry ETA, fallback to dossier ETA if needed
+            eta_val = entry.eta or (entry.dossier_id and entry.dossier_id.eta) or False
+            
+            if eta_val and eta_val < today:
+                at_port.append({
+                    'bl': entry.bl_number or 'Inconnu',
+                    'count': cnt,
+                    'eta': eta_val.strftime('%d/%m/%Y')
+                })
             else:
-                eta_str = entry.eta.strftime('%d/%m/%Y') if entry.eta else "Date inconnue"
+                eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else "Date inconnue/À venir"
                 upcoming[eta_str] = upcoming.get(eta_str, 0) + cnt
 
         # 8. Format Response
         response = f"🚢 *LOGISTIQUE - {article.name.upper()}*\n"
         response += f"━━━━━━━━━━━━━━━━━━\n\n"
 
+        if not at_port and not upcoming:
+            response += f"✅ Dossiers trouvés ({exited_count}), mais ils sont tous déjà sortis (Status: Exited).\n"
+            return {'status': 'response', 'response': response}
+
         # Section: At Port
         if at_port:
-            total_at_port = sum(e.container_count for e in at_port)
+            total_at_port = sum(item['count'] for item in at_port)
             response += f"⚓ *DÉJÀ SUR PORT ({total_at_port} conteneurs)*\n"
-            for entry in at_port:
-                eta_val = entry.eta.strftime('%d/%m/%Y') if entry.eta else "N/A"
-                response += f"• BL {entry.bl_number or 'Inconnu'} : *{entry.container_count}* cont.(ETA: {eta_val})\n"
+            for item in at_port:
+                response += f"• BL {item['bl']} : *{item['count']}* cont. (ETA: {item['eta']})\n"
             response += "\n"
 
         # Section: Upcoming
         if upcoming:
+            # Sort upcoming by date (handle 'Date inconnue' gracefully)
             response += f"📅 *ARRIVAGES À VENIR*\n"
-            for eta_date, count in upcoming.items():
-                response += f"• Le *{eta_date}* : *{count}* conteneurs\n"
-        elif not at_port:
-            response += "⚠️ Aucun conteneur en attente détecté.\n"
+            for eta_date in sorted(upcoming.keys()):
+                response += f"• Le *{eta_date}* : *{upcoming[eta_date]}* conteneurs\n"
 
         response += "\n_Statut : On Port uniquement_"
 

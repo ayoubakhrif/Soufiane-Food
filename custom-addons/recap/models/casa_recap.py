@@ -12,6 +12,7 @@ class CasaRecap(models.Model):
         required=True,
         default=fields.Date.context_today
     )
+    currency_id = fields.Many2one('res.currency', string='Devise', default=lambda self: self.env.company.currency_id)
 
     @api.depends('date')
     def _compute_name(self):

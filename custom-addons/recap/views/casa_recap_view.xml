@@ -235,6 +235,7 @@
                                     <field name="client_id"/>
                                     <field name="mt_vente" sum="Total Vente"/>
                                     <field name="mt_achat" sum="Total Achat"/>
+                                    <field name="recap_margin" sum="Total Différence"/>
                                 </tree>
                             </field>
                         </page>
@@ -245,6 +246,7 @@
                                     <field name="client_id"/>
                                     <field name="mt_vente" sum="Total Vente"/>
                                     <field name="mt_achat" sum="Total Achat"/>
+                                    <field name="recap_margin" sum="Total Différence"/>
                                 </tree>
                             </field>
                         </page>

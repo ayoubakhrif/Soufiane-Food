@@ -117,12 +117,12 @@
 
                     <notebook>
                         <page string="Charges" name="charges">
-                            <field name="charge_ids" readonly="1">
+                            <field name="charge_line_ids" readonly="1">
                                 <tree>
-                                    <field name="date"/>
-                                    <field name="ville"/>
-                                    <field name="client_id"/>
-                                    <field name="total_amount" sum="Total"/>
+                                    <field name="charge_id" string="Réf. Opération" optional="show"/>
+                                    <field name="type"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="comment"/>
                                 </tree>
                             </field>
                         </page>

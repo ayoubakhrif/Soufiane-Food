@@ -36,7 +36,7 @@ class CasaRecap(models.Model):
     total_avances = fields.Float(string='Total Avances du jour', compute='_compute_kpis')
 
     # --- Display Fields for Notebook ---
-    charge_ids = fields.Many2many('charges.casa', compute='_compute_trans_ids', string='Charges du jour')
+    charge_line_ids = fields.Many2many('charges.casa.line', compute='_compute_trans_ids', string='Détails des Charges')
     versement_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Versements du jour')
     virement_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Virements du jour')
     cheque_ids = fields.Many2many('casa.client.advance', compute='_compute_trans_ids', string='Chèques du jour')
@@ -185,13 +185,14 @@ class CasaRecap(models.Model):
     def _compute_trans_ids(self):
         for rec in self:
             if not rec.date:
-                rec.charge_ids = False
+                rec.charge_line_ids = False
                 rec.versement_ids = False
                 rec.virement_ids = False
                 rec.cheque_ids = False
                 continue
 
-            rec.charge_ids = self.env['charges.casa'].search([('date', '=', rec.date)])
+            day_charges = self.env['charges.casa'].search([('date', '=', rec.date)])
+            rec.charge_line_ids = day_charges.mapped('line_ids')
             
             advances = self.env['casa.client.advance'].search([
                 ('date', '=', rec.date),

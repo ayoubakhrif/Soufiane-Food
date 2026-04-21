@@ -1,6 +1,11 @@
 from odoo import models, fields, api, _
 from datetime import datetime, time
 
+class ChargesCasaLine(models.Model):
+    _inherit = 'charges.casa.line'
+    
+    client_id = fields.Many2one(related='charge_id.client_id', string='Client', readonly=True)
+
 class CasaRecap(models.Model):
     _name = 'casa.recap'
     _description = 'Récapitulatif Quotidien'

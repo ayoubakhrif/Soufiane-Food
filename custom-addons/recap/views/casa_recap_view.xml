@@ -119,7 +119,7 @@
                         <page string="Charges" name="charges">
                             <field name="charge_line_ids" readonly="1">
                                 <tree>
-                                    <field name="charge_id" string="Réf. Opération" optional="show"/>
+                                    <field name="client_id" string="Client" optional="show"/>
                                     <field name="type"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="comment"/>

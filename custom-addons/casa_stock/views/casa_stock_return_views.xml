@@ -44,6 +44,7 @@
                             <field name="price_return" readonly="state != 'draft'"/>
                             <field name="date" readonly="state != 'draft'"/>
                             <field name="driver_id" readonly="state != 'draft'"/>
+                            <field name="ville" readonly="state != 'draft'"/>
                         </group>
                         <group>
                             <field name="exit_id" readonly="state != 'draft'" options="{'no_create': True}"/>

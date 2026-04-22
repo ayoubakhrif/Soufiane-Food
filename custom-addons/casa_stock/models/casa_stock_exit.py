@@ -411,6 +411,7 @@ class CasaStockExit(models.Model):
                 'default_dum': self.dum,
                 'default_calibre': self.calibre,
                 'default_price_return': self.price_purchase,
+                'default_ville': self.ville,
             }
         }
 

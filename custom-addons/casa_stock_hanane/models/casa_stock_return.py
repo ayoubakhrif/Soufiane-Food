@@ -15,7 +15,13 @@ class CasaStockReturn(models.Model):
     product_id = fields.Many2one( related='exit_id.product_id', store=True, string='Produit')
     lot = fields.Char(related='exit_id.lot', store=True, string='Lot')
     dum = fields.Char(related='exit_id.dum', store=True, string='DUM')
-    ville = fields.Selection(related='exit_id.ville', store=True, string='Ville')
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+        ('kenitra', 'Kénitra'),
+        ('agadir', 'Agadir'),
+        ('marrakech', 'Marrakech')
+    ], string='Ville', required=True)
     client_id = fields.Many2one('casa_hanane.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('casa_hanane.ste', related='exit_id.ste_id', store=True, string='Société')
     calibre = fields.Char(related='exit_id.calibre', store=True, string='Calibre')
@@ -37,6 +43,11 @@ class CasaStockReturn(models.Model):
 
     move_id = fields.Many2one('casa_hanane.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa_hanane.stock.move', string='Mouvement d\'Annulation', readonly=True)
+
+    @api.onchange('exit_id')
+    def _onchange_exit_id(self):
+        if self.exit_id and self.exit_id.ville:
+            self.ville = self.exit_id.ville
 
     @api.depends('qty', 'weight')
     def _compute_tonnage(self):

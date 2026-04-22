@@ -111,7 +111,7 @@
                             <field name="container_count" string="Nb of Containers" readonly="1"/>
                             
                             <!-- For non-admins: readonly when confirmed -->
-                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/> 
+                            <field name="contract_id" required="1" options="{'no_create': True}" domain="[('state', '=', 'open')]" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/> 
                             <field name="ste_id"      options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="supplier_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <field name="shipping_id" options="{'no_create': True, 'no_create_edit': True}" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
@@ -119,7 +119,7 @@
                             <field name="incoterm" readonly="purchase_state != 'initial'" groups="!achat.group_purchase_admin"/>
                             <!-- date_booking readonly if draft (interpreted as locked from draft onwards) -->                            
                             <!-- For admins: always editable -->
-                            <field name="contract_id" options="{'no_create': True}" domain="[('state', '=', 'open')]" groups="achat.group_purchase_admin"/> 
+                            <field name="contract_id" required="1" options="{'no_create': True}" domain="[('state', '=', 'open')]" groups="achat.group_purchase_admin"/> 
                             <field name="ste_id"      options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
                             <field name="supplier_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>
                             <field name="shipping_id" options="{'no_create': True, 'no_create_edit': True}" groups="achat.group_purchase_admin"/>

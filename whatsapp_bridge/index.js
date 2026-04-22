@@ -17,12 +17,14 @@ const CLIENT_GROUP_ID = "120363426234155722@g.us";
 const STOCK_VALIDATION_GROUP_ID = "120363403203705514@g.us";
 const FINANCE_GROUP_ID = "120363428965532100@g.us";
 const LOGISTICS_GROUP_ID = "120363427755410654@g.us";
+const DOUANE_GROUP_ID = "120363406635335778@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
 const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_kal3iya/chat";
 const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance?db=soufianefoods";
 const LOGISTICS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics?db=soufianefoods";
+const DOUANE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/douane?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -105,6 +107,9 @@ async function connectToWhatsApp() {
             } else if (from === LOGISTICS_GROUP_ID) {
                 targetOdooUrl = LOGISTICS_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === DOUANE_GROUP_ID) {
+                targetOdooUrl = DOUANE_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -153,6 +158,7 @@ async function connectToWhatsApp() {
                 else if (from === CLIENT_GROUP_ID) typeStr = "CLIENT";
                 else if (from === FINANCE_GROUP_ID) typeStr = "FINANCE";
                 else if (from === LOGISTICS_GROUP_ID) typeStr = "LOGISTICS";
+                else if (from === DOUANE_GROUP_ID) typeStr = "DOUANE";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 const response = await axios.post(targetOdooUrl, {
@@ -195,16 +201,29 @@ async function connectToWhatsApp() {
                     let reportType = "de stock";
                     if (from === CLIENT_GROUP_ID) reportType = "de compte";
                     if (from === FINANCE_GROUP_ID) reportType = "financier";
+                    if (from === DOUANE_GROUP_ID) reportType = "douane (DUM)";
 
-                    console.log(`Entité identifiée : ${identifier}. Envoi du PDF...`);
+                    console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 
-                    // Envoi du PDF
-                    await sock.sendMessage(from, {
-                        document: Buffer.from(result.pdf_base64, 'base64'),
-                        mimetype: 'application/pdf',
-                        fileName: result.file_name,
-                        caption: `Voici le rapport ${reportType} pour *${identifier}*.`
-                    }, { quoted: msg });
+                    // Support for multiple files
+                    if (result.files && Array.isArray(result.files)) {
+                        for (const file of result.files) {
+                            await sock.sendMessage(from, {
+                                document: Buffer.from(file.pdf_base64, 'base64'),
+                                mimetype: 'application/pdf',
+                                fileName: file.file_name,
+                                caption: `Document DUM pour *${identifier}*.`
+                            }, { quoted: msg });
+                        }
+                    } else if (result.pdf_base64) {
+                        // Original single file support
+                        await sock.sendMessage(from, {
+                            document: Buffer.from(result.pdf_base64, 'base64'),
+                            mimetype: 'application/pdf',
+                            fileName: result.file_name,
+                            caption: `Voici le rapport ${reportType} pour *${identifier}*.`
+                        }, { quoted: msg });
+                    }
                 } else if (result && result.status === 'not_found') {
                     console.log(`Non trouvé : ${result.message}`);
                     await sock.sendMessage(from, { text: result.message }, { quoted: msg });

@@ -104,4 +104,9 @@
     <menuitem id="menu_charges_casa_root" name="Charges Casa" sequence="50"/>
     <menuitem id="menu_charges_casa_main" name="Charges" parent="menu_charges_casa_root"
               action="action_charges_casa" sequence="10"/>
+
+    <!-- Mirror Menu in Stock Casa -->
+    <menuitem id="menu_casa_stock_charges" name="Charges"
+              parent="casa_stock.menu_casa_stock_root"
+              action="action_charges_casa" sequence="47"/>
 </odoo>

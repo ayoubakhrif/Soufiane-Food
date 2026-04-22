@@ -9,6 +9,7 @@
                 <field name="date"/>
                 <field name="client_id"/>
                 <field name="ville"/>
+                <field name="total_transport" sum="Total Transport"/>
                 <field name="total_amount" sum="Total"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="state" widget="badge"
@@ -41,6 +42,9 @@
                         <group>
                             <field name="user_id" readonly="1"/>
                             <field name="total_amount" readonly="1"/>
+                            <field name="total_transport" readonly="1"/>
+                            <field name="total_salaires" readonly="1"/>
+                            <field name="total_autres" readonly="1"/>
                         </group>
                     </group>
                     <notebook>

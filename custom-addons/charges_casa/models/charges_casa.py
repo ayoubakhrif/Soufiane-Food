@@ -39,11 +39,17 @@ class ChargesCasa(models.Model):
     line_ids = fields.One2many('charges.casa.line', 'charge_id', string='Lignes de Charges')
 
     total_amount = fields.Float(string='Total', compute='_compute_total_amount', store=True)
+    total_transport = fields.Float(string='Total Transport', compute='_compute_total_amount', store=True)
+    total_salaires = fields.Float(string='Total Salaires', compute='_compute_total_amount', store=True)
+    total_autres = fields.Float(string='Total Autres', compute='_compute_total_amount', store=True)
 
-    @api.depends('line_ids.amount')
+    @api.depends('line_ids.amount', 'line_ids.type')
     def _compute_total_amount(self):
         for record in self:
             record.total_amount = sum(record.line_ids.mapped('amount'))
+            record.total_transport = sum(record.line_ids.filtered(lambda l: l.type == 'transport').mapped('amount'))
+            record.total_salaires = sum(record.line_ids.filtered(lambda l: l.type == 'salaires').mapped('amount'))
+            record.total_autres = sum(record.line_ids.filtered(lambda l: l.type == 'autres').mapped('amount'))
 
     def action_confirm(self):
         for record in self:

@@ -75,6 +75,12 @@ class WhatsAppDouaneController(http.Controller):
         elif message_text.startswith("❌ Non, c'est autre chose"):
             return {'status': 'response', 'response': "Désolé pour la confusion. Veuillez renvoyer la référence exacte."}
 
+        # 4.5 Handle Standalone "DUM" or "BL" manually typed
+        if message_text.lower() == 'dum':
+            return {'status': 'response', 'response': "D'accord, veuillez m'envoyer le numéro de la DUM."}
+        if message_text.lower() == 'bl':
+            return {'status': 'response', 'response': "D'accord, veuillez m'envoyer le numéro du BL."}
+
         # 5. Extract Reference using OpenAI
         openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not openai_key:
@@ -131,16 +137,28 @@ class WhatsAppDouaneController(http.Controller):
         }
 
     def _find_entry_by_norm_ref(self, norm_target, field_type):
-        """Finds logistique.entry by normalizing DB fields."""
+        """Finds logistique.entry by normalizing DB fields with flexible wildcards."""
+        if not norm_target:
+            return None
+            
         field = 'dum' if field_type == 'dum' else 'bl_number'
-        # Optimization: use ilike with first characters to limit result set
-        search_hint = norm_target[:4] if len(norm_target) > 4 else norm_target
-        domain = [(field, 'ilike', search_hint)]
+        
+        # Build a flexible search term: %3%3%1%L% for "331L"
+        # This ignores any characters (like spaces) present in the database field
+        flexible_search = '%' + '%'.join(list(norm_target)) + '%'
+        domain = [(field, 'ilike', flexible_search)]
         
         candidates = request.env['logistique.entry'].sudo().search(domain)
+        # Final strict validation in Python
         for entry in candidates:
             if self.normalize_ref(entry[field]) == norm_target:
                 return entry
+        
+        # Secondary check: see if the target is a substring of the normalized DB field
+        for entry in candidates:
+            if norm_target in self.normalize_ref(entry[field]):
+                return entry
+                
         return None
 
     def _get_fuzzy_matches(self, norm_target):

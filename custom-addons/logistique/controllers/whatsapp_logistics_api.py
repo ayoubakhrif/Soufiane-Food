@@ -40,7 +40,86 @@ class WhatsAppLogisticsController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Logistics Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Logistics Group.'}
 
-        # 4. Search for Article (Filter by Active Dossiers Only)
+        # 4. Detect Specialized Commands (BL or Supplier)
+        import re
+        
+        # A. BL Search: BL (xxx) or BL xxx
+        bl_match = re.search(r"(?i)^bl\s*[:(\s]*([A-Z0-9.\-_/]+)[)\s]*$", message_text)
+        if bl_match:
+            bl_code = bl_match.group(1)
+            entry = request.env['logistique.entry'].sudo().search([
+                ('bl_number', 'ilike', bl_code)
+            ], limit=1, order='id desc')
+            
+            if entry:
+                art_name = entry.achat_article_id.name or entry.article_id.name or "Inconnu"
+                eta_val = entry.eta or (entry.dossier_id and entry.dossier_id.eta) or False
+                eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else "À venir"
+                
+                status = "⚓ DÉJÀ SUR PORT" if (eta_val and eta_val < date.today()) else "🚢 EN COURS / À VENIR"
+                if entry.port_status == 'exited':
+                    status = "✅ SORTI (EXITED)"
+
+                response = (
+                    f"📋 *Dossier BL : {entry.bl_number}*\n"
+                    f"━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📦 *Article* : {art_name.upper()}\n"
+                    f"🚢 *Statut* : {status}\n"
+                    f"📅 *ETA* : {eta_str}\n"
+                    f"🔢 *Quantité* : *{entry.container_count}* conteneurs\n"
+                    f"🏗️ *Port* : {entry.port_status}\n"
+                )
+                return {'status': 'response', 'response': response}
+            else:
+                return {'status': 'not_found', 'message': f"❌ Aucun dossier trouvé avec le BL '{bl_code}'."}
+
+        # B. Supplier Search: Supplier (name) or suplier name
+        # Flexibility: Supplier, Suplier, Suppier, Suuplier
+        supp_match = re.search(r"(?i)^(?:supplier|suplier|suppier|suuplier)\s*[:(\s]*([^)]+)\)?$", message_text)
+        if supp_match:
+            supp_name = supp_match.group(1).strip()
+            # Find supplier (direct match or AI fallback)
+            supplier = request.env['logistique.supplier'].sudo().search([('name', 'ilike', supp_name)], limit=1)
+            
+            if not supplier:
+                # Optional: Simple AI check for supplier name if direct fails
+                return {'status': 'not_found', 'message': f"❌ Fournisseur '{supp_name}' non reconnu."}
+
+            # Find all active dossiers for this supplier
+            entries = request.env['logistique.entry'].sudo().search([
+                ('supplier_id', '=', supplier.id),
+                ('port_status', '=', 'on_port')
+            ], order='eta asc')
+            
+            if not entries:
+                return {
+                    'status': 'response',
+                    'response': f"📋 *Fournisseur : {supplier.name.upper()}*\n\n✅ Aucun dossier 'Sur Port' actuellement pour ce fournisseur."
+                }
+
+            # Format Supplier Response
+            response = f"📋 *Fournisseur : {supplier.name.upper()}*\n"
+            response += f"━━━━━━━━━━━━━━━━━━\n\n"
+            
+            # Group by Article
+            grouped = {}
+            for e in entries:
+                art = e.achat_article_id.name or e.article_id.name or "Inconnu"
+                if art not in grouped: grouped[art] = []
+                grouped[art].append(e)
+            
+            for art, r_entries in grouped.items():
+                response += f"🛳️ *{art.upper()}*\n"
+                for e in r_entries:
+                    eta_val = e.eta or (e.dossier_id and e.dossier_id.eta) or False
+                    eta_str = eta_val.strftime('%d/%m') if eta_val else "??"
+                    response += f"• BL {e.bl_number or '??'} : *{e.container_count}* cont. (ETA: {eta_str})\n"
+                response += "\n"
+                
+            response += f"_Total : {len(entries)} dossiers sur port_"
+            return {'status': 'response', 'response': response}
+
+        # 4. Search for Article (Fallback - Filter by Active Dossiers Only)
         active_entries = request.env['logistique.entry'].sudo().search([
             ('port_status', '=', 'on_port')
         ])

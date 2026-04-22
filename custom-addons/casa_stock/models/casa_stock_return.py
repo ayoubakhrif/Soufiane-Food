@@ -17,10 +17,7 @@ class CasaStockReturn(models.Model):
     dum = fields.Char(related='exit_id.dum', store=True, string='DUM')
     ville = fields.Selection([
         ('tanger', 'Tanger'),
-        ('casa', 'Casa'),
-        ('kenitra', 'Kénitra'),
-        ('agadir', 'Agadir'),
-        ('marrakech', 'Marrakech')
+        ('casa', 'Casa')
     ], string='Ville', required=True)
     client_id = fields.Many2one('casa.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('casa.ste', related='exit_id.ste_id', store=True, string='Société')

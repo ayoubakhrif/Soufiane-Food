@@ -6,6 +6,13 @@ class SuiviOperation(models.Model):
     _order = 'date desc, id desc'
 
     name = fields.Char(string='Référence', required=True, copy=False, readonly=True, default='/')
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+        ('kenitra', 'Kenitra'),
+        ('agadir', 'Agadir'),
+        ('marrakech', 'Marrakech'),
+    ], string='Ville', required=True)
     chauffeur_id = fields.Many2one('suivi.chauffeur', string='Chauffeur', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     lot = fields.Char(string='LOT')

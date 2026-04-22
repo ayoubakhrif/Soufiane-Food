@@ -7,6 +7,7 @@
             <tree string="Opérations Transport">
                 <field name="name"/>
                 <field name="date"/>
+                <field name="ville"/>
                 <field name="chauffeur_id"/>
                 <field name="lot"/>
                 <field name="montant" sum="Total Montant"/>
@@ -31,6 +32,7 @@
                         <group>
                             <field name="chauffeur_id"/>
                             <field name="date"/>
+                            <field name="ville"/>
                         </group>
                         <group>
                             <field name="montant"/>
@@ -51,6 +53,24 @@
                     </notebook>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_suivi_operation_search" model="ir.ui.view">
+        <field name="name">suivi.operation.search</field>
+        <field name="model">suivi.operation</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Opérations">
+                <field name="name"/>
+                <field name="chauffeur_id"/>
+                <field name="ville"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Ville" name="group_by_ville" context="{'group_by': 'ville'}"/>
+                    <filter string="Chauffeur" name="group_by_chauffeur" context="{'group_by': 'chauffeur_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
         </field>
     </record>
 

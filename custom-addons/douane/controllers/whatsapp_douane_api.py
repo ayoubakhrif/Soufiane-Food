@@ -88,9 +88,9 @@ class WhatsAppDouaneController(http.Controller):
 
         reference = self._extract_reference(message_text, openai_key)
         
-        # Fallback for very short messages if OpenAI fails or returned IGNORE/NONE
-        if (not reference or reference.upper() in ['IGNORE', 'NONE']) and len(message_text) < 15:
-            # If it's a short alphanumeric string, try it as is
+        # Fallback for short/medium messages if OpenAI fails or returned IGNORE/NONE
+        if (not reference or reference.upper() in ['IGNORE', 'NONE']) and len(message_text) < 25:
+            # If it's an alphanumeric string, try it as is
             import re
             if re.match(r'^[A-Z0-9\s/\-_.]+$', message_text.upper()):
                 reference = message_text
@@ -227,7 +227,7 @@ class WhatsAppDouaneController(http.Controller):
             "Tu es un assistant logistique. Ta tâche est d'identifier la référence d'un dossier mentionnée dans un message WhatsApp.\n"
             "Exemples de formats valides :\n"
             "- DUM : 12345/2026, 610/2025, 331 L, 00313 L, 313 L\n"
-            "- BL : MEDUT7846505, MSCU1234567, 331 L (un BL peut aussi ressembler à une DUM)\n\n"
+            "- BL : MEDUT7846505, MSCU1234567, HLCUBSC2511BEGMO, 331 L (un BL peut aussi ressembler à une DUM)\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles :\n"
             "1. Identifie la référence la plus probable.\n"

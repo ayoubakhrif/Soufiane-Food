@@ -96,8 +96,10 @@ class WhatsAppClientController(http.Controller):
                     'file_name': f"Situation_Globale_Clients_{fields.Date.today()}.pdf"
                 }
 
-            # Handle partial match via search
-            clients = request.env['casa.client'].sudo().search([('name', 'ilike', extracted_name)])
+            # Handle partial match via search (Name OR Alias)
+            clients = request.env['casa.client'].sudo().search([
+                '|', ('name', 'ilike', extracted_name), ('alias_ids.name', 'ilike', extracted_name)
+            ])
 
         if not clients:
             return {'status': 'not_found', 'message': f"Aucun client trouvé pour : '{extracted_name}'."}

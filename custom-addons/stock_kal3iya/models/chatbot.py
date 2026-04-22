@@ -323,10 +323,10 @@ class StockKal3iyaChatbot(models.AbstractModel):
             if matching_garage_record:
                 return "Bien"
             else:
-                # Si aucun match pour ce garage, on prend le premier disponible pour suggérer la correction
-                record = work_set[0]
-                correct_garage = self._get_garage_label(record.garage)
-                return f"{qty} {record.product_id.name} {garage_raw} lot {lot_raw} -> Correction Garage: {correct_garage}"
+                # Si aucun match pour ce garage, on liste tous les garages où ce lot est disponible
+                all_available_garages = sorted(list(set(self._get_garage_label(s.garage) for s in work_set)))
+                garages_str = ", ".join(all_available_garages)
+                return f"{qty} {work_set[0].product_id.name} {garage_raw} lot {lot_raw} -> Disponible dans: {garages_str}"
 
         # ---------------------------------------------------------
         # STRATÉGIE 2 : LOT NON TROUVÉ -> RECHERCHE PAR PRODUIT + SIMILARITÉ

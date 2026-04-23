@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import requests
+import traceback
 from datetime import datetime
 from odoo import http, SUPERUSER_ID, fields
 from odoo.http import request
@@ -67,7 +68,7 @@ class WhatsAppSortieController(http.Controller):
                 # Value should be in YYYY-MM-DD
                 return self._generate_report_response(date_filter=date_str)
             except Exception as e:
-                _logger.error(f"Error generating date report: {str(e)}")
+                _logger.error(f"Error generating date report: {str(e)}\n{traceback.format_exc()}")
                 return {'status': 'error', 'message': "Erreur lors de la génération du rapport par date."}
 
         # 6. Handle Product Intent
@@ -107,10 +108,11 @@ class WhatsAppSortieController(http.Controller):
             return {'status': 'response', 'response': msg}
 
         # Render PDF
-        context = {'date_filter': date_filter, 'product_ids': product_ids}
-        pdf_content, _ = request.env['ir.actions.report'].sudo().with_context(context)._render_qweb_pdf(
+        data = {'date_filter': date_filter, 'product_ids': product_ids}
+        pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf(
             'casa_stock.action_report_casa_stock_exit', 
-            res_ids=request.env['casa.stock.exit'].sudo().search(domain, limit=1).ids # Dummy ID needed for Odoo but our helper uses context
+            res_ids=request.env['casa.stock.exit'].sudo().search(domain, limit=1).ids, # Dummy recordset
+            data=data
         )
         
         from odoo import fields

@@ -15,9 +15,7 @@
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
             <meta charset="utf-8" />
             
-            <t t-set="date_filter" t-value="context.get('date_filter')"/>
-            <t t-set="product_ids" t-value="context.get('product_ids')"/>
-            <t t-set="data" t-value="docs._get_report_data(date_filter=date_filter, product_ids=product_ids)"/>
+            <t t-set="data_report" t-value="docs._get_report_data(date_filter=date_filter, product_ids=product_ids)"/>
             
             <div class="page">
                 <style>
@@ -49,12 +47,12 @@
                             <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%y')"/>
                         </div>
                         <div class="title-box">
-                            <t t-esc="data['title']"/>
+                            <t t-esc="data_report['title']"/>
                         </div>
                     </div>
                 </div>
 
-                <t t-foreach="data['cities']" t-as="city">
+                <t t-foreach="data_report['cities']" t-as="city">
                     <div class="city-header">
                         <t t-esc="city['name']"/>
                     </div>

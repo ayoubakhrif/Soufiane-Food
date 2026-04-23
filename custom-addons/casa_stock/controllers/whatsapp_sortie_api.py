@@ -59,7 +59,7 @@ class WhatsAppSortieController(http.Controller):
             return {'status': 'ignored'}
 
         if analysis.get('intent') == 'NONE':
-            return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier de date ou de produit dans votre message."}
+            return {'status': 'not_found', 'message': "Desole, je n'ai pas pu identifier de date ou de produit dans votre message."}
 
         # 5. Handle Date Intent
         if analysis.get('intent') == 'DATE':
@@ -69,7 +69,7 @@ class WhatsAppSortieController(http.Controller):
                 return self._generate_report_response(date_filter=date_str)
             except Exception as e:
                 _logger.error(f"Error generating date report: {str(e)}\n{traceback.format_exc()}")
-                return {'status': 'error', 'message': "Erreur lors de la génération du rapport par date."}
+                return {'status': 'error', 'message': "Erreur lors de la generation du rapport par date."}
 
         # 6. Handle Product Intent
         if analysis.get('intent') == 'PRODUCT':
@@ -85,7 +85,7 @@ class WhatsAppSortieController(http.Controller):
             # Find linked casa.product records
             casa_products = request.env['casa.product'].sudo().search([('article_id', '=', article.id)])
             if not casa_products:
-                return {'status': 'not_found', 'message': f"Aucun produit 'Casa' lié à l'article '{article.display_name}'."}
+                return {'status': 'not_found', 'message': f"Aucun produit 'Casa' lie a l'article '{article.display_name}'."}
             
             return self._generate_report_response(product_ids=casa_products.ids)
 
@@ -102,9 +102,9 @@ class WhatsAppSortieController(http.Controller):
             
         count = request.env['casa.stock.exit'].sudo().search_count(domain)
         if count == 0:
-            msg = "Aucune sortie confirmée trouvée pour cette demande."
+            msg = "Aucune sortie confirme trouvee pour cette demande."
             if date_filter:
-                msg = f"Aucune sortie confirmée pour le {datetime.strptime(date_filter, '%Y-%m-%d').strftime('%d/%m/%Y')}."
+                msg = f"Aucune sortie confirme pour le {datetime.strptime(date_filter, '%Y-%m-%d').strftime('%d/%m/%Y')}."
             return {'status': 'response', 'response': msg}
 
         # Render PDF

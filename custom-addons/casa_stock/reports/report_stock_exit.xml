@@ -59,35 +59,28 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th style="width: 8%;">Date</th>
-                                <th style="width: 10%;">Réf</th>
-                                <th style="width: 15%;">Client</th>
-                                <th style="width: 27%;">Produit</th>
-                                <th style="width: 10%;">Chauffeur</th>
-                                <th style="width: 7%;">Qté</th>
-                                <th style="width: 7%;">Poids</th>
-                                <th style="width: 7%;">Prix</th>
-                                <th style="width: 9%;">Total</th>
+                                <th style="width: 15%;">Date</th>
+                                <th style="width: 25%;">Client</th>
+                                <th style="width: 30%;">Produit</th>
+                                <th style="width: 10%;">Qte</th>
+                                <th style="width: 10%;">Poids</th>
+                                <th style="width: 10%;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-foreach="city['lines']" t-as="line">
                                 <tr>
                                     <td><t t-esc="line['date']"/></td>
-                                    <td><t t-esc="line['name']"/></td>
                                     <td style="text-align: left;"><t t-esc="line['client']"/></td>
                                     <td class="product-cell"><t t-esc="line['product']"/></td>
-                                    <td><t t-esc="line['driver']"/></td>
                                     <td class="qty-cell"><t t-esc="'{0:,.0f}'.format(line['qty'])"/></td>
                                     <td><t t-esc="line['poids']"/></td>
-                                    <td><t t-esc="'{0:,.2f}'.format(line['price'])"/></td>
                                     <td><t t-esc="'{0:,.2f}'.format(line['total'])"/></td>
                                 </tr>
                             </t>
                             <tr class="total-city-row">
-                                <td colspan="5" class="total-city-label">TOTAL <t t-esc="city['name']"/></td>
+                                <td colspan="3" class="total-city-label">TOTAL <t t-esc="city['name']"/></td>
                                 <td class="total-city-qty"><t t-esc="'{0:,.0f}'.format(city['total_qty'])"/></td>
-                                <td></td>
                                 <td></td>
                                 <td class="total-city-amount"><t t-esc="'{0:,.2f}'.format(city['total_amount'])"/> Dh</td>
                             </tr>
@@ -96,7 +89,7 @@
                 </t>
 
                 <div class="footer">
-                    Généré par Gestia ERP - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%H:%M:%S')"/>
+                    Genere par Gestia ERP - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%H:%M:%S')"/>
                 </div>
             </div>
         </t>

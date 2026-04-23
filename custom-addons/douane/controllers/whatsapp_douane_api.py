@@ -10,22 +10,24 @@ _logger = logging.getLogger(__name__)
 class WhatsAppDouaneController(http.Controller):
 
     def normalize_ref(self, val):
-        """Removes spaces, leading zeros, and returns uppercase string."""
+        """Removes ALL non-alphanumeric characters and converts to uppercase."""
         if not val:
             return ""
-        return str(val).replace(' ', '').lstrip('0').upper()
+        # Keep only A-Z and 0-9
+        import re
+        return re.sub(r'[^A-Z0-9]', '', str(val).upper())
 
     def get_char_diff_count(self, s1, s2):
-        """Counts differences between two strings of same length, or returns distance."""
+        """Counts differences between two normalized strings."""
         n1 = self.normalize_ref(s1)
         n2 = self.normalize_ref(s2)
         if abs(len(n1) - len(n2)) > 1:
             return 99
-        # Basic diff for 1-char difference
+        # Basic diff for strings of same length
         if len(n1) == len(n2):
             return sum(1 for a, b in zip(n1, n2) if a != b)
         else:
-            # One char more or less
+            # One char difference (addition or subtraction)
             return 1 if (n1 in n2 or n2 in n1) else 99
 
     @http.route('/api/whatsapp/douane', type='json', auth='none', methods=['POST'], csrf=False)
@@ -63,22 +65,28 @@ class WhatsAppDouaneController(http.Controller):
 
         # 4. Handle Interactivity / State
         forced_type = None
-        if message_text.startswith("🔍 C'est une DUM : "):
+        if message_text.startswith("🔍 DUM : "):
             forced_type = 'dum'
-            message_text = message_text.replace("🔍 C'est une DUM : ", "").strip()
-        elif message_text.startswith("🚢 C'est un BL : "):
+            message_text = message_text.replace("🔍 DUM : ", "").strip()
+        elif message_text.startswith("📦 Lot : "):
+            forced_type = 'lot'
+            message_text = message_text.replace("📦 Lot : ", "").strip()
+        elif message_text.startswith("🚢 BL : "):
             forced_type = 'bl'
-            message_text = message_text.replace("🚢 C'est un BL : ", "").strip()
+            message_text = message_text.replace("🚢 BL : ", "").strip()
         elif message_text.startswith("✅ Oui, c'est : "):
             ref_to_send = message_text.replace("✅ Oui, c'est : ", "").strip()
             return self._send_dum_docs_by_ref(ref_to_send)
         elif message_text.startswith("❌ Non, c'est autre chose"):
             return {'status': 'response', 'response': "Désolé pour la confusion. Veuillez renvoyer la référence exacte."}
 
-        # 4.5 Handle Standalone "DUM" or "BL" manually typed
-        if message_text.lower() == 'dum':
+        # 4.5 Handle Standalone "DUM", "Lot" or "BL" manually typed
+        low_msg = message_text.lower()
+        if low_msg == 'dum':
             return {'status': 'response', 'response': "D'accord, veuillez m'envoyer le numéro de la DUM."}
-        if message_text.lower() == 'bl':
+        if low_msg == 'lot':
+            return {'status': 'response', 'response': "D'accord, veuillez m'envoyer le numéro du Lot."}
+        if low_msg == 'bl':
             return {'status': 'response', 'response': "D'accord, veuillez m'envoyer le numéro du BL."}
 
         # 5. Extract Reference using OpenAI
@@ -101,7 +109,7 @@ class WhatsAppDouaneController(http.Controller):
         if reference.upper() == 'NONE':
             return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier de référence DUM ou BL dans votre message."}
 
-        # 6. Aggressive Search Logic
+        # 6. Aggressive Search Logic (Priority: DUM -> Lot -> BL)
         norm_target = self.normalize_ref(reference)
         
         # Search with priority
@@ -109,11 +117,11 @@ class WhatsAppDouaneController(http.Controller):
         if forced_type:
             entry = self._find_entry_by_norm_ref(norm_target, forced_type)
         else:
-            # Check DUM first
-            entry = self._find_entry_by_norm_ref(norm_target, 'dum')
-            # Check BL second
-            if not entry:
-                entry = self._find_entry_by_norm_ref(norm_target, 'bl')
+            # Priority: DUM -> Lot -> BL
+            for t in ['dum', 'lot', 'bl']:
+                entry = self._find_entry_by_norm_ref(norm_target, t)
+                if entry:
+                    break
 
         if entry:
             return self._send_dum_docs_by_object(entry)
@@ -129,11 +137,11 @@ class WhatsAppDouaneController(http.Controller):
                 'choices': choices
             }
 
-        # 8. No match or fuzzy match -> Ask DUM or BL?
+        # 8. No match or fuzzy match -> Ask DUM, Lot or BL?
         return {
             'status': 'multiple_choices',
-            'message': f"Je n'ai pas trouvé '{reference}'. S'agit-il d'une DUM ou d'un BL ?",
-            'choices': [f"🔍 C'est une DUM : {reference}", f"🚢 C'est un BL : {reference}"]
+            'message': f"Je n'ai pas trouvé '{reference}'. S'agit-il d'une DUM, d'un Lot ou d'un BL ?",
+            'choices': [f"🔍 DUM : {reference}", f"📦 Lot : {reference}", f"🚢 BL : {reference}"]
         }
 
     def _find_entry_by_norm_ref(self, norm_target, field_type):
@@ -141,10 +149,13 @@ class WhatsAppDouaneController(http.Controller):
         if not norm_target:
             return None
             
-        field = 'dum' if field_type == 'dum' else 'bl_number'
+        field = field_type
+        if field_type == 'bl':
+            field = 'bl_number'
         
         # Build a flexible search term: %3%3%1%L% for "331L"
         # This ignores any characters (like spaces) present in the database field
+        import re
         flexible_search = '%' + '%'.join(list(norm_target)) + '%'
         domain = [(field, 'ilike', flexible_search)]
         
@@ -166,11 +177,11 @@ class WhatsAppDouaneController(http.Controller):
         found = []
         # Search recently modified entries for speed
         candidates = request.env['logistique.entry'].sudo().search([
-            '|', ('dum', '!=', False), ('bl_number', '!=', False)
+            '|', '|', ('dum', '!=', False), ('bl_number', '!=', False), ('lot', '!=', False)
         ], order='write_date desc', limit=500)
         
         for entry in candidates:
-            for field in ['dum', 'bl_number']:
+            for field in ['dum', 'bl_number', 'lot']:
                 val = entry[field]
                 if val and self.get_char_diff_count(norm_target, val) == 1:
                     found.append(val)
@@ -179,14 +190,12 @@ class WhatsAppDouaneController(http.Controller):
 
     def _send_dum_docs_by_ref(self, reference):
         """Find entry by exact string match and send docs."""
-        entry = request.env['logistique.entry'].sudo().search([
-            '|', ('dum', '=', reference), ('bl_number', '=', reference)
-        ], limit=1)
-        if not entry:
-            # Try one last aggressive search
-            norm = self.normalize_ref(reference)
-            entry = self._find_entry_by_norm_ref(norm, 'dum')
-            if not entry: entry = self._find_entry_by_norm_ref(norm, 'bl')
+        norm = self.normalize_ref(reference)
+        entry = None
+        for t in ['dum', 'lot', 'bl']:
+            entry = self._find_entry_by_norm_ref(norm, t)
+            if entry:
+                break
             
         if not entry:
             return {'status': 'not_found', 'message': "Dossier introuvable après confirmation."}
@@ -216,7 +225,7 @@ class WhatsAppDouaneController(http.Controller):
         }
 
     def _extract_reference(self, text, api_key):
-        """Use OpenAI to extract DUM or BL reference with updated examples."""
+        """Use OpenAI to extract reference with updated instructions."""
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
@@ -224,16 +233,16 @@ class WhatsAppDouaneController(http.Controller):
         }
         
         prompt = (
-            "Tu es un assistant logistique. Ta tâche est d'identifier la référence d'un dossier mentionnée dans un message WhatsApp.\n"
-            "Exemples de formats valides :\n"
-            "- DUM : 12345/2026, 610/2025, 331 L, 00313 L, 313 L\n"
-            "- BL : MEDUT7846505, MSCU1234567, HLCUBSC2511BEGMO, 331 L (un BL peut aussi ressembler à une DUM)\n\n"
+            "Tu es un assistant logistique. Ta tâche est d'identifier la référence d'un dossier (DUM, Lot ou BL) mentionnée dans un message WhatsApp.\n"
+            "Exemples valides :\n"
+            "- DUM : 12345/2026, 610/2025, 331 L\n"
+            "- Lot : LOT 123, L-456, 331 L\n"
+            "- BL : MEDUT7846505, HLCUBSC2511BEGMO\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles :\n"
-            "1. Identifie la référence la plus probable.\n"
-            "2. Retourne uniquement la référence brute (ex: '331 L').\n"
-            "3. Les zéros au début ou les espaces importent peu, retourne ce que tu vois.\n"
-            "4. Si le message est trop vague ou ne contient rien d'utile, réponds 'IGNORE' ou 'None'.\n"
+            "1. Retourne uniquement la référence brute.\n"
+            "2. Ignore les caractères spéciaux et espaces lors de ton analyse mais retourne la référence telle qu'écrite.\n"
+            "3. Si rien n'est trouvé, réponds 'None'.\n"
             "Retourne UNIQUEMENT le résultat."
         )
         data = {

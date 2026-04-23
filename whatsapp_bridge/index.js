@@ -18,6 +18,7 @@ const STOCK_VALIDATION_GROUP_ID = "120363403203705514@g.us";
 const FINANCE_GROUP_ID = "120363428965532100@g.us";
 const LOGISTICS_GROUP_ID = "120363427755410654@g.us";
 const DOUANE_GROUP_ID = "120363406635335778@g.us";
+const SORTIE_GROUP_ID = "120363424919316319@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -25,6 +26,7 @@ const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_
 const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance?db=soufianefoods";
 const LOGISTICS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics?db=soufianefoods";
 const DOUANE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/douane?db=soufianefoods";
+const SORTIE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/sortie?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -110,6 +112,9 @@ async function connectToWhatsApp() {
             } else if (from === DOUANE_GROUP_ID) {
                 targetOdooUrl = DOUANE_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === SORTIE_GROUP_ID) {
+                targetOdooUrl = SORTIE_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -159,6 +164,7 @@ async function connectToWhatsApp() {
                 else if (from === FINANCE_GROUP_ID) typeStr = "FINANCE";
                 else if (from === LOGISTICS_GROUP_ID) typeStr = "LOGISTICS";
                 else if (from === DOUANE_GROUP_ID) typeStr = "DOUANE";
+                else if (from === SORTIE_GROUP_ID) typeStr = "SORTIE";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 const response = await axios.post(targetOdooUrl, {
@@ -202,6 +208,7 @@ async function connectToWhatsApp() {
                     if (from === CLIENT_GROUP_ID) reportType = "de compte";
                     if (from === FINANCE_GROUP_ID) reportType = "financier";
                     if (from === DOUANE_GROUP_ID) reportType = "douane (DUM)";
+                    if (from === SORTIE_GROUP_ID) reportType = "de sorties";
 
                     console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 

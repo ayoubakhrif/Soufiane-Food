@@ -41,21 +41,43 @@ class WhatsAppSortieController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Sortie Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Sortie Group.'}
 
-        # 4. Process Message via OpenAI
+        # 4. FAST TRACK: Search in Article + Aliases first (Case-insensitive)
+        exact_article = request.env['company.article'].sudo().search([
+            '|', ('display_name', '=ilike', message_text), ('alias_ids.name', '=ilike', message_text)
+        ], limit=1)
+        
+        if exact_article:
+            casa_products = request.env['casa.product'].sudo().search([('article_id', '=', exact_article.id)])
+            if casa_products:
+                return self._generate_report_response(product_ids=casa_products.ids)
+
+        # 5. Process Message via OpenAI if no exact match
         openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not openai_key:
             return {'status': 'error', 'message': 'OpenAI API key not configured'}
 
-        # Fetch product names and aliases for AI
-        all_articles = request.env['company.article'].sudo().search([])
+        # Fetch product names and aliases for AI (larger samples)
+        all_articles = request.env['company.article'].sudo().search([], limit=200)
         article_names = [a.display_name for a in all_articles if a.display_name]
         
-        all_aliases = request.env['company.article.alias'].sudo().search([])
+        all_aliases = request.env['company.article.alias'].sudo().search([], limit=100)
         alias_list = [f"{a.name} -> {a.article_id.display_name}" for a in all_aliases if a.article_id]
 
         analysis = self._analyze_intent(message_text, openai_key, article_names, alias_list)
         
         if not analysis or analysis.get('intent') == 'IGNORE':
+            # Last chance: if it's a single word, maybe it's a product OpenAI doesn't know
+            if len(message_text.split()) == 1 and len(message_text) > 3:
+                 # Try a broad search
+                 article = request.env['company.article'].sudo().search([
+                    '|', ('display_name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+                 ], limit=1)
+                 if article:
+                     casa_products = request.env['casa.product'].sudo().search([('article_id', '=', article.id)])
+                     if casa_products:
+                         return self._generate_report_response(product_ids=casa_products.ids)
+            
+            _logger.info(f"Ignoring message in Sortie: {message_text}")
             return {'status': 'ignored'}
 
         if analysis.get('intent') == 'NONE':
@@ -139,19 +161,18 @@ class WhatsAppSortieController(http.Controller):
         aliases_str = "\n".join(alias_list[:50])
 
         prompt = (
-            "Tu es un assistant logistique. Ta tâche est d'analyser le message de l'utilisateur pour extraire soit une DATE, soit un PRODUIT.\n\n"
+            "Tu es un assistant logistique pour une societe agroalimentaire. Ta tâche est d'analyser le message de l'utilisateur pour extraire soit une DATE, soit un PRODUIT.\n\n"
             f"Nous sommes aujourd'hui le : {today}.\n\n"
-            "Voici une liste partielle d'articles disponibles :\n"
+            "Voici une liste d'articles connus (peut etre incomplete) :\n"
             f"[{articles_str}]\n"
-            "Et quelques alias ( Darija ) :\n"
+            "Et quelques alias Darija :\n"
             f"{aliases_str}\n\n"
             "Message utilisateur : " + text + "\n\n"
             "Règles :\n"
-            "1. Si l'utilisateur demande une date (ex: 'aujourd'hui', 'hier', '23/04', 'lundi'), renvoie un JSON : {\"intent\": \"DATE\", \"value\": \"YYYY-MM-DD\"}.\n"
-            "2. Si l'utilisateur mentionne un produit ou un alias Darija, renvoie un JSON : {\"intent\": \"PRODUCT\", \"value\": \"Nom Exact de l'Article ou de l'Alias\"}.\n"
-            "3. Si le message est hors sujet (salutations simples, emojis, bruits), renvoie {\"intent\": \"IGNORE\"}.\n"
-            "4. Si tu ne trouves rien, renvoie {\"intent\": \"NONE\"}.\n"
-            "5. Les sorties confirmées concernent le stock Casa.\n"
+            "1. DATE : si l'utilisateur demande une date (ex: 'aujourd'hui', 'hier', '23/04', 'lundi'), renvoie {\"intent\": \"DATE\", \"value\": \"YYYY-MM-DD\"}.\n"
+            "2. PRODUCT : si l'utilisateur mentionne un aliment, une epice (ex: 'skenjbir', 'gingembre', 'poivre'), ou un article de la liste, renvoie {\"intent\": \"PRODUCT\", \"value\": \"Nom de l'Article\"}.\n"
+            "3. IGNORE : uniquement pour les messages totalement hors sujet (ex: 'ca va ?', 'ok', emojis seuls).\n"
+            "IMPORTANT : Ne sois pas trop restrictif. Si le mot ressemble a un produit alimentaire, c'est un PRODUCT.\n"
             "Retourne UNIQUEMENT le JSON."
         )
         

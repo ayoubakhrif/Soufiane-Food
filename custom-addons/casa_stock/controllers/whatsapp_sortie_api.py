@@ -116,7 +116,7 @@ class WhatsAppSortieController(http.Controller):
     def _generate_report_response(self, date_filter=None, product_ids=None):
         """Helper to render PDF and return response."""
         # Check if records exist
-        domain = [('state', 'in', ['confirmed', 'done'])]
+        domain = [('state', '=', 'done')]
         if date_filter:
             domain.append(('date', '=', date_filter))
         if product_ids:

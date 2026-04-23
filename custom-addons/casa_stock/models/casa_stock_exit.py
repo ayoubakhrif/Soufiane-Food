@@ -423,8 +423,8 @@ class CasaStockExit(models.Model):
 
     def _get_report_data(self, date_filter=None, product_ids=None):
         """Prepare data for the Sortie report."""
-        domain = [('state', 'in', ['confirmed', 'done'])]
-        title = "Rapport des Sorties"
+        domain = [('state', '=', 'done')]
+        title = "Rapport des Sorties Validees"
         
         if date_filter:
             domain.append(('date', '=', date_filter))
@@ -461,11 +461,12 @@ class CasaStockExit(models.Model):
                 'poids': ex.poids,
                 'tonnage': ex.tonnage,
                 'price': ex.price_sale,
-                'total': ex.mt_vente,
+                'discount': ex.discount_amount,
+                'total': ex.mt_vente_final,
             })
             cities_data[city_key]['total_qty'] += ex.qty
             cities_data[city_key]['total_tonnage'] += ex.tonnage
-            cities_data[city_key]['total_amount'] += ex.mt_vente
+            cities_data[city_key]['total_amount'] += ex.mt_vente_final
 
         return {
             'title': title,

@@ -59,11 +59,13 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th style="width: 15%;">Date</th>
-                                <th style="width: 25%;">Client</th>
-                                <th style="width: 30%;">Produit</th>
-                                <th style="width: 10%;">Qte</th>
-                                <th style="width: 10%;">Poids</th>
+                                <th style="width: 10%;">Date</th>
+                                <th style="width: 20%;">Client</th>
+                                <th style="width: 28%;">Produit</th>
+                                <th style="width: 8%;">Qte</th>
+                                <th style="width: 8%;">Poids</th>
+                                <th style="width: 8%;">Prix</th>
+                                <th style="width: 8%;">Reduc</th>
                                 <th style="width: 10%;">Total</th>
                             </tr>
                         </thead>
@@ -75,12 +77,16 @@
                                     <td class="product-cell"><t t-esc="line['product']"/></td>
                                     <td class="qty-cell"><t t-esc="'{0:,.0f}'.format(line['qty'])"/></td>
                                     <td><t t-esc="line['poids']"/></td>
+                                    <td><t t-esc="'{0:,.2f}'.format(line['price'])"/></td>
+                                    <td style="color: red;"><t t-esc="'{0:,.2f}'.format(line['discount'])"/></td>
                                     <td><t t-esc="'{0:,.2f}'.format(line['total'])"/></td>
                                 </tr>
                             </t>
                             <tr class="total-city-row">
                                 <td colspan="3" class="total-city-label">TOTAL <t t-esc="city['name']"/></td>
                                 <td class="total-city-qty"><t t-esc="'{0:,.0f}'.format(city['total_qty'])"/></td>
+                                <td></td>
+                                <td></td>
                                 <td></td>
                                 <td class="total-city-amount"><t t-esc="'{0:,.2f}'.format(city['total_amount'])"/> Dh</td>
                             </tr>

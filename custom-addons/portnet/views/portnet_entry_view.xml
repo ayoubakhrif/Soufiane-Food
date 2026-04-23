@@ -138,6 +138,16 @@
                        decoration-warning="state == 'domicilied'"
                        decoration-success="state == 'regle'"
                        decoration-danger="state == 'annule'"/>
+                <button name="action_domicilier"
+                        string="Valider"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'new'"/>
+                <button name="action_regler"
+                        string="Domicilier"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'domicilied'"/>
             </tree>
         </field>
     </record>

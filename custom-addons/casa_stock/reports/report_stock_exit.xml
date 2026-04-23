@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_casa_stock_exit" model="ir.actions.report">
+        <field name="name">Rapport Sorties (Bot)</field>
+        <field name="model">casa.stock.exit</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">casa_stock.report_stock_exit_template</field>
+        <field name="report_file">casa_stock.report_stock_exit_template</field>
+        <field name="binding_model_id" ref="model_casa_stock_exit"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_stock_exit_template">
+        <t t-call="web.html_container">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta charset="utf-8" />
+            
+            <t t-set="date_filter" t-value="context.get('date_filter')"/>
+            <t t-set="product_ids" t-value="context.get('product_ids')"/>
+            <t t-set="data" t-value="docs._get_report_data(date_filter=date_filter, product_ids=product_ids)"/>
+            
+            <div class="page">
+                <style>
+                    .report-header { margin-bottom: 20px; }
+                    .header-row { display: flex; align-items: stretch; margin-bottom: 10px; }
+                    .date-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 18px; font-weight: bold; width: 15%; text-align: center; }
+                    .title-box { background-color: #FF00FF; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; color: black; flex-grow: 1; text-align: center; }
+                    
+                    .city-header { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 18px; font-weight: bold; text-align: center; text-transform: uppercase; margin-top: 20px; }
+                    
+                    .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+                    .data-table th { background-color: #FCE9DA; border: 1px solid black; padding: 5px; text-align: center; font-size: 11px; font-weight: bold; }
+                    .data-table td { border: 1px solid black; padding: 4px; text-align: center; font-size: 10px; }
+                    
+                    .product-cell { background-color: #6DA9DC; font-weight: bold; text-align: left !important; }
+                    .qty-cell { background-color: #FF9900; font-weight: bold; }
+                    
+                    .total-city-row { font-weight: bold; font-size: 11px; }
+                    .total-city-label { background-color: #6DA9DC; text-align: left !important; }
+                    .total-city-qty { background-color: #FF9900; }
+                    .total-city-amount { background-color: #00FFFF; text-align: right !important; }
+                    
+                    .footer { margin-top: 30px; font-style: italic; font-size: 9px; }
+                </style>
+
+                <div class="report-header">
+                    <div class="header-row">
+                        <div class="date-box">
+                            <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%y')"/>
+                        </div>
+                        <div class="title-box">
+                            <t t-esc="data['title']"/>
+                        </div>
+                    </div>
+                </div>
+
+                <t t-foreach="data['cities']" t-as="city">
+                    <div class="city-header">
+                        <t t-esc="city['name']"/>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">Date</th>
+                                <th style="width: 10%;">Réf</th>
+                                <th style="width: 15%;">Client</th>
+                                <th style="width: 27%;">Produit</th>
+                                <th style="width: 10%;">Chauffeur</th>
+                                <th style="width: 7%;">Qté</th>
+                                <th style="width: 7%;">Poids</th>
+                                <th style="width: 7%;">Prix</th>
+                                <th style="width: 9%;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="city['lines']" t-as="line">
+                                <tr>
+                                    <td><t t-esc="line['date']"/></td>
+                                    <td><t t-esc="line['name']"/></td>
+                                    <td style="text-align: left;"><t t-esc="line['client']"/></td>
+                                    <td class="product-cell"><t t-esc="line['product']"/></td>
+                                    <td><t t-esc="line['driver']"/></td>
+                                    <td class="qty-cell"><t t-esc="'{0:,.0f}'.format(line['qty'])"/></td>
+                                    <td><t t-esc="line['poids']"/></td>
+                                    <td><t t-esc="'{0:,.2f}'.format(line['price'])"/></td>
+                                    <td><t t-esc="'{0:,.2f}'.format(line['total'])"/></td>
+                                </tr>
+                            </t>
+                            <tr class="total-city-row">
+                                <td colspan="5" class="total-city-label">TOTAL <t t-esc="city['name']"/></td>
+                                <td class="total-city-qty"><t t-esc="'{0:,.0f}'.format(city['total_qty'])"/></td>
+                                <td></td>
+                                <td></td>
+                                <td class="total-city-amount"><t t-esc="'{0:,.2f}'.format(city['total_amount'])"/> Dh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+
+                <div class="footer">
+                    Généré par Gestia ERP - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%H:%M:%S')"/>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

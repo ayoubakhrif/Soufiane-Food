@@ -421,6 +421,57 @@ class CasaStockExit(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
+    def _get_report_data(self, date_filter=None, product_ids=None):
+        """Prepare data for the Sortie report."""
+        domain = [('state', 'in', ['confirmed', 'done'])]
+        title = "Rapport des Sorties"
+        
+        if date_filter:
+            domain.append(('date', '=', date_filter))
+            title = f"Sorties du {fields.Date.from_string(date_filter).strftime('%d/%m/%Y')}"
+        
+        if product_ids:
+            domain.append(('product_id', 'in', product_ids))
+            if not date_filter:
+                products = self.env['casa.product'].browse(product_ids)
+                title = f"Historique Sorties : {', '.join(products.mapped('name'))}"
+
+        exits = self.search(domain, order='ville, date desc, name desc')
+        
+        cities_data = {}
+        for ex in exits:
+            city_key = ex.ville or 'autre'
+            if city_key not in cities_data:
+                city_name = dict(self._fields['ville'].selection).get(city_key, 'Autre')
+                cities_data[city_key] = {
+                    'name': city_name.upper(),
+                    'lines': [],
+                    'total_qty': 0.0,
+                    'total_tonnage': 0.0,
+                    'total_amount': 0.0,
+                }
+            
+            cities_data[city_key]['lines'].append({
+                'date': ex.date.strftime('%d/%m/%Y') if ex.date else '',
+                'name': ex.name,
+                'product': ex.product_id.name,
+                'client': ex.client_id.name or 'Comptoir',
+                'driver': ex.driver_id.name or '',
+                'qty': ex.qty,
+                'poids': ex.poids,
+                'tonnage': ex.tonnage,
+                'price': ex.price_sale,
+                'total': ex.mt_vente,
+            })
+            cities_data[city_key]['total_qty'] += ex.qty
+            cities_data[city_key]['total_tonnage'] += ex.tonnage
+            cities_data[city_key]['total_amount'] += ex.mt_vente
+
+        return {
+            'title': title,
+            'cities': list(cities_data.values())
+        }
+
     @api.constrains('qty', 'product_id', 'lot', 'dum', 'ville', 'ste_id', 'weight', 'calibre', 'price_purchase')
     def _check_stock_availability(self):
         for rec in self:

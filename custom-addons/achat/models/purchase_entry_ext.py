@@ -172,9 +172,18 @@ class LogisticsEntry(models.Model):
         if data_to_verify["lot"]:
             fields_to_check.append(f"- Lot No. : '{data_to_verify['lot']}'")
         if data_to_verify["weight_tonnes"]:
-            fields_to_check.append(f"- Poids : {data_to_verify['weight_tonnes']} tonnes (peut apparaître comme MT, T, ou en KG × 1000)")
+            w_kg = data_to_verify["weight_tonnes"]
+            fields_to_check.append(
+                f"- Poids : {w_kg} KG "
+                f"(équivalent : {w_kg/1000:.4f} T / {w_kg/1000:.4f} MT — le PDF peut afficher l'une ou l'autre unité)"
+            )
         if data_to_verify["price_unit_usd_per_tonne"]:
-            fields_to_check.append(f"- Prix Unitaire : {data_to_verify['price_unit_usd_per_tonne']} USD/tonne")
+            pu = data_to_verify["price_unit_usd_per_tonne"]
+            pu_per_kg = round(pu / 1000, 6)
+            fields_to_check.append(
+                f"- Prix Unitaire : {pu} USD/tonne = {pu_per_kg} USD/KG "
+                f"(le PDF peut afficher l'un ou l'autre, les deux sont corrects)"
+            )
         if data_to_verify["origin"]:
             fields_to_check.append(f"- Origine : '{data_to_verify['origin']}'")
 
@@ -185,16 +194,30 @@ class LogisticsEntry(models.Model):
 
         prompt_text = f"""Vous êtes un agent de contrôle logistique. Lisez attentivement le document commercial joint (invoice PDF).
 
-Voici les informations saisies dans le système pour CETTE facture. Vérifiez UNIQUEMENT les champs listés ci-dessous (les autres sont vides et doivent être ignorés) :
+Voici les informations saisies dans le système pour CETTE facture. Vérifiez UNIQUEMENT les champs listés ci-dessous :
 
 {fields_str}
 
-RÈGLES DE COMPARAISON STRICTES :
-1. TEXTE (contract, invoice, lot, origin) : Comparez sans tenir compte de la casse et en ignorant les espaces, tirets (-), points (.), slashes (/). Exemple : "SL20260128WKJ" = "SL-20260128-WKJ" = "sl 20260128 wkj".
-2. POIDS : Le poids en Odoo est en TONNES. Valeurs équivalentes : 44 tonnes = 44 MT = 44 T = 44,000 KG = 44.000 KG.
-3. PRIX UNITAIRE : Comparaison stricte sur le nombre. "1825" = "1,825" = "1.825" = "US$1,825.00".
-4. BÉNÉFICE DU DOUTE : Si l'information est partiellement lisible ou ambiguë dans le PDF, considérez-la comme CORRECTE. Ne signalez une erreur que si vous êtes CERTAIN à 100% qu'il y a une différence réelle.
-5. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le (ne le signalez pas comme erreur).
+RÈGLES DE COMPARAISON — LISEZ ATTENTIVEMENT :
+
+1. TEXTE (contract, invoice, lot, origin) :
+   - Ignorez la casse, les espaces, tirets (-), points (.), slashes (/).
+   - CORRESPONDANCE PARTIELLE AUTORISÉE : si la valeur Odoo est un suffixe ou une partie du numéro PDF, c'est CORRECT.
+     Exemple : Odoo="1668" et PDF="A26/202601668" → CORRECT car "1668" est contenu à la fin du numéro PDF.
+   - Ne signalez une erreur que si les chiffres/lettres sont réellement différents.
+
+2. POIDS (le poids Odoo est en KG) :
+   - Les deux valeurs ci-dessus en KG et en T/MT sont équivalentes. Si le PDF affiche l'une OU l'autre, c'est CORRECT.
+   - Exemple : Odoo=19958.4 KG → PDF="19,958.40 KG" ou "19.9584 MT" ou "19.9584 T" → tous CORRECTS.
+   - Ne signalez une erreur que si le nombre est réellement différent après conversion.
+
+3. PRIX UNITAIRE :
+   - Le prix Odoo est en USD/tonne. Les deux valeurs (USD/T et USD/KG) sont données ci-dessus.
+   - Si le PDF affiche l'un ou l'autre, c'est CORRECT.
+   - Exemple : Odoo=6800 USD/T = 6.8 USD/KG → PDF="6.8 USD/KG" → CORRECT.
+
+4. BÉNÉFICE DU DOUTE : En cas de doute ou d'ambiguïté dans le PDF, considérez comme CORRECT.
+5. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas dans le document, ignorez-le.
 
 Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown :
 {{
@@ -202,7 +225,7 @@ Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown :
     "mismatches": [
         {{"field": "nom du champ", "odoo_value": "valeur Odoo", "pdf_value": "valeur trouvée dans le PDF"}}
     ],
-    "reason": "Résumé en français des incompatibilités trouvées."
+    "reason": "Résumé en français des incompatibilités réelles trouvées."
 }}
 OU si tout est correct :
 {{

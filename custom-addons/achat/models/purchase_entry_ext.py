@@ -154,12 +154,21 @@ class LogisticsEntry(models.Model):
         import json
 
         pdf_bytes = base64.b64decode(invoice_doc.file)
-        reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
-        pdf_text = ""
-        for page in reader.pages:
-            extr = page.extract_text()
-            if extr:
-                pdf_text += extr + "\n"
+        try:
+            # Pour la compatibilité avec les anciennes versions de PyPDF2 (avant 3.0.0)
+            if hasattr(PyPDF2, 'PdfReader'):
+                reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
+            else:
+                reader = PyPDF2.PdfFileReader(io.BytesIO(pdf_bytes))
+
+            pdf_text = ""
+            for i in range(len(reader.pages) if hasattr(reader, 'pages') else reader.getNumPages()):
+                page = reader.pages[i] if hasattr(reader, 'pages') else reader.getPage(i)
+                extr = page.extract_text() if hasattr(page, 'extract_text') else page.extractText()
+                if extr:
+                    pdf_text += extr + "\n"
+        except Exception as e:
+            raise ValidationError(f"Erreur lors de la lecture du fichier PDF natif : {str(e)}")
                 
         if len(pdf_text.strip()) < 20:
              raise ValidationError("Le PDF semble être une image scannée (aucun texte extrait). L'extraction de texte natif a échoué.")

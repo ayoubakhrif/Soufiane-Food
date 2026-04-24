@@ -6,11 +6,12 @@
         <field name="model">logistique.entry</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <tree string="Dossiers Achat">
+            <tree string="Dossiers Achat" decoration-danger="is_faux == True">
                 <field name="bl_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
+                <field name="is_faux" readonly="1" force_save="1" optional="show"/>
                 <field name="container_count" string="Nb of Containers" optional="show"/>
                 <field name="eta"/>
                 <field name="date_booking" optional="show"/>
@@ -63,6 +64,7 @@
         <field name="arch" type="xml">
             <form string="Dossier Achat" chatter_position="bottom">
                 <header>
+                    <button name="action_verify_invoice_ai" string="Vérifier via IA" type="object" class="btn-info" icon="fa-magic"/>
                     <button name="action_move_to_draft" string="Move to Draft" type="object" class="oe_highlight" invisible="purchase_state != 'initial'"/>
                     <button name="action_confirm_purchase" string="Confirm" type="object" class="oe_highlight" invisible="purchase_state != 'draft'"/>
                     <!-- Admin-only reset buttons -->
@@ -107,6 +109,7 @@
                     </div>
                     <group>
                         <group string="Informations Générales">
+                            <field name="is_faux" readonly="1" force_save="1"/>
                             <field name="eta"/>
                             <field name="container_count" string="Nb of Containers" readonly="1"/>
                             

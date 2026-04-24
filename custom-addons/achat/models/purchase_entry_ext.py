@@ -17,6 +17,14 @@ class LogisticsEntry(models.Model):
     is_non_change = fields.Boolean(string='Non Changé', default=False,
                                    help='Cocher si le dossier n\'a pas encore été changé')
 
+    is_faux = fields.Boolean(
+        string='Faux',
+        default=False,
+        readonly=True,
+        tracking=True,
+        help="Coché automatiquement par l'IA si l'Invoice ne correspond pas aux données."
+    )
+
     date_booking = fields.Date(string='Date of Booking')
     date_docs_received = fields.Date(string='Date Documents Received')
     date_docs_confirmed = fields.Date(string='Date Documents Confirmed')
@@ -124,6 +132,102 @@ class LogisticsEntry(models.Model):
     def action_reset_to_draft(self):
         """Admin-only: Reset purchase state back to Draft."""
         self.write({'purchase_state': 'draft'})
+
+    def action_verify_invoice_ai(self):
+        self.ensure_one()
+        invoice_doc = self.env['logistique.entry.document'].search([
+            ('entry_id', '=', self.id),
+            ('document_type', '=', 'invoice')
+        ], limit=1)
+
+        if not invoice_doc or not invoice_doc.file:
+            raise ValidationError("Aucun document de type Invoice (Commercial Invoice) n'est attaché à ce dossier.")
+
+        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+        if not api_key:
+            raise ValidationError("La clé API OpenAI n'est pas configurée dans les Paramètres Système sous 'whatsapp_stock.openai_key'.")
+
+        import PyPDF2
+        import base64
+        import io
+        import requests
+        import json
+
+        pdf_bytes = base64.b64decode(invoice_doc.file)
+        reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
+        pdf_text = ""
+        for page in reader.pages:
+            extr = page.extract_text()
+            if extr:
+                pdf_text += extr + "\n"
+                
+        if len(pdf_text.strip()) < 20:
+             raise ValidationError("Le PDF semble être une image scannée (aucun texte extrait). L'extraction de texte natif a échoué.")
+
+        data_to_verify = {
+            "contract_num": self.contract_num or "",
+            "invoice_number": self.invoice_number or "",
+            "lot": self.lot or "",
+            "weight": self.weight or 0.0,
+            "price_unit": self.price_unit or 0.0,
+            "origin": self.origin_id.name if self.origin_id else ""
+        }
+
+        prompt = f"""
+Voici le texte extrait d'un document Invoice (PDF) :
+\"\"\"
+{pdf_text}
+\"\"\"
+
+Voici les données saisies dans le système Odoo pour cette facture :
+{json.dumps(data_to_verify, indent=2)}
+
+Votre tâche :
+Vérifiez si les informations saisies dans Odoo correspondent au texte de la facture (Poids, PU, Lot, Facture, Contract, Origine).
+Règles de vérification :
+1. Pour les nombres (weight, price_unit) : la correspondance doit être stricte sur la valeur (par exemple 20000 kg et 20.0 MT c'est correct, soyez intelligent avec les unités de poids).
+2. Pour le texte (contract_num, invoice_number, lot, origin) : soyez tolérant, ignorez les espaces blancs en trop, la casse, et les caractères de ponctuation ('/', '-', '.').
+3. Si un champ dans Odoo est complètement vide ("" ou 0), ignorez-le dans la comparaison pour éviter un faux positif. Ne comparez que ce qui est rempli.
+
+Répondez UNIQUEMENT avec un objet JSON strictement formaté comme ceci, sans markdown autour :
+{{
+    "is_faux": true ou false,
+    "reason": "Si is_faux est true, expliquez en une phrase courte en français ce qui ne correspond pas exactement. Sinon, laissez vide."
+}}
+"""
+        payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "Vous êtes un assistant logistique strict et intelligent qui renvoie uniquement du JSON valide."},
+                {"role": "user", "content": prompt}
+            ],
+            "response_format": {"type": "json_object"},
+            "temperature": 0.1
+        }
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            resp = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=60)
+            resp.raise_for_status()
+            ai_data = resp.json()
+            content = ai_data["choices"][0]["message"]["content"]
+            result = json.loads(content)
+            
+            is_faux_val = result.get("is_faux", False)
+            reason = result.get("reason", "")
+            
+            self.is_faux = is_faux_val
+            if is_faux_val:
+                self.message_post(body=f"<span style='color:red;'><i class='fa fa-exclamation-triangle'></i> Alerte IA: Incompatibilité détectée: {reason}</span>")
+            else:
+                self.message_post(body="<span style='color:green;'><i class='fa fa-check'></i> IA: Le document correspond parfaitement aux informations saisies.</span>")
+
+        except Exception as e:
+            raise ValidationError(f"Erreur lors de la communication avec OpenAI : {str(e)}")
 
     legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
     achat_article_id = fields.Many2one('achat.article', string='Article')

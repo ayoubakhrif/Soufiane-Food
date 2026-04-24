@@ -1,6 +1,12 @@
 from odoo import models, fields, api
 
 
+class CasaClientAdvance(models.Model):
+    _inherit = 'casa.client.advance'
+
+    charge_line_id = fields.Many2one('charges.casa.line', string='Ligne de Charge Casa', ondelete='cascade')
+
+
 class ChargesCasaLine(models.Model):
     _name = 'charges.casa.line'
     _description = 'Ligne de Charge Casa'
@@ -54,37 +60,39 @@ class ChargesCasa(models.Model):
     def action_confirm(self):
         for record in self:
             record.state = 'confirmed'
+            record._create_client_advances()
 
     def action_draft(self):
         for record in self:
+            # Check if any advance is already validated
+            advances = self.env['casa.client.advance'].search([('charge_line_id', 'in', record.line_ids.ids)])
+            if any(a.state == 'confirmed' for a in advances):
+                raise models.ValidationError("Vous ne pouvez pas remettre en brouillon car certaines avances liées ont déjà été validées.")
+            
+            advances.unlink()
             record.state = 'draft'
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        records = super().create(vals_list)
-        for record in records:
-            if record.client_id:
-                record._create_client_advances()
-        return records
-
-    def write(self, vals):
-        if 'client_id' in vals:
-            old_clients = {rec.id: rec.client_id for rec in self}
-            res = super().write(vals)
-            for rec in self:
-                if rec.client_id and rec.client_id != old_clients.get(rec.id):
-                    rec._create_client_advances()
-            return res
-        return super().write(vals)
 
     def _create_client_advances(self):
         self.ensure_one()
         for line in self.line_ids:
-            self.env['casa.client.advance'].create({
+            if line.amount <= 0:
+                continue
+            
+            # Use search to avoid duplicates if called multiple times or partially confirmed
+            existing_advance = self.env['casa.client.advance'].search([('charge_line_id', '=', line.id)], limit=1)
+            
+            vals = {
                 'client_id': self.client_id.id,
                 'amount': line.amount,
                 'date': self.date,
                 'payment_mode': 'charge',
                 'comment': line.comment,
                 'state': 'draft',
-            })
+                'charge_line_id': line.id,
+            }
+            
+            if existing_advance:
+                existing_advance.write(vals)
+            else:
+                self.env['casa.client.advance'].create(vals)
+

@@ -35,21 +35,21 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="date"/>
-                            <field name="client_id"/>
-                            <field name="ville"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="client_id" readonly="state != 'draft'"/>
+                            <field name="ville" readonly="state != 'draft'"/>
                         </group>
                         <group>
                             <field name="user_id" readonly="1"/>
                             <field name="total_amount" readonly="1"/>
-                            <field name="total_transport" readonly="1"/>
-                            <field name="total_salaires" readonly="1"/>
-                            <field name="total_autres" readonly="1"/>
+                            <field name="total_transport" readonly="1" invisible="total_transport == 0"/>
+                            <field name="total_salaires" readonly="1" invisible="total_salaires == 0"/>
+                            <field name="total_autres" readonly="1" invisible="total_autres == 0"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Charges">
-                            <field name="line_ids">
+                            <field name="line_ids" readonly="state != 'draft'">
                                 <tree editable="bottom">
                                     <field name="type"/>
                                     <field name="amount"/>

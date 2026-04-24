@@ -12,6 +12,7 @@
                 <group expand="0" string="Group By">
                     <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
                     <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
+                    <filter string="Faux" name="group_fault" context="{'group_by':'is_fault'}"/>
                 </group>
             </search>
         </field>

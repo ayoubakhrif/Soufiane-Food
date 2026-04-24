@@ -40,14 +40,17 @@ class StockKal3iyaStock(models.Model):
 
     def _compute_display_name(self):
         for record in self:
-            name = record.lot
+            parts = []
+            if record.lot:
+                parts.append(str(record.lot))
             if record.dum:
-                name += f" - DUM: {record.dum}"
+                parts.append(f"DUM: {record.dum}")
             if record.weight:
-                name += f" - {record.weight}kg"
+                parts.append(f"{record.weight}kg")
             if record.calibre:
-                name += f" - Cal: {record.calibre}"
-            record.display_name = name
+                parts.append(f"Cal: {record.calibre}")
+            
+            record.display_name = " - ".join(parts) if parts else "N/A"
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)

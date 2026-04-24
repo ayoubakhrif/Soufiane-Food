@@ -74,9 +74,23 @@
         </field>
     </record>
 
+    <record id="view_suivi_operation_pivot" model="ir.ui.view">
+        <field name="name">suivi.operation.pivot</field>
+        <field name="model">suivi.operation</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Opérations" display_quantity="true">
+                <field name="date" type="row" interval="month"/>
+                <field name="chauffeur_id" type="row"/>
+                <field name="ville" type="col"/>
+                <field name="montant" type="measure"/>
+                <field name="credit" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_suivi_operation" model="ir.actions.act_window">
         <field name="name">Opérations</field>
         <field name="res_model">suivi.operation</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,pivot</field>
     </record>
 </odoo>

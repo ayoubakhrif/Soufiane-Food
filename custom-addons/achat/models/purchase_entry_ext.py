@@ -191,10 +191,13 @@ Voici les informations saisies dans le système pour CETTE facture. Vérifiez UN
 
 RÈGLES DE COMPARAISON STRICTES :
 1. TEXTE (contract, invoice, lot, origin) : Comparez sans tenir compte de la casse et en ignorant les espaces, tirets (-), points (.), slashes (/).
-   - ⚠️ RÈGLE D'OR : Si la valeur dans Odoo est CONTENUE dans la valeur du PDF (ex: Odoo="358" et PDF="358/2026", ou Odoo="139" et PDF="LOT-139"), c'est une CORRESPONDANCE (is_faux=false). Ne signalez pas d'erreur pour les suffixes/préfixes (comme "/2026").
+   - ⚠️ RÈGLE DE CORRESPONDANCE LOGIQUE : Considérez que c'est une CORRESPONDANCE si le numéro Odoo est la partie principale du numéro PDF.
+   - Ignorez les ZÉROS INUTILES au début et les préfixes/suffixes.
+   - Exemple : Odoo="152" match avec PDF="A26/202600152" (car 152 est le coeur du numéro).
+   - Exemple : Odoo="358" match avec PDF="358/2026".
 2. POIDS : Le poids en Odoo est en TONNES. Valeurs équivalentes : 44 tonnes = 44 MT = 44 T = 44,000 KG = 44.000 KG.
 3. MONTANT TOTAL (CFR) : Comparaison stricte sur le nombre total de la facture (souvent marqué comme 'Total Amount', 'CFR Value', 'Balance', 'Total CFR', etc.). "80300" = "80,300" = "80.300" = "US$80,300.00".
-4. BÉNÉFICE DU DOUTE : Si vous trouvez une correspondance partielle ou que vous avez un doute, considérez que c'est CORRECT. Ne mettez is_faux=true que si les numéros sont radicalement différents (ex: 139 vs 4042).
+4. BÉNÉFICE DU DOUTE : Soyez très tolérant. Ne mettez is_faux=true que si les chiffres sont totalement différents et sans aucun lien logique.
 5. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
 
 Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown :

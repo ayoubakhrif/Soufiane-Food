@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+from markupsafe import Markup
 from datetime import date, timedelta
 import base64
 import io
@@ -20,9 +21,8 @@ class LogisticsEntry(models.Model):
     is_faux = fields.Boolean(
         string='Faux',
         default=False,
-        readonly=True,
         tracking=True,
-        help="Coché automatiquement par l'IA si l'Invoice ne correspond pas aux données."
+        help="Coché automatiquement par l'IA si l'Invoice ne correspond pas aux données. L'admin peut le décocher manuellement."
     )
 
     date_booking = fields.Date(string='Date of Booking')
@@ -268,21 +268,42 @@ OU si tout est correct :
             self.sudo().write({'is_faux': is_faux_val})
 
             if is_faux_val:
-                details = ""
+                details = Markup("")
                 if mismatches:
-                    details = "<ul>" + "".join(
-                        f"<li><b>{m.get('field','')}</b> : Odoo=<i>{m.get('odoo_value','')}</i> / PDF=<i>{m.get('pdf_value','')}</i></li>"
+                    items = Markup("").join(
+                        Markup(
+                            "<li><b>{field}</b> : "
+                            "Odoo = <code style='background:#ffeaea;padding:2px 5px;border-radius:3px;'>{odoo}</code> "
+                            "&nbsp;➡&nbsp; "
+                            "PDF = <code style='background:#fff3cd;padding:2px 5px;border-radius:3px;'>{pdf}</code></li>"
+                        ).format(
+                            field=m.get('field', ''),
+                            odoo=m.get('odoo_value', ''),
+                            pdf=m.get('pdf_value', '')
+                        )
                         for m in mismatches
-                    ) + "</ul>"
-                self.message_post(body=(
-                    f"<span style='color:red;'><i class='fa fa-exclamation-triangle'></i> <b>Alerte IA — Incompatibilité détectée :</b></span><br/>"
-                    f"{details}"
-                    f"<i>{reason}</i>"
-                ))
+                    )
+                    details = Markup("<ul style='margin:8px 0 8px 16px;'>{}</ul>").format(items)
+
+                self.message_post(body=Markup(
+                    "<div style='border-left:4px solid #dc3545;padding:8px 12px;background:#fff5f5;border-radius:4px;'>"
+                    "<span style='color:#dc3545;font-size:15px;'>"
+                    "<i class='fa fa-exclamation-triangle'></i>&nbsp;"
+                    "<b>Alerte IA — Incompatibilité détectée</b>"
+                    "</span>"
+                    "{details}"
+                    "<p style='color:#555;margin:4px 0 0;'><i>{reason}</i></p>"
+                    "</div>"
+                ).format(details=details, reason=reason))
             else:
-                self.message_post(body=(
-                    "<span style='color:green;'><i class='fa fa-check-circle'></i> "
-                    "<b>IA :</b> Le document Invoice correspond aux informations saisies.</span>"
+                self.message_post(body=Markup(
+                    "<div style='border-left:4px solid #28a745;padding:8px 12px;background:#f5fff8;border-radius:4px;'>"
+                    "<span style='color:#28a745;font-size:15px;'>"
+                    "<i class='fa fa-check-circle'></i>&nbsp;"
+                    "<b>IA : Document validé</b>"
+                    "</span>"
+                    "<p style='color:#555;margin:4px 0 0;'>Le document Invoice correspond parfaitement aux informations saisïes dans Odoo.</p>"
+                    "</div>"
                 ))
 
         except requests.exceptions.HTTPError as e:

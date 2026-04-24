@@ -11,7 +11,9 @@
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
-                <field name="is_faux" readonly="1" force_save="1" optional="show"/>
+                <!-- Faux : readonly pour les agents, éditable pour les admins -->
+                <field name="is_faux" readonly="1" optional="show" groups="!achat.group_purchase_admin"/>
+                <field name="is_faux" optional="show" groups="achat.group_purchase_admin"/>
                 <field name="container_count" string="Nb of Containers" optional="show"/>
                 <field name="eta"/>
                 <field name="date_booking" optional="show"/>
@@ -109,7 +111,11 @@
                     </div>
                     <group>
                         <group string="Informations Générales">
-                            <field name="is_faux" readonly="1" force_save="1"/>
+                            <!-- Faux : readonly pour les agents, éditable + confirmable pour l'admin -->
+                            <field name="is_faux" readonly="1" groups="!achat.group_purchase_admin"/>
+                            <field name="is_faux" groups="achat.group_purchase_admin"
+                                   widget="boolean_toggle"
+                                   string="Faux (Admin)"/>
                             <field name="eta"/>
                             <field name="container_count" string="Nb of Containers" readonly="1"/>
                             

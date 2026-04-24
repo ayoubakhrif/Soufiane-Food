@@ -147,32 +147,33 @@ class LogisticsEntry(models.Model):
         if not api_key:
             raise ValidationError("La clé API OpenAI n'est pas configurée dans les Paramètres Système sous 'whatsapp_stock.openai_key'.")
 
-        import PyPDF2
         import base64
-        import io
         import requests
         import json
 
         pdf_bytes = base64.b64decode(invoice_doc.file)
+        file_name = invoice_doc.file_name or "invoice.pdf"
+
+        # --- Étape 1 : Upload du PDF à l'API OpenAI Files ---
+        upload_headers = {"Authorization": f"Bearer {api_key}"}
         try:
-            # Pour la compatibilité avec les anciennes versions de PyPDF2 (avant 3.0.0)
-            if hasattr(PyPDF2, 'PdfReader'):
-                reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
-            else:
-                reader = PyPDF2.PdfFileReader(io.BytesIO(pdf_bytes))
+            upload_resp = requests.post(
+                "https://api.openai.com/v1/files",
+                headers=upload_headers,
+                files={
+                    "file": (file_name, pdf_bytes, "application/pdf"),
+                    "purpose": (None, "assistants"),
+                },
+                timeout=60
+            )
+            upload_resp.raise_for_status()
+            file_id = upload_resp.json().get("id")
+            if not file_id:
+                raise ValidationError("Erreur OpenAI: impossible d'obtenir l'ID du fichier uploadé.")
+        except requests.exceptions.RequestException as e:
+            raise ValidationError(f"Erreur lors de l'upload du PDF vers OpenAI : {str(e)}")
 
-            pdf_text = ""
-            for i in range(len(reader.pages) if hasattr(reader, 'pages') else reader.getNumPages()):
-                page = reader.pages[i] if hasattr(reader, 'pages') else reader.getPage(i)
-                extr = page.extract_text() if hasattr(page, 'extract_text') else page.extractText()
-                if extr:
-                    pdf_text += extr + "\n"
-        except Exception as e:
-            raise ValidationError(f"Erreur lors de la lecture du fichier PDF natif : {str(e)}")
-                
-        if len(pdf_text.strip()) < 20:
-             raise ValidationError("Le PDF semble être une image scannée (aucun texte extrait). L'extraction de texte natif a échoué.")
-
+        # --- Étape 2 : Appel GPT-4o avec le fichier ---
         data_to_verify = {
             "contract_num": self.contract_num or "",
             "invoice_number": self.invoice_number or "",
@@ -182,36 +183,45 @@ class LogisticsEntry(models.Model):
             "origin": self.origin_id.name if self.origin_id else ""
         }
 
-        prompt = f"""
-Voici le texte extrait d'un document Invoice (PDF) :
-\"\"\"
-{pdf_text}
-\"\"\"
-
-Voici les données saisies dans le système Odoo pour cette facture :
-{json.dumps(data_to_verify, indent=2)}
+        prompt_text = f"""Voici les données saisies dans le système Odoo pour cette facture :
+{json.dumps(data_to_verify, indent=2, ensure_ascii=False)}
 
 Votre tâche :
-Vérifiez si les informations saisies dans Odoo correspondent au texte de la facture (Poids, PU, Lot, Facture, Contract, Origine).
-Règles de vérification :
-1. Pour les nombres (weight, price_unit) : la correspondance doit être stricte sur la valeur (par exemple 20000 kg et 20.0 MT c'est correct, soyez intelligent avec les unités de poids).
-2. Pour le texte (contract_num, invoice_number, lot, origin) : soyez tolérant, ignorez les espaces blancs en trop, la casse, et les caractères de ponctuation ('/', '-', '.').
-3. Si un champ dans Odoo est complètement vide ("" ou 0), ignorez-le dans la comparaison pour éviter un faux positif. Ne comparez que ce qui est rempli.
+Lisez attentivement le document Invoice ci-joint et vérifiez si les informations Odoo correspondent.
+Champs à vérifier : Contract (contract_num), Invoice (invoice_number), Lot, Poids (weight en tonnes/MT), Prix Unitaire (price_unit en USD/T), Origine (origin).
 
-Répondez UNIQUEMENT avec un objet JSON strictement formaté comme ceci, sans markdown autour :
+Règles de vérification :
+1. Pour les nombres (weight, price_unit) : correspondance stricte sur la valeur. Soyez intelligent avec les unités (ex: 44 MT = 44.0, 44000 KG = 44.0 tonnes).
+2. Pour le texte (contract_num, invoice_number, lot, origin) : soyez tolérant, ignorez la casse et les caractères de ponctuation (/, -, ., espaces).
+3. Si un champ Odoo est vide ("" ou 0), ignorez-le dans la comparaison.
+
+Répondez UNIQUEMENT avec un objet JSON :
 {{
     "is_faux": true ou false,
-    "reason": "Si is_faux est true, expliquez en une phrase courte en français ce qui ne correspond pas exactement. Sinon, laissez vide."
-}}
-"""
+    "reason": "Si is_faux est true, expliquez en français ce qui ne correspond pas. Sinon laissez vide."
+}}"""
+
         payload = {
             "model": "gpt-4o",
             "messages": [
-                {"role": "system", "content": "Vous êtes un assistant logistique strict et intelligent qui renvoie uniquement du JSON valide."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "Vous êtes un assistant logistique expert en vérification de documents commerciaux. Vous renvoyez uniquement du JSON valide."
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "file",
+                            "file": {"file_id": file_id}
+                        },
+                        {"type": "text", "text": prompt_text}
+                    ]
+                }
             ],
             "response_format": {"type": "json_object"},
-            "temperature": 0.1
+            "temperature": 0.1,
+            "max_tokens": 500
         }
 
         headers = {
@@ -220,7 +230,7 @@ Répondez UNIQUEMENT avec un objet JSON strictement formaté comme ceci, sans ma
         }
 
         try:
-            resp = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=60)
+            resp = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=120)
             resp.raise_for_status()
             ai_data = resp.json()
             content = ai_data["choices"][0]["message"]["content"]
@@ -229,14 +239,24 @@ Répondez UNIQUEMENT avec un objet JSON strictement formaté comme ceci, sans ma
             is_faux_val = result.get("is_faux", False)
             reason = result.get("reason", "")
             
-            self.is_faux = is_faux_val
+            self.sudo().write({'is_faux': is_faux_val})
             if is_faux_val:
-                self.message_post(body=f"<span style='color:red;'><i class='fa fa-exclamation-triangle'></i> Alerte IA: Incompatibilité détectée: {reason}</span>")
+                self.message_post(body=f"<span style='color:red;'><i class='fa fa-exclamation-triangle'></i> <b>Alerte IA:</b> Incompatibilité détectée: {reason}</span>")
             else:
-                self.message_post(body="<span style='color:green;'><i class='fa fa-check'></i> IA: Le document correspond parfaitement aux informations saisies.</span>")
+                self.message_post(body="<span style='color:green;'><i class='fa fa-check'></i> <b>IA:</b> Le document correspond parfaitement aux informations saisies.</span>")
 
         except Exception as e:
             raise ValidationError(f"Erreur lors de la communication avec OpenAI : {str(e)}")
+        finally:
+            # Nettoyage : supprimer le fichier uploadé chez OpenAI
+            try:
+                requests.delete(
+                    f"https://api.openai.com/v1/files/{file_id}",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    timeout=10
+                )
+            except Exception:
+                pass  # Non-bloquant si la suppression échoue
 
     legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
     achat_article_id = fields.Many2one('achat.article', string='Article')

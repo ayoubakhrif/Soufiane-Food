@@ -1016,13 +1016,24 @@ class DataCheque(models.Model):
         # Le fichier binaire est déjà stocké en base64 dans Odoo
         pdf_b64 = self.cheque_copy_pdf.decode('utf-8') if isinstance(self.cheque_copy_pdf, bytes) else self.cheque_copy_pdf
 
+        # Résoudre le nom légal complet de la société :
+        # Priorité : raison_social (finance.ste) > core_ste_id.name > ste_id.name (abréviation)
+        societe_legale = ""
+        if self.ste_id:
+            if self.ste_id.raison_social:
+                societe_legale = self.ste_id.raison_social
+            elif self.ste_id.core_ste_id and self.ste_id.core_ste_id.name:
+                societe_legale = self.ste_id.core_ste_id.name
+            else:
+                societe_legale = self.ste_id.name
+
         # Données à vérifier
         data_to_verify = {
             "chq": self.chq or "",
             "amount": self.amount or 0.0,
             "beneficiaire": self.benif_id.name if self.benif_id else "",
             "date_emission": str(self.date_emission) if self.date_emission else "",
-            "societe": self.ste_id.name if self.ste_id else "",
+            "societe": societe_legale,
         }
 
         # Construire uniquement les champs non-vides
@@ -1036,7 +1047,7 @@ class DataCheque(models.Model):
         if data_to_verify["date_emission"]:
             fields_to_check.append(f"- Date d'émission : '{data_to_verify['date_emission']}' (format YYYY-MM-DD, comparer avec la date sur le chèque)")
         if data_to_verify["societe"]:
-            fields_to_check.append(f"- Société émettrice : '{data_to_verify['societe']}'")
+            fields_to_check.append(f"- Société émettrice (raison sociale) : '{data_to_verify['societe']}'")
 
         if not fields_to_check:
             from odoo.exceptions import ValidationError as VE

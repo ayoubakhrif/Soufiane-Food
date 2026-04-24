@@ -98,6 +98,26 @@ class DataCheque(models.Model):
     unlock_until = fields.Datetime(string="Déverrouillé jusqu'à", help="Si défini, le chèque peut être modifié jusqu'à cette date", tracking=True)
     unlock_until_label = fields.Char(compute='_compute_unlock_until_label', string="Label date déverrouillage")
     is_locked = fields.Boolean(string="Verrouillé", compute='_compute_is_locked', help="Indique si le chèque est verrouillé pour l'utilisateur actuel")
+
+    # ------------------------------------------------------------
+    # COPIE PHYSIQUE DU CHÈQUE (PDF uploadé manuellement)
+    # ------------------------------------------------------------
+    cheque_copy_pdf = fields.Binary(
+        string="Copie du chèque (PDF)",
+        attachment=True,
+        help="PDF de la copie physique du chèque à vérifier par l'IA"
+    )
+    cheque_copy_filename = fields.Char(string="Nom du fichier")
+
+    # ------------------------------------------------------------
+    # FLAG IA
+    # ------------------------------------------------------------
+    is_fault = fields.Boolean(
+        string='Faux',
+        default=False,
+        tracking=True,
+        help="Coché automatiquement par l'IA si la copie du chèque ne correspond pas aux données saisies. L'admin peut le décocher manuellement."
+    )
     # ------------------------------------------------------------
     # EDIT LOCK LOGIC
     # ------------------------------------------------------------
@@ -974,6 +994,206 @@ class DataCheque(models.Model):
             "url": self.doc_pdf_url,
             "target": "new",
         }
+
+    # ------------------------------------------------------------
+    # VÉRIFICATION IA — Copie physique du chèque
+    # ------------------------------------------------------------
+    def action_verify_cheque_ai(self):
+        self.ensure_one()
+
+        if not self.cheque_copy_pdf:
+            from odoo.exceptions import ValidationError as VE
+            raise VE("Aucune copie PDF du chèque n'est attachée à cet enregistrement. Veuillez d'abord uploader le PDF dans l'onglet 'Chèque'.")
+
+        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+        if not api_key:
+            from odoo.exceptions import ValidationError as VE
+            raise VE("La clé API OpenAI n'est pas configurée dans les Paramètres Système sous 'whatsapp_stock.openai_key'.")
+
+        import requests
+        import json
+
+        # Le fichier binaire est déjà stocké en base64 dans Odoo
+        pdf_b64 = self.cheque_copy_pdf.decode('utf-8') if isinstance(self.cheque_copy_pdf, bytes) else self.cheque_copy_pdf
+
+        # Données à vérifier
+        data_to_verify = {
+            "chq": self.chq or "",
+            "amount": self.amount or 0.0,
+            "beneficiaire": self.benif_id.name if self.benif_id else "",
+            "date_emission": str(self.date_emission) if self.date_emission else "",
+            "societe": self.ste_id.name if self.ste_id else "",
+        }
+
+        # Construire uniquement les champs non-vides
+        fields_to_check = []
+        if data_to_verify["chq"]:
+            fields_to_check.append(f"- Numéro de chèque : '{data_to_verify['chq']}'")
+        if data_to_verify["amount"]:
+            fields_to_check.append(f"- Montant : {data_to_verify['amount']} MAD (peut apparaître comme DH, MAD, ou sans unité)")
+        if data_to_verify["beneficiaire"]:
+            fields_to_check.append(f"- Bénéficiaire (à l'ordre de) : '{data_to_verify['beneficiaire']}'")
+        if data_to_verify["date_emission"]:
+            fields_to_check.append(f"- Date d'émission : '{data_to_verify['date_emission']}' (format YYYY-MM-DD, comparer avec la date sur le chèque)")
+        if data_to_verify["societe"]:
+            fields_to_check.append(f"- Société émettrice : '{data_to_verify['societe']}'")
+
+        if not fields_to_check:
+            from odoo.exceptions import ValidationError as VE
+            raise VE("Aucun champ renseigné à vérifier. Veuillez saisir au minimum le numéro et le montant.")
+
+        fields_str = "\n".join(fields_to_check)
+
+        prompt_text = f"""Vous êtes un agent de contrôle financier. Lisez attentivement la copie du chèque joint (PDF).
+
+Voici les informations saisies dans le système pour CE chèque. Vérifiez UNIQUEMENT les champs listés ci-dessous :
+
+{fields_str}
+
+RÈGLES DE COMPARAISON STRICTES :
+1. NUMÉRO : Comparez les 7 chiffres du numéro de chèque tel qu'il apparaît sur le chèque (zone MICR ou corps du chèque).
+2. MONTANT : Valeurs équivalentes : 100000 = 100,000 = 100.000 = 100 000 MAD = 100 000 DH. Ignorez les séparateurs de milliers.
+3. TEXTE (bénéficiaire, société) : Insensible à la casse, ignorez espaces/tirets/points superflus.
+4. DATE : Comparez la date d'émission au format jour/mois/année sur le chèque avec la date système.
+5. BÉNÉFICE DU DOUTE : Si l'information est partiellement lisible ou absente du PDF, considérez-la comme CORRECTE. Ne signalez une erreur que si vous êtes CERTAIN à 100% qu'il y a une différence réelle.
+6. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
+
+Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown :
+{{
+    "is_fault": true,
+    "mismatches": [
+        {{"field": "nom du champ", "odoo_value": "valeur Odoo", "pdf_value": "valeur trouvée dans le PDF"}}
+    ],
+    "reason": "Résumé en français des incompatibilités trouvées."
+}}
+OU si tout est correct :
+{{
+    "is_fault": false,
+    "mismatches": [],
+    "reason": ""
+}}"""
+
+        # Utilisation de l'API Responses OpenAI (même pattern que les factures achat)
+        payload = {
+            "model": "gpt-4o",
+            "input": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "input_file",
+                            "filename": self.cheque_copy_filename or "cheque.pdf",
+                            "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                        },
+                        {
+                            "type": "input_text",
+                            "text": prompt_text
+                        }
+                    ]
+                }
+            ],
+            "text": {
+                "format": {
+                    "type": "json_object"
+                }
+            },
+            "temperature": 0.0,
+            "max_output_tokens": 800
+        }
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
+            resp.raise_for_status()
+            ai_data = resp.json()
+
+            # Extraction de la réponse texte (format /v1/responses)
+            raw_content = ""
+            for output_item in ai_data.get("output", []):
+                for content_item in output_item.get("content", []):
+                    if content_item.get("type") == "output_text":
+                        raw_content = content_item.get("text", "")
+                        break
+
+            if not raw_content:
+                from odoo.exceptions import ValidationError as VE
+                raise VE("OpenAI n'a retourné aucune réponse. Vérifiez le fichier PDF.")
+
+            result = json.loads(raw_content)
+
+            is_fault_val = result.get("is_fault", False)
+            reason = result.get("reason", "")
+            mismatches = result.get("mismatches", [])
+
+            self.sudo().write({'is_fault': is_fault_val})
+
+            if is_fault_val:
+                details = Markup("")
+                if mismatches:
+                    items = Markup("").join(
+                        Markup(
+                            "<li><b>{field}</b> : "
+                            "Odoo = <code style='background:#ffeaea;padding:2px 5px;border-radius:3px;'>{odoo}</code> "
+                            "&nbsp;➡&nbsp; "
+                            "PDF = <code style='background:#fff3cd;padding:2px 5px;border-radius:3px;'>{pdf}</code></li>"
+                        ).format(
+                            field=m.get('field', ''),
+                            odoo=m.get('odoo_value', ''),
+                            pdf=m.get('pdf_value', '')
+                        )
+                        for m in mismatches
+                    )
+                    details = Markup("<ul style='margin:8px 0 8px 16px;'>{}</ul>").format(items)
+
+                self.message_post(body=Markup(
+                    "<div style='border-left:4px solid #dc3545;padding:8px 12px;background:#fff5f5;border-radius:4px;'>"
+                    "<span style='color:#dc3545;font-size:15px;'>"
+                    "<i class='fa fa-exclamation-triangle'></i>&nbsp;"
+                    "<b>Alerte IA — Incompatibilité détectée sur la copie du chèque</b>"
+                    "</span>"
+                    "{details}"
+                    "<p style='color:#555;margin:4px 0 0;'><i>{reason}</i></p>"
+                    "</div>"
+                ).format(details=details, reason=reason))
+            else:
+                self.message_post(body=Markup(
+                    "<div style='border-left:4px solid #28a745;padding:8px 12px;background:#f5fff8;border-radius:4px;'>"
+                    "<span style='color:#28a745;font-size:15px;'>"
+                    "<i class='fa fa-check-circle'></i>&nbsp;"
+                    "<b>IA : Chèque validé ✅</b>"
+                    "</span>"
+                    "<p style='color:#555;margin:4px 0 0;'>La copie du chèque correspond parfaitement aux informations saisies dans Odoo.</p>"
+                    "</div>"
+                ))
+
+        except requests.exceptions.HTTPError as e:
+            err_body = ""
+            try:
+                err_body = e.response.json().get("error", {}).get("message", "")
+            except Exception:
+                pass
+            from odoo.exceptions import ValidationError as VE
+            raise VE(f"Erreur OpenAI ({e.response.status_code}) : {err_body or str(e)}")
+        except Exception as e:
+            from odoo.exceptions import ValidationError as VE
+            raise VE(f"Erreur lors de la communication avec OpenAI : {str(e)}")
+
+    def action_reset_fault(self):
+        """Permet à un manager Finance de réinitialiser manuellement le flag is_fault."""
+        self.ensure_one()
+        self.sudo().write({'is_fault': False})
+        self.message_post(body=Markup(
+            "<div style='border-left:4px solid #6c757d;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
+            "<span style='color:#6c757d;font-size:15px;'>"
+            "<i class='fa fa-undo'></i>&nbsp;"
+            "<b>Flag 'Faux' réinitialisé manuellement par un manager</b>"
+            "</span>"
+            "</div>"
+        ))
 
     # ------------------------------------------------------------
     # CRON : synchroniser les PDF CHQ tous les jours

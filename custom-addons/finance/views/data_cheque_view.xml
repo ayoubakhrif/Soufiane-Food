@@ -39,7 +39,7 @@
         <field name="name">datachq tree</field>
         <field name="model">datacheque</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-danger="is_fault == True">
                 <field name="ste_id"/>
                 <field name="chq"/>
                 <field name="talon_id"/>
@@ -58,6 +58,7 @@
                 <field name="existing_tag" optional="1"/>
                 <field name="existing_dem_tag" optional="1"/>
                 <field name="existing_doc_tag" optional="1"/>
+                <field name="is_fault" invisible="1"/>
             </tree>
         </field>
     </record>
@@ -72,6 +73,19 @@
                             type="object"
                             class="btn-primary"
                             invisible="state != 'reserve'"/>
+                    <button name="action_verify_cheque_ai"
+                            string="🔍 Vérifier avec l'IA"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-robot"
+                            groups="finance.group_finance_user"/>
+                    <button name="action_reset_fault"
+                            string="✅ Réinitialiser le flag IA"
+                            type="object"
+                            class="btn-secondary"
+                            icon="fa-undo"
+                            invisible="not is_fault"
+                            groups="finance.group_finance_user"/>
                     <button name="action_request_edit"
                             string="Demander une authorisation"
                             type="object"
@@ -188,6 +202,35 @@
                             <field name="doc_pdf_url" widget="url" string="PDF DOC"/>
                         </group>
                     </group>
+
+                    <!-- Notebook avec onglet Chèque -->
+                    <notebook>
+                        <page string="Chèque" name="cheque_copy">
+                            <group string="Copie physique du chèque">
+                                <group>
+                                    <field name="cheque_copy_pdf"
+                                           widget="binary"
+                                           filename="cheque_copy_filename"
+                                           string="Uploader la copie PDF"/>
+                                    <field name="cheque_copy_filename" invisible="1"/>
+                                </group>
+                                <group>
+                                    <field name="is_fault"
+                                           string="🔴 Faux (détecté par l'IA)"
+                                           readonly="not is_manager"
+                                           widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                            <div invisible="not is_fault"
+                                 style="margin-top:8px;padding:12px 16px;background:#fff5f5;border-left:4px solid #dc3545;border-radius:6px;">
+                                <span style="color:#dc3545;font-weight:700;">
+                                    <i class="fa fa-exclamation-triangle"/> Ce chèque a été marqué comme FAUX par l'IA.
+                                    Vérifiez le chatter pour le détail des incompatibilités.
+                                </span>
+                            </div>
+                        </page>
+                    </notebook>
+
                     <separator string="Historique"/>
                     <div class="oe_chatter" groups="finance.group_finance_user">
                         <field name="message_follower_ids"/>

@@ -309,6 +309,14 @@ class CasaStockEntry(models.Model):
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
 
+    @api.constrains('weight', 'price_purchase')
+    def _check_weight_price_positive(self):
+        for rec in self:
+            if rec.weight <= 0:
+                raise ValidationError(_("Le poids doit être strictement positif."))
+            if rec.price_purchase <= 0:
+                raise ValidationError(_("Le prix d'achat doit être strictement positif."))
+
     @api.constrains('lot', 'dum')
     def _check_lot_dum_format(self):
         for rec in self:

@@ -1,4 +1,5 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 class SuiviOperation(models.Model):
     _name = 'suivi.operation'
@@ -27,6 +28,13 @@ class SuiviOperation(models.Model):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('suivi.operation') or '/'
         return super(SuiviOperation, self).create(vals)
+
+    @api.constrains('montant', 'credit', 'ville')
+    def _check_montant_credit(self):
+        for rec in self:
+            if rec.ville != 'casa':
+                if rec.montant <= 0 and rec.credit <= 0:
+                    raise ValidationError(_("Pour les villes hors Casa, soit le montant soit le crédit doit être positif."))
 
 class SuiviOperationLine(models.Model):
     _name = 'suivi.operation.line'

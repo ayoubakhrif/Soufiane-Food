@@ -143,6 +143,10 @@ class WhatsAppDouaneController(http.Controller):
             }
 
         # 8. No match or fuzzy match -> Ask DUM, Lot or BL?
+        if forced_type:
+            type_label = "une DUM" if forced_type == 'dum' else "un Lot" if forced_type == 'lot' else "un BL"
+            return {'status': 'not_found', 'message': f"Je n'ai pas trouvé '{reference}' en tant que {type_label}. Veuillez vérifier la référence."}
+
         choices = [f"🔍 DUM : {reference}", f"📦 Lot : {reference}", f"🚢 BL : {reference}"]
         message = f"Je n'ai pas trouvé '{reference}'. S'agit-il d'une DUM, d'un Lot ou d'un BL ?\n\n"
         for i, choice in enumerate(choices, 1):

@@ -9,9 +9,8 @@
                 <field name="date"/>
                 <field name="ville"/>
                 <field name="chauffeur_id"/>
-                <field name="lot"/>
-                <field name="montant" sum="Total Montant"/>
-                <field name="credit" sum="Total Crédit"/>
+                <field name="montant" sum="Total Montant" attrs="{'invisible': [('ville', '=', 'casa')]}"/>
+                <field name="credit" sum="Total Crédit" attrs="{'invisible': [('ville', '=', 'casa')]}"/>
                 <field name="payer_id"/>
             </tree>
         </field>
@@ -35,8 +34,8 @@
                             <field name="ville"/>
                         </group>
                         <group>
-                            <field name="montant"/>
-                            <field name="credit"/>
+                            <field name="montant" attrs="{'invisible': [('ville', '=', 'casa')], 'required': [('ville', '!=', 'casa')]}"/>
+                            <field name="credit" attrs="{'invisible': [('ville', '=', 'casa')], 'required': [('ville', '!=', 'casa')]}"/>
                             <field name="payer_id" options="{'no_create': True}"/>
                         </group>
                     </group>

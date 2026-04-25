@@ -123,16 +123,23 @@ async function connectToWhatsApp() {
             // GESTION DU MENU INTERACTIF
             if (pendingChoices.has(from)) {
                 const choices = pendingChoices.get(from);
-                const choiceNum = parseInt(text.trim());
-                if (!isNaN(choiceNum) && choiceNum > 0 && choiceNum <= choices.length) {
+                const trimmedText = text.trim();
+                const choiceNum = parseInt(trimmedText);
+
+                // Si c'est un numéro de choix valide (ex: 1, 2, 3)
+                if (!isNaN(choiceNum) && choiceNum > 0 && choiceNum <= choices.length && trimmedText.length <= 2) {
                     realMessage = choices[choiceNum - 1];
                     console.log(`Sélection utilisateur : Option ${choiceNum} -> "${realMessage}"`);
                     pendingChoices.delete(from); // Clear menu once selected
-                } else if (!isNaN(choiceNum)) {
+                } 
+                // Si c'est un numéro mais court/ambigu (ex: 5 alors qu'il y a 3 choix), on signale l'erreur
+                else if (!isNaN(choiceNum) && trimmedText.length <= 2) {
                     await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par le bon numéro." }, { quoted: msg });
                     continue; // Skip Odoo call
-                } else {
-                    // L'utilisateur a tapé une phrase, le menu est abandonné
+                } 
+                // Si c'est une phrase ou un long numéro (référence probable), on abandonne le menu et on traite normalement
+                else {
+                    console.log(`Menu abandonné pour une nouvelle saisie : "${trimmedText}"`);
                     pendingChoices.delete(from);
                 }
             }

@@ -34,6 +34,8 @@ access_ai_alias_manager,ai.alias,model_ai_alias,group_manager,1,1,1,1
 access_ai_interaction_log_viewer,ai.interaction.log,model_ai_interaction_log,group_viewer,1,0,0,0
 access_ai_interaction_log_user,ai.interaction.log,model_ai_interaction_log,group_user,1,1,1,1
 access_ai_interaction_log_manager,ai.interaction.log,model_ai_interaction_log,group_manager,1,1,1,1
+access_stock_tanger_difference,stock.tanger.difference,model_stock_tanger_difference,base.group_user,1,0,0,0
+
 
 
 

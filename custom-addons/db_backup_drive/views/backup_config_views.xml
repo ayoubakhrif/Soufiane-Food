@@ -14,19 +14,39 @@
                             <field name="name"/>
                         </h1>
                     </div>
-                    <group>
-                        <group string="Configuration">
+                    <group string="1. Identifiants Google Cloud" invisible="refresh_token">
+                        <field name="client_id" placeholder="Ex: 123456-abcdef.apps.googleusercontent.com"/>
+                        <field name="client_secret" password="True" placeholder="Votre client secret"/>
+                        <button name="action_generate_auth_url" string="Générer l'URL d'autorisation" 
+                                type="object" class="btn-primary" invisible="not client_id or not client_secret"/>
+                    </group>
+                    
+                    <group string="2. Autorisation" invisible="not auth_url or refresh_token">
+                        <field name="auth_url" widget="url" text="Cliquez ici pour autoriser Odoo" readonly="1"/>
+                        <field name="auth_code" placeholder="Collez le code ici après avoir autorisé"/>
+                        <button name="action_validate_auth_code" string="Valider le code" 
+                                type="object" class="btn-success" invisible="not auth_code"/>
+                    </group>
+
+                    <group string="Configuration Active" invisible="not refresh_token">
+                        <group>
                             <field name="folder_id"/>
                             <field name="master_password" password="True"/>
+                            <field name="refresh_token" password="True"/>
                         </group>
-                        <group string="Last Backup Info">
+                        <group string="Dernier Backup">
                             <field name="last_backup_date"/>
                             <field name="last_backup_status" widget="badge" 
                                    decoration-success="last_backup_status == 'success'"
                                    decoration-danger="last_backup_status == 'failed'"/>
                         </group>
                     </group>
-                    <group string="Error Trace" invisible="not error_message">
+                    
+                    <button name="action_generate_auth_url" string="Ré-initialiser l'autorisation" 
+                            type="object" class="btn-secondary" invisible="not refresh_token"
+                            confirm="Voulez-vous vraiment réinitialiser l'accès ?"/>
+
+                    <group string="Erreur" invisible="not error_message">
                         <field name="error_message" readonly="1"/>
                     </group>
                     <div class="alert alert-info" role="alert">

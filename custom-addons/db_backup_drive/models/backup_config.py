@@ -7,9 +7,11 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.service import db
 import google.auth
-from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
+import requests
 
 _logger = logging.getLogger(__name__)
 
@@ -20,6 +22,14 @@ class DbBackupDriveConfig(models.Model):
     name = fields.Char(string="Name", default="Google Drive Backup Config", readonly=True)
     folder_id = fields.Char(string="Google Drive Folder ID", required=True, default="1cmkn6Ev66h3POgimDZuftPnnNn8BDgwR")
     master_password = fields.Char(string="Odoo Master Password", help="Required to perform database dumps.")
+    
+    # OAuth2 Fields
+    client_id = fields.Char(string="Client ID")
+    client_secret = fields.Char(string="Client Secret")
+    refresh_token = fields.Char(string="Refresh Token", readonly=True)
+    auth_url = fields.Text(string="Authorization URL", readonly=True)
+    auth_code = fields.Char(string="Authorization Code", help="Paste the code received after authorizing.")
+
     last_backup_date = fields.Datetime(string="Last Backup Date", readonly=True)
     last_backup_status = fields.Selection([
         ('success', 'Success'),
@@ -34,6 +44,50 @@ class DbBackupDriveConfig(models.Model):
             config = self.create({'name': 'Google Drive Backup Config'})
         return config
 
+    def action_generate_auth_url(self):
+        """Generate the URL for the user to authorize."""
+        self.ensure_one()
+        if not self.client_id or not self.client_secret:
+            raise UserError("Please enter Client ID and Client Secret first.")
+        
+        scopes = ['https://www.googleapis.com/auth/drive.file']
+        flow = InstalledAppFlow.from_client_config(
+            {
+                "web": {
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                }
+            },
+            scopes=scopes
+        )
+        flow.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'
+        auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
+        self.auth_url = auth_url
+
+    def action_validate_auth_code(self):
+        """Exchange the auth code for a refresh token."""
+        self.ensure_one()
+        if not self.auth_code:
+            raise UserError("Please enter the Authorization Code.")
+            
+        data = {
+            'code': self.auth_code,
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'redirect_uri': 'urn:ietf:wg:oauth:2.0:oob',
+            'grant_type': 'authorization_code'
+        }
+        response = requests.post('https://oauth2.googleapis.com/token', data=data).json()
+        
+        if 'refresh_token' in response:
+            self.refresh_token = response['refresh_token']
+            self.auth_code = False
+            self.auth_url = False
+        else:
+            raise UserError(f"Error getting refresh token: {response.get('error_description', response.get('error', 'Unknown error'))}")
+
     def action_backup_now(self):
         """Manually trigger the backup."""
         self.ensure_one()
@@ -43,52 +97,36 @@ class DbBackupDriveConfig(models.Model):
     def _run_scheduled_backup(self):
         """Called by Cron."""
         config = self.get_config()
-        if config.folder_id:
+        if config.refresh_token:
             config._perform_backup()
 
     def _perform_backup(self):
         self.ensure_one()
+        if not self.refresh_token:
+            msg = "Missing Refresh Token. Please authorize the app first."
+            self.write({'last_backup_status': 'failed', 'error_message': msg})
+            return
+
         db_name = self.env.cr.dbname
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"backup_{db_name}_{timestamp}.zip"
         
-        # Path to service account - adjusted for Docker environment
-        # Expected path in Docker: /mnt/extra-addons/google_credentials/service_account.json
-        # Check environment variable first, then standard paths
-        possible_paths = [
-            os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', '/mnt/extra-addons/google_credentials/service_account.json'),
-            '/mnt/extra-addons/google_credentials/service_account.json',
-            'c:\\odoo-repos\\Soufiane-Food\\google_credentials\\service_account.json',
-        ]
-        
-        service_account_path = False
-        for path in possible_paths:
-            if os.path.exists(path):
-                service_account_path = path
-                break
-        
-        if not service_account_path:
-            msg = f"Service account file not found. Checked: {', '.join(possible_paths)}"
-            self.write({
-                'last_backup_status': 'failed',
-                'error_message': msg
-            })
-            _logger.error(msg)
-            return
-
         try:
             _logger.info(f"Starting backup for database {db_name} to Google Drive folder {self.folder_id}")
             
             # 1. Dump database
-            # We use 'zip' format to include the filestore
-            # Note: odoo.service.db.dump_db returns content via the stream
             buffer = io.BytesIO()
             db.dump_db(db_name, buffer, backup_format='zip')
             buffer.seek(0)
             
-            # 2. Authenticate with Google
-            scopes = ['https://www.googleapis.com/auth/drive.file']
-            creds = service_account.Credentials.from_service_account_file(service_account_path, scopes=scopes)
+            # 2. Authenticate with Google OAuth2
+            creds = Credentials(
+                None,
+                refresh_token=self.refresh_token,
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                token_uri="https://oauth2.googleapis.com/token"
+            )
             service = build('drive', 'v3', credentials=creds)
             
             # 3. Upload to Google Drive

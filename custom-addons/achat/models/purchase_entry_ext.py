@@ -150,7 +150,7 @@ class LogisticsEntry(models.Model):
             ], limit=1)
 
             if not invoice_doc or not invoice_doc.file:
-                rec.message_post(body="<b>Saut de la vérification IA</b> : Aucun document de type 'Invoice' (Commercial Invoice) n'est attaché à ce dossier.")
+                rec.message_post(body=Markup("<b>Saut de la vérification IA</b> : Aucun document de type 'Invoice' (Commercial Invoice) n'est attaché à ce dossier."))
                 continue
 
             try:
@@ -183,7 +183,7 @@ class LogisticsEntry(models.Model):
                     fields_to_check.append(f"- Origine : '{data_to_verify['origin']}'")
 
                 if not fields_to_check:
-                    rec.message_post(body="<b>Saut de la vérification IA</b> : Aucun champ renseigné à vérifier (contract, invoice, lot, poids, total CFR, origine).")
+                    rec.message_post(body=Markup("<b>Saut de la vérification IA</b> : Aucun champ renseigné à vérifier (contract, invoice, lot, poids, total CFR, origine)."))
                     continue
 
                 fields_str = "\n".join(fields_to_check)
@@ -265,7 +265,7 @@ OU si tout est correct :
                             break
 
                 if not raw_content:
-                    rec.message_post(body="<b>Erreur IA</b> : OpenAI n'a retourné aucune réponse pour ce document.")
+                    rec.message_post(body=Markup("<b>Erreur IA</b> : OpenAI n'a retourné aucune réponse pour ce document."))
                     continue
 
                 result = json.loads(raw_content)
@@ -315,7 +315,7 @@ OU si tout est correct :
                     ))
 
             except Exception as e:
-                rec.message_post(body=f"<b>Erreur IA</b> : Une erreur est survenue lors de la communication avec OpenAI : {str(e)}")
+                rec.message_post(body=Markup(f"<b>Erreur IA</b> : Une erreur est survenue lors de la communication avec OpenAI : {str(e)}"))
                 continue
 
     legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)

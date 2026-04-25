@@ -9,8 +9,8 @@
                 <field name="qty_kal3iya" sum="Total Kal3iya"/>
                 <field name="qty_casa_tanger" sum="Total Casa Tanger"/>
                 <field name="qty_hanane_tanger" sum="Total Hanane Tanger"/>
-                <field name="qty_casa_total" sum="Total Casa"/>
-                <field name="difference" sum="Total Différence" decoration-danger="difference != 0" decoration-success="difference == 0"/>
+                <field name="diff_kal_casa" sum="Diff Kal-Casa" decoration-danger="diff_kal_casa != 0" decoration-success="diff_kal_casa == 0"/>
+                <field name="diff_kal_hanane" sum="Diff Kal-Hanane" decoration-danger="diff_kal_hanane != 0" decoration-success="diff_kal_hanane == 0"/>
             </tree>
         </field>
     </record>

@@ -11,8 +11,8 @@ class StockTangerDifference(models.Model):
     qty_kal3iya = fields.Float(string='Quantité (Kal3iya)', readonly=True)
     qty_casa_tanger = fields.Float(string='Quantité (Casa Tanger)', readonly=True)
     qty_hanane_tanger = fields.Float(string='Quantité (Hanane Tanger)', readonly=True)
-    qty_casa_total = fields.Float(string='Total Casa (Tanger)', readonly=True)
-    difference = fields.Float(string='Différence (Kal3iya - Total Casa)', readonly=True)
+    diff_kal_casa = fields.Float(string='Diff (Kal3iya - Casa)', readonly=True)
+    diff_kal_hanane = fields.Float(string='Diff (Kal3iya - Hanane)', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -24,8 +24,8 @@ class StockTangerDifference(models.Model):
                     COALESCE(k.qty, 0) as qty_kal3iya,
                     COALESCE(c.qty, 0) as qty_casa_tanger,
                     COALESCE(h.qty, 0) as qty_hanane_tanger,
-                    (COALESCE(c.qty, 0) + COALESCE(h.qty, 0)) as qty_casa_total,
-                    (COALESCE(k.qty, 0) - (COALESCE(c.qty, 0) + COALESCE(h.qty, 0))) as difference
+                    (COALESCE(k.qty, 0) - COALESCE(c.qty, 0)) as diff_kal_casa,
+                    (COALESCE(k.qty, 0) - COALESCE(h.qty, 0)) as diff_kal_hanane
                 FROM company_article a
                 LEFT JOIN (
                     SELECT p.company_article_id as article_id, SUM(m.qty) as qty

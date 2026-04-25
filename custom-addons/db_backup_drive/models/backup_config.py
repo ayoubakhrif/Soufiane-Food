@@ -81,9 +81,9 @@ class DbBackupDriveConfig(models.Model):
             
             # 1. Dump database
             # We use 'zip' format to include the filestore
-            # Note: odoo.service.db.dump_db returns content as bytes
+            # Note: odoo.service.db.dump_db returns content via the stream
             buffer = io.BytesIO()
-            db.dump_db(db_name, buffer, format='zip', backup_secret=self.master_password)
+            db.dump_db(db_name, buffer, backup_format='zip')
             buffer.seek(0)
             
             # 2. Authenticate with Google

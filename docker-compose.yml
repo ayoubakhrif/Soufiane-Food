@@ -27,6 +27,7 @@ services:
     volumes:
       - ./custom-addons:/mnt/extra-addons/custom-addons
       - ./kal3iya:/mnt/extra-addons/kal3iya
+      - ./google_credentials:/mnt/extra-addons/google_credentials
       - ./config:/etc/odoo
       - ./data:/var/lib/odoo
     restart: always

@@ -54,25 +54,27 @@ class DbBackupDriveConfig(models.Model):
         
         # Path to service account - adjusted for Docker environment
         # Expected path in Docker: /mnt/extra-addons/google_credentials/service_account.json
-        service_account_path = os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', '/mnt/extra-addons/google_credentials/service_account.json')
+        # Check environment variable first, then standard paths
+        possible_paths = [
+            os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', '/mnt/extra-addons/google_credentials/service_account.json'),
+            '/mnt/extra-addons/google_credentials/service_account.json',
+            'c:\\odoo-repos\\Soufiane-Food\\google_credentials\\service_account.json',
+        ]
         
-        if not os.path.exists(service_account_path):
-            # Try a relative path as fallback (local development)
-            base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            service_account_path = os.path.join(base_path, '..', 'google_credentials', 'service_account.json')
-            if not os.path.exists(service_account_path):
-                # Another attempt at finding it
-                alt_path = 'c:\\odoo-repos\\Soufiane-Food\\google_credentials\\service_account.json'
-                if os.path.exists(alt_path):
-                    service_account_path = alt_path
-                else:
-                    msg = f"Service account file not found at {service_account_path}"
-                    self.write({
-                        'last_backup_status': 'failed',
-                        'error_message': msg
-                    })
-                    _logger.error(msg)
-                    return
+        service_account_path = False
+        for path in possible_paths:
+            if os.path.exists(path):
+                service_account_path = path
+                break
+        
+        if not service_account_path:
+            msg = f"Service account file not found. Checked: {', '.join(possible_paths)}"
+            self.write({
+                'last_backup_status': 'failed',
+                'error_message': msg
+            })
+            _logger.error(msg)
+            return
 
         try:
             _logger.info(f"Starting backup for database {db_name} to Google Drive folder {self.folder_id}")

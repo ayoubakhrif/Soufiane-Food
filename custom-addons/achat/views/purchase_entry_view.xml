@@ -319,5 +319,4 @@
             action = records.action_verify_invoice_ai()
         </field>
     </record>
-
 </odoo>

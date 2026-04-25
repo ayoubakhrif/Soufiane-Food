@@ -119,6 +119,47 @@ class WhatsAppLogisticsController(http.Controller):
             response += f"_Total : {len(entries)} dossiers sur port_"
             return {'status': 'response', 'response': response}
 
+        # C. Port Status: "port", "au port", etc.
+        if message_text.lower() in ['port', 'au port', 'dossiers port', 'dossiers au port']:
+            today = fields.Date.today()
+            # Search for dossiers that are currently 'on_port' and have arrived (ETA <= today)
+            entries = request.env['logistique.entry'].sudo().search([
+                ('port_status', '=', 'on_port'),
+                ('eta', '<=', today)
+            ], order='eta asc')
+
+            if not entries:
+                return {
+                    'status': 'response',
+                    'response': "⚓ *LOGISTIQUE - PORT*\n\n✅ Aucun dossier n'est actuellement marqué 'Sur Port' avec une arrivée confirmée."
+                }
+
+            response = "⚓ *DOSSIERS ACTUELLEMENT AU PORT*\n"
+            response += "━━━━━━━━━━━━━━━━━━━━\n\n"
+            
+            # Group by article
+            grouped = {}
+            for e in entries:
+                art = (e.achat_article_id.name or e.article_id.name or "SANS ARTICLE").strip().upper()
+                if art not in grouped: grouped[art] = []
+                grouped[art].append(e)
+            
+            total_containers = 0
+            for art, r_entries in sorted(grouped.items()):
+                art_containers = sum(e.container_count for e in r_entries)
+                total_containers += art_containers
+                response += f"📦 *{art}* ({art_containers} cont.)\n"
+                for e in r_entries:
+                    eta_val = e.eta or (e.dossier_id and e.dossier_id.eta) or False
+                    eta_str = eta_val.strftime('%d/%m') if eta_val else "??"
+                    response += f" • BL {e.bl_number or '??'} (ETA: {eta_str})\n"
+                response += "\n"
+                
+            response += f"━━━━━━━━━━━━━━━━━━━━\n"
+            response += f"🚢 *Total : {total_containers} conteneurs au port*"
+            return {'status': 'response', 'response': response}
+
+
         # 4. Search for Article (Fallback - Filter by Active Dossiers Only)
         active_entries = request.env['logistique.entry'].sudo().search([
             ('port_status', '=', 'on_port')

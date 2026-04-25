@@ -308,4 +308,16 @@
         <field name="domain">[]</field>
         <field name="context">{}</field>
     </record>
+    <!-- Server Action for Batch AI Verification -->
+    <record id="action_server_verify_invoice_ai_batch" model="ir.actions.server">
+        <field name="name">Vérifier via l'IA</field>
+        <field name="model_id" ref="logistique.model_logistique_entry"/>
+        <field name="binding_model_id" ref="logistique.model_logistique_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.action_verify_invoice_ai()
+        </field>
+    </record>
+
 </odoo>

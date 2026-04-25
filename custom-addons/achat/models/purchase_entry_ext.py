@@ -134,15 +134,7 @@ class LogisticsEntry(models.Model):
         self.write({'purchase_state': 'draft'})
 
     def action_verify_invoice_ai(self):
-        self.ensure_one()
-        invoice_doc = self.env['logistique.entry.document'].search([
-            ('entry_id', '=', self.id),
-            ('document_type', '=', 'invoice')
-        ], limit=1)
-
-        if not invoice_doc or not invoice_doc.file:
-            raise ValidationError("Aucun document de type Invoice (Commercial Invoice) n'est attaché à ce dossier.")
-
+        """Verify invoices using AI for selected dossiers."""
         api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not api_key:
             raise ValidationError("La clé API OpenAI n'est pas configurée dans les Paramètres Système sous 'whatsapp_stock.openai_key'.")
@@ -151,39 +143,52 @@ class LogisticsEntry(models.Model):
         import requests
         import json
 
-        # Le fichier est déjà en base64 dans Odoo, on le passe directement
-        pdf_b64 = invoice_doc.file.decode('utf-8') if isinstance(invoice_doc.file, bytes) else invoice_doc.file
+        for rec in self:
+            invoice_doc = rec.env['logistique.entry.document'].search([
+                ('entry_id', '=', rec.id),
+                ('document_type', '=', 'invoice')
+            ], limit=1)
 
-        data_to_verify = {
-            "contract_num": self.contract_num or "",
-            "invoice_number": self.invoice_number or "",
-            "lot": self.lot or "",
-            "weight_tonnes": self.weight or 0.0,
-            "total_cfr_usd": self.amount_total or 0.0,
-            "origin": self.origin_id.name if self.origin_id else ""
-        }
+            if not invoice_doc or not invoice_doc.file:
+                rec.message_post(body="<b>Saut de la vérification IA</b> : Aucun document de type 'Invoice' (Commercial Invoice) n'est attaché à ce dossier.")
+                continue
 
-        # Construire la liste des champs NON-vides à vérifier
-        fields_to_check = []
-        if data_to_verify["contract_num"]:
-            fields_to_check.append(f"- Contract : '{data_to_verify['contract_num']}'")
-        if data_to_verify["invoice_number"]:
-            fields_to_check.append(f"- Invoice No. : '{data_to_verify['invoice_number']}'")
-        if data_to_verify["lot"]:
-            fields_to_check.append(f"- Lot No. : '{data_to_verify['lot']}'")
-        if data_to_verify["weight_tonnes"]:
-            fields_to_check.append(f"- Poids : {data_to_verify['weight_tonnes']} tonnes (peut apparaître comme MT, T, ou en KG × 1000)")
-        if data_to_verify["total_cfr_usd"]:
-            fields_to_check.append(f"- Montant Total (CFR) : {data_to_verify['total_cfr_usd']} USD")
-        if data_to_verify["origin"]:
-            fields_to_check.append(f"- Origine : '{data_to_verify['origin']}'")
+            try:
+                # Le fichier est déjà en base64 dans Odoo, on le passe directement
+                pdf_bytes = invoice_doc.file
+                pdf_b64 = pdf_bytes.decode('utf-8') if isinstance(pdf_bytes, bytes) else pdf_bytes
 
-        if not fields_to_check:
-            raise ValidationError("Aucun champ renseigné à vérifier (contract, invoice, lot, poids, total CFR, origine). Renseignez au moins un champ.")
+                data_to_verify = {
+                    "contract_num": rec.contract_num or "",
+                    "invoice_number": rec.invoice_number or "",
+                    "lot": rec.lot or "",
+                    "weight_tonnes": rec.weight or 0.0,
+                    "total_cfr_usd": rec.amount_total or 0.0,
+                    "origin": rec.origin_id.name if rec.origin_id else ""
+                }
 
-        fields_str = "\n".join(fields_to_check)
+                # Construire la liste des champs NON-vides à vérifier
+                fields_to_check = []
+                if data_to_verify["contract_num"]:
+                    fields_to_check.append(f"- Contract : '{data_to_verify['contract_num']}'")
+                if data_to_verify["invoice_number"]:
+                    fields_to_check.append(f"- Invoice No. : '{data_to_verify['invoice_number']}'")
+                if data_to_verify["lot"]:
+                    fields_to_check.append(f"- Lot No. : '{data_to_verify['lot']}'")
+                if data_to_verify["weight_tonnes"]:
+                    fields_to_check.append(f"- Poids : {data_to_verify['weight_tonnes']} tonnes (peut apparaître comme MT, T, ou en KG × 1000)")
+                if data_to_verify["total_cfr_usd"]:
+                    fields_to_check.append(f"- Montant Total (CFR) : {data_to_verify['total_cfr_usd']} USD")
+                if data_to_verify["origin"]:
+                    fields_to_check.append(f"- Origine : '{data_to_verify['origin']}'")
 
-        prompt_text = f"""Vous êtes un agent de contrôle logistique. Lisez attentivement le document commercial joint (invoice PDF).
+                if not fields_to_check:
+                    rec.message_post(body="<b>Saut de la vérification IA</b> : Aucun champ renseigné à vérifier (contract, invoice, lot, poids, total CFR, origine).")
+                    continue
+
+                fields_str = "\n".join(fields_to_check)
+
+                prompt_text = f"""Vous êtes un agent de contrôle logistique. Lisez attentivement le document commercial joint (invoice PDF).
 
 Voici les informations saisies dans le système pour CETTE facture. Vérifiez UNIQUEMENT les champs listés ci-dessous (les autres sont vides et doivent être ignorés) :
 
@@ -215,110 +220,103 @@ OU si tout est correct :
     "reason": ""
 }}"""
 
-        # Utilisation de l'API Responses OpenAI qui supporte les PDFs nativement
-        payload = {
-            "model": "gpt-4o",
-            "input": [
-                {
-                    "role": "user",
-                    "content": [
+                # Utilisation de l'API Responses OpenAI qui supporte les PDFs nativement
+                payload = {
+                    "model": "gpt-4o",
+                    "input": [
                         {
-                            "type": "input_file",
-                            "filename": invoice_doc.file_name or "invoice.pdf",
-                            "file_data": f"data:application/pdf;base64,{pdf_b64}"
-                        },
-                        {
-                            "type": "input_text",
-                            "text": prompt_text
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "input_file",
+                                    "filename": invoice_doc.file_name or "invoice.pdf",
+                                    "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                                },
+                                {
+                                    "type": "input_text",
+                                    "text": prompt_text
+                                }
+                            ]
                         }
-                    ]
+                    ],
+                    "text": {
+                        "format": {
+                            "type": "json_object"
+                        }
+                    },
+                    "temperature": 0.0,
+                    "max_output_tokens": 800
                 }
-            ],
-            "text": {
-                "format": {
-                    "type": "json_object"
+
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
                 }
-            },
-            "temperature": 0.0,
-            "max_output_tokens": 800
-        }
 
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
+                resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
+                resp.raise_for_status()
+                ai_data = resp.json()
+                
+                raw_content = ""
+                for output_item in ai_data.get("output", []):
+                    for content_item in output_item.get("content", []):
+                        if content_item.get("type") == "output_text":
+                            raw_content = content_item.get("text", "")
+                            break
 
-        try:
-            resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
-            resp.raise_for_status()
-            ai_data = resp.json()
-            # La réponse de /v1/responses est dans output[].content[].text
-            raw_content = ""
-            for output_item in ai_data.get("output", []):
-                for content_item in output_item.get("content", []):
-                    if content_item.get("type") == "output_text":
-                        raw_content = content_item.get("text", "")
-                        break
+                if not raw_content:
+                    rec.message_post(body="<b>Erreur IA</b> : OpenAI n'a retourné aucune réponse pour ce document.")
+                    continue
 
-            if not raw_content:
-                raise ValidationError("OpenAI n'a retourné aucune réponse. Vérifiez le fichier PDF.")
+                result = json.loads(raw_content)
+                is_faux_val = result.get("is_faux", False)
+                reason = result.get("reason", "")
+                mismatches = result.get("mismatches", [])
 
-            result = json.loads(raw_content)
+                rec.sudo().write({'is_faux': is_faux_val})
 
-            is_faux_val = result.get("is_faux", False)
-            reason = result.get("reason", "")
-            mismatches = result.get("mismatches", [])
-
-            self.sudo().write({'is_faux': is_faux_val})
-
-            if is_faux_val:
-                details = Markup("")
-                if mismatches:
-                    items = Markup("").join(
-                        Markup(
-                            "<li><b>{field}</b> : "
-                            "Odoo = <code style='background:#ffeaea;padding:2px 5px;border-radius:3px;'>{odoo}</code> "
-                            "&nbsp;➡&nbsp; "
-                            "PDF = <code style='background:#fff3cd;padding:2px 5px;border-radius:3px;'>{pdf}</code></li>"
-                        ).format(
-                            field=m.get('field', ''),
-                            odoo=m.get('odoo_value', ''),
-                            pdf=m.get('pdf_value', '')
+                if is_faux_val:
+                    details = Markup("")
+                    if mismatches:
+                        items = Markup("").join(
+                            Markup(
+                                "<li><b>{field}</b> : "
+                                "Odoo = <code style='background:#ffeaea;padding:2px 5px;border-radius:3px;'>{odoo}</code> "
+                                "&nbsp;➡&nbsp; "
+                                "PDF = <code style='background:#fff3cd;padding:2px 5px;border-radius:3px;'>{pdf}</code></li>"
+                            ).format(
+                                field=m.get('field', ''),
+                                odoo=m.get('odoo_value', ''),
+                                pdf=m.get('pdf_value', '')
+                            )
+                            for m in mismatches
                         )
-                        for m in mismatches
-                    )
-                    details = Markup("<ul style='margin:8px 0 8px 16px;'>{}</ul>").format(items)
+                        details = Markup("<ul style='margin:8px 0 8px 16px;'>{}</ul>").format(items)
 
-                self.message_post(body=Markup(
-                    "<div style='border-left:4px solid #dc3545;padding:8px 12px;background:#fff5f5;border-radius:4px;'>"
-                    "<span style='color:#dc3545;font-size:15px;'>"
-                    "<i class='fa fa-exclamation-triangle'></i>&nbsp;"
-                    "<b>Alerte IA — Incompatibilité détectée</b>"
-                    "</span>"
-                    "{details}"
-                    "<p style='color:#555;margin:4px 0 0;'><i>{reason}</i></p>"
-                    "</div>"
-                ).format(details=details, reason=reason))
-            else:
-                self.message_post(body=Markup(
-                    "<div style='border-left:4px solid #28a745;padding:8px 12px;background:#f5fff8;border-radius:4px;'>"
-                    "<span style='color:#28a745;font-size:15px;'>"
-                    "<i class='fa fa-check-circle'></i>&nbsp;"
-                    "<b>IA : Document validé</b>"
-                    "</span>"
-                    "<p style='color:#555;margin:4px 0 0;'>Le document Invoice correspond parfaitement aux informations saisïes dans Odoo.</p>"
-                    "</div>"
-                ))
+                    rec.message_post(body=Markup(
+                        "<div style='border-left:4px solid #dc3545;padding:8px 12px;background:#fff5f5;border-radius:4px;'>"
+                        "<span style='color:#dc3545;font-size:15px;'>"
+                        "<i class='fa fa-exclamation-triangle'></i>&nbsp;"
+                        "<b>Alerte IA — Incompatibilité détectée</b>"
+                        "</span>"
+                        "{details}"
+                        "<p style='color:#555;margin:4px 0 0;'><i>{reason}</i></p>"
+                        "</div>"
+                    ).format(details=details, reason=reason))
+                else:
+                    rec.message_post(body=Markup(
+                        "<div style='border-left:4px solid #28a745;padding:8px 12px;background:#f5fff8;border-radius:4px;'>"
+                        "<span style='color:#28a745;font-size:15px;'>"
+                        "<i class='fa fa-check-circle'></i>&nbsp;"
+                        "<b>IA : Document validé</b>"
+                        "</span>"
+                        "<p style='color:#555;margin:4px 0 0;'>Le document Invoice correspond parfaitement aux informations saisies dans Odoo.</p>"
+                        "</div>"
+                    ))
 
-        except requests.exceptions.HTTPError as e:
-            err_body = ""
-            try:
-                err_body = e.response.json().get("error", {}).get("message", "")
-            except Exception:
-                pass
-            raise ValidationError(f"Erreur OpenAI ({e.response.status_code}) : {err_body or str(e)}")
-        except Exception as e:
-            raise ValidationError(f"Erreur lors de la communication avec OpenAI : {str(e)}")
+            except Exception as e:
+                rec.message_post(body=f"<b>Erreur IA</b> : Une erreur est survenue lors de la communication avec OpenAI : {str(e)}")
+                continue
 
     legacy_article_id = fields.Many2one('logistique.article', string='Article (Ancien)', readonly=True)
     achat_article_id = fields.Many2one('achat.article', string='Article')

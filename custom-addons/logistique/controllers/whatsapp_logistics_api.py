@@ -119,8 +119,11 @@ class WhatsAppLogisticsController(http.Controller):
             response += f"_Total : {len(entries)} dossiers sur port_"
             return {'status': 'response', 'response': response}
 
-        # C. Port Status: "port", "au port", etc.
-        if message_text.lower() in ['port', 'au port', 'dossiers port', 'dossiers au port']:
+        # C. Port Status: "port", "au port", "on port", "sur port", etc.
+        if message_text.lower() in [
+            'port', 'au port', 'on port', 'sur port',
+            'dossiers port', 'dossiers au port', 'dossiers sur port', 'dossiers on port'
+        ]:
             today = fields.Date.today()
             # Search for dossiers that are currently 'on_port' and have arrived (ETA <= today)
             entries = request.env['logistique.entry'].sudo().search([

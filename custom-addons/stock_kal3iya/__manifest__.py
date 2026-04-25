@@ -31,6 +31,7 @@ This module provides a robust stock management system based on an immutable move
         'views/stock_kal3iya_master_data_views.xml',
         'views/stock_kal3iya_transfer_views.xml',
         'views/stock_kal3iya_menus.xml',
+        'views/stock_tanger_difference_views.xml',
     ],
     'installable': True,
     'application': True,

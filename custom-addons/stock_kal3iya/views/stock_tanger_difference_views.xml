@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_tanger_difference_tree" model="ir.ui.view">
+        <field name="name">stock.tanger.difference.tree</field>
+        <field name="model">stock.tanger.difference</field>
+        <field name="arch" type="xml">
+            <tree string="Différence Tanger" create="false" edit="false" delete="false">
+                <field name="article_id"/>
+                <field name="qty_kal3iya" sum="Total Kal3iya"/>
+                <field name="qty_casa_tanger" sum="Total Casa Tanger"/>
+                <field name="qty_hanane_tanger" sum="Total Hanane Tanger"/>
+                <field name="qty_casa_total" sum="Total Casa"/>
+                <field name="difference" sum="Total Différence" decoration-danger="difference != 0" decoration-success="difference == 0"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_stock_tanger_difference" model="ir.actions.act_window">
+        <field name="name">Différence Tanger</field>
+        <field name="res_model">stock.tanger.difference</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune différence de stock Tanger trouvée.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for stock_kal3iya -->
+    <menuitem id="menu_stock_kal3iya_difference_root"
+              name="Différences"
+              parent="menu_stock_kal3iya_root"
+              sequence="65"/>
+
+    <menuitem id="menu_stock_kal3iya_tanger_difference"
+              name="Différence Tanger"
+              parent="menu_stock_kal3iya_difference_root"
+              action="action_stock_tanger_difference"
+              sequence="10"/>
+
+    <!-- Injection into casa_stock_hanane Différence menu -->
+    <menuitem id="menu_casa_hanane_tanger_difference"
+              name="Différence Tanger"
+              parent="casa_stock_hanane.menu_casa_hanane_difference_root"
+              action="action_stock_tanger_difference"
+              sequence="30"/>
+
+    <!-- Injection into casa_stock Différence menu -->
+    <menuitem id="menu_casa_stock_tanger_difference"
+              name="Différence Tanger"
+              parent="casa_stock_hanane.menu_casa_stock_difference_root_in_casa"
+              action="action_stock_tanger_difference"
+              sequence="30"/>
+
+</odoo>

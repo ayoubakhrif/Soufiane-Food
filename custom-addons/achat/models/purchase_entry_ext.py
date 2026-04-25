@@ -12,7 +12,7 @@ except ImportError:
 class LogisticsEntry(models.Model):
     _inherit = 'logistique.entry'
 
-    contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]", required=True)
+    contract_id = fields.Many2one('achat.contract', string='Contract', domain="[('state', '=', 'open')]", required=False)
     free_time_negotiated = fields.Integer(string='Negotiated Free Time')
 
     is_non_change = fields.Boolean(string='Non Changé', default=False,

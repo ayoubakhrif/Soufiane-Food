@@ -5,7 +5,7 @@ class StockTangerDifference(models.Model):
     _description = 'Différence de stock Tanger'
     _auto = False
     _log_access = False
-    _order = 'difference DESC'
+    _order = 'diff_kal_casa DESC'
 
     article_id = fields.Many2one('company.article', string='Article', readonly=True)
     qty_kal3iya = fields.Float(string='Quantité (Kal3iya)', readonly=True)

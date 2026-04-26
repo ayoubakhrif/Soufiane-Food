@@ -18,6 +18,7 @@ class AuditInvoice(models.Model):
     supplier = fields.Char(string='Fournisseur', tracking=True)
     invoice_number = fields.Char(string='N° facture', tracking=True)
     invoice_date = fields.Date(string='Date facture', tracking=True)
+    amount_untaxed = fields.Float(string='Total HT', tracking=True)
     
     # Document PDF
     invoice_pdf = fields.Binary(string='Facture PDF', attachment=True, required=True)
@@ -55,6 +56,7 @@ class AuditInvoice(models.Model):
 1. "supplier" : Le nom du fournisseur (ex: "MARGLORY", "SUTRA", etc.)
 2. "invoice_number" : Le numéro de la facture.
 3. "invoice_date" : La date de la facture au format YYYY-MM-DD.
+4. "amount_untaxed" : Le montant total hors taxes (HT) en nombre (ex: 1250.50).
 
 Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown. 
 Si une information manque, mettez null.
@@ -63,7 +65,8 @@ Exemple de réponse attendue :
 {
     "supplier": "Nom du Fournisseur",
     "invoice_number": "FA-2024-001",
-    "invoice_date": "2024-04-20"
+    "invoice_date": "2024-04-20",
+    "amount_untaxed": 1250.50
 }"""
 
         # Utilisation de l'API OpenAI (Format identique aux autres modules du repo)
@@ -125,6 +128,8 @@ Exemple de réponse attendue :
                 vals['invoice_number'] = result["invoice_number"]
             if result.get("invoice_date"):
                 vals['invoice_date'] = result["invoice_date"]
+            if result.get("amount_untaxed"):
+                vals['amount_untaxed'] = float(result["amount_untaxed"])
                 
             vals['state'] = 'extracted'
             self.write(vals)

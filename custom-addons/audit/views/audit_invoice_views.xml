@@ -10,6 +10,7 @@
                 <field name="supplier"/>
                 <field name="invoice_number"/>
                 <field name="invoice_date"/>
+                <field name="amount_untaxed" sum="Total HT"/>
                 <field name="state" widget="badge"/>
                 <field name="create_date" string="Date Création"/>
             </tree>
@@ -37,6 +38,7 @@
                             <field name="supplier" placeholder="Nom du fournisseur..."/>
                             <field name="invoice_number" placeholder="N° de facture..."/>
                             <field name="invoice_date"/>
+                            <field name="amount_untaxed"/>
                         </group>
                         <group string="Document PDF">
                             <field name="invoice_pdf" filename="invoice_filename" widget="pdf_viewer"/>

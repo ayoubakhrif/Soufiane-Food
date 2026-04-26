@@ -10,6 +10,7 @@
     'author': 'Antigravity',
     'depends': ['base', 'mail'],
     'data': [
+        'security/audit_security.xml',
         'security/ir.model.access.csv',
         'views/audit_invoice_views.xml',
         'views/audit_menu.xml',

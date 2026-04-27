@@ -26,7 +26,7 @@ class DbBackupDriveConfig(models.Model):
     # OAuth2 Fields
     client_id = fields.Char(string="Client ID")
     client_secret = fields.Char(string="Client Secret")
-    refresh_token = fields.Char(string="Refresh Token", readonly=True)
+    refresh_token = fields.Char(string="Refresh Token")
     auth_url = fields.Text(string="Authorization URL", readonly=True)
     auth_code = fields.Char(string="Authorization Code", help="Paste the code received after authorizing.")
 

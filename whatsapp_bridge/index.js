@@ -19,6 +19,7 @@ const FINANCE_GROUP_ID = "120363428965532100@g.us";
 const LOGISTICS_GROUP_ID = "120363427755410654@g.us";
 const DOUANE_GROUP_ID = "120363406635335778@g.us";
 const SORTIE_GROUP_ID = "120363424919316319@g.us";
+const CASA_CORRECTION_GROUP_ID = "120363049891261462@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -27,6 +28,7 @@ const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/financ
 const LOGISTICS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics?db=soufianefoods";
 const DOUANE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/douane?db=soufianefoods";
 const SORTIE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/sortie?db=soufianefoods";
+const CASA_CORRECTION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/casa_correction?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -115,6 +117,9 @@ async function connectToWhatsApp() {
             } else if (from === SORTIE_GROUP_ID) {
                 targetOdooUrl = SORTIE_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === CASA_CORRECTION_GROUP_ID) {
+                targetOdooUrl = CASA_CORRECTION_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -172,6 +177,7 @@ async function connectToWhatsApp() {
                 else if (from === LOGISTICS_GROUP_ID) typeStr = "LOGISTICS";
                 else if (from === DOUANE_GROUP_ID) typeStr = "DOUANE";
                 else if (from === SORTIE_GROUP_ID) typeStr = "SORTIE";
+                else if (from === CASA_CORRECTION_GROUP_ID) typeStr = "CASA_CORR";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 const response = await axios.post(targetOdooUrl, {

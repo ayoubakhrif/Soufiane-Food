@@ -17,3 +17,4 @@ from . import casa_client_alias
 from . import casa_other_sale
 from . import casa_stock_perte
 from . import casa_sortie_supp
+from . import casa_stock_chatbot

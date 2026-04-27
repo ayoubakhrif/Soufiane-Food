@@ -76,3 +76,6 @@ share/
 
 google_credentials/
 custom-addons/9al3iya/static/drive_auth/
+
+# --- Script local (peut contenir des credentials) ---
+generate_refresh_token.py

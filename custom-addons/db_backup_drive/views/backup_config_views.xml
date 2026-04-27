@@ -21,6 +21,15 @@
                                 type="object" class="btn-primary" invisible="not client_id or not client_secret"/>
                     </group>
                     
+                    <!-- Option directe : coller le refresh token généré avec le script local -->
+                    <group string="OU : Coller le Refresh Token directement" invisible="refresh_token">
+                        <field name="client_id" placeholder="Client ID" invisible="client_id"/>
+                        <field name="client_secret" password="True" placeholder="Client Secret" invisible="client_secret"/>
+                        <field name="refresh_token" placeholder="Collez le Refresh Token ici (généré via le script local)"/>
+                        <field name="folder_id"/>
+                        <field name="master_password" password="True" placeholder="Mot de passe maître Odoo"/>
+                    </group>
+
                     <group string="2. Autorisation" invisible="not auth_url or refresh_token">
                         <field name="auth_url" widget="url" text="Cliquez ici pour autoriser Odoo" readonly="1"/>
                         <field name="auth_code" placeholder="Collez le code ici après avoir autorisé"/>

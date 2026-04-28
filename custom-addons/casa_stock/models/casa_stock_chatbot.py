@@ -152,20 +152,8 @@ class CasaStockChatbot(models.AbstractModel):
             lot_matches = all_active_stocks.filtered(lambda s: self._normalize_lot(s.lot) == lot_norm)
 
         if lot_matches:
-            # Check if product name matches any of the lot matches
-            # We look for the product name in both casa.product name and article display name
-            refined_matches = lot_matches.filtered(lambda s: 
-                product_name.lower() in (s.product_id.name or '').lower() or 
-                product_name.lower() in (s.product_id.article_id.display_name or '').lower()
-            )
-            
-            if refined_matches:
-                return "Bien"
-            else:
-                # Lot found but for a different product? 
-                # Let's see what product it belongs to
-                found_prod_name = lot_matches[0].product_id.name
-                return f"{qty or ''} {product_name} lot {lot_raw} -> ⚠️ Ce lot appartient à : {found_prod_name}"
+            # User wants to ignore product name if lot is correct
+            return "Bien"
 
         # 3. Lot not found, check product existence to help user
         product = self._resolve_product(product_name)

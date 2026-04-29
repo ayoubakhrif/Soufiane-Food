@@ -40,14 +40,12 @@ class WhatsAppStockController(http.Controller):
         if not message_text:
             return {'status': 'error', 'message': 'Empty message'}
 
-        # --- NEW: Check for General Stock Report trigger (with more flexibility for typos) ---
+        # --- NEW: Check for General Stock Report trigger ---
         general_triggers = [
             'stock général', 'stock general', 'situation générale', 'situation generale', 
             'stock total', 'stok general', 'stok génial', 'stok genial', 'total stock'
         ]
         message_clean = message_text.lower().strip()
-        
-        # 1. Quick check with hardcoded list
         is_general = any(trigger in message_clean for trigger in general_triggers)
         
         # 1. First, check for General Report
@@ -67,14 +65,11 @@ class WhatsAppStockController(http.Controller):
         fast_articles_in_stock = fast_stock.mapped('product_id.article_id')
 
         if len(fast_articles_in_stock) > 1:
-            choices = [a.name for a in fast_articles_in_stock][:20]
-            choices_text = f"Plusieurs articles en stock correspondent à '{message_text}'. Lequel voulez-vous ?\n"
-            for i, v in enumerate(choices, 1):
-                choices_text += f"{i}- {v}\n"
+            choices = [a.name for a in fast_articles_in_stock]
             return {
                 'status': 'multiple_choices',
-                'message': choices_text,
-                'choices': choices
+                'message': f"Plusieurs articles en stock correspondent à '{message_text}'. Lequel voulez-vous ?",
+                'choices': choices[:20]
             }
         
         final_extracted_str = None
@@ -135,7 +130,7 @@ class WhatsAppStockController(http.Controller):
             # ONLY ONE VARIETY HAS STOCK -> GENERATE PDF
             stock_for_pdf = stock_records.filtered(lambda r: r.product_id.article_id.id == articles_in_stock[0].id)
             report_action = request.env['ir.actions.report'].sudo()
-            pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_for_pdf.ids)
+            pdf_content, _ = report_action._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_product', res_ids=stock_for_pdf.ids)
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
             return {
@@ -148,7 +143,7 @@ class WhatsAppStockController(http.Controller):
         else:
             # MORE THAN 1 VARIETY HAS STOCK => PROMPT THE USER WITH NUMBERS!
             varieties = [a.name for a in articles_in_stock]
-            choices_text = "Veuillez choisir le produit que vous voulez consulter :\n"
+            choices_text = "Plusieurs variétés correspondent à votre demande. Laquelle voulez-vous consulter ?\n\n"
             for i, v in enumerate(varieties, 1):
                 choices_text += f"{i}- {v}\n"
                 

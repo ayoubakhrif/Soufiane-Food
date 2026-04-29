@@ -125,6 +125,7 @@
                             <thead>
                                 <tr>
                                     <th>Qualibre</th>
+                                    <th>Lot</th>
                                     <th>Qté global</th>
                                     <th>Poids</th>
                                     <th>Tonnage</th>
@@ -136,6 +137,7 @@
                                 <t t-foreach="city['lines']" t-as="line">
                                     <tr>
                                         <td class="calibre-cell"><t t-esc="line['calibre']"/></td>
+                                        <td><t t-esc="line['lot']"/></td>
                                         <td class="qty-cell"><t t-esc="'{0:,.2f}'.format(line['qty'])"/></td>
                                         <td><t t-esc="'{0:,.2f}'.format(line['weight'])"/></td>
                                         <td><t t-esc="'{0:,.1f}'.format(line['tonnage'])"/></td>

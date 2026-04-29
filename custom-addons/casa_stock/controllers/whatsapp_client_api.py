@@ -58,11 +58,14 @@ class WhatsAppClientController(http.Controller):
         ])
         
         if len(fast_clients) > 1:
-            choices = [c.name for c in fast_clients]
+            choices = [c.name for c in fast_clients][:15]
+            choices_text = f"Plusieurs clients correspondent à '{message_text}'. Lequel voulez-vous ?\n"
+            for i, name in enumerate(choices, 1):
+                choices_text += f"{i}- {name}\n"
             return {
                 'status': 'multiple_choices',
-                'message': f"Plusieurs clients correspondent à '{message_text}'. Lequel voulez-vous ?",
-                'choices': choices[:15] # Limit to avoid huge messages
+                'message': choices_text,
+                'choices': choices
             }
         
         if len(fast_clients) == 1:

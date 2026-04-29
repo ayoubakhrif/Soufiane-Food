@@ -192,8 +192,8 @@ class WhatsAppStockController(http.Controller):
             "1. Si l'utilisateur demande une situation globale, le stock général ou le stock total (même avec des fautes comme 'stok genial'), réponds UNIQUEMENT 'GLOBAL_STOCK_REPORT'.\n"
             "2. Sinon, identifie le nom de l'article. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus.\n"
             "3. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact.\n"
-            "4. IMPORTANT : Si le message ne contient QUE des emojis (ex: '🚀🚀') ou ne contient QUE des caractères aléatoires sans sens (ex: 'qsdqsd', '...', '???'), réponds UNIQUEMENT 'IGNORE'.\n"
-            "5. Pour tout autre message (salutations, fautes de frappe, phrases complètes), tente d'identifier l'article ou réponds 'None' si aucun ne correspond.\n"
+            "4. IMPORTANT : Si le message ne contient QUE des symboles/caractères spéciaux sans sens (ex: '???', '...', '---') ou ne contient QUE des emojis (ex: '🚀🚀', '👍'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "5. Pour tout autre message qui ressemble à un mot, un nom ou une phrase (ex: 'Akajo', 'Salut', 'Poivree'), tente d'identifier l'article ou réponds 'None' si aucun ne correspond.\n"
             "Retourne UNIQUEMENT le résultat (ou GLOBAL_STOCK_REPORT ou IGNORE)."
         )
         data = {

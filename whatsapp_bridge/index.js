@@ -247,6 +247,9 @@ async function connectToWhatsApp() {
                 } else if (result && result.status === 'not_found') {
                     console.log(`Non trouvé : ${result.message}`);
                     await sock.sendMessage(from, { text: result.message }, { quoted: msg });
+                } else if (result && result.status === 'ignored') {
+                    // Silently ignore as requested (noise filtering)
+                    console.log(`Action : Message ignoré (bruit détecté)`);
                 } else {
                     console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
                 }

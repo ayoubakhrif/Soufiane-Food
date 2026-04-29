@@ -329,6 +329,19 @@ class StockKal3iyaChatbot(models.AbstractModel):
                 return f"{qty} {work_set[0].product_id.name} {garage_raw} lot {lot_raw} -> Disponible dans: {garages_str}"
 
         # ---------------------------------------------------------
+        # STRATÉGIE 1.5 : MATCH FLEXIBLE DU LOT PAR PRODUIT
+        # ---------------------------------------------------------
+        # Si le lot n'est pas trouvé globalement, on regarde si le lot du produit match partiellement
+        res_prod = self._resolve_product(product_name)
+        if res_prod['status'] == 'found':
+            product = res_prod['product']
+            available_stocks = Stock.search([('product_id', '=', product.id), ('quantity', '>', 0)])
+            for s in available_stocks:
+                db_lot_norm = self._normalize_lot(s.lot)
+                if db_lot_norm and (db_lot_norm in lot_norm or lot_norm in db_lot_norm):
+                    return "Bien"
+
+        # ---------------------------------------------------------
         # STRATÉGIE 2 : LOT NON TROUVÉ -> RECHERCHE PAR PRODUIT + SIMILARITÉ
         # ---------------------------------------------------------
         # On essaie de résoudre le produit (soit nom exact, soit fuzzy)

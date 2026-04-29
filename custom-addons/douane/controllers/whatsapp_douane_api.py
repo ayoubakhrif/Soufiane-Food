@@ -256,8 +256,9 @@ class WhatsAppDouaneController(http.Controller):
             "Règles :\n"
             "1. Retourne uniquement la référence brute.\n"
             "2. Ignore les caractères spéciaux et espaces lors de ton analyse mais retourne la référence telle qu'écrite.\n"
-            "3. Si rien n'est trouvé, réponds 'None'.\n"
-            "Retourne UNIQUEMENT le résultat."
+            "3. IMPORTANT : Si le message ne contient QUE des symboles/caractères spéciaux sans sens (ex: '???', '...', '---') ou ne contient QUE des emojis (ex: '🚀🚀', '👍'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "4. Pour tout autre message qui ressemble à un mot ou une référence (ex: 'Akajo', 'Salut'), tente d'identifier la référence ou réponds 'None' si aucun ne correspond.\n"
+            "Retourne UNIQUEMENT le résultat (ou IGNORE)."
         )
         data = {
             "model": "gpt-4o-mini",

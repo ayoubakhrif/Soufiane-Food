@@ -155,13 +155,17 @@ class CasaStockChatbot(models.AbstractModel):
             # User wants to ignore product name if lot is correct
             return "Bien"
 
-        # 3. Lot not found, check product existence to help user
+        # 3. Flexible Lot Match: Check if any lot of the identified product matches as substring
         product = self._resolve_product(product_name)
         if product:
-            # Product exists, show available lots for it
             available_stocks = Stock.search([('product_id', '=', product.id), ('quantity', '>', 0)])
+            for s in available_stocks:
+                db_lot_norm = self._normalize_lot(s.lot)
+                if db_lot_norm and (db_lot_norm in lot_norm or lot_norm in db_lot_norm):
+                    return "Bien"
+            
+            # Si aucun match, on liste les lots disponibles
             if available_stocks:
-                # Group by lot
                 lots = sorted(list(set(available_stocks.mapped('lot'))))
                 # Try fuzzy matching on lots
                 matches = difflib.get_close_matches(lot_raw, lots, n=1, cutoff=0.6)

@@ -111,26 +111,6 @@ class WhatsAppStockController(http.Controller):
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour : '{final_extracted_str}'."}
 
-    def _send_global_report(self):
-        """Helper to generate and send the global report."""
-        report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
-        dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
-        
-        if not dummy_record:
-            return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
-        
-        pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_general', res_ids=dummy_record.ids)
-        from odoo import fields
-        return {
-            'status': 'success',
-            'message': "Information : J'ai identifié une demande de situation globale.\nVoici l'état consolidé du stock (Quantités, Tonnages et Valeurs).",
-            'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
-            'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
-        }
-        
-        if not articles:
-            return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{final_extracted_str}'."}
-
         products = request.env['casa_hanane.product'].sudo().search([('article_id', 'in', articles.ids)])
         
         # Check stock globally for these products (Strictly positive stock)
@@ -174,6 +154,23 @@ class WhatsAppStockController(http.Controller):
                 'message': choices_text,
                 'choices': varieties
             }
+
+    def _send_global_report(self):
+        """Helper to generate and send the global report."""
+        report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
+        dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
+        
+        if not dummy_record:
+            return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
+        
+        pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_general', res_ids=dummy_record.ids)
+        from odoo import fields
+        return {
+            'status': 'success',
+            'message': "Information : J'ai identifié une demande de situation globale.\nVoici l'état consolidé du stock (Quantités, Tonnages et Valeurs).",
+            'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
+            'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
+        }
 
     def _extract_product_name(self, text, api_key, article_names_list, darija_aliases=None):
         """Use OpenAI to extract the product name from a natural language sentence."""

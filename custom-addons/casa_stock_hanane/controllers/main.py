@@ -50,77 +50,83 @@ class WhatsAppStockController(http.Controller):
         # 1. Quick check with hardcoded list
         is_general = any(trigger in message_clean for trigger in general_triggers)
         
-        # 3. Call OpenAI to extract product name (with a rule for Global Report)
-        openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
-        if not openai_key:
-            return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo'}
+        # 1. First, check for General Report
+        if is_general:
+            return self._send_global_report()
 
-        # Fetch all article names to guide the AI
-        all_articles = request.env['company.article'].sudo().search([])
-        article_names_list = list(set([a.name for a in all_articles if a.name]))
+        # 2. FAST TRACK: Search Name or Alias in Odoo directly before AI
+        fast_articles = request.env['company.article'].sudo().search([
+            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+        ])
         
-        # We call AI if it's not obviously a general trigger or if we want extra flexibility
-        all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
-        darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
-        
-        extracted_str = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
+        # Check stock for these fast matches
+        fast_stock = request.env['casa_hanane.stock.stock'].sudo().search([
+            ('product_id.article_id', 'in', fast_articles.ids),
+            ('quantity', '>', 0)
+        ])
+        fast_articles_in_stock = fast_stock.mapped('product_id.article_id')
 
-        # 2. Check if AI identified it as a global report request
-        if is_general or (extracted_str and extracted_str.upper() == 'GLOBAL_STOCK_REPORT'):
-            report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
-            dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
-            
-            if not dummy_record:
-                return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
-            
-            pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_general', res_ids=dummy_record.ids)
-            from odoo import fields
+        if len(fast_articles_in_stock) > 1:
+            choices = [a.name for a in fast_articles_in_stock]
             return {
-                'status': 'success',
-                'message': "Information : J'ai identifié une demande de situation globale.\nVoici l'état consolidé du stock (Quantités, Tonnages et Valeurs).",
-                'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
-                'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
+                'status': 'multiple_choices',
+                'message': f"Plusieurs articles en stock correspondent à '{message_text}'. Lequel voulez-vous ?",
+                'choices': choices[:20]
             }
-
-        # Step 1: Check for an exact name match (after confirming it's not a global report)
-        articles = request.env['company.article'].sudo().search([('name', '=ilike', message_text)])
         
-        final_extracted_str = message_text
-        
-        # Step 2: If no single exact match
-        if len(articles) != 1:
-            # Check for manual aliases matching the message words
-            words = [w.strip() for w in message_text.split() if len(w.strip()) > 2]
-            for word in words:
-                alias_matches = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', word)])
-                if alias_matches:
-                    articles |= alias_matches.mapped('article_id')
+        final_extracted_str = None
+        articles = request.env['company.article'].sudo().browse()
 
-            # Step 3: Use OpenAI for intelligent extraction
+        if len(fast_articles_in_stock) == 1:
+            articles = fast_articles_in_stock
+            final_extracted_str = fast_articles_in_stock.name
+        else:
+            # 3. If not found in Fast Track, call OpenAI
+            openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+            if not openai_key:
+                return {'status': 'error', 'message': 'OpenAI API key not configured in Odoo'}
+
+            all_articles = request.env['company.article'].sudo().search([])
+            article_names_list = list(set([a.name for a in all_articles if a.name]))
             all_aliases = request.env['casa_hanane.article.alias'].sudo().search([])
             darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
             
             extracted_name = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
             
             if not extracted_name or extracted_name.upper() == 'IGNORE':
-                _logger.info(f"Ignoring off-topic message from group {group_id}")
                 return {'status': 'ignored'}
+            
+            if extracted_name and extracted_name.upper() == 'GLOBAL_STOCK_REPORT':
+                return self._send_global_report()
 
-            if extracted_name and extracted_name.lower() != 'none':
-                final_extracted_str = extracted_name
-                extracted_list = [name.strip() for name in extracted_name.split(',')]
-                ai_domain = []
-                for name in extracted_list:
-                    ai_domain.append(('name', 'ilike', name))
-                    # Also lookup by alias in case AI returns an alias keyword
-                    alias_ids = request.env['casa_hanane.article.alias'].sudo().search([('name', 'ilike', name)]).mapped('article_id').ids
-                    if alias_ids:
-                        ai_domain.append(('id', 'in', alias_ids))
-                
-                if ai_domain:
-                    for i in range(len(ai_domain) - 1):
-                        ai_domain.insert(0, '|')
-                    articles |= request.env['company.article'].sudo().search(ai_domain)
+            if not extracted_name or extracted_name.lower() == 'none':
+                return {'status': 'not_found', 'message': f"Désolé, je n'ai pas pu identifier l'article dans : '{message_text}'."}
+
+            final_extracted_str = extracted_name
+            # Re-search based on AI extraction
+            articles = request.env['company.article'].sudo().search([
+                '|', ('name', 'ilike', final_extracted_str), ('alias_ids.name', 'ilike', final_extracted_str)
+            ])
+
+        if not articles:
+            return {'status': 'not_found', 'message': f"Aucun article trouvé pour : '{final_extracted_str}'."}
+
+    def _send_global_report(self):
+        """Helper to generate and send the global report."""
+        report_action = request.env.ref('casa_stock_hanane.action_report_casa_stock_general').sudo()
+        dummy_record = request.env['casa_hanane.stock.stock'].sudo().search([('quantity', '>', 0)], limit=1)
+        
+        if not dummy_record:
+            return {'status': 'not_found', 'message': "Désolé, il n'y a actuellement aucun article en stock pour générer le rapport général."}
+        
+        pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('casa_stock_hanane.action_report_casa_stock_general', res_ids=dummy_record.ids)
+        from odoo import fields
+        return {
+            'status': 'success',
+            'message': "Information : J'ai identifié une demande de situation globale.\nVoici l'état consolidé du stock (Quantités, Tonnages et Valeurs).",
+            'pdf_base64': base64.b64encode(pdf_content).decode('utf-8'),
+            'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
+        }
         
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour la demande: '{final_extracted_str}'."}

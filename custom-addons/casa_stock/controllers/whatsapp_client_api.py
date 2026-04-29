@@ -52,12 +52,22 @@ class WhatsAppClientController(http.Controller):
         # 4. Handle exact triggers or call AI to check intent
         # (We call AI below if exact triggers don't match, but we move the logic to handle both)
 
-        # 4. Handle Exact Match First (Bypass OpenAI for menu selections)
-        exact_client = request.env['casa.client'].sudo().search([('name', '=ilike', message_text)], limit=1)
+        # 4. FAST TRACK: Search Name or Alias in Odoo directly before AI
+        fast_clients = request.env['casa.client'].sudo().search([
+            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+        ])
         
-        if exact_client:
-            clients = exact_client
-            extracted_name = exact_client.name
+        if len(fast_clients) > 1:
+            choices = [c.name for c in fast_clients]
+            return {
+                'status': 'multiple_choices',
+                'message': f"Plusieurs clients correspondent à '{message_text}'. Lequel voulez-vous ?",
+                'choices': choices[:15] # Limit to avoid huge messages
+            }
+        
+        if len(fast_clients) == 1:
+            clients = fast_clients
+            extracted_name = fast_clients.name
         else:
             # 5. Call OpenAI to extract client name
             openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')

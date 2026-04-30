@@ -57,6 +57,12 @@ class WhatsAppClientController(http.Controller):
             '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
         ])
         
+        # Check for absolute exact match to break loops from bridge
+        if len(fast_clients) > 1:
+            exact_match = fast_clients.filtered(lambda c: c.name.lower() == message_text.lower())
+            if exact_match:
+                fast_clients = exact_match[0]
+                
         if len(fast_clients) > 1:
             choices = [c.name for c in fast_clients][:15]
             choices_text = f"Plusieurs clients correspondent à '{message_text}'. Lequel voulez-vous ?\n"

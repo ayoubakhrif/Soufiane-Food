@@ -57,6 +57,12 @@ class WhatsAppStockController(http.Controller):
             '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
         ])
         
+        # Check for absolute exact match to break loops from bridge
+        if len(fast_articles) > 1:
+            exact_match = fast_articles.filtered(lambda a: a.name.lower() == message_text.lower())
+            if exact_match:
+                fast_articles = exact_match[0]
+        
         # Check stock for these fast matches
         fast_stock = request.env['casa_hanane.stock.stock'].sudo().search([
             ('product_id.article_id', 'in', fast_articles.ids),
@@ -105,6 +111,10 @@ class WhatsAppStockController(http.Controller):
             articles = request.env['company.article'].sudo().search([
                 '|', ('name', 'ilike', final_extracted_str), ('alias_ids.name', 'ilike', final_extracted_str)
             ])
+            if len(articles) > 1:
+                exact_match = articles.filtered(lambda a: a.name.lower() == final_extracted_str.lower())
+                if exact_match:
+                    articles = exact_match[0]
 
         if not articles:
             return {'status': 'not_found', 'message': f"Aucun article trouvé pour : '{final_extracted_str}'."}

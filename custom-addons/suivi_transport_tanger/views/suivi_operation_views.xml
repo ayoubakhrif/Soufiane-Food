@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_tanger_operation_tree" model="ir.ui.view">
+        <field name="name">suivi.transport.tanger.operation.tree</field>
+        <field name="model">suivi.transport.tanger.operation</field>
+        <field name="arch" type="xml">
+            <tree string="Opérations Transport">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="ville"/>
+                <field name="chauffeur_id"/>
+                <field name="montant" sum="Total Montant" invisible="ville == 'casa'"/>
+                <field name="credit" sum="Total Crédit" invisible="ville == 'casa'"/>
+                <field name="payer_id"/>
+                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-success="state == 'paid'" decoration-primary="state == 'validated'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_tanger_operation_form" model="ir.ui.view">
+        <field name="name">suivi.transport.tanger.operation.form</field>
+        <field name="model">suivi.transport.tanger.operation</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Opération">
+                <header>
+                    <button name="action_pay" string="Confirmer Paiement" type="object" class="oe_highlight" invisible="state != 'initial'"/>
+                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" invisible="state != 'paid'"/>
+                    <button name="action_set_initial" string="Remettre en Initial" type="object" groups="suivi_transport_tanger.group_suivi_tanger_manager" invisible="state == 'initial'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="initial,paid,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chauffeur_id" readonly="state == 'validated'"/>
+                            <field name="date" readonly="state == 'validated'"/>
+                            <field name="ville" readonly="state == 'validated'"/>
+                        </group>
+                        <group>
+                            <field name="montant" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
+                            <field name="credit" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
+                            <field name="payer_id" options="{'no_create': True}" readonly="state == 'validated'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Détails" name="lines_details">
+                            <field name="line_ids" readonly="state == 'validated'">
+                                <tree editable="bottom">
+                                    <field name="client_id" required="1"/>
+                                    <field name="article_id" required="1"/>
+                                    <field name="lot"/>
+                                    <field name="exit_id" readonly="1" force_save="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_suivi_tanger_operation_search" model="ir.ui.view">
+        <field name="name">suivi.transport.tanger.operation.search</field>
+        <field name="model">suivi.transport.tanger.operation</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Opérations">
+                <field name="name"/>
+                <field name="chauffeur_id"/>
+                <field name="ville"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Ville" name="group_by_ville" context="{'group_by': 'ville'}"/>
+                    <filter string="Chauffeur" name="group_by_chauffeur" context="{'group_by': 'chauffeur_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_suivi_tanger_operation_pivot" model="ir.ui.view">
+        <field name="name">suivi.transport.tanger.operation.pivot</field>
+        <field name="model">suivi.transport.tanger.operation</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Opérations" display_quantity="true">
+                <field name="date" type="row" interval="month"/>
+                <field name="chauffeur_id" type="row"/>
+                <field name="ville" type="col"/>
+                <field name="montant" type="measure"/>
+                <field name="credit" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_suivi_tanger_operation" model="ir.actions.act_window">
+        <field name="name">Opérations</field>
+        <field name="res_model">suivi.transport.tanger.operation</field>
+        <field name="view_mode">tree,form,pivot</field>
+    </record>
+</odoo>

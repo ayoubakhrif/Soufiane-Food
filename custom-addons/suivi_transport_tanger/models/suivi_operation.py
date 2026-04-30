@@ -1,0 +1,69 @@
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
+
+class SuiviTransportTangerOperation(models.Model):
+    _name = 'suivi.transport.tanger.operation'
+    _description = 'Opération Suivi Transport Tanger'
+    _order = 'date desc, id desc'
+
+    name = fields.Char(string='Référence', required=True, copy=False, readonly=True, default='/')
+    ville = fields.Selection([
+        ('tanger', 'Tanger'),
+        ('casa', 'Casa'),
+        ('kenitra', 'Kenitra'),
+        ('agadir', 'Agadir'),
+        ('marrakech', 'Marrakech'),
+    ], string='Ville', required=True, default='tanger')
+    chauffeur_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur', required=True)
+    date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
+    lot = fields.Char(string='LOT')
+    montant = fields.Float(string='Montant', default=0.0)
+    credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
+    payer_id = fields.Many2one('stock.kal3iya.client', string='Qui a payé')
+    state = fields.Selection([
+        ('initial', 'Initial'),
+        ('paid', 'Payé'),
+        ('validated', 'Validé')
+    ], string='État', default='initial', tracking=True)
+
+    line_ids = fields.One2many('suivi.transport.tanger.operation.line', 'operation_id', string='Détails des opérations')
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('suivi.transport.tanger.operation') or '/'
+        return super(SuiviTransportTangerOperation, self).create(vals)
+
+    @api.constrains('montant', 'credit', 'ville')
+    def _check_montant_credit(self):
+        for rec in self:
+            if rec.ville != 'casa':
+                if rec.montant < 0 or rec.credit < 0:
+                    raise ValidationError(_("Le montant ou le crédit ne peuvent pas être négatifs."))
+
+    @api.onchange('line_ids')
+    def _onchange_line_ids_for_payer(self):
+        client_ids = self.line_ids.mapped('client_id').ids
+        return {'domain': {'payer_id': [('id', 'in', client_ids)]}}
+
+    def action_pay(self):
+        for rec in self:
+            if rec.credit > 0:
+                raise ValidationError(_("Impossible de passer à l'état 'Payé' tant que le crédit n'est pas nul."))
+            rec.state = 'paid'
+
+    def action_validate(self):
+        self.write({'state': 'validated'})
+
+    def action_set_initial(self):
+        self.write({'state': 'initial'})
+
+class SuiviTransportTangerOperationLine(models.Model):
+    _name = 'suivi.transport.tanger.operation.line'
+    _description = 'Ligne Opération Suivi Transport Tanger'
+
+    operation_id = fields.Many2one('suivi.transport.tanger.operation', string='Opération', required=True, ondelete='cascade')
+    client_id = fields.Many2one('stock.kal3iya.client', string='Client')
+    article_id = fields.Many2one('stock.kal3iya.product', string='Article')
+    lot = fields.Char(string='LOT')
+    exit_id = fields.Many2one('stock.kal3iya.exit', string='Sortie Stock Liée')

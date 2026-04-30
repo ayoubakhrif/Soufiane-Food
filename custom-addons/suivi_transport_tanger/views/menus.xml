@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_suivi_tanger_transport_root"
+              name="Suivi Transport Tanger"
+              web_icon="suivi_transport_tanger,static/description/icon.png"
+              groups="suivi_transport_tanger.group_suivi_tanger_user,suivi_transport_tanger.group_suivi_tanger_manager"
+              sequence="26"/> <!-- Positioned somewhat near transport or logistique -->
+
+    <!-- Operations Menu -->
+    <menuitem id="menu_suivi_tanger_transport_operations"
+              name="Opérations"
+              parent="menu_suivi_tanger_transport_root"
+              action="action_suivi_tanger_operation"
+              sequence="10"/>
+
+    <!-- Mirror Menu in Stock Casa -->
+    <menuitem id="menu_casa_stock_suivi_tanger_transport"
+              name="Suivi Transport Tanger"
+              parent="casa_stock.menu_casa_stock_root"
+              action="action_suivi_tanger_operation"
+              sequence="49"/>
+</odoo>

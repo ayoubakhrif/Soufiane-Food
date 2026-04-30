@@ -141,6 +141,27 @@ class StockKal3iyaExit(models.Model):
                 'move_id': move.id
             })
 
+            if rec.driver_id:
+                suivi_op = self.env['suivi.transport.tanger.operation'].search([
+                    ('date', '=', rec.date),
+                    ('chauffeur_id', '=', rec.driver_id.id)
+                ], limit=1)
+                
+                if not suivi_op:
+                    suivi_op = self.env['suivi.transport.tanger.operation'].create({
+                        'date': rec.date,
+                        'chauffeur_id': rec.driver_id.id,
+                        'ville': 'tanger',
+                    })
+                
+                self.env['suivi.transport.tanger.operation.line'].create({
+                    'operation_id': suivi_op.id,
+                    'client_id': rec.client_id.id,
+                    'article_id': rec.product_id.id,
+                    'lot': rec.lot,
+                    'exit_id': rec.id,
+                })
+
     def action_cancel(self):
         for rec in self:
             if rec.state != 'done':

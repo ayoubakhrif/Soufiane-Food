@@ -34,6 +34,10 @@ class AchatDocumentFollowup(models.Model):
         ('other', 'Autre'),
     ], string='Document avec problème', required=True, tracking=True)
 
+    version = fields.Char(string='Version', tracking=True)
+    document_pdf = fields.Binary(string='Document PDF', tracking=True)
+    document_pdf_name = fields.Char(string='Nom du Document PDF')
+
     comment = fields.Text(string='Commentaire / Problème', required=True, tracking=True)
 
     # 4. Workflow State

@@ -68,6 +68,9 @@
                     </group>
                     <group string="Document Details">
                         <field name="document_type" readonly="state != 'initial'"/>
+                        <field name="version" readonly="state != 'initial'"/>
+                        <field name="document_pdf" filename="document_pdf_name" widget="pdf_viewer" readonly="state != 'initial'"/>
+                        <field name="document_pdf_name" invisible="1"/>
                         <field name="comment" readonly="state == 'confirmed'"/>
                     </group>
                 </sheet>

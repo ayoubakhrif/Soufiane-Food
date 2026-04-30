@@ -5,6 +5,10 @@ class StockKal3iyaDriver(models.Model):
     _description = 'Chauffeurs Stock Kal3iya'
 
     name = fields.Char(string='Nom', required=True)
+    type_chauffeur = fields.Selection([
+        ('chair', 'Chair'),
+        ('soufiane', 'Soufiane')
+    ], string='Type Chauffeur')
     employee_id = fields.Many2one(
         'core.employee', 
         string='Employé', 

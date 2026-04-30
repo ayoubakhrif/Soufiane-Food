@@ -141,7 +141,7 @@ class StockKal3iyaExit(models.Model):
                 'move_id': move.id
             })
 
-            if rec.driver_id:
+            if rec.driver_id and rec.driver_id.type_chauffeur == 'chair':
                 suivi_op = self.env['suivi.transport.tanger.operation'].search([
                     ('date', '=', rec.date),
                     ('chauffeur_id', '=', rec.driver_id.id)

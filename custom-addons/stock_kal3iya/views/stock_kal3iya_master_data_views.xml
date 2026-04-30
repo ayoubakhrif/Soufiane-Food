@@ -72,6 +72,7 @@
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="name"/>
+                <field name="type_chauffeur"/>
                 <field name="employee_id"/>
             </tree>
         </field>
@@ -86,6 +87,7 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="type_chauffeur"/>
                             <field name="employee_id"/>
                         </group>
                     </group>

@@ -71,11 +71,14 @@ class WhatsAppStockController(http.Controller):
         fast_articles_in_stock = fast_stock.mapped('product_id.article_id')
 
         if len(fast_articles_in_stock) > 1:
-            choices = [a.name for a in fast_articles_in_stock]
+            choices = [a.name for a in fast_articles_in_stock][:20]
+            choices_text = f"Plusieurs articles en stock correspondent à '{message_text}'. Lequel voulez-vous ?\n"
+            for i, v in enumerate(choices, 1):
+                choices_text += f"{i}- {v}\n"
             return {
                 'status': 'multiple_choices',
-                'message': f"Plusieurs articles en stock correspondent à '{message_text}'. Lequel voulez-vous ?",
-                'choices': choices[:20]
+                'message': choices_text,
+                'choices': choices
             }
         
         final_extracted_str = None

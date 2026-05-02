@@ -8,7 +8,7 @@
         It provides a daily stock snapshot based on FIFO rules.
     """,
     'author': 'Ayoub Akhrif',
-    'depends': ['stock_kal3iya'],
+    'depends': ['stock_kal3iya', 'suivi_personnel'],
     'data': [
         'security/ir.model.access.csv',
         'views/mobile_stock_snapshot_views.xml',

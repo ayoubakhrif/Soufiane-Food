@@ -117,16 +117,26 @@ class SuiviMonthReport(models.Model):
         self.write({'state': 'draft'})
 
     @api.model
-    def get_mobile_dashboard(self):
-        """ Returns summary stats for the mobile app via RPC """
+    def get_mobile_dashboard(self, year=None, month=None):
+        """ Returns summary stats for the mobile app via RPC with optional period filtering """
         today = fields.Date.today()
-        period = self.env['suivi.period'].search([
-            ('date_start', '<=', today),
-            ('date_end', '>=', today)
-        ], limit=1)
+        
+        if year and month:
+            # Format period name like YYYY-MM
+            period_name = f"{year}-{str(month).zfill(2)}"
+            period = self.env['suivi.period'].search([('name', '=', period_name)], limit=1)
+        else:
+            # Default to current period
+            period = self.env['suivi.period'].search([
+                ('date_start', '<=', today),
+                ('date_end', '>=', today)
+            ], limit=1)
 
         if not period:
-            return {'status': 'error', 'message': 'Aucune période budgétaire trouvée.'}
+            return {
+                'status': 'error', 
+                'message': f"Aucune période budgétaire trouvée pour {year}-{month}" if year else "Aucune période trouvée pour aujourd'hui."
+            }
 
         report = self.search([('period_id', '=', period.id)], limit=1)
         if not report:

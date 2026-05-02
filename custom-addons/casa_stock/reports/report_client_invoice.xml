@@ -133,7 +133,14 @@
                                 <t t-foreach="week_data['sorties']" t-as="sortie">
                                     <tr>
                                         <td><t t-esc="sortie.date"/></td>
-                                        <td><t t-esc="sortie.product_id.name"/></td>
+                                        <td>
+                                             <t t-esc="sortie.product_id.name"/>
+                                             <t t-if="sortie._name == 'casa.other.sale'">
+                                                 <span style="font-size: 10px; color: #6b7280; margin-left: 5px;">
+                                                     (<t t-esc="sortie.de_qui or 'Autre'"/>)
+                                                 </span>
+                                             </t>
+                                         </td>
                                         <td><t t-esc="sortie.qty"/></td>
                                         <td><t t-esc="sortie.tonnage"/></td>
                                         <td><t t-esc="wizard.format_amount(sortie.price_sale)"/> Dh</td>

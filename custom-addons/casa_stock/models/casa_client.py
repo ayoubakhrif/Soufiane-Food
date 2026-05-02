@@ -622,6 +622,10 @@ class CasaClient(models.Model):
         for s in self.exit_ids:
             if s.week: weeks.add(s.week)
         
+        # Autres Ventes
+        for s in self.other_sale_ids:
+            if s.date: weeks.add(date_to_week(s.date))
+        
         # Avances
         for a in self.advance_ids:
             if a.date: weeks.add(date_to_week(a.date))
@@ -647,7 +651,16 @@ class CasaClient(models.Model):
         self.ensure_one()
 
         # 1️⃣ Filtrer sorties de la semaine
-        sorties = self.exit_ids.filtered(lambda s: s.week == week and s.state == 'done')
+        sorties_base = self.exit_ids.filtered(lambda s: s.week == week and s.state == 'done')
+        
+        # --- NEW: Include Other Sales ---
+        others = self.other_sale_ids.filtered(
+            lambda s: s.date and s.date.strftime("%Y-W%W") == week and s.state == 'done'
+        )
+        
+        # Merge and Sort
+        sorties = sorted(list(sorties_base) + list(others), key=lambda r: r.date if r.date else fields.Date.today())
+        
         total_sorties = sum((s.mt_vente or 0.0) for s in sorties)
         total_discounts = sum((s.discount_amount or 0.0) for s in sorties)
         total_net_sorties = total_sorties - total_discounts

@@ -95,3 +95,48 @@ class SuiviConfig(models.Model):
             'view_mode': 'form',
             'target': 'inline',
         }
+
+    @api.model
+    def create_mobile_transaction(self, vals):
+        """ Creates a transaction from mobile app via RPC """
+        trans_type = vals.get('type')
+        if trans_type == 'expense':
+            return self.env['suivi.expense.daily'].create({
+                'amount': vals.get('amount'),
+                'date': vals.get('date', fields.Date.today()),
+                'category_id': vals.get('category_id'),
+                'description': vals.get('description'),
+            }).id
+        elif trans_type == 'income':
+            return self.env['suivi.income.daily'].create({
+                'amount': vals.get('amount'),
+                'date': vals.get('date', fields.Date.today()),
+                'description': vals.get('description'),
+            }).id
+        return False
+
+    @api.model
+    def get_recent_transactions(self, limit=10):
+        """ Returns last N transactions for mobile app via RPC """
+        expenses = self.env['suivi.expense.daily'].search([], limit=limit, order='date desc, id desc')
+        incomes = self.env['suivi.income.daily'].search([], limit=limit, order='date desc, id desc')
+        
+        combined = []
+        for exp in expenses:
+            combined.append({
+                'type': 'expense',
+                'date': exp.date,
+                'amount': exp.amount,
+                'category': exp.category_id.name,
+                'description': exp.description or '',
+            })
+        for inc in incomes:
+            combined.append({
+                'type': 'income',
+                'date': inc.date,
+                'amount': inc.amount,
+                'category': 'Revenu',
+                'description': inc.description or '',
+            })
+        combined.sort(key=lambda x: str(x['date']), reverse=True)
+        return combined[:limit]

@@ -88,3 +88,9 @@ class ExpenseCategory(models.Model):
         month_end = month_start + relativedelta(months=1) - timedelta(days=1)
 
         return month_start, month_end, today
+
+    @api.model
+    def get_mobile_categories(self):
+        """ Returns list of categories for the mobile app via RPC """
+        categories = self.search([('active', '=', True)])
+        return [{'id': cat.id, 'name': cat.name} for cat in categories]

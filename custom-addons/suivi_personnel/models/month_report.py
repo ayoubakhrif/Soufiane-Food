@@ -116,6 +116,42 @@ class SuiviMonthReport(models.Model):
     def action_draft(self):
         self.write({'state': 'draft'})
 
+    @api.model
+    def get_mobile_dashboard(self):
+        """ Returns summary stats for the mobile app via RPC """
+        today = fields.Date.today()
+        period = self.env['suivi.period'].search([
+            ('date_start', '<=', today),
+            ('date_end', '>=', today)
+        ], limit=1)
+
+        if not period:
+            return {'status': 'error', 'message': 'Aucune période budgétaire trouvée.'}
+
+        report = self.search([('period_id', '=', period.id)], limit=1)
+        if not report:
+            report = self.create({'period_id': period.id})
+        
+        report.action_compute()
+
+        categories_data = []
+        for line in report.line_ids:
+            categories_data.append({
+                'id': line.category_id.id,
+                'name': line.category_id.name,
+                'limit': line.limit,
+                'spent': line.spent,
+                'remaining': line.remaining,
+            })
+
+        return {
+            'period_name': period.name,
+            'income_total': report.income_total,
+            'expense_total': report.expense_total,
+            'balance': report.balance,
+            'categories': categories_data
+        }
+
 
 class SuiviMonthReportLine(models.Model):
     _name = 'suivi.month.report.line'

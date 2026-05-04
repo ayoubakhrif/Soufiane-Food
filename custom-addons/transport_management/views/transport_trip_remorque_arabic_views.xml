@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_transport_trip_remorque_arab_form" model="ir.ui.view">
+        <field name="name">transport.trip.remorque.arab.form</field>
+        <field name="model">transport.trip.remorque.arab</field>
+        <field name="arch" type="xml">
+            <form string="رحلة نقل مقطورة">
+
+                <!-- ================= HEADER ================= -->
+                <header>
+                    <button name="action_confirm_paid"
+                            string="دفع"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="is_paid"/>
+
+                    <button name="action_set_unpaid"
+                            string="غير مدفوع"
+                            type="object"
+                            invisible="not is_paid"/>
+
+                    <field name="is_paid" widget="boolean_button"
+                        options="{'terminology': 'paid'}"
+                        invisible="1"/>
+                </header>
+
+                <sheet>
+
+                    <!-- ================= TITLE ================= -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="date" class="oe_inline"/>
+                        </h1>
+                    </div>
+
+                    <!-- ================= GENERAL INFO ================= -->
+                    <group string="معلومات الرحلة">
+                        <group>
+                            <field name="driver_remorque_id"/>
+                            <field name="client_id"/>
+                            <field name="going_price"/>
+                        </group>
+                        <group>
+                            <field name="destination"/>
+                            <field name="returning_price"/>
+                        </group>
+                    </group>
+
+                    <!-- ================= CHARGES ================= -->
+                    <group string="المصاريف">
+                        <group>
+                            <field name="charge_fuel"/>
+                            <field name="charge_driver"/>
+                            <field name="charge_adblue"/>
+                            <field name="charge_mixed"/>
+                            <field name="note" invisible="charge_mixed == 0" required="charge_mixed &gt; 0"/>
+                        </group>
+                    </group>
+
+                    <!-- ================= TOTAL ================= -->
+                    <group string="الملخص">
+                        <group>
+                            <field name="total_amount"
+                                readonly="1"
+                                class="oe_inline"
+                                widget="monetary"/>
+                            <field name="total_price"/>
+                            <field name="profit"/>
+                        </group>
+                    </group>
+
+                    <!-- ================= COMMENTS ================= -->
+                    <group string="تعليق">
+                        <field name="note" placeholder="تحديد تفاصيل المصاريف المتنوعة"/>
+                    </group>
+
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+
+
+    <!-- Tree View -->
+    <record id="view_transport_trip_remorque_arab_tree" model="ir.ui.view">
+        <field name="name">transport.trip.remorque.arab.tree</field>
+        <field name="model">transport.trip.remorque.arab</field>
+        <field name="arch" type="xml">
+            <tree string="رحلات النقل مقطورة" decoration-success="is_paid" decoration-info="is_checked">
+                <field name="is_checked" widget="boolean_toggle"/>
+                <field name="date"/>
+                <field name="driver_remorque_id"/>
+                <field name="client_id"/>
+                <field name="destination"/>
+                <field name="going_price"/>
+                <field name="returning_price"/>
+                <field name="total_price"/>
+                <field name="charge_fuel"/>
+                <field name="charge_driver"/>
+                <field name="charge_adblue"/>
+                <field name="charge_mixed"/>
+                <field name="total_amount" sum="إجمالي المصاريف"/>
+                <field name="profit" sum="الربح"/>
+                <field name="create_date" string="تاريخ الإنشاء" optional="show"/>
+                <field name="is_paid" widget="boolean_toggle" decoration-success="is_paid" decoration-danger="not is_paid"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_transport_trip_remorque_arab_search" model="ir.ui.view">
+        <field name="name">transport.trip.remorque.arab.search</field>
+        <field name="model">transport.trip.remorque.arab</field>
+        <field name="arch" type="xml">
+            <search string="البحث في رحلات النقل مقطورة">
+                <field name="driver_remorque_id"/>
+                <field name="client_id"/>
+                <field name="destination"/>
+                <field name="date"/>
+                
+                <filter string="مدفوع" name="paid" domain="[('is_paid', '=', True)]"/>
+                <filter string="غير مدفوع" name="unpaid" domain="[('is_paid', '=', False)]"/>
+                <separator/>
+                <filter string="اليوم" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="هذا الشهر" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+                <group expand="0" string="تجميع حسب">
+                    <filter string="السائق" name="group_driver" domain="[]" context="{'group_by': 'driver_remorque_id'}"/>
+                    <filter string="الزبون" name="group_client" domain="[]" context="{'group_by': 'client_id'}"/>
+                    <filter string="الوجهة" name="group_dest" domain="[]" context="{'group_by': 'destination'}"/>
+                    <filter string="التاريخ" name="group_date" domain="[]" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_transport_trip_remorque_arab_pivot" model="ir.ui.view">
+        <field name="name">transport.trip.remorque.arab.pivot</field>
+        <field name="model">transport.trip.remorque.arab</field>
+        <field name="arch" type="xml">
+            <pivot string="تحليل النقل مقطورة">
+                <field name="date" type="row" interval="day"/>
+                <field name="client_id" type="row"/>
+                <field name="total_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_transport_trip_remorque_arab_graph" model="ir.ui.view">
+        <field name="name">transport.trip.remorque.arab.graph</field>
+        <field name="model">transport.trip.remorque.arab</field>
+        <field name="arch" type="xml">
+            <graph string="تحليل النقل مقطورة" type="bar">
+                <field name="date" type="row" interval="day"/>
+                <field name="total_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_transport_trip_remorque_arab" model="ir.actions.act_window">
+        <field name="name">رحلات النقل مقطورة (عربي)</field>
+        <field name="res_model">transport.trip.remorque.arab</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                أنشئ رحلة نقل مقطورة جديدة!
+            </p>
+        </field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_transport_trip_remorque_arab" name="رحلات المقطورة (عربي)" parent="menu_transport_operations" action="action_transport_trip_remorque_arab" sequence="3"/>
+
+</odoo>

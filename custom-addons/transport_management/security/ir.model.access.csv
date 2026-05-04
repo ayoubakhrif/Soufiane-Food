@@ -25,3 +25,6 @@ access_transport_result_line_user,access.transport.result.line.user,model_transp
 access_transport_trip_remorque_viewer,transport.trip.remorque.viewer,model_transport_trip_remorque,group_transport_viewer,1,0,0,0
 access_transport_trip_remorque_user,transport.trip.remorque.user,model_transport_trip_remorque,group_transport_user,1,1,1,0
 access_transport_trip_remorque,transport.trip.remorque,model_transport_trip_remorque,base.group_user,1,1,1,1
+access_transport_trip_remorque_arab_viewer,transport.trip.remorque.arab.viewer,model_transport_trip_remorque_arab,group_transport_viewer,1,0,0,0
+access_transport_trip_remorque_arab_user,transport.trip.remorque.arab.user,model_transport_trip_remorque_arab,group_transport_user,1,1,1,0
+access_transport_trip_remorque_arab,transport.trip.remorque.arab,model_transport_trip_remorque_arab,base.group_user,1,1,1,1

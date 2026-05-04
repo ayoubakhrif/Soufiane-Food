@@ -89,9 +89,50 @@ class Cal3iyaClient(models.Model):
             'non_encaisse': non_encaisse_chqs
         }
 
-    def get_non_encaisse_count(self):
+    def get_detailed_cheques(self):
+        """Returns detailed information for each physical cheque for the report."""
         self.ensure_one()
-        return len(self.physical_chq_ids.filtered(lambda c: not c.date_encaissement))
+        detailed_chqs = []
+        facture_labels = {'m': 'M', 'bureau': 'Bureau', 'fact': 'F/', 'annule': 'Annulé'}
+        
+        for chq in self.physical_chq_ids:
+            # Aggregate data from splits
+            factures = []
+            persons = []
+            types = []
+            
+            for dc in chq.datacheque_ids:
+                # Facture
+                if dc.facture == 'fact':
+                    factures.append(dc.serie or 'F/')
+                else:
+                    factures.append(facture_labels.get(dc.facture, dc.facture or ''))
+                
+                # Person
+                if dc.perso_id and dc.perso_id.name not in persons:
+                    persons.append(dc.perso_id.name)
+                
+                # Type
+                if dc.type:
+                    type_label = dict(dc._fields['type'].selection).get(dc.type, dc.type)
+                    if type_label not in types:
+                        types.append(type_label)
+
+            detailed_chqs.append({
+                'name': chq.name,
+                'ste': chq.ste_id.name if chq.ste_id else '',
+                'date_emission': chq.date_emission,
+                'date_echeance': chq.date_echeance,
+                'date_encaissement': chq.date_encaissement,
+                'amount': chq.amount_total,
+                'status': 'Encaissé' if chq.date_encaissement else 'Non encaissé',
+                'factures': ', '.join(filter(None, factures)),
+                'persons': ', '.join(filter(None, persons)),
+                'types': ', '.join(filter(None, types)),
+            })
+        
+        # Sort by date echeance
+        return sorted(detailed_chqs, key=lambda x: (x['date_echeance'] or fields.Date.today()))
 
     def action_export_excel(self):
         self.ensure_one()
@@ -109,39 +150,45 @@ class Cal3iyaClient(models.Model):
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
 
         # Styles
-        title_style = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center'})
+        title_style = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter'})
         section_style = workbook.add_format({'bold': True, 'font_size': 12, 'bg_color': '#f2f2f2', 'border': 1})
-        header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2'})
-        cell_style = workbook.add_format({'border': 1})
-        money_style = workbook.add_format({'border': 1, 'num_format': '#,##0.00'})
-        date_style = workbook.add_format({'border': 1, 'num_format': 'dd/mm/yyyy'})
+        header_style = workbook.add_format({'bold': True, 'border': 1, 'align': 'center', 'bg_color': '#f2f2f2', 'valign': 'vcenter'})
+        cell_style = workbook.add_format({'border': 1, 'valign': 'top'})
+        money_style = workbook.add_format({'border': 1, 'num_format': '#,##0.00', 'valign': 'top'})
+        date_style = workbook.add_format({'border': 1, 'num_format': 'dd/mm/yyyy', 'valign': 'top'})
+        wrap_style = workbook.add_format({'border': 1, 'text_wrap': True, 'valign': 'top'})
 
         sheet = workbook.add_worksheet("Détails Bénéficiaire")
         
-        # Colonnes
-        sheet.set_column(0, 0, 18)  # N° Chèque
-        sheet.set_column(1, 1, 25)  # Société
-        sheet.set_column(2, 2, 18)  # Date d'émission
-        sheet.set_column(3, 3, 18)  # Date d'échéance
-        sheet.set_column(4, 4, 18)  # Date d'encaissement
-        sheet.set_column(5, 5, 25)  # Facture
-        sheet.set_column(6, 6, 18)  # Crédit
-        sheet.set_column(7, 7, 18)  # Débit
+        # Colonnes (13 colonnes total: 0 à 12)
+        sheet.set_column(0, 0, 15)  # N° Chèque
+        sheet.set_column(1, 1, 20)  # Société
+        sheet.set_column(2, 2, 15)  # Date d'émission
+        sheet.set_column(3, 3, 15)  # Date d'échéance
+        sheet.set_column(4, 4, 15)  # Date d'encaissement
+        sheet.set_column(5, 5, 20)  # Facture
+        sheet.set_column(6, 6, 20)  # Personne
+        sheet.set_column(7, 7, 15)  # Type
+        sheet.set_column(8, 8, 12)  # Journal
+        sheet.set_column(9, 9, 15)  # BL
+        sheet.set_column(10, 10, 12) # État
+        sheet.set_column(11, 11, 15) # Crédit
+        sheet.set_column(12, 12, 15) # Débit
 
         # Titre Principal
-        sheet.merge_range('A1:G1', f"Situation du Bénéficiaire : {self.name}", title_style)
+        sheet.merge_range('A1:M1', f"Situation du Bénéficiaire : {self.name}", title_style)
 
         # Date de relevé à droite
         from odoo import fields as odoo_fields
-        sheet.write('F4', 'Date', header_style)
-        sheet.write('G4', odoo_fields.Date.today().strftime('%d/%m/%Y'), cell_style)
+        sheet.write('L4', 'Date', header_style)
+        sheet.write('M4', odoo_fields.Date.today().strftime('%d/%m/%Y'), cell_style)
 
         row = 2
 
         # -------------------------
         # Bloc Résumé
         # -------------------------
-        sheet.merge_range(row, 0, row, 6, "Informations Générales", section_style)
+        sheet.merge_range(row, 0, row, 12, "Informations Générales", section_style)
         row += 1
 
         summary = [
@@ -165,19 +212,18 @@ class Cal3iyaClient(models.Model):
         # -------------------------
         # Bloc Liste des Chèques
         # -------------------------
-        sheet.merge_range(row, 0, row, 7, "Chèques Physiques", section_style)
+        sheet.merge_range(row, 0, row, 12, "Détails des Chèques Physiques", section_style)
         row += 1
-
-        wrap_style = workbook.add_format({'border': 1, 'text_wrap': True, 'valign': 'top'})
 
         headers = [
             "N° Chèque", "Société", "Date d'émission", "Date d'échéance",
-            "Date d'encaissement", "Facture", "Crédit", "Débit"
+            "Date d'encaissement", "Facture", "Personne", "Type", 
+            "Journal", "BL", "État", "Crédit", "Débit"
         ]
         sheet.write_row(row, 0, headers, header_style)
         row += 1
 
-        facture_labels = {'m': 'M', 'bureau': 'Bureau', 'annule': 'Annulé'}
+        facture_labels = {'m': 'M', 'bureau': 'Bureau', 'fact': 'F/', 'annule': 'Annulé'}
 
         for chq in self.physical_chq_ids:
             # Numéro
@@ -198,18 +244,54 @@ class Cal3iyaClient(models.Model):
             if dt_enc: sheet.write_datetime(row, 4, dt_enc, date_style)
             else: sheet.write(row, 4, "", cell_style)
 
-            # Factures (toutes les lignes datacheque)
-            facture_lines = []
+            # Aggregated fields from splits
+            fact_list = []
+            perso_list = []
+            type_list = []
+            journal_list = []
+            bl_list = []
+            state_list = []
+
             for dc in chq.datacheque_ids:
+                # Facture
                 if dc.facture == 'fact':
-                    facture_lines.append(dc.serie or 'F/')
+                    fact_list.append(dc.serie or 'F/')
                 else:
-                    facture_lines.append(facture_labels.get(dc.facture, dc.facture or ''))
-            sheet.write(row, 5, '\n'.join(facture_lines), wrap_style)
+                    fact_list.append(facture_labels.get(dc.facture, dc.facture or ''))
+                
+                # Personne
+                if dc.perso_id and dc.perso_id.name not in perso_list:
+                    perso_list.append(dc.perso_id.name)
+                
+                # Type
+                if dc.type:
+                    t_label = dict(dc._fields['type'].selection).get(dc.type, dc.type)
+                    if t_label not in type_list:
+                        type_list.append(t_label)
+                
+                # Journal
+                if str(dc.journal) not in journal_list:
+                    journal_list.append(str(dc.journal))
+                
+                # BL
+                if dc.bl and dc.bl not in bl_list:
+                    bl_list.append(dc.bl)
+                
+                # State
+                s_label = dict(dc._fields['state'].selection).get(dc.state, dc.state)
+                if s_label not in state_list:
+                    state_list.append(s_label)
+
+            sheet.write(row, 5, '\n'.join(filter(None, fact_list)), wrap_style)
+            sheet.write(row, 6, '\n'.join(filter(None, perso_list)), wrap_style)
+            sheet.write(row, 7, '\n'.join(filter(None, type_list)), wrap_style)
+            sheet.write(row, 8, '\n'.join(filter(None, journal_list)), wrap_style)
+            sheet.write(row, 9, '\n'.join(filter(None, bl_list)), wrap_style)
+            sheet.write(row, 10, '\n'.join(filter(None, state_list)), wrap_style)
 
             # Montants
-            sheet.write_number(row, 6, float(chq.credit or 0.0), money_style)
-            sheet.write_number(row, 7, float(chq.debit or 0.0), money_style)
+            sheet.write_number(row, 11, float(chq.credit or 0.0), money_style)
+            sheet.write_number(row, 12, float(chq.debit or 0.0), money_style)
 
             row += 1
 
@@ -235,4 +317,4 @@ class Cal3iyaClient(models.Model):
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'self',
-        }
+        }

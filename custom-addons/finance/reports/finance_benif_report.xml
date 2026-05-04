@@ -121,6 +121,55 @@
                             </tbody>
                         </table>
 
+                        <!-- Detailed Cheques Section -->
+                        <div class="section-header" style="page-break-before: always;">
+                            DÉTAIL DES CHÈQUES
+                        </div>
+                        
+                        <t t-set="detailed_chqs" t-value="o.get_detailed_cheques()"/>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>N° CHQ</th>
+                                    <th>Société</th>
+                                    <th>Échéance</th>
+                                    <th>Montant</th>
+                                    <th>Détails (Fact/Pers/Type)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="detailed_chqs" t-as="chq">
+                                    <tr>
+                                        <td style="font-weight: bold;"><t t-esc="chq['name']"/></td>
+                                        <td style="text-align: left;"><t t-esc="chq['ste']"/></td>
+                                        <td>
+                                            <t t-if="chq['date_echeance']">
+                                                <t t-esc="chq['date_echeance'].strftime('%d/%m/%Y')"/>
+                                            </t>
+                                        </td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(chq['amount']).replace(',', ' ')"/> DH</td>
+                                        <td style="text-align: left; font-size: 10px;">
+                                            <t t-if="chq['factures']"><b>F:</b> <t t-esc="chq['factures']"/><br/></t>
+                                            <t t-if="chq['persons']"><b>P:</b> <t t-esc="chq['persons']"/><br/></t>
+                                            <t t-if="chq['types']"><b>T:</b> <t t-esc="chq['types']"/></t>
+                                        </td>
+                                        <td>
+                                            <t t-if="chq['status'] == 'Encaissé'">
+                                                <span style="color: green; font-weight: bold;">Encaissé</span>
+                                                <t t-if="chq['date_encaissement']">
+                                                    <br/><span style="font-size: 10px;"><t t-esc="chq['date_encaissement'].strftime('%d/%m/%y')"/></span>
+                                                </t>
+                                            </t>
+                                            <t t-else="">
+                                                <span style="color: orange;">En cours</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
 <div class="footer">
                             Généré par Gestia ERP - <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%H:%M:%S')"/>
                         </div>

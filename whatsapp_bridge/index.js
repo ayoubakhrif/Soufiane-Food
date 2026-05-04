@@ -282,15 +282,17 @@ app.post('/api/send', async (req, res) => {
     }
 
     if (!sock) {
+        console.log(`[BOT] Tentative d'envoi mais socket non initialisé.`);
         return res.status(503).json({ status: 'error', message: 'WhatsApp socket not initialized' });
     }
 
     try {
+        console.log(`[BOT] Reçu demande d'envoi pour ${group_id}...`);
         await sock.sendMessage(group_id, { text });
-        console.log(`[BOT] Message envoyé à ${group_id} : "${text}"`);
+        console.log(`[BOT] Message envoyé avec succès à ${group_id}`);
         res.json({ status: 'success' });
     } catch (err) {
-        console.error(`[BOT] Erreur envoi message :`, err);
+        console.error(`[BOT] ÉCHEC envoi message :`, err.message);
         res.status(500).json({ status: 'error', message: err.message });
     }
 });

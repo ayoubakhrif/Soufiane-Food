@@ -90,12 +90,25 @@ class AchatArticlePrice(models.Model):
         # If price changed, send notification
         if old_price != new_price:
             try:
-                msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n\n"
+                # Determine trend
+                if old_price == 0:
+                    trend_msg = "🆕 *NOUVEAU PRIX*"
+                    icon = "⭐"
+                elif new_price > old_price:
+                    trend_msg = "🔺 *AUGMENTATION*"
+                    icon = "📈"
+                else:
+                    trend_msg = "🔻 *DIMINUTION*"
+                    icon = "📉"
+
+                msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
+                msg += f"------------------------------------\n"
                 msg += f"📦 *Article:* {record.article_id.name}\n"
-                msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n"
-                msg += f"📉 *Ancien Prix:* {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
-                msg += f"📈 *Nouveau Prix:* {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
-                msg += f"👤 *Saisi par:* {self.env.user.name}"
+                msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n\n"
+                msg += f"{icon} {trend_msg}\n"
+                msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                msg += f"👤 Saisi par: {self.env.user.name}"
 
                 payload = {
                     "group_id": "120363428923348892@g.us",

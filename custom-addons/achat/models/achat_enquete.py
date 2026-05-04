@@ -41,7 +41,7 @@ class AchatArticlePrice(models.Model):
         'res.currency',
         string='Currency',
         required=True,
-        default=lambda self: self.env.company.currency_id
+        default=lambda self: self.env['res.currency'].search([('name', '=', 'USD')], limit=1)
     )
 
     date = fields.Date(
@@ -88,6 +88,7 @@ class AchatArticlePrice(models.Model):
         new_price = record.price
 
         # If price changed, send notification
+        _logger.info("Price Bot: Article %s - Old: %s, New: %s", record.article_id.name, old_price, new_price)
         if old_price != new_price:
             try:
                 # Determine trend
@@ -101,14 +102,17 @@ class AchatArticlePrice(models.Model):
                     trend_msg = "🔻 *DIMINUTION*"
                     icon = "📉"
 
+                article_display = record.article_id.traduction or record.article_id.name
+
                 msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
                 msg += f"------------------------------------\n"
-                msg += f"📦 *Article:* {record.article_id.name}\n"
+                msg += f"📦 *Article:* {article_display}\n"
                 msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n\n"
                 msg += f"{icon} {trend_msg}\n"
                 msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
                 msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
                 msg += f"👤 Saisi par: {self.env.user.name}"
+
 
                 payload = {
                     "group_id": "120363428923348892@g.us",

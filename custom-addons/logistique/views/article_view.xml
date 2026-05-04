@@ -6,6 +6,8 @@
         <field name="arch" type="xml">
             <tree string="Articles">
                 <field name="name"/>
+                <field name="traduction"/>
+
                 <field name="company_article_id"/>
             </tree>
         </field>
@@ -19,6 +21,8 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="traduction"/>
+
                         <field name="company_article_id" options="{'no_create': True, 'no_edit': True}"/>
                     </group>
                 </sheet>

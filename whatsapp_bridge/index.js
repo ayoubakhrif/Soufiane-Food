@@ -10,6 +10,8 @@ const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const fs = require('fs');
 const pino = require('pino');
+const express = require('express');
+
 
 // CONFIGURATION
 const ARTICLE_GROUP_ID = "120363405648854156@g.us";
@@ -20,6 +22,8 @@ const LOGISTICS_GROUP_ID = "120363427755410654@g.us";
 const DOUANE_GROUP_ID = "120363406635335778@g.us";
 const SORTIE_GROUP_ID = "120363424919316319@g.us";
 const CASA_CORRECTION_GROUP_ID = "120363049891261462@g.us";
+const PRICE_GROUP_ID = "120363428923348892@g.us";
+
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -263,6 +267,32 @@ async function connectToWhatsApp() {
             }
         }
     });
+
+    // EXPRESS SERVER FOR PROACTIVE MESSAGES
+    const app = express();
+    app.use(express.json());
+
+    app.post('/api/send', async (req, res) => {
+        const { group_id, text } = req.body;
+        if (!group_id || !text) {
+            return res.status(400).json({ status: 'error', message: 'Missing group_id or text' });
+        }
+
+        try {
+            await sock.sendMessage(group_id, { text });
+            console.log(`[BOT] Message envoyé à ${group_id} : "${text}"`);
+            res.json({ status: 'success' });
+        } catch (err) {
+            console.error(`[BOT] Erreur envoi message :`, err);
+            res.status(500).json({ status: 'error', message: err.message });
+        }
+    });
+
+    const PORT = 3000;
+    app.listen(PORT, () => {
+        console.log(`--- BRIDGE API ÉCOUTE SUR LE PORT ${PORT} ---`);
+    });
+
 }
 
 connectToWhatsApp();

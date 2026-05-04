@@ -1,4 +1,9 @@
 from odoo import models, fields, api
+import requests
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class AchatArticlePrice(models.Model):
     _name = 'achat.article.price'
@@ -68,3 +73,39 @@ class AchatArticlePrice(models.Model):
         ('article_supplier_date_uniq', 'unique(article_id, supplier_id, date)', 
          'Ce produit existe déjà pour ce fournisseur à la même date !')
     ]
+
+    @api.model
+    def create(self, vals):
+        record = super(AchatArticlePrice, self).create(vals)
+        
+        # Look for the previous price for this article
+        previous_price_rec = self.search([
+            ('article_id', '=', record.article_id.id),
+            ('id', '!=', record.id)
+        ], order='date desc, id desc', limit=1)
+
+        old_price = previous_price_rec.price if previous_price_rec else 0.0
+        new_price = record.price
+
+        # If price changed, send notification
+        if old_price != new_price:
+            try:
+                msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n\n"
+                msg += f"📦 *Article:* {record.article_id.name}\n"
+                msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n"
+                msg += f"📉 *Ancien Prix:* {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                msg += f"📈 *Nouveau Prix:* {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                msg += f"👤 *Saisi par:* {self.env.user.name}"
+
+                payload = {
+                    "group_id": "120363428923348892@g.us",
+                    "text": msg
+                }
+                
+                # Send to bridge API (same server)
+                requests.post("http://localhost:3000/api/send", json=payload, timeout=5)
+                _logger.info(f"Price Bot notification sent for article {record.article_id.name}")
+            except Exception as e:
+                _logger.error(f"Failed to send Price Bot notification: {str(e)}")
+
+        return record

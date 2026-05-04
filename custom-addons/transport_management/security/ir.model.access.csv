@@ -27,4 +27,8 @@ access_transport_trip_remorque_user,transport.trip.remorque.user,model_transport
 access_transport_trip_remorque,transport.trip.remorque,model_transport_trip_remorque,base.group_user,1,1,1,1
 access_transport_trip_remorque_arab_viewer,transport.trip.remorque.arab.viewer,model_transport_trip_remorque_arab,group_transport_viewer,1,0,0,0
 access_transport_trip_remorque_arab_user,transport.trip.remorque.arab.user,model_transport_trip_remorque_arab,group_transport_user,1,1,1,0
-access_transport_trip_remorque_arab,transport.trip.remorque.arab,model_transport_trip_remorque_arab,base.group_user,1,1,1,1
+access_transport_trip_remorque_arab,transport.trip.remorque.arab,model_transport_trip_remorque_arab,base.group_user,1,1,1,1
+access_transport_trip_remorque_arab_grp,transport.trip.remorque.arab.grp,model_transport_trip_remorque_arab,group_transport_remorque_arab,1,1,1,1
+access_transport_driver_grp,transport.driver.grp,model_transport_driver,group_transport_remorque_arab,1,0,0,0
+access_transport_client_grp,transport.client.grp,model_transport_client,group_transport_remorque_arab,1,0,0,0
+

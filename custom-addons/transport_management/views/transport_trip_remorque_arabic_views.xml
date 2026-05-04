@@ -179,6 +179,11 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="menu_transport_trip_remorque_arab" name="رحلات المقطورة (عربي)" parent="menu_transport_operations" action="action_transport_trip_remorque_arab" sequence="3"/>
+    <menuitem id="menu_transport_trip_remorque_arab" 
+              name="رحلات المقطورة (عربي)" 
+              parent="menu_transport_operations" 
+              action="action_transport_trip_remorque_arab" 
+              sequence="3"
+              groups="group_transport_remorque_arab,group_transport_manager"/>
 
 </odoo>

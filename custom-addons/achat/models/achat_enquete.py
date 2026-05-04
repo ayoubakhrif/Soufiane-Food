@@ -102,8 +102,8 @@ class AchatArticlePrice(models.Model):
                     "text": msg
                 }
                 
-                # Send to bridge API (same server)
-                requests.post("http://localhost:3000/api/send", json=payload, timeout=5)
+                # Send to bridge API (same server, host from docker)
+                requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
                 _logger.info(f"Price Bot notification sent for article {record.article_id.name}")
             except Exception as e:
                 _logger.error(f"Failed to send Price Bot notification: {str(e)}")

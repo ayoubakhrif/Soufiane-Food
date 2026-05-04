@@ -39,13 +39,15 @@ const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètre
 let odooSessionCookie = '';
 const pendingChoices = new Map(); // Garde en mémoire les menus interactifs par groupe
 
+let sock; // Global socket variable
+
 async function connectToWhatsApp() {
     const { version, isLatest } = await fetchLatestBaileysVersion();
     console.log(`Utilisation de la version WA v${version.join('.')} (Est la plus récente : ${isLatest})`);
 
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
-    const sock = makeWASocket({
+    sock = makeWASocket({
         version,
         auth: state,
         logger: pino({ level: 'debug' }),
@@ -267,32 +269,35 @@ async function connectToWhatsApp() {
             }
         }
     });
-
-    // EXPRESS SERVER FOR PROACTIVE MESSAGES
-    const app = express();
-    app.use(express.json());
-
-    app.post('/api/send', async (req, res) => {
-        const { group_id, text } = req.body;
-        if (!group_id || !text) {
-            return res.status(400).json({ status: 'error', message: 'Missing group_id or text' });
-        }
-
-        try {
-            await sock.sendMessage(group_id, { text });
-            console.log(`[BOT] Message envoyé à ${group_id} : "${text}"`);
-            res.json({ status: 'success' });
-        } catch (err) {
-            console.error(`[BOT] Erreur envoi message :`, err);
-            res.status(500).json({ status: 'error', message: err.message });
-        }
-    });
-
-    const PORT = 3000;
-    app.listen(PORT, () => {
-        console.log(`--- BRIDGE API ÉCOUTE SUR LE PORT ${PORT} ---`);
-    });
-
 }
+
+// EXPRESS SERVER FOR PROACTIVE MESSAGES (Started once)
+const app = express();
+app.use(express.json());
+
+app.post('/api/send', async (req, res) => {
+    const { group_id, text } = req.body;
+    if (!group_id || !text) {
+        return res.status(400).json({ status: 'error', message: 'Missing group_id or text' });
+    }
+
+    if (!sock) {
+        return res.status(503).json({ status: 'error', message: 'WhatsApp socket not initialized' });
+    }
+
+    try {
+        await sock.sendMessage(group_id, { text });
+        console.log(`[BOT] Message envoyé à ${group_id} : "${text}"`);
+        res.json({ status: 'success' });
+    } catch (err) {
+        console.error(`[BOT] Erreur envoi message :`, err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`--- BRIDGE API ÉCOUTE SUR LE PORT ${PORT} ---`);
+});
 
 connectToWhatsApp();

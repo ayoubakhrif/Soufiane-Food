@@ -137,30 +137,17 @@ class WhatsAppLogisticsController(http.Controller):
                     'response': "⚓ *LOGISTIQUE - PORT*\n\n✅ Aucun dossier n'est actuellement marqué 'Sur Port' avec une arrivée confirmée."
                 }
 
-            response = "⚓ *DOSSIERS ACTUELLEMENT AU PORT*\n"
-            response += "━━━━━━━━━━━━━━━━━━━━\n\n"
-            
-            # Group by article
-            grouped = {}
-            for e in entries:
-                art = (e.achat_article_id.name or e.article_id.name or "SANS ARTICLE").strip().upper()
-                if art not in grouped: grouped[art] = []
-                grouped[art].append(e)
-            
-            total_containers = 0
-            for art, r_entries in sorted(grouped.items()):
-                art_containers = sum(e.container_count for e in r_entries)
-                total_containers += art_containers
-                response += f"📦 *{art}* ({art_containers} cont.)\n"
-                for e in r_entries:
-                    eta_val = e.eta or (e.dossier_id and e.dossier_id.eta) or False
-                    eta_str = eta_val.strftime('%d/%m') if eta_val else "??"
-                    response += f" • BL {e.bl_number or '??'} (ETA: {eta_str})\n"
-                response += "\n"
-                
-            response += f"━━━━━━━━━━━━━━━━━━━━\n"
-            response += f"🚢 *Total : {total_containers} conteneurs au port*"
-            return {'status': 'response', 'response': response}
+            # Use a dummy record to render the report
+            dummy_record = request.env['logistique.entry'].sudo().search([], limit=1)
+            pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('logistique.action_report_logistique_port', res_ids=dummy_record.ids)
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+            return {
+                'status': 'success',
+                'message': "⚓ *DOSSIERS ACTUELLEMENT AU PORT*\nVoici la situation détaillée en format PDF.",
+                'pdf_base64': pdf_base64,
+                'file_name': f"Situation_Port_{today.strftime('%d_%m_%Y')}.pdf"
+            }
 
 
         # 4. Search for Article (Fallback - Filter by Active Dossiers Only)

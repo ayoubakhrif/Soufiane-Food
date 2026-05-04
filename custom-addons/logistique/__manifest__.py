@@ -27,6 +27,7 @@
         'views/surest_mag_views.xml',
         'views/surest_mag_menus.xml',
         'views/menus.xml',
+        'reports/report_port_status.xml',
         'data/server_actions.xml',
         'data/cron_terminal49.xml',
     ],

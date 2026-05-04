@@ -473,3 +473,41 @@ class LogisticsEntry(models.Model):
                 #    raise ValidationError(
                 #        "Free Time must be at least 14 days when Incoterm is FOB or CFR."
                 #    )
+
+    def _get_port_report_data(self):
+        self.ensure_one()
+        today = fields.Date.today()
+        # Fetch entries currently on port
+        entries = self.env['logistique.entry'].sudo().search([
+            ('port_status', '=', 'on_port'),
+            ('eta', '<=', today)
+        ], order='eta asc')
+
+        grouped = {}
+        global_containers = 0
+        for e in entries:
+            art = (e.achat_article_id.name if hasattr(e, 'achat_article_id') and e.achat_article_id else (e.article_id.name if e.article_id else "SANS ARTICLE")).strip().upper()
+            if art not in grouped:
+                grouped[art] = {'name': art, 'total_containers': 0, 'lines': []}
+            
+            cnt = e.container_count or 0
+            grouped[art]['total_containers'] += cnt
+            global_containers += cnt
+            
+            eta_val = e.eta or (e.dossier_id and e.dossier_id.eta) or False
+            eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else "À venir"
+            
+            grouped[art]['lines'].append({
+                'bl': e.bl_number or 'Inconnu',
+                'count': cnt,
+                'eta': eta_str
+            })
+
+        sorted_articles = [grouped[k] for k in sorted(grouped.keys())]
+
+        return {
+            'report_date': today.strftime('%d/%m/%Y'),
+            'global_containers': global_containers,
+            'articles': sorted_articles
+        }
+

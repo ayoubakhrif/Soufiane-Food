@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_logistique_port" model="ir.actions.report">
+        <field name="name">Situation Dossiers au Port</field>
+        <field name="model">logistique.entry</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">logistique.report_port_status_template</field>
+        <field name="report_file">logistique.report_port_status_template</field>
+        <field name="binding_model_id" ref="model_logistique_entry"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_port_status_template">
+        <t t-call="web.html_container">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            
+            <t t-set="data" t-value="docs[0]._get_port_report_data()"/>
+            
+            <div class="page">
+                <style>
+                    .report-title {
+                        background-color: #6DA9DC;
+                        color: white;
+                        text-align: center;
+                        padding: 15px;
+                        font-size: 24px;
+                        font-weight: bold;
+                        border: 2px solid black;
+                        margin-bottom: 20px;
+                    }
+                    .info-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 20px;
+                        font-size: 16px;
+                    }
+                    .article-section {
+                        margin-top: 30px;
+                    }
+                    .article-name {
+                        background-color: #FCE9DA;
+                        border: 1px solid black;
+                        padding: 8px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        text-align: center;
+                        text-transform: uppercase;
+                    }
+                    .stock-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                    }
+                    .stock-table th {
+                        background-color: #FCE9DA;
+                        border: 1px solid black;
+                        padding: 8px;
+                        text-align: left;
+                        font-size: 13px;
+                    }
+                    .stock-table td {
+                        border: 1px solid black;
+                        padding: 8px;
+                        font-size: 13px;
+                    }
+                    .text-right { text-align: right; }
+                    .text-center { text-align: center; }
+                    .bg-blue { background-color: #6DA9DC; font-weight: bold; }
+                    .bg-orange { background-color: #FF9900; font-weight: bold; }
+                    .bg-cyan { background-color: #00FFFF; font-weight: bold; }
+                    
+                    .total-row {
+                        font-weight: bold;
+                        background-color: #f2f2f2;
+                    }
+                    .footer-note {
+                        margin-top: 40px;
+                        font-style: italic;
+                        font-size: 10px;
+                        color: #666;
+                    }
+                    .global-summary {
+                        margin-top: 30px;
+                        border: 2px solid black;
+                        padding: 15px;
+                        background-color: #f9f9f9;
+                    }
+                </style>
+
+                <div class="info-header">
+                    <div style="flex: 1;">
+                        <img src="/gestia_branding/static/src/img/Gestia_logo.png" style="max-height: 80px;"/>
+                    </div>
+                    <div style="flex: 1; text-align: right; padding-top: 20px;">
+                        <span>Date : <t t-esc="data['report_date']"/></span><br/>
+                        <span>Document : Situation Port</span>
+                    </div>
+                </div>
+
+                <div class="report-title">
+                    DOSSIERS ACTUELLEMENT AU PORT
+                </div>
+
+                <t t-foreach="data['articles']" t-as="article">
+                    <div class="article-section">
+                        <div class="article-name"><t t-esc="article['name']"/> (<t t-esc="article['total_containers']"/> conteneurs)</div>
+                        <table class="stock-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">N° BL</th>
+                                    <th class="text-center" style="width: 20%;">Nb Conteneurs</th>
+                                    <th class="text-center" style="width: 40%;">ETA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="article['lines']" t-as="line">
+                                    <tr>
+                                        <td><t t-esc="line['bl']"/></td>
+                                        <td class="text-center bg-orange"><t t-esc="line['count']"/></td>
+                                        <td class="text-center"><t t-esc="line['eta']"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+
+                <div class="global-summary">
+                    <div style="font-size: 18px; font-weight: bold; border-bottom: 1px solid black; margin-bottom: 10px;">
+                        RESUME GLOBAL
+                    </div>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 50%; font-size: 16px;">Total Conteneurs au Port :</td>
+                            <td style="width: 50%; font-size: 18px; font-weight: bold; color: #d00;" class="text-right">
+                                <t t-esc="data['global_containers']"/> Conteneurs
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="footer-note">
+                    Ce document est genere automatiquement par Gestia erp.
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

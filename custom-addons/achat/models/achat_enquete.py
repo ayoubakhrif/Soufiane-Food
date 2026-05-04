@@ -88,7 +88,6 @@ class AchatArticlePrice(models.Model):
         new_price = record.price
 
         # If price changed, send notification
-        _logger.info(f"Price Bot: Checking {record.article_id.name} - Old: {old_price}, New: {new_price}")
         if old_price != new_price:
             try:
                 # Determine trend
@@ -122,4 +121,4 @@ class AchatArticlePrice(models.Model):
             except Exception as e:
                 _logger.error(f"Failed to send Price Bot notification: {str(e)}")
 
-        return record
+        return record

@@ -251,15 +251,26 @@ class WhatsAppFinanceController(http.Controller):
         msg += f"💰 *Montant Total:* {'{:,.2f}'.format(physical.amount_total).replace(',', ' ')} DH\n"
         msg += f"📅 *Émission:* {physical.date_emission.strftime('%d/%m/%Y') if physical.date_emission else 'N/A'}\n"
         msg += f"⏳ *Échéance:* {physical.date_echeance.strftime('%d/%m/%Y') if physical.date_echeance else 'N/A'}\n"
+        
+        if physical.encours == 'encaisse' and physical.date_encaissement:
+            msg += f"✅ *Encaissé le:* {physical.date_encaissement.strftime('%d/%m/%Y')}\n"
+
         msg += f"📊 *État Global:* *{status_label}*\n\n"
         
         if physical.datacheque_ids:
             msg += "🧾 *Répartitions (Paiements) :*\n"
             for d in physical.datacheque_ids:
+                # Labels
                 facture_labels = dict(d._fields['facture'].selection or [])
                 f_label = facture_labels.get(d.facture, d.facture)
+                
+                type_labels = dict(d._fields['type'].selection or [])
+                t_label = type_labels.get(d.type, d.type)
+                
                 d_status = "✅" if d.encours == 'encaisse' else "⏳"
-                msg += f"• {d.benif_id.name}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}) {d_status}\n"
+                d_date = f" {d.date_encaissement.strftime('%d/%m/%y')}" if d.date_encaissement else ""
+                
+                msg += f"• {d.benif_id.name}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}{d_date}\n"
             
         return {
             'status': 'success',

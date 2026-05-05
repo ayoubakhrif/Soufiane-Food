@@ -302,6 +302,7 @@ class DataCheque(models.Model):
             else:
                 rec.date_echeance = rec.date_emission
 
+    @api.depends('date_encaissement')
     def _compute_encours(self):
         for rec in self:
             if rec.date_encaissement:

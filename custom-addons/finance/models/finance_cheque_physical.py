@@ -74,7 +74,8 @@ class FinanceChequePhysical(models.Model):
                 rec.date_emission = first.date_emission
                 rec.date_echeance = first.date_echeance
                 rec.benif_id = first.benif_id
-                rec.date_encaissement = first.date_encaissement
+                # Search for the first non-empty cashing date among splits
+                rec.date_encaissement = next((d.date_encaissement for d in rec.datacheque_ids if d.date_encaissement), False)
             else:
                 rec.date_emission = False
                 rec.date_echeance = False
@@ -92,7 +93,7 @@ class FinanceChequePhysical(models.Model):
                         total_debit += split.amount
             rec.debit = total_debit
 
-    @api.depends('datacheque_ids.encours')
+    @api.depends('datacheque_ids.encours', 'datacheque_ids.date_encaissement')
     def _compute_encours(self):
         for rec in self:
             # If ANY of the splits is 'encaisse', we consider the physical cheque as encaisse?

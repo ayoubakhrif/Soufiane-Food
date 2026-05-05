@@ -244,7 +244,12 @@ class WhatsAppFinanceController(http.Controller):
             return None
 
     def _format_physical_cheque_details(self, physical):
-        status_label = "Encaissé" if physical.encours == 'encaisse' else "En cours"
+        # Force re-read to ensure we have latest computed status
+        physical = physical.sudo().with_context(bin_size=True).browse(physical.id)
+        
+        # Determine global status
+        is_encaissé = physical.encours == 'encaisse' or any(d.date_encaissement for d in physical.datacheque_ids)
+        status_label = "Encaissé" if is_encaissé else "En cours"
         
         msg = f"📄 *Détails du Chèque Physique #{physical.name}*\n\n"
         msg += f"🏢 *Société:* {physical.ste_id.name}\n"
@@ -252,24 +257,26 @@ class WhatsAppFinanceController(http.Controller):
         msg += f"📅 *Émission:* {physical.date_emission.strftime('%d/%m/%Y') if physical.date_emission else 'N/A'}\n"
         msg += f"⏳ *Échéance:* {physical.date_echeance.strftime('%d/%m/%Y') if physical.date_echeance else 'N/A'}\n"
         
-        if physical.encours == 'encaisse' and physical.date_encaissement:
-            msg += f"✅ *Encaissé le:* {physical.date_encaissement.strftime('%d/%m/%Y')}\n"
+        # Use first available cashing date
+        cashing_date = physical.date_encaissement or next((d.date_encaissement for d in physical.datacheque_ids if d.date_encaissement), None)
+        if cashing_date:
+            msg += f"✅ *Encaissé le:* {cashing_date.strftime('%d/%m/%Y')}\n"
 
         msg += f"📊 *État Global:* *{status_label}*\n\n"
         
         if physical.datacheque_ids:
             msg += "🧾 *Répartitions (Paiements) :*\n"
             for d in physical.datacheque_ids:
-                # Labels
-                facture_labels = dict(d._fields['facture'].selection or [])
-                f_label = facture_labels.get(d.facture, d.facture)
+                # Labels robust fetching
+                f_selection = dict(d._fields['facture'].selection or {})
+                f_label = f_selection.get(d.facture) or d.facture or "N/A"
                 
-                type_labels = dict(d._fields['type'].selection or [])
-                t_label = type_labels.get(d.type, d.type)
+                t_selection = dict(d._fields['type'].selection or {})
+                t_label = t_selection.get(d.type) or d.type or "N/A"
                 
-                d_status = "✅" if d.encours == 'encaisse' else "⏳"
+                d_status = "✅" if (d.encours == 'encaisse' or d.date_encaissement) else "⏳"
                 
-                msg += f"• {d.benif_id.name}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}\n"
+                msg += f"• {d.benif_id.name or 'Inconnu'}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}\n"
             
         return {
             'status': 'success',

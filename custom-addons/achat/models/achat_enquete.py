@@ -71,58 +71,64 @@ class AchatArticlePrice(models.Model):
 
     _sql_constraints = [
         ('article_supplier_date_uniq', 'unique(article_id, supplier_id, date)', 
-         'Ce produit existe déjà pour ce fournisseur à la même date !')
+         'Ce produit existe déjà pour ce fournisseur à la même date !'),
+        ('price_gt_zero', 'CHECK(price > 0)', 'Le prix doit être strictement supérieur à 0 !')
     ]
 
-    @api.model
-    def create(self, vals):
-        record = super(AchatArticlePrice, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super(AchatArticlePrice, self).create(vals_list)
         
-        # Look for the previous price for this article
-        previous_price_rec = self.search([
-            ('article_id', '=', record.article_id.id),
-            ('id', '!=', record.id)
-        ], order='date desc, id desc', limit=1)
+        for record, vals in zip(records, vals_list):
+            # Look for the previous price for this article
+            previous_price_rec = self.search([
+                ('article_id', '=', record.article_id.id),
+                ('id', 'not in', records.ids) # Exclude all records being created in this batch
+            ], order='date desc, id desc', limit=1)
 
-        old_price = previous_price_rec.price if previous_price_rec else 0.0
-        new_price = record.price
+            old_price = previous_price_rec.price if previous_price_rec else 0.0
+            # Use value from vals if available to avoid cache issues, fallback to record.price
+            new_price = vals.get('price', record.price)
 
-        # If price changed, send notification
-        _logger.info("Price Bot: Article %s - Old: %s, New: %s", record.article_id.name, old_price, new_price)
-        if old_price != new_price:
-            try:
-                # Determine trend
-                if old_price == 0:
-                    trend_msg = "🆕 *NOUVEAU PRIX*"
-                    icon = "⭐"
-                elif new_price > old_price:
-                    trend_msg = "🔺 *AUGMENTATION*"
-                    icon = "📈"
-                else:
-                    trend_msg = "🔻 *DIMINUTION*"
-                    icon = "📉"
+            # If price changed, send notification
+            _logger.info("Price Bot: Article %s - Old: %s, New: %s", record.article_id.name, old_price, new_price)
+            if old_price != new_price:
+                try:
+                    # Determine trend
+                    if old_price == 0:
+                        trend_msg = "🆕 *NOUVEAU PRIX*"
+                        icon = "⭐"
+                    elif new_price > old_price:
+                        trend_msg = "🔺 *AUGMENTATION*"
+                        icon = "📈"
+                    else:
+                        trend_msg = "🔻 *DIMINUTION*"
+                        icon = "📉"
 
-                article_display = record.article_id.traduction or record.article_id.name
+                    # Display Translation and Name if both exist
+                    name = record.article_id.name or ""
+                    trad = record.article_id.traduction or ""
+                    article_display = f"{trad} ({name})" if trad and trad != name else (trad or name)
 
-                msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
-                msg += f"------------------------------------\n"
-                msg += f"📦 *Article:* {article_display}\n"
-                msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n\n"
-                msg += f"{icon} {trend_msg}\n"
-                msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
-                msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
-                msg += f"👤 Saisi par: {self.env.user.name}"
+                    msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
+                    msg += f"------------------------------------\n"
+                    msg += f"📦 *Article:* {article_display}\n"
+                    msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n\n"
+                    msg += f"{icon} {trend_msg}\n"
+                    msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                    msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                    msg += f"👤 Saisi par: {self.env.user.name}"
 
 
-                payload = {
-                    "group_id": "120363428923348892@g.us",
-                    "text": msg
-                }
-                
-                # Send to bridge API (same server, host from docker)
-                requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
-                _logger.info(f"Price Bot notification sent for article {record.article_id.name}")
-            except Exception as e:
-                _logger.error(f"Failed to send Price Bot notification: {str(e)}")
+                    payload = {
+                        "group_id": "120363428923348892@g.us",
+                        "text": msg
+                    }
+                    
+                    # Send to bridge API (same server, host from docker)
+                    requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
+                    _logger.info(f"Price Bot notification sent for article {record.article_id.name}")
+                except Exception as e:
+                    _logger.error(f"Failed to send Price Bot notification: {str(e)}")
 
-        return record
+        return records

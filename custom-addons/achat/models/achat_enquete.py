@@ -105,10 +105,9 @@ class AchatArticlePrice(models.Model):
                         trend_msg = "🔻 *DIMINUTION*"
                         icon = "📉"
 
-                    # Display Translation and Name if both exist
-                    name = record.article_id.name or ""
-                    trad = record.article_id.traduction or ""
-                    article_display = f"{trad} ({name})" if trad and trad != name else (trad or name)
+                    # Affichage de la traduction (champ traduction de logistique.article)
+                    article_sudo = record.article_id.sudo()
+                    article_display = article_sudo.traduction or article_sudo.name
 
                     msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
                     msg += f"------------------------------------\n"

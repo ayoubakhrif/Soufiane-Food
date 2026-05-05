@@ -718,7 +718,7 @@ class FinanceTalon(models.Model):
                 'benif': c.benif_id.name if c.benif_id else "",
                 'date': c.date_emission,
                 'amount': c.amount,
-                'status': 'Encaissé' if c.encours == 'encaisse' else 'En cours',
+                'status': 'Encaissé' if (c.encours == 'encaisse' or c.date_encaissement) else 'En cours',
                 'date_encaissement': c.date_encaissement,
                 'type': 'Chèque'
             })
@@ -729,7 +729,7 @@ class FinanceTalon(models.Model):
                 'benif': e.benif_id.name if e.benif_id else "",
                 'date': e.date_emission,
                 'amount': e.montant,
-                'status': 'Encaissé' if e.state == 'encaisse' else 'En cours',
+                'status': 'Encaissé' if (e.state == 'encaisse' or e.date_encaissement) else 'En cours',
                 'date_encaissement': e.date_encaissement,
                 'type': 'Effet'
             })

@@ -68,7 +68,48 @@ class WhatsAppFinanceController(http.Controller):
                 else:
                     return {'status': 'not_found', 'message': f"Société '{company_part}' non trouvée."}
 
-        # 5. Handle Exact Matches (Talon Name or Beneficiary Name)
+        # 5. Handle Cheque Number Search
+        import re
+        is_cheque_search = False
+        cheque_number = None
+        
+        # A. Check if 7 digits numeric (Direct Search)
+        if message_text.isdigit() and len(message_text) == 7:
+            is_cheque_search = True
+            cheque_number = message_text
+        
+        # B. Check if it's a choice result like "CHQ 2102572 (Company A)"
+        match = re.match(r"CHQ (\d{7}) \((.+)\)", message_text)
+        if match:
+            is_cheque_search = True
+            cheque_number = match.group(1)
+            company_name = match.group(2)
+            # Find specific cheque
+            cheque = request.env['datacheque'].sudo().search([
+                ('chq', '=', cheque_number),
+                ('ste_id.name', '=', company_name)
+            ], limit=1)
+            if cheque:
+                return self._format_cheque_details(cheque)
+
+        if is_cheque_search:
+            cheques = request.env['datacheque'].sudo().search([('chq', '=', cheque_number)])
+            if cheques:
+                if len(cheques) == 1:
+                    return self._format_cheque_details(cheques[0])
+                else:
+                    choices = [f"CHQ {c.chq} ({c.ste_id.name})" for c in cheques]
+                    choices_text = f"Le chèque *{cheque_number}* existe pour plusieurs sociétés. Veuillez choisir :\n"
+                    for i, choice in enumerate(choices, 1):
+                        choices_text += f"{i}- {choice}\n"
+                    
+                    return {
+                        'status': 'multiple_choices',
+                        'message': choices_text,
+                        'choices': choices
+                    }
+
+        # 6. Handle Exact Matches (Talon Name or Beneficiary Name)
         exact_talon = request.env['finance.talon'].sudo().search([('name_shown', '=ilike', message_text)], limit=1)
         if exact_talon:
             talon = exact_talon[0]
@@ -200,3 +241,30 @@ class WhatsAppFinanceController(http.Controller):
         except Exception as e:
             _logger.error(f"OpenAI Finance Extraction Error: {str(e)}")
             return None
+
+    def _format_cheque_details(self, cheque):
+        # Human readable values
+        facture_labels = dict(cheque._fields['facture'].selection or [])
+        facture_label = facture_labels.get(cheque.facture, cheque.facture)
+        
+        status_label = "Encaissé" if cheque.encours == 'encaisse' else "En cours"
+        
+        msg = f"📄 *Détails du Chèque #{cheque.chq}*\n\n"
+        msg += f"🏢 *Société:* {cheque.ste_id.name}\n"
+        msg += f"👤 *Bénéficiaire:* {cheque.benif_id.name}\n"
+        msg += f"💰 *Montant:* {'{:,.2f}'.format(cheque.amount).replace(',', ' ')} DH\n"
+        msg += f"📅 *Émission:* {cheque.date_emission.strftime('%d/%m/%Y') if cheque.date_emission else 'N/A'}\n"
+        msg += f"⏳ *Échéance:* {cheque.date_echeance.strftime('%d/%m/%Y') if cheque.date_echeance else 'N/A'}\n"
+        msg += f"📊 *État:* *{status_label}*\n"
+        msg += f"📝 *Type:* {cheque.type}\n"
+        msg += f"📂 *Facture:* {facture_label}\n"
+        msg += f"👤 *Saisi par:* {cheque.perso_id.name}\n"
+        if cheque.talon_id:
+            msg += f"📔 *Talon:* {cheque.talon_id.name_shown}\n"
+        if cheque.journal:
+            msg += f"📓 *Journal N°:* {cheque.journal}\n"
+            
+        return {
+            'status': 'success',
+            'response': msg
+        }

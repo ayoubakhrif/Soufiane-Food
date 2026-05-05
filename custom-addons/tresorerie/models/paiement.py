@@ -16,7 +16,13 @@ class TresoreriePaiement(models.Model):
     payment_type = fields.Selection([
         ('especes', 'Espèces'),
         ('cheque', 'Chèques'),
+        ('effet', 'Effets'),
     ], string='Type de paiement', required=True, default='especes')
+
+    is_soufiane = fields.Boolean(
+        compute='_compute_is_soufiane',
+        string='Est Soufiane',
+    )
 
     date = fields.Date(
         string='Date du paiement',
@@ -59,10 +65,15 @@ class TresoreriePaiement(models.Model):
     # ------------------------------------------------------------------
     # Compute
     # ------------------------------------------------------------------
+    @api.depends('client_id.name')
+    def _compute_is_soufiane(self):
+        for rec in self:
+            rec.is_soufiane = rec.client_id and rec.client_id.name == 'Soufiane'
+
     @api.depends('payment_type', 'amount_especes', 'cheque_line_ids.amount')
     def _compute_amount(self):
         for rec in self:
-            if rec.payment_type == 'cheque':
+            if rec.payment_type in ['cheque', 'effet']:
                 rec.amount = sum(rec.cheque_line_ids.mapped('amount'))
             else:
                 rec.amount = rec.amount_especes

@@ -23,7 +23,7 @@ class TresorerieSortie(models.Model):
         required=True,
     )
     payment_type = fields.Selection(
-        [('especes', 'Espèces'), ('cheque', 'Chèque')],
+        [('especes', 'Espèces'), ('cheque', 'Chèque'), ('effet', 'Effet')],
         string='Mode de paiement',
         required=True,
         default='especes',
@@ -61,6 +61,11 @@ class TresorerieSortie(models.Model):
         compute='_compute_balances',
         digits=(10, 2),
     )
+    balance_effets = fields.Float(
+        string='Solde Effets disponible (MAD)',
+        compute='_compute_balances',
+        digits=(10, 2),
+    )
     client_cheque_balance = fields.Float(
         string='Solde chèques client (MAD)',
         compute='_compute_client_cheque_balance',
@@ -82,6 +87,7 @@ class TresorerieSortie(models.Model):
         paiements = self.env['tresorerie.paiement'].search([])
         total_especes_in = sum(p.amount for p in paiements if p.payment_type == 'especes')
         total_cheques_in = sum(p.amount for p in paiements if p.payment_type == 'cheque')
+        total_effets_in = sum(p.amount for p in paiements if p.payment_type == 'effet')
 
         # --- Confirmed sorties split by type ---
         all_confirmed = self.env['tresorerie.sortie'].search([('state', '=', 'confirmed')])
@@ -91,8 +97,12 @@ class TresorerieSortie(models.Model):
                               if s.payment_type == 'especes' and s.id != rec.id)
             cheques_out = sum(s.amount for s in all_confirmed
                               if s.payment_type == 'cheque' and s.id != rec.id)
+            effets_out = sum(s.amount for s in all_confirmed
+                              if s.payment_type == 'effet' and s.id != rec.id)
+
             rec.balance_especes = total_especes_in - especes_out
             rec.balance_cheques = total_cheques_in - cheques_out
+            rec.balance_effets = total_effets_in - effets_out
 
     @api.depends('client_id', 'state', 'amount')
     def _compute_client_cheque_balance(self):
@@ -106,10 +116,10 @@ class TresorerieSortie(models.Model):
                 rec.client_cheque_balance = 0.0
                 continue
 
-            # Cheques received from this client with surpassed due date
+            # Cheques/Effets received from this client with surpassed due date
             cheques = self.env['tresorerie.paiement'].search([
                 ('client_id', '=', rec.client_id.id),
-                ('payment_type', '=', 'cheque'),
+                ('payment_type', '=', rec.payment_type if rec.payment_type in ['cheque', 'effet'] else 'cheque'),
                 ('check_date', '<=', today),
             ])
             total_cheques = sum(c.amount for c in cheques)
@@ -130,7 +140,7 @@ class TresorerieSortie(models.Model):
     def _domain_clients_with_overdue_cheques(self):
         today = fields.Date.today()
         paiements = self.env['tresorerie.paiement'].search([
-            ('payment_type', '=', 'cheque'),
+            ('payment_type', 'in', ['cheque', 'effet']),
             ('check_date', '<=', today),
         ])
         client_ids = paiements.mapped('client_id').ids
@@ -165,6 +175,7 @@ class TresorerieSortie(models.Model):
             paiements = self.env['tresorerie.paiement'].search([])
             total_especes_in = sum(p.amount for p in paiements if p.payment_type == 'especes')
             total_cheques_in = sum(p.amount for p in paiements if p.payment_type == 'cheque')
+            total_effets_in = sum(p.amount for p in paiements if p.payment_type == 'effet')
 
             all_confirmed = self.env['tresorerie.sortie'].search([
                 ('state', '=', 'confirmed'),
@@ -172,9 +183,11 @@ class TresorerieSortie(models.Model):
             ])
             especes_out = sum(s.amount for s in all_confirmed if s.payment_type == 'especes')
             cheques_out = sum(s.amount for s in all_confirmed if s.payment_type == 'cheque')
+            effets_out = sum(s.amount for s in all_confirmed if s.payment_type == 'effet')
 
             available_especes = total_especes_in - especes_out
             available_cheques = total_cheques_in - cheques_out
+            available_effets = total_effets_in - effets_out
 
             # ----------------------------------------------------------------
             # 1. Per-type trésorerie balance check
@@ -187,56 +200,60 @@ class TresorerieSortie(models.Model):
                         f"Solde Espèces    : {available_especes:,.2f} MAD"
                     )
 
-            elif rec.payment_type == 'cheque':
-                # 1a. Global chèque reserve check
-                if rec.amount > available_cheques:
+            elif rec.payment_type in ['cheque', 'effet']:
+                label = 'Chèques' if rec.payment_type == 'cheque' else 'Effets'
+                available = available_cheques if rec.payment_type == 'cheque' else available_effets
+
+                # 1a. Global reserve check
+                if rec.amount > available:
                     raise ValidationError(
-                        f"❌ Solde Chèques insuffisant en trésorerie !\n"
+                        f"❌ Solde {label} insuffisant en trésorerie !\n"
                         f"Montant demandé  : {rec.amount:,.2f} MAD\n"
-                        f"Solde Chèques    : {available_cheques:,.2f} MAD"
+                        f"Solde {label}    : {available:,.2f} MAD"
                     )
 
-                # 1b. Client-specific cheque balance check
+                # 1b. Client-specific check
                 if not rec.client_id:
                     raise ValidationError(
-                        "❌ Veuillez sélectionner un client pour un paiement par chèque."
+                        f"❌ Veuillez sélectionner un client pour un paiement par {label.lower().rstrip('s')}."
                     )
 
                 today = fields.Date.today()
-                client_cheques = self.env['tresorerie.paiement'].search([
+                client_entries = self.env['tresorerie.paiement'].search([
                     ('client_id', '=', rec.client_id.id),
-                    ('payment_type', '=', 'cheque'),
+                    ('payment_type', '=', rec.payment_type),
                     ('check_date', '<=', today),
                 ])
-                total_client_cheques = sum(c.amount for c in client_cheques)
+                total_client_entries = sum(c.amount for c in client_entries)
 
-                if total_client_cheques == 0:
+                if total_client_entries == 0:
                     raise ValidationError(
-                        f"❌ Le client {rec.client_id.name} n'a aucun chèque échu disponible."
+                        f"❌ Le client {rec.client_id.name} n'a aucun {label.lower().rstrip('s')} échu disponible."
                     )
 
                 client_sorties = self.env['tresorerie.sortie'].search([
                     ('client_id', '=', rec.client_id.id),
-                    ('payment_type', '=', 'cheque'),
+                    ('payment_type', '=', rec.payment_type),
                     ('state', '=', 'confirmed'),
                     ('id', '!=', rec.id),
                 ])
                 already_used = sum(s.amount for s in client_sorties)
-                client_available = total_client_cheques - already_used
+                client_available = total_client_entries - already_used
 
                 if rec.amount > client_available:
                     raise ValidationError(
-                        f"❌ Montant supérieur au solde chèques de {rec.client_id.name} !\n"
+                        f"❌ Montant supérieur au solde {label.lower()} de {rec.client_id.name} !\n"
                         f"Montant demandé          : {rec.amount:,.2f} MAD\n"
-                        f"Solde chèques disponible : {client_available:,.2f} MAD"
+                        f"Solde {label.lower()} disponible : {client_available:,.2f} MAD"
                     )
 
     @api.constrains('payment_type', 'client_id')
     def _check_cheque_requires_client(self):
         for rec in self:
-            if rec.payment_type == 'cheque' and not rec.client_id:
+            if rec.payment_type in ['cheque', 'effet'] and not rec.client_id:
+                label = 'chèque' if rec.payment_type == 'cheque' else 'effet'
                 raise ValidationError(
-                    "❌ Un paiement par chèque nécessite la sélection d'un client."
+                    f"❌ Un paiement par {label} nécessite la sélection d'un client."
                 )
 
     # -------------------------------------------------------------------------

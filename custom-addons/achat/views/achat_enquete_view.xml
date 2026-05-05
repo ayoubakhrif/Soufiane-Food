@@ -9,6 +9,7 @@
                 <field name="article_id"/>
                 <field name="supplier_id"/>
                 <field name="origin_id"/>
+                <field name="incoterm"/>
                 <field name="price"/>
                 <field name="currency_id"/>
                 <field name="user_id"/>
@@ -27,6 +28,7 @@
                             <field name="details"/>
                             <field name="supplier_id"/>
                             <field name="origin_id"/>
+                            <field name="incoterm"/>
                             <field name="price"/>
                             <field name="currency_id"/>
                             <field name="date"/>
@@ -60,6 +62,7 @@
                 <field name="article_id" type="row"/>
                 <field name="supplier_id" type="col"/>
                 <field name="origin_id" type="row"/>
+                <field name="incoterm" type="row"/>
                 <field name="price" type="measure"/>
             </pivot>
         </field>
@@ -73,10 +76,12 @@
                 <field name="article_id"/>
                 <field name="supplier_id"/>
                 <field name="origin_id"/>
+                <field name="incoterm"/>
                 <group expand="0" string="Group By">
                     <filter string="Article" name="group_article" context="{'group_by': 'article_id'}"/>
                     <filter string="Supplier" name="group_supplier" context="{'group_by': 'supplier_id'}"/>
                     <filter string="Origin" name="group_origin" context="{'group_by': 'origin_id'}"/>
+                    <filter string="Incoterm" name="group_incoterm" context="{'group_by': 'incoterm'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
                 </group>
             </search>

@@ -28,6 +28,13 @@ class PaiementChequeLine(models.Model):
              "Sélectionner le porteur si le chèque est un effet de commerce.",
     )
 
+    # Specific field for "Soufiane" client
+    soufiane_owner_id = fields.Many2one(
+        'tresorerie.effets.owner',
+        string='Client soufiane',
+        ondelete='restrict',
+    )
+
     check_date = fields.Date(
         string="Date d'échéance",
         required=True,

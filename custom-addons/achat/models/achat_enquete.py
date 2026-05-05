@@ -51,11 +51,16 @@ class AchatArticlePrice(models.Model):
         index=True
     )
 
-    # Optional but recommended
     remarks = fields.Char(
         string='Remarks',
         help='Conditions, MOQ, delivery delay, or any additional information'
     )
+
+    incoterm = fields.Selection([
+        ('cfr', 'CFR'),
+        ('fob', 'FOB'),
+        ('emirate', 'Emirate')
+    ], string='Incoterm')
 
     user_id = fields.Many2one(
         'res.users',
@@ -83,6 +88,7 @@ class AchatArticlePrice(models.Model):
             # Look for the previous price for this article
             previous_price_rec = self.search([
                 ('article_id', '=', record.article_id.id),
+                ('incoterm', '=', record.incoterm),
                 ('id', 'not in', records.ids) # Exclude all records being created in this batch
             ], order='date desc, id desc', limit=1)
 
@@ -106,13 +112,21 @@ class AchatArticlePrice(models.Model):
                     article_sudo = record.article_id.sudo()
                     article_display = article_sudo.traduction
 
-                    msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
+                    # Dates pour l'affichage
+                    old_date_str = previous_price_rec.date.strftime('%d/%m') if previous_price_rec and previous_price_rec.date else "??"
+                    new_date_str = record.date.strftime('%d/%m') if record.date else "??"
+                    
+                    # Libellé Incoterm
+                    incoterm_val = dict(self._fields['incoterm'].selection).get(record.incoterm, record.incoterm or 'N/A')
+
+                    msg = f"📢 *CHANGEMENT DE PRIX ({incoterm_val.upper()})* 📢\n"
                     msg += f"------------------------------------\n"
                     msg += f"📦 *Article:* {article_display}\n"
-                    msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n\n"
+                    msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n"
+                    msg += f"🌍 *Origine:* {record.origin_id.name or 'Inconnu'}\n\n"
                     msg += f"{icon} {trend_msg}\n"
-                    msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
-                    msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'}\n"
+                    msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'} ({old_date_str})\n"
+                    msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'} ({new_date_str})\n"
                     msg += f"👤 Saisi par: {self.env.user.name}"
 
 

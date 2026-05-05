@@ -73,10 +73,18 @@
                         <span> MAD</span>
                     </div>
 
+                    <div class="alert alert-info" role="alert"
+                          style="margin-bottom:12px;"
+                          invisible="payment_type != 'effet'">
+                        <strong>📄 Solde Effets disponible :</strong>
+                        <field name="balance_effets" readonly="1" nolabel="1"/>
+                        <span> MAD</span>
+                    </div>
+
                     <div class="alert alert-warning" role="alert"
-                         style="margin-bottom:12px;"
-                         invisible="payment_type != 'cheque' or not client_id">
-                        <strong>👤 Solde chèques disponible pour ce client :</strong>
+                          style="margin-bottom:12px;"
+                          invisible="payment_type not in ['cheque', 'effet'] or not client_id">
+                        <strong>👤 Solde disponible pour ce client :</strong>
                         <field name="client_cheque_balance" readonly="1" nolabel="1"/>
                         <span> MAD</span>
                     </div>
@@ -87,13 +95,13 @@
                             <field name="payment_type" widget="radio"
                                    readonly="state == 'confirmed'"/>
 
-                            <!-- Client — only for cheque, domain filtered dynamically -->
+                            <!-- Client — for cheque/effet, domain filtered dynamically -->
                             <field name="client_id"
-                                   invisible="payment_type != 'cheque'"
-                                   required="payment_type == 'cheque'"
+                                   invisible="payment_type not in ['cheque', 'effet']"
+                                   required="payment_type in ['cheque', 'effet']"
                                    readonly="state == 'confirmed'"
                                    options="{'no_quick_create': True, 'no_create_edit': True}"
-                                   domain="[('paiement_ids.payment_type', '=', 'cheque'),
+                                   domain="[('paiement_ids.payment_type', '=', payment_type),
                                             ('paiement_ids.check_date', '&lt;=', context_today())]"/>
                         </group>
                         <group string="Détails">
@@ -131,6 +139,7 @@
                 <separator/>
                 <filter string="Espèces"      name="especes"   domain="[('payment_type', '=', 'especes')]"/>
                 <filter string="Chèque"       name="cheque"    domain="[('payment_type', '=', 'cheque')]"/>
+                <filter string="Effet"        name="effet"     domain="[('payment_type', '=', 'effet')]"/>
                 <separator/>
                 <filter string="Sorties du jour" name="today"
                         domain="[('date', '=', context_today())]"/>

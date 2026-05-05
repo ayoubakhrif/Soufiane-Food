@@ -18,3 +18,11 @@ access_claims_divers_manager,claims.divers.manager,model_claims_divers,group_cla
 access_claims_divers_charge_viewer,claims.divers.charge.viewer,model_claims_divers_charge,group_claims_viewer,1,0,0,0
 access_claims_divers_charge_user,claims.divers.charge.user,model_claims_divers_charge,group_claims_user,1,1,1,0
 access_claims_divers_charge_manager,claims.divers.charge.manager,model_claims_divers_charge,group_claims_manager,1,1,1,1
+access_logistique_entry_claims_user,logistique.entry.claims.user,logistique.model_logistique_entry,group_claims_user,1,0,0,0
+access_logistique_entry_doc_claims_user,logistique.entry.doc.claims.user,achat.model_logistique_entry_document,group_claims_user,1,0,0,0
+access_logistique_ste_claims_user,logistique.ste.claims.user,logistique.model_logistique_ste,group_claims_user,1,0,0,0
+access_logistique_supplier_claims_user,logistique.supplier.claims.user,logistique.model_logistique_supplier,group_claims_user,1,0,0,0
+access_logistique_article_claims_user,logistique.article.claims.user,logistique.model_logistique_article,group_claims_user,1,0,0,0
+access_achat_origin_claims_user,achat.origin.claims.user,achat.model_achat_origin,group_claims_user,1,0,0,0
+access_logistique_entry_claims_viewer,logistique.entry.claims.viewer,logistique.model_logistique_entry,group_claims_viewer,1,0,0,0
+access_logistique_entry_doc_claims_viewer,logistique.entry.doc.claims.viewer,achat.model_logistique_entry_document,group_claims_viewer,1,0,0,0

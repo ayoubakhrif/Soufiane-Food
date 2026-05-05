@@ -697,3 +697,43 @@ class FinanceTalon(models.Model):
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'self',
         }
+
+    def get_talon_stats(self):
+        self.ensure_one()
+        return {
+            'total': self.num_chq,
+            'used': self.used_chqs,
+            'remaining': self.unused_chqs,
+            'percentage': round(self.usage_percentage, 1),
+            'etat': dict(self._fields['etat'].selection).get(self.etat, self.etat)
+        }
+
+    def get_outgoing_checks_data(self):
+        self.ensure_one()
+        data = []
+        # Checks
+        for c in self.cheque_ids:
+            data.append({
+                'ref': c.chq,
+                'benif': c.benif_id.name if c.benif_id else "",
+                'date': c.date_emission,
+                'amount': c.amount,
+                'status': 'Encaissé' if c.encours == 'encaisse' else 'En cours',
+                'type': 'Chèque'
+            })
+        # Effects
+        for e in self.effet_ids:
+            data.append({
+                'ref': e.serie,
+                'benif': e.benif_id.name if e.benif_id else "",
+                'date': e.date_emission,
+                'amount': e.montant,
+                'status': 'Encaissé' if e.state == 'encaisse' else 'En cours',
+                'type': 'Effet'
+            })
+        # Sort by ref (numeric if possible)
+        try:
+            data.sort(key=lambda x: int(x['ref']) if (x['ref'] and x['ref'].isdigit()) else 0)
+        except:
+            pass
+        return data

@@ -42,7 +42,57 @@ class WhatsAppFinanceController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Finance Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Finance Group.'}
 
-        # 4. Handle Exact Match First
+        # 4. Handle Talon Logic
+        if message_text.lower().startswith("talon"):
+            company_part = message_text[5:].strip()
+            if company_part:
+                # Search for company
+                ste = request.env['finance.ste'].sudo().search([('name', 'ilike', company_part)], limit=1)
+                if ste:
+                    talons = request.env['finance.talon'].sudo().search([('ste_id', '=', ste.id)])
+                    if talons:
+                        choices = [t.name_shown for t in talons]
+                        choices_text = f"Voici les talons pour *{ste.name}* :\n"
+                        for i, t in enumerate(talons, 1):
+                            # Get human readable state
+                            state_label = dict(t._fields['etat'].selection).get(t.etat, t.etat)
+                            choices_text += f"{i}- {t.name_shown} ({state_label})\n"
+                        
+                        return {
+                            'status': 'multiple_choices',
+                            'message': choices_text,
+                            'choices': choices
+                        }
+                    else:
+                        return {'status': 'not_found', 'message': f"Aucun talon trouvé pour la société '{ste.name}'."}
+                else:
+                    return {'status': 'not_found', 'message': f"Société '{company_part}' non trouvée."}
+
+        # 5. Handle Exact Matches (Talon Name or Beneficiary Name)
+        exact_talon = request.env['finance.talon'].sudo().search([('name_shown', '=ilike', message_text)], limit=1)
+        if exact_talon:
+            talon = exact_talon[0]
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_talon_summary', res_ids=talon.ids)
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+            stats = talon.get_talon_stats()
+            summary_msg = f"Voici les détails du talon *{talon.name_shown}* ({talon.ste_id.name}).\n\n"
+            summary_msg += f"📊 *Statistiques* :\n"
+            summary_msg += f"• Total: {stats['total']}\n"
+            summary_msg += f"• Utilisés: {stats['used']}\n"
+            summary_msg += f"• Restants: {stats['remaining']}\n"
+            summary_msg += f"• État: *{stats['etat']}*"
+
+            from odoo import fields
+            return {
+                'status': 'success',
+                'product_name': talon.name_shown,
+                'message': summary_msg,
+                'pdf_base64': pdf_base64,
+                'file_name': f"Talon_{talon.name_shown.replace(' ', '_')}_{fields.Date.today()}.pdf"
+            }
+
         exact_benif = request.env['finance.benif'].sudo().search([('name', '=ilike', message_text)], limit=1)
         
         if exact_benif:

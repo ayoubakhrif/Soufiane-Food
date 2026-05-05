@@ -30,6 +30,7 @@
         'views/finance_contact_view.xml',
         'reports/cheque_request_report.xml',
         'reports/finance_benif_report.xml',
+        'reports/finance_talon_report.xml',
         'data/cron.xml',
     ],
     'assets': {

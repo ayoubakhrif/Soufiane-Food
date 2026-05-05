@@ -104,7 +104,7 @@ class AchatArticlePrice(models.Model):
 
                     # Affichage de la traduction (champ traduction de logistique.article)
                     article_sudo = record.article_id.sudo()
-                    article_display = article_sudo.traduction or article_sudo.name
+                    article_display = article_sudo.traduction
 
                     msg = f"📢 *CHANGEMENT DE PRIX (ENQUÊTE)* 📢\n"
                     msg += f"------------------------------------\n"

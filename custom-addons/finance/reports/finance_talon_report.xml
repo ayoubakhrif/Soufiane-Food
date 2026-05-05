@@ -104,6 +104,9 @@
                                         <td>
                                             <t t-if="line['status'] == 'Encaissé'">
                                                 <span style="color: green; font-weight: bold;">Encaissé</span>
+                                                <t t-if="line['date_encaissement']">
+                                                    <br/><span style="font-size: 10px;"><t t-esc="line['date_encaissement'].strftime('%d/%m/%y')"/></span>
+                                                </t>
                                             </t>
                                             <t t-else="">
                                                 <span style="color: orange;">En cours</span>

@@ -719,6 +719,7 @@ class FinanceTalon(models.Model):
                 'date': c.date_emission,
                 'amount': c.amount,
                 'status': 'Encaissé' if c.encours == 'encaisse' else 'En cours',
+                'date_encaissement': c.date_encaissement,
                 'type': 'Chèque'
             })
         # Effects
@@ -729,6 +730,7 @@ class FinanceTalon(models.Model):
                 'date': e.date_emission,
                 'amount': e.montant,
                 'status': 'Encaissé' if e.state == 'encaisse' else 'En cours',
+                'date_encaissement': e.date_encaissement,
                 'type': 'Effet'
             })
         # Sort by ref (numeric if possible)

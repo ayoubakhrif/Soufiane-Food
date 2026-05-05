@@ -268,9 +268,8 @@ class WhatsAppFinanceController(http.Controller):
                 t_label = type_labels.get(d.type, d.type)
                 
                 d_status = "✅" if d.encours == 'encaisse' else "⏳"
-                d_date = f" {d.date_encaissement.strftime('%d/%m/%y')}" if d.date_encaissement else ""
                 
-                msg += f"• {d.benif_id.name}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}{d_date}\n"
+                msg += f"• {d.benif_id.name}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}\n"
             
         return {
             'status': 'success',

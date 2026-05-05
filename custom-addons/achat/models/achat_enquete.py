@@ -92,13 +92,10 @@ class AchatArticlePrice(models.Model):
 
             # If price changed, send notification
             _logger.info("Price Bot: Article %s - Old: %s, New: %s", record.article_id.name, old_price, new_price)
-            if old_price != new_price:
+            if old_price != 0 and old_price != new_price:
                 try:
                     # Determine trend
-                    if old_price == 0:
-                        trend_msg = "🆕 *NOUVEAU PRIX*"
-                        icon = "⭐"
-                    elif new_price > old_price:
+                    if new_price > old_price:
                         trend_msg = "🔺 *AUGMENTATION*"
                         icon = "📈"
                     else:

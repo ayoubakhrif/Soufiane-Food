@@ -67,9 +67,18 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response = f"📋 *Paiements du BL : {dossier.name}*\n"
         response += f"━━━━━━━━━━━━━━━━━━\n\n"
         
-        response += f"🏢 *Société* : {dossier.ste_id.name or 'N/A'}\n"
-        response += f"👤 *Fournisseur* : {dossier.supplier_id.name or 'N/A'}\n"
-        response += f"📅 *ETA* : {dossier.eta.strftime('%d/%m/%Y') if dossier.eta else 'N/A'}\n\n"
+        # Fallback dynamically to the first linked entry if common fields are empty on the dossier record
+        entry = dossier.entry_ids[0] if dossier.entry_ids else None
+        
+        ste_name = dossier.ste_id.name or (entry and entry.ste_id.name) or 'N/A'
+        supplier_name = dossier.supplier_id.name or (entry and entry.supplier_id.name) or 'N/A'
+        
+        eta_val = dossier.eta or (entry and entry.eta) or False
+        eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else 'N/A'
+        
+        response += f"🏢 *Société* : {ste_name}\n"
+        response += f"👤 *Fournisseur* : {supplier_name}\n"
+        response += f"📅 *ETA* : {eta_str}\n\n"
         
         response += f"📊 *Synthèse des Charges* :\n"
         response += f"• 🚢 *Fret* : {dossier.fret_amount:,.2f} DH\n"

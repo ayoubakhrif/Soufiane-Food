@@ -32,13 +32,6 @@ class TransportTripRemorqueArab(models.Model):
     charge_mixed = fields.Float(string='مصاريف متنوعة (تحدد في الملاحظات)', tracking=True)
     note = fields.Text(string='ملاحظة (مصاريف متنوعة)')
     going_price = fields.Float(string='سعر الذهاب', tracking=True)
-    returning_price = fields.Float(string='سعر العودة', tracking=True)
-    total_price = fields.Float(
-        string='إجمالي سعر الذهاب والعودة',
-        compute='_compute_total_price',
-        store=True,
-        tracking=True
-    )
     profit = fields.Float(
         string='الربح',
         compute='_compute_profit',
@@ -46,6 +39,10 @@ class TransportTripRemorqueArab(models.Model):
         tracking=True
     )
     is_paid = fields.Boolean(string='مدفوع', default=False, tracking=True)
+    payment_status = fields.Selection([
+        ('paid', 'مدفوع'),
+        ('unpaid', 'غير مدفوع')
+    ], string='الحالة', compute='_compute_payment_status', store=True)
     is_checked = fields.Boolean(string="تم التحقق", default=False)
     total_amount = fields.Float(
         string='إجمالي المصاريف',
@@ -77,15 +74,15 @@ class TransportTripRemorqueArab(models.Model):
                 (record.charge_mixed or 0.0)
             )
 
-    @api.depends('going_price', 'returning_price')
-    def _compute_total_price(self):
-        for rec in self:
-            rec.total_price = rec.going_price + rec.returning_price
+    @api.depends('is_paid')
+    def _compute_payment_status(self):
+        for record in self:
+            record.payment_status = 'paid' if record.is_paid else 'unpaid'
 
-    @api.depends('total_price', 'total_amount')
+    @api.depends('going_price', 'total_amount')
     def _compute_profit(self):
         for rec in self:
-            rec.profit = rec.total_price - rec.total_amount
+            rec.profit = (rec.going_price or 0.0) - (rec.total_amount or 0.0)
 
     @api.constrains('charge_mixed', 'note')
     def _check_mixed_note(self):

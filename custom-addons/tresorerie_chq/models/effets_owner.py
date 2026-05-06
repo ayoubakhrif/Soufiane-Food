@@ -17,7 +17,7 @@ class EffetsOwner(models.Model):
 
     # Back-reference: all cheque lines that reference this owner
     cheque_line_ids = fields.One2many(
-        'tresorerie_chq.paiement.cheque.line',
+        'tresorerie_chq.cheque',
         'owner_id',
         string='Chèques',
         readonly=True,
@@ -25,7 +25,7 @@ class EffetsOwner(models.Model):
 
     # Back-reference: all effet lines that reference this owner
     effet_line_ids = fields.One2many(
-        'tresorerie_chq.paiement.effet.line',
+        'tresorerie_chq.effet',
         'owner_id',
         string='Effets',
         readonly=True,

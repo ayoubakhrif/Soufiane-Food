@@ -42,8 +42,84 @@ class WhatsAppFinanceController(http.Controller):
             _logger.info(f"Ignoring request from group {group_id} in Finance Agent")
             return {'status': 'ignored', 'message': 'This agent only handles the Finance Group.'}
 
+        # 3.1 Handle Documentation Interactive Choices
+        if message_text.startswith("DOC_OUI_"):
+            try:
+                phys_id = int(message_text[8:])
+                physical = request.env['finance.cheque.physical'].sudo().browse(phys_id)
+                if physical.exists():
+                    choices = [
+                        f"DOC_LINK_VIDE_{physical.id}",
+                        f"DOC_LINK_DOC_{physical.id}",
+                        f"DOC_LINK_CHQ_{physical.id}"
+                    ]
+                    choices_text = (
+                        f"Voici les documents disponibles pour le chèque *#{physical.name}* :\n"
+                        f"1- Chèque vide\n"
+                        f"2- Documentation\n"
+                        f"3- Chèque\n\n"
+                        f"Veuillez choisir le numéro du document que vous souhaitez ouvrir."
+                    )
+                    return {
+                        'status': 'multiple_choices',
+                        'message': choices_text,
+                        'choices': choices
+                    }
+            except Exception as e:
+                _logger.error(f"Error handling DOC_OUI_ choice: {str(e)}")
+
+        if message_text.startswith("DOC_NON_"):
+            return {
+                'status': 'success',
+                'response': "D'accord, je reste à votre disposition si vous avez d'autres demandes ! 😊"
+            }
+
+        if message_text.startswith("DOC_LINK_"):
+            try:
+                pdf_data = None
+                file_name = ""
+                name = ""
+                if message_text.startswith("DOC_LINK_VIDE_"):
+                    phys_id = int(message_text[14:])
+                    physical = request.env['finance.cheque.physical'].sudo().browse(phys_id)
+                    pdf_data = physical.chq_vide_pdf
+                    file_name = physical.chq_vide_filename or f"Cheque_Vide_{physical.name}.pdf"
+                    name = "Chèque vide"
+                elif message_text.startswith("DOC_LINK_DOC_"):
+                    phys_id = int(message_text[13:])
+                    physical = request.env['finance.cheque.physical'].sudo().browse(phys_id)
+                    pdf_data = physical.doc_pdf
+                    file_name = physical.doc_filename or f"Documentation_{physical.name}.pdf"
+                    name = "Documentation"
+                elif message_text.startswith("DOC_LINK_CHQ_"):
+                    phys_id = int(message_text[13:])
+                    physical = request.env['finance.cheque.physical'].sudo().browse(phys_id)
+                    pdf_data = physical.cheque_copy_pdf
+                    file_name = physical.cheque_copy_filename or f"Cheque_{physical.name}.pdf"
+                    name = "Chèque"
+                
+                if pdf_data:
+                    # Odoo binaries are already base64-encoded bytes or string
+                    pdf_base64 = pdf_data.decode('utf-8') if isinstance(pdf_data, bytes) else pdf_data
+                    return {
+                        'status': 'success',
+                        'product_name': f"{name} du chèque #{physical.name}",
+                        'pdf_base64': pdf_base64,
+                        'file_name': file_name
+                    }
+                else:
+                    return {
+                        'status': 'success',
+                        'response': f"Désolé, le fichier pour *{name}* de ce chèque n'a pas été uploadé dans Odoo."
+                    }
+            except Exception as e:
+                _logger.error(f"Error handling DOC_LINK_ choice: {str(e)}")
+
+
+
         # 4. Handle Talon Logic
         if message_text.lower().startswith("talon"):
+
             company_part = message_text[5:].strip()
             if company_part:
                 # Search for company
@@ -277,8 +353,24 @@ class WhatsAppFinanceController(http.Controller):
                 d_status = "✅" if (d.encours == 'encaisse' or d.date_encaissement) else "⏳"
                 
                 msg += f"• {d.benif_id.name or 'Inconnu'}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}\n"
+                
+                # Retrieve and append Google Drive links of this datacheque split
+                links = []
+                if d.chq_pdf_url:
+                    links.append(f"CHQ: {d.chq_pdf_url}")
+                if d.doc_pdf_url:
+                    links.append(f"DOC: {d.doc_pdf_url}")
+                if d.dem_pdf_url:
+                    links.append(f"DEM: {d.dem_pdf_url}")
+                
+                if links:
+                    msg += f"  ↳ 🔗 { ' | '.join(links) }\n"
             
+        # Interactive followup question for documentation
+        choices = [f"DOC_OUI_{physical.id}", f"DOC_NON_{physical.id}"]
+        choices_text = msg + "\n\nEst ce que tu veux voir la documentation ?\n1- Oui\n2- Non"
         return {
-            'status': 'success',
-            'response': msg
+            'status': 'multiple_choices',
+            'message': choices_text,
+            'choices': choices
         }

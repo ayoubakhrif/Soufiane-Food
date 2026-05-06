@@ -86,16 +86,19 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Copie Chèque" name="cheque_copy">
-                            <group string="Copie physique du chèque">
-                                <group>
-                                    <field name="cheque_copy_pdf"
-                                           widget="binary"
-                                           filename="cheque_copy_filename"
-                                           string="Uploader la copie PDF"/>
+                        <page string="Documents" name="cheque_documents">
+                            <group>
+                                <group string="Fichiers PDF à uploader">
+                                    <field name="chq_vide_pdf" widget="binary" filename="chq_vide_filename" string="Chèque vide (PDF)"/>
+                                    <field name="chq_vide_filename" invisible="1"/>
+
+                                    <field name="doc_pdf" widget="binary" filename="doc_filename" string="Documentation (PDF)"/>
+                                    <field name="doc_filename" invisible="1"/>
+
+                                    <field name="cheque_copy_pdf" widget="binary" filename="cheque_copy_filename" string="Chèque (PDF)"/>
                                     <field name="cheque_copy_filename" invisible="1"/>
                                 </group>
-                                <group>
+                                <group string="Détection d'anomalies (IA)">
                                     <field name="is_fault"
                                            string="🔴 Faux (détecté par l'IA)"
                                            widget="boolean_toggle"/>
@@ -110,6 +113,7 @@
                             </div>
                         </page>
                     </notebook>
+
                 </sheet>
                 <div class="oe_chatter" groups="finance.group_finance_user">
                      <field name="message_follower_ids"/>
@@ -119,7 +123,7 @@
             </form>
         </field>
     </record>
-
+ 
     <record id="action_finance_cheque_physical" model="ir.actions.act_window">
         <field name="name">Chèques Physiques</field>
         <field name="res_model">finance.cheque.physical</field>
@@ -129,7 +133,7 @@
 
     <menuitem id="menu_finance_cheque_physical"
               name="Chèques Physiques"
-              parent="data_finance_menu"
+              parent="finance_root_menu"
               action="action_finance_cheque_physical"
-              sequence="5"/>
+              sequence="15"/>
 </odoo>

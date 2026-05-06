@@ -31,14 +31,22 @@ class FinanceChequePhysical(models.Model):
     ], string='Status Encaissement', compute='_compute_encours', store=True)
 
     # ------------------------------------------------------------
-    # COPIE PHYSIQUE DU CHÈQUE (PDF uploadé manuellement)
+    # DOCUMENTS PDF EN BASE
     # ------------------------------------------------------------
+    chq_vide_pdf = fields.Binary(string='Chèque vide (PDF)', attachment=True, tracking=True)
+    chq_vide_filename = fields.Char(string='Nom du fichier Chèque vide')
+    
+    doc_pdf = fields.Binary(string='Documentation (PDF)', attachment=True, tracking=True)
+    doc_filename = fields.Char(string='Nom du fichier Documentation')
+    
     cheque_copy_pdf = fields.Binary(
-        string="Copie du chèque (PDF)",
+        string="Chèque (PDF)",
         attachment=True,
-        help="PDF de la copie physique du chèque à vérifier par l'IA"
+        tracking=True,
+        help="PDF de la copie physique du chèque"
     )
-    cheque_copy_filename = fields.Char(string="Nom du fichier")
+    cheque_copy_filename = fields.Char(string="Nom du fichier Chèque")
+
 
     # ------------------------------------------------------------
     # FLAG IA

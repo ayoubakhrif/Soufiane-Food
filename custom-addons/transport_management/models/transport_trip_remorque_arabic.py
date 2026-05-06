@@ -25,6 +25,8 @@ class TransportTripRemorqueArab(models.Model):
     destination = fields.Selection([
         ('tanger', 'طنجة'),
         ('fenideq', 'الفنيدق'),
+        ('tetouan', 'تطوان'),
+        ('casablanca', 'الدار البيضاء'),
     ], string='الوجهة', tracking=True)
     charge_fuel = fields.Float(string='المازوت', tracking=True)
     charge_driver = fields.Float(string='مصاريف السائق', tracking=True)

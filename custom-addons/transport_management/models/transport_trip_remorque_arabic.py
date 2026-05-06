@@ -16,8 +16,6 @@ class TransportTripRemorqueArab(models.Model):
         tracking=True, 
         domain=[('remorque', '=', True)]
     )
-    client_id = fields.Many2one('transport.client', string='الزبون', required=True, tracking=True)
-
     # Deprecated fields (kept for data safety, but hidden in views)
     driver = fields.Char(string='السائق (قديم)')
     client = fields.Char(string='الزبون (قديم)')

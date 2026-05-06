@@ -38,7 +38,6 @@
                     <group string="معلومات الرحلة">
                         <group>
                             <field name="driver_remorque_id"/>
-                            <field name="client_id"/>
                             <field name="going_price"/>
                         </group>
                         <group>
@@ -113,7 +112,6 @@
         <field name="arch" type="xml">
             <search string="البحث في رحلات النقل مقطورة">
                 <field name="driver_remorque_id"/>
-                <field name="client_id"/>
                 <field name="destination"/>
                 <field name="date"/>
                 
@@ -125,7 +123,6 @@
 
                 <group expand="0" string="تجميع حسب">
                     <filter string="السائق" name="group_driver" domain="[]" context="{'group_by': 'driver_remorque_id'}"/>
-                    <filter string="الزبون" name="group_client" domain="[]" context="{'group_by': 'client_id'}"/>
                     <filter string="الوجهة" name="group_dest" domain="[]" context="{'group_by': 'destination'}"/>
                     <filter string="التاريخ" name="group_date" domain="[]" context="{'group_by': 'date'}"/>
                 </group>
@@ -140,7 +137,6 @@
         <field name="arch" type="xml">
             <pivot string="تحليل النقل مقطورة">
                 <field name="date" type="row" interval="day"/>
-                <field name="client_id" type="row"/>
                 <field name="total_amount" type="measure"/>
             </pivot>
         </field>

@@ -4,7 +4,7 @@
     'summary': 'Gestion interne de la trésorerie et des paiements',
     'description': 'Module spécifique pour gérer les paiements internes indépendamment des partenaires standards.',
     'category': 'Accounting/Localizations',
-    'author': 'Your Company',
+    'author': 'Gestia',
     'depends': ['base'],
     'data': [
         'security/security.xml',

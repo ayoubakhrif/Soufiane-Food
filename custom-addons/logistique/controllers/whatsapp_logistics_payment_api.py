@@ -76,8 +76,16 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         eta_val = dossier.eta or (entry and entry.eta) or False
         eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else 'N/A'
         
+        # Article and Incoterm (extracted from entry)
+        article_name = (entry and entry.article_id.name) or 'N/A'
+        incoterm_val = 'N/A'
+        if entry and entry.incoterm:
+            incoterm_val = dict(entry._fields['incoterm'].selection or {}).get(entry.incoterm, entry.incoterm).upper()
+        
         response += f"🏢 *Société* : {ste_name}\n"
         response += f"👤 *Fournisseur* : {supplier_name}\n"
+        response += f"📦 *Article* : {article_name}\n"
+        response += f"🌐 *Incoterm* : {incoterm_val}\n"
         response += f"📅 *ETA* : {eta_str}\n\n"
         
         response += f"📊 *Synthèse des Charges* :\n"

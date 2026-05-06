@@ -76,8 +76,14 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         eta_val = dossier.eta or (entry and entry.eta) or False
         eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else 'N/A'
         
-        # Article and Incoterm (extracted from entry)
-        article_name = (entry and entry.article_id.name) or 'N/A'
+        # Article (achat_article_id from achat module or fallback to article_id) and Incoterm (extracted from entry)
+        article_name = 'N/A'
+        if entry:
+            if hasattr(entry, 'achat_article_id') and entry.achat_article_id:
+                article_name = entry.achat_article_id.name or 'N/A'
+            elif entry.article_id:
+                article_name = entry.article_id.name or 'N/A'
+        
         incoterm_val = 'N/A'
         if entry and entry.incoterm:
             incoterm_val = dict(entry._fields['incoterm'].selection or {}).get(entry.incoterm, entry.incoterm).upper()
@@ -91,7 +97,7 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"📊 *Synthèse des Charges* :\n"
         response += f"• 🚢 *Fret* : {dossier.fret_amount:,.2f} DH\n"
         response += f"• ⚓ *THC* : {dossier.thc_amount:,.2f} DH\n"
-        response += f"•  Magasinage : {dossier.magasinage_amount:,.2f} DH\n"
+        response += f"•     Magasinage : {dossier.magasinage_amount:,.2f} DH\n"
         response += f"• ⏳ *Surestarie* : {dossier.surestarie_amount:,.2f} DH\n\n"
 
         # Apply Moroccan Dirham spacing format

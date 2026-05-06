@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- =================================================================
+         Tree View
+    ================================================================= -->
+    <record id="view_tresorerie_chq_cheque_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.cheque.tree</field>
+        <field name="model">tresorerie_chq.cheque</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi des Chèques" 
+                  decoration-info="state == 'stock'"
+                  decoration-warning="state in ['remis', 'banque']"
+                  decoration-success="state == 'encaisse'"
+                  decoration-danger="state == 'impaye'">
+                <field name="note"/>
+                <field name="client_id"/>
+                <field name="owner_display" string="Porteur"/>
+                <field name="check_date"/>
+                <field name="amount" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'stock'"
+                       decoration-warning="state in ['remis', 'banque']"
+                       decoration-success="state == 'encaisse'"
+                       decoration-danger="state == 'impaye'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Form View
+    ================================================================= -->
+    <record id="view_tresorerie_chq_cheque_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.cheque.form</field>
+        <field name="model">tresorerie_chq.cheque</field>
+        <field name="arch" type="xml">
+            <form string="Suivi du Chèque">
+                <header>
+                    <!-- State Transitions Buttons -->
+                    <button name="action_remis" 
+                            string="Remettre au client" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state == 'remis' or (state not in ['stock', 'impaye'] and not is_manager)"/>
+                    
+                    <button name="action_banque" 
+                            string="Envoyer à la banque" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state == 'banque' or (state not in ['stock', 'impaye'] and not is_manager)"/>
+                    
+                    <button name="action_encaisse" 
+                            string="Encaisser" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state == 'encaisse' or (state != 'banque' and not is_manager)"/>
+                    
+                    <button name="action_impaye" 
+                            string="Impayé" 
+                            type="object" 
+                            class="btn-danger" 
+                            invisible="state == 'impaye' or (state != 'banque' and not is_manager)"/>
+                    
+                    <button name="action_stock" 
+                            string="Remettre en stock" 
+                            type="object" 
+                            invisible="state == 'stock' or not is_manager"/>
+
+                    <!-- Statusbar Widget -->
+                    <field name="state" widget="statusbar" statusbar_visible="stock,remis,banque,encaisse,impaye"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="note" string="Numéro de chèque"/>
+                        <h1>
+                            <!-- HTML / UI limits size to 7 on typing -->
+                            <field name="note" placeholder="7 chiffres" required="1" size="7" maxlength="7"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Détails Financiers">
+                            <field name="amount" string="Montant (MAD)"/>
+                            <field name="check_date" string="Date d'échéance"/>
+                            <field name="is_manager" invisible="1"/>
+                        </group>
+                        <group string="Acteurs">
+                            <field name="paiement_id" string="Paiement d'origine" readonly="1"/>
+                            <field name="client_id" string="Client d'origine"/>
+                            <field name="owner_id" string="Porteur de chèque" placeholder="— Client —"/>
+                            <field name="soufiane_owner_id" string="Client soufiane" invisible="client_id != 1 and client_id != 'Soufiane'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Search View
+    ================================================================= -->
+    <record id="view_tresorerie_chq_cheque_search" model="ir.ui.view">
+        <field name="name">tresorerie_chq.cheque.search</field>
+        <field name="model">tresorerie_chq.cheque</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Chèques">
+                <field name="note"/>
+                <field name="client_id"/>
+                <field name="owner_id"/>
+                <separator/>
+                <filter string="En Stock" name="state_stock" domain="[('state', '=', 'stock')]"/>
+                <filter string="Remis au client" name="state_remis" domain="[('state', '=', 'remis')]"/>
+                <filter string="Envoyé à la banque" name="state_banque" domain="[('state', '=', 'banque')]"/>
+                <filter string="Encaissé" name="state_encaisse" domain="[('state', '=', 'encaisse')]"/>
+                <filter string="Impayé" name="state_impaye" domain="[('state', '=', 'impaye')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Date d'échéance" name="group_date" context="{'group_by': 'check_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Action
+    ================================================================= -->
+    <record id="action_tresorerie_chq_cheque" model="ir.actions.act_window">
+        <field name="name">Suivi des Chèques</field>
+        <field name="res_model">tresorerie_chq.cheque</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_tresorerie_chq_cheque_search"/>
+        <field name="context">{'search_default_group_state': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun chèque enregistré.
+            </p>
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Menu Item
+    ================================================================= -->
+    <menuitem id="menu_tresorerie_chq_cheque_action"
+              name="Suivi des Chèques"
+              parent="menu_tresorerie_chq_paiements"
+              action="action_tresorerie_chq_cheque"
+              sequence="20"/>
+</odoo>

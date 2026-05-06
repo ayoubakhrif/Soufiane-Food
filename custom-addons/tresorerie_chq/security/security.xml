@@ -22,14 +22,5 @@
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
-        <!-- Séquence pour les références de sorties -->
-        <record id="seq_tresorerie_chq_sortie" model="ir.sequence">
-            <field name="name">Trésorerie Chq/Eff - Sortie</field>
-            <field name="code">tresorerie_chq.sortie</field>
-            <field name="prefix">TSOR/%(year)s/</field>
-            <field name="padding">5</field>
-            <field name="number_next">1</field>
-            <field name="number_increment">1</field>
-        </record>
     </data>
 </odoo>

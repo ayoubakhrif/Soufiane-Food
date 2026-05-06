@@ -61,6 +61,14 @@
                                     <field name="note"
                                            string="N° chèque"
                                            optional="show"/>
+                                    <field name="state"
+                                           string="État"
+                                           readonly="1"
+                                           widget="badge"
+                                           decoration-info="state == 'stock'"
+                                           decoration-warning="state in ['remis', 'banque']"
+                                           decoration-success="state == 'encaisse'"
+                                           decoration-danger="state == 'impaye'"/>
                                 </tree>
                             </field>
                             <group>
@@ -94,6 +102,14 @@
                                     <field name="note"
                                            string="N° effet"
                                            optional="show"/>
+                                    <field name="state"
+                                           string="État"
+                                           readonly="1"
+                                           widget="badge"
+                                           decoration-info="state == 'stock'"
+                                           decoration-warning="state in ['remis', 'banque']"
+                                           decoration-success="state == 'encaisse'"
+                                           decoration-danger="state == 'impaye'"/>
                                 </tree>
                             </field>
                             <group>

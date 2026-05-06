@@ -5,6 +5,7 @@ class TresorerieChqClient(models.Model):
     _description = 'Client (Trésorerie Chèques & Effets)'
 
     name = fields.Char(string='Nom', required=True)
+    cin = fields.Char(string='CIN')
     phone = fields.Char(string='Téléphone')
     email = fields.Char(string='E-mail')
     address = fields.Text(string='Adresse')

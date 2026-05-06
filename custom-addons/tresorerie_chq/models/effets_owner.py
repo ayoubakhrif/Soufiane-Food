@@ -11,6 +11,7 @@ class EffetsOwner(models.Model):
     _order = 'name'
 
     name = fields.Char(string='Nom du porteur', required=True)
+    cin = fields.Char(string='CIN')
     phone = fields.Char(string='Téléphone')
     note = fields.Text(string='Remarques')
 

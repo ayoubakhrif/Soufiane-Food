@@ -33,13 +33,13 @@ class TresoreriePaiement(models.Model):
     # Chèques et Effets: separate detail lines
     # ------------------------------------------------------------------
     cheque_line_ids = fields.One2many(
-        'tresorerie_chq.paiement.cheque.line',
+        'tresorerie_chq.cheque',
         'paiement_id',
         string='Chèques',
     )
 
     effet_line_ids = fields.One2many(
-        'tresorerie_chq.paiement.effet.line',
+        'tresorerie_chq.effet',
         'paiement_id',
         string='Effets',
     )
@@ -52,7 +52,7 @@ class TresoreriePaiement(models.Model):
         digits=(10, 2),
     )
 
-    # Computed single check date for backward/sortie query compatibility
+    # Computed single check date for backward/sorting compatibility
     check_date = fields.Date(
         string='Date d\'échéance',
         compute='_compute_check_date',

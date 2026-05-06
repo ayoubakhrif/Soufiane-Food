@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Clients">
                 <field name="name"/>
+                <field name="cin" optional="show"/>
                 <field name="phone"/>
                 <field name="email"/>
             </tree>
@@ -27,6 +28,7 @@
                     </div>
                     <group>
                         <group>
+                            <field name="cin"/>
                             <field name="phone"/>
                             <field name="email"/>
                         </group>

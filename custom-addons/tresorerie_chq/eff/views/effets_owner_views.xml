@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =================================================================
+         Tree View
+    ================================================================= -->
+    <record id="view_tresorerie_chq_effets_owner_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.effets.owner.tree</field>
+        <field name="model">tresorerie_chq.effets.owner</field>
+        <field name="arch" type="xml">
+            <tree string="Porteurs de Chèques / Effets">
+                <field name="name"/>
+                <field name="phone"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Form View
+    ================================================================= -->
+    <record id="view_tresorerie_chq_effets_owner_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.effets.owner.form</field>
+        <field name="model">tresorerie_chq.effets.owner</field>
+        <field name="arch" type="xml">
+            <form string="Porteur de Chèque / Effet">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="phone"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Remarques…"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Action + Menu (under Configurations)
+    ================================================================= -->
+    <record id="action_tresorerie_chq_effets_owner" model="ir.actions.act_window">
+        <field name="name">Porteurs de Chèques / Effets</field>
+        <field name="res_model">tresorerie_chq.effets.owner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Ajouter un nouveau porteur de chèque / effet
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_tresorerie_chq_effets_owner"
+              name="Porteurs de Chèques"
+              parent="menu_tresorerie_chq_donnees"
+              action="action_tresorerie_chq_effets_owner"
+              sequence="20"/>
+
+</odoo>

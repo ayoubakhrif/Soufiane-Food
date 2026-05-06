@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_tresorerie_chq_root" name="Trésorerie Chq/Eff" sequence="51"/>
+
+    <!-- Level 1 Menus -->
+    <menuitem id="menu_tresorerie_chq_paiements" name="Mouvements" parent="menu_tresorerie_chq_root" sequence="10"/>
+    <menuitem id="menu_tresorerie_chq_donnees" name="Configurations" parent="menu_tresorerie_chq_root" sequence="20"/>
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View for Client -->
+    <record id="view_tresorerie_chq_client_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.client.tree</field>
+        <field name="model">tresorerie_chq.client</field>
+        <field name="arch" type="xml">
+            <tree string="Clients">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Client -->
+    <record id="view_tresorerie_chq_client_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.client.form</field>
+        <field name="model">tresorerie_chq.client</field>
+        <field name="arch" type="xml">
+            <form string="Client">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du client"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="address"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Client -->
+    <record id="action_tresorerie_chq_client" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">tresorerie_chq.client</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau client
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for Client under Données -->
+    <menuitem id="menu_tresorerie_chq_clients" 
+              name="Clients" 
+              parent="menu_tresorerie_chq_donnees" 
+              action="action_tresorerie_chq_client" 
+              sequence="10"/>
+</odoo>

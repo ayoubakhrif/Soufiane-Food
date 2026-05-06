@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View for Paiement -->
+    <record id="view_tresorerie_chq_paiement_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.paiement.tree</field>
+        <field name="model">tresorerie_chq.paiement</field>
+        <field name="arch" type="xml">
+            <tree string="Entrées" decoration-info="payment_type in ['cheque', 'effet']">
+                <field name="date"/>
+                <field name="client_id"/>
+                <field name="payment_type"/>
+                <field name="amount" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Paiement -->
+    <record id="view_tresorerie_chq_paiement_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.paiement.form</field>
+        <field name="model">tresorerie_chq.paiement</field>
+        <field name="arch" type="xml">
+            <form string="Entrée Trésorerie">
+                <sheet>
+                    <group>
+                        <group string="Informations générales">
+                            <field name="client_id"/>
+                            <field name="date"/>
+                            <field name="payment_type" widget="radio"/>
+                        </group>
+                        <group string="Montant">
+                             <!-- Computed read-only total -->
+                            <field name="amount"
+                                   string="Total (MAD)"
+                                   readonly="1"/>
+                            <field name="is_soufiane" invisible="1"/>
+                        </group>
+                    </group>
+
+                     <!-- Separate Notebook Pages for Chèques and Effets -->
+                    <notebook>
+                        <!-- Page for Chèques -->
+                        <page string="Chèques" name="cheque_lines" invisible="payment_type != 'cheque'">
+                            <field name="cheque_line_ids"
+                                   context="{'default_check_date': date}">
+                                <tree editable="bottom">
+                                    <field name="owner_id"
+                                           string="Porteur"
+                                           optional="show"
+                                           options="{'no_quick_create': False, 'no_create_edit': False}"
+                                           placeholder="— Client —"/>
+                                    <!-- Specific field for Soufiane -->
+                                    <field name="soufiane_owner_id"
+                                           string="Client soufiane"
+                                           invisible="not parent.is_soufiane"
+                                           optional="show"/>
+                                    <field name="check_date"
+                                           string="Date d'échéance"/>
+                                    <field name="amount"
+                                           string="Montant (MAD)"
+                                           sum="Total"/>
+                                    <field name="note"
+                                           string="N° chèque"
+                                           optional="show"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="amount"
+                                       string="Total (MAD)"
+                                       readonly="1"
+                                       class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+
+                        <!-- Page for Effets -->
+                        <page string="Effets" name="effet_lines" invisible="payment_type != 'effet'">
+                            <field name="effet_line_ids"
+                                   context="{'default_check_date': date}">
+                                <tree editable="bottom">
+                                    <field name="owner_id"
+                                           string="Porteur"
+                                           optional="show"
+                                           options="{'no_quick_create': False, 'no_create_edit': False}"
+                                           placeholder="— Client —"/>
+                                    <!-- Specific field for Soufiane -->
+                                    <field name="soufiane_owner_id"
+                                           string="Client soufiane"
+                                           invisible="not parent.is_soufiane"
+                                           optional="show"/>
+                                    <field name="check_date"
+                                           string="Date d'échéance"/>
+                                    <field name="amount"
+                                           string="Montant (MAD)"
+                                           sum="Total"/>
+                                    <field name="note"
+                                           string="N° effet"
+                                           optional="show"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="amount"
+                                       string="Total (MAD)"
+                                       readonly="1"
+                                       class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_tresorerie_chq_paiement_search" model="ir.ui.view">
+        <field name="name">tresorerie_chq.paiement.search</field>
+        <field name="model">tresorerie_chq.paiement</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Entrées">
+                <field name="client_id"/>
+                <field name="payment_type"/>
+                <filter string="Chèques" name="type_cheque"
+                        domain="[('payment_type', '=', 'cheque')]"/>
+                <filter string="Effets" name="type_effet"
+                        domain="[('payment_type', '=', 'effet')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Client"
+                            name="group_client"
+                            context="{'group_by': 'client_id'}"/>
+                    <filter string="Type de paiement"
+                            name="group_type"
+                            context="{'group_by': 'payment_type'}"/>
+                    <filter string="Date"
+                            name="group_date"
+                            context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Paiement -->
+    <record id="action_tresorerie_chq_paiement" model="ir.actions.act_window">
+        <field name="name">Entrées (Chèques &amp; Effets)</field>
+        <field name="res_model">tresorerie_chq.paiement</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_group_date': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Enregistrer un nouveau paiement par chèque ou effet
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for Paiement under Mouvements -->
+    <menuitem id="menu_tresorerie_chq_paiement_action"
+              name="Entrées"
+              parent="menu_tresorerie_chq_paiements"
+              action="action_tresorerie_chq_paiement"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- =================================================================
+             Search View
+        ================================================================= -->
+        <record id="view_tresorerie_chq_analyse_report_search" model="ir.ui.view">
+            <field name="name">tresorerie_chq.analyse.report.search</field>
+            <field name="model">tresorerie_chq.analyse.report</field>
+            <field name="arch" type="xml">
+                <search string="Analyse des Flux de Trésorerie">
+
+                    <!-- Searchable fields -->
+                    <field name="client_id"/>
+                    <field name="date"/>
+
+                    <!-- Quick filters -->
+                    <filter name="entrées"
+                            string="Entrées seulement"
+                            domain="[('move_type', '=', 'in')]"/>
+                    <filter name="sorties"
+                            string="Sorties seulement"
+                            domain="[('move_type', '=', 'out')]"/>
+                    <separator/>
+                    <filter name="cheques"
+                            string="Chèques"
+                            domain="[('payment_type', '=', 'cheque')]"/>
+                    <filter name="effets"
+                            string="Effets"
+                            domain="[('payment_type', '=', 'effet')]"/>
+                    <separator/>
+                    <filter name="this_year"
+                            string="Cette Année"
+                            domain="[('date', '&gt;=', context_today().strftime('%Y-01-01'))]"/>
+                    <filter name="this_month"
+                            string="Ce Mois"
+                            domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+                    <!-- Group-by options -->
+                    <group expand="1" string="Regrouper par">
+                        <filter string="Mois"
+                                name="group_date_month"
+                                context="{'group_by': 'date:month'}"/>
+                        <filter string="Semaine"
+                                name="group_date_week"
+                                context="{'group_by': 'date:week'}"/>
+                        <filter string="Client"
+                                name="group_client"
+                                context="{'group_by': 'client_id'}"/>
+                        <filter string="Mode de paiement"
+                                name="group_payment_type"
+                                context="{'group_by': 'payment_type'}"/>
+                        <filter string="Sens (Entrée / Sortie)"
+                                name="group_move_type"
+                                context="{'group_by': 'move_type'}"/>
+                    </group>
+
+                </search>
+            </field>
+        </record>
+
+        <!-- =================================================================
+             Pivot View  (default)
+        ================================================================= -->
+        <record id="view_tresorerie_chq_analyse_report_pivot" model="ir.ui.view">
+            <field name="name">tresorerie_chq.analyse.report.pivot</field>
+            <field name="model">tresorerie_chq.analyse.report</field>
+            <field name="arch" type="xml">
+                <pivot string="Analyse des Flux de Trésorerie"
+                       disable_linking="True">
+                    <!-- Default row grouping: by month -->
+                    <field name="date" interval="month" type="row"/>
+                    <!-- Measures -->
+                    <field name="amount_in"   type="measure"/>
+                    <field name="amount_out"  type="measure"/>
+                    <field name="net_balance" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- =================================================================
+             Graph View
+        ================================================================= -->
+        <record id="view_tresorerie_chq_analyse_report_graph" model="ir.ui.view">
+            <field name="name">tresorerie_chq.analyse.report.graph</field>
+            <field name="model">tresorerie_chq.analyse.report</field>
+            <field name="arch" type="xml">
+                <graph string="Flux de Trésorerie" type="bar" stacked="True">
+                    <field name="date" interval="month"/>
+                    <field name="move_type" type="row"/>
+                    <field name="amount_in"  type="measure"/>
+                    <field name="amount_out" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- =================================================================
+             Tree View  (detail / drill-down)
+        ================================================================= -->
+        <record id="view_tresorerie_chq_analyse_report_tree" model="ir.ui.view">
+            <field name="name">tresorerie_chq.analyse.report.tree</field>
+            <field name="model">tresorerie_chq.analyse.report</field>
+            <field name="arch" type="xml">
+                <tree string="Mouvements de Trésorerie"
+                      decoration-success="move_type == 'in'"
+                      decoration-danger="move_type == 'out'">
+                    <field name="date"/>
+                    <field name="move_type"     widget="badge"
+                           decoration-success="move_type == 'in'"
+                           decoration-danger="move_type == 'out'"/>
+                    <field name="payment_type"/>
+                    <field name="client_id"     optional="show"/>
+                    <field name="amount_in"     sum="Total Entrées"/>
+                    <field name="amount_out"    sum="Total Sorties"/>
+                    <field name="net_balance"   sum="Solde Net"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- =================================================================
+             Action
+        ================================================================= -->
+        <record id="action_tresorerie_chq_analyse_report" model="ir.actions.act_window">
+            <field name="name">Analyse des Flux</field>
+            <field name="res_model">tresorerie_chq.analyse.report</field>
+            <field name="view_mode">pivot,graph,tree</field>
+            <field name="context">{'search_default_group_date_month': 1}</field>
+            <field name="search_view_id" ref="view_tresorerie_chq_analyse_report_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Aucun mouvement trouvé pour les filtres sélectionnés.
+                </p>
+            </field>
+        </record>
+
+        <!-- =================================================================
+             Menu Items
+        ================================================================= -->
+        <!-- Parent sub-menu under root Trésorerie -->
+        <menuitem id="menu_tresorerie_chq_analyse"
+                  name="Analyses"
+                  parent="menu_tresorerie_chq_root"
+                  sequence="30"/>
+
+        <menuitem id="menu_tresorerie_chq_analyse_report"
+                  name="Flux de Trésorerie"
+                  parent="menu_tresorerie_chq_analyse"
+                  action="action_tresorerie_chq_analyse_report"
+                  sequence="10"/>
+
+    </data>
+</odoo>

@@ -179,6 +179,6 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="menu_transport_trip_remorque" name="Trips Remorque" parent="menu_transport_operations" action="action_transport_trip_remorque" sequence="2"/>
+    <menuitem id="menu_transport_trip_remorque" name="Trips Remorque" parent="menu_transport_operations" action="action_transport_trip_remorque" sequence="2" groups="group_transport_user,group_transport_manager"/>
 
 </odoo>

@@ -71,5 +71,6 @@
               name="Avances Salaires"
               parent="transport_management.menu_transport_operations"
               action="action_transport_driver_advance"
-              sequence="10"/>
+              sequence="10"
+              groups="group_transport_user,group_transport_manager"/>
 </odoo>

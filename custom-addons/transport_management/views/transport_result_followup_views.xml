@@ -72,5 +72,6 @@
         name="Suivi des Résultats"
         parent="menu_transport_root"
         action="action_transport_result_followup"
-        sequence="50"/>
+        sequence="50"
+        groups="group_transport_user,group_transport_manager"/>
 </odoo>

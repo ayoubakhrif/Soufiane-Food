@@ -1,32 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- ======================================================== -->
+    <!-- TRANSPORT TRIP REMORQUE ARABIC VIEWS                    -->
+    <!-- ======================================================== -->
+
     <!-- Form View -->
     <record id="view_transport_trip_remorque_arab_form" model="ir.ui.view">
         <field name="name">transport.trip.remorque.arab.form</field>
         <field name="model">transport.trip.remorque.arab</field>
         <field name="arch" type="xml">
             <form string="رحلة نقل مقطورة">
-
-                <!-- ================= HEADER ================= -->
-                <header>
-                    <button name="action_confirm_paid"
-                            string="دفع"
-                            type="object"
-                            class="oe_highlight"
-                            invisible="is_paid"/>
-
-                    <button name="action_set_unpaid"
-                            string="غير مدفوع"
-                            type="object"
-                            invisible="not is_paid"/>
-
-                    <field name="is_paid" widget="boolean_button"
-                        options="{'terminology': 'paid'}"
-                        invisible="1"/>
-                </header>
-
                 <sheet>
-
                     <!-- ================= TITLE ================= -->
                     <div class="oe_title">
                         <h1>
@@ -64,8 +48,6 @@
                                 class="oe_inline"
                                 widget="monetary"/>
                             <field name="profit"/>
-                            <field name="profit_paid" readonly="1"/>
-                            <field name="profit_unpaid" readonly="1"/>
                         </group>
                     </group>
 
@@ -92,15 +74,10 @@
         <field name="name">transport.trip.remorque.arab.tree</field>
         <field name="model">transport.trip.remorque.arab</field>
         <field name="arch" type="xml">
-            <tree string="رحلات النقل مقطورة" decoration-success="is_paid">
-                <field name="is_paid" column_invisible="True"/>
+            <tree string="رحلات النقل مقطورة">
                 <field name="date"/>
                 <field name="driver_remorque_id"/>
-                <field name="profit_paid" sum="إجمالي الربح المدفوع"/>
-                <field name="profit_unpaid" sum="إجمالي الربح غير المدفوع"/>
-                <field name="payment_status" widget="badge" decoration-success="payment_status == 'paid'" decoration-danger="payment_status == 'unpaid'"/>
-                <button name="action_confirm_paid" string="دفع" type="object" class="btn-success" invisible="is_paid"/>
-                <button name="action_set_unpaid" string="إلغاء الدفع" type="object" class="btn-secondary" invisible="not is_paid"/>
+                <field name="profit" sum="إجمالي الربح"/>
             </tree>
         </field>
     </record>
@@ -115,8 +92,6 @@
                 <field name="destination"/>
                 <field name="date"/>
                 
-                <filter string="مدفوع" name="paid" domain="[('is_paid', '=', True)]"/>
-                <filter string="غير مدفوع" name="unpaid" domain="[('is_paid', '=', False)]"/>
                 <separator/>
                 <filter string="اليوم" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="هذا الشهر" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
@@ -154,11 +129,12 @@
         </field>
     </record>
 
-    <!-- Action -->
+    <!-- Window Action -->
     <record id="action_transport_trip_remorque_arab" model="ir.actions.act_window">
         <field name="name">رحلات النقل مقطورة (عربي)</field>
         <field name="res_model">transport.trip.remorque.arab</field>
         <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="context">{'search_default_group_driver': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 أنشئ رحلة نقل مقطورة جديدة!
@@ -166,12 +142,110 @@
         </field>
     </record>
 
-    <!-- Menus -->
+
+    <!-- ======================================================== -->
+    <!-- DRIVER BALANCE RECONCILIATION ARABIC VIEWS              -->
+    <!-- ======================================================== -->
+
+    <!-- Tree View -->
+    <record id="view_transport_driver_balance_arab_tree" model="ir.ui.view">
+        <field name="name">transport.driver.balance.arab.tree</field>
+        <field name="model">transport.driver.balance.arab</field>
+        <field name="arch" type="xml">
+            <tree string="تسوية حسابات السائقين (مقطورة)" create="true" delete="true">
+                <field name="driver_id"/>
+                <field name="total_profit" sum="إجمالي الأرباح"/>
+                <field name="total_paid" sum="إجمالي المبالغ المستلمة"/>
+                <field name="total_unpaid" sum="إجمالي المبالغ غير المدفوعة"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_transport_driver_balance_arab_form" model="ir.ui.view">
+        <field name="name">transport.driver.balance.arab.form</field>
+        <field name="model">transport.driver.balance.arab</field>
+        <field name="arch" type="xml">
+            <form string="تسوية حساب السائق">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="driver_id" class="oe_edit_only" string="السائق / الشوفير"/>
+                        <h1>
+                            <field name="driver_id" placeholder="اختر الشوفير / السائق"/>
+                        </h1>
+                    </div>
+
+                    <!-- Financial Balance Dashboard -->
+                    <group string="ملخص الحساب المالي">
+                        <group>
+                            <field name="total_profit" readonly="1" class="oe_inline" style="font-size: 1.5em; font-weight: bold; color: #2C3E50;"/>
+                            <field name="total_paid" readonly="1" class="oe_inline" style="font-size: 1.5em; font-weight: bold; color: #27AE60;"/>
+                            <field name="total_unpaid" readonly="1" class="oe_inline" style="font-size: 1.5em; font-weight: bold; color: #C0392B;"/>
+                        </group>
+                    </group>
+
+                    <!-- Payment lines (Ledger) -->
+                    <notebook>
+                        <page string="سجل المبالغ المستلمة (الدفعات)">
+                            <field name="payment_line_ids" context="{'default_balance_id': active_id}">
+                                <tree string="الدفعات" editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount" sum="إجمالي المبالغ المستلمة"/>
+                                    <field name="note" placeholder="أدخل أي ملاحظة هنا"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_transport_driver_balance_arab_search" model="ir.ui.view">
+        <field name="name">transport.driver.balance.arab.search</field>
+        <field name="model">transport.driver.balance.arab</field>
+        <field name="arch" type="xml">
+            <search string="البحث في حسابات السائقين">
+                <field name="driver_id"/>
+                <group expand="0" string="تجميع حسب">
+                    <filter string="السائق" name="group_driver" domain="[]" context="{'group_by': 'driver_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_transport_driver_balance_arab" model="ir.actions.act_window">
+        <field name="name">تسوية حسابات السائقين (مقطورة)</field>
+        <field name="res_model">transport.driver.balance.arab</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                أنشئ تسوية حساب جديدة لسائق مقطورة!
+            </p>
+        </field>
+    </record>
+
+
+    <!-- ======================================================== -->
+    <!-- MENUITEMS CONFIGURATION                                 -->
+    <!-- ======================================================== -->
+
+    <!-- Trips Menu (Arabic User) -->
     <menuitem id="menu_transport_trip_remorque_arab" 
               name="رحلات المقطورة (عربي)" 
               parent="menu_transport_operations" 
               action="action_transport_trip_remorque_arab" 
               sequence="3"
+              groups="group_transport_remorque_arab,group_transport_manager"/>
+
+    <!-- Driver Balances Menu (Arabic User) -->
+    <menuitem id="menu_transport_driver_balance_arab" 
+              name="تسوية حساب الشوفيرات (عربي)" 
+              parent="menu_transport_operations" 
+              action="action_transport_driver_balance_arab" 
+              sequence="4"
               groups="group_transport_remorque_arab,group_transport_manager"/>
 
 </odoo>

@@ -40,6 +40,18 @@ class TransportTripRemorqueArab(models.Model):
         store=True,
         tracking=True
     )
+    profit_paid = fields.Float(
+        string='الربح المدفوع',
+        compute='_compute_split_profits',
+        store=True,
+        tracking=True
+    )
+    profit_unpaid = fields.Float(
+        string='الربح غير المدفوع',
+        compute='_compute_split_profits',
+        store=True,
+        tracking=True
+    )
     is_paid = fields.Boolean(string='مدفوع', default=False, tracking=True)
     payment_status = fields.Selection([
         ('paid', 'مدفوع'),
@@ -85,6 +97,16 @@ class TransportTripRemorqueArab(models.Model):
     def _compute_profit(self):
         for rec in self:
             rec.profit = (rec.going_price or 0.0) - (rec.total_amount or 0.0)
+
+    @api.depends('profit', 'is_paid')
+    def _compute_split_profits(self):
+        for rec in self:
+            if rec.is_paid:
+                rec.profit_paid = rec.profit
+                rec.profit_unpaid = 0.0
+            else:
+                rec.profit_paid = 0.0
+                rec.profit_unpaid = rec.profit
 
     @api.constrains('charge_mixed', 'note')
     def _check_mixed_note(self):

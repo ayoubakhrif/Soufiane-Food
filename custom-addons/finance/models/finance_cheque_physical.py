@@ -33,19 +33,19 @@ class FinanceChequePhysical(models.Model):
     # ------------------------------------------------------------
     # DOCUMENTS PDF EN BASE
     # ------------------------------------------------------------
-    chq_vide_pdf = fields.Binary(string='Chèque vide (PDF)', attachment=True, tracking=True)
+    chq_vide_pdf = fields.Binary(string='Chèque vide (PDF)', attachment=True)
     chq_vide_filename = fields.Char(string='Nom du fichier Chèque vide')
     
-    doc_pdf = fields.Binary(string='Documentation (PDF)', attachment=True, tracking=True)
+    doc_pdf = fields.Binary(string='Documentation (PDF)', attachment=True)
     doc_filename = fields.Char(string='Nom du fichier Documentation')
     
     cheque_copy_pdf = fields.Binary(
         string="Chèque (PDF)",
         attachment=True,
-        tracking=True,
         help="PDF de la copie physique du chèque"
     )
     cheque_copy_filename = fields.Char(string="Nom du fichier Chèque")
+
 
 
     # ------------------------------------------------------------

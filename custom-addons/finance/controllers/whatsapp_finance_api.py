@@ -367,24 +367,25 @@ class WhatsAppFinanceController(http.Controller):
                     msg += f"  ↳ 🔗 { ' | '.join(links) }\n"
             
         # Direct PDF attachments if available
+        physical_full = physical.sudo().with_context(bin_size=False).browse(physical.id)
         files = []
-        if physical.chq_vide_pdf:
+        if physical_full.chq_vide_pdf:
             files.append({
-                'pdf_base64': physical.chq_vide_pdf.decode('utf-8') if isinstance(physical.chq_vide_pdf, bytes) else physical.chq_vide_pdf,
-                'file_name': physical.chq_vide_filename or f"Cheque_Vide_{physical.name}.pdf",
-                'caption': f"Chèque vide #{physical.name}"
+                'pdf_base64': physical_full.chq_vide_pdf.decode('utf-8') if isinstance(physical_full.chq_vide_pdf, bytes) else physical_full.chq_vide_pdf,
+                'file_name': physical_full.chq_vide_filename or f"Cheque_Vide_{physical_full.name}.pdf",
+                'caption': f"Chèque vide #{physical_full.name}"
             })
-        if physical.doc_pdf:
+        if physical_full.doc_pdf:
             files.append({
-                'pdf_base64': physical.doc_pdf.decode('utf-8') if isinstance(physical.doc_pdf, bytes) else physical.doc_pdf,
-                'file_name': physical.doc_filename or f"Documentation_{physical.name}.pdf",
-                'caption': f"Documentation #{physical.name}"
+                'pdf_base64': physical_full.doc_pdf.decode('utf-8') if isinstance(physical_full.doc_pdf, bytes) else physical_full.doc_pdf,
+                'file_name': physical_full.doc_filename or f"Documentation_{physical_full.name}.pdf",
+                'caption': f"Documentation #{physical_full.name}"
             })
-        if physical.cheque_copy_pdf:
+        if physical_full.cheque_copy_pdf:
             files.append({
-                'pdf_base64': physical.cheque_copy_pdf.decode('utf-8') if isinstance(physical.cheque_copy_pdf, bytes) else physical.cheque_copy_pdf,
-                'file_name': physical.cheque_copy_filename or f"Cheque_{physical.name}.pdf",
-                'caption': f"Chèque #{physical.name}"
+                'pdf_base64': physical_full.cheque_copy_pdf.decode('utf-8') if isinstance(physical_full.cheque_copy_pdf, bytes) else physical_full.cheque_copy_pdf,
+                'file_name': physical_full.cheque_copy_filename or f"Cheque_{physical_full.name}.pdf",
+                'caption': f"Chèque #{physical_full.name}"
             })
 
         return {

@@ -131,8 +131,8 @@ class Cal3iyaClient(models.Model):
                 'types': ', '.join(filter(None, types)),
             })
         
-        # Sort by date echeance
-        return sorted(detailed_chqs, key=lambda x: (x['date_echeance'] or fields.Date.today()))
+        # Sort by company (case-insensitive) first, then by date echeance
+        return sorted(detailed_chqs, key=lambda x: ((x['ste'] or '').lower(), x['date_echeance'] or fields.Date.today()))
 
     def action_export_excel(self):
         self.ensure_one()

@@ -44,7 +44,6 @@
                             invisible="state != 'waiting'"/>
                     <button name="action_refuse" string="Refusé" type="object"
                             invisible="state != 'waiting'"
-                            groups="claims.group_claims_manager"
                             class="btn-danger"/>
                     <button name="action_close" string="Clôturé" type="object"
                             invisible="state != 'resolved'"

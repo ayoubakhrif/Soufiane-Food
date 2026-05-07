@@ -141,9 +141,9 @@ class ClaimsQuality(models.Model):
         })
 
     def action_refuse(self):
-        """Waiting -> Refused. Admin only."""
+        """Waiting -> Refused. Admin or Responsible user."""
         if not self.env.user.has_group('claims.group_claims_manager'):
-            raise UserError("Only Administrators can refuse claims.")
+            self._check_responsibility()
         self.write({
             'state': 'refused',
             'date_refused': fields.Date.context_today(self)

@@ -56,6 +56,13 @@ class TresorerieChqCheque(models.Model):
         size=7,
     )
 
+    scan_chq = fields.Binary(
+        string="Scan Chèque",
+        attachment=True,
+        help="Fichier de scan ou photo du chèque"
+    )
+    scan_chq_name = fields.Char(string="Nom du fichier chèque")
+
     owner_display = fields.Char(
         string='Porteur',
         compute='_compute_owner_display',
@@ -219,6 +226,13 @@ class TresorerieChqEffet(models.Model):
         digits=(10, 2),
     )
     note = fields.Char(string='N° effet')
+
+    scan_effet = fields.Binary(
+        string="Scan Effet",
+        attachment=True,
+        help="Fichier de scan ou photo de l'effet"
+    )
+    scan_effet_name = fields.Char(string="Nom du fichier effet")
 
     owner_display = fields.Char(
         string='Porteur',

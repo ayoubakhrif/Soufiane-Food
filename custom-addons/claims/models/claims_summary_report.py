@@ -17,7 +17,7 @@ class ClaimsSummaryReport(models.AbstractModel):
         claims_list = []
         for model_name, type_label in claims_models:
             if model_name in self.env:
-                records = self.env[model_name].sudo().search([('state', '!=', 'closed')])
+                records = self.env[model_name].sudo().search([('state', 'not in', ('closed', 'refused'))])
                 for rec in records:
                     bl_num = rec.bl_id.bl_number if rec.bl_id else 'Inconnu'
                     supplier_name = rec.supplier_id.name if rec.supplier_id else 'Inconnu'

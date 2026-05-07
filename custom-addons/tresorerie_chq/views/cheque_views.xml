@@ -17,6 +17,12 @@
                   decoration-danger="state == 'impaye'">
                 
                 <field name="note" readonly="1"/>
+                <field name="scan_chq_name" column_invisible="True"/>
+                <field name="scan_chq"
+                       string="Scan"
+                       filename="scan_chq_name"
+                       widget="binary"
+                       optional="show"/>
                 <field name="client_id" readonly="1"/>
                 
                 <!-- Editable Porteur and CIN directly on the row -->
@@ -131,6 +137,11 @@
                             <field name="amount" string="Montant (MAD)"/>
                             <field name="check_date" string="Date d'échéance"/>
                             <field name="is_manager" invisible="1"/>
+                            <field name="scan_chq_name" invisible="1"/>
+                            <field name="scan_chq"
+                                   string="Scan Chèque"
+                                   filename="scan_chq_name"
+                                   widget="binary"/>
                         </group>
                         <group string="Acteurs">
                             <field name="paiement_id" string="Paiement d'origine" readonly="1"/>

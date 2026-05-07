@@ -43,7 +43,7 @@ class WhatsAppFinanceController(http.Controller):
             return {'status': 'ignored', 'message': 'This agent only handles the Finance Group.'}
 
         # 3.1 Handle Documentation Interactive Choices
-        if message_text.startswith("DOC_OUI_"):
+        if False: # message_text.startswith("DOC_OUI_"):
             try:
                 phys_id = int(message_text[8:])
                 physical = request.env['finance.cheque.physical'].sudo().browse(phys_id)
@@ -68,13 +68,13 @@ class WhatsAppFinanceController(http.Controller):
             except Exception as e:
                 _logger.error(f"Error handling DOC_OUI_ choice: {str(e)}")
 
-        if message_text.startswith("DOC_NON_"):
+        if False: # message_text.startswith("DOC_NON_"):
             return {
                 'status': 'success',
                 'response': "D'accord, je reste à votre disposition si vous avez d'autres demandes ! 😊"
             }
 
-        if message_text.startswith("DOC_LINK_"):
+        if False: # message_text.startswith("DOC_LINK_"):
             try:
                 pdf_data = None
                 file_name = ""
@@ -366,11 +366,30 @@ class WhatsAppFinanceController(http.Controller):
                 if links:
                     msg += f"  ↳ 🔗 { ' | '.join(links) }\n"
             
-        # Interactive followup question for documentation
-        choices = [f"DOC_OUI_{physical.id}", f"DOC_NON_{physical.id}"]
-        choices_text = msg + "\n\nEst ce que tu veux voir la documentation ?\n1- Oui\n2- Non"
+        # Direct PDF attachments if available
+        files = []
+        if physical.chq_vide_pdf:
+            files.append({
+                'pdf_base64': physical.chq_vide_pdf.decode('utf-8') if isinstance(physical.chq_vide_pdf, bytes) else physical.chq_vide_pdf,
+                'file_name': physical.chq_vide_filename or f"Cheque_Vide_{physical.name}.pdf",
+                'caption': f"Chèque vide #{physical.name}"
+            })
+        if physical.doc_pdf:
+            files.append({
+                'pdf_base64': physical.doc_pdf.decode('utf-8') if isinstance(physical.doc_pdf, bytes) else physical.doc_pdf,
+                'file_name': physical.doc_filename or f"Documentation_{physical.name}.pdf",
+                'caption': f"Documentation #{physical.name}"
+            })
+        if physical.cheque_copy_pdf:
+            files.append({
+                'pdf_base64': physical.cheque_copy_pdf.decode('utf-8') if isinstance(physical.cheque_copy_pdf, bytes) else physical.cheque_copy_pdf,
+                'file_name': physical.cheque_copy_filename or f"Cheque_{physical.name}.pdf",
+                'caption': f"Chèque #{physical.name}"
+            })
+
         return {
-            'status': 'multiple_choices',
-            'message': choices_text,
-            'choices': choices
+            'status': 'success',
+            'response': msg,
+            'files': files,
+            'product_name': f"Chèque #{physical.name}"
         }

@@ -220,51 +220,64 @@ async function connectToWhatsApp() {
                     pendingChoices.set(from, result.choices);
                     await sock.sendMessage(from, { text: result.message }, { quoted: msg });
                 }
-                else if (result && result.response) {
-                    // C'est une réponse textuelle simple (ex: chatbot stock)
-                    console.log(`Réponse textuelle : ${result.response}`);
-                    await sock.sendMessage(from, { text: result.response }, { quoted: msg });
-                }
-                else if (result && result.status === 'success') {
-                    // Extract identifier (it might be in client_name or product_name depending on the controller result)
-                    const identifier = result.client_name || result.product_name || "Bénéficiaire";
+                else {
+                    let hasAction = false;
                     
-                    let reportType = "de stock";
-                    if (from === CLIENT_GROUP_ID) reportType = "de compte";
-                    if (from === FINANCE_GROUP_ID) reportType = "financier";
-                    if (from === DOUANE_GROUP_ID) reportType = "douane (DUM)";
-                    if (from === SORTIE_GROUP_ID) reportType = "de sorties";
-                    if (from === LOGISTICS_GROUP_ID) reportType = "logistique";
+                    if (result && result.response) {
+                        // C'est une réponse textuelle
+                        console.log(`Réponse textuelle : ${result.response}`);
+                        await sock.sendMessage(from, { text: result.response }, { quoted: msg });
+                        hasAction = true;
+                    }
+                    
+                    if (result && result.status === 'success') {
+                        // Extract identifier
+                        const identifier = result.client_name || result.product_name || "Bénéficiaire";
+                        
+                        let reportType = "de stock";
+                        if (from === CLIENT_GROUP_ID) reportType = "de compte";
+                        if (from === FINANCE_GROUP_ID) reportType = "financier";
+                        if (from === DOUANE_GROUP_ID) reportType = "douane (DUM)";
+                        if (from === SORTIE_GROUP_ID) reportType = "de sorties";
+                        if (from === LOGISTICS_GROUP_ID) reportType = "logistique";
 
-                    console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
+                        console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 
-                    // Support for multiple files
-                    if (result.files && Array.isArray(result.files)) {
-                        for (const file of result.files) {
+                        // Support for multiple files
+                        if (result.files && Array.isArray(result.files)) {
+                            for (const file of result.files) {
+                                await sock.sendMessage(from, {
+                                    document: Buffer.from(file.pdf_base64, 'base64'),
+                                    mimetype: 'application/pdf',
+                                    fileName: file.file_name,
+                                    caption: file.caption || `Document pour *${identifier}*.`
+                                }, { quoted: msg });
+                            }
+                        } else if (result.pdf_base64) {
+                            // Original single file support
                             await sock.sendMessage(from, {
-                                document: Buffer.from(file.pdf_base64, 'base64'),
+                                document: Buffer.from(result.pdf_base64, 'base64'),
                                 mimetype: 'application/pdf',
-                                fileName: file.file_name,
-                                caption: file.caption || `Document DUM pour *${identifier}*.`
+                                fileName: result.file_name,
+                                caption: result.message || `Voici le rapport ${reportType} pour *${identifier}*.`
                             }, { quoted: msg });
                         }
-                    } else if (result.pdf_base64) {
-                        // Original single file support
-                        await sock.sendMessage(from, {
-                            document: Buffer.from(result.pdf_base64, 'base64'),
-                            mimetype: 'application/pdf',
-                            fileName: result.file_name,
-                            caption: result.message || `Voici le rapport ${reportType} pour *${identifier}*.`
-                        }, { quoted: msg });
+                        hasAction = true;
                     }
-                } else if (result && result.status === 'not_found') {
-                    console.log(`Non trouvé : ${result.message}`);
-                    await sock.sendMessage(from, { text: result.message }, { quoted: msg });
-                } else if (result && result.status === 'ignored') {
-                    // Silently ignore as requested (noise filtering)
-                    console.log(`Action : Message ignoré (bruit détecté)`);
-                } else {
-                    console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
+                    
+                    if (result && result.status === 'not_found') {
+                        console.log(`Non trouvé : ${result.message}`);
+                        await sock.sendMessage(from, { text: result.message }, { quoted: msg });
+                        hasAction = true;
+                    } else if (result && result.status === 'ignored') {
+                        // Silently ignore as requested (noise filtering)
+                        console.log(`Action : Message ignoré (bruit détecté)`);
+                        hasAction = true;
+                    }
+                    
+                    if (!hasAction && result) {
+                        console.log("Structure de réponse inattendue :", JSON.stringify(response.data, null, 2));
+                    }
                 }
 
             } catch (error) {

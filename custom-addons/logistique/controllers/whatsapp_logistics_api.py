@@ -149,6 +149,43 @@ class WhatsAppLogisticsController(http.Controller):
                 'file_name': f"Situation_Port_{today.strftime('%d_%m_%Y')}.pdf"
             }
 
+        # D. Claims/Souffrance: keywords like "souffrance", "soufrance", "réclamations", "problemes", "claims", "مشاكل", etc.
+        claims_keywords = [
+            'souffrance', 'soufrance', 'réclamation', 'reclamation', 'problème', 'probleme', 
+            'claim', 'complaint', 'مشكل', 'مشاكل', 'شكاوى', 'شكوى', 'شكايات', 'شكاية'
+        ]
+        if any(keyword in message_text.lower() for keyword in claims_keywords):
+            if 'claims.quantity' not in request.env:
+                return {
+                    'status': 'response',
+                    'response': "❌ Le module de réclamations n'est pas activé ou installé sur cette base."
+                }
+            
+            dummy_record = request.env['logistique.entry'].sudo().search([], limit=1)
+            if not dummy_record:
+                return {
+                    'status': 'response',
+                    'response': "❌ Aucun dossier logistique n'est disponible pour générer le rapport."
+                }
+            
+            try:
+                today = fields.Date.today()
+                pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('claims.action_report_claims_summary', res_ids=dummy_record.ids)
+                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+                return {
+                    'status': 'success',
+                    'message': "⚠️ *DOSSIERS EN SOUFFRANCE & RÉCLAMATIONS*\nVoici la situation globale des réclamations actives.",
+                    'pdf_base64': pdf_base64,
+                    'file_name': f"Situation_Reclamations_{today.strftime('%d_%m_%Y')}.pdf"
+                }
+            except Exception as e:
+                _logger.error(f"Error generating claims summary PDF report: {str(e)}")
+                return {
+                    'status': 'response',
+                    'response': f"❌ Une erreur est survenue lors de la génération du PDF des réclamations : {str(e)}"
+                }
+
 
         # 4. Search for Article (Fallback - Filter by Active Dossiers Only)
         active_entries = request.env['logistique.entry'].sudo().search([

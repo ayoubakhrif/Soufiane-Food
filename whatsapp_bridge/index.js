@@ -234,6 +234,7 @@ async function connectToWhatsApp() {
                     if (from === FINANCE_GROUP_ID) reportType = "financier";
                     if (from === DOUANE_GROUP_ID) reportType = "douane (DUM)";
                     if (from === SORTIE_GROUP_ID) reportType = "de sorties";
+                    if (from === LOGISTICS_GROUP_ID) reportType = "logistique";
 
                     console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 
@@ -244,7 +245,7 @@ async function connectToWhatsApp() {
                                 document: Buffer.from(file.pdf_base64, 'base64'),
                                 mimetype: 'application/pdf',
                                 fileName: file.file_name,
-                                caption: `Document DUM pour *${identifier}*.`
+                                caption: file.caption || `Document DUM pour *${identifier}*.`
                             }, { quoted: msg });
                         }
                     } else if (result.pdf_base64) {
@@ -253,7 +254,7 @@ async function connectToWhatsApp() {
                             document: Buffer.from(result.pdf_base64, 'base64'),
                             mimetype: 'application/pdf',
                             fileName: result.file_name,
-                            caption: `Voici le rapport ${reportType} pour *${identifier}*.`
+                            caption: result.message || `Voici le rapport ${reportType} pour *${identifier}*.`
                         }, { quoted: msg });
                     }
                 } else if (result && result.status === 'not_found') {

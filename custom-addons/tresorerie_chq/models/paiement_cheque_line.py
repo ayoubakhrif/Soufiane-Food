@@ -62,6 +62,13 @@ class TresorerieChqCheque(models.Model):
         store=False,
     )
 
+    owner_cin = fields.Char(
+        string="CIN Porteur",
+        compute="_compute_owner_cin",
+        inverse="_inverse_owner_cin",
+        store=True,
+    )
+
     state = fields.Selection([
         ('stock', 'En stock'),
         ('remis', 'Remis au client'),
@@ -93,6 +100,18 @@ class TresorerieChqCheque(models.Model):
                 line.owner_display = line.paiement_id.client_id.name
             else:
                 line.owner_display = ''
+
+    @api.depends('owner_id', 'owner_id.cin')
+    def _compute_owner_cin(self):
+        for rec in self:
+            rec.owner_cin = rec.owner_id.cin if rec.owner_id else ''
+
+    def _inverse_owner_cin(self):
+        for rec in self:
+            if rec.owner_cin and not rec.owner_id:
+                raise ValidationError("❌ Veuillez sélectionner un porteur avant de renseigner le CIN.")
+            if rec.owner_id:
+                rec.owner_id.cin = rec.owner_cin
 
     # ------------------------------------------------------------------
     # Constraints
@@ -144,6 +163,8 @@ class TresorerieChqCheque(models.Model):
     def action_impaye(self):
         """Mark as unpaid/bounced."""
         for rec in self:
+            if not rec.owner_cin:
+                raise ValidationError("❌ Le champ CIN du porteur doit être renseigné pour marquer ce chèque comme impayé.")
             if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
                 if rec.state != 'banque':
                     raise ValidationError("❌ Le chèque doit être envoyé à la banque pour pouvoir être marqué impayé.")
@@ -205,6 +226,13 @@ class TresorerieChqEffet(models.Model):
         store=False,
     )
 
+    owner_cin = fields.Char(
+        string="CIN Porteur",
+        compute="_compute_owner_cin",
+        inverse="_inverse_owner_cin",
+        store=True,
+    )
+
     state = fields.Selection([
         ('stock', 'En stock'),
         ('remis', 'Remis au client'),
@@ -236,6 +264,18 @@ class TresorerieChqEffet(models.Model):
                 line.owner_display = line.paiement_id.client_id.name
             else:
                 line.owner_display = ''
+
+    @api.depends('owner_id', 'owner_id.cin')
+    def _compute_owner_cin(self):
+        for rec in self:
+            rec.owner_cin = rec.owner_id.cin if rec.owner_id else ''
+
+    def _inverse_owner_cin(self):
+        for rec in self:
+            if rec.owner_cin and not rec.owner_id:
+                raise ValidationError("❌ Veuillez sélectionner un porteur avant de renseigner le CIN.")
+            if rec.owner_id:
+                rec.owner_id.cin = rec.owner_cin
 
     # ------------------------------------------------------------------
     # Workflow Actions
@@ -274,6 +314,8 @@ class TresorerieChqEffet(models.Model):
     def action_impaye(self):
         """Mark as unpaid/bounced."""
         for rec in self:
+            if not rec.owner_cin:
+                raise ValidationError("❌ Le champ CIN du porteur doit être renseigné pour marquer cet effet comme impayé.")
             if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
                 if rec.state != 'banque':
                     raise ValidationError("❌ L'effet doit être envoyé à la banque pour pouvoir être marqué impayé.")

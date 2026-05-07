@@ -8,26 +8,79 @@
         <field name="model">tresorerie_chq.cheque</field>
         <field name="arch" type="xml">
             <tree string="Suivi des Chèques" 
+                  editable="bottom"
+                  create="0"
+                  delete="0"
                   decoration-info="state == 'stock'"
                   decoration-warning="state in ['remis', 'banque']"
                   decoration-success="state == 'encaisse'"
                   decoration-danger="state == 'impaye'">
-                <field name="note"/>
-                <field name="client_id"/>
-                <field name="owner_display" string="Porteur"/>
-                <field name="check_date"/>
-                <field name="amount" sum="Total"/>
-                <field name="state" widget="badge"
+                
+                <field name="note" readonly="1"/>
+                <field name="client_id" readonly="1"/>
+                
+                <!-- Editable Porteur and CIN directly on the row -->
+                <field name="owner_id" string="Porteur" required="0"/>
+                <field name="owner_cin" string="CIN Porteur" placeholder="CIN..."/>
+                
+                <field name="check_date" readonly="1"/>
+                <field name="amount" sum="Total" readonly="1"/>
+                
+                <field name="state" widget="badge" readonly="1"
                        decoration-info="state == 'stock'"
                        decoration-warning="state in ['remis', 'banque']"
                        decoration-success="state == 'encaisse'"
                        decoration-danger="state == 'impaye'"/>
+                
+                <!-- Hidden helper to pass role context to visibility expressions -->
+                <field name="is_manager" column_invisible="True"/>
+
+                <!-- Row action buttons with modern icons and context visibility -->
+                <button name="action_remis" 
+                        string="Remettre au client" 
+                        type="object" 
+                        icon="fa-hand-o-right"
+                        class="btn-success"
+                        title="Remettre au client"
+                        invisible="state == 'remis' or (state not in ['stock', 'impaye'] and not is_manager)"/>
+                
+                <button name="action_banque" 
+                        string="Envoyer à la banque" 
+                        type="object" 
+                        icon="fa-university"
+                        class="btn-primary"
+                        title="Envoyer à la banque"
+                        invisible="state == 'banque' or (state not in ['stock', 'impaye'] and not is_manager)"/>
+                
+                <button name="action_encaisse" 
+                        string="Encaisser" 
+                        type="object" 
+                        icon="fa-check-circle"
+                        class="btn-success"
+                        title="Encaisser"
+                        invisible="state == 'encaisse' or (state != 'banque' and not is_manager)"/>
+                
+                <button name="action_impaye" 
+                        string="Impayé" 
+                        type="object" 
+                        icon="fa-times-circle"
+                        class="btn-danger"
+                        title="Impayé"
+                        invisible="state == 'impaye' or (state != 'banque' and not is_manager)"/>
+
+                <button name="action_stock" 
+                        string="Remettre en stock" 
+                        type="object" 
+                        icon="fa-archive"
+                        class="btn-secondary"
+                        title="Remettre en stock"
+                        invisible="state == 'stock' or not is_manager"/>
             </tree>
         </field>
     </record>
 
     <!-- =================================================================
-         Form View
+         Form View (for backward compatibility / backup, but not in action)
     ================================================================= -->
     <record id="view_tresorerie_chq_cheque_form" model="ir.ui.view">
         <field name="name">tresorerie_chq.cheque.form</field>
@@ -35,7 +88,6 @@
         <field name="arch" type="xml">
             <form string="Suivi du Chèque">
                 <header>
-                    <!-- State Transitions Buttons -->
                     <button name="action_remis" 
                             string="Remettre au client" 
                             type="object" 
@@ -65,14 +117,12 @@
                             type="object" 
                             invisible="state == 'stock' or not is_manager"/>
 
-                    <!-- Statusbar Widget -->
                     <field name="state" widget="statusbar" statusbar_visible="stock,remis,banque,encaisse,impaye"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <label for="note" string="Numéro de chèque"/>
                         <h1>
-                            <!-- HTML / UI limits size to 7 on typing -->
                             <field name="note" placeholder="7 chiffres" required="1" size="7" maxlength="7"/>
                         </h1>
                     </div>
@@ -86,6 +136,7 @@
                             <field name="paiement_id" string="Paiement d'origine" readonly="1"/>
                             <field name="client_id" string="Client d'origine"/>
                             <field name="owner_id" string="Porteur de chèque" placeholder="— Client —"/>
+                            <field name="owner_cin" string="CIN Porteur"/>
                             <field name="soufiane_owner_id" string="Client soufiane" invisible="client_id != 1 and client_id != 'Soufiane'"/>
                         </group>
                     </group>
@@ -105,6 +156,7 @@
                 <field name="note"/>
                 <field name="client_id"/>
                 <field name="owner_id"/>
+                <field name="owner_cin"/>
                 <separator/>
                 <filter string="En Stock" name="state_stock" domain="[('state', '=', 'stock')]"/>
                 <filter string="Remis au client" name="state_remis" domain="[('state', '=', 'remis')]"/>
@@ -121,12 +173,12 @@
     </record>
 
     <!-- =================================================================
-         Action
+         Action (Tree View Only - Locks user to inline editing)
     ================================================================= -->
     <record id="action_tresorerie_chq_cheque" model="ir.actions.act_window">
         <field name="name">Suivi des Chèques</field>
         <field name="res_model">tresorerie_chq.cheque</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree</field>
         <field name="search_view_id" ref="view_tresorerie_chq_cheque_search"/>
         <field name="context">{'search_default_group_state': 1}</field>
         <field name="help" type="html">

@@ -9,3 +9,6 @@ access_tresorerie_chq_cheque_user,tresorerie_chq.cheque user,model_tresorerie_ch
 access_tresorerie_chq_cheque_manager,tresorerie_chq.cheque manager,model_tresorerie_chq_cheque,group_tresorerie_chq_manager,1,1,1,1
 access_tresorerie_chq_effet_user,tresorerie_chq.effet user,model_tresorerie_chq_effet,group_tresorerie_chq_user,1,1,1,0
 access_tresorerie_chq_effet_manager,tresorerie_chq.effet manager,model_tresorerie_chq_effet,group_tresorerie_chq_manager,1,1,1,1
+access_tresorerie_chq_bank_user,tresorerie_chq.bank user,model_tresorerie_chq_bank,group_tresorerie_chq_user,1,1,1,0
+access_tresorerie_chq_bank_manager,tresorerie_chq.bank manager,model_tresorerie_chq_bank,group_tresorerie_chq_manager,1,1,1,1
+

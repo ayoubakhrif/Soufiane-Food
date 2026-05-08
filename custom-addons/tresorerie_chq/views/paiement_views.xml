@@ -61,6 +61,10 @@
                                     <field name="note"
                                            string="N° chèque"
                                            optional="show"/>
+                                    <field name="bank_id"
+                                           string="Banque"
+                                           options="{'no_create_edit': True, 'no_quick_create': True}"
+                                           optional="show"/>
                                     <field name="scan_chq_name" column_invisible="True"/>
                                     <field name="scan_chq"
                                            string="Scan"
@@ -107,6 +111,10 @@
                                            sum="Total"/>
                                     <field name="note"
                                            string="N° effet"
+                                           optional="show"/>
+                                    <field name="bank_id"
+                                           string="Banque"
+                                           options="{'no_create_edit': True, 'no_quick_create': True}"
                                            optional="show"/>
                                     <field name="scan_effet_name" column_invisible="True"/>
                                     <field name="scan_effet"

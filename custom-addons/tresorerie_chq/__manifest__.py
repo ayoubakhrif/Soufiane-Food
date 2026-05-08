@@ -12,6 +12,7 @@
         'views/menu_views.xml',
         'views/client_views.xml',
         'views/effets_owner_views.xml',
+        'views/bank_views.xml',
         'views/paiement_views.xml',
         'views/cheque_views.xml',
         'views/effet_views.xml',

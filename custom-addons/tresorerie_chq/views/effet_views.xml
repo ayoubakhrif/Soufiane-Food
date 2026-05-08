@@ -23,6 +23,7 @@
                        filename="scan_effet_name"
                        widget="binary"
                        optional="show"/>
+                <field name="bank_id" string="Banque" readonly="1" optional="show"/>
                 <field name="client_id" readonly="1"/>
                 
                 <!-- Editable Porteur and CIN directly on the row -->
@@ -136,6 +137,7 @@
                         <group string="Détails Financiers">
                             <field name="amount" string="Montant (MAD)"/>
                             <field name="check_date" string="Date d'échéance"/>
+                            <field name="bank_id" string="Banque" options="{'no_create_edit': True, 'no_quick_create': True}"/>
                             <field name="is_manager" invisible="1"/>
                             <field name="scan_effet_name" invisible="1"/>
                             <field name="scan_effet"

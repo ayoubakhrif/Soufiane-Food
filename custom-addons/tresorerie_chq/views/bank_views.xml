@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View for Bank -->
+    <record id="view_tresorerie_chq_bank_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.bank.tree</field>
+        <field name="model">tresorerie_chq.bank</field>
+        <field name="arch" type="xml">
+            <tree string="Banques" editable="bottom">
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Bank -->
+    <record id="view_tresorerie_chq_bank_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.bank.form</field>
+        <field name="model">tresorerie_chq.bank</field>
+        <field name="arch" type="xml">
+            <form string="Banque">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Bank -->
+    <record id="action_tresorerie_chq_bank" model="ir.actions.act_window">
+        <field name="name">Banques</field>
+        <field name="res_model">tresorerie_chq.bank</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle banque
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for Bank under Données -->
+    <menuitem id="menu_tresorerie_chq_banks" 
+              name="Banques" 
+              parent="menu_tresorerie_chq_donnees" 
+              action="action_tresorerie_chq_bank" 
+              sequence="30"/>
+</odoo>

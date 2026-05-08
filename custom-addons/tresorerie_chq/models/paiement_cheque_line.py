@@ -63,6 +63,11 @@ class TresorerieChqCheque(models.Model):
     )
     scan_chq_name = fields.Char(string="Nom du fichier chèque")
 
+    bank_id = fields.Many2one(
+        'tresorerie_chq.bank',
+        string='Banque',
+    )
+
     owner_display = fields.Char(
         string='Porteur',
         compute='_compute_owner_display',
@@ -233,6 +238,11 @@ class TresorerieChqEffet(models.Model):
         help="Fichier de scan ou photo de l'effet"
     )
     scan_effet_name = fields.Char(string="Nom du fichier effet")
+
+    bank_id = fields.Many2one(
+        'tresorerie_chq.bank',
+        string='Banque',
+    )
 
     owner_display = fields.Char(
         string='Porteur',

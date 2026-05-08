@@ -92,7 +92,54 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"👤 *Fournisseur* : {supplier_name}\n"
         response += f"📦 *Article* : {article_name}\n"
         response += f"🌐 *Incoterm* : {incoterm_val}\n"
-        response += f"📅 *ETA* : {eta_str}\n\n"
+        response += f"📅 *ETA* : {eta_str}\n"
+
+        # Additional Fields from Image Section 1 & 2
+        shipping_name = 'N/A'
+        if entry and entry.shipping_id:
+            shipping_name = entry.shipping_id.name or 'N/A'
+        
+        container_count = dossier.container_count or (entry and entry.container_count) or 0
+        container_names = dossier.container_names or (entry and entry.container_names) or 'N/A'
+        
+        size_val = 'N/A'
+        if entry and hasattr(entry, 'container_size') and entry.container_size:
+            size_val = dict(entry._fields['container_size'].selection or {}).get(entry.container_size, entry.container_size)
+            if size_val == '20':
+                size_val = "20'"
+            elif size_val == '40':
+                size_val = "40'"
+        
+        port_status_val = 'N/A'
+        if entry and entry.port_status:
+            port_status_val = dict(entry._fields['port_status'].selection or {}).get(entry.port_status, entry.port_status)
+        
+        franchise_val = 'N/A'
+        if entry and hasattr(entry, 'free_time') and entry.free_time:
+            franchise_val = f"{entry.free_time}j"
+        elif entry and hasattr(entry, 'free_time_negotiated') and entry.free_time_negotiated:
+            franchise_val = f"{entry.free_time_negotiated}j"
+            
+        response += f"🚢 *Compagnie* : {shipping_name}\n"
+        response += f"🔢 *Nombre Conteneurs* : {container_count}\n"
+        response += f"🔠 *N° Conteneurs* : {container_names}\n"
+        response += f"📐 *Taille* : {size_val}\n"
+        response += f"⚓ *Port Status* : {port_status_val}\n"
+        response += f"⏳ *Franchise gérée* : {franchise_val}\n\n"
+        
+        # Additional Dates from Image Section 3
+        bad_date_str = entry.bad_date.strftime('%d/%m/%Y') if entry and entry.bad_date else 'N/A'
+        exit_date_str = entry.exit_date.strftime('%d/%m/%Y') if entry and entry.exit_date else 'N/A'
+        entry_date_str = entry.entry_date.strftime('%d/%m/%Y') if entry and entry.entry_date else 'N/A'
+        
+        dhl_date_val = dossier.eta_dhl or (entry and entry.eta_dhl) or False
+        dhl_date_str = dhl_date_val.strftime('%d/%m/%Y') if dhl_date_val else 'N/A'
+        
+        response += f"📅 *Dates Importantes* :\n"
+        response += f"• 📦 *DHL* : {dhl_date_str}\n"
+        response += f"• 📄 *BAD* : {bad_date_str}\n"
+        response += f"• 🚪 *D. Sortie* : {exit_date_str}\n"
+        response += f"• 📥 *D. Entré* : {entry_date_str}\n\n"
         
         response += f"📊 *Synthèse des Charges* :\n"
         response += f"• 🚢 *Fret* : {dossier.fret_amount:,.2f} DH\n"
@@ -174,6 +221,85 @@ class WhatsAppLogisticsPaymentController(http.Controller):
                     type_str = m.type or "N/A"
                     m_fin_line = f"  • Facture *{m.facture_marglory or 'N/A'}* ({type_str}) : *{m.amount:,.2f} DH* | {chq_str} | {status}\n"
                     response += m_fin_line.replace(',', ' ')
+            response += "\n"
+
+        # F. Réclamations (Charges à récupérer)
+        if entry_ids:
+            claims_models = [
+                ('claims.quantity', 'Quantité'),
+                ('claims.quality', 'Qualité'),
+                ('claims.dhl.delay', 'DHL Delay'),
+                ('claims.franchise.difference', 'Franchise'),
+                ('claims.divers', 'Divers')
+            ]
+            claims_found = []
+            responsibles = set()
+            total_amount_due = 0.0
+            states_info = []
+            
+            for model_name, type_label in claims_models:
+                if model_name in request.env:
+                    records = request.env[model_name].sudo().search([('bl_id', 'in', entry_ids)])
+                    for r in records:
+                        claims_found.append((type_label, r))
+                        if r.responsible_id:
+                            responsibles.add(r.responsible_id.name)
+                        total_amount_due += r.amount_due or 0.0
+                        
+                        # Gather status / dates
+                        state_label = dict(r._fields['state'].selection or {}).get(r.state, r.state).capitalize()
+                        date_str = ""
+                        if r.state == 'initial' and hasattr(r, 'claim_date') and r.claim_date:
+                            date_str = r.claim_date.strftime('%d/%m/%y')
+                        elif r.state == 'received' and hasattr(r, 'date_received') and r.date_received:
+                            date_str = r.date_received.strftime('%d/%m/%y')
+                        elif r.state == 'waiting' and hasattr(r, 'date_waiting') and r.date_waiting:
+                            date_str = r.date_waiting.strftime('%d/%m/%y')
+                        elif r.state == 'refused' and hasattr(r, 'date_refused') and r.date_refused:
+                            date_str = r.date_refused.strftime('%d/%m/%y')
+                        elif r.state == 'resolved' and hasattr(r, 'date_resolved') and r.date_resolved:
+                            date_str = r.date_resolved.strftime('%d/%m/%y')
+                        elif r.state == 'closed' and hasattr(r, 'date_closed') and r.date_closed:
+                            date_str = r.date_closed.strftime('%d/%m/%y')
+                        
+                        if date_str:
+                            states_info.append(f"{state_label} ({date_str})")
+                        else:
+                            states_info.append(f"{state_label}")
+
+            if claims_found:
+                response += f"⚠️ *Réclamations (charges à récupérer)* :\n"
+                resp_str = ", ".join(responsibles) if responsibles else "Non assigné"
+                response += f"• 👤 *Responsable* : {resp_str}\n"
+                
+                for type_label, r in claims_found:
+                    if type_label == 'DHL Delay':
+                        response += f"• ✉️ *DHL* : {r.dhl_delay}j retard\n"
+                    elif type_label == 'Franchise':
+                        response += f"• ⏳ *Franchise* : Franchise trouvée : {r.franchise_found:.0f} j / diff : {r.franchise_difference:.0f} j\n"
+                    elif type_label == 'Quantité':
+                        response += f"• 📦 *Quantité* : Manquante : {r.missing_quantity:.2f}\n"
+                    elif type_label == 'Qualité':
+                        response += f"• 🔬 *Qualité* : Dossier Qualité disponible\n"
+                    elif type_label == 'Divers':
+                        response += f"• ➕ *Divers* : Réclamation divers active\n"
+                
+                # Fetch Currency Exchange Rate
+                usd_currency = request.env['res.currency'].sudo().search([('name', '=', 'USD')], limit=1)
+                exchange_rate = 9.15
+                if usd_currency and usd_currency.rate:
+                    if usd_currency.rate < 1.0:
+                        exchange_rate = 1.0 / usd_currency.rate
+                
+                total_amount_due_mad = total_amount_due * exchange_rate
+                
+                response += f"• 💰 *Montant à récupérer* : {total_amount_due:,.2f} USD / {total_amount_due_mad:,.2f} DH\n"
+                if states_info:
+                    response += f"• 🔄 *Status* : { ' / '.join(states_info) }\n"
+                response += "\n"
+
+        # Apply final Moroccan spacing (replace commas with spaces)
+        response = response.replace(',', ' ')
 
         return {'status': 'response', 'response': response}
 

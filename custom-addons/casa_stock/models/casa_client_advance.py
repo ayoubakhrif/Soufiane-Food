@@ -35,6 +35,12 @@ class CasaClientAdvance(models.Model):
         ('confirmed', 'Validé'),
     ], string='État', required=True, default='draft', readonly=True)
 
+    @api.model
+    def create(self, vals):
+        if vals.get('payment_mode') == 'transport' and not self.env.context.get('is_transport_operation'):
+            raise UserError(_("Les avances de type 'Transport' ne peuvent être créées automatiquement que depuis la validation des opérations de transport Tanger."))
+        return super().create(vals)
+
     def action_confirm(self):
         for rec in self:
             rec.state = 'confirmed'
@@ -44,6 +50,8 @@ class CasaClientAdvance(models.Model):
             rec.state = 'draft'
 
     def write(self, vals):
+        if vals.get('payment_mode') == 'transport' and not self.env.context.get('is_transport_operation'):
+            raise UserError(_("Les avances de type 'Transport' ne peuvent être créées automatiquement que depuis la validation des opérations de transport Tanger."))
         for rec in self:
             if rec.state == 'confirmed' and any(f != 'state' for f in vals):
                  raise UserError(_("Vous ne pouvez pas modifier une avance validée. Veuillez d'abord la remettre en brouillon."))

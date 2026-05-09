@@ -19,7 +19,7 @@ class CasaClientInvoiceWizard(models.TransientModel):
         weeks = set()
         
         def date_to_week(d):
-            return d.strftime("%Y-W%W") if d else False
+            return d.strftime("%G-W%V") if d else False
             
         env = self.env
         
@@ -60,14 +60,15 @@ class CasaClientInvoiceWizard(models.TransientModel):
 
         res['client_id'] = client_id
         client = self.env['casa_hanane.client'].browse(client_id)
+        client.exit_ids._compute_week()
 
         client_weeks = set()
         for s in client.exit_ids:
             if s.week: client_weeks.add(s.week)
         for a in client.advance_ids:
-            if a.date: client_weeks.add(a.date.strftime("%Y-W%W"))
+            if a.date: client_weeks.add(a.date.strftime("%G-W%V"))
         for u in client.unpaid_ids:
-            if u.date: client_weeks.add(u.date.strftime("%Y-W%W"))
+            if u.date: client_weeks.add(u.date.strftime("%G-W%V"))
                 
         sorted_client_weeks = sorted(client_weeks, reverse=True)
         if sorted_client_weeks:

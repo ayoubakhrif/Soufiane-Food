@@ -70,7 +70,7 @@ class CasaStockExit(models.Model):
     def _compute_week(self):
         for record in self:
             if record.date:
-                record.week = record.date.strftime("%Y-W%W")
+                record.week = record.date.strftime("%G-W%V")
             else:
                 record.week = False
 

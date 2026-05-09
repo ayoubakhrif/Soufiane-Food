@@ -629,25 +629,25 @@ class CasaClient(models.Model):
 
         # 1.5️⃣ Filtrer retours de la semaine
         retours = self.return_ids.filtered(
-            lambda r: r.date and r.date.strftime("%Y-W%W") == week and r.state == 'done'
+            lambda r: r.date and r.date.strftime("%G-W%V") == week and r.state == 'done'
         )
         total_retours = sum(retours.mapped('mt_retour'))
 
         # 2️⃣ Filtrer avances de la semaine (en se basant sur la date)
         avances = self.advance_ids.filtered(
-            lambda a: a.date and a.date.strftime("%Y-W%W") == week and a.state == 'confirmed'
+            lambda a: a.date and a.date.strftime("%G-W%V") == week and a.state == 'confirmed'
         )
         total_avances = sum(avances.mapped('amount'))
 
         # 3️⃣ Filtrer impayés de la semaine
         impayes = self.unpaid_ids.filtered(
-            lambda u: u.date and u.date.strftime("%Y-W%W") == week
+            lambda u: u.date and u.date.strftime("%G-W%V") == week
         )
         total_impayes = sum(impayes.mapped('amount'))
 
         # 4️⃣ Filtrer sorties supplémentaires de la semaine
         sorties_supp = self.sortie_supp_ids.filtered(
-            lambda s: s.date and s.date.strftime("%Y-W%W") == week
+            lambda s: s.date and s.date.strftime("%G-W%V") == week
         )
         total_sorties_supp = sum(sorties_supp.mapped('amount'))
 

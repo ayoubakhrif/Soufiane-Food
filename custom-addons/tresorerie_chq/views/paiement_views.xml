@@ -53,8 +53,10 @@
                                            string="Client soufiane"
                                            invisible="not parent.is_soufiane"
                                            optional="show"/>
+                                    <field name="allow_no_date" column_invisible="True"/>
                                     <field name="check_date"
-                                           string="Date d'échéance"/>
+                                           string="Date d'échéance"
+                                           required="not allow_no_date"/>
                                     <field name="amount"
                                            string="Montant (MAD)"
                                            sum="Total"/>
@@ -104,8 +106,10 @@
                                            string="Client soufiane"
                                            invisible="not parent.is_soufiane"
                                            optional="show"/>
+                                    <field name="allow_no_date" column_invisible="True"/>
                                     <field name="check_date"
-                                           string="Date d'échéance"/>
+                                           string="Date d'échéance"
+                                           required="not allow_no_date"/>
                                     <field name="amount"
                                            string="Montant (MAD)"
                                            sum="Total"/>

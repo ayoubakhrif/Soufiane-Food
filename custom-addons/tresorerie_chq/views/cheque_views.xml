@@ -136,7 +136,8 @@
                     <group>
                         <group string="Détails Financiers">
                             <field name="amount" string="Montant (MAD)"/>
-                            <field name="check_date" string="Date d'échéance"/>
+                            <field name="allow_no_date" invisible="1"/>
+                            <field name="check_date" string="Date d'échéance" required="not allow_no_date"/>
                             <field name="bank_id" string="Banque" options="{'no_create_edit': True, 'no_quick_create': True}"/>
                             <field name="is_manager" invisible="1"/>
                             <field name="scan_chq_name" invisible="1"/>

@@ -19,7 +19,7 @@ class SuiviTransportTangerOperation(models.Model):
     lot = fields.Char(string='LOT')
     montant = fields.Float(string='Montant', default=0.0)
     credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
-    payer_id = fields.Many2one('casa.client', string='Qui a payé')
+    casa_payer_id = fields.Many2one('casa.client', string='Qui a payé')
     state = fields.Selection([
         ('initial', 'Initial'),
         ('paid', 'Payé'),
@@ -43,8 +43,8 @@ class SuiviTransportTangerOperation(models.Model):
 
     @api.onchange('line_ids')
     def _onchange_line_ids_for_payer(self):
-        client_ids = self.line_ids.mapped('client_id').ids
-        return {'domain': {'payer_id': [('id', 'in', client_ids)]}}
+        client_ids = self.line_ids.mapped('casa_client_id').ids
+        return {'domain': {'casa_payer_id': [('id', 'in', client_ids)]}}
 
     def action_pay(self):
         for rec in self:
@@ -62,9 +62,9 @@ class SuiviTransportTangerOperation(models.Model):
                 raise ValidationError(_("La validation n'est possible que si le crédit est de 0."))
             
             # Créer l'avance si un client a payé un montant
-            if rec.payer_id and rec.montant > 0:
+            if rec.casa_payer_id and rec.montant > 0:
                 self.env['casa.client.advance'].create({
-                    'client_id': rec.payer_id.id,
+                    'client_id': rec.casa_payer_id.id,
                     'amount': rec.montant,
                     'date': rec.date,
                     'payment_mode': 'transport',
@@ -83,7 +83,7 @@ class SuiviTransportTangerOperationLine(models.Model):
     _description = 'Ligne Opération Suivi Transport Tanger'
 
     operation_id = fields.Many2one('suivi.transport.tanger.operation', string='Opération', required=True, ondelete='cascade')
-    client_id = fields.Many2one('casa.client', string='Client')
+    casa_client_id = fields.Many2one('casa.client', string='Client')
     article_id = fields.Many2one('stock.kal3iya.product', string='Article')
     lot = fields.Char(string='LOT')
     exit_id = fields.Many2one('stock.kal3iya.exit', string='Sortie Stock Liée')

@@ -11,7 +11,7 @@
                 <field name="chauffeur_id"/>
                 <field name="montant" sum="Total Montant" invisible="ville == 'casa'"/>
                 <field name="credit" sum="Total Crédit" invisible="ville == 'casa'"/>
-                <field name="payer_id"/>
+                <field name="casa_payer_id"/>
                 <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-success="state == 'paid'" decoration-primary="state == 'validated'"/>
             </tree>
         </field>
@@ -43,14 +43,14 @@
                         <group>
                             <field name="montant" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
                             <field name="credit" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
-                            <field name="payer_id" options="{'no_create': True}" readonly="state == 'validated'"/>
+                            <field name="casa_payer_id" options="{'no_create': True}" readonly="state == 'validated'"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Détails" name="lines_details">
                             <field name="line_ids" readonly="state == 'validated'">
                                 <tree editable="bottom">
-                                    <field name="client_id" required="1"/>
+                                    <field name="casa_client_id" required="1"/>
                                     <field name="article_id" required="1"/>
                                     <field name="lot"/>
                                     <field name="exit_id" readonly="1" force_save="1"/>

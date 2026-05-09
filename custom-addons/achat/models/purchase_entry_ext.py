@@ -25,6 +25,58 @@ class LogisticsEntry(models.Model):
         help="Coché automatiquement par l'IA si l'Invoice ne correspond pas aux données. L'admin peut le décocher manuellement."
     )
 
+    is_onicl_applicable = fields.Boolean(
+        string='Applicable ONICL',
+        compute='_compute_is_onicl_applicable',
+        search='_search_is_onicl_applicable'
+    )
+    
+    onicl_days_to_eta = fields.Integer(
+        string='Jours restants (ETA)',
+        compute='_compute_onicl_days_to_eta',
+        help="Nombre de jours restants jusqu'à l'ETA"
+    )
+
+    @api.depends('eta', 'achat_article_id.is_onicl')
+    def _compute_is_onicl_applicable(self):
+        today = date.today()
+        fifteen_days_later = today + timedelta(days=15)
+        for rec in self:
+            is_onicl = rec.achat_article_id.is_onicl if rec.achat_article_id else False
+            rec.is_onicl_applicable = is_onicl and bool(rec.eta) and rec.eta <= fifteen_days_later
+
+    def _search_is_onicl_applicable(self, operator, value):
+        if operator not in ('=', '!='):
+            raise NotImplementedError("Only '=' and '!=' operators are supported")
+        today = date.today()
+        fifteen_days_later = today + timedelta(days=15)
+        
+        onicl_articles = self.env['achat.article'].search([('is_onicl', '=', True)])
+        onicl_article_ids = onicl_articles.ids
+        
+        if (operator == '=' and value) or (operator == '!=' and not value):
+            return [
+                ('achat_article_id', 'in', onicl_article_ids),
+                ('eta', '!=', False),
+                ('eta', '<=', fifteen_days_later)
+            ]
+        else:
+            return ['|', '|',
+                ('achat_article_id', 'not in', onicl_article_ids),
+                ('eta', '=', False),
+                ('eta', '>', fifteen_days_later)
+            ]
+
+    @api.depends('eta')
+    def _compute_onicl_days_to_eta(self):
+        today = date.today()
+        for rec in self:
+            if rec.eta:
+                delta = rec.eta - today
+                rec.onicl_days_to_eta = delta.days
+            else:
+                rec.onicl_days_to_eta = 0
+
     date_booking = fields.Date(string='Date of Booking')
     date_docs_received = fields.Date(string='Date Documents Received')
     date_docs_confirmed = fields.Date(string='Date Documents Confirmed')

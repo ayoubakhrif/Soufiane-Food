@@ -25,6 +25,7 @@
         'views/document_followup_views.xml',
         'views/contract_advance_views.xml',
         'views/operational_actions.xml',
+        'views/onicl_views.xml',
         'views/menu.xml',
 
     ],

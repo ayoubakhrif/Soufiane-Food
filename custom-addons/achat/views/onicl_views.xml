@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Custom Tree View for ONICL Dossiers -->
+    <record id="view_achat_onicl_tree" model="ir.ui.view">
+        <field name="name">achat.onicl.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Dossiers ONICL" 
+                  create="false" delete="false"
+                  decoration-danger="onicl_days_to_eta &lt;= 5"
+                  decoration-warning="onicl_days_to_eta &gt; 5 and onicl_days_to_eta &lt;= 10"
+                  decoration-info="onicl_days_to_eta &gt; 10">
+                <field name="dossier_id" invisible="1"/>
+                <field name="bl_number"/>
+                <field name="ste_id"/>
+                <field name="supplier_id"/>
+                <field name="achat_article_id"/>
+                <field name="eta"/>
+                <field name="onicl_days_to_eta" decoration-bf="1"/>
+                <field name="port_status" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
+                <field name="purchase_state" widget="badge" decoration-info="purchase_state == 'initial'" decoration-success="purchase_state == 'confirmed'" decoration-muted="purchase_state == 'closed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Dedicated Search View for ONICL -->
+    <record id="view_achat_onicl_search" model="ir.ui.view">
+        <field name="name">achat.onicl.search</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <search string="Dossiers ONICL">
+                <field name="bl_number"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <field name="achat_article_id"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Fournisseur" name="group_by_supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
+                    <filter string="Article" name="group_by_article" context="{'group_by': 'achat_article_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action for ONICL -->
+    <record id="action_achat_onicl" model="ir.actions.act_window">
+        <field name="name">Dossiers ONICL</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_onicl_applicable', '=', True)]</field>
+        <field name="context">{'create': False}</field>
+        <field name="search_view_id" ref="view_achat_onicl_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_achat_onicl_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('achat.view_purchase_entry_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun dossier ONICL actif avec une ETA dans les 15 prochains jours.
+            </p>
+        </field>
+    </record>
+
+</odoo>

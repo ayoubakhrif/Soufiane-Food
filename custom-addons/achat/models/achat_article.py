@@ -15,6 +15,12 @@ class AchatArticle(models.Model):
         required=True
     )
 
+    is_onicl = fields.Boolean(
+        string='Est ONICL',
+        default=False,
+        help="Cocher si cet article est assujetti à l'ONICL."
+    )
+
     company_article_image = fields.Image(
         string='Image',
         related='company_article_id.image',

@@ -12,6 +12,7 @@
                                 options="{'no_create': True}"/>
                             <field name="name"
                                 placeholder="Nom interne utilisé par Achat"/>
+                            <field name="is_onicl" widget="boolean_toggle"/>
                         </group>
                         <group>
                             <field name="company_article_image"
@@ -40,6 +41,7 @@
             <tree>
                 <field name="company_article_id"/>
                 <field name="name"/>
+                <field name="is_onicl" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>

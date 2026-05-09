@@ -42,6 +42,12 @@
               action="action_achat_tanger_med"
               sequence="8"/>
 
+    <menuitem id="menu_achat_onicl"
+              name="Onicl"
+              parent="menu_achat_root"
+              action="action_achat_onicl"
+              sequence="9"/>
+
 
     <!-- Data Menu (Moved from Logistique) -->
     <menuitem id="menu_achat_data"

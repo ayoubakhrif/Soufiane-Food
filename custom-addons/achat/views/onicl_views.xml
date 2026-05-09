@@ -8,11 +8,11 @@
         <field name="arch" type="xml">
             <tree string="Dossiers ONICL" 
                   create="false" delete="false"
+                  default_order="onicl_days_to_eta asc"
                   decoration-danger="onicl_days_to_eta &lt;= 5"
                   decoration-warning="onicl_days_to_eta &gt; 5 and onicl_days_to_eta &lt;= 10"
                   decoration-info="onicl_days_to_eta &gt; 10">
                 <field name="dossier_id" invisible="1"/>
-                <field name="bl_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>

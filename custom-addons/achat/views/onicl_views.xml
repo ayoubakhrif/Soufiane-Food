@@ -19,7 +19,6 @@
                 <field name="eta"/>
                 <field name="onicl_days_to_eta" decoration-bf="1"/>
                 <field name="port_status" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
-                <field name="purchase_state" widget="badge" decoration-info="purchase_state == 'initial'" decoration-success="purchase_state == 'confirmed'" decoration-muted="purchase_state == 'closed'"/>
             </tree>
         </field>
     </record>

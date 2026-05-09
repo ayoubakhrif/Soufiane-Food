@@ -19,7 +19,7 @@ class SuiviTransportTangerOperation(models.Model):
     lot = fields.Char(string='LOT')
     montant = fields.Float(string='Montant', default=0.0)
     credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
-    payer_id = fields.Many2one('stock.kal3iya.client', string='Qui a payé')
+    payer_id = fields.Many2one('casa.client', string='Qui a payé')
     state = fields.Selection([
         ('initial', 'Initial'),
         ('paid', 'Payé'),
@@ -53,7 +53,27 @@ class SuiviTransportTangerOperation(models.Model):
             rec.state = 'paid'
 
     def action_validate(self):
-        self.write({'state': 'validated'})
+        for rec in self:
+            if rec.ville == 'tanger':
+                if not self.env.user.has_group('casa_stock.group_manager'):
+                    raise ValidationError(_("Seul le responsable de stock_casa peut valider les opérations de Tanger."))
+            
+            if rec.credit > 0:
+                raise ValidationError(_("La validation n'est possible que si le crédit est de 0."))
+            
+            # Créer l'avance si un client a payé un montant
+            if rec.payer_id and rec.montant > 0:
+                self.env['casa.client.advance'].create({
+                    'client_id': rec.payer_id.id,
+                    'amount': rec.montant,
+                    'date': rec.date,
+                    'payment_mode': 'transport',
+                    'ville': rec.ville,
+                    'comment': f"Paiement transport {rec.name}",
+                    'state': 'confirmed',
+                })
+
+            rec.state = 'validated'
 
     def action_set_initial(self):
         self.write({'state': 'initial'})
@@ -63,7 +83,7 @@ class SuiviTransportTangerOperationLine(models.Model):
     _description = 'Ligne Opération Suivi Transport Tanger'
 
     operation_id = fields.Many2one('suivi.transport.tanger.operation', string='Opération', required=True, ondelete='cascade')
-    client_id = fields.Many2one('stock.kal3iya.client', string='Client')
+    client_id = fields.Many2one('casa.client', string='Client')
     article_id = fields.Many2one('stock.kal3iya.product', string='Article')
     lot = fields.Char(string='LOT')
     exit_id = fields.Many2one('stock.kal3iya.exit', string='Sortie Stock Liée')

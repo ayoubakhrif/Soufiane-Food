@@ -243,17 +243,31 @@ class CasaStockOrder(models.Model):
             if order.state not in ('confirmed', 'done'):
                 continue
 
-            # Step 1: Cancel confirmed/done exits to restore stock via reversal moves
+            # Step 1: Cancel and delete any discounts linked to this order
+            discounts = self.env['casa_hanane.stock.discount'].search([('order_id', '=', order.id)])
+            for disc in discounts:
+                if disc.state == 'done':
+                    disc.action_cancel()
+            discounts.sudo().unlink()
+
+            # Step 2: Cancel and delete any returns linked to these exits
+            returns = self.env['casa_hanane.stock.return'].search([('exit_id', 'in', order.exit_ids.ids)])
+            for ret in returns:
+                if ret.state == 'done':
+                    ret.action_cancel()
+            returns.sudo().unlink()
+
+            # Step 3: Cancel confirmed/done exits to restore stock via reversal moves
             for exit_record in order.exit_ids:
                 if exit_record.state in ('confirmed', 'done'):
                     exit_record.action_cancel()
 
-            # Step 2: Delete ALL exits linked to this order (including draft and cancelled)
+            # Step 4: Delete ALL exits linked to this order (including draft and cancelled)
             # This prevents duplicates when re-confirming creates fresh exits from order lines
             # We use sudo() because we want to allow managers to reset orders without giving them general unlink access on exits
             order.exit_ids.sudo().unlink()
 
-            # Step 3: Set order back to draft so lines can be edited/added
+            # Step 5: Set order back to draft so lines can be edited/added
             order.write({'state': 'draft'})
 
 class CasaStockOrderLine(models.Model):

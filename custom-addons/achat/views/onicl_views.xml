@@ -24,6 +24,54 @@
         </field>
     </record>
 
+    <!-- Custom Form View for ONICL Dossiers -->
+    <record id="view_achat_onicl_form" model="ir.ui.view">
+        <field name="name">achat.onicl.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <form string="Dossier ONICL">
+                <header>
+                    <button name="action_onicl_send_ricpc" string="Envoyer Demande RICPC" type="object" class="oe_highlight" invisible="onicl_state not in ('new', 'ricpc_error')"/>
+                    <button name="action_onicl_approve" string="Approuver" type="object" class="btn-success" invisible="onicl_state != 'ricpc_sent'"/>
+                    <button name="action_onicl_set_error" string="Signaler Erreur" type="object" class="btn-danger" invisible="onicl_state != 'ricpc_sent'"/>
+                    <button name="action_onicl_enter" string="Saisir sur système ONICL" type="object" class="oe_highlight" invisible="onicl_state != 'ricpc_approved'"/>
+                    <button name="action_onicl_validate" string="Valider" type="object" class="btn-success" invisible="onicl_state != 'onicl_entered'"/>
+                    <button name="action_onicl_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="onicl_state != 'validated'"/>
+                    <button name="action_onicl_validate_portnet" string="Valider sur Portnet" type="object" class="btn-success" invisible="onicl_state != 'confirmed'"/>
+                    
+                    <!-- Admin clickable statusbar -->
+                    <field name="onicl_state" widget="statusbar" statusbar_visible="new,ricpc_sent,ricpc_approved,onicl_entered,validated,confirmed,portnet_validated" options="{'clickable': '1'}" groups="achat.group_purchase_admin"/>
+                    <field name="onicl_state" widget="statusbar" statusbar_visible="new,ricpc_sent,ricpc_approved,onicl_entered,validated,confirmed,portnet_validated" groups="!achat.group_purchase_admin"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" placeholder="BL Number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informations Principales">
+                            <field name="supplier_id" readonly="1"/>
+                            <field name="achat_article_id" readonly="1"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="contract_id" readonly="1"/>
+                            <field name="invoice_number" readonly="1"/>
+                        </group>
+                        <group string="Documents ONICL">
+                            <field name="onicl_pdf_name" invisible="1"/>
+                            <field name="onicl_pdf" filename="onicl_pdf_name" widget="binary"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
     <!-- Dedicated Search View for ONICL -->
     <record id="view_achat_onicl_search" model="ir.ui.view">
         <field name="name">achat.onicl.search</field>
@@ -54,7 +102,7 @@
         <field name="search_view_id" ref="view_achat_onicl_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_achat_onicl_tree')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('achat.view_purchase_entry_form')})]"/>
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_achat_onicl_form')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucun dossier ONICL actif avec une ETA dans les 15 prochains jours.

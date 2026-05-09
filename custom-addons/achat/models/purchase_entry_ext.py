@@ -37,6 +37,50 @@ class LogisticsEntry(models.Model):
         help="Nombre de jours restants jusqu'à l'ETA"
     )
 
+    onicl_state = fields.Selection([
+        ('new', 'Nouveau'),
+        ('ricpc_sent', 'Demande RICPC envoyée'),
+        ('ricpc_error', 'Erreur RICPC'),
+        ('ricpc_approved', 'Approuvé RICPC'),
+        ('onicl_entered', 'Saisi sur système ONICL'),
+        ('validated', 'Validé'),
+        ('confirmed', 'Confirmé'),
+        ('portnet_validated', 'Validé sur Portnet'),
+    ], string='Statut ONICL', default='new', tracking=True)
+
+    onicl_pdf = fields.Binary(string='PDF ONICL', attachment=True)
+    onicl_pdf_name = fields.Char(string='Nom du PDF ONICL')
+
+    def action_onicl_send_ricpc(self):
+        for rec in self:
+            rec.onicl_state = 'ricpc_sent'
+
+    def action_onicl_set_error(self):
+        for rec in self:
+            rec.onicl_state = 'ricpc_error'
+
+    def action_onicl_approve(self):
+        for rec in self:
+            rec.onicl_state = 'ricpc_approved'
+
+    def action_onicl_enter(self):
+        for rec in self:
+            rec.onicl_state = 'onicl_entered'
+
+    def action_onicl_validate(self):
+        for rec in self:
+            rec.onicl_state = 'validated'
+
+    def action_onicl_confirm(self):
+        for rec in self:
+            if not rec.onicl_pdf:
+                raise ValidationError("Vous devez importer le PDF ONICL avant de confirmer ce dossier.")
+            rec.onicl_state = 'confirmed'
+
+    def action_onicl_validate_portnet(self):
+        for rec in self:
+            rec.onicl_state = 'portnet_validated'
+
     @api.depends('eta', 'achat_article_id.is_onicl')
     def _compute_is_onicl_applicable(self):
         today = date.today()

@@ -40,8 +40,7 @@
                     <notebook>
                         <!-- Page for Chèques -->
                         <page string="Chèques" name="cheque_lines" invisible="payment_type != 'cheque'">
-                            <field name="cheque_line_ids"
-                                   context="{'default_check_date': date}">
+                            <field name="cheque_line_ids">
                                 <tree editable="bottom">
                                     <field name="owner_id"
                                            string="Porteur"
@@ -93,8 +92,7 @@
 
                         <!-- Page for Effets -->
                         <page string="Effets" name="effet_lines" invisible="payment_type != 'effet'">
-                            <field name="effet_line_ids"
-                                   context="{'default_check_date': date}">
+                            <field name="effet_line_ids">
                                 <tree editable="bottom">
                                     <field name="owner_id"
                                            string="Porteur"

@@ -20,6 +20,7 @@ class SuiviTransportTangerOperation(models.Model):
     montant = fields.Float(string='Montant', default=0.0)
     credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
     casa_payer_id = fields.Many2one('casa.client', string='Qui a payé')
+    available_client_ids = fields.Many2many('casa.client', compute='_compute_available_client_ids', store=False)
     state = fields.Selection([
         ('initial', 'Initial'),
         ('paid', 'Payé'),
@@ -41,10 +42,10 @@ class SuiviTransportTangerOperation(models.Model):
                 if rec.montant < 0 or rec.credit < 0:
                     raise ValidationError(_("Le montant ou le crédit ne peuvent pas être négatifs."))
 
-    @api.onchange('line_ids')
-    def _onchange_line_ids_for_payer(self):
-        client_ids = self.line_ids.mapped('casa_client_id').ids
-        return {'domain': {'casa_payer_id': [('id', 'in', client_ids)]}}
+    @api.depends('line_ids.casa_client_id')
+    def _compute_available_client_ids(self):
+        for rec in self:
+            rec.available_client_ids = rec.line_ids.mapped('casa_client_id')
 
     def action_pay(self):
         for rec in self:

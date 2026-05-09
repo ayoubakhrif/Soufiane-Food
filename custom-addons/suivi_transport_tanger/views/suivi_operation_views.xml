@@ -43,7 +43,8 @@
                         <group>
                             <field name="montant" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
                             <field name="credit" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
-                            <field name="casa_payer_id" options="{'no_create': True}" readonly="state == 'validated'"/>
+                            <field name="available_client_ids" invisible="1"/>
+                            <field name="casa_payer_id" domain="[('id', 'in', available_client_ids)]" options="{'no_create': True}" readonly="state == 'validated'"/>
                         </group>
                     </group>
                     <notebook>

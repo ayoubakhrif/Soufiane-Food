@@ -154,9 +154,16 @@ class StockKal3iyaExit(models.Model):
                         'ville': 'tanger',
                     })
                 
+                casa_client_id = False
+                if rec.client_id:
+                    casa_client = self.env['casa.client'].search([('name', '=', rec.client_id.name)], limit=1)
+                    if not casa_client:
+                        casa_client = self.env['casa.client'].create({'name': rec.client_id.name})
+                    casa_client_id = casa_client.id
+
                 self.env['suivi.transport.tanger.operation.line'].create({
                     'operation_id': suivi_op.id,
-                    'client_id': rec.client_id.id,
+                    'casa_client_id': casa_client_id,
                     'article_id': rec.product_id.id,
                     'lot': rec.lot,
                     'exit_id': rec.id,

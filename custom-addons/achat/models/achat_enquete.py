@@ -62,6 +62,11 @@ class AchatArticlePrice(models.Model):
         ('emirate', 'Emirate')
     ], string='Incoterm')
 
+    crop = fields.Selection([
+        ('new_crop', 'New crop'),
+        ('old_crop', 'Old crop')
+    ], string='Crop')
+
     user_id = fields.Many2one(
         'res.users',
         string='Entered By',
@@ -75,10 +80,18 @@ class AchatArticlePrice(models.Model):
     )
 
     _sql_constraints = [
-        ('article_supplier_date_uniq', 'unique(article_id, supplier_id, date)', 
-         'Ce produit existe déjà pour ce fournisseur à la même date !'),
+        ('article_supplier_date_crop_uniq', 'unique(article_id, supplier_id, date, crop)', 
+         'Ce produit existe déjà pour ce fournisseur à la même date avec ce crop !'),
         ('price_gt_zero', 'CHECK(price > 0)', 'Le prix doit être strictement supérieur à 0 !')
     ]
+
+    def init(self):
+        # Drop the old unique constraint to allow the new unique constraint with crop to take effect
+        self.env.cr.execute("""
+            ALTER TABLE achat_article_price 
+            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_uniq
+        """)
+        super(AchatArticlePrice, self).init()
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -89,6 +102,7 @@ class AchatArticlePrice(models.Model):
             previous_price_rec = self.search([
                 ('article_id', '=', record.article_id.id),
                 ('incoterm', '=', record.incoterm),
+                ('crop', '=', record.crop),
                 ('id', 'not in', records.ids) # Exclude all records being created in this batch
             ], order='date desc, id desc', limit=1)
 
@@ -122,6 +136,9 @@ class AchatArticlePrice(models.Model):
                     msg = f"📢 *CHANGEMENT DE PRIX ({incoterm_val.upper()})* 📢\n"
                     msg += f"------------------------------------\n"
                     msg += f"📦 *Article:* {article_display}\n"
+                    if record.crop:
+                        crop_display = "Nouvelle récolte (New crop)" if record.crop == 'new_crop' else "Ancienne récolte (Old crop)"
+                        msg += f"🌱 *Crop:* {crop_display}\n"
                     msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n"
                     msg += f"🌍 *Origine:* {record.origin_id.name or 'Inconnu'}\n\n"
                     msg += f"{icon} {trend_msg}\n"

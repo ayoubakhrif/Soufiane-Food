@@ -546,6 +546,64 @@ class ReportFinanceSituation(models.AbstractModel):
                 # Write company total
                 sheet_company.merge_range(comp_row, 0, comp_row, 4, f"TOTAL ENCOURS — {company}", sum_row_global)
                 sheet_company.write_number(comp_row, 5, sum(c['amount'] for c in company_checks), sum_row_global_amt)
+
+                # --- COMPANY SUMMARY ANALYSES (Right Side) ---
+                comp_state_stats = {
+                    'ACTIF': {'count': 0, 'amount': 0.0},
+                    'RÉSERVE': {'count': 0, 'amount': 0.0},
+                    'BUREAU': {'count': 0, 'amount': 0.0},
+                    'ANNULÉ': {'count': 0, 'amount': 0.0},
+                }
+                for c in company_checks:
+                    lbl = c['state_label']
+                    comp_state_stats[lbl]['count'] += 1
+                    comp_state_stats[lbl]['amount'] += c['amount']
+                
+                sheet_company.set_column(6, 6, 3)   # Separator column
+                sheet_company.set_column(7, 7, 12)  # Summary State
+                sheet_company.set_column(8, 8, 12)  # Summary Count
+                sheet_company.set_column(9, 9, 18)  # Summary Amount
+                
+                # Headers for the Right-Side Summary
+                sheet_company.write(2, 7, "État", sum_header_style)
+                sheet_company.write(2, 8, "Nombre", sum_header_style)
+                sheet_company.write(2, 9, "Montant Global", sum_header_style)
+                
+                state_keys_ordered = ['ACTIF', 'RÉSERVE', 'BUREAU', 'ANNULÉ']
+                state_theme_mapping = {
+                    'ACTIF': themes['actif'],
+                    'RÉSERVE': themes['reserve'],
+                    'BUREAU': themes['bureau'],
+                    'ANNULÉ': themes['annule']
+                }
+                
+                for idx, state_lbl in enumerate(state_keys_ordered):
+                    stat = comp_state_stats[state_lbl]
+                    t_state = state_theme_mapping[state_lbl]
+                    
+                    sheet_company.write(3 + idx, 7, state_lbl, t_state['left_bold'])
+                    sheet_company.write_number(3 + idx, 8, stat['count'], t_state['center'])
+                    sheet_company.write_number(3 + idx, 9, stat['amount'], t_state['money'])
+                    
+                # Total for Right-Side Summary
+                sheet_company.write(7, 7, "TOTAL", sum_row_global)
+                sheet_company.write_number(7, 8, sum(s['count'] for s in comp_state_stats.values()), sum_row_global)
+                sheet_company.write_number(7, 9, sum(s['amount'] for s in comp_state_stats.values()), sum_row_global_amt)
+                
+                # Pie Chart on the Right
+                chart_comp_state = workbook.add_chart({'type': 'pie'})
+                chart_comp_state.add_series({
+                    'categories': f"='{safe_name}'!$H$4:$H$7",
+                    'values': f"='{safe_name}'!$J$4:$J$7",
+                    'name': 'Répartition par État',
+                    'data_labels': {'percentage': True}
+                })
+                chart_comp_state.set_title({
+                    'name': 'Répartition Financière par État',
+                    'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
+                })
+                chart_comp_state.set_size({'width': 440, 'height': 280})
+                sheet_company.insert_chart('L2', chart_comp_state)
             else:
                 sheet_company.merge_range(comp_row, 0, comp_row, 5, "Aucun chèque enregistré pour cette société.", themes['reserve']['empty'])
 

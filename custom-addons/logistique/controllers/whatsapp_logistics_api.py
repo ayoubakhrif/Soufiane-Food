@@ -187,6 +187,77 @@ class WhatsAppLogisticsController(http.Controller):
                 }
 
 
+        # E. Week Search: W1, Semaine 1, S1, Week 1, etc.
+        # Support formats like W1, w01, Semaine 1, semaine-1, S1, Week 1, and optional year like W1 2026, S1/2026, etc.
+        week_match = re.search(r"(?i)^\s*(?:week|semaine|s|w)\s*[-_ ]*\s*([0-9]{1,2})(?:\s*[-_/ ]\s*([0-9]{2,4}))?\s*$", message_text)
+        if week_match:
+            try:
+                week_num = int(week_match.group(1))
+                year_num = int(week_match.group(2)) if week_match.group(2) else date.today().year
+                if len(str(year_num)) == 2:
+                    year_num += 2000
+
+                # Validate week number
+                if not (1 <= week_num <= 53):
+                    return {'status': 'response', 'response': f"❌ Numéro de semaine '{week_num}' invalide. Veuillez entrer une semaine entre 1 et 53."}
+
+                # Calculate start and end dates of the week
+                start_date = date.fromisocalendar(year_num, week_num, 1)
+                end_date = date.fromisocalendar(year_num, week_num, 7)
+
+                # Search entries with BAD date in this week
+                entries = request.env['logistique.entry'].sudo().search([
+                    ('bad_date', '>=', start_date),
+                    ('bad_date', '<=', end_date)
+                ], order='bad_date asc, id asc')
+
+                if not entries:
+                    return {
+                        'status': 'response',
+                        'response': f"📅 *Semaine {week_num} ({year_num})*\n🗓️ *Du {start_date.strftime('%d/%m/%Y')} au {end_date.strftime('%d/%m/%Y')}*\n\n✅ Aucun BL trouvé avec une date de BAD durant cette semaine."
+                    }
+
+                # Format response
+                response = f"📅 *Situation Semaine {week_num} ({year_num})*\n"
+                response += f"🗓️ *Du {start_date.strftime('%d/%m')} au {end_date.strftime('%d/%m')}*\n"
+                response += f"━━━━━━━━━━━━━━━━━━\n\n"
+
+                # Group by Article
+                grouped = {}
+                for e in entries:
+                    art = e.achat_article_id.name or e.article_id.name or "SANS ARTICLE"
+                    if art not in grouped:
+                        grouped[art] = []
+                    grouped[art].append(e)
+
+                total_containers = 0
+                for art, r_entries in grouped.items():
+                    response += f"🛳️ *{art.upper()}*\n"
+                    for e in r_entries:
+                        status_lbl = "✅ Sorti" if e.port_status == 'exited' else "⚓ Au Port"
+                        bad_str = e.bad_date.strftime('%d/%m') if e.bad_date else "??"
+                        supplier_name = e.supplier_id.name or "Inconnu"
+                        containers = e.container_count or 0
+                        total_containers += containers
+                        
+                        response += f"• *BL {e.bl_number or '??'}* : *{containers}* cont. | BAD: {bad_str} | Fourn: {supplier_name} | {status_lbl}\n"
+                    response += "\n"
+
+                response += f"━━━━━━━━━━━━━━━━━━\n"
+                response += f"📊 *Résumé de la semaine :*\n"
+                response += f"• Total BLs : *{len(entries)}*\n"
+                response += f"• Total conteneurs : *{total_containers}* conteneurs\n"
+
+                return {'status': 'response', 'response': response}
+
+            except ValueError as val_err:
+                _logger.error(f"ValueError parsing week query: {str(val_err)}")
+                return {'status': 'response', 'response': f"❌ Erreur lors de la détermination de la semaine {week_num} pour l'année {year_num}."}
+            except Exception as e:
+                _logger.error(f"Error handling week query: {str(e)}")
+                return {'status': 'response', 'response': f"❌ Une erreur inattendue est survenue lors de la recherche par semaine."}
+
+
         # 4. Search for Article (Fallback - Filter by Active Dossiers Only)
         active_entries = request.env['logistique.entry'].sudo().search([
             ('port_status', '=', 'on_port')

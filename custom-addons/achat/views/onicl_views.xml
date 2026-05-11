@@ -30,7 +30,7 @@
         <field name="arch" type="xml">
             <form string="Dossier ONICL">
                 <header>
-                    <button name="action_onicl_send_ricpc" string="Envoyer Demande RICPC" type="object" class="oe_highlight" invisible="onicl_state not in ('new', 'ricpc_error')"/>
+                    <button name="action_onicl_send_ricpc" string="Envoyer Demande RCPSS" type="object" class="oe_highlight" invisible="onicl_state not in ('new', 'ricpc_error')"/>
                     <button name="action_onicl_approve" string="Approuver" type="object" class="btn-success" invisible="onicl_state != 'ricpc_sent'"/>
                     <button name="action_onicl_set_error" string="Signaler Erreur" type="object" class="btn-danger" invisible="onicl_state != 'ricpc_sent'"/>
                     <button name="action_onicl_enter" string="Saisir sur système ONICL" type="object" class="oe_highlight" invisible="onicl_state != 'ricpc_approved'"/>

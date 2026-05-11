@@ -81,6 +81,7 @@ class ReportFinanceSituation(models.AbstractModel):
         return {
             'doc_ids': docids,
             'doc_model': 'finance.cheque.physical',
+            'active_list': active_list_phys,
             'active_summary': ste_summary_list,
             'total_active_count': total_active_count,
             'total_active_amount': total_active_amount,
@@ -374,7 +375,7 @@ class ReportFinanceSituation(models.AbstractModel):
             'categories': "='Situation_Cheques'!$A$4:$A$7",
             'values': "='Situation_Cheques'!$B$4:$B$7",
             'name': 'Nombre de Chèques par État',
-            'data_labels': {'value': True}
+            'data_labels': {'percentage': True}
         })
         chart_count.set_title({
             'name': 'Répartition par Nombre de Chèques',
@@ -407,7 +408,113 @@ class ReportFinanceSituation(models.AbstractModel):
             chart_active.set_legend({'none': True})
             chart_active.set_size({'width': 850, 'height': 450})
             sheet_analysis.insert_chart('A21', chart_active)
+        # ----------------------------------------------------
+        # 6. DETAILED SHEETS PER COMPANY (SOCIÉTÉ)
+        # ----------------------------------------------------
+        all_companies = set()
+        for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:
+            for chq in values.get(lst_key, []):
+                if chq.get('ste'):
+                    all_companies.add(chq['ste'])
+        
+        sorted_companies = sorted(list(all_companies))
+        
+        def make_safe_sheet_name(name):
+            for char in [':', '\\', '/', '?', '*', '[', ']']:
+                name = name.replace(char, '')
+            return name[:30]  # Excel 31 characters limit
+
+        from datetime import datetime, time
+
+        for company in sorted_companies:
+            safe_name = make_safe_sheet_name(company)
+            sheet_company = workbook.add_worksheet(safe_name)
+            sheet_company.set_default_row(20)
             
+            # Column widths for Company detailed sheet
+            sheet_company.set_column(0, 0, 15)  # État
+            sheet_company.set_column(1, 1, 15)  # N° Chèque
+            sheet_company.set_column(2, 2, 28)  # Bénéficiaire
+            sheet_company.set_column(3, 3, 20)  # Personne
+            sheet_company.set_column(4, 4, 15)  # Échéance
+            sheet_company.set_column(5, 5, 18)  # Montant
+            
+            # Title block
+            sheet_company.set_row(0, 30)
+            sheet_company.merge_range('A1:F1', f"Situation Détaillée — {company}", title_style)
+            
+            # Write Headers
+            comp_row = 2
+            sheet_company.write(comp_row, 0, "État", sum_header_style)
+            sheet_company.write(comp_row, 1, "N° Chèque", sum_header_style)
+            sheet_company.write(comp_row, 2, "Bénéficiaire", sum_header_style)
+            sheet_company.write(comp_row, 3, "Personne", sum_header_style)
+            sheet_company.write(comp_row, 4, "Échéance", sum_header_style)
+            sheet_company.write(comp_row, 5, "Montant", sum_header_style)
+            comp_row += 1
+            
+            # Gather and tag company-specific checks
+            company_checks = []
+            
+            # Actifs
+            for chq in values.get('active_list', []):
+                if chq['ste'] == company:
+                    c_copy = chq.copy()
+                    c_copy['state_label'] = 'ACTIF'
+                    c_copy['theme'] = themes['actif']
+                    company_checks.append(c_copy)
+            
+            # Réserve
+            for chq in values.get('reserve_list', []):
+                if chq['ste'] == company:
+                    c_copy = chq.copy()
+                    c_copy['state_label'] = 'RÉSERVE'
+                    c_copy['theme'] = themes['reserve']
+                    company_checks.append(c_copy)
+                    
+            # Bureau
+            for chq in values.get('bureau_list', []):
+                if chq['ste'] == company:
+                    c_copy = chq.copy()
+                    c_copy['state_label'] = 'BUREAU'
+                    c_copy['theme'] = themes['bureau']
+                    company_checks.append(c_copy)
+                    
+            # Annulé
+            for chq in values.get('annule_list', []):
+                if chq['ste'] == company:
+                    c_copy = chq.copy()
+                    c_copy['state_label'] = 'ANNULÉ'
+                    c_copy['theme'] = themes['annule']
+                    company_checks.append(c_copy)
+                    
+            # Sort checks by State order, then check number
+            state_priority = {'ACTIF': 0, 'RÉSERVE': 1, 'BUREAU': 2, 'ANNULÉ': 3}
+            company_checks.sort(key=lambda x: (state_priority[x['state_label']], x['chq'] or ''))
+            
+            if company_checks:
+                for c in company_checks:
+                    t = c['theme']
+                    sheet_company.write(comp_row, 0, c['state_label'], t['left_bold'])
+                    sheet_company.write(comp_row, 1, c['chq'] or "", t['center'])
+                    sheet_company.write(comp_row, 2, c['benif'], t['left'])
+                    sheet_company.write(comp_row, 3, c['perso'], t['left'])
+                    
+                    d_ech = c['date_echeance']
+                    if d_ech:
+                        sheet_company.write_datetime(comp_row, 4, datetime.combine(d_ech, time.min), t['date'])
+                    else:
+                        sheet_company.write(comp_row, 4, "", t['center'])
+                        
+                    sheet_company.write_number(comp_row, 5, c['amount'], t['money'])
+                    comp_row += 1
+                
+                # Write company total
+                sheet_company.merge_range(comp_row, 0, comp_row, 4, f"TOTAL ENCOURS — {company}", sum_row_global)
+                sheet_company.write_number(comp_row, 5, sum(c['amount'] for c in company_checks), sum_row_global_amt)
+            else:
+                sheet_company.merge_range(comp_row, 0, comp_row, 5, "Aucun chèque enregistré pour cette société.", themes['reserve']['empty'])
+
         workbook.close()
         output.seek(0)
         file_data = base64.b64encode(output.read()).decode('utf-8')

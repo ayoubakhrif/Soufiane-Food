@@ -122,11 +122,26 @@ class WhatsAppFinanceController(http.Controller):
                 pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_situation', res_ids=[])
                 pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-                # Query counts to show a nice summary message
-                active_count = request.env['datacheque'].sudo().search_count([('state', '=', 'actif')])
-                reserve_count = request.env['datacheque'].sudo().search_count([('state', '=', 'reserve')])
-                bureau_count = request.env['datacheque'].sudo().search_count([('state', '=', 'bureau')])
-                annule_count = request.env['datacheque'].sudo().search_count([('state', '=', 'annule')])
+                # Query physical counts of each state based on the first linked datacheque
+                physicals = request.env['finance.cheque.physical'].sudo().search([])
+                
+                active_count = 0
+                reserve_count = 0
+                bureau_count = 0
+                annule_count = 0
+                
+                for p in physicals:
+                    if p.datacheque_ids:
+                        state = p.datacheque_ids[0].state
+                        if state == 'actif':
+                            active_count += 1
+                        elif state == 'reserve':
+                            reserve_count += 1
+                        elif state == 'bureau':
+                            bureau_count += 1
+                        elif state == 'annule':
+                            annule_count += 1
+
 
                 summary_msg = (
                     f"📋 *Situation Générale des Chèques* 📋\n"

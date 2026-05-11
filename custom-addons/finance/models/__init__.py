@@ -20,3 +20,5 @@ from . import finance_effet
 from . import finance_logistics_reconciliation
 from . import finance_cheque_effet_calendar
 from . import finance_contact
+from . import finance_situation_report
+

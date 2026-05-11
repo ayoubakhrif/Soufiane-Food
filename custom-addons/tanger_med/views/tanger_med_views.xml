@@ -10,6 +10,7 @@
         <field name="arch" type="xml">
             <tree string="Tanger Med" create="false" delete="false" default_order="exit_date desc">
                 <field name="bl_number"/>
+                <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="article_id"/>
@@ -80,6 +81,7 @@
                                     <field name="eta" readonly="1"/>
                                     <field name="tanger_med_lot"/>
                                     <field name="tanger_med_dum"/>
+                                    <field name="week"/>
                                 </group>
                                 <group string="SUR+MAG">
                                     <field name="calculated_surestarie_ht" readonly="1"/>
@@ -111,11 +113,13 @@
         <field name="arch" type="xml">
             <search string="Recherche Tanger Med">
                 <field name="bl_number"/>
+                <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="article_id"/>
                 <field name="container_names" string="Conteneur"/>
                 <group string="Regrouper par">
+                    <filter name="group_week" string="Semaine" context="{'group_by': 'week'}"/>
                     <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
                     <filter name="group_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
                     <filter name="group_article" string="Article" context="{'group_by': 'article_id'}"/>

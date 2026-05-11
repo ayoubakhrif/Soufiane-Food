@@ -142,13 +142,13 @@ class StockKal3iyaExit(models.Model):
             })
 
             if rec.driver_id and rec.driver_id.type_chauffeur == 'chair':
-                suivi_op = self.env['suivi.transport.tanger.operation'].search([
+                suivi_op = self.env['suivi.transport.tanger.operation'].sudo().search([
                     ('date', '=', rec.date),
                     ('chauffeur_id', '=', rec.driver_id.id)
                 ], limit=1)
                 
                 if not suivi_op:
-                    suivi_op = self.env['suivi.transport.tanger.operation'].create({
+                    suivi_op = self.env['suivi.transport.tanger.operation'].sudo().create({
                         'date': rec.date,
                         'chauffeur_id': rec.driver_id.id,
                         'ville': 'tanger',
@@ -156,12 +156,12 @@ class StockKal3iyaExit(models.Model):
                 
                 casa_client_id = False
                 if rec.client_id:
-                    casa_client = self.env['casa.client'].search([('name', '=', rec.client_id.name)], limit=1)
+                    casa_client = self.env['casa.client'].sudo().search([('name', '=', rec.client_id.name)], limit=1)
                     if not casa_client:
-                        casa_client = self.env['casa.client'].create({'name': rec.client_id.name})
+                        casa_client = self.env['casa.client'].sudo().create({'name': rec.client_id.name})
                     casa_client_id = casa_client.id
 
-                self.env['suivi.transport.tanger.operation.line'].create({
+                self.env['suivi.transport.tanger.operation.line'].sudo().create({
                     'operation_id': suivi_op.id,
                     'casa_client_id': casa_client_id,
                     'article_id': rec.product_id.id,

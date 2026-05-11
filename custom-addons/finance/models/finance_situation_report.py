@@ -204,33 +204,33 @@ class ReportFinanceSituation(models.AbstractModel):
         # Summary table (Data Sheet)
         sheet.write(row, 0, "État", sum_header_style)
         sheet.write(row, 1, "Nombre de Chèques", sum_header_style)
-        sheet.merge_range(row, 2, row, 3, "Montant Global", sum_header_style)
+        sheet.write(row, 2, "Montant Global", sum_header_style)
         row += 1
         
         # Actif
         sheet.write(row, 0, "ACTIFS", sum_row_actif)
         sheet.write_number(row, 1, values['total_active_count'], sum_row_actif)
-        sheet.merge_range(row, 2, row, 3, values['total_active_amount'], sum_row_actif_amt)
+        sheet.write_number(row, 2, values['total_active_amount'], sum_row_actif_amt)
         row += 1
         # Reserve
         sheet.write(row, 0, "RÉSERVE", sum_row_reserve)
         sheet.write_number(row, 1, values['total_reserve_count'], sum_row_reserve)
-        sheet.merge_range(row, 2, row, 3, values['total_reserve_amount'], sum_row_reserve_amt)
+        sheet.write_number(row, 2, values['total_reserve_amount'], sum_row_reserve_amt)
         row += 1
         # Bureau
         sheet.write(row, 0, "BUREAU", sum_row_bureau)
         sheet.write_number(row, 1, values['total_bureau_count'], sum_row_bureau)
-        sheet.merge_range(row, 2, row, 3, values['total_bureau_amount'], sum_row_bureau_amt)
+        sheet.write_number(row, 2, values['total_bureau_amount'], sum_row_bureau_amt)
         row += 1
         # Annule
         sheet.write(row, 0, "ANNULÉS", sum_row_annule)
         sheet.write_number(row, 1, values['total_annule_count'], sum_row_annule)
-        sheet.merge_range(row, 2, row, 3, values['total_annule_amount'], sum_row_annule_amt)
+        sheet.write_number(row, 2, values['total_annule_amount'], sum_row_annule_amt)
         row += 1
         # Global Total
         sheet.write(row, 0, "TOTAL GENERAL", sum_row_global)
         sheet.write_number(row, 1, values['global_count'], sum_row_global)
-        sheet.merge_range(row, 2, row, 3, values['global_amount'], sum_row_global_amt)
+        sheet.write_number(row, 2, values['global_amount'], sum_row_global_amt)
         row += 2  # spacing
         
         # 1. SECTION ACTIFS (RECAP GENERAL)
@@ -353,40 +353,29 @@ class ReportFinanceSituation(models.AbstractModel):
             sheet.write_number(row, 4, values['total_annule_amount'], t_ann['total_money'])
             row += 1
 
-        # ----------------------------------------------------
-        # 5. CHARTS & GRAPHS (Inserted in the ANALYSES sheet)
-        # ----------------------------------------------------
-        # Chart 1: Doughnut Chart for States Distribution
-        chart_state = workbook.add_chart({'type': 'doughnut'})
+        # Chart 1: Pie Chart for States Distribution (Highly Compatible)
+        chart_state = workbook.add_chart({'type': 'pie'})
         chart_state.add_series({
             'categories': "='Situation_Cheques'!$A$4:$A$7",
             'values': "='Situation_Cheques'!$C$4:$C$7",
-            'points': [
-                {'fill': {'color': '#137333'}},  # Actif (Green)
-                {'fill': {'color': '#B06000'}},  # Reserve (Orange)
-                {'fill': {'color': '#1A73E8'}},  # Bureau (Blue)
-                {'fill': {'color': '#C5221F'}},  # Annule (Red)
-            ],
             'name': 'Montant Global par État',
-            'data_labels': {'percentage': True, 'position': 'outside_end'}
+            'data_labels': {'percentage': True}
         })
         chart_state.set_title({
             'name': 'Répartition Financière par État',
             'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
         })
-        chart_state.set_style(10)
         chart_state.set_size({'width': 500, 'height': 350})
         sheet_analysis.insert_chart('A3', chart_state)
 
-        # Chart 2: Column Chart for Active Checks per Company (if any exist)
+        # Chart 2: Column Chart for Active Checks per Company
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
             chart_active = workbook.add_chart({'type': 'column'})
             chart_active.add_series({
                 'categories': f"='Situation_Cheques'!$A${start_row_active_excel}:$A${end_row_active_excel}",
                 'values': f"='Situation_Cheques'!$C${start_row_active_excel}:$C${end_row_active_excel}",
-                'fill': {'color': '#137333'},
                 'name': 'Montant Total Actif (MAD)',
-                'data_labels': {'value': True, 'font': {'size': 10, 'color': '#137333'}}
+                'data_labels': {'value': True}
             })
             chart_active.set_title({
                 'name': 'Encours Actif par Société',
@@ -394,16 +383,13 @@ class ReportFinanceSituation(models.AbstractModel):
             })
             chart_active.set_x_axis({
                 'name': 'Sociétés Émettrices',
-                'name_font': {'size': 10, 'bold': True},
-                'num_font': {'size': 9, 'rotation': -15}
+                'name_font': {'size': 10, 'bold': True}
             })
             chart_active.set_y_axis({
                 'name': 'Montant Cumulé (MAD)',
-                'name_font': {'size': 10, 'bold': True},
-                'num_font': {'size': 9}
+                'name_font': {'size': 10, 'bold': True}
             })
             chart_active.set_legend({'none': True})
-            chart_active.set_style(11)
             chart_active.set_size({'width': 850, 'height': 450})
             sheet_analysis.insert_chart('A21', chart_active)
             

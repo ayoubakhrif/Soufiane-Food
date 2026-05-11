@@ -173,8 +173,8 @@ class ReportFinanceSituation(models.AbstractModel):
             'annule': make_theme_formats('#C5221F', '#FCE8E6', '#C5221F'),
         }
 
-        sheet_analysis = workbook.add_worksheet("Analyses Graphiques")
-        sheet = workbook.add_worksheet("Situation des Chèques")
+        sheet_analysis = workbook.add_worksheet("Analyses")
+        sheet = workbook.add_worksheet("Situation_Cheques")
         sheet_analysis.activate()
         
         sheet.set_default_row(20)

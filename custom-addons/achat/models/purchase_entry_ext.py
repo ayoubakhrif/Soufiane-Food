@@ -39,9 +39,9 @@ class LogisticsEntry(models.Model):
 
     onicl_state = fields.Selection([
         ('new', 'Nouveau'),
-        ('ricpc_sent', 'Demande RICPC envoyée'),
-        ('ricpc_error', 'Erreur RICPC'),
-        ('ricpc_approved', 'Approuvé RICPC'),
+        ('ricpc_sent', 'Demande RCPSS envoyée'),
+        ('ricpc_error', 'Erreur RCPSS'),
+        ('ricpc_approved', 'Approuvé RCPSS'),
         ('onicl_entered', 'Saisi sur système ONICL'),
         ('validated', 'Validé'),
         ('confirmed', 'Confirmé'),

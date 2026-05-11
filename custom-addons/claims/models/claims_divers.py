@@ -170,6 +170,15 @@ class ClaimsDivers(models.Model):
     # ==========================
     evidence_link = fields.Char(string='Evidence Link', help="Link to proof documents (emails, reports, etc.)")
     can_see_evidence = fields.Boolean(compute='_compute_can_see_evidence')
+    document_ids = fields.Many2many(
+        'ir.attachment',
+        'claims_divers_attachment_rel',
+        'claim_id',
+        'attachment_id',
+        string='Documents PDF',
+        tracking=True,
+        help="Upload proof documents (PDF, etc.) proving the paid amounts."
+    )
 
     @api.depends('responsible_id')
     def _compute_can_see_evidence(self):

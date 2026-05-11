@@ -368,6 +368,21 @@ class ReportFinanceSituation(models.AbstractModel):
         chart_state.set_size({'width': 500, 'height': 350})
         sheet_analysis.insert_chart('A3', chart_state)
 
+        # Chart 3: Pie Chart for Check Count Distribution (Highly Compatible)
+        chart_count = workbook.add_chart({'type': 'pie'})
+        chart_count.add_series({
+            'categories': "='Situation_Cheques'!$A$4:$A$7",
+            'values': "='Situation_Cheques'!$B$4:$B$7",
+            'name': 'Nombre de Chèques par État',
+            'data_labels': {'value': True}
+        })
+        chart_count.set_title({
+            'name': 'Répartition par Nombre de Chèques',
+            'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
+        })
+        chart_count.set_size({'width': 500, 'height': 350})
+        sheet_analysis.insert_chart('J3', chart_count)
+
         # Chart 2: Column Chart for Active Checks per Company
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
             chart_active = workbook.add_chart({'type': 'column'})

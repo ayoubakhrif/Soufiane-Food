@@ -246,9 +246,23 @@ async function connectToWhatsApp() {
                         // Support for multiple files
                         if (result.files && Array.isArray(result.files)) {
                             for (const file of result.files) {
+                                const base64Data = file.pdf_base64 || file.base64;
+                                if (!base64Data) continue;
+                                
+                                let mimeType = file.mimetype;
+                                if (!mimeType) {
+                                    if (file.file_name.endsWith('.xlsx')) {
+                                        mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                                    } else if (file.file_name.endsWith('.xls')) {
+                                        mimeType = 'application/vnd.ms-excel';
+                                    } else {
+                                        mimeType = 'application/pdf';
+                                    }
+                                }
+                                
                                 await sock.sendMessage(from, {
-                                    document: Buffer.from(file.pdf_base64, 'base64'),
-                                    mimetype: 'application/pdf',
+                                    document: Buffer.from(base64Data, 'base64'),
+                                    mimetype: mimeType,
                                     fileName: file.file_name,
                                     caption: file.caption || `Document pour *${identifier}*.`
                                 }, { quoted: msg });

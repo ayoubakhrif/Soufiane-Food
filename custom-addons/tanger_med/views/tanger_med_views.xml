@@ -8,8 +8,9 @@
         <field name="name">tanger.med.entry.tree</field>
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
-            <tree string="Tanger Med" create="false" delete="false" default_order="exit_date desc">
+            <tree string="Tanger Med" create="false" delete="false" default_order="bad_date desc">
                 <field name="bl_number"/>
+                <field name="tanger_med_state" widget="badge" decoration-info="tanger_med_state == 'port'" decoration-warning="tanger_med_state == 'sortie_port'" decoration-success="tanger_med_state == 'arrive_stock'"/>
                 <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
@@ -40,6 +41,12 @@
         <field name="model">logistique.entry</field>
         <field name="arch" type="xml">
             <form string="Dossier Tanger Med" create="false" delete="false">
+                <header>
+                    <button name="action_tanger_med_sortie_port" string="Sortie de Port" type="object" class="oe_highlight" invisible="tanger_med_state != 'port'"/>
+                    <button name="action_tanger_med_arrive_stock" string="Arrivé au Stock" type="object" class="oe_highlight" invisible="tanger_med_state != 'sortie_port'"/>
+                    <button name="action_tanger_med_reset" string="Remettre Au Port" type="object" invisible="tanger_med_state == 'port'" groups="tanger_med.group_tanger_med_manager"/>
+                    <field name="tanger_med_state" widget="statusbar" statusbar_visible="port,sortie_port,arrive_stock"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
@@ -70,6 +77,18 @@
                     </group>
                     <group string="Arrivée au Stockage">
                         <field name="arrival_picture" widget="image" class="oe_avatar"/>
+                    </group>
+                    <group string="Workflow Tanger Med">
+                        <group string="Contrôles Port">
+                            <field name="is_analyse"/>
+                            <field name="date_analyse" invisible="not is_analyse"/>
+                            <field name="is_visite"/>
+                            <field name="date_visite" invisible="not is_visite"/>
+                        </group>
+                        <group string="Étapes Logistiques">
+                            <field name="date_sortie_port"/>
+                            <field name="date_arrive_stock"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Tanger Med" name="tanger_med">
@@ -119,6 +138,7 @@
                 <field name="article_id"/>
                 <field name="container_names" string="Conteneur"/>
                 <group string="Regrouper par">
+                    <filter name="group_tanger_med_state" string="Statut Tanger Med" context="{'group_by': 'tanger_med_state'}"/>
                     <filter name="group_week" string="Semaine" context="{'group_by': 'week'}"/>
                     <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
                     <filter name="group_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>

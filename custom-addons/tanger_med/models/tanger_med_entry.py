@@ -110,3 +110,70 @@ class TangerMedEntry(models.Model):
         if 'exit_date' in vals and vals.get('exit_date'):
             vals['sur_mag_user'] = self.env.user.id
         return super().write(vals)
+
+    tanger_med_state = fields.Selection([
+        ('port', 'Au Port'),
+        ('sortie_port', 'Sortie de Port'),
+        ('arrive_stock', 'Arrivé au Stock'),
+    ], string='Statut Tanger Med', default='port', tracking=True)
+
+    is_analyse = fields.Boolean(string='Analyse', default=False, tracking=True)
+    date_analyse = fields.Date(string="Date d'Analyse", tracking=True)
+
+    is_visite = fields.Boolean(string='Visite', default=False, tracking=True)
+    date_visite = fields.Date(string="Date de Visite", tracking=True)
+
+    date_sortie_port = fields.Date(string="Date de Sortie de Port", tracking=True)
+    date_arrive_stock = fields.Date(string="Date d'Arrivée au Stock", tracking=True)
+
+    @api.onchange('is_analyse')
+    def _onchange_is_analyse(self):
+        if self.is_analyse and not self.date_analyse:
+            self.date_analyse = fields.Date.context_today(self)
+        elif not self.is_analyse:
+            self.date_analyse = False
+
+    @api.onchange('is_visite')
+    def _onchange_is_visite(self):
+        if self.is_visite and not self.date_visite:
+            self.date_visite = fields.Date.context_today(self)
+        elif not self.is_visite:
+            self.date_visite = False
+
+    @api.onchange('date_analyse')
+    def _onchange_date_analyse(self):
+        self.is_analyse = bool(self.date_analyse)
+
+    @api.onchange('date_visite')
+    def _onchange_date_visite(self):
+        self.is_visite = bool(self.date_visite)
+
+    @api.onchange('date_sortie_port')
+    def _onchange_date_sortie_port(self):
+        if self.date_sortie_port:
+            self.tanger_med_state = 'sortie_port'
+
+    @api.onchange('date_arrive_stock')
+    def _onchange_date_arrive_stock(self):
+        if self.date_arrive_stock:
+            self.tanger_med_state = 'arrive_stock'
+
+    def action_tanger_med_sortie_port(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'sortie_port',
+                'date_sortie_port': fields.Date.context_today(rec)
+            })
+
+    def action_tanger_med_arrive_stock(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'arrive_stock',
+                'date_arrive_stock': fields.Date.context_today(rec)
+            })
+
+    def action_tanger_med_reset(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'port'
+            })

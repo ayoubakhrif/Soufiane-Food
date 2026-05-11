@@ -47,7 +47,7 @@
 
             <!-- Add Sortie Port Button -->
             <xpath expr="//header" position="inside">
-                <button name="action_exit_port" string="Sortie Port" type="object" class="oe_highlight" 
+                <button name="action_exit_port" string="Décharge" type="object" class="oe_highlight" 
                         invisible="port_status == 'exited'"
                         groups="achat.group_purchase_user"/>
             </xpath>
@@ -123,6 +123,7 @@
                   decoration-muted="is_non_change == True">
                 <field name="dossier_id" invisible="1"/>
                 <field name="ste_id"/>
+                <field name="tanger_med_state" widget="badge" decoration-info="tanger_med_state == 'port'" decoration-warning="tanger_med_state == 'sortie_port'" decoration-success="tanger_med_state == 'arrive_stock'"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
                 <field name="achat_article_id"/>

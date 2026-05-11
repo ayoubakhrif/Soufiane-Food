@@ -359,8 +359,8 @@ class ReportFinanceSituation(models.AbstractModel):
         # Chart 1: Doughnut Chart for States Distribution
         chart_state = workbook.add_chart({'type': 'doughnut'})
         chart_state.add_series({
-            'categories': "='Situation des Chèques'!$A$4:$A$7",
-            'values': "='Situation des Chèques'!$C$4:$C$7",
+            'categories': "='Situation_Cheques'!$A$4:$A$7",
+            'values': "='Situation_Cheques'!$C$4:$C$7",
             'points': [
                 {'fill': {'color': '#137333'}},  # Actif (Green)
                 {'fill': {'color': '#B06000'}},  # Reserve (Orange)
@@ -382,8 +382,8 @@ class ReportFinanceSituation(models.AbstractModel):
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
             chart_active = workbook.add_chart({'type': 'column'})
             chart_active.add_series({
-                'categories': f"='Situation des Chèques'!$A${start_row_active_excel}:$A${end_row_active_excel}",
-                'values': f"='Situation des Chèques'!$C${start_row_active_excel}:$C${end_row_active_excel}",
+                'categories': f"='Situation_Cheques'!$A${start_row_active_excel}:$A${end_row_active_excel}",
+                'values': f"='Situation_Cheques'!$C${start_row_active_excel}:$C${end_row_active_excel}",
                 'fill': {'color': '#137333'},
                 'name': 'Montant Total Actif (MAD)',
                 'data_labels': {'value': True, 'font': {'size': 10, 'color': '#137333'}}

@@ -176,13 +176,14 @@ class ReportFinanceSituation(models.AbstractModel):
         sheet = workbook.add_worksheet("Situation des Chèques")
         sheet.set_default_row(20)
         
-        # Set column widths (A to F)
+        # Set column widths (A to G)
         sheet.set_column(0, 0, 15)  # N° Chèque / Société
         sheet.set_column(1, 1, 28)  # Société / Nbre Chqs
         sheet.set_column(2, 2, 28)  # Bénéficiaire / Montant
         sheet.set_column(3, 3, 20)  # Personne
         sheet.set_column(4, 4, 15)  # Échéance
         sheet.set_column(5, 5, 18)  # Montant
+        sheet.set_column(6, 6, 3)   # Separator Column
 
         # Header Block
         sheet.set_row(0, 30)
@@ -233,6 +234,7 @@ class ReportFinanceSituation(models.AbstractModel):
         sheet.write(row, 2, "Montant Total", t_actif['header'])
         row += 1
         
+        start_row_active_excel = row + 1
         if values['active_summary']:
             for active in values['active_summary']:
                 sheet.write(row, 0, active['ste_name'], t_actif['left_bold'])
@@ -242,6 +244,7 @@ class ReportFinanceSituation(models.AbstractModel):
         else:
             sheet.merge_range(row, 0, row, 2, "Aucun chèque actif trouvé.", t_actif['empty'])
             row += 1
+        end_row_active_excel = row
             
         sheet.write(row, 0, "TOTAL ACTIFS", t_actif['total_left'])
         sheet.write_number(row, 1, values['total_active_count'], t_actif['total'])
@@ -340,6 +343,60 @@ class ReportFinanceSituation(models.AbstractModel):
             sheet.merge_range(row, 0, row, 3, "TOTAL ANNULÉS", t_ann['total_left'])
             sheet.write_number(row, 4, values['total_annule_amount'], t_ann['total_money'])
             row += 1
+
+        # ----------------------------------------------------
+        # 5. CHARTS & GRAPHS FOR ANALYSIS
+        # ----------------------------------------------------
+        # Chart 1: Doughnut Chart for States Distribution
+        chart_state = workbook.add_chart({'type': 'doughnut'})
+        chart_state.add_series({
+            'categories': "='Situation des Chèques'!$A$4:$A$7",
+            'values': "='Situation des Chèques'!$C$4:$C$7",
+            'points': [
+                {'fill': {'color': '#137333'}},  # Actif (Green)
+                {'fill': {'color': '#B06000'}},  # Reserve (Orange)
+                {'fill': {'color': '#1A73E8'}},  # Bureau (Blue)
+                {'fill': {'color': '#C5221F'}},  # Annule (Red)
+            ],
+            'name': 'Montant Global par État',
+            'data_labels': {'percentage': True, 'position': 'outside_end'}
+        })
+        chart_state.set_title({
+            'name': 'Répartition Financière par État',
+            'name_font': {'bold': True, 'size': 11, 'color': '#1A4D80'}
+        })
+        chart_state.set_style(10)
+        chart_state.set_size({'width': 440, 'height': 240})
+        sheet.insert_chart('H3', chart_state)
+
+        # Chart 2: Column Chart for Active Checks per Company (if any exist)
+        if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
+            chart_active = workbook.add_chart({'type': 'column'})
+            chart_active.add_series({
+                'categories': f"='Situation des Chèques'!$A${start_row_active_excel}:$A${end_row_active_excel}",
+                'values': f"='Situation des Chèques'!$C${start_row_active_excel}:$C${end_row_active_excel}",
+                'fill': {'color': '#137333'},
+                'name': 'Montant Total Actif (MAD)',
+                'data_labels': {'value': True, 'font': {'size': 9, 'color': '#137333'}}
+            })
+            chart_active.set_title({
+                'name': 'Encours Actif par Société',
+                'name_font': {'bold': True, 'size': 11, 'color': '#137333'}
+            })
+            chart_active.set_x_axis({
+                'name': 'Sociétés Émettrices',
+                'name_font': {'size': 9, 'bold': True},
+                'num_font': {'size': 8, 'rotation': -15}
+            })
+            chart_active.set_y_axis({
+                'name': 'Montant Cumulé (MAD)',
+                'name_font': {'size': 9, 'bold': True},
+                'num_font': {'size': 8}
+            })
+            chart_active.set_legend({'none': True})
+            chart_active.set_style(11)
+            chart_active.set_size({'width': 440, 'height': 260})
+            sheet.insert_chart('H16', chart_active)
             
         workbook.close()
         output.seek(0)

@@ -114,8 +114,42 @@ class WhatsAppFinanceController(http.Controller):
                     }
             except Exception as e:
                 _logger.error(f"Error handling DOC_LINK_ choice: {str(e)}")
+        # 3.2 Handle Situation Logic
+        if message_text.lower().strip() == "situation" or message_text.lower().strip().startswith("situation"):
+            try:
+                # Render report
+                report_action = request.env['ir.actions.report'].sudo()
+                pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_situation', res_ids=[])
+                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
+                # Query counts to show a nice summary message
+                active_count = request.env['datacheque'].sudo().search_count([('state', '=', 'actif')])
+                reserve_count = request.env['datacheque'].sudo().search_count([('state', '=', 'reserve')])
+                bureau_count = request.env['datacheque'].sudo().search_count([('state', '=', 'bureau')])
+                annule_count = request.env['datacheque'].sudo().search_count([('state', '=', 'annule')])
 
+                summary_msg = (
+                    f"📋 *Situation Générale des Chèques* 📋\n"
+                    f"━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📊 *Résumé des États* :\n"
+                    f"• 🟢 *Actifs* : {active_count} chèques\n"
+                    f"• 🟡 *Réserve* : {reserve_count} chèques\n"
+                    f"• 🔵 *Bureau* : {bureau_count} chèques\n"
+                    f"• 🔴 *Annulés* : {annule_count} chèques\n\n"
+                    f"📂 _Le rapport PDF détaillé a été généré et est joint ci-dessous._"
+                )
+
+                from odoo import fields
+                return {
+                    'status': 'success',
+                    'product_name': 'Situation Générale',
+                    'message': summary_msg,
+                    'pdf_base64': pdf_base64,
+                    'file_name': f"Situation_Cheques_{fields.Date.today()}.pdf"
+                }
+            except Exception as e:
+                _logger.error(f"Error generating Situation report: {str(e)}")
+                return {'status': 'error', 'message': f"Erreur lors de la génération du rapport : {str(e)}"}
 
         # 4. Handle Talon Logic
         if message_text.lower().startswith("talon"):

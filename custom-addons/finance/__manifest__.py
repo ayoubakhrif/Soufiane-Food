@@ -31,6 +31,8 @@
         'reports/cheque_request_report.xml',
         'reports/finance_benif_report.xml',
         'reports/finance_talon_report.xml',
+        'reports/finance_situation_report.xml',
+
         'data/cron.xml',
     ],
     'assets': {

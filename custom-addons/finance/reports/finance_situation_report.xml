@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_finance_situation" model="ir.actions.report">
+        <field name="name">Rapport de Situation des Chèques</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance.report_finance_situation_template</field>
+        <field name="report_file">finance.report_finance_situation_template</field>
+    </record>
+
+    <template id="report_finance_situation_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <style>
+                        .report-header { margin-bottom: 25px; }
+                        .header-row { display: flex; align-items: stretch; margin-bottom: 15px; }
+                        .date-box { background-color: #E2ECF7; border: 1px solid #1A4D80; padding: 12px; font-size: 18px; font-weight: bold; width: 25%; text-align: center; color: #1A4D80; border-radius: 4px; margin-right: 15px; }
+                        .title-box { background-color: #1A4D80; border: 1px solid #1A4D80; padding: 12px; font-size: 22px; font-weight: bold; color: white; flex-grow: 1; text-align: center; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+                        
+                        .section-title { font-size: 18px; font-weight: bold; color: #1A4D80; border-bottom: 2px solid #1A4D80; padding-bottom: 5px; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; }
+                        
+                        .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                        .data-table th { background-color: #1A4D80; border: 1px solid #1A4D80; padding: 10px 8px; text-align: center; font-size: 12px; font-weight: bold; color: white; text-transform: uppercase; }
+                        .data-table td { border: 1px solid #E2ECF7; padding: 8px; text-align: center; font-size: 11px; color: #333; }
+                        .data-table tr:nth-child(even) { background-color: #F8FAFC; }
+                        
+                        /* Custom Cell Styling */
+                        .ste-cell { font-weight: bold; color: #1A4D80; }
+                        .amount-cell { font-weight: bold; color: #E05A47; text-align: right; white-space: nowrap; }
+                        .total-cell { background-color: #E2ECF7; font-weight: bold; color: #1A4D80; }
+                        
+                        .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
+                        .summary-table th { background-color: #E2ECF7; border: 1px solid #B0CBE3; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: #1A4D80; text-transform: uppercase; }
+                        .summary-table td { border: 1px solid #B0CBE3; padding: 12px; text-align: center; font-size: 15px; font-weight: bold; }
+                        
+                        /* State Specific Colors in Summary */
+                        .state-actif { background-color: #E6F4EA; color: #137333; }
+                        .state-reserve { background-color: #FEF7E0; color: #B06000; }
+                        .state-bureau { background-color: #E8F0FE; color: #1A73E8; }
+                        .state-annule { background-color: #FCE8E6; color: #C5221F; }
+                        .state-global { background-color: #F1F3F4; color: #3C4043; }
+                        
+                        .footer { margin-top: 35px; font-style: italic; font-size: 10px; border-top: 1px solid #E2ECF7; padding-top: 10px; color: #666; display: flex; justify-content: space-between; }
+                    </style>
+
+                    <!-- Header -->
+                    <div class="report-header">
+                        <div class="header-row">
+                            <div class="date-box">
+                                <t t-esc="report_date"/>
+                            </div>
+                            <div class="title-box">
+                                Situation Générale des Chèques
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats Table -->
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">État</th>
+                                <th style="width: 30%;">Nombre de Chèques</th>
+                                <th style="width: 50%;">Montant Global</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="state-actif">
+                                <td>ACTIFS</td>
+                                <td><t t-esc="total_active_count"/></td>
+                                <td style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_active_amount).replace(',', ' ')"/> DH</td>
+                            </tr>
+                            <tr class="state-reserve">
+                                <td>RÉSERVE</td>
+                                <td><t t-esc="total_reserve_count"/></td>
+                                <td style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_reserve_amount).replace(',', ' ')"/> DH</td>
+                            </tr>
+                            <tr class="state-bureau">
+                                <td>BUREAU</td>
+                                <td><t t-esc="total_bureau_count"/></td>
+                                <td style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_bureau_amount).replace(',', ' ')"/> DH</td>
+                            </tr>
+                            <tr class="state-annule">
+                                <td>ANNULÉS</td>
+                                <td><t t-esc="total_annule_count"/></td>
+                                <td style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_annule_amount).replace(',', ' ')"/> DH</td>
+                            </tr>
+                            <tr class="state-global" style="font-size: 16px;">
+                                <td>TOTAL GENERAL</td>
+                                <td><t t-esc="global_count"/></td>
+                                <td style="text-align: right; font-weight: 900;"><t t-esc="'{:,.2f}'.format(global_amount).replace(',', ' ')"/> DH</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- SECTION 1: ACTIFS (RECAP GENERAL) -->
+                    <div class="section-title">Récapitulatif des Chèques Actifs</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 50%;">Société (Émettrice)</th>
+                                <th style="width: 20%;">Nombre de Chèques</th>
+                                <th style="text-align: right; width: 30%;">Montant Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="active_summary" t-as="active">
+                                <tr>
+                                    <td class="ste-cell" style="text-align: left;"><t t-esc="active['ste_name']"/></td>
+                                    <td><t t-esc="active['count']"/></td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(active['total_amount']).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                            <tr class="total-cell">
+                                <td style="text-align: left;">TOTAL ACTIFS</td>
+                                <td><t t-esc="total_active_count"/></td>
+                                <td style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_active_amount).replace(',', ' ')"/> DH</td>
+                            </tr>
+                            <t t-if="not active_summary">
+                                <tr>
+                                    <td colspan="3" style="padding: 15px; font-style: italic; color: #666;">
+                                        Aucun chèque actif trouvé.
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- SECTION 2: RÉSERVE (DETAIL) -->
+                    <div class="section-title">Détail des Chèques en Réserve</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">N° Chèque</th>
+                                <th style="text-align: left; width: 20%;">Société</th>
+                                <th style="text-align: left; width: 25%;">Bénéficiaire</th>
+                                <th style="text-align: left; width: 20%;">Personne</th>
+                                <th style="width: 10%;">Échéance</th>
+                                <th style="text-align: right; width: 13%;">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="reserve_list" t-as="item">
+                                <tr>
+                                    <td style="font-weight: bold;"><t t-esc="item['chq']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['ste']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['benif']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['perso']"/></td>
+                                    <td>
+                                        <t t-if="item['date_echeance']">
+                                            <t t-esc="item['date_echeance'].strftime('%d/%m/%Y')"/>
+                                        </t>
+                                    </td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                            <t t-if="not reserve_list">
+                                <tr>
+                                    <td colspan="6" style="padding: 15px; font-style: italic; color: #666;">
+                                        Aucun chèque en réserve.
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="reserve_list">
+                                <tr class="total-cell">
+                                    <td colspan="5" style="text-align: left; font-weight: bold;">TOTAL RÉSERVE</td>
+                                    <td style="text-align: right; font-weight: bold; color: #1A4D80;"><t t-esc="'{:,.2f}'.format(total_reserve_amount).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- SECTION 3: BUREAU (DETAIL) -->
+                    <div class="section-title">Détail des Chèques Bureau</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">N° Chèque</th>
+                                <th style="text-align: left; width: 25%;">Société</th>
+                                <th style="text-align: left; width: 25%;">Bénéficiaire</th>
+                                <th style="text-align: left; width: 20%;">Personne</th>
+                                <th style="text-align: right; width: 15%;">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="bureau_list" t-as="item">
+                                <tr>
+                                    <td style="font-weight: bold;"><t t-esc="item['chq']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['ste']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['benif']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['perso']"/></td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                            <t t-if="not bureau_list">
+                                <tr>
+                                    <td colspan="5" style="padding: 15px; font-style: italic; color: #666;">
+                                        Aucun chèque bureau.
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="bureau_list">
+                                <tr class="total-cell">
+                                    <td colspan="4" style="text-align: left; font-weight: bold;">TOTAL BUREAU</td>
+                                    <td style="text-align: right; font-weight: bold; color: #1A4D80;"><t t-esc="'{:,.2f}'.format(total_bureau_amount).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- SECTION 4: ANNULE (DETAIL) -->
+                    <div class="section-title">Détail des Chèques Annulés</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">N° Chèque</th>
+                                <th style="text-align: left; width: 25%;">Société</th>
+                                <th style="text-align: left; width: 25%;">Bénéficiaire</th>
+                                <th style="text-align: left; width: 20%;">Personne</th>
+                                <th style="text-align: right; width: 15%;">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="annule_list" t-as="item">
+                                <tr>
+                                    <td style="font-weight: bold;"><t t-esc="item['chq']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['ste']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['benif']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['perso']"/></td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                            <t t-if="not annule_list">
+                                <tr>
+                                    <td colspan="5" style="padding: 15px; font-style: italic; color: #666;">
+                                        Aucun chèque annulé.
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="annule_list">
+                                <tr class="total-cell">
+                                    <td colspan="4" style="text-align: left; font-weight: bold;">TOTAL ANNULÉS</td>
+                                    <td style="text-align: right; font-weight: bold; color: #1A4D80;"><t t-esc="'{:,.2f}'.format(total_annule_amount).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Footer -->
+                    <div class="footer">
+                        <span>Généré par Gestia ERP - Finance Bot</span>
+                        <span>Page 1 / 1</span>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

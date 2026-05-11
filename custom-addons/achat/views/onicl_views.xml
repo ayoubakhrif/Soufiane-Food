@@ -12,14 +12,13 @@
                   decoration-danger="onicl_days_to_eta &lt;= 5"
                   decoration-warning="onicl_days_to_eta &gt; 5 and onicl_days_to_eta &lt;= 10"
                   decoration-info="onicl_days_to_eta &gt; 10">
-                <field name="dossier_id" invisible="1"/>
+                <field name="port_status" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
                 <field name="eta"/>
                 <field name="onicl_days_to_eta" decoration-bf="1"/>
                 <field name="onicl_state" widget="badge" decoration-muted="onicl_state == 'new'" decoration-warning="onicl_state in ('ricpc_sent', 'onicl_entered')" decoration-danger="onicl_state == 'ricpc_error'" decoration-info="onicl_state in ('ricpc_approved', 'validated')" decoration-success="onicl_state in ('confirmed', 'portnet_validated')"/>
-                <field name="port_status" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
             </tree>
         </field>
     </record>

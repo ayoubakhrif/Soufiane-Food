@@ -40,6 +40,7 @@ class ReportFinanceSituation(models.AbstractModel):
                 'date_emission': chq.date_emission,
                 'date_echeance': chq.date_echeance,
             })
+        reserve_list.sort(key=lambda x: (x['ste'].lower(), x['chq'] or ''))
         total_reserve_count = len(reserve_recs)
         total_reserve_amount = sum(reserve_recs.mapped('amount')) or 0.0
 
@@ -56,6 +57,7 @@ class ReportFinanceSituation(models.AbstractModel):
                 'date_emission': chq.date_emission,
                 'date_echeance': chq.date_echeance,
             })
+        bureau_list.sort(key=lambda x: (x['ste'].lower(), x['chq'] or ''))
         total_bureau_count = len(bureau_recs)
         total_bureau_amount = sum(bureau_recs.mapped('amount')) or 0.0
 
@@ -72,6 +74,7 @@ class ReportFinanceSituation(models.AbstractModel):
                 'date_emission': chq.date_emission,
                 'date_echeance': chq.date_echeance,
             })
+        annule_list.sort(key=lambda x: (x['ste'].lower(), x['chq'] or ''))
         total_annule_count = len(annule_recs)
         total_annule_amount = sum(annule_recs.mapped('amount')) or 0.0
 

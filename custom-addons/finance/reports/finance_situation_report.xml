@@ -18,18 +18,48 @@
                         .date-box { background-color: #E2ECF7; border: 1px solid #1A4D80; padding: 12px; font-size: 18px; font-weight: bold; width: 25%; text-align: center; color: #1A4D80; border-radius: 4px; margin-right: 15px; }
                         .title-box { background-color: #1A4D80; border: 1px solid #1A4D80; padding: 12px; font-size: 22px; font-weight: bold; color: white; flex-grow: 1; text-align: center; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
                         
-                        .section-title { font-size: 18px; font-weight: bold; color: #1A4D80; border-bottom: 2px solid #1A4D80; padding-bottom: 5px; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; }
+                        /* Custom Section Titles with state colors */
+                        .section-title { font-size: 16px; font-weight: bold; padding-bottom: 5px; margin-top: 30px; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid; }
+                        .section-title.section-actif { color: #137333; border-color: #137333; }
+                        .section-title.section-reserve { color: #B06000; border-color: #B06000; }
+                        .section-title.section-bureau { color: #1A73E8; border-color: #1A73E8; }
+                        .section-title.section-annule { color: #C5221F; border-color: #C5221F; }
                         
+                        /* Base Table Styles */
                         .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                        .data-table th { background-color: #1A4D80; border: 1px solid #1A4D80; padding: 10px 8px; text-align: center; font-size: 12px; font-weight: bold; color: white; text-transform: uppercase; }
-                        .data-table td { border: 1px solid #E2ECF7; padding: 8px; text-align: center; font-size: 11px; color: #333; }
-                        .data-table tr:nth-child(even) { background-color: #F8FAFC; }
+                        .data-table th { padding: 10px 8px; text-align: center; font-size: 12px; font-weight: bold; color: white; text-transform: uppercase; }
+                        .data-table td { padding: 8px; text-align: center; font-size: 11px; color: #333; }
+                        .data-table tr:nth-child(even) { background-color: #F9FAFB; }
                         
-                        /* Custom Cell Styling */
-                        .ste-cell { font-weight: bold; color: #1A4D80; }
-                        .amount-cell { font-weight: bold; color: #E05A47; text-align: right; white-space: nowrap; }
-                        .total-cell { background-color: #E2ECF7; font-weight: bold; color: #1A4D80; }
-                        
+                        /* Table Actif (Green theme) */
+                        .table-actif th { background-color: #137333; border: 1px solid #137333; }
+                        .table-actif td { border: 1px solid #E6F4EA; }
+                        .table-actif .ste-cell { font-weight: bold; color: #137333; }
+                        .table-actif .amount-cell { font-weight: bold; color: #137333; text-align: right; white-space: nowrap; }
+                        .table-actif .total-cell { background-color: #E6F4EA; font-weight: bold; color: #137333; }
+
+                        /* Table Réserve (Ochre/Orange theme) */
+                        .table-reserve th { background-color: #B06000; border: 1px solid #B06000; }
+                        .table-reserve td { border: 1px solid #FEF7E0; }
+                        .table-reserve .ste-cell { font-weight: bold; color: #B06000; }
+                        .table-reserve .amount-cell { font-weight: bold; color: #B06000; text-align: right; white-space: nowrap; }
+                        .table-reserve .total-cell { background-color: #FEF7E0; font-weight: bold; color: #B06000; }
+
+                        /* Table Bureau (Blue theme) */
+                        .table-bureau th { background-color: #1A73E8; border: 1px solid #1A73E8; }
+                        .table-bureau td { border: 1px solid #E8F0FE; }
+                        .table-bureau .ste-cell { font-weight: bold; color: #1A73E8; }
+                        .table-bureau .amount-cell { font-weight: bold; color: #1A73E8; text-align: right; white-space: nowrap; }
+                        .table-bureau .total-cell { background-color: #E8F0FE; font-weight: bold; color: #1A73E8; }
+
+                        /* Table Annulé (Red theme) */
+                        .table-annule th { background-color: #C5221F; border: 1px solid #C5221F; }
+                        .table-annule td { border: 1px solid #FCE8E6; }
+                        .table-annule .ste-cell { font-weight: bold; color: #C5221F; }
+                        .table-annule .amount-cell { font-weight: bold; color: #C5221F; text-align: right; white-space: nowrap; }
+                        .table-annule .total-cell { background-color: #FCE8E6; font-weight: bold; color: #C5221F; }
+
+                        /* Summary Stats Table */
                         .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
                         .summary-table th { background-color: #E2ECF7; border: 1px solid #B0CBE3; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: #1A4D80; text-transform: uppercase; }
                         .summary-table td { border: 1px solid #B0CBE3; padding: 12px; text-align: center; font-size: 15px; font-weight: bold; }
@@ -95,8 +125,8 @@
                     </table>
 
                     <!-- SECTION 1: ACTIFS (RECAP GENERAL) -->
-                    <div class="section-title">Récapitulatif des Chèques Actifs</div>
-                    <table class="data-table">
+                    <div class="section-title section-actif">Récapitulatif des Chèques Actifs</div>
+                    <table class="data-table table-actif">
                         <thead>
                             <tr>
                                 <th style="text-align: left; width: 50%;">Société (Émettrice)</th>
@@ -115,7 +145,7 @@
                             <tr class="total-cell">
                                 <td style="text-align: left;">TOTAL ACTIFS</td>
                                 <td><t t-esc="total_active_count"/></td>
-                                <td style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_active_amount).replace(',', ' ')"/> DH</td>
+                                <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_active_amount).replace(',', ' ')"/> DH</td>
                             </tr>
                             <t t-if="not active_summary">
                                 <tr>
@@ -128,8 +158,8 @@
                     </table>
 
                     <!-- SECTION 2: RÉSERVE (DETAIL) -->
-                    <div class="section-title">Détail des Chèques en Réserve</div>
-                    <table class="data-table">
+                    <div class="section-title section-reserve">Détail des Chèques en Réserve</div>
+                    <table class="data-table table-reserve">
                         <thead>
                             <tr>
                                 <th style="width: 12%;">N° Chèque</th>
@@ -144,7 +174,7 @@
                             <t t-foreach="reserve_list" t-as="item">
                                 <tr>
                                     <td style="font-weight: bold;"><t t-esc="item['chq']"/></td>
-                                    <td style="text-align: left;"><t t-esc="item['ste']"/></td>
+                                    <td class="ste-cell" style="text-align: left;"><t t-esc="item['ste']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['benif']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['perso']"/></td>
                                     <td>
@@ -165,15 +195,15 @@
                             <t t-if="reserve_list">
                                 <tr class="total-cell">
                                     <td colspan="5" style="text-align: left; font-weight: bold;">TOTAL RÉSERVE</td>
-                                    <td style="text-align: right; font-weight: bold; color: #1A4D80;"><t t-esc="'{:,.2f}'.format(total_reserve_amount).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_reserve_amount).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
                         </tbody>
                     </table>
 
                     <!-- SECTION 3: BUREAU (DETAIL) -->
-                    <div class="section-title">Détail des Chèques Bureau</div>
-                    <table class="data-table">
+                    <div class="section-title section-bureau">Détail des Chèques Bureau</div>
+                    <table class="data-table table-bureau">
                         <thead>
                             <tr>
                                 <th style="width: 15%;">N° Chèque</th>
@@ -187,7 +217,7 @@
                             <t t-foreach="bureau_list" t-as="item">
                                 <tr>
                                     <td style="font-weight: bold;"><t t-esc="item['chq']"/></td>
-                                    <td style="text-align: left;"><t t-esc="item['ste']"/></td>
+                                    <td class="ste-cell" style="text-align: left;"><t t-esc="item['ste']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['benif']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['perso']"/></td>
                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
@@ -203,15 +233,15 @@
                             <t t-if="bureau_list">
                                 <tr class="total-cell">
                                     <td colspan="4" style="text-align: left; font-weight: bold;">TOTAL BUREAU</td>
-                                    <td style="text-align: right; font-weight: bold; color: #1A4D80;"><t t-esc="'{:,.2f}'.format(total_bureau_amount).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_bureau_amount).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
                         </tbody>
                     </table>
 
                     <!-- SECTION 4: ANNULE (DETAIL) -->
-                    <div class="section-title">Détail des Chèques Annulés</div>
-                    <table class="data-table">
+                    <div class="section-title section-annule">Détail des Chèques Annulés</div>
+                    <table class="data-table table-annule">
                         <thead>
                             <tr>
                                 <th style="width: 15%;">N° Chèque</th>
@@ -225,7 +255,7 @@
                             <t t-foreach="annule_list" t-as="item">
                                 <tr>
                                     <td style="font-weight: bold;"><t t-esc="item['chq']"/></td>
-                                    <td style="text-align: left;"><t t-esc="item['ste']"/></td>
+                                    <td class="ste-cell" style="text-align: left;"><t t-esc="item['ste']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['benif']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['perso']"/></td>
                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
@@ -241,7 +271,7 @@
                             <t t-if="annule_list">
                                 <tr class="total-cell">
                                     <td colspan="4" style="text-align: left; font-weight: bold;">TOTAL ANNULÉS</td>
-                                    <td style="text-align: right; font-weight: bold; color: #1A4D80;"><t t-esc="'{:,.2f}'.format(total_annule_amount).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_annule_amount).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
                         </tbody>

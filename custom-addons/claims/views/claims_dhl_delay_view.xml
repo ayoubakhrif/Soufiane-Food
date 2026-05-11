@@ -107,6 +107,9 @@
                             <field name="date_closed"/>
                         </group>
                     </group>
+                    <group string="Documents justificatifs (PDF)">
+                        <field name="document_ids" widget="many2many_binary" string="Documents PDF" nolabel="1"/>
+                    </group>
                     <group string="Follow-up">
                         <field name="create_uid"/>
                         <field name="responsible_id"/>

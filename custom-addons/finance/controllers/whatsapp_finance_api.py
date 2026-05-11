@@ -117,31 +117,20 @@ class WhatsAppFinanceController(http.Controller):
         # 3.2 Handle Situation Logic
         if message_text.lower().strip() == "situation" or message_text.lower().strip().startswith("situation"):
             try:
-                # Render report
+                # 1. Render QWeb PDF report
                 report_action = request.env['ir.actions.report'].sudo()
                 pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_situation', res_ids=[])
                 pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-                # Query physical counts of each state based on the first linked datacheque
-                physicals = request.env['finance.cheque.physical'].sudo().search([])
-                
-                active_count = 0
-                reserve_count = 0
-                bureau_count = 0
-                annule_count = 0
-                
-                for p in physicals:
-                    if p.datacheque_ids:
-                        state = p.datacheque_ids[0].state
-                        if state == 'actif':
-                            active_count += 1
-                        elif state == 'reserve':
-                            reserve_count += 1
-                        elif state == 'bureau':
-                            bureau_count += 1
-                        elif state == 'annule':
-                            annule_count += 1
+                # 2. Render Excel spreadsheet using report parser helper
+                report_obj = request.env['report.finance.report_finance_situation_template'].sudo()
+                report_values = report_obj._get_report_values([])
+                xlsx_base64 = report_obj.generate_excel_data(report_values)
 
+                active_count = report_values.get('total_active_count', 0)
+                reserve_count = report_values.get('total_reserve_count', 0)
+                bureau_count = report_values.get('total_bureau_count', 0)
+                annule_count = report_values.get('total_annule_count', 0)
 
                 summary_msg = (
                     f"📋 *Situation Générale des Chèques* 📋\n"
@@ -151,16 +140,27 @@ class WhatsAppFinanceController(http.Controller):
                     f"• 🟡 *Réserve* : {reserve_count} chèques\n"
                     f"• 🔵 *Bureau* : {bureau_count} chèques\n"
                     f"• 🔴 *Annulés* : {annule_count} chèques\n\n"
-                    f"📂 _Le rapport PDF détaillé a été généré et est joint ci-dessous._"
+                    f"📂 _Les rapports PDF et Excel détaillés ont été générés et sont joints ci-dessous._"
                 )
 
                 from odoo import fields
+                today_str = fields.Date.today().strftime('%d_%m/%Y').replace('/', '_')
                 return {
                     'status': 'success',
                     'product_name': 'Situation Générale',
-                    'message': summary_msg,
-                    'pdf_base64': pdf_base64,
-                    'file_name': f"Situation_Cheques_{fields.Date.today()}.pdf"
+                    'response': summary_msg,
+                    'files': [
+                        {
+                            'pdf_base64': pdf_base64,
+                            'file_name': f"Situation_Cheques_{today_str}.pdf",
+                            'caption': "Situation des Chèques - Version PDF 📄"
+                        },
+                        {
+                            'pdf_base64': xlsx_base64,
+                            'file_name': f"Situation_Cheques_{today_str}.xlsx",
+                            'caption': "Situation des Chèques - Version Excel 📊"
+                        }
+                    ]
                 }
             except Exception as e:
                 _logger.error(f"Error generating Situation report: {str(e)}")

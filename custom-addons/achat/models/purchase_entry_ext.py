@@ -48,8 +48,11 @@ class LogisticsEntry(models.Model):
         ('portnet_validated', 'Validé sur Portnet'),
     ], string='Statut ONICL', default='new', tracking=True)
 
-    onicl_pdf = fields.Binary(string='PDF ONICL', attachment=True)
-    onicl_pdf_name = fields.Char(string='Nom du PDF ONICL')
+    onicl_pdf = fields.Binary(string='Capture mise à disposition', attachment=True)
+    onicl_pdf_name = fields.Char(string='Nom de la Capture mise à disposition')
+
+    recepisse_pdf = fields.Binary(string='Récépissé', attachment=True)
+    recepisse_pdf_name = fields.Char(string='Nom du Récépissé')
 
     def action_onicl_send_ricpc(self):
         for rec in self:
@@ -73,8 +76,8 @@ class LogisticsEntry(models.Model):
 
     def action_onicl_confirm(self):
         for rec in self:
-            if not rec.onicl_pdf:
-                raise ValidationError("Vous devez importer le PDF ONICL avant de confirmer ce dossier.")
+            if not rec.onicl_pdf or not rec.recepisse_pdf:
+                raise ValidationError("Vous devez importer la Capture mise à disposition et le Récépissé avant de confirmer ce dossier.")
             rec.onicl_state = 'confirmed'
 
     def action_onicl_validate_portnet(self):

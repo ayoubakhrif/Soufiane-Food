@@ -59,6 +59,8 @@
                         <group string="Documents ONICL">
                             <field name="onicl_pdf_name" invisible="1"/>
                             <field name="onicl_pdf" filename="onicl_pdf_name" widget="binary"/>
+                            <field name="recepisse_pdf_name" invisible="1"/>
+                            <field name="recepisse_pdf" filename="recepisse_pdf_name" widget="binary"/>
                         </group>
                     </group>
                 </sheet>

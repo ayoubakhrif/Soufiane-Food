@@ -64,6 +64,8 @@ class DataCheque(models.Model):
         ('fret', 'Fret'),
         ('divers', 'Divers'),
         ('reserve', 'Reserve'),
+        ('bureau','Bureau'),
+        ('annule','Annulé'),
     ], store=True, string='Type', tracking=True, required=True)
     
     # New Fields

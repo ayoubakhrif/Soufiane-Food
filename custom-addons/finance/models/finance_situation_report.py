@@ -59,18 +59,18 @@ class ReportFinanceSituation(models.AbstractModel):
         total_active_count = len(active_list_phys)
         total_active_amount = sum(item['amount'] for item in active_list_phys)
 
-        # 2. Detailed Reserve Checks (sorted by company, then amount descending, then check number ascending)
-        reserve_list_phys.sort(key=lambda x: (x['ste'].lower(), -x['amount'], x['chq'] or ''))
+        # 2. Detailed Reserve Checks (sorted by company, then check number ascending)
+        reserve_list_phys.sort(key=lambda x: (x['ste'].lower(), x['chq'] or ''))
         total_reserve_count = len(reserve_list_phys)
         total_reserve_amount = sum(item['amount'] for item in reserve_list_phys)
 
-        # 3. Detailed Bureau Checks (sorted by company, then amount descending, then check number ascending)
-        bureau_list_phys.sort(key=lambda x: (x['ste'].lower(), -x['amount'], x['chq'] or ''))
+        # 3. Detailed Bureau Checks (sorted by company, then check number ascending)
+        bureau_list_phys.sort(key=lambda x: (x['ste'].lower(), x['chq'] or ''))
         total_bureau_count = len(bureau_list_phys)
         total_bureau_amount = sum(item['amount'] for item in bureau_list_phys)
 
-        # 4. Detailed Annulé Checks (sorted by company, then amount descending, then check number ascending)
-        annule_list_phys.sort(key=lambda x: (x['ste'].lower(), -x['amount'], x['chq'] or ''))
+        # 4. Detailed Annulé Checks (sorted by company, then check number ascending)
+        annule_list_phys.sort(key=lambda x: (x['ste'].lower(), x['chq'] or ''))
         total_annule_count = len(annule_list_phys)
         total_annule_amount = sum(item['amount'] for item in annule_list_phys)
 

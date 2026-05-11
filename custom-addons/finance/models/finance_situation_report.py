@@ -232,6 +232,40 @@ class ReportFinanceSituation(models.AbstractModel):
         sheet.write(row, 0, "TOTAL GENERAL", sum_row_global)
         sheet.write_number(row, 1, values['global_count'], sum_row_global)
         sheet.write_number(row, 2, values['global_amount'], sum_row_global_amt)
+
+        # --- COMPANY SUMMARY TABLE (Columns D, E, F) ---
+        company_stats = {}
+        for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:
+            for chq in values.get(lst_key, []):
+                ste = chq.get('ste', 'Inconnu')
+                if ste not in company_stats:
+                    company_stats[ste] = {'ste_name': ste, 'count': 0, 'total_amount': 0.0}
+                company_stats[ste]['count'] += 1
+                company_stats[ste]['total_amount'] += chq['amount']
+        
+        sorted_company_stats = sorted(list(company_stats.values()), key=lambda x: -x['total_amount'])
+        
+        comp_sum_row = 2
+        sheet.write(comp_sum_row, 3, "Société", sum_header_style)
+        sheet.write(comp_sum_row, 4, "Nombre de Chèques", sum_header_style)
+        sheet.write(comp_sum_row, 5, "Montant Global", sum_header_style)
+        comp_sum_row += 1
+        
+        start_row_comp_sum_excel = comp_sum_row + 1
+        
+        sum_row_comp = workbook.add_format({'border': 1, 'border_color': '#B0CBE3', 'align': 'center'})
+        sum_row_comp_left = workbook.add_format({'bold': True, 'border': 1, 'border_color': '#B0CBE3', 'align': 'left', 'font_color': '#1A4D80'})
+        sum_row_comp_amt = workbook.add_format({'border': 1, 'border_color': '#B0CBE3', 'align': 'right', 'num_format': '#,##0.00" DH"'})
+        
+        for c_stat in sorted_company_stats:
+            sheet.write(comp_sum_row, 3, c_stat['ste_name'], sum_row_comp_left)
+            sheet.write_number(comp_sum_row, 4, c_stat['count'], sum_row_comp)
+            sheet.write_number(comp_sum_row, 5, c_stat['total_amount'], sum_row_comp_amt)
+            comp_sum_row += 1
+            
+        end_row_comp_sum_excel = comp_sum_row
+        # -----------------------------------------------
+        
         row += 2  # spacing
         
         # 1. SECTION ACTIFS (RECAP GENERAL)
@@ -354,31 +388,31 @@ class ReportFinanceSituation(models.AbstractModel):
             sheet.write_number(row, 4, values['total_annule_amount'], t_ann['total_money'])
             row += 1
 
-        # Chart 1: Pie Chart for States Distribution (Highly Compatible)
+        # Chart 1: Pie Chart for Companies Distribution by Amount (Highly Compatible)
         chart_state = workbook.add_chart({'type': 'pie'})
         chart_state.add_series({
-            'categories': "='Situation_Cheques'!$A$4:$A$7",
-            'values': "='Situation_Cheques'!$C$4:$C$7",
-            'name': 'Montant Global par État',
+            'categories': f"='Situation_Cheques'!$D$4:$D${end_row_comp_sum_excel}",
+            'values': f"='Situation_Cheques'!$F$4:$F${end_row_comp_sum_excel}",
+            'name': 'Part Financière par Société',
             'data_labels': {'percentage': True}
         })
         chart_state.set_title({
-            'name': 'Répartition Financière par État',
+            'name': 'Répartition Financière par Société',
             'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
         })
         chart_state.set_size({'width': 500, 'height': 350})
         sheet_analysis.insert_chart('A3', chart_state)
 
-        # Chart 3: Pie Chart for Check Count Distribution (Highly Compatible)
+        # Chart 3: Pie Chart for Companies Distribution by Check Count (Highly Compatible)
         chart_count = workbook.add_chart({'type': 'pie'})
         chart_count.add_series({
-            'categories': "='Situation_Cheques'!$A$4:$A$7",
-            'values': "='Situation_Cheques'!$B$4:$B$7",
-            'name': 'Nombre de Chèques par État',
+            'categories': f"='Situation_Cheques'!$D$4:$D${end_row_comp_sum_excel}",
+            'values': f"='Situation_Cheques'!$E$4:$E${end_row_comp_sum_excel}",
+            'name': 'Nombre de Chèques par Société',
             'data_labels': {'percentage': True}
         })
         chart_count.set_title({
-            'name': 'Répartition par Nombre de Chèques',
+            'name': 'Répartition par Nombre de Chèques par Société',
             'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
         })
         chart_count.set_size({'width': 500, 'height': 350})

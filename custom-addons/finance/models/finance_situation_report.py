@@ -171,7 +171,9 @@ class ReportFinanceSituation(models.AbstractModel):
             'reserve': make_theme_formats('#B06000', '#FEF7E0', '#B06000'),
             'bureau': make_theme_formats('#1A73E8', '#E8F0FE', '#1A73E8'),
             'annule': make_theme_formats('#C5221F', '#FCE8E6', '#C5221F'),
-                sheet_analysis = workbook.add_worksheet("Analyses Graphiques")
+        }
+
+        sheet_analysis = workbook.add_worksheet("Analyses Graphiques")
         sheet = workbook.add_worksheet("Situation des Chèques")
         sheet_analysis.activate()
         

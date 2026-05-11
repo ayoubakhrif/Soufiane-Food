@@ -590,16 +590,16 @@ class ReportFinanceSituation(models.AbstractModel):
                 sheet_company.write_number(7, 8, sum(s['count'] for s in comp_state_stats.values()), sum_row_global)
                 sheet_company.write_number(7, 9, sum(s['amount'] for s in comp_state_stats.values()), sum_row_global_amt)
                 
-                # Pie Chart on the Right
+                # Pie Chart on the Right (Distribution by Check Counts in Percentage)
                 chart_comp_state = workbook.add_chart({'type': 'pie'})
                 chart_comp_state.add_series({
                     'categories': f"='{safe_name}'!$H$4:$H$7",
-                    'values': f"='{safe_name}'!$J$4:$J$7",
+                    'values': f"='{safe_name}'!$I$4:$I$7",
                     'name': 'Répartition par État',
                     'data_labels': {'percentage': True}
                 })
                 chart_comp_state.set_title({
-                    'name': 'Répartition Financière par État',
+                    'name': 'Répartition par Nombre de Chèques',
                     'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
                 })
                 chart_comp_state.set_size({'width': 440, 'height': 280})

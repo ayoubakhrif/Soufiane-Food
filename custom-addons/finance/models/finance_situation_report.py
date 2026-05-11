@@ -171,28 +171,35 @@ class ReportFinanceSituation(models.AbstractModel):
             'reserve': make_theme_formats('#B06000', '#FEF7E0', '#B06000'),
             'bureau': make_theme_formats('#1A73E8', '#E8F0FE', '#1A73E8'),
             'annule': make_theme_formats('#C5221F', '#FCE8E6', '#C5221F'),
-        }
-
+                sheet_analysis = workbook.add_worksheet("Analyses Graphiques")
         sheet = workbook.add_worksheet("Situation des Chèques")
-        sheet.set_default_row(20)
+        sheet_analysis.activate()
         
-        # Set column widths (A to G)
+        sheet.set_default_row(20)
+        sheet_analysis.set_default_row(20)
+        
+        # Set column widths for Data sheet
         sheet.set_column(0, 0, 15)  # N° Chèque / Société
         sheet.set_column(1, 1, 28)  # Société / Nbre Chqs
         sheet.set_column(2, 2, 28)  # Bénéficiaire / Montant
         sheet.set_column(3, 3, 20)  # Personne
         sheet.set_column(4, 4, 15)  # Échéance
         sheet.set_column(5, 5, 18)  # Montant
-        sheet.set_column(6, 6, 3)   # Separator Column
+        
+        # Set column widths for Analysis sheet
+        sheet_analysis.set_column(0, 5, 18)
 
-        # Header Block
+        # Header Block on Data Sheet
         sheet.set_row(0, 30)
         sheet.write('A1', values['report_date'], date_box_style)
         sheet.merge_range('B1:F1', "Situation Générale des Chèques", title_style)
         
+        # Dashboard Title
+        sheet_analysis.merge_range('A1:F1', "TABLEAU DE BORD D'ANALYSE", title_style)
+        
         row = 2
         
-        # Summary table
+        # Summary table (Data Sheet)
         sheet.write(row, 0, "État", sum_header_style)
         sheet.write(row, 1, "Nombre de Chèques", sum_header_style)
         sheet.merge_range(row, 2, row, 3, "Montant Global", sum_header_style)
@@ -345,7 +352,7 @@ class ReportFinanceSituation(models.AbstractModel):
             row += 1
 
         # ----------------------------------------------------
-        # 5. CHARTS & GRAPHS FOR ANALYSIS
+        # 5. CHARTS & GRAPHS (Inserted in the ANALYSES sheet)
         # ----------------------------------------------------
         # Chart 1: Doughnut Chart for States Distribution
         chart_state = workbook.add_chart({'type': 'doughnut'})
@@ -363,11 +370,11 @@ class ReportFinanceSituation(models.AbstractModel):
         })
         chart_state.set_title({
             'name': 'Répartition Financière par État',
-            'name_font': {'bold': True, 'size': 11, 'color': '#1A4D80'}
+            'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
         })
         chart_state.set_style(10)
-        chart_state.set_size({'width': 440, 'height': 240})
-        sheet.insert_chart('H3', chart_state)
+        chart_state.set_size({'width': 500, 'height': 350})
+        sheet_analysis.insert_chart('A3', chart_state)
 
         # Chart 2: Column Chart for Active Checks per Company (if any exist)
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
@@ -377,26 +384,26 @@ class ReportFinanceSituation(models.AbstractModel):
                 'values': f"='Situation des Chèques'!$C${start_row_active_excel}:$C${end_row_active_excel}",
                 'fill': {'color': '#137333'},
                 'name': 'Montant Total Actif (MAD)',
-                'data_labels': {'value': True, 'font': {'size': 9, 'color': '#137333'}}
+                'data_labels': {'value': True, 'font': {'size': 10, 'color': '#137333'}}
             })
             chart_active.set_title({
                 'name': 'Encours Actif par Société',
-                'name_font': {'bold': True, 'size': 11, 'color': '#137333'}
+                'name_font': {'bold': True, 'size': 14, 'color': '#137333'}
             })
             chart_active.set_x_axis({
                 'name': 'Sociétés Émettrices',
-                'name_font': {'size': 9, 'bold': True},
-                'num_font': {'size': 8, 'rotation': -15}
+                'name_font': {'size': 10, 'bold': True},
+                'num_font': {'size': 9, 'rotation': -15}
             })
             chart_active.set_y_axis({
                 'name': 'Montant Cumulé (MAD)',
-                'name_font': {'size': 9, 'bold': True},
-                'num_font': {'size': 8}
+                'name_font': {'size': 10, 'bold': True},
+                'num_font': {'size': 9}
             })
             chart_active.set_legend({'none': True})
             chart_active.set_style(11)
-            chart_active.set_size({'width': 440, 'height': 260})
-            sheet.insert_chart('H16', chart_active)
+            chart_active.set_size({'width': 850, 'height': 450})
+            sheet_analysis.insert_chart('A21', chart_active)
             
         workbook.close()
         output.seek(0)

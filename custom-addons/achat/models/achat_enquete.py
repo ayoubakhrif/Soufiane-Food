@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 import requests
 import logging
 
@@ -80,18 +81,28 @@ class AchatArticlePrice(models.Model):
     )
 
     _sql_constraints = [
-        ('article_supplier_date_crop_uniq', 'unique(article_id, supplier_id, date, crop)', 
-         'Ce produit existe déjà pour ce fournisseur à la même date avec ce crop !'),
+        ('article_supplier_date_crop_origin_uniq', 'unique(article_id, supplier_id, date, crop, origin_id)', 
+         'Ce produit existe déjà pour ce fournisseur à la même date avec ce crop et cette origine !'),
         ('price_gt_zero', 'CHECK(price > 0)', 'Le prix doit être strictement supérieur à 0 !')
     ]
 
     def init(self):
-        # Drop the old unique constraint to allow the new unique constraint with crop to take effect
+        # Drop the old unique constraints to allow the new unique constraint with crop and origin to take effect
         self.env.cr.execute("""
             ALTER TABLE achat_article_price 
-            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_uniq
+            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_uniq,
+            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_crop_uniq
         """)
         super(AchatArticlePrice, self).init()
+
+    @api.constrains('article_id')
+    def _check_article_translation(self):
+        for record in self:
+            if record.article_id and (not record.article_id.traduction or not record.article_id.traduction.strip()):
+                raise ValidationError(
+                    f"Enregistrement impossible : L'article '{record.article_id.name}' n'a pas de traduction renseignée.\n"
+                    "Veuillez d'abord remplir le champ 'Traduction' sur la fiche article."
+                )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -103,6 +114,7 @@ class AchatArticlePrice(models.Model):
                 ('article_id', '=', record.article_id.id),
                 ('incoterm', '=', record.incoterm),
                 ('crop', '=', record.crop),
+                ('origin_id', '=', record.origin_id.id),
                 ('id', 'not in', records.ids) # Exclude all records being created in this batch
             ], order='date desc, id desc', limit=1)
 

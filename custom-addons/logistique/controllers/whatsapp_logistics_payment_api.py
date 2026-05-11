@@ -92,7 +92,6 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"👤 *Fournisseur* : {supplier_name}\n"
         response += f"📦 *Article* : {article_name}\n"
         response += f"🌐 *Incoterm* : {incoterm_val}\n"
-        response += f"📅 *ETA* : {eta_str}\n"
 
         # Additional Fields from Image Section 1 & 2
         shipping_name = 'N/A'
@@ -125,7 +124,7 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"🔠 *N° Conteneurs* : {container_names}\n"
         response += f"📐 *Taille* : {size_val}\n"
         response += f"⚓ *Port Status* : {port_status_val}\n"
-        response += f"⏳ *Franchise gérée* : {franchise_val}\n\n"
+        response += f"⏳ *Franchise confirmée* : {franchise_val}\n\n"
         
         # Additional Dates from Image Section 3
         bad_date_str = entry.bad_date.strftime('%d/%m/%Y') if entry and entry.bad_date else 'N/A'
@@ -135,13 +134,14 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         dhl_date_val = dossier.eta_dhl or (entry and entry.eta_dhl) or False
         dhl_date_str = dhl_date_val.strftime('%d/%m/%Y') if dhl_date_val else 'N/A'
         
-        response += f"📅 *Dates Importantes* :\n"
+        response += f"📅 *Dates* :\n"
+        response += f"• 📅 *ETA* : {eta_str}\n"
         response += f"• 📦 *DHL* : {dhl_date_str}\n"
         response += f"• 📄 *BAD* : {bad_date_str}\n"
         response += f"• 🚪 *D. Sortie* : {exit_date_str}\n"
         response += f"• 📥 *D. Entré* : {entry_date_str}\n\n"
         
-        response += f"📊 *Synthèse des Charges* :\n"
+        response += f"📊 *Charges engagées* :\n"
         response += f"• 🚢 *Fret* : {dossier.fret_amount:,.2f} DH\n"
         response += f"• ⚓ *THC* : {dossier.thc_amount:,.2f} DH\n"
         response += f"•     Magasinage : {dossier.magasinage_amount:,.2f} DH\n"
@@ -153,17 +153,42 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         # A. Details Chèques
         if dossier.cheque_ids:
             response += f"🧾 *Détails des Chèques* :\n"
+            
+            # Grouping/sorting order: fret, thc, magasinage, surestarie, autres
+            type_order = ['fret', 'thc', 'magasinage', 'surestarie', 'autres']
+            cheques_by_type = {t: [] for t in type_order}
+            
             for c in dossier.cheque_ids:
-                status = "⏳ En cours (Non rapproché)"
-                fin_chq = request.env['finance.cheque.physical'].sudo().search([('name', '=', c.cheque_serie)], limit=1)
-                if fin_chq:
-                    is_encaissé = fin_chq.encours == 'encaisse' or any(d.date_encaissement for d in fin_chq.datacheque_ids)
-                    status = "✅ Encaissé" if is_encaissé else "⏳ En cours"
+                t = c.type if c.type in type_order else 'autres'
+                cheques_by_type[t].append(c)
                 
-                type_label = dict(c._fields['type'].selection or {}).get(c.type, c.type or "N/A").upper()
-                benef = c.beneficiary_id.name or "N/A"
-                chq_line = f"• Chq *#{c.cheque_serie}* ({type_label}) : *{c.amount:,.2f} DH* | {benef} | {status}\n"
-                response += chq_line.replace(',', ' ')
+            type_headers = {
+                'fret': '🚢 *Fret*',
+                'thc': '⚓ *THC*',
+                'magasinage': '📦 *Magasinage*',
+                'surestarie': '⏳ *Surestarie*',
+                'autres': '➕ *Autres factures*'
+            }
+            
+            for t in type_order:
+                cheques = cheques_by_type[t]
+                if cheques:
+                    header = type_headers.get(t, t.capitalize())
+                    response += f"  • {header} :\n"
+                    for c in cheques:
+                        status = "⏳ En cours (Non rapproché)"
+                        fin_chq = request.env['finance.cheque.physical'].sudo().search([('name', '=', c.cheque_serie)], limit=1)
+                        if fin_chq:
+                            is_encaissé = fin_chq.encours == 'encaisse' or any(d.date_encaissement for d in fin_chq.datacheque_ids)
+                            if is_encaissé:
+                                enc_date = fin_chq.date_encaissement or next((d.date_encaissement for d in fin_chq.datacheque_ids if d.date_encaissement), False)
+                                status = f"✅ Encaissé le {enc_date.strftime('%d/%m/%Y')}" if enc_date else "✅ Encaissé"
+                            else:
+                                status = "⏳ Non encaissé"
+                        
+                        benef = c.beneficiary_id.name or "N/A"
+                        chq_line = f"    - Chq *#{c.cheque_serie}* : *{c.amount:,.2f} DH* | {benef} | {status}\n"
+                        response += chq_line.replace(',', ' ')
             response += "\n"
 
         # B. Details Virements

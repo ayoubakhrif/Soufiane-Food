@@ -541,7 +541,7 @@ class ReportFinanceSituation(models.AbstractModel):
             'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
         })
         chart_state_count.set_size({'width': 380, 'height': 260})
-        sheet_analysis.insert_chart('H3', chart_state_count)
+        sheet_analysis.insert_chart('I3', chart_state_count)
 
         # Chart 2: Column Chart for Active Checks per Company
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:

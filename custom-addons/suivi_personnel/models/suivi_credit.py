@@ -26,4 +26,4 @@ class SuiviCredit(models.Model):
         ('debit', 'Débit')
     ], string='Type', required=True, default='credit')
     
-    description = fields.Text(string='Détails')
+    description = fields.Char(string='Détails')

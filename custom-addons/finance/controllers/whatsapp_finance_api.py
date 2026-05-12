@@ -116,14 +116,30 @@ class WhatsAppFinanceController(http.Controller):
                 _logger.error(f"Error handling DOC_LINK_ choice: {str(e)}")
 
         # 3.2 Handle Situation / Encours Logic
-        is_situation_cmd = message_text.lower().strip() == "situation" or message_text.lower().strip().startswith("situation")
-        is_encours_cmd = message_text.lower().strip() in ["encours", "en cours"] or message_text.lower().strip().startswith("encours") or message_text.lower().strip().startswith("en cours")
+        msg_clean = message_text.lower().strip()
+        is_situation_cmd = msg_clean == "situation" or msg_clean.startswith("situation ")
+        is_encours_cmd = msg_clean in ["encours", "en cours"] or msg_clean.startswith("encours ") or msg_clean.startswith("en cours ")
+        
+        # Check if they want the global situation grouped by beneficiary
+        benif_triggers = [
+            "situation beneficiaire", "situation bénéficiaire", 
+            "situation benif", "situation benef",
+            "beneficiaires", "bénéficiaires", "benficiaires",
+            "benifs", "benif"
+        ]
+        is_benif_situation_cmd = (msg_clean in benif_triggers) or any(t in msg_clean for t in ["situation beneficiaire", "situation bénéficiaire", "situation benif", "situation benef", "situation benifs"])
 
-        if is_situation_cmd or is_encours_cmd:
+        if is_benif_situation_cmd or is_situation_cmd or is_encours_cmd:
             try:
                 # Set dynamic configuration based on command type
-                encours_only = is_encours_cmd
-                data_arg = {'encours_only': True} if encours_only else {}
+                by_benif = is_benif_situation_cmd
+                encours_only = is_encours_cmd and not by_benif
+                
+                data_arg = {}
+                if encours_only:
+                    data_arg['encours_only'] = True
+                if by_benif:
+                    data_arg['by_benif'] = True
                 
                 # 1. Render QWeb PDF report
                 report_action = request.env['ir.actions.report'].sudo()
@@ -140,7 +156,13 @@ class WhatsAppFinanceController(http.Controller):
                 bureau_count = report_values.get('total_bureau_count', 0)
                 annule_count = report_values.get('total_annule_count', 0)
 
-                if encours_only:
+                if by_benif:
+                    title_msg = "📋 *Situation des Chèques par Bénéficiaire* 📋"
+                    caption_pdf = "Situation par Bénéficiaire - Version PDF 📄"
+                    caption_xlsx = "Situation par Bénéficiaire - Version Excel 📊"
+                    file_prefix = "Situation_Beneficiaires"
+                    prod_name = "Situation Bénéficiaires"
+                elif encours_only:
                     title_msg = "📋 *Situation des Chèques En Cours (Non Encaissés)* 📋"
                     caption_pdf = "Chèques En Cours - Version PDF 📄"
                     caption_xlsx = "Chèques En Cours - Version Excel 📊"
@@ -331,6 +353,18 @@ class WhatsAppFinanceController(http.Controller):
             summary_msg += f"• Encaissés: {stats['encaisse']}\n"
             summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
             summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
+
+            # Append company-wise breakdown if available
+            breakdown_data = benif.get_financial_breakdown()
+            if breakdown_data:
+                summary_msg += "\n\n🏢 *Chiffres par Société* :\n"
+                for b_item in breakdown_data:
+                    summary_msg += (
+                        f"• *{b_item['ste']}* :\n"
+                        f"   ↳ Total: {b_item['count_total']} chqs ({'{:,.2f}'.format(b_item['total']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Encaissés: {b_item['count_encaisse']} chqs ({'{:,.2f}'.format(b_item['encaisse']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Restants: {b_item['count_non_encaisse']} chqs ({'{:,.2f}'.format(b_item['non_encaisse']).replace(',', ' ')} DH)\n"
+                    )
 
             from odoo import fields
             return {

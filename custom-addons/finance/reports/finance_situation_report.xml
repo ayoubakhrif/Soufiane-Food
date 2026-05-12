@@ -141,11 +141,17 @@
                     </t>
 
                     <!-- SECTION 1: ACTIFS (RECAP GENERAL) -->
-                    <div class="section-title section-actif">Récapitulatif des Chèques Actifs</div>
+                    <div class="section-title section-actif">
+                        <t t-if="by_benif">Récapitulatif des Chèques Actifs par Bénéficiaire</t>
+                        <t t-else="">Récapitulatif des Chèques Actifs par Société</t>
+                    </div>
                     <table class="data-table table-actif">
                         <thead>
                             <tr>
-                                <th style="text-align: left; width: 50%;">Société (Émettrice)</th>
+                                <th style="text-align: left; width: 50%;">
+                                    <t t-if="by_benif">Bénéficiaire</t>
+                                    <t t-else="">Société (Émettrice)</t>
+                                </th>
                                 <th style="width: 20%;">Nombre de Chèques</th>
                                 <th style="text-align: right; width: 30%;">Montant Total</th>
                             </tr>

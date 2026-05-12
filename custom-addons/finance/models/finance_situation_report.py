@@ -59,18 +59,21 @@ class ReportFinanceSituation(models.AbstractModel):
             elif state == 'annule':
                 annule_list_phys.append(item)
 
-        # 1. Active checks general recap (grouped by company)
+        by_benif = data and data.get('by_benif')
+
+        # 1. Active checks general recap (grouped by company or beneficiary)
         ste_summary = {}
         for item in active_list_phys:
-            ste_name = item['ste']
-            if ste_name not in ste_summary:
-                ste_summary[ste_name] = {
-                    'ste_name': ste_name,
+            group_key = item['benif'] if by_benif else item['ste']
+            if group_key not in ste_summary:
+                ste_summary[group_key] = {
+                    'ste_name': group_key, # for backward-compatibility with XML
+                    'group_name': group_key,
                     'count': 0,
                     'total_amount': 0.0
                 }
-            ste_summary[ste_name]['count'] += 1
-            ste_summary[ste_name]['total_amount'] += item['amount']
+            ste_summary[group_key]['count'] += 1
+            ste_summary[group_key]['total_amount'] += item['amount']
 
         ste_summary_list = list(ste_summary.values())
         ste_summary_list.sort(key=lambda x: -x['total_amount'])
@@ -120,8 +123,13 @@ class ReportFinanceSituation(models.AbstractModel):
             'global_count': global_count,
             'global_amount': global_amount,
             
+            'by_benif': by_benif,
             'report_date': fields.Date.today().strftime('%d/%m/%Y'),
-            'report_title': "Situation des Chèques En Cours" if (data and data.get('encours_only')) else "Situation Générale des Chèques",
+            'report_title': (
+                ("Situation des Chèques En Cours par Bénéficiaire" if (data and data.get('encours_only')) else "Situation Générale des Chèques par Bénéficiaire")
+                if by_benif else
+                ("Situation des Chèques En Cours" if (data and data.get('encours_only')) else "Situation Générale des Chèques")
+            ),
         }
 
         # Generate base64 charts for the QWeb PDF
@@ -142,14 +150,13 @@ class ReportFinanceSituation(models.AbstractModel):
                 pass
             import matplotlib.pyplot as plt
             import io
-            import base64
-
-            # 1. Company Pie Chart
+                     # 1. Company / Beneficiary Pie Chart
+            by_benif = values.get('by_benif')
             comp_totals = {}
             for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:
                 for chq in values.get(lst_key, []):
-                    ste = chq.get('ste', 'Inconnu')
-                    comp_totals[ste] = comp_totals.get(ste, 0.0) + chq.get('amount', 0.0)
+                    group_key = chq.get('benif', 'Inconnu') if by_benif else chq.get('ste', 'Inconnu')
+                    comp_totals[group_key] = comp_totals.get(group_key, 0.0) + chq.get('amount', 0.0)
             
             if comp_totals:
                 sorted_comps = sorted(comp_totals.items(), key=lambda x: -x[1])
@@ -160,7 +167,7 @@ class ReportFinanceSituation(models.AbstractModel):
                 if len(labels) > len(colors):
                     colors = colors * (len(labels) // len(colors) + 1)
                 colors = colors[:len(labels)]
-
+ 
                 fig, ax = plt.subplots(figsize=(5, 4.5), dpi=120)
                 wedges, texts, autotexts = ax.pie(
                     amounts, 
@@ -171,7 +178,8 @@ class ReportFinanceSituation(models.AbstractModel):
                     textprops=dict(color="black", fontsize=8)
                 )
                 plt.setp(autotexts, size=8, weight="bold")
-                ax.set_title("Répartition Financière par Société", fontsize=10, fontweight='bold', color='#1A4D80', pad=10)
+                title_lbl = "Répartition Financière par Bénéficiaire" if by_benif else "Répartition Financière par Société"
+                ax.set_title(title_lbl, fontsize=10, fontweight='bold', color='#1A4D80', pad=10)
                 fig.tight_layout()
 
                 buf = io.BytesIO()
@@ -510,37 +518,39 @@ class ReportFinanceSituation(models.AbstractModel):
             sheet.write_number(row, 4, values['total_annule_amount'], t_ann['total_money'])
             row += 1
 
-        # Chart 1: Pie Chart for Companies Distribution by Amount (Highly Compatible)
+        by_benif = values.get('by_benif')
+
+        # Chart 1: Pie Chart for Group Distribution by Amount
         chart_state = workbook.add_chart({'type': 'pie'})
         chart_state.add_series({
             'categories': f"='Situation_Cheques'!$D$4:$D${end_row_comp_sum_excel}",
             'values': f"='Situation_Cheques'!$F$4:$F${end_row_comp_sum_excel}",
-            'name': 'Part Financière par Société',
+            'name': 'Part Financière par Bénéficiaire' if by_benif else 'Part Financière par Société',
             'data_labels': {'percentage': True}
         })
         chart_state.set_title({
-            'name': 'Répartition Financière par Société',
+            'name': 'Répartition Financière par Bénéficiaire' if by_benif else 'Répartition Financière par Société',
             'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
         })
         chart_state.set_size({'width': 380, 'height': 260})
         sheet_analysis.insert_chart('B3', chart_state)
 
-        # Chart 3: Pie Chart for Companies Distribution by Check Count (Highly Compatible)
+        # Chart 3: Pie Chart for Group Distribution by Check Count
         chart_count = workbook.add_chart({'type': 'pie'})
         chart_count.add_series({
             'categories': f"='Situation_Cheques'!$D$4:$D${end_row_comp_sum_excel}",
             'values': f"='Situation_Cheques'!$E$4:$E${end_row_comp_sum_excel}",
-            'name': 'Nombre de Chèques par Société',
+            'name': 'Nombre de Chèques par Bénéficiaire' if by_benif else 'Nombre de Chèques par Société',
             'data_labels': {'percentage': True}
         })
         chart_count.set_title({
-            'name': 'Répartition par Nombre de Chèques par Société',
+            'name': 'Répartition par Nombre de Chèques par Bénéficiaire' if by_benif else 'Répartition par Nombre de Chèques par Société',
             'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
         })
         chart_count.set_size({'width': 380, 'height': 260})
         sheet_analysis.insert_chart('E3', chart_count)
 
-        # Chart 4: Pie Chart for States Distribution by Check Count (Highly Compatible)
+        # Chart 4: Pie Chart for States Distribution by Check Count
         chart_state_count = workbook.add_chart({'type': 'pie'})
         chart_state_count.add_series({
             'categories': "='Situation_Cheques'!$A$4:$A$7",
@@ -555,7 +565,7 @@ class ReportFinanceSituation(models.AbstractModel):
         chart_state_count.set_size({'width': 380, 'height': 260})
         sheet_analysis.insert_chart('I3', chart_state_count)
 
-        # Chart 2: Column Chart for Active Checks per Company
+        # Chart 2: Column Chart for Active Checks per Group
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
             chart_active = workbook.add_chart({'type': 'column'})
             chart_active.add_series({
@@ -565,30 +575,28 @@ class ReportFinanceSituation(models.AbstractModel):
                 'data_labels': {'value': True}
             })
             chart_active.set_title({
-                'name': 'Encours Actif par Société',
+                'name': 'Encours Actif par Bénéficiaire' if by_benif else 'Encours Actif par Société',
                 'name_font': {'bold': True, 'size': 14, 'color': '#137333'}
             })
             chart_active.set_x_axis({
-                'name': 'Sociétés Émettrices',
+                'name': 'Bénéficiaires' if by_benif else 'Sociétés Émettrices',
                 'name_font': {'size': 10, 'bold': True}
             })
             chart_active.set_y_axis({
                 'name': 'Montant Cumulé (MAD)',
                 'name_font': {'size': 10, 'bold': True}
             })
-            chart_active.set_legend({'none': True})
-            chart_active.set_size({'width': 850, 'height': 400})
-            sheet_analysis.insert_chart('B16', chart_active)
+            chart_active.set_legend({'none':        # ----------------------------------------------------
+        # 6. DETAILED SHEETS PER GROUP (SOCIÉTÉ OR BÉNÉFICIAIRE)
         # ----------------------------------------------------
-        # 6. DETAILED SHEETS PER COMPANY (SOCIÉTÉ)
-        # ----------------------------------------------------
-        all_companies = set()
+        all_groups = set()
         for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:
             for chq in values.get(lst_key, []):
-                if chq.get('ste'):
-                    all_companies.add(chq['ste'])
+                val_key = chq.get('benif') if by_benif else chq.get('ste')
+                if val_key:
+                    all_groups.add(val_key)
         
-        sorted_companies = sorted(list(all_companies))
+        sorted_groups = sorted(list(all_groups))
         
         def make_safe_sheet_name(name):
             for char in [':', '\\', '/', '?', '*', '[', ']']:
@@ -597,39 +605,41 @@ class ReportFinanceSituation(models.AbstractModel):
 
         from datetime import datetime, time
 
-        for company in sorted_companies:
-            safe_name = make_safe_sheet_name(company)
+        for group_item in sorted_groups:
+            safe_name = make_safe_sheet_name(group_item)
             sheet_company = workbook.add_worksheet(safe_name)
             sheet_company.set_default_row(20)
             
-            # Column widths for Company detailed sheet
+            # Column widths for detailed sheet
             sheet_company.set_column(0, 0, 15)  # État
             sheet_company.set_column(1, 1, 15)  # N° Chèque
-            sheet_company.set_column(2, 2, 28)  # Bénéficiaire
+            sheet_company.set_column(2, 2, 28)  # Société or Bénéficiaire
             sheet_company.set_column(3, 3, 20)  # Personne
             sheet_company.set_column(4, 4, 15)  # Échéance
             sheet_company.set_column(5, 5, 18)  # Montant
             
             # Title block
+            title_text = f"Situation Détaillée — {group_item}"
             sheet_company.set_row(0, 30)
-            sheet_company.merge_range('A1:F1', f"Situation Détaillée — {company}", title_style)
+            sheet_company.merge_range('A1:F1', title_text, title_style)
             
             # Write Headers
             comp_row = 2
             sheet_company.write(comp_row, 0, "État", sum_header_style)
             sheet_company.write(comp_row, 1, "N° Chèque", sum_header_style)
-            sheet_company.write(comp_row, 2, "Bénéficiaire", sum_header_style)
+            sheet_company.write(comp_row, 2, "Société" if by_benif else "Bénéficiaire", sum_header_style)
             sheet_company.write(comp_row, 3, "Personne", sum_header_style)
             sheet_company.write(comp_row, 4, "Échéance", sum_header_style)
             sheet_company.write(comp_row, 5, "Montant", sum_header_style)
             comp_row += 1
             
-            # Gather and tag company-specific checks
+            # Gather and tag group-specific checks
             company_checks = []
             
             # Actifs
             for chq in values.get('active_list', []):
-                if chq['ste'] == company:
+                match_val = chq['benif'] if by_benif else chq['ste']
+                if match_val == group_item:
                     c_copy = chq.copy()
                     c_copy['state_label'] = 'ACTIF'
                     c_copy['theme'] = themes['actif']
@@ -637,7 +647,8 @@ class ReportFinanceSituation(models.AbstractModel):
             
             # Réserve
             for chq in values.get('reserve_list', []):
-                if chq['ste'] == company:
+                match_val = chq['benif'] if by_benif else chq['ste']
+                if match_val == group_item:
                     c_copy = chq.copy()
                     c_copy['state_label'] = 'RÉSERVE'
                     c_copy['theme'] = themes['reserve']
@@ -645,7 +656,8 @@ class ReportFinanceSituation(models.AbstractModel):
                     
             # Bureau
             for chq in values.get('bureau_list', []):
-                if chq['ste'] == company:
+                match_val = chq['benif'] if by_benif else chq['ste']
+                if match_val == group_item:
                     c_copy = chq.copy()
                     c_copy['state_label'] = 'BUREAU'
                     c_copy['theme'] = themes['bureau']
@@ -653,7 +665,8 @@ class ReportFinanceSituation(models.AbstractModel):
                     
             # Annulé
             for chq in values.get('annule_list', []):
-                if chq['ste'] == company:
+                match_val = chq['benif'] if by_benif else chq['ste']
+                if match_val == group_item:
                     c_copy = chq.copy()
                     c_copy['state_label'] = 'ANNULÉ'
                     c_copy['theme'] = themes['annule']
@@ -668,7 +681,7 @@ class ReportFinanceSituation(models.AbstractModel):
                     t = c['theme']
                     sheet_company.write(comp_row, 0, c['state_label'], t['left_bold'])
                     sheet_company.write(comp_row, 1, c['chq'] or "", t['center'])
-                    sheet_company.write(comp_row, 2, c['benif'], t['left'])
+                    sheet_company.write(comp_row, 2, c['ste'] if by_benif else c['benif'], t['left'])
                     sheet_company.write(comp_row, 3, c['perso'], t['left'])
                     
                     d_ech = c['date_echeance']
@@ -680,11 +693,11 @@ class ReportFinanceSituation(models.AbstractModel):
                     sheet_company.write_number(comp_row, 5, c['amount'], t['money'])
                     comp_row += 1
                 
-                # Write company total
-                sheet_company.merge_range(comp_row, 0, comp_row, 4, f"TOTAL ENCOURS — {company}", sum_row_global)
+                # Write group total
+                sheet_company.merge_range(comp_row, 0, comp_row, 4, f"TOTAL ENCOURS — {group_item}", sum_row_global)
                 sheet_company.write_number(comp_row, 5, sum(c['amount'] for c in company_checks), sum_row_global_amt)
 
-                # --- COMPANY SUMMARY ANALYSES (Right Side) ---
+                # --- GROUP SUMMARY ANALYSES (Right Side) ---
                 comp_state_stats = {
                     'ACTIF': {'count': 0, 'amount': 0.0},
                     'RÉSERVE': {'count': 0, 'amount': 0.0},
@@ -742,7 +755,7 @@ class ReportFinanceSituation(models.AbstractModel):
                 chart_comp_state.set_size({'width': 440, 'height': 280})
                 sheet_company.insert_chart('L2', chart_comp_state)
 
-                # --- COMPANY TYPES SUMMARY (Right Side) ---
+                # --- TYPES SUMMARY (Right Side) ---
                 comp_type_stats = {}
                 for c in company_checks:
                     t_lbl = c.get('type') or 'Divers'
@@ -793,8 +806,37 @@ class ReportFinanceSituation(models.AbstractModel):
                 })
                 chart_comp_type.set_size({'width': 440, 'height': 280})
                 sheet_company.insert_chart('L18', chart_comp_type)
+
+                # --- BENEFICIARY COMPANIES BREAKDOWN (Right Side, below Types Summary) ---
+                if by_benif:
+                    comp_breakdown_row = type_row_curr + 2
+                    sheet_company.write(comp_breakdown_row, 7, "Société Émettrice", sum_header_style)
+                    sheet_company.write(comp_breakdown_row, 8, "Nombre", sum_header_style)
+                    sheet_company.write(comp_breakdown_row, 9, "Montant Global", sum_header_style)
+                    comp_breakdown_row += 1
+                    
+                    benif_comp_stats = {}
+                    for c in company_checks:
+                        c_ste = c['ste']
+                        if c_ste not in benif_comp_stats:
+                            benif_comp_stats[c_ste] = {'count': 0, 'amount': 0.0}
+                        benif_comp_stats[c_ste]['count'] += 1
+                        benif_comp_stats[c_ste]['amount'] += c['amount']
+                    
+                    sorted_benif_comp = sorted(list(benif_comp_stats.items()), key=lambda x: -x[1]['amount'])
+                    
+                    for ste_lbl, stat in sorted_benif_comp:
+                        sheet_company.write(comp_breakdown_row, 7, ste_lbl, sum_row_type_neutral_left)
+                        sheet_company.write_number(comp_breakdown_row, 8, stat['count'], sum_row_type_neutral)
+                        sheet_company.write_number(comp_breakdown_row, 9, stat['amount'], sum_row_type_neutral_amt)
+                        comp_breakdown_row += 1
+                    
+                    # Total row for Company Breakdown
+                    sheet_company.write(comp_breakdown_row, 7, "TOTAL S/SOCIÉTÉS", sum_row_global)
+                    sheet_company.write_number(comp_breakdown_row, 8, sum(s['count'] for s in benif_comp_stats.values()), sum_row_global)
+                    sheet_company.write_number(comp_breakdown_row, 9, sum(s['amount'] for s in benif_comp_stats.values()), sum_row_global_amt)
             else:
-                sheet_company.merge_range(comp_row, 0, comp_row, 5, "Aucun chèque enregistré pour cette société.", themes['reserve']['empty'])
+                sheet_company.merge_range(comp_row, 0, comp_row, 5, "Aucun chèque enregistré pour cet élément.", themes['reserve']['empty'])
 
         workbook.close()
         output.seek(0)

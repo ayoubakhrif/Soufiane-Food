@@ -878,7 +878,8 @@ class CasaClient(models.Model):
                 plt.close(fig)
                 
             # --- 2. Graphique de Répartition Volumique (Colonnes en Tonnage) ---
-            labels_ton, tonnages = get_top_n_data(product_data, 'tonnage', max_items=8)
+            labels_ton, tonnages_kg = get_top_n_data(product_data, 'tonnage', max_items=8)
+            tonnages = [t / 1000.0 for t in tonnages_kg] # Conversion de Kg en Tonnes réelles
             
             if tonnages:
                 fig, ax = plt.subplots(figsize=(6, 5), dpi=120)

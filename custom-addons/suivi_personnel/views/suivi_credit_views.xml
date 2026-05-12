@@ -62,7 +62,7 @@
         <field name="arch" type="xml">
             <graph string="Statistiques de Crédit / Débit" type="bar">
                 <field name="personne_id"/>
-                <field name="type" logical_type="string"/>
+                <field name="type"/>
                 <field name="amount" type="measure"/>
             </graph>
         </field>

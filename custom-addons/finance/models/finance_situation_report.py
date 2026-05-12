@@ -121,18 +121,18 @@ class ReportFinanceSituation(models.AbstractModel):
         return res
 
     def _generate_base64_charts(self, values):
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
-        import io
-        import base64
-
         charts_b64 = {
             'company_pie': '',
             'state_pie': ''
         }
 
         try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            import io
+            import base64
+
             # 1. Company Pie Chart
             comp_totals = {}
             for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:

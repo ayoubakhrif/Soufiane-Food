@@ -6,3 +6,6 @@ from . import income_monthly
 from . import income_daily
 from . import expense_monthly
 from . import expense_daily
+from . import suivi_personne
+from . import suivi_credit
+

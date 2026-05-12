@@ -12,7 +12,7 @@
     'author': 'Odoo',
     'website': '',
     'category': 'Custom',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'suivi_personnel'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

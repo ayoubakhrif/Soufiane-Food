@@ -28,6 +28,8 @@ Features:
         'views/income_daily_views.xml',
         'views/expense_monthly_views.xml',
         'views/expense_daily_views.xml',
+        'views/suivi_personne_views.xml',
+        'views/suivi_credit_views.xml',
         'views/menus.xml',
     ],
     'installable': True,

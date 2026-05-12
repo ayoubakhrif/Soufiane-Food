@@ -17,3 +17,7 @@ access_month_report_line_mgr,suivi.month.report.line,model_suivi_month_report_li
 access_month_report_line_user,suivi.month.report.line,model_suivi_month_report_line,group_suivi_user,1,0,0,0
 access_period_mgr,suivi.period,model_suivi_period,group_suivi_manager,1,1,1,1
 access_period_user,suivi.period,model_suivi_period,group_suivi_user,1,1,1,0
+access_suivi_personne_mgr,suivi.personne,model_suivi_personne,group_suivi_manager,1,1,1,1
+access_suivi_personne_user,suivi.personne,model_suivi_personne,group_suivi_user,1,1,1,1
+access_suivi_credit_mgr,suivi.credit,model_suivi_credit,group_suivi_manager,1,1,1,1
+access_suivi_credit_user,suivi.credit,model_suivi_credit,group_suivi_user,1,1,1,1

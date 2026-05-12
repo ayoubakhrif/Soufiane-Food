@@ -45,6 +45,26 @@
               sequence="20"/>
 
     <!-- ========================= -->
+    <!-- 💳 Section Crédits & Débits -->
+    <!-- ========================= -->
+    <menuitem id="menu_suivi_credits"
+              name="Crédits &amp; Débits"
+              parent="menu_suivi_root"
+              sequence="30"/>
+
+    <menuitem id="menu_suivi_credit_mgt"
+              name="Gestion des Crédits"
+              parent="menu_suivi_credits"
+              action="action_suivi_credit"
+              sequence="10"/>
+
+    <menuitem id="menu_suivi_personne_mgt"
+              name="Personnes"
+              parent="menu_suivi_credits"
+              action="action_suivi_personne"
+              sequence="20"/>
+
+    <!-- ========================= -->
     <!-- ⚙️ Configuration Section -->
     <!-- ========================= -->
     <menuitem id="menu_suivi_config"

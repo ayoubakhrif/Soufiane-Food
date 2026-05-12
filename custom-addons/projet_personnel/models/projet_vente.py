@@ -8,6 +8,7 @@ class ProjetVente(models.Model):
     name = fields.Char(string='Référence', required=True, copy=False, default=lambda self: 'Nouveau')
     command_number = fields.Char(string='Command', copy=False, readonly=True)
     date = fields.Date(string='Date de Vente', required=True, default=fields.Date.context_today)
+    personne_id = fields.Many2one('suivi.personne', string='Acheteur / Personne', tracking=True)
     line_ids = fields.One2many('projet.vente.line', 'vente_id', string='Articles Vendus')
     
     state = fields.Selection([

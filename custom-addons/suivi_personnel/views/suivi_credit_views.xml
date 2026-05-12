@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vues de Suivi des Crédits -->
+
+    <!-- 1. Vue Liste (Tree) -->
+    <record id="view_suivi_credit_tree" model="ir.ui.view">
+        <field name="name">suivi.credit.tree</field>
+        <field name="model">suivi.credit</field>
+        <field name="arch" type="xml">
+            <tree string="Gestion des Crédits">
+                <field name="date"/>
+                <field name="personne_id"/>
+                <field name="description"/>
+                <field name="type" widget="badge" decoration-danger="type == 'credit'" decoration-success="type == 'debit'"/>
+                <field name="amount" sum="Montant Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- 2. Vue Formulaire (Form) -->
+    <record id="view_suivi_credit_form" model="ir.ui.view">
+        <field name="name">suivi.credit.form</field>
+        <field name="model">suivi.credit</field>
+        <field name="arch" type="xml">
+            <form string="Crédit / Débit">
+                <sheet>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="personne_id" options="{'no_quick_create': False}"/>
+                            <field name="date"/>
+                        </group>
+                        <group string="Transaction">
+                            <field name="type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="amount" widget="monetary"/>
+                        </group>
+                    </group>
+                    <group string="Détails de l'opération">
+                        <field name="description" placeholder="Ex: Avance sur salaire, remboursement, achat d'alimentation, etc..." nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 3. Vue Pivot (Tableau Croisé Dynamique) -->
+    <record id="view_suivi_credit_pivot" model="ir.ui.view">
+        <field name="name">suivi.credit.pivot</field>
+        <field name="model">suivi.credit</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Crédits &amp; Débits">
+                <field name="personne_id" type="row"/>
+                <field name="type" type="col"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- 4. Vue Graphique (Graph) -->
+    <record id="view_suivi_credit_graph" model="ir.ui.view">
+        <field name="name">suivi.credit.graph</field>
+        <field name="model">suivi.credit</field>
+        <field name="arch" type="xml">
+            <graph string="Statistiques de Crédit / Débit" type="bar">
+                <field name="personne_id"/>
+                <field name="type" logical_type="string"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- 5. Vue Recherche & Groupements (Search) -->
+    <record id="view_suivi_credit_search" model="ir.ui.view">
+        <field name="name">suivi.credit.search</field>
+        <field name="model">suivi.credit</field>
+        <field name="arch" type="xml">
+            <search string="Recherche de Crédits">
+                <field name="personne_id"/>
+                <field name="description"/>
+                <filter string="Crédits" name="filter_credit" domain="[('type', '=', 'credit')]"/>
+                <filter string="Débits" name="filter_debit" domain="[('type', '=', 'debit')]"/>
+                <separator/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Personne" name="group_by_personne" context="{'group_by': 'personne_id'}"/>
+                    <filter string="Type" name="group_by_type" context="{'group_by': 'type'}"/>
+                    <filter string="Date (Mois)" name="group_by_month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 6. Action Window -->
+    <record id="action_suivi_credit" model="ir.actions.act_window">
+        <field name="name">Gestion des Crédits</field>
+        <field name="res_model">suivi.credit</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_suivi_credit_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Enregistrez une opération de crédit ou débit !
+            </p>
+            <p>
+                Spécifiez la personne, le montant et le type d'opération pour assurer un suivi financier rigoureux.
+            </p>
+        </field>
+    </record>
+</odoo>

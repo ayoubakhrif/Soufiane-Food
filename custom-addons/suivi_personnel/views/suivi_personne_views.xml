@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vues du Registre des Personnes -->
+    
+    <!-- 1. Vue Liste (Tree) -->
+    <record id="view_suivi_personne_tree" model="ir.ui.view">
+        <field name="name">suivi.personne.tree</field>
+        <field name="model">suivi.personne</field>
+        <field name="arch" type="xml">
+            <tree string="Registre des Personnes">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="total_credit" sum="Total des Crédits" decoration-danger="total_credit &gt; 0"/>
+                <field name="total_debit" sum="Total des Débits" decoration-success="total_debit &gt; 0"/>
+                <field name="balance" sum="Solde Global" decoration-danger="balance &gt; 0" decoration-success="balance &lt; 0"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- 2. Vue Formulaire (Form) -->
+    <record id="view_suivi_personne_form" model="ir.ui.view">
+        <field name="name">suivi.personne.form</field>
+        <field name="model">suivi.personne</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Personne">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_credits" type="object" class="oe_stat_button" icon="fa-list">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="balance" widget="monetary"/>
+                                </span>
+                                <span class="o_stat_text">Solde</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Nom Complet"/>
+                        <h1>
+                            <field name="name" placeholder="Ex: Soufiane El Amrani"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Coordonnées">
+                            <field name="phone" widget="phone"/>
+                            <field name="email" widget="email"/>
+                        </group>
+                        <group string="Situation Financière">
+                            <field name="total_credit" readonly="1" widget="monetary" decoration-danger="total_credit &gt; 0"/>
+                            <field name="total_debit" readonly="1" widget="monetary" decoration-success="total_debit &gt; 0"/>
+                            <field name="balance" readonly="1" widget="monetary" decoration-danger="balance &gt; 0" decoration-success="balance &lt; 0"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Crédits &amp; Débits">
+                            <field name="credit_ids">
+                                <tree editable="bottom" default_order="date desc, id desc">
+                                    <field name="date"/>
+                                    <field name="description" placeholder="Détail de l'opération..."/>
+                                    <field name="type" widget="badge" decoration-danger="type == 'credit'" decoration-success="type == 'debit'"/>
+                                    <field name="amount" sum="Total"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes &amp; Remarques">
+                            <field name="note" placeholder="Ajouter des notes privées ou des détails additionnels..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 3. Action Window -->
+    <record id="action_suivi_personne" model="ir.actions.act_window">
+        <field name="name">Personnes</field>
+        <field name="res_model">suivi.personne</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez la première personne dans votre registre !
+            </p>
+            <p>
+                Vous pourrez ainsi enregistrer ses crédits et débits, et la lier aux ventes.
+            </p>
+        </field>
+    </record>
+</odoo>

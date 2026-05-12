@@ -586,7 +586,10 @@ class ReportFinanceSituation(models.AbstractModel):
                 'name': 'Montant Cumulé (MAD)',
                 'name_font': {'size': 10, 'bold': True}
             })
-            chart_active.set_legend({'none':        # ----------------------------------------------------
+            chart_active.set_legend({'none': True})
+            chart_active.set_size({'width': 850, 'height': 400})
+            sheet_analysis.insert_chart('B16', chart_active)
+        # ----------------------------------------------------
         # 6. DETAILED SHEETS PER GROUP (SOCIÉTÉ OR BÉNÉFICIAIRE)
         # ----------------------------------------------------
         all_groups = set()

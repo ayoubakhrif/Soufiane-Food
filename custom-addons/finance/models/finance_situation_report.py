@@ -7,7 +7,10 @@ class ReportFinanceSituation(models.AbstractModel):
     @api.model
     def _get_report_values(self, docids, data=None):
         # Fetch physical cheques instead of datacheques (répartitions)
-        physical_recs = self.env['finance.cheque.physical'].sudo().search([])
+        domain = []
+        if data and data.get('encours_only'):
+            domain = [('encours', '=', 'non_encaisse')]
+        physical_recs = self.env['finance.cheque.physical'].sudo().search(domain)
         
         active_list_phys = []
         reserve_list_phys = []
@@ -114,6 +117,7 @@ class ReportFinanceSituation(models.AbstractModel):
             'global_amount': global_amount,
             
             'report_date': fields.Date.today().strftime('%d/%m/%Y'),
+            'report_title': "Situation des Chèques En Cours" if (data and data.get('encours_only')) else "Situation Générale des Chèques",
         }
 
         # Generate base64 charts for the QWeb PDF

@@ -114,17 +114,25 @@ class WhatsAppFinanceController(http.Controller):
                     }
             except Exception as e:
                 _logger.error(f"Error handling DOC_LINK_ choice: {str(e)}")
-        # 3.2 Handle Situation Logic
-        if message_text.lower().strip() == "situation" or message_text.lower().strip().startswith("situation"):
+
+        # 3.2 Handle Situation / Encours Logic
+        is_situation_cmd = message_text.lower().strip() == "situation" or message_text.lower().strip().startswith("situation")
+        is_encours_cmd = message_text.lower().strip() in ["encours", "en cours"] or message_text.lower().strip().startswith("encours") or message_text.lower().strip().startswith("en cours")
+
+        if is_situation_cmd or is_encours_cmd:
             try:
+                # Set dynamic configuration based on command type
+                encours_only = is_encours_cmd
+                data_arg = {'encours_only': True} if encours_only else {}
+                
                 # 1. Render QWeb PDF report
                 report_action = request.env['ir.actions.report'].sudo()
-                pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_situation', res_ids=[])
+                pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_situation', res_ids=[], data=data_arg)
                 pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
                 # 2. Render Excel spreadsheet using report parser helper
                 report_obj = request.env['report.finance.report_finance_situation_template'].sudo()
-                report_values = report_obj._get_report_values([])
+                report_values = report_obj._get_report_values([], data=data_arg)
                 xlsx_base64 = report_obj.generate_excel_data(report_values)
 
                 active_count = report_values.get('total_active_count', 0)
@@ -132,8 +140,21 @@ class WhatsAppFinanceController(http.Controller):
                 bureau_count = report_values.get('total_bureau_count', 0)
                 annule_count = report_values.get('total_annule_count', 0)
 
+                if encours_only:
+                    title_msg = "📋 *Situation des Chèques En Cours (Non Encaissés)* 📋"
+                    caption_pdf = "Chèques En Cours - Version PDF 📄"
+                    caption_xlsx = "Chèques En Cours - Version Excel 📊"
+                    file_prefix = "Encours_Cheques"
+                    prod_name = "Chèques En Cours"
+                else:
+                    title_msg = "📋 *Situation Générale des Chèques* 📋"
+                    caption_pdf = "Situation des Chèques - Version PDF 📄"
+                    caption_xlsx = "Situation des Chèques - Version Excel 📊"
+                    file_prefix = "Situation_Cheques"
+                    prod_name = "Situation Générale"
+
                 summary_msg = (
-                    f"📋 *Situation Générale des Chèques* 📋\n"
+                    f"{title_msg}\n"
                     f"━━━━━━━━━━━━━━━━━━\n\n"
                     f"📊 *Résumé des États* :\n"
                     f"• 🟢 *Actifs* : {active_count} chèques\n"
@@ -144,26 +165,26 @@ class WhatsAppFinanceController(http.Controller):
                 )
 
                 from odoo import fields
-                today_str = fields.Date.today().strftime('%d_%m/%Y').replace('/', '_')
+                today_str = fields.Date.today().strftime('%d/%m/%Y').replace('/', '_')
                 return {
                     'status': 'success',
-                    'product_name': 'Situation Générale',
+                    'product_name': prod_name,
                     'response': summary_msg,
                     'files': [
                         {
                             'pdf_base64': pdf_base64,
-                            'file_name': f"Situation_Cheques_{today_str}.pdf",
-                            'caption': "Situation des Chèques - Version PDF 📄"
+                            'file_name': f"{file_prefix}_{today_str}.pdf",
+                            'caption': caption_pdf
                         },
                         {
                             'pdf_base64': xlsx_base64,
-                            'file_name': f"Situation_Cheques_{today_str}.xlsx",
-                            'caption': "Situation des Chèques - Version Excel 📊"
+                            'file_name': f"{file_prefix}_{today_str}.xlsx",
+                            'caption': caption_xlsx
                         }
                     ]
                 }
             except Exception as e:
-                _logger.error(f"Error generating Situation report: {str(e)}")
+                _logger.error(f"Error generating Situation/Encours report: {str(e)}")
                 return {'status': 'error', 'message': f"Erreur lors de la génération du rapport : {str(e)}"}
 
         # 4. Handle Talon Logic

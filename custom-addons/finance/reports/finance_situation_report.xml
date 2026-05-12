@@ -81,7 +81,7 @@
                                 <t t-esc="report_date"/>
                             </div>
                             <div class="title-box">
-                                Situation Générale des Chèques
+                                <t t-esc="report_title or 'Situation Générale des Chèques'"/>
                             </div>
                         </div>
                     </div>

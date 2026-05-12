@@ -842,7 +842,7 @@ class CasaClient(models.Model):
             labels_amt, amounts = get_top_n_data(product_data, 'amount', max_items=13)
             
             if amounts:
-                fig, ax = plt.subplots(figsize=(8, 6), dpi=120)
+                fig, ax = plt.subplots(figsize=(10, 6), dpi=120)
                 
                 # Couleur bleue élégante
                 bars = ax.bar(labels_amt, amounts, color='#1A4D80', edgecolor='none', width=0.55)
@@ -882,7 +882,7 @@ class CasaClient(models.Model):
             tonnages = [t / 1000.0 for t in tonnages_kg] # Conversion de Kg en Tonnes réelles
             
             if tonnages:
-                fig, ax = plt.subplots(figsize=(8, 6), dpi=120)
+                fig, ax = plt.subplots(figsize=(10, 6), dpi=120)
                 
                 # Couleur verte émeraude élégante
                 bars = ax.bar(labels_ton, tonnages, color='#137333', edgecolor='none', width=0.55)

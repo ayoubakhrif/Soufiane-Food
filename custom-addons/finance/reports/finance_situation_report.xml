@@ -124,6 +124,22 @@
                         </tbody>
                     </table>
 
+                    <!-- Analytical Charts Section (Side-by-Side) -->
+                    <t t-if="charts">
+                        <div class="charts-row" style="display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 25px; page-break-inside: avoid;">
+                            <div class="chart-box" style="width: 49%; text-align: center; border: 1px solid #B0CBE3; padding: 5px; border-radius: 4px; background-color: #FAFAFA;">
+                                <t t-if="charts.get('company_pie')">
+                                    <img t-att-src="'data:image/png;base64,%s' % charts['company_pie']" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"/>
+                                </t>
+                            </div>
+                            <div class="chart-box" style="width: 49%; text-align: center; border: 1px solid #B0CBE3; padding: 5px; border-radius: 4px; background-color: #FAFAFA;">
+                                <t t-if="charts.get('state_pie')">
+                                    <img t-att-src="'data:image/png;base64,%s' % charts['state_pie']" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"/>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
                     <!-- SECTION 1: ACTIFS (RECAP GENERAL) -->
                     <div class="section-title section-actif">Récapitulatif des Chèques Actifs</div>
                     <table class="data-table table-actif">

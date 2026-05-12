@@ -90,7 +90,7 @@ class ReportFinanceSituation(models.AbstractModel):
         global_count = total_active_count + total_reserve_count + total_bureau_count + total_annule_count
         global_amount = total_active_amount + total_reserve_amount + total_bureau_amount + total_annule_amount
 
-        return {
+        res = {
             'doc_ids': docids,
             'doc_model': 'finance.cheque.physical',
             'active_list': active_list_phys,
@@ -115,6 +115,104 @@ class ReportFinanceSituation(models.AbstractModel):
             
             'report_date': fields.Date.today().strftime('%d/%m/%Y'),
         }
+
+        # Generate base64 charts for the QWeb PDF
+        res['charts'] = self._generate_base64_charts(res)
+        return res
+
+    def _generate_base64_charts(self, values):
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        import io
+        import base64
+
+        charts_b64 = {
+            'company_pie': '',
+            'state_pie': ''
+        }
+
+        try:
+            # 1. Company Pie Chart
+            comp_totals = {}
+            for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:
+                for chq in values.get(lst_key, []):
+                    ste = chq.get('ste', 'Inconnu')
+                    comp_totals[ste] = comp_totals.get(ste, 0.0) + chq.get('amount', 0.0)
+            
+            if comp_totals:
+                sorted_comps = sorted(comp_totals.items(), key=lambda x: -x[1])
+                labels = [x[0] for x in sorted_comps]
+                amounts = [x[1] for x in sorted_comps]
+                
+                colors = ['#1A4D80', '#2980B9', '#3498DB', '#5DADE2', '#85C1E9', '#A9CCE3', '#D4E6F1']
+                if len(labels) > len(colors):
+                    colors = colors * (len(labels) // len(colors) + 1)
+                colors = colors[:len(labels)]
+
+                fig, ax = plt.subplots(figsize=(5, 4.5), dpi=120)
+                wedges, texts, autotexts = ax.pie(
+                    amounts, 
+                    labels=labels, 
+                    autopct='%1.1f%%',
+                    startangle=140, 
+                    colors=colors,
+                    textprops=dict(color="black", fontsize=8)
+                )
+                plt.setp(autotexts, size=8, weight="bold")
+                ax.set_title("Répartition Financière par Société", fontsize=10, fontweight='bold', color='#1A4D80', pad=10)
+                fig.tight_layout()
+
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png', bbox_inches='tight', transparent=True)
+                buf.seek(0)
+                charts_b64['company_pie'] = base64.b64encode(buf.read()).decode('utf-8')
+                buf.close()
+                plt.close(fig)
+
+            # 2. State Pie Chart
+            state_counts = {
+                'ACTIF': len(values.get('active_list', [])),
+                'RÉSERVE': len(values.get('reserve_list', [])),
+                'BUREAU': len(values.get('bureau_list', [])),
+                'ANNULÉ': len(values.get('annule_list', []))
+            }
+            state_counts = {k: v for k, v in state_counts.items() if v > 0}
+            if state_counts:
+                labels = list(state_counts.keys())
+                counts = list(state_counts.values())
+                
+                state_colors = {
+                    'ACTIF': '#137333',
+                    'RÉSERVE': '#1A73E8',
+                    'BUREAU': '#E67E22',
+                    'ANNULÉ': '#D93025'
+                }
+                colors = [state_colors.get(lbl, '#7F8C8D') for lbl in labels]
+
+                fig, ax = plt.subplots(figsize=(5, 4.5), dpi=120)
+                wedges, texts, autotexts = ax.pie(
+                    counts, 
+                    labels=labels, 
+                    autopct='%1.1f%%',
+                    startangle=140, 
+                    colors=colors,
+                    textprops=dict(color="black", fontsize=8)
+                )
+                plt.setp(autotexts, size=8, weight="bold")
+                ax.set_title("Répartition Globale par Nombre de Chèques", fontsize=10, fontweight='bold', color='#1A4D80', pad=10)
+                fig.tight_layout()
+
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png', bbox_inches='tight', transparent=True)
+                buf.seek(0)
+                charts_b64['state_pie'] = base64.b64encode(buf.read()).decode('utf-8')
+                buf.close()
+                plt.close(fig)
+        except Exception:
+            pass
+
+        return charts_b64
 
     @api.model
     def generate_excel_data(self, values):

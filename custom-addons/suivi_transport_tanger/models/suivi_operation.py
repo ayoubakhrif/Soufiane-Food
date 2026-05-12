@@ -84,7 +84,7 @@ class SuiviTransportTangerOperationLine(models.Model):
     _description = 'Ligne Opération Suivi Transport Tanger'
 
     operation_id = fields.Many2one('suivi.transport.tanger.operation', string='Opération', required=True, ondelete='cascade')
-    casa_client_id = fields.Many2one('casa.client', string='Client')
+    casa_client_id = fields.Many2one('casa.client', string='Client', required=True)
     use_client2 = fields.Boolean(related='casa_client_id.use_client2', string='Utiliser Client 2', readonly=True)
     client2 = fields.Char(string='Client 2')
     article_id = fields.Many2one('stock.kal3iya.product', string='Article')

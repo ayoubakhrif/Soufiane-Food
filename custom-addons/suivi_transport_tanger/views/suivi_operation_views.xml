@@ -53,7 +53,7 @@
                                 <tree editable="bottom">
                                     <field name="casa_client_id" required="1"/>
                                     <field name="use_client2" column_invisible="True"/>
-                                    <field name="client2" invisible="not use_client2"/>
+                                    <field name="client2" invisible="not use_client2" required="use_client2"/>
                                     <field name="article_id" required="1"/>
                                     <field name="lot"/>
                                     <field name="exit_id" readonly="1" force_save="1"/>

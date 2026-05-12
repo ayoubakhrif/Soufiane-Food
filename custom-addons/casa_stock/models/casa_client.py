@@ -765,3 +765,124 @@ class CasaClient(models.Model):
             })
             
         return report_data
+
+    def _generate_product_charts_base64(self):
+        """
+        Génère deux graphiques circulaires pour le client courant :
+        1. Répartition Financière par Produit (Achat en DH)
+        2. Répartition Volumique par Produit (Tonnage)
+        Retourne un dictionnaire avec les images encodées en base64.
+        """
+        charts_b64 = {
+            'product_amount_pie': '',
+            'product_tonnage_pie': ''
+        }
+        
+        try:
+            import matplotlib
+            try:
+                matplotlib.use('Agg')
+            except Exception:
+                pass
+            import matplotlib.pyplot as plt
+            import io
+            import base64
+            
+            # Agrégation des achats par produit
+            product_data = {}
+            
+            # 1. Sorties standards validées (state == 'done')
+            for s in self.exit_ids.filtered(lambda x: x.state == 'done'):
+                p_name = s.product_id.name or 'Inconnu'
+                amount = s.mt_vente_final or 0.0
+                tonnage = s.tonnage or 0.0
+                if p_name not in product_data:
+                    product_data[p_name] = {'amount': 0.0, 'tonnage': 0.0}
+                product_data[p_name]['amount'] += amount
+                product_data[p_name]['tonnage'] += tonnage
+                
+            # 2. Autres ventes validées (state == 'done')
+            for s in self.other_sale_ids.filtered(lambda x: x.state == 'done'):
+                p_name = s.product_id.name or 'Inconnu'
+                amount = s.mt_vente_final or 0.0
+                tonnage = s.tonnage or 0.0
+                if p_name not in product_data:
+                    product_data[p_name] = {'amount': 0.0, 'tonnage': 0.0}
+                product_data[p_name]['amount'] += amount
+                product_data[p_name]['tonnage'] += tonnage
+                
+            if not product_data:
+                return charts_b64
+                
+            # --- 1. Graphique de Répartition Financière (Montants Nets en DH) ---
+            sorted_by_amt = sorted(product_data.items(), key=lambda x: -x[1]['amount'])
+            sorted_by_amt = [x for x in sorted_by_amt if x[1]['amount'] > 0]
+            
+            if sorted_by_amt:
+                labels_amt = [f"{x[0]}\n({x[1]['amount']:,.2f} DH)".replace(',', ' ') for x in sorted_by_amt]
+                amounts = [x[1]['amount'] for x in sorted_by_amt]
+                
+                colors = ['#1E3A8A', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE']
+                if len(amounts) > len(colors):
+                    colors = colors * (len(amounts) // len(colors) + 1)
+                colors = colors[:len(amounts)]
+                
+                fig, ax = plt.subplots(figsize=(5, 4.5), dpi=120)
+                wedges, texts, autotexts = ax.pie(
+                    amounts,
+                    labels=labels_amt,
+                    autopct='%1.1f%%',
+                    startangle=140,
+                    colors=colors,
+                    textprops=dict(color="black", fontsize=8)
+                )
+                plt.setp(autotexts, size=8, weight="bold")
+                ax.set_title("Répartition Financière par Produit (Achat)", fontsize=10, fontweight='bold', color='#1E3A8A', pad=10)
+                fig.tight_layout()
+                
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png', bbox_inches='tight', transparent=True)
+                buf.seek(0)
+                charts_b64['product_amount_pie'] = base64.b64encode(buf.read()).decode('utf-8')
+                buf.close()
+                plt.close(fig)
+                
+            # --- 2. Graphique de Répartition Volumique (Tonnage) ---
+            sorted_by_ton = sorted(product_data.items(), key=lambda x: -x[1]['tonnage'])
+            sorted_by_ton = [x for x in sorted_by_ton if x[1]['tonnage'] > 0]
+            
+            if sorted_by_ton:
+                labels_ton = [f"{x[0]}\n({x[1]['tonnage']:,.2f} T)".replace(',', ' ') for x in sorted_by_ton]
+                tonnages = [x[1]['tonnage'] for x in sorted_by_ton]
+                
+                colors_ton = ['#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5']
+                if len(tonnages) > len(colors_ton):
+                    colors_ton = colors_ton * (len(tonnages) // len(colors_ton) + 1)
+                colors_ton = colors_ton[:len(tonnages)]
+                
+                fig, ax = plt.subplots(figsize=(5, 4.5), dpi=120)
+                wedges, texts, autotexts = ax.pie(
+                    tonnages,
+                    labels=labels_ton,
+                    autopct='%1.1f%%',
+                    startangle=140,
+                    colors=colors_ton,
+                    textprops=dict(color="black", fontsize=8)
+                )
+                plt.setp(autotexts, size=8, weight="bold")
+                ax.set_title("Répartition du Volume par Produit (Tonnage)", fontsize=10, fontweight='bold', color='#059669', pad=10)
+                fig.tight_layout()
+                
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png', bbox_inches='tight', transparent=True)
+                buf.seek(0)
+                charts_b64['product_tonnage_pie'] = base64.b64encode(buf.read()).decode('utf-8')
+                buf.close()
+                plt.close(fig)
+                
+        except Exception as e:
+            import logging
+            logging.getLogger('odoo.addons.casa_stock').error("ERREUR DE GENERATION DE GRAPHIQUES PRODUITS CLIENT: %s", str(e), exc_info=True)
+            
+        return charts_b64
+

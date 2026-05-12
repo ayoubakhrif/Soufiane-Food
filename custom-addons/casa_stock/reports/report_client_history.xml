@@ -145,6 +145,23 @@
                             </div>
                         </div>
 
+                        <!-- Bloc des Graphiques de Répartition des Achats -->
+                        <t t-set="charts" t-value="client._generate_product_charts_base64()"/>
+                        <t t-if="charts and (charts.get('product_amount_pie') or charts.get('product_tonnage_pie'))">
+                            <div class="charts-row" style="display: flex; justify-content: space-between; margin-top: 25px; margin-bottom: 25px; page-break-inside: avoid; text-align: center;">
+                                <t t-if="charts.get('product_amount_pie')">
+                                    <div class="chart-box" style="width: 48%; text-align: center; border: 1px solid #BFDBFE; padding: 8px; border-radius: 8px; background-color: #F8FAFC; display: inline-block;">
+                                        <img t-att-src="'data:image/png;base64,%s' % charts['product_amount_pie']" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"/>
+                                    </div>
+                                </t>
+                                <t t-if="charts.get('product_tonnage_pie')">
+                                    <div class="chart-box" style="width: 48%; text-align: center; border: 1px solid #A7F3D0; padding: 8px; border-radius: 8px; background-color: #F8FAFC; display: inline-block;">
+                                        <img t-att-src="'data:image/png;base64,%s' % charts['product_tonnage_pie']" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
                         <t t-foreach="all_weeks" t-as="week">
                             <t t-set="week_data" t-value="client._get_week_data(week)"/>
                             

@@ -17,10 +17,21 @@ class ReportFinanceSituation(models.AbstractModel):
         for physical in physical_recs:
             if not physical.datacheque_ids:
                 continue
-            # Use the first linked datacheque as the source of state and person
             first_datacheque = physical.datacheque_ids[0]
             state = first_datacheque.state or 'reserve'
-            
+
+            type_selection = {
+                'magasinage': 'Magasinage',
+                'surestarie': 'Surestarie',
+                'change': 'Change',
+                'fret': 'Fret',
+                'divers': 'Divers',
+                'reserve': 'Réserve',
+                'bureau': 'Bureau',
+                'annule': 'Annulé'
+            }
+            type_label = type_selection.get(first_datacheque.type, 'Divers')
+
             item = {
                 'chq': physical.name,
                 'ste': physical.ste_id.name or 'Inconnu',
@@ -29,6 +40,7 @@ class ReportFinanceSituation(models.AbstractModel):
                 'amount': physical.amount_total or 0.0,
                 'date_emission': physical.date_emission,
                 'date_echeance': physical.date_echeance,
+                'type': type_label,
             }
             
             if state == 'actif':
@@ -398,9 +410,9 @@ class ReportFinanceSituation(models.AbstractModel):
         })
         chart_state.set_title({
             'name': 'Répartition Financière par Société',
-            'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
+            'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
         })
-        chart_state.set_size({'width': 500, 'height': 350})
+        chart_state.set_size({'width': 380, 'height': 260})
         sheet_analysis.insert_chart('A3', chart_state)
 
         # Chart 3: Pie Chart for Companies Distribution by Check Count (Highly Compatible)
@@ -413,10 +425,25 @@ class ReportFinanceSituation(models.AbstractModel):
         })
         chart_count.set_title({
             'name': 'Répartition par Nombre de Chèques par Société',
-            'name_font': {'bold': True, 'size': 14, 'color': '#1A4D80'}
+            'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
         })
-        chart_count.set_size({'width': 500, 'height': 350})
-        sheet_analysis.insert_chart('J3', chart_count)
+        chart_count.set_size({'width': 380, 'height': 260})
+        sheet_analysis.insert_chart('F3', chart_count)
+
+        # Chart 4: Pie Chart for States Distribution by Check Count (Highly Compatible)
+        chart_state_count = workbook.add_chart({'type': 'pie'})
+        chart_state_count.add_series({
+            'categories': "='Situation_Cheques'!$A$4:$A$7",
+            'values': "='Situation_Cheques'!$B$4:$B$7",
+            'name': 'Répartition des États',
+            'data_labels': {'percentage': True}
+        })
+        chart_state_count.set_title({
+            'name': 'Répartition des États par Nbre de Chèques',
+            'name_font': {'bold': True, 'size': 12, 'color': '#1A4D80'}
+        })
+        chart_state_count.set_size({'width': 380, 'height': 260})
+        sheet_analysis.insert_chart('K3', chart_state_count)
 
         # Chart 2: Column Chart for Active Checks per Company
         if values.get('active_summary') and start_row_active_excel <= end_row_active_excel:
@@ -440,8 +467,8 @@ class ReportFinanceSituation(models.AbstractModel):
                 'name_font': {'size': 10, 'bold': True}
             })
             chart_active.set_legend({'none': True})
-            chart_active.set_size({'width': 850, 'height': 450})
-            sheet_analysis.insert_chart('A21', chart_active)
+            chart_active.set_size({'width': 850, 'height': 400})
+            sheet_analysis.insert_chart('A16', chart_active)
         # ----------------------------------------------------
         # 6. DETAILED SHEETS PER COMPANY (SOCIÉTÉ)
         # ----------------------------------------------------
@@ -604,6 +631,58 @@ class ReportFinanceSituation(models.AbstractModel):
                 })
                 chart_comp_state.set_size({'width': 440, 'height': 280})
                 sheet_company.insert_chart('L2', chart_comp_state)
+
+                # --- COMPANY TYPES SUMMARY (Right Side) ---
+                comp_type_stats = {}
+                for c in company_checks:
+                    t_lbl = c.get('type') or 'Divers'
+                    if t_lbl not in comp_type_stats:
+                        comp_type_stats[t_lbl] = {'count': 0, 'amount': 0.0}
+                    comp_type_stats[t_lbl]['count'] += 1
+                    comp_type_stats[t_lbl]['amount'] += c['amount']
+                
+                # Headers for the Types Summary
+                sheet_company.write(9, 7, "Type", sum_header_style)
+                sheet_company.write(9, 8, "Nombre", sum_header_style)
+                sheet_company.write(9, 9, "Montant Global", sum_header_style)
+                
+                type_row_curr = 10
+                type_row_excel_start = type_row_curr + 1  # 1-based Excel row (11)
+                
+                sum_row_type_neutral = workbook.add_format({'border': 1, 'border_color': '#B0CBE3', 'align': 'center'})
+                sum_row_type_neutral_left = workbook.add_format({'bold': True, 'border': 1, 'border_color': '#B0CBE3', 'align': 'left', 'font_color': '#1A4D80'})
+                sum_row_type_neutral_amt = workbook.add_format({'border': 1, 'border_color': '#B0CBE3', 'align': 'right', 'num_format': '#,##0.00" DH"'})
+                
+                # Sort types by amount descending
+                sorted_type_stats = sorted(list(comp_type_stats.items()), key=lambda x: -x[1]['amount'])
+                
+                for t_lbl, stat in sorted_type_stats:
+                    sheet_company.write(type_row_curr, 7, t_lbl, sum_row_type_neutral_left)
+                    sheet_company.write_number(type_row_curr, 8, stat['count'], sum_row_type_neutral)
+                    sheet_company.write_number(type_row_curr, 9, stat['amount'], sum_row_type_neutral_amt)
+                    type_row_curr += 1
+                    
+                type_row_excel_end = type_row_curr  # 1-based Excel row of last data row
+                
+                # Total for Types Summary
+                sheet_company.write(type_row_curr, 7, "TOTAL", sum_row_global)
+                sheet_company.write_number(type_row_curr, 8, sum(s['count'] for s in comp_type_stats.values()), sum_row_global)
+                sheet_company.write_number(type_row_curr, 9, sum(s['amount'] for s in comp_type_stats.values()), sum_row_global_amt)
+
+                # Second Pie Chart on the Right (Distribution of Types by Check Counts in Percentage)
+                chart_comp_type = workbook.add_chart({'type': 'pie'})
+                chart_comp_type.add_series({
+                    'categories': f"='{safe_name}'!$H${type_row_excel_start}:$H${type_row_excel_end}",
+                    'values': f"='{safe_name}'!$I${type_row_excel_start}:$I${type_row_excel_end}",
+                    'name': 'Répartition par Type',
+                    'data_labels': {'percentage': True}
+                })
+                chart_comp_type.set_title({
+                    'name': 'Répartition par Type de Dossier',
+                    'name_font': {'bold': True, 'size': 12, 'color': '#137333'}
+                })
+                chart_comp_type.set_size({'width': 440, 'height': 280})
+                sheet_company.insert_chart('L18', chart_comp_type)
             else:
                 sheet_company.merge_range(comp_row, 0, comp_row, 5, "Aucun chèque enregistré pour cette société.", themes['reserve']['empty'])
 

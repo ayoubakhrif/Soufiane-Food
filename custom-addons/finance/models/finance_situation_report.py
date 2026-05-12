@@ -23,6 +23,10 @@ class ReportFinanceSituation(models.AbstractModel):
             first_datacheque = physical.datacheque_ids[0]
             state = first_datacheque.state or 'reserve'
 
+            # Exclude Bureau and Annulé from outstanding (encours) analysis
+            if data and data.get('encours_only') and state in ['bureau', 'annule']:
+                continue
+
             type_selection = {
                 'magasinage': 'Magasinage',
                 'surestarie': 'Surestarie',
@@ -132,7 +136,10 @@ class ReportFinanceSituation(models.AbstractModel):
 
         try:
             import matplotlib
-            matplotlib.use('Agg')
+            try:
+                matplotlib.use('Agg')
+            except Exception:
+                pass
             import matplotlib.pyplot as plt
             import io
             import base64
@@ -213,8 +220,9 @@ class ReportFinanceSituation(models.AbstractModel):
                 charts_b64['state_pie'] = base64.b64encode(buf.read()).decode('utf-8')
                 buf.close()
                 plt.close(fig)
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger('odoo.addons.finance').error("ERREUR DE GENERATION DE GRAPHIQUES PDF: %s", str(e), exc_info=True)
 
         return charts_b64
 

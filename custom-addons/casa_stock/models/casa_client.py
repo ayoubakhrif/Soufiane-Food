@@ -788,14 +788,14 @@ class CasaClient(models.Model):
             import io
             import base64
             
-            # Agrégation des achats par "Produit - Société"
+            # Agrégation des achats par "Article (Base) - Société"
             product_data = {}
             
             # 1. Sorties standards validées (state == 'done')
             for s in self.exit_ids.filtered(lambda x: x.state == 'done'):
-                p_name = s.product_id.name or 'Inconnu'
+                art_name = s.product_id.article_id.name or s.product_id.name or 'Inconnu'
                 ste_name = s.ste_id.name if s.ste_id else ''
-                key = f"{p_name} - {ste_name}" if ste_name else p_name
+                key = f"{art_name} - {ste_name}" if ste_name else art_name
                 amount = s.mt_vente_final or 0.0
                 tonnage = s.tonnage or 0.0
                 if key not in product_data:
@@ -805,9 +805,9 @@ class CasaClient(models.Model):
                 
             # 2. Autres ventes validées (state == 'done')
             for s in self.other_sale_ids.filtered(lambda x: x.state == 'done'):
-                p_name = s.product_id.name or 'Inconnu'
-                # Autres ventes n'ont pas de société associée, clé = nom de l'article
-                key = p_name
+                art_name = s.product_id.article_id.name or s.product_id.name or 'Inconnu'
+                # Autres ventes n'ont pas de société associée, clé = nom de l'article de base
+                key = art_name
                 amount = s.mt_vente_final or 0.0
                 tonnage = s.tonnage or 0.0
                 if key not in product_data:

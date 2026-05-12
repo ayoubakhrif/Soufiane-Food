@@ -55,9 +55,8 @@ class SuiviTransportTangerOperation(models.Model):
 
     def action_validate(self):
         for rec in self:
-            if rec.ville == 'tanger':
-                if not self.env.user.has_group('casa_stock.group_manager'):
-                    raise ValidationError(_("Seul le responsable de stock_casa peut valider les opérations de Tanger."))
+            if not self.env.user.has_group('casa_stock.group_manager'):
+                raise ValidationError(_("Seul le responsable de stock_casa peut valider les opérations."))
             
             if rec.credit > 0:
                 raise ValidationError(_("La validation n'est possible que si le crédit est de 0."))
@@ -74,7 +73,7 @@ class SuiviTransportTangerOperation(models.Model):
                     'state': 'confirmed',
                 })
 
-            rec.state = 'validated'
+            rec.sudo().write({'state': 'validated'})
 
     def action_set_initial(self):
         self.write({'state': 'initial'})

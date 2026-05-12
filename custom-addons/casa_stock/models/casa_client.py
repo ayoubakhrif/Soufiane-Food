@@ -819,7 +819,7 @@ class CasaClient(models.Model):
                 return charts_b64
 
             # Helper pour obtenir le Top N et regrouper le reste sous "Autres"
-            def get_top_n_data(data_dict, value_field, max_items=8):
+            def get_top_n_data(data_dict, value_field, max_items=13):
                 sorted_items = sorted(data_dict.items(), key=lambda x: -x[1][value_field])
                 sorted_items = [x for x in sorted_items if x[1][value_field] > 0]
                 
@@ -839,10 +839,10 @@ class CasaClient(models.Model):
                 return labels, values
 
             # --- 1. Graphique de Répartition Financière (Colonnes en DH) ---
-            labels_amt, amounts = get_top_n_data(product_data, 'amount', max_items=8)
+            labels_amt, amounts = get_top_n_data(product_data, 'amount', max_items=13)
             
             if amounts:
-                fig, ax = plt.subplots(figsize=(6, 5), dpi=120)
+                fig, ax = plt.subplots(figsize=(8, 6), dpi=120)
                 
                 # Couleur bleue élégante
                 bars = ax.bar(labels_amt, amounts, color='#1A4D80', edgecolor='none', width=0.55)
@@ -878,11 +878,11 @@ class CasaClient(models.Model):
                 plt.close(fig)
                 
             # --- 2. Graphique de Répartition Volumique (Colonnes en Tonnage) ---
-            labels_ton, tonnages_kg = get_top_n_data(product_data, 'tonnage', max_items=8)
+            labels_ton, tonnages_kg = get_top_n_data(product_data, 'tonnage', max_items=13)
             tonnages = [t / 1000.0 for t in tonnages_kg] # Conversion de Kg en Tonnes réelles
             
             if tonnages:
-                fig, ax = plt.subplots(figsize=(6, 5), dpi=120)
+                fig, ax = plt.subplots(figsize=(8, 6), dpi=120)
                 
                 # Couleur verte émeraude élégante
                 bars = ax.bar(labels_ton, tonnages, color='#137333', edgecolor='none', width=0.55)

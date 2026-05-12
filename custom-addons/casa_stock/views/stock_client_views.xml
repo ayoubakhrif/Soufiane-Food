@@ -87,6 +87,7 @@
                         <group string="Informations Client">
                             <field name="name"/>
                             <field name="compte_initial"/>
+                            <field name="use_client2"/>
                         </group>
                         <group string="Totaux Financiers">
                             <field name="total_commandes" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>

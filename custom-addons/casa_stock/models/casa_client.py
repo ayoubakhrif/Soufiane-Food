@@ -13,6 +13,12 @@ class CasaClient(models.Model):
         help="Solde du client avant l'utilisation du système",
         tracking=True,
     )
+    use_client2 = fields.Boolean(
+        string='Utiliser Client 2',
+        default=False,
+        help="Si coché, permet de saisir un deuxième client pour ce client dans le transport Tanger.",
+        tracking=True,
+    )
 
     # Champ computed pour le nombre de commandes
     exit_count = fields.Integer(

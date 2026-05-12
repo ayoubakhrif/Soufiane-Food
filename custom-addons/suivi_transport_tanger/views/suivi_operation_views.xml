@@ -44,7 +44,7 @@
                             <field name="montant" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
                             <field name="credit" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
                             <field name="available_client_ids" invisible="1"/>
-                            <field name="casa_payer_id" domain="[('id', 'in', available_client_ids)]" options="{'no_create': True}" readonly="state == 'validated'"/>
+                            <field name="casa_payer_id" options="{'no_create': True}" readonly="state == 'validated'"/>
                         </group>
                     </group>
                     <notebook>
@@ -52,6 +52,8 @@
                             <field name="line_ids" readonly="state == 'validated'">
                                 <tree editable="bottom">
                                     <field name="casa_client_id" required="1"/>
+                                    <field name="use_client2" column_invisible="True"/>
+                                    <field name="client2" invisible="not use_client2"/>
                                     <field name="article_id" required="1"/>
                                     <field name="lot"/>
                                     <field name="exit_id" readonly="1" force_save="1"/>

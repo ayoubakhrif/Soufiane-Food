@@ -78,6 +78,20 @@ class ReportFinanceSituation(models.AbstractModel):
         ste_summary_list = list(ste_summary.values())
         ste_summary_list.sort(key=lambda x: -x['total_amount'])
 
+        # Group anything past the top 19 into "Autres" to prevent unreadable cluttered charts
+        if len(ste_summary_list) > 20:
+            top_part = ste_summary_list[:19]
+            others_part = ste_summary_list[19:]
+            others_count = sum(x['count'] for x in others_part)
+            others_amount = sum(x['total_amount'] for x in others_part)
+            others_item = {
+                'ste_name': 'Autres',
+                'group_name': 'Autres',
+                'count': others_count,
+                'total_amount': others_amount
+            }
+            ste_summary_list = top_part + [others_item]
+
         total_active_count = len(active_list_phys)
         total_active_amount = sum(item['amount'] for item in active_list_phys)
 
@@ -160,8 +174,16 @@ class ReportFinanceSituation(models.AbstractModel):
             
             if comp_totals:
                 sorted_comps = sorted(comp_totals.items(), key=lambda x: -x[1])
-                labels = [x[0] for x in sorted_comps]
-                amounts = [x[1] for x in sorted_comps]
+                sorted_comps = [x for x in sorted_comps if x[1] > 0]
+                
+                if len(sorted_comps) <= 20:
+                    labels = [x[0] for x in sorted_comps]
+                    amounts = [x[1] for x in sorted_comps]
+                else:
+                    top_comps = sorted_comps[:19]
+                    others_amt = sum(x[1] for x in sorted_comps[19:])
+                    labels = [x[0] for x in top_comps] + ["Autres"]
+                    amounts = [x[1] for x in top_comps] + [others_amt]
                 
                 colors = ['#1A4D80', '#2980B9', '#3498DB', '#5DADE2', '#85C1E9', '#A9CCE3', '#D4E6F1']
                 if len(labels) > len(colors):
@@ -364,10 +386,11 @@ class ReportFinanceSituation(models.AbstractModel):
         sheet.write_number(row, 2, values['global_amount'], sum_row_global_amt)
 
         # --- COMPANY SUMMARY TABLE (Columns D, E, F) ---
+        by_benif = values.get('by_benif')
         company_stats = {}
         for lst_key in ['active_list', 'reserve_list', 'bureau_list', 'annule_list']:
             for chq in values.get(lst_key, []):
-                ste = chq.get('ste', 'Inconnu')
+                ste = chq.get('benif', 'Inconnu') if by_benif else chq.get('ste', 'Inconnu')
                 if ste not in company_stats:
                     company_stats[ste] = {'ste_name': ste, 'count': 0, 'total_amount': 0.0}
                 company_stats[ste]['count'] += 1
@@ -375,8 +398,21 @@ class ReportFinanceSituation(models.AbstractModel):
         
         sorted_company_stats = sorted(list(company_stats.values()), key=lambda x: -x['total_amount'])
         
+        # Limit to top 19 + "Autres" if count exceeds 20 items to prevent unreadable cluttered charts
+        if len(sorted_company_stats) > 20:
+            top_stats = sorted_company_stats[:19]
+            others_stats = sorted_company_stats[19:]
+            others_count = sum(x['count'] for x in others_stats)
+            others_amount = sum(x['total_amount'] for x in others_stats)
+            others_item = {
+                'ste_name': 'Autres',
+                'count': others_count,
+                'total_amount': others_amount
+            }
+            sorted_company_stats = top_stats + [others_item]
+
         comp_sum_row = 2
-        sheet.write(comp_sum_row, 3, "Société", sum_header_style)
+        sheet.write(comp_sum_row, 3, "Bénéficiaire" if by_benif else "Société", sum_header_style)
         sheet.write(comp_sum_row, 4, "Nombre de Chèques", sum_header_style)
         sheet.write(comp_sum_row, 5, "Montant Global", sum_header_style)
         comp_sum_row += 1

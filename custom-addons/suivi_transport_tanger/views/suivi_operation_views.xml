@@ -76,6 +76,7 @@
                 <field name="chauffeur_id"/>
                 <field name="ville"/>
                 <group expand="0" string="Regrouper par">
+                    <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>
                     <filter string="Ville" name="group_by_ville" context="{'group_by': 'ville'}"/>
                     <filter string="Chauffeur" name="group_by_chauffeur" context="{'group_by': 'chauffeur_id'}"/>
                     <filter string="Date" name="group_by_date" context="{'group_by': 'date:month'}"/>
@@ -102,5 +103,6 @@
         <field name="name">Opérations</field>
         <field name="res_model">suivi.transport.tanger.operation</field>
         <field name="view_mode">tree,form,pivot</field>
+        <field name="context">{'search_default_group_by_state': 1}</field>
     </record>
 </odoo>

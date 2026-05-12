@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 class ProjetVente(models.Model):
     _name = 'projet.vente'
@@ -16,9 +17,16 @@ class ProjetVente(models.Model):
         ('done', 'Validé')
     ], string='Statut', default='draft', required=True, tracking=True)
 
+    is_manager = fields.Boolean(compute='_compute_is_manager')
+
     total_prix_vente = fields.Float(string='Total Vente', compute='_compute_totals', store=True)
     total_benefice_reel = fields.Float(string='Bénéfice Réel Total', compute='_compute_totals', store=True)
     total_benefice_percent = fields.Float(string='Bénéfice Réel %', compute='_compute_totals', store=True)
+
+    @api.depends_context('uid')
+    def _compute_is_manager(self):
+        for rec in self:
+            rec.is_manager = self.env.user.has_group('projet_personnel.group_manager')
 
     @api.depends('line_ids.prix_vente', 'line_ids.benefice_reel', 'line_ids.quantite')
     def _compute_totals(self):
@@ -38,11 +46,30 @@ class ProjetVente(models.Model):
                 record.command_number = f"Command {record.id}"
         return records
 
+    def write(self, vals):
+        if 'state' in vals:
+            # Restreindre le changement d'état libre au manager
+            if not self.env.user.has_group('projet_personnel.group_manager'):
+                raise UserError("Seul un gestionnaire peut modifier librement l'état de la commande.")
+            
+            for record in self:
+                old_state = record.state
+                new_state = vals['state']
+                if old_state != new_state:
+                    if new_state == 'done':
+                        # Validation de la commande : mettre à jour les stocks
+                        for line in record.line_ids:
+                            if line.stock_id:
+                                line.stock_id.quantite_vendue += line.quantite
+                    elif old_state == 'done' and new_state == 'draft':
+                        # Retour en brouillon : annuler l'impact sur les stocks
+                        for line in record.line_ids:
+                            if line.stock_id:
+                                line.stock_id.quantite_vendue -= line.quantite
+        return super(ProjetVente, self).write(vals)
+
     def action_validate(self):
         for record in self:
-            for line in record.line_ids:
-                if line.stock_id:
-                    line.stock_id.quantite_vendue += line.quantite
             record.state = 'done'
 
 class ProjetVenteLine(models.Model):

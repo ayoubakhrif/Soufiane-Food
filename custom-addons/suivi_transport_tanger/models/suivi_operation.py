@@ -64,7 +64,7 @@ class SuiviTransportTangerOperation(models.Model):
             
             # Créer l'avance si un client a payé un montant
             if rec.casa_payer_id and rec.montant > 0:
-                self.env['casa.client.advance'].with_context(is_transport_operation=True).create({
+                self.env['casa.client.advance'].sudo().with_context(is_transport_operation=True).create({
                     'client_id': rec.casa_payer_id.id,
                     'amount': rec.montant,
                     'date': rec.date,

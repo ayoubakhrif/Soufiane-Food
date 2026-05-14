@@ -657,11 +657,11 @@ class CasaClient(models.Model):
         self.ensure_one()
 
         # 1️⃣ Filtrer sorties de la semaine
-        sorties_base = self.exit_ids.filtered(lambda s: s.week == week and s.state == 'done')
+        sorties_base = self.exit_ids.filtered(lambda s: s.week == week and s.state in ('confirmed', 'done'))
         
         # --- NEW: Include Other Sales ---
         others = self.other_sale_ids.filtered(
-            lambda s: s.date and s.date.strftime("%G-W%V") == week and s.state == 'done'
+            lambda s: s.date and s.date.strftime("%G-W%V") == week and s.state in ('confirmed', 'done')
         )
         
         # Merge and Sort

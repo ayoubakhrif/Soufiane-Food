@@ -140,8 +140,8 @@
                             <div class="client-info" style="font-size: 20px;"><strong>Client:</strong> <t t-esc="client.name"/></div>
                             
                             <div class="solde-card">
-                                <div class="label">SOLDE ACTUEL DU COMPTE</div>
-                                <div class="value"><t t-esc="'{:,.2f}'.format(client.compte_total).replace(',', ' ')"/> <small style="font-size: 16px;">DH</small></div>
+                                <div class="label">SOLDE PROVISOIRE DU COMPTE</div>
+                                <div class="value"><t t-esc="'{:,.2f}'.format(client.compte_provisoire).replace(',', ' ')"/> <small style="font-size: 16px;">DH</small></div>
                             </div>
                         </div>
 

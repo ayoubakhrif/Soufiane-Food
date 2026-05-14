@@ -103,7 +103,7 @@ class WhatsAppClientController(http.Controller):
             if is_general or (extracted_name and extracted_name.upper() == 'GLOBAL_CLIENT_REPORT'):
                 report_action = request.env.ref('casa_stock.action_report_casa_clients_total').sudo()
                 from odoo import fields
-                dummy_record = request.env['casa.client'].sudo().search([('compte_total', '!=', 0)], limit=1)
+                dummy_record = request.env['casa.client'].sudo().search([('compte_provisoire', '!=', 0)], limit=1)
                 if not dummy_record:
                     return {'status': 'not_found', 'message': "Désolé, aucun solde client n'est actuellement disponible."}
                 

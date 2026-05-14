@@ -20,17 +20,17 @@ class CasaStockClientDifference(models.Model):
                 SELECT
                     (hashtext(COALESCE(c1.name, c2.name)) & 2147483647) AS id,
                     COALESCE(c1.name, c2.name) AS client_name,
-                    COALESCE(c1.compte_total, 0) AS compte_total_casa,
-                    COALESCE(c2.compte_total, 0) AS compte_total_hanane,
-                    (COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS difference,
-                    ABS(COALESCE(c1.compte_total, 0) - COALESCE(c2.compte_total, 0)) AS abs_difference
+                    COALESCE(c1.compte_provisoire, 0) AS compte_total_casa,
+                    COALESCE(c2.compte_provisoire, 0) AS compte_total_hanane,
+                    (COALESCE(c1.compte_provisoire, 0) - COALESCE(c2.compte_provisoire, 0)) AS difference,
+                    ABS(COALESCE(c1.compte_provisoire, 0) - COALESCE(c2.compte_provisoire, 0)) AS abs_difference
                 FROM (
-                    SELECT LOWER(TRIM(name)) as match_name, MAX(name) as name, SUM(compte_total) as compte_total
+                    SELECT LOWER(TRIM(name)) as match_name, MAX(name) as name, SUM(compte_provisoire) as compte_provisoire
                     FROM casa_client
                     GROUP BY LOWER(TRIM(name))
                 ) c1
                 FULL OUTER JOIN (
-                    SELECT LOWER(TRIM(name)) as match_name, MAX(name) as name, SUM(compte_total) as compte_total
+                    SELECT LOWER(TRIM(name)) as match_name, MAX(name) as name, SUM(compte_provisoire) as compte_provisoire
                     FROM casa_hanane_client
                     GROUP BY LOWER(TRIM(name))
                 ) c2 ON c1.match_name = c2.match_name

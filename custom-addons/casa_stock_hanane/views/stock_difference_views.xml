@@ -15,6 +15,7 @@
         <field name="arch" type="xml">
             <tree string="Différence produits" create="false" edit="false" delete="false">
                 <field name="article_id"/>
+                <field name="ville"/>
                 <field name="quantity_casa"/>
                 <field name="quantity_hanane"/>
                 <field name="difference"/>

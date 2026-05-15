@@ -34,7 +34,8 @@ class TransportResultFollowup(models.Model):
 
     type = fields.Selection([
         ('transport', 'Transport'),
-        ('gasoil', 'Gasoil')
+        ('gasoil', 'Gasoil'),
+        ('transport_remorque', 'Transport Remorques')
     ], string='Type', required=True, default='transport', tracking=True)
     
     line_ids = fields.One2many(
@@ -48,6 +49,8 @@ class TransportResultFollowup(models.Model):
         for rec in self:
             if rec.type == 'gasoil':
                 records = self.env['gasoil.sale'].search([])
+            elif rec.type == 'transport_remorque':
+                records = self.env['transport.trip.remorque'].search([])
             else:
                 records = self.env['transport.trip'].search([])
             rec.total_profit = sum(records.mapped('profit'))

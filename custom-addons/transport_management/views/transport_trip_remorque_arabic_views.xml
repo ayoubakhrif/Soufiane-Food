@@ -238,7 +238,7 @@
               parent="menu_transport_operations" 
               action="action_transport_trip_remorque_arab" 
               sequence="3"
-              groups="group_transport_remorque_arab,group_transport_manager"/>
+              groups="group_transport_viewer,group_transport_remorque_arab,group_transport_manager"/>
 
     <!-- Driver Balances Menu (Arabic User) -->
     <menuitem id="menu_transport_driver_balance_arab" 
@@ -246,6 +246,6 @@
               parent="menu_transport_operations" 
               action="action_transport_driver_balance_arab" 
               sequence="4"
-              groups="group_transport_remorque_arab,group_transport_manager"/>
+              groups="group_transport_viewer,group_transport_remorque_arab,group_transport_manager"/>
 
 </odoo>

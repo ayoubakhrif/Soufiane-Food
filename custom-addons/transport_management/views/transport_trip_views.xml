@@ -175,17 +175,17 @@
     <!-- Menus -->
     <menuitem id="menu_transport_root" name="Transport" sequence="10"/>
     <menuitem id="menu_transport_operations" name="Operations" parent="menu_transport_root" sequence="1"/>
-    <menuitem id="menu_transport_trip" name="Trips" parent="menu_transport_operations" action="action_transport_trip" sequence="1" groups="group_transport_user,group_transport_manager"/>
+    <menuitem id="menu_transport_trip" name="Trips" parent="menu_transport_operations" action="action_transport_trip" sequence="1" groups="group_transport_viewer,group_transport_user,group_transport_manager"/>
 
     <!-- Gasoil Menu -->
-    <menuitem id="menu_transport_gasoil" name="Gazoil" parent="menu_transport_root" sequence="2" groups="group_transport_user,group_transport_manager"/>
+    <menuitem id="menu_transport_gasoil" name="Gazoil" parent="menu_transport_root" sequence="2" groups="group_transport_viewer,group_transport_user,group_transport_manager"/>
     <menuitem id="menu_gasoil_refill" name="Remplissages" parent="menu_transport_gasoil" action="action_gasoil_refill" sequence="1"/>
     <menuitem id="menu_gasoil_sale" name="Ventes" parent="menu_transport_gasoil" action="action_gasoil_sale" sequence="2"/>
     <menuitem id="menu_transport_data"
             name="Données"
             parent="menu_transport_root"
             sequence="50"
-            groups="group_transport_user,group_transport_manager"/>
+            groups="group_transport_viewer,group_transport_user,group_transport_manager"/>
             
     <menuitem id="menu_transport_driver"
             name="Chauffeurs"

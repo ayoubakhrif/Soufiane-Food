@@ -25,6 +25,8 @@
                        optional="show"/>
                 <field name="bank_id" string="Banque" readonly="1" optional="show"/>
                 <field name="client_id" readonly="1"/>
+                <field name="core_ste_id" options="{'no_create': True}" optional="show"/>
+                <field name="reception_date" optional="show"/>
                 
                 <!-- Editable Porteur and CIN directly on the row -->
                 <field name="owner_id" string="Porteur" required="0"/>
@@ -32,6 +34,8 @@
                 
                 <field name="check_date" readonly="1"/>
                 <field name="amount" sum="Total" readonly="1"/>
+                <field name="bank_send_date" optional="show"/>
+                <field name="unpaid_date" optional="show"/>
                 
                 <field name="state" widget="badge" readonly="1"
                        decoration-info="state == 'stock'"
@@ -139,6 +143,8 @@
                             <field name="allow_no_date" invisible="1"/>
                             <field name="check_date" string="Date d'échéance" required="not allow_no_date"/>
                             <field name="bank_id" string="Banque" options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="bank_send_date"/>
+                            <field name="unpaid_date"/>
                             <field name="is_manager" invisible="1"/>
                             <field name="scan_chq_name" invisible="1"/>
                             <field name="scan_chq"
@@ -152,6 +158,8 @@
                             <field name="owner_id" string="Porteur de chèque" placeholder="— Client —"/>
                             <field name="owner_cin" string="CIN Porteur"/>
                             <field name="soufiane_owner_id" string="Client soufiane" invisible="client_id != 1 and client_id != 'Soufiane'"/>
+                            <field name="core_ste_id" options="{'no_create': True}"/>
+                            <field name="reception_date"/>
                         </group>
                     </group>
                 </sheet>

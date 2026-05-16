@@ -52,6 +52,8 @@
                                            string="Client soufiane"
                                            invisible="not parent.is_soufiane"
                                            optional="show"/>
+                                    <field name="core_ste_id" options="{'no_create': True}" optional="show"/>
+                                    <field name="reception_date" optional="show"/>
                                     <field name="allow_no_date" column_invisible="True"/>
                                     <field name="check_date"
                                            string="Date d'échéance"
@@ -104,6 +106,8 @@
                                            string="Client soufiane"
                                            invisible="not parent.is_soufiane"
                                            optional="show"/>
+                                    <field name="core_ste_id" options="{'no_create': True}" optional="show"/>
+                                    <field name="reception_date" optional="show"/>
                                     <field name="allow_no_date" column_invisible="True"/>
                                     <field name="check_date"
                                            string="Date d'échéance"

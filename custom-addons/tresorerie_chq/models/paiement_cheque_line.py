@@ -69,6 +69,11 @@ class TresorerieChqCheque(models.Model):
     )
     scan_chq_name = fields.Char(string="Nom du fichier chèque")
 
+    core_ste_id = fields.Many2one('core.ste', string='Société')
+    reception_date = fields.Date(string='Date de réception')
+    bank_send_date = fields.Date(string="Date d'envoi au banque")
+    unpaid_date = fields.Date(string="Date impayé")
+
     bank_id = fields.Many2one(
         'tresorerie_chq.bank',
         string='Banque',
@@ -172,6 +177,8 @@ class TresorerieChqCheque(models.Model):
     def action_banque(self):
         """Send to bank."""
         for rec in self:
+            if not rec.bank_send_date:
+                raise ValidationError("❌ La 'Date d'envoi au banque' est obligatoire pour envoyer le chèque à la banque.")
             if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
                 if rec.state not in ['stock', 'impaye']:
                     raise ValidationError("❌ Le chèque doit être en stock ou impayé pour être envoyé à la banque.")
@@ -188,6 +195,8 @@ class TresorerieChqCheque(models.Model):
     def action_impaye(self):
         """Mark as unpaid/bounced."""
         for rec in self:
+            if not rec.unpaid_date:
+                raise ValidationError("❌ La 'Date impayé' est obligatoire pour marquer ce chèque comme impayé.")
             if not rec.owner_cin:
                 raise ValidationError("❌ Le champ CIN du porteur doit être renseigné pour marquer ce chèque comme impayé.")
             if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
@@ -257,6 +266,11 @@ class TresorerieChqEffet(models.Model):
         help="Fichier de scan ou photo de l'effet"
     )
     scan_effet_name = fields.Char(string="Nom du fichier effet")
+
+    core_ste_id = fields.Many2one('core.ste', string='Société')
+    reception_date = fields.Date(string='Date de réception')
+    bank_send_date = fields.Date(string="Date d'envoi au banque")
+    unpaid_date = fields.Date(string="Date impayé")
 
     bank_id = fields.Many2one(
         'tresorerie_chq.bank',
@@ -351,6 +365,8 @@ class TresorerieChqEffet(models.Model):
     def action_banque(self):
         """Send to bank."""
         for rec in self:
+            if not rec.bank_send_date:
+                raise ValidationError("❌ La 'Date d'envoi au banque' est obligatoire pour envoyer l'effet à la banque.")
             if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
                 if rec.state not in ['stock', 'impaye']:
                     raise ValidationError("❌ L'effet doit être en stock ou impayé pour être envoyé à la banque.")
@@ -367,6 +383,8 @@ class TresorerieChqEffet(models.Model):
     def action_impaye(self):
         """Mark as unpaid/bounced."""
         for rec in self:
+            if not rec.unpaid_date:
+                raise ValidationError("❌ La 'Date impayé' est obligatoire pour marquer cet effet comme impayé.")
             if not rec.owner_cin:
                 raise ValidationError("❌ Le champ CIN du porteur doit être renseigné pour marquer cet effet comme impayé.")
             if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):

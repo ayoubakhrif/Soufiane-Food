@@ -32,6 +32,7 @@
         'reports/finance_benif_report.xml',
         'reports/finance_talon_report.xml',
         'reports/finance_situation_report.xml',
+        'reports/finance_talons_global_report.xml',
 
         'data/cron.xml',
     ],

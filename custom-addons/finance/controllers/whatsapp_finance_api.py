@@ -210,8 +210,92 @@ class WhatsAppFinanceController(http.Controller):
                 return {'status': 'error', 'message': f"Erreur lors de la génération du rapport : {str(e)}"}
 
         # 4. Handle Talon Logic
-        if message_text.lower().startswith("talon"):
+        msg_clean = message_text.lower().strip()
+        is_global_talon = False
+        talon_state_filter = None
+        state_label_fr = "Tous"
+        
+        if msg_clean in ["talon", "talons"]:
+            is_global_talon = True
+        elif msg_clean in ["talon coffre", "talons coffre", "talon en coffre", "talons en coffre"]:
+            is_global_talon = True
+            talon_state_filter = "coffre"
+            state_label_fr = "en Coffre"
+        elif msg_clean in ["talon actif", "talons actifs", "talon actifs"]:
+            is_global_talon = True
+            talon_state_filter = "actif"
+            state_label_fr = "Actifs"
+        elif msg_clean in ["talon cloture", "talons clotures", "talon clotures", "talon cloturé", "talon clôturé", "talons cloturés", "talons clôturés"]:
+            is_global_talon = True
+            talon_state_filter = "cloture"
+            state_label_fr = "Cloturés"
 
+        if is_global_talon:
+            try:
+                data_arg = {}
+                if talon_state_filter:
+                    data_arg['talon_state_filter'] = talon_state_filter
+
+                # 1. Render QWeb PDF report
+                report_action = request.env['ir.actions.report'].sudo()
+                pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_talons_global', res_ids=[], data=data_arg)
+                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+                # 2. Render Excel spreadsheet using parser helper
+                report_obj = request.env['report.finance.report_finance_talons_global_template'].sudo()
+                report_values = report_obj._get_report_values([], data=data_arg)
+                xlsx_base64 = report_obj.generate_excel_data(report_values)
+
+                total_count = report_values.get('total_talons_count', 0)
+                total_coffre = report_values.get('total_coffre_count', 0)
+                total_actif = report_values.get('total_actif_count', 0)
+                total_cloture = report_values.get('total_cloture_count', 0)
+                total_missing = report_values.get('total_missing_chqs', 0)
+
+                title_msg = f"📋 *Rapport Global des Talons ({state_label_fr})* 📋"
+                caption_pdf = f"Rapport Talons {state_label_fr} - PDF 📄"
+                caption_xlsx = f"Rapport Talons {state_label_fr} - Excel 📊"
+                file_prefix = f"Rapport_Talons_{state_label_fr.replace(' ', '_')}"
+
+                summary_msg = (
+                    f"{title_msg}\n"
+                    f"━━━━━━━━━━━━━━━━━━\n\n"
+                    f"📊 *Résumé des Talons* :\n"
+                    f"• 📁 *Total* : {total_count} talons\n"
+                )
+                if not talon_state_filter:
+                    summary_msg += (
+                        f"• 🔵 *En Coffre* : {total_coffre} talons\n"
+                        f"• 🟢 *Actifs* : {total_actif} talons\n"
+                        f"• 🔴 *Cloturés* : {total_cloture} talons\n"
+                    )
+                summary_msg += f"• ⚠️ *Chèques absents* : {total_missing} chèques\n\n"
+                summary_msg += f"📂 _Les rapports PDF et Excel détaillés ont été générés et sont joints ci-dessous._"
+
+                from odoo import fields
+                today_str = fields.Date.today().strftime('%d/%m/%Y').replace('/', '_')
+                return {
+                    'status': 'success',
+                    'product_name': f"Rapport Talons {state_label_fr}",
+                    'response': summary_msg,
+                    'files': [
+                        {
+                            'pdf_base64': pdf_base64,
+                            'file_name': f"{file_prefix}_{today_str}.pdf",
+                            'caption': caption_pdf
+                        },
+                        {
+                            'pdf_base64': xlsx_base64,
+                            'file_name': f"{file_prefix}_{today_str}.xlsx",
+                            'caption': caption_xlsx
+                        }
+                    ]
+                }
+            except Exception as e:
+                _logger.error(f"Error generating Global Talons report: {str(e)}")
+                return {'status': 'error', 'message': f"Erreur lors de la génération du rapport : {str(e)}"}
+
+        elif message_text.lower().startswith("talon"):
             company_part = message_text[5:].strip()
             if company_part:
                 # Search for company

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_finance_talons_global" model="ir.actions.report">
+        <field name="name">Rapport Global des Talons</field>
+        <field name="model">finance.talon</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance.report_finance_talons_global_template</field>
+        <field name="report_file">finance.report_finance_talons_global_template</field>
+    </record>
+
+    <template id="report_finance_talons_global_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <style>
+                        .report-header { margin-bottom: 25px; }
+                        .header-row { display: flex; align-items: stretch; margin-bottom: 15px; }
+                        .date-box { background-color: #E2ECF7; border: 1px solid #1A4D80; padding: 12px; font-size: 18px; font-weight: bold; width: 25%; text-align: center; color: #1A4D80; border-radius: 4px; margin-right: 15px; }
+                        .title-box { background-color: #1A4D80; border: 1px solid #1A4D80; padding: 12px; font-size: 22px; font-weight: bold; color: white; flex-grow: 1; text-align: center; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+                        
+                        /* Base Table Styles */
+                        .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                        .data-table th { padding: 8px 6px; text-align: center; font-size: 11px; font-weight: bold; color: white; text-transform: uppercase; background-color: #1A4D80; border: 1px solid #1A4D80; }
+                        .data-table td { padding: 6px; text-align: center; font-size: 11px; color: #333; border: 1px solid #E2ECF7; }
+                        .data-table tr:nth-child(even) { background-color: #F9FAFB; }
+                        
+                        /* Company Header Row */
+                        .ste-header-row { background-color: #F1F3F4 !important; font-weight: bold; font-size: 13px; color: #1A4D80; text-align: left !important; padding: 8px 10px !important; }
+                        
+                        /* State Specific Colors */
+                        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; text-transform: uppercase; display: inline-block; }
+                        .badge-coffre { background-color: #E8F0FE; color: #1A73E8; }
+                        .badge-actif { background-color: #E6F4EA; color: #137333; }
+                        .badge-cloture { background-color: #FCE8E6; color: #C5221F; }
+                        
+                        /* Summary Stats Table */
+                        .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
+                        .summary-table th { background-color: #E2ECF7; border: 1px solid #B0CBE3; padding: 8px; text-align: center; font-size: 12px; font-weight: bold; color: #1A4D80; text-transform: uppercase; }
+                        .summary-table td { border: 1px solid #B0CBE3; padding: 10px; text-align: center; font-size: 14px; font-weight: bold; }
+                        
+                        .footer { margin-top: 35px; font-style: italic; font-size: 10px; border-top: 1px solid #E2ECF7; padding-top: 10px; color: #666; display: flex; justify-content: space-between; }
+                    </style>
+
+                    <!-- Header -->
+                    <div class="report-header">
+                        <div class="header-row">
+                            <div class="date-box">
+                                <t t-esc="report_date"/>
+                            </div>
+                            <div class="title-box">
+                                <t t-esc="report_title"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats Table -->
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">INDICATEUR</th>
+                                <th style="width: 25%;">TALONS</th>
+                                <th style="width: 25%;">CHÈQUES</th>
+                                <th style="width: 25%;">UTILISATION MOYENNE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align: left; font-size: 11px; color: #666; font-weight: normal;">
+                                    • Total Talons: <span style="font-weight: bold; color: #333;"><t t-esc="total_talons_count"/></span><br/>
+                                    • En Coffre: <span style="font-weight: bold; color: #1A73E8;"><t t-esc="total_coffre_count"/></span><br/>
+                                    • Actifs: <span style="font-weight: bold; color: #137333;"><t t-esc="total_actif_count"/></span><br/>
+                                    • Cloturés: <span style="font-weight: bold; color: #C5221F;"><t t-esc="total_cloture_count"/></span>
+                                </td>
+                                <td>
+                                    <span style="color: #1A4D80; font-size: 20px;"><t t-esc="total_talons_count"/></span><br/>
+                                    <span style="font-size: 9px; color: #666; font-weight: normal;">TALONS GLOBALS</span>
+                                </td>
+                                <td style="text-align: left; font-size: 11px; color: #666; font-weight: normal;">
+                                    • Total: <span style="font-weight: bold; color: #333;"><t t-esc="total_chqs_count"/></span><br/>
+                                    • Utilisés: <span style="font-weight: bold; color: #137333;"><t t-esc="total_used_chqs"/></span><br/>
+                                    • Restants: <span style="font-weight: bold; color: #1A73E8;"><t t-esc="total_unused_chqs"/></span><br/>
+                                    • Absents: <span style="font-weight: bold; color: #C5221F;"><t t-esc="total_missing_chqs"/></span>
+                                </td>
+                                <td>
+                                    <span style="color: #137333; font-size: 20px;"><t t-esc="'{:.1f}%'.format(avg_usage_percentage)"/></span><br/>
+                                    <span style="font-size: 9px; color: #666; font-weight: normal;">TAUX D'UTILISATION</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Analytical Charts Section -->
+                    <t t-if="charts and (charts.get('state_pie') or charts.get('company_bar'))">
+                        <div class="charts-row" style="display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 25px; page-break-inside: avoid;">
+                            <t t-if="charts.get('state_pie')">
+                                <div class="chart-box" style="width: 49%; text-align: center; border: 1px solid #B0CBE3; padding: 5px; border-radius: 4px; background-color: #FAFAFA;">
+                                    <img t-att-src="'data:image/png;base64,%s' % charts['state_pie']" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"/>
+                                </div>
+                            </t>
+                            <t t-if="charts.get('company_bar')">
+                                <div class="chart-box" style="width: 49%; text-align: center; border: 1px solid #B0CBE3; padding: 5px; border-radius: 4px; background-color: #FAFAFA;">
+                                    <img t-att-src="'data:image/png;base64,%s' % charts['company_bar']" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"/>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Details Table -->
+                    <div style="margin-top: 20px;">
+                        <h3 style="font-size: 14px; font-weight: bold; color: #1A4D80; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #1A4D80; padding-bottom: 5px;">
+                            Détail par Société
+                        </h3>
+                        
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Talon</th>
+                                    <th style="width: 10%;">Série</th>
+                                    <th style="width: 10%;">Total Chqs</th>
+                                    <th style="width: 10%;">Utilisés</th>
+                                    <th style="width: 10%;">Restants</th>
+                                    <th style="width: 10%;">Absents</th>
+                                    <th style="width: 10%;">% Usage</th>
+                                    <th style="width: 15%;">État</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="ste_summary" t-as="ste">
+                                    <!-- Company Header Row -->
+                                    <tr>
+                                        <td colspan="8" class="ste-header-row">
+                                            🏢 <t t-esc="ste['ste_name']"/> 
+                                            <span style="font-size: 10px; font-weight: normal; color: #555; margin-left: 10px;">
+                                                (<t t-esc="ste['count_total']"/> Talons : 
+                                                <t t-esc="ste['count_coffre']"/> Coffre, 
+                                                <t t-esc="ste['count_actif']"/> Actif, 
+                                                <t t-esc="ste['count_cloture']"/> Cloturé)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <!-- Talons details -->
+                                    <t t-foreach="ste['talons']" t-as="t">
+                                        <tr>
+                                            <td style="text-align: left; font-weight: bold; padding-left: 15px;"><t t-esc="t['name_shown']"/></td>
+                                            <td><t t-esc="t['serie']"/></td>
+                                            <td><t t-esc="t['total']"/></td>
+                                            <td style="color: #137333; font-weight: bold;"><t t-esc="t['used']"/></td>
+                                            <td style="color: #1A73E8;"><t t-esc="t['remaining']"/></td>
+                                            <td style="color: #C5221F;"><t t-esc="t['missing']"/></td>
+                                            <td style="font-weight: bold;"><t t-esc="'{:.1f}%'.format(t['percentage'])"/></td>
+                                            <td>
+                                                <span t-attf-class="badge badge-#{t['etat']}"><t t-esc="t['state_label']"/></span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <!-- Company Subtotal -->
+                                    <tr style="background-color: #FAFAFA; font-weight: bold; border-top: 1px solid #B0CBE3; border-bottom: 2px solid #B0CBE3;">
+                                        <td style="text-align: left; padding-left: 10px;">TOTAL <t t-esc="ste['ste_name']"/></td>
+                                        <td></td>
+                                        <td><t t-esc="ste['total_chqs']"/></td>
+                                        <td style="color: #137333;"><t t-esc="ste['used_chqs']"/></td>
+                                        <td style="color: #1A73E8;"><t t-esc="ste['unused_chqs']"/></td>
+                                        <td style="color: #C5221F;"><t t-esc="ste['missing_chqs']"/></td>
+                                        <td style="color: #1A4D80;">
+                                            <t t-if="ste['total_chqs']">
+                                                <t t-esc="'{:.1f}%'.format(ste['used_chqs'] / ste['total_chqs'] * 100)"/>
+                                            </t>
+                                            <t t-else="">0.0%</t>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </t>
+                                <t t-if="not ste_summary">
+                                    <tr>
+                                        <td colspan="8" style="padding: 20px; font-style: italic; color: #666;">
+                                            Aucun talon trouvé.
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="footer">
+                        <span>Généré par Gestia ERP - Finance Bot</span>
+                        <span>Page 1 / 1</span>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

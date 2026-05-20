@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_logistique" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.logistique</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="20"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Logistique" string="Logistique" data-key="logistique" groups="base.group_system">
+                    <h2>Intégration Maersk (DCSA API v2.2)</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Maersk Consumer Key</span>
+                                <div class="text-muted">
+                                    Clé de l'API OAuth2 Maersk
+                                </div>
+                                <field name="maersk_consumer_key"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Maersk Consumer Secret</span>
+                                <div class="text-muted">
+                                    Secret de l'API OAuth2 Maersk
+                                </div>
+                                <field name="maersk_consumer_secret"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_logistique_config_settings" model="ir.actions.act_window">
+        <field name="name">Paramètres Logistique</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'logistique', 'bin_size': False}</field>
+    </record>
+
+    <menuitem id="menu_logistique_config_settings"
+              name="Configuration"
+              parent="logistique.menu_logistique_root"
+              sequence="100"/>
+
+    <menuitem id="menu_logistique_settings"
+              name="Paramètres"
+              parent="menu_logistique_config_settings"
+              action="action_logistique_config_settings"
+              sequence="10"/>
+</odoo>

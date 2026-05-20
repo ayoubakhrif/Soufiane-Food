@@ -135,6 +135,14 @@ class LogisticsEntry(models.Model):
             return str(self.container_ids[0].name)
         return ""
 
+    def _is_maersk_bl(self):
+        """Check if the BL starts with a Maersk SCAC code."""
+        tracking_number = self._terminal49_get_tracking_number()
+        if not tracking_number:
+            return False
+        scac = tracking_number[:4].upper()
+        return scac in ['MAEU', 'MSKU', 'MRKU', 'MRSU', 'MCPU', 'MXKU']
+
     def action_terminal49_register(self):
         """Manually register the shipment in Terminal49."""
         for rec in self:
@@ -143,23 +151,32 @@ class LogisticsEntry(models.Model):
     def _terminal49_register_shipment(self, raise_error=False):
         """Sends a POST request to register tracking in Terminal49."""
         self.ensure_one()
+
+        if self._is_maersk_bl():
+            if raise_error:
+                self.message_post(body=_("ℹ️ Les BLs Maersk sont désormais suivis via l'API Maersk directe. Synchronisation en cours..."))
+            try:
+                self.env['maersk.tracking.service'].sync_eta_for_entry(self)
+            except Exception as e:
+                self.message_post(body=_("❌ Erreur lors de l'appel à l'API Maersk : %s") % str(e))
+            return
+
         tracking_number = self._terminal49_get_tracking_number()
         
         if not tracking_number:
             if raise_error:
-                raise UserError(_("Veuillez renseigner un numéro de BL ou un numéro de conteneur avant d'enregistrer sur Terminal49."))
+                self.message_post(body=_("❌ Erreur Terminal49 : Veuillez renseigner un numéro de BL ou un numéro de conteneur avant d'enregistrer."))
             return
             
         if self.terminal49_shipment_id:
             if raise_error:
-                raise UserError(_("Ce dossier est déjà enregistré sur Terminal49."))
+                self.message_post(body=_("ℹ️ Ce dossier est déjà enregistré sur Terminal49."))
             return
 
         if len(tracking_number) < 4:
             if raise_error:
-                raise UserError(_("Le numéro de suivi ('%s') est trop court. Il doit commencer par le code SCAC (4 lettres) suivi du numéro.") % tracking_number)
-            else:
-                return
+                self.message_post(body=_("❌ Erreur Terminal49 : Le numéro de suivi ('%s') est trop court. Il doit commencer par le code SCAC (4 lettres) suivi du numéro.") % tracking_number)
+            return
 
         headers = {
             'Authorization': f'Token {TERMINAL49_API_TOKEN}',
@@ -188,29 +205,28 @@ class LogisticsEntry(models.Model):
                 shipment_id = data.get('data', {}).get('relationships', {}).get('shipment', {}).get('data', {}).get('id')
                 if shipment_id:
                     self.write({'terminal49_shipment_id': shipment_id})
-                    self.message_post(body=_("Dossier enregistré sur Terminal49 (ID: %s)") % shipment_id)
+                    self.message_post(body=_("✅ Dossier enregistré sur Terminal49 (ID: %s)") % shipment_id)
                 elif raise_error:
-                    raise UserError(_("La requête a réussi mais aucun ID d'expédition n'a été retourné par Terminal49."))
+                    self.message_post(body=_("⚠️ Terminal49 : La requête a réussi mais aucun ID d'expédition n'a été retourné."))
             elif response.status_code == 422:
                 data_resp = response.json()
                 errors = data_resp.get('errors', [])
                 if errors and errors[0].get('code') == 'duplicate':
                     if raise_error:
-                        raise UserError(_("Ce numéro de BL ou conteneur a DÉJÀ été enregistré sur Terminal49 par le passé (probablement depuis un autre système ou une ancienne demande).\n\nMalheureusement, la clé d'API actuelle n'autorise pas Odoo à lire l'historique pour rattacher automatiquement ce dossier. Vous devez soit utiliser un autre numéro, soit contacter l'administrateur de Terminal49."))
+                        self.message_post(body=_("⚠️ Terminal49 : Ce numéro de BL ou conteneur a DÉJÀ été enregistré par le passé (probablement depuis un autre système). La clé d'API actuelle n'autorise pas Odoo à récupérer l'historique pour le rattacher automatiquement."))
                     return
 
                 _logger.warning("Terminal49: Error 422 for %s - %s", tracking_number, response.text)
                 if raise_error:
-                    error_msg = "Le numéro de BL ou de conteneur n'a pas pu être enregistré.\n\nDétails renvoyés par l'API : " + response.text
-                    raise UserError(_(error_msg))
+                    self.message_post(body=_("❌ Erreur Terminal49 : Le numéro de BL ou de conteneur n'a pas pu être enregistré.\n\nDétails : %s") % response.text)
             else:
                 _logger.error("Terminal49 Register Error: %s - %s", response.status_code, response.text)
                 if raise_error:
-                    raise UserError(_("Erreur de communication avec Terminal49 (Code: %s).\n\nDétails : %s") % (response.status_code, response.text))
+                    self.message_post(body=_("❌ Erreur de communication avec Terminal49 (Code: %s).\n\nDétails : %s") % (response.status_code, response.text))
         except Exception as e:
             _logger.exception("Terminal49 Registration Exception: %s", str(e))
-            if raise_error and not isinstance(e, UserError):
-                raise UserError(_("Une erreur de réseau ou interne est survenue lors de la connexion à Terminal49 : %s") % str(e))
+            if raise_error:
+                self.message_post(body=_("❌ Une erreur interne ou réseau est survenue avec Terminal49 : %s") % str(e))
 
     def action_terminal49_update_eta(self):
         """Force update ETA from Terminal49."""
@@ -220,6 +236,14 @@ class LogisticsEntry(models.Model):
     def _terminal49_update_eta(self):
         """Retrieves latest shipment data and updates ETA."""
         self.ensure_one()
+
+        if self._is_maersk_bl():
+            try:
+                self.env['maersk.tracking.service'].sync_eta_for_entry(self)
+            except Exception as e:
+                _logger.error("Erreur lors de la synchronisation Maersk pour le BL %s: %s", self.bl_number, str(e))
+            return
+
         if not self.terminal49_shipment_id:
             # Try registering if not done
             self._terminal49_register_shipment()
@@ -263,14 +287,17 @@ class LogisticsEntry(models.Model):
     def cron_terminal49_sync_eta(self):
         """Cron method to sync ETA for all active entries."""
         entries = self.search([
-            ('port_status', '=', 'on_port'),
-            ('terminal49_shipment_id', '!=', False)
+            ('port_status', '=', 'on_port')
         ])
-        _logger.info("Terminal49 Sync: Processing %s entries", len(entries))
+        _logger.info("Terminal49/Maersk Sync: Processing %s entries", len(entries))
         for entry in entries:
-            entry._terminal49_update_eta()
-            self.env.cr.commit() # Commit each to avoid losing progress if one fails? 
-            # Or depend on individual try/except in _terminal49_update_eta
+            if entry._is_maersk_bl():
+                try:
+                    self.env['maersk.tracking.service'].sync_eta_for_entry(entry)
+                except Exception as e:
+                    _logger.error("Erreur lors de la synchro cron Maersk %s: %s", entry.bl_number, str(e))
+            elif entry.terminal49_shipment_id:
+                entry._terminal49_update_eta()
     
     port_status = fields.Selection([
         ('on_port', 'On Port'),

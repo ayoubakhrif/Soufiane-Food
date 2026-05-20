@@ -6,7 +6,7 @@
         <field name="priority" eval="20"/>
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('settings')]" position="inside">
+            <xpath expr="//form" position="inside">
                 <div class="app_settings_block" data-string="Logistique" string="Logistique" data-key="logistique" groups="base.group_system">
                     <h2>Intégration Maersk (DCSA API v2.2)</h2>
                     <div class="row mt16 o_settings_container">

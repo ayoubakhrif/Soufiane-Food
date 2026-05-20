@@ -138,14 +138,28 @@ class LogisticsEntry(models.Model):
     def action_terminal49_register(self):
         """Manually register the shipment in Terminal49."""
         for rec in self:
-            rec._terminal49_register_shipment()
+            rec._terminal49_register_shipment(raise_error=True)
 
-    def _terminal49_register_shipment(self):
+    def _terminal49_register_shipment(self, raise_error=False):
         """Sends a POST request to register tracking in Terminal49."""
         self.ensure_one()
         tracking_number = self._terminal49_get_tracking_number()
-        if not tracking_number or self.terminal49_shipment_id:
+        
+        if not tracking_number:
+            if raise_error:
+                raise UserError(_("Veuillez renseigner un numéro de BL ou un numéro de conteneur avant d'enregistrer sur Terminal49."))
             return
+            
+        if self.terminal49_shipment_id:
+            if raise_error:
+                raise UserError(_("Ce dossier est déjà enregistré sur Terminal49."))
+            return
+
+        if len(tracking_number) < 4:
+            if raise_error:
+                raise UserError(_("Le numéro de suivi ('%s') est trop court. Il doit commencer par le code SCAC (4 lettres) suivi du numéro.") % tracking_number)
+            else:
+                return
 
         headers = {
             'Authorization': f'Token {TERMINAL49_API_TOKEN}',
@@ -175,13 +189,22 @@ class LogisticsEntry(models.Model):
                 if shipment_id:
                     self.write({'terminal49_shipment_id': shipment_id})
                     self.message_post(body=_("Dossier enregistré sur Terminal49 (ID: %s)") % shipment_id)
+                elif raise_error:
+                    raise UserError(_("La requête a réussi mais aucun ID d'expédition n'a été retourné par Terminal49."))
             elif response.status_code == 422:
                 # Already exists or invalid
                 _logger.warning("Terminal49: Error 422 for %s - %s", tracking_number, response.text)
+                if raise_error:
+                    error_msg = "Le numéro de BL ou de conteneur semble invalide ou n'est pas reconnu par Terminal49.\nAssurez-vous que les 4 premières lettres correspondent bien au code SCAC.\n\nDétails renvoyés par l'API : " + response.text
+                    raise UserError(_(error_msg))
             else:
                 _logger.error("Terminal49 Register Error: %s - %s", response.status_code, response.text)
+                if raise_error:
+                    raise UserError(_("Erreur de communication avec Terminal49 (Code: %s).\n\nDétails : %s") % (response.status_code, response.text))
         except Exception as e:
             _logger.exception("Terminal49 Registration Exception: %s", str(e))
+            if raise_error and not isinstance(e, UserError):
+                raise UserError(_("Une erreur de réseau ou interne est survenue lors de la connexion à Terminal49 : %s") % str(e))
 
     def action_terminal49_update_eta(self):
         """Force update ETA from Terminal49."""

@@ -195,20 +195,9 @@ class LogisticsEntry(models.Model):
                 data_resp = response.json()
                 errors = data_resp.get('errors', [])
                 if errors and errors[0].get('code') == 'duplicate':
-                    tracking_request_id = errors[0].get('meta', {}).get('tracking_request_id')
-                    if tracking_request_id:
-                        req_response = requests.get(f"{TERMINAL49_BASE_URL}/tracking_requests/{tracking_request_id}", headers=headers, timeout=10)
-                        if req_response.status_code == 200:
-                            req_data = req_response.json()
-                            shipment_data = req_data.get('data', {}).get('relationships', {}).get('shipment', {}).get('data')
-                            if shipment_data and isinstance(shipment_data, dict) and shipment_data.get('id'):
-                                shipment_id = shipment_data.get('id')
-                                self.write({'terminal49_shipment_id': shipment_id})
-                                self.message_post(body=_("Dossier (déjà existant) rattaché depuis Terminal49 (ID: %s)") % shipment_id)
-                                return
-                            elif raise_error:
-                                raise UserError(_("Le tracking a déjà été demandé sur Terminal49, mais le dossier est encore en attente (pending) chez la compagnie maritime. Veuillez patienter et réessayer plus tard."))
-                            return
+                    if raise_error:
+                        raise UserError(_("Ce numéro de BL ou conteneur a DÉJÀ été enregistré sur Terminal49 par le passé (probablement depuis un autre système ou une ancienne demande).\n\nMalheureusement, la clé d'API actuelle n'autorise pas Odoo à lire l'historique pour rattacher automatiquement ce dossier. Vous devez soit utiliser un autre numéro, soit contacter l'administrateur de Terminal49."))
+                    return
 
                 _logger.warning("Terminal49: Error 422 for %s - %s", tracking_number, response.text)
                 if raise_error:

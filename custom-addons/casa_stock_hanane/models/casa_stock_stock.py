@@ -222,6 +222,20 @@ class CasaStockStock(models.Model):
                 'default_stock_soufiane': self.stock_soufiane,
             }
         }
+
+    def action_change_price(self):
+        self.ensure_one()
+        return {
+            'name': _('Changer le Prix d\'Achat'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'casa_hanane.stock.change.price.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_stock_id': self.id,
+            }
+        }
+
     def action_export_stock_excel(self):
         # If called from a list view with selection, use selected records.
         # Otherwise, export all stock with quantity != 0

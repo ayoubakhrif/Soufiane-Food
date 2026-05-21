@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_casa_hanane_stock_change_price_wizard_form" model="ir.ui.view">
+        <field name="name">casa_hanane.stock.change.price.wizard.form</field>
+        <field name="model">casa_hanane.stock.change.price.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Changer le Prix d'Achat">
+                <group>
+                    <field name="product_id" readonly="1"/>
+                    <field name="quantity" readonly="1"/>
+                    <field name="current_price" readonly="1"/>
+                    <field name="new_price"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_casa_hanane_stock_change_price_wizard" model="ir.actions.act_window">
+        <field name="name">Changer le Prix d'Achat</field>
+        <field name="res_model">casa_hanane.stock.change.price.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

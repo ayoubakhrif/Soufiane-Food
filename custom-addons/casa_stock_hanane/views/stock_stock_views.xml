@@ -178,7 +178,7 @@
             <form string="Ligne de Stock" create="false" edit="false">
                 <header>
                     <button name="action_new_exit" string="Nouvelle Sortie" type="object" class="btn-primary" groups="casa_stock_hanane.group_admin"/>
-                    <button name="action_change_price" string="Changer Prix Achat" type="object" class="btn-secondary" groups="casa_stock_hanane.group_admin"/>
+                    <button name="action_change_price" string="Changer Prix Achat" type="object" class="btn-secondary" groups="casa_stock_hanane.group_manager,casa_stock_hanane.group_admin"/>
                     <button name="action_new_perte" string="Déclarer Perte" type="object" class="btn-warning"/>
                 </header>
                 <sheet>
@@ -289,7 +289,7 @@
         if records:
             action = records[0].action_change_price()
         </field>
-        <field name="groups_id" eval="[(4, ref('casa_stock_hanane.group_admin'))]"/>
+        <field name="groups_id" eval="[(4, ref('casa_stock_hanane.group_manager')), (4, ref('casa_stock_hanane.group_admin'))]"/>
     </record>
 
     <!-- Server Action: Export Stock to Excel -->

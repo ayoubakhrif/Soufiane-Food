@@ -368,7 +368,7 @@ class WhatsAppFinanceController(http.Controller):
             week_num = int(week_match.group(1))
             week_str = f"W{week_num:02d}"
             
-            datacheques = request.env['datacheque'].sudo().search([('week', '=', week_str)])
+            datacheques = request.env['datacheque'].sudo().search([('week', '=', week_str)], order='journal asc')
             if not datacheques:
                 return {'status': 'not_found', 'message': f"Aucun chèque trouvé pour la semaine {week_str}."}
 

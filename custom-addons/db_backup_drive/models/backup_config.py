@@ -22,6 +22,7 @@ class DbBackupDriveConfig(models.Model):
     name = fields.Char(string="Name", default="Google Drive Backup Config", readonly=True)
     folder_id = fields.Char(string="Google Drive Folder ID", required=True, default="1cmkn6Ev66h3POgimDZuftPnnNn8BDgwR")
     master_password = fields.Char(string="Odoo Master Password", help="Required to perform database dumps.")
+    retention_count = fields.Integer(string="Keep Last X Backups", default=7, help="Number of backups to keep in Google Drive. Set to 0 to keep all.")
     
     # OAuth2 Fields
     client_id = fields.Char(string="Client ID")
@@ -98,6 +99,10 @@ class DbBackupDriveConfig(models.Model):
         """Called by Cron."""
         config = self.get_config()
         if config.refresh_token:
+            if config.last_backup_status == 'success' and config.last_backup_date:
+                if config.last_backup_date.date() == datetime.datetime.utcnow().date():
+                    _logger.info("Backup already performed today. Skipping to prevent duplicates from missed cron executions.")
+                    return
             config._perform_backup()
 
     def _perform_backup(self):
@@ -143,6 +148,21 @@ class DbBackupDriveConfig(models.Model):
             ).execute()
             
             _logger.info(f"Backup uploaded successfully to Google Drive. File ID: {file.get('id')}")
+            
+            # Clean up old backups if retention_count is set
+            if self.retention_count > 0:
+                try:
+                    query = f"'{self.folder_id}' in parents and trashed=false"
+                    results = service.files().list(q=query, orderBy="createdTime desc", fields="files(id, name)").execute()
+                    files = results.get('files', [])
+                    
+                    if len(files) > self.retention_count:
+                        files_to_delete = files[self.retention_count:]
+                        for f in files_to_delete:
+                            service.files().delete(fileId=f['id']).execute()
+                            _logger.info(f"Deleted old backup: {f.get('name')}")
+                except Exception as e:
+                    _logger.warning(f"Failed to clean up old backups: {str(e)}")
             
             self.write({
                 'last_backup_date': fields.Datetime.now(),

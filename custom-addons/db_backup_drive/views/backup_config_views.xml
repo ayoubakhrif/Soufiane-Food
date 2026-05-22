@@ -42,6 +42,7 @@
                             <field name="folder_id"/>
                             <field name="master_password" password="True"/>
                             <field name="refresh_token" password="True"/>
+                            <field name="retention_count"/>
                         </group>
                         <group string="Dernier Backup">
                             <field name="last_backup_date"/>

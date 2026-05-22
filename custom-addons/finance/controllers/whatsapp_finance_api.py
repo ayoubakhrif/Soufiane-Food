@@ -411,6 +411,7 @@ class WhatsAppFinanceController(http.Controller):
                             <th>Bénéficiaire</th>
                             <th>Type</th>
                             <th>Montant (DH)</th>
+                            <th>Montant Global (DH)</th>
                             <th>État</th>
                         </tr>
             """
@@ -424,7 +425,7 @@ class WhatsAppFinanceController(http.Controller):
                 is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
                 etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
                 
-                chq_display = f"<div class='chq-info'>{chq_name}</div><div class='chq-total'>Total: {phys_amount}</div>"
+                chq_display = f"<div class='chq-info'>{chq_name}</div>"
 
                 grouped_rows = []
                 for dq in dqs:
@@ -472,6 +473,7 @@ class WhatsAppFinanceController(http.Controller):
                         
                         if first_group and first_item:
                             html_content += f"""
+                                <td rowspan="{phys_rowspan}"><strong>{phys_amount}</strong></td>
                                 <td rowspan="{phys_rowspan}">{etat_label}</td>
                             """
                             

@@ -403,17 +403,14 @@ class WhatsAppFinanceController(http.Controller):
                 <body>
                     <h2>Chèques de la Semaine {week_str}</h2>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>N° Chèque</th>
-                                <th>Société</th>
-                                <th>N° Journal</th>
-                                <th>Bénéficiaire</th>
-                                <th>Type</th>
-                                <th>Montant (DH)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                        <tr style="background-color: #ecf0f1;">
+                            <th>N° Chèque</th>
+                            <th>Société</th>
+                            <th>N° Journal</th>
+                            <th>Bénéficiaire</th>
+                            <th>Type</th>
+                            <th>Montant (DH)</th>
+                        </tr>
             """
             
             for phys, dqs in grouped_dqs.items():
@@ -422,7 +419,10 @@ class WhatsAppFinanceController(http.Controller):
                 phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')
                 date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
                 
-                chq_display = f"<div class='chq-info'>{chq_name}</div><div class='chq-date'>Émis: {date_em}</div><div class='chq-total'>Total: {phys_amount}</div>"
+                is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
+                etat_label = "<span style='color:green;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22;'>En cours</span>"
+                
+                chq_display = f"<div class='chq-info'>{chq_name}</div><div class='chq-date'>Émis: {date_em}</div><div class='chq-date'>État: {etat_label}</div><div class='chq-total'>Total: {phys_amount}</div>"
 
                 grouped_rows = []
                 for dq in dqs:
@@ -472,7 +472,6 @@ class WhatsAppFinanceController(http.Controller):
 
             total_str = '{:,.2f}'.format(total_amount).replace(',', ' ')
             html_content += f"""
-                        </tbody>
                     </table>
                     <div class="total">Total de la semaine: {total_str} DH</div>
                 </body>

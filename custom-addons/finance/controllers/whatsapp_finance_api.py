@@ -391,18 +391,29 @@ class WhatsAppFinanceController(http.Controller):
                     <style>
                         body {{ font-family: sans-serif; font-size: 14px; color: #333; }}
                         h2 {{ text-align: center; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }}
-                        .cheque-card {{ border: 1px solid #bdc3c7; border-radius: 5px; margin-bottom: 20px; padding: 15px; background-color: #fdfdfd; page-break-inside: avoid; }}
-                        .cheque-header {{ margin-bottom: 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }}
-                        .cheque-title {{ font-size: 16px; font-weight: bold; color: #2980b9; margin: 0 0 5px 0; }}
-                        .cheque-info {{ margin: 0; font-size: 13px; color: #555; }}
                         table {{ border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 13px; }}
-                        th, td {{ border: 1px solid #ecf0f1; padding: 6px 10px; text-align: left; }}
-                        th {{ background-color: #ecf0f1; font-weight: bold; color: #333; }}
+                        th, td {{ border: 1px solid #bdc3c7; padding: 8px 10px; text-align: left; vertical-align: middle; }}
+                        th {{ background-color: #ecf0f1; font-weight: bold; color: #2c3e50; }}
                         .total {{ text-align: right; margin-top: 20px; font-size: 18px; color: #2c3e50; font-weight: bold; }}
+                        .chq-info {{ font-weight: bold; color: #2980b9; }}
+                        .chq-date {{ font-size: 11px; color: #7f8c8d; }}
+                        .chq-total {{ font-size: 11px; color: #e67e22; font-weight: bold; }}
                     </style>
                 </head>
                 <body>
                     <h2>Chèques de la Semaine {week_str}</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N° Chèque</th>
+                                <th>Société</th>
+                                <th>N° Journal</th>
+                                <th>Bénéficiaire</th>
+                                <th>Type</th>
+                                <th>Montant (DH)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             """
             
             for phys, dqs in grouped_dqs.items():
@@ -410,25 +421,9 @@ class WhatsAppFinanceController(http.Controller):
                 ste_name = phys.ste_id.name if phys.ste_id else "N/A"
                 phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')
                 date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
-
-                html_content += f"""
-                    <div class="cheque-card">
-                        <div class="cheque-header">
-                            <h3 class="cheque-title">Chèque N° {chq_name} - {ste_name}</h3>
-                            <p class="cheque-info"><strong>Montant Global:</strong> {phys_amount} DH &nbsp;|&nbsp; <strong>Date d'émission:</strong> {date_em}</p>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>N° Journal</th>
-                                    <th>Bénéficiaire</th>
-                                    <th>Type</th>
-                                    <th>Montant (DH)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                """
                 
+                chq_display = f"<div class='chq-info'>{chq_name}</div><div class='chq-date'>Émis: {date_em}</div><div class='chq-total'>Total: {phys_amount}</div>"
+
                 grouped_rows = []
                 for dq in dqs:
                     journal_val = str(dq.journal) if dq.journal else "N/A"
@@ -445,35 +440,40 @@ class WhatsAppFinanceController(http.Controller):
                             'benif': benif_name,
                             'items': [{'type': t_label, 'amount': dq_amount}]
                         })
-                        
-                for group in grouped_rows:
-                    rowspan = len(group['items'])
-                    first_item = group['items'][0]
-                    
-                    html_content += f"""
-                                <tr>
-                                    <td rowspan="{rowspan}" style="vertical-align: middle;">{group['journal']}</td>
-                                    <td rowspan="{rowspan}" style="vertical-align: middle;">{group['benif']}</td>
-                                    <td>{first_item['type']}</td>
-                                    <td>{first_item['amount']}</td>
-                                </tr>
-                    """
-                    for item in group['items'][1:]:
-                        html_content += f"""
-                                <tr>
-                                    <td>{item['type']}</td>
-                                    <td>{item['amount']}</td>
-                                </tr>
-                        """
 
-                html_content += """
-                            </tbody>
-                        </table>
-                    </div>
-                """
+                phys_rowspan = sum(len(group['items']) for group in grouped_rows)
+                
+                first_group = True
+                for group in grouped_rows:
+                    group_rowspan = len(group['items'])
+                    first_item = True
+                    for item in group['items']:
+                        html_content += "<tr>"
+                        
+                        if first_group and first_item:
+                            html_content += f"""
+                                <td rowspan="{phys_rowspan}">{chq_display}</td>
+                                <td rowspan="{phys_rowspan}">{ste_name}</td>
+                            """
+                            
+                        if first_item:
+                            html_content += f"""
+                                <td rowspan="{group_rowspan}">{group['journal']}</td>
+                                <td rowspan="{group_rowspan}">{group['benif']}</td>
+                            """
+                            
+                        html_content += f"""
+                                <td>{item['type']}</td>
+                                <td>{item['amount']}</td>
+                            </tr>
+                        """
+                        first_item = False
+                    first_group = False
 
             total_str = '{:,.2f}'.format(total_amount).replace(',', ' ')
             html_content += f"""
+                        </tbody>
+                    </table>
                     <div class="total">Total de la semaine: {total_str} DH</div>
                 </body>
             </html>

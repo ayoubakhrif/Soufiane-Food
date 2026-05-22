@@ -432,7 +432,7 @@ class WhatsAppFinanceController(http.Controller):
 
             report_action = request.env['ir.actions.report'].sudo()
             try:
-                pdf_content, _ = report_action._run_wkhtmltopdf([html_content.encode('utf-8')])
+                pdf_content, _ = report_action._run_wkhtmltopdf([html_content])
                 pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
                 return {
@@ -448,8 +448,10 @@ class WhatsAppFinanceController(http.Controller):
                     ]
                 }
             except Exception as e:
-                _logger.error(f"Error generating week PDF: {str(e)}")
-                return {'status': 'error', 'message': f"Erreur lors de la génération du PDF pour la semaine {week_str}."}
+                import traceback
+                error_trace = traceback.format_exc()
+                _logger.error(f"Error generating week PDF: {error_trace}")
+                return {'status': 'error', 'message': f"Erreur lors de la génération du PDF ({week_str}) : {str(e)}\n\nTrace: {error_trace}"}
 
         # 6. Handle Exact Matches (Talon Name or Beneficiary Name)
         exact_talon = request.env['finance.talon'].sudo().search([('name_shown', '=ilike', message_text)], limit=1)

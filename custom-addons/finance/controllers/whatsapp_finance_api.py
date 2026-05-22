@@ -362,6 +362,95 @@ class WhatsAppFinanceController(http.Controller):
                         'choices': choices
                     }
 
+        # 5.5 Handle Week Search
+        week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", msg_clean)
+        if week_match:
+            week_num = int(week_match.group(1))
+            week_str = f"W{week_num:02d}"
+            
+            datacheques = request.env['datacheque'].sudo().search([('week', '=', week_str)])
+            if not datacheques:
+                return {'status': 'not_found', 'message': f"Aucun chèque trouvé pour la semaine {week_str}."}
+
+            html_content = f"""
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <style>
+                        body {{ font-family: sans-serif; }}
+                        h2 {{ text-align: center; color: #333; }}
+                        table {{ border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 14px; }}
+                        th, td {{ border: 1px solid #dddddd; padding: 8px; text-align: left; }}
+                        th {{ background-color: #f2f2f2; font-weight: bold; color: #333; }}
+                        .total {{ text-align: right; margin-top: 20px; font-size: 18px; color: #333; }}
+                    </style>
+                </head>
+                <body>
+                    <h2>Chèques de la Semaine {week_str}</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N° Chèque</th>
+                                <th>N° Journal</th>
+                                <th>Société</th>
+                                <th>Bénéficiaire</th>
+                                <th>Date d'émission</th>
+                                <th>Montant (DH)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            """
+            total_amount = 0.0
+            for dq in datacheques:
+                journal_val = dq.journal if dq.journal else "N/A"
+                date_em = dq.date_emission.strftime('%d/%m/%Y') if dq.date_emission else "N/A"
+                chq_num = dq.chq or "N/A"
+                ste_name = dq.ste_id.name if dq.ste_id else "N/A"
+                benif_name = dq.benif_id.name if dq.benif_id else "N/A"
+                amount_str = '{{:,.2f}}'.format(dq.amount).replace(',', ' ')
+                
+                html_content += f"""
+                            <tr>
+                                <td>{chq_num}</td>
+                                <td>{journal_val}</td>
+                                <td>{ste_name}</td>
+                                <td>{benif_name}</td>
+                                <td>{date_em}</td>
+                                <td>{amount_str}</td>
+                            </tr>
+                """
+                total_amount += dq.amount
+
+            total_str = '{{:,.2f}}'.format(total_amount).replace(',', ' ')
+            html_content += f"""
+                        </tbody>
+                    </table>
+                    <div class="total"><strong>Total: {total_str} DH</strong></div>
+                </body>
+            </html>
+            """
+
+            report_action = request.env['ir.actions.report'].sudo()
+            try:
+                pdf_content, _ = report_action._run_wkhtmltopdf([html_content.encode('utf-8')])
+                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+                return {
+                    'status': 'success',
+                    'product_name': f"Chèques Semaine {week_str}",
+                    'response': f"Voici le rapport des chèques pour la semaine *{week_str}*.",
+                    'files': [
+                        {
+                            'pdf_base64': pdf_base64,
+                            'file_name': f"Cheques_{week_str}.pdf",
+                            'caption': f"Chèques de la semaine {week_str} 📄"
+                        }
+                    ]
+                }
+            except Exception as e:
+                _logger.error(f"Error generating week PDF: {str(e)}")
+                return {'status': 'error', 'message': f"Erreur lors de la génération du PDF pour la semaine {week_str}."}
+
         # 6. Handle Exact Matches (Talon Name or Beneficiary Name)
         exact_talon = request.env['finance.talon'].sudo().search([('name_shown', '=ilike', message_text)], limit=1)
         if exact_talon:

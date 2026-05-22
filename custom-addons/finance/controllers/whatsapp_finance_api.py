@@ -407,7 +407,7 @@ class WhatsAppFinanceController(http.Controller):
                 chq_num = dq.chq or "N/A"
                 ste_name = dq.ste_id.name if dq.ste_id else "N/A"
                 benif_name = dq.benif_id.name if dq.benif_id else "N/A"
-                amount_str = '{{:,.2f}}'.format(dq.amount).replace(',', ' ')
+                amount_str = '{:,.2f}'.format(dq.amount).replace(',', ' ')
                 
                 html_content += f"""
                             <tr>
@@ -421,7 +421,7 @@ class WhatsAppFinanceController(http.Controller):
                 """
                 total_amount += dq.amount
 
-            total_str = '{{:,.2f}}'.format(total_amount).replace(',', ' ')
+            total_str = '{:,.2f}'.format(total_amount).replace(',', ' ')
             html_content += f"""
                         </tbody>
                     </table>

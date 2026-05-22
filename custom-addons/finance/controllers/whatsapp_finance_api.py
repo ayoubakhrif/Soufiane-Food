@@ -372,60 +372,88 @@ class WhatsAppFinanceController(http.Controller):
             if not datacheques:
                 return {'status': 'not_found', 'message': f"Aucun chèque trouvé pour la semaine {week_str}."}
 
+            grouped_dqs = {}
+            total_amount = 0.0
+
+            for dq in datacheques:
+                phys = dq.physical_cheque_id
+                if not phys:
+                    continue
+                if phys not in grouped_dqs:
+                    grouped_dqs[phys] = []
+                grouped_dqs[phys].append(dq)
+                total_amount += dq.amount
+
             html_content = f"""
             <html>
                 <head>
                     <meta charset="utf-8"/>
                     <style>
-                        body {{ font-family: sans-serif; }}
-                        h2 {{ text-align: center; color: #333; }}
-                        table {{ border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 14px; }}
-                        th, td {{ border: 1px solid #dddddd; padding: 8px; text-align: left; }}
-                        th {{ background-color: #f2f2f2; font-weight: bold; color: #333; }}
-                        .total {{ text-align: right; margin-top: 20px; font-size: 18px; color: #333; }}
+                        body {{ font-family: sans-serif; font-size: 14px; color: #333; }}
+                        h2 {{ text-align: center; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }}
+                        .cheque-card {{ border: 1px solid #bdc3c7; border-radius: 5px; margin-bottom: 20px; padding: 15px; background-color: #fdfdfd; page-break-inside: avoid; }}
+                        .cheque-header {{ margin-bottom: 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }}
+                        .cheque-title {{ font-size: 16px; font-weight: bold; color: #2980b9; margin: 0 0 5px 0; }}
+                        .cheque-info {{ margin: 0; font-size: 13px; color: #555; }}
+                        table {{ border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 13px; }}
+                        th, td {{ border: 1px solid #ecf0f1; padding: 6px 10px; text-align: left; }}
+                        th {{ background-color: #ecf0f1; font-weight: bold; color: #333; }}
+                        .total {{ text-align: right; margin-top: 20px; font-size: 18px; color: #2c3e50; font-weight: bold; }}
                     </style>
                 </head>
                 <body>
                     <h2>Chèques de la Semaine {week_str}</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>N° Chèque</th>
-                                <th>N° Journal</th>
-                                <th>Société</th>
-                                <th>Bénéficiaire</th>
-                                <th>Date d'émission</th>
-                                <th>Montant (DH)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
             """
-            total_amount = 0.0
-            for dq in datacheques:
-                journal_val = dq.journal if dq.journal else "N/A"
-                date_em = dq.date_emission.strftime('%d/%m/%Y') if dq.date_emission else "N/A"
-                chq_num = dq.chq or "N/A"
-                ste_name = dq.ste_id.name if dq.ste_id else "N/A"
-                benif_name = dq.benif_id.name if dq.benif_id else "N/A"
-                amount_str = '{:,.2f}'.format(dq.amount).replace(',', ' ')
-                
+            
+            for phys, dqs in grouped_dqs.items():
+                chq_name = phys.name or "N/A"
+                ste_name = phys.ste_id.name if phys.ste_id else "N/A"
+                phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')
+                date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
+
                 html_content += f"""
-                            <tr>
-                                <td>{chq_num}</td>
-                                <td>{journal_val}</td>
-                                <td>{ste_name}</td>
-                                <td>{benif_name}</td>
-                                <td>{date_em}</td>
-                                <td>{amount_str}</td>
-                            </tr>
+                    <div class="cheque-card">
+                        <div class="cheque-header">
+                            <h3 class="cheque-title">Chèque N° {chq_name} - {ste_name}</h3>
+                            <p class="cheque-info"><strong>Montant Global:</strong> {phys_amount} DH &nbsp;|&nbsp; <strong>Date d'émission:</strong> {date_em}</p>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>N° Journal</th>
+                                    <th>Bénéficiaire</th>
+                                    <th>Type</th>
+                                    <th>Montant (DH)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 """
-                total_amount += dq.amount
+                for dq in dqs:
+                    journal_val = dq.journal if dq.journal else "N/A"
+                    benif_name = dq.benif_id.name if dq.benif_id else "N/A"
+                    
+                    t_selection = dict(dq._fields['type'].selection or {})
+                    t_label = t_selection.get(dq.type) or dq.type or "N/A"
+                    
+                    dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
+                    
+                    html_content += f"""
+                                <tr>
+                                    <td>{journal_val}</td>
+                                    <td>{benif_name}</td>
+                                    <td>{t_label}</td>
+                                    <td>{dq_amount}</td>
+                                </tr>
+                    """
+                html_content += """
+                            </tbody>
+                        </table>
+                    </div>
+                """
 
             total_str = '{:,.2f}'.format(total_amount).replace(',', ' ')
             html_content += f"""
-                        </tbody>
-                    </table>
-                    <div class="total"><strong>Total: {total_str} DH</strong></div>
+                    <div class="total">Total de la semaine: {total_str} DH</div>
                 </body>
             </html>
             """

@@ -405,11 +405,13 @@ class WhatsAppFinanceController(http.Controller):
                     <table>
                         <tr style="background-color: #ecf0f1;">
                             <th>N° Chèque</th>
+                            <th>Date d'émission</th>
                             <th>Société</th>
                             <th>N° Journal</th>
                             <th>Bénéficiaire</th>
                             <th>Type</th>
                             <th>Montant (DH)</th>
+                            <th>État</th>
                         </tr>
             """
             
@@ -420,9 +422,9 @@ class WhatsAppFinanceController(http.Controller):
                 date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
                 
                 is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
-                etat_label = "<span style='color:green;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22;'>En cours</span>"
+                etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
                 
-                chq_display = f"<div class='chq-info'>{chq_name}</div><div class='chq-date'>Émis: {date_em}</div><div class='chq-date'>État: {etat_label}</div><div class='chq-total'>Total: {phys_amount}</div>"
+                chq_display = f"<div class='chq-info'>{chq_name}</div><div class='chq-total'>Total: {phys_amount}</div>"
 
                 grouped_rows = []
                 for dq in dqs:
@@ -453,6 +455,7 @@ class WhatsAppFinanceController(http.Controller):
                         if first_group and first_item:
                             html_content += f"""
                                 <td rowspan="{phys_rowspan}">{chq_display}</td>
+                                <td rowspan="{phys_rowspan}">{date_em}</td>
                                 <td rowspan="{phys_rowspan}">{ste_name}</td>
                             """
                             
@@ -465,8 +468,14 @@ class WhatsAppFinanceController(http.Controller):
                         html_content += f"""
                                 <td>{item['type']}</td>
                                 <td>{item['amount']}</td>
-                            </tr>
                         """
+                        
+                        if first_group and first_item:
+                            html_content += f"""
+                                <td rowspan="{phys_rowspan}">{etat_label}</td>
+                            """
+                            
+                        html_content += "</tr>"
                         first_item = False
                     first_group = False
 

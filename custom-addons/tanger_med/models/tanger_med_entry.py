@@ -32,14 +32,16 @@ class TangerMedEntry(models.Model):
     calculated_surestarie_ht = fields.Float(string='Surestarie HT (Simulé)', compute='_compute_surest_mag', store=True)
     calculated_magasinage_ht = fields.Float(string='Magasinage HT (Simulé)', compute='_compute_surest_mag', store=True)
 
-    @api.depends('entry_date', 'exit_date', 'container_type', 'container_size', 'eta', 'shipping_id', 'free_time', 'container_count')
+    @api.depends('entry_date', 'exit_date', 'date_sortie_port', 'container_type', 'container_size', 'eta', 'bad_date', 'shipping_id', 'free_time', 'container_count')
     def _compute_surest_mag(self):
         for rec in self:
             rec.calculated_surestarie_ht = 0.0
             rec.calculated_magasinage_ht = 0.0
             rec.sur_mag_amount = 0.0
             rec.sur_mag_date = False
-            if not rec.shipping_id or not rec.container_type or not rec.container_size or not rec.eta:
+            
+            start_date = rec.eta or rec.bad_date
+            if not rec.shipping_id or not rec.container_type or not rec.container_size or not start_date:
                 continue
 
             config = self.env['logistique.surest_mag.config'].search([
@@ -51,13 +53,15 @@ class TangerMedEntry(models.Model):
             if not config:
                 continue
 
+            eff_exit_date = rec.exit_date or rec.date_sortie_port
+            
             days_magasinage = 0
-            if rec.eta and rec.exit_date and rec.exit_date >= rec.eta:
-                days_magasinage = (rec.exit_date - rec.eta).days + 1
+            if start_date and eff_exit_date and eff_exit_date >= start_date:
+                days_magasinage = (eff_exit_date - start_date).days + 1
             
             days_surestarie = 0
-            if rec.eta and rec.entry_date and rec.entry_date >= rec.eta:
-                days_surestarie = (rec.entry_date - rec.eta).days + 1
+            if start_date and rec.entry_date and rec.entry_date >= start_date:
+                days_surestarie = (rec.entry_date - start_date).days + 1
 
             result = config.calculate_amounts(days_magasinage, days_surestarie, rec.free_time or 0, rec.container_count or 1)
             

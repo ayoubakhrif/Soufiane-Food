@@ -432,7 +432,7 @@ class WhatsAppFinanceController(http.Controller):
 
             report_action = request.env['ir.actions.report'].sudo()
             try:
-                pdf_content, _ = report_action._run_wkhtmltopdf([html_content])
+                pdf_content = report_action._run_wkhtmltopdf([html_content])
                 pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
                 return {

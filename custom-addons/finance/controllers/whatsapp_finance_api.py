@@ -428,23 +428,44 @@ class WhatsAppFinanceController(http.Controller):
                             </thead>
                             <tbody>
                 """
+                
+                grouped_rows = []
                 for dq in dqs:
-                    journal_val = dq.journal if dq.journal else "N/A"
+                    journal_val = str(dq.journal) if dq.journal else "N/A"
                     benif_name = dq.benif_id.name if dq.benif_id else "N/A"
-                    
                     t_selection = dict(dq._fields['type'].selection or {})
                     t_label = t_selection.get(dq.type) or dq.type or "N/A"
-                    
                     dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
+                    
+                    if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
+                        grouped_rows[-1]['items'].append({'type': t_label, 'amount': dq_amount})
+                    else:
+                        grouped_rows.append({
+                            'journal': journal_val,
+                            'benif': benif_name,
+                            'items': [{'type': t_label, 'amount': dq_amount}]
+                        })
+                        
+                for group in grouped_rows:
+                    rowspan = len(group['items'])
+                    first_item = group['items'][0]
                     
                     html_content += f"""
                                 <tr>
-                                    <td>{journal_val}</td>
-                                    <td>{benif_name}</td>
-                                    <td>{t_label}</td>
-                                    <td>{dq_amount}</td>
+                                    <td rowspan="{rowspan}" style="vertical-align: middle;">{group['journal']}</td>
+                                    <td rowspan="{rowspan}" style="vertical-align: middle;">{group['benif']}</td>
+                                    <td>{first_item['type']}</td>
+                                    <td>{first_item['amount']}</td>
                                 </tr>
                     """
+                    for item in group['items'][1:]:
+                        html_content += f"""
+                                <tr>
+                                    <td>{item['type']}</td>
+                                    <td>{item['amount']}</td>
+                                </tr>
+                        """
+
                 html_content += """
                             </tbody>
                         </table>

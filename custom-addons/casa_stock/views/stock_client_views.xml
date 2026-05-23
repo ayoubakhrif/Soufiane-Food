@@ -151,11 +151,11 @@
                                             invisible="state == 'confirmed'"/>
                                     <button name="action_draft" string="Remettre en brouillon" type="object" 
                                             icon="fa-undo" 
-                                            groups="casa_stock.group_admin"
+                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                                             invisible="state == 'draft'"/>
                                     <button name="action_cancel" string="Annuler" type="object" 
                                             icon="fa-times" 
-                                            groups="casa_stock.group_admin,casa_stock.group_manager"
+                                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                                             invisible="state == 'cancelled'"/>
                                 </tree>
                             </field>
@@ -319,11 +319,11 @@
                         invisible="state == 'confirmed'"/>
                 <button name="action_draft" string="Remettre en brouillon" type="object" 
                         icon="fa-undo" 
-                        groups="casa_stock.group_admin"
+                        groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                         invisible="state == 'draft'"/>
                 <button name="action_cancel" string="Annuler" type="object" 
                         icon="fa-times" 
-                        groups="casa_stock.group_admin,casa_stock.group_manager"
+                        groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                         invisible="state == 'cancelled'"/>
             </tree>
         </field>
@@ -339,10 +339,10 @@
                             groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                             invisible="state == 'confirmed'"/>
                     <button name="action_draft" string="Remettre en brouillon" type="object" 
-                            groups="casa_stock.group_admin"
+                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                             invisible="state == 'draft'"/>
                     <button name="action_cancel" string="Annuler" type="object" 
-                            groups="casa_stock.group_admin,casa_stock.group_manager"
+                            groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
                             invisible="state == 'cancelled'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
                 </header>

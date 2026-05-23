@@ -60,7 +60,7 @@ access_casa_stock_discount_line_manager,casa.stock.discount.line.manager,model_c
 access_casa_stock_discount_line_admin,casa.stock.discount.line.admin,model_casa_stock_discount_line,group_admin,1,1,1,1
 access_casa_stock_discount_line_viewer,casa.stock.discount.line.viewer,model_casa_stock_discount_line,group_viewer,1,0,0,0
 access_casa_client_advance_user,casa.client.advance.user,model_casa_client_advance,group_user,1,1,1,0
-access_casa_client_advance_manager,casa.client.advance.manager,model_casa_client_advance,group_manager,1,1,1,0
+access_casa_client_advance_manager,casa.client.advance.manager,model_casa_client_advance,group_manager,1,1,1,1
 access_casa_client_advance_admin,casa.client.advance.admin,model_casa_client_advance,group_admin,1,1,1,1
 access_casa_client_advance_viewer,casa.client.advance.viewer,model_casa_client_advance,group_viewer,1,0,0,0
 access_casa_client_unpaid_user,casa.client.unpaid.user,model_casa_client_unpaid,group_user,1,1,1,0
@@ -82,5 +82,7 @@ access_casa_sortie_supp_admin,casa.sortie.supp.admin,model_casa_sortie_supp,grou
 access_casa_sortie_supp_viewer,casa.sortie.supp.viewer,model_casa_sortie_supp,group_viewer,1,0,0,0
 access_casa_client_alias_user,casa.client.alias.user,model_casa_client_alias,group_user,1,0,0,0
 access_casa_client_alias_admin,casa.client.alias.admin,model_casa_client_alias,group_admin,1,1,1,1
+access_casa_stock_change_price_wizard,casa.stock.change.price.wizard,model_casa_stock_change_price_wizard,group_user,1,1,1,1
+access_casa_stock_change_price_wizard_admin,casa.stock.change.price.wizard,model_casa_stock_change_price_wizard,group_admin,1,1,1,1
 access_casa_stock_change_price_wizard,casa.stock.change.price.wizard,model_casa_stock_change_price_wizard,group_user,1,1,1,1
 access_casa_stock_change_price_wizard_admin,casa.stock.change.price.wizard,model_casa_stock_change_price_wizard,group_admin,1,1,1,1

@@ -33,6 +33,7 @@ class CasaClientAdvance(models.Model):
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Validé'),
+        ('cancelled', 'Annulé'),
     ], string='État', required=True, default='draft', readonly=True)
 
     def action_confirm(self):
@@ -42,6 +43,10 @@ class CasaClientAdvance(models.Model):
     def action_draft(self):
         for rec in self:
             rec.state = 'draft'
+
+    def action_cancel(self):
+        for rec in self:
+            rec.state = 'cancelled'
 
     def write(self, vals):
         for rec in self:

@@ -33,6 +33,7 @@ class CasaClientAdvance(models.Model):
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Validé'),
+        ('cancelled', 'Annulé'),
     ], string='État', required=True, default='draft', readonly=True)
 
     @api.model
@@ -48,6 +49,10 @@ class CasaClientAdvance(models.Model):
     def action_draft(self):
         for rec in self:
             rec.state = 'draft'
+
+    def action_cancel(self):
+        for rec in self:
+            rec.state = 'cancelled'
 
     def write(self, vals):
         if vals.get('payment_mode') == 'transport' and not self.env.context.get('is_transport_operation'):

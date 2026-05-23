@@ -135,7 +135,7 @@
 
                         <page string="Avances">
                             <field name="advance_ids" nolabel="1">
-                                <tree editable="bottom" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'">
+                                <tree editable="bottom" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'" decoration-danger="state == 'cancelled'">
                                     <field name="date"/>
                                     <field name="payment_mode"/>
                                     <field name="ville"/>
@@ -143,7 +143,8 @@
                                     <field name="comment"/>
                                     <field name="state" widget="badge" 
                                            decoration-success="state == 'confirmed'" 
-                                           decoration-info="state == 'draft'"/>
+                                           decoration-info="state == 'draft'"
+                                           decoration-danger="state == 'cancelled'"/>
                                     <button name="action_confirm" string="Valider" type="object" 
                                             icon="fa-check" 
                                             groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
@@ -152,6 +153,10 @@
                                             icon="fa-undo" 
                                             groups="casa_stock.group_admin"
                                             invisible="state == 'draft'"/>
+                                    <button name="action_cancel" string="Annuler" type="object" 
+                                            icon="fa-times" 
+                                            groups="casa_stock.group_admin,casa_stock.group_manager"
+                                            invisible="state == 'cancelled'"/>
                                 </tree>
                             </field>
                         </page>
@@ -297,7 +302,7 @@
         <field name="name">casa.client.advance.tree</field>
         <field name="model">casa.client.advance</field>
         <field name="arch" type="xml">
-            <tree string="Avances Clients" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'" multi_edit="1">
+            <tree string="Avances Clients" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'" decoration-danger="state == 'cancelled'" multi_edit="1">
                 <field name="date"/>
                 <field name="client_id"/>
                 <field name="payment_mode"/>
@@ -306,7 +311,8 @@
                 <field name="comment"/>
                 <field name="state" widget="badge" 
                        decoration-success="state == 'confirmed'" 
-                       decoration-info="state == 'draft'"/>
+                       decoration-info="state == 'draft'"
+                       decoration-danger="state == 'cancelled'"/>
                 <button name="action_confirm" string="Valider" type="object" 
                         icon="fa-check" 
                         groups="casa_stock.group_admin,casa_stock.group_valid_admin,casa_stock.group_manager"
@@ -315,6 +321,10 @@
                         icon="fa-undo" 
                         groups="casa_stock.group_admin"
                         invisible="state == 'draft'"/>
+                <button name="action_cancel" string="Annuler" type="object" 
+                        icon="fa-times" 
+                        groups="casa_stock.group_admin,casa_stock.group_manager"
+                        invisible="state == 'cancelled'"/>
             </tree>
         </field>
     </record>
@@ -331,7 +341,10 @@
                     <button name="action_draft" string="Remettre en brouillon" type="object" 
                             groups="casa_stock.group_admin"
                             invisible="state == 'draft'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    <button name="action_cancel" string="Annuler" type="object" 
+                            groups="casa_stock.group_admin,casa_stock.group_manager"
+                            invisible="state == 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
                 </header>
                 <sheet>
                     <group>

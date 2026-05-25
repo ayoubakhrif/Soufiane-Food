@@ -2,6 +2,8 @@ import logging
 import os
 import datetime
 import io
+import os
+import tempfile
 import base64
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -119,33 +121,41 @@ class DbBackupDriveConfig(models.Model):
         try:
             _logger.info(f"Starting backup for database {db_name} to Google Drive folder {self.folder_id}")
             
-            # 1. Dump database
-            buffer = io.BytesIO()
-            db.dump_db(db_name, buffer, backup_format='zip')
-            buffer.seek(0)
-            
-            # 2. Authenticate with Google OAuth2
-            creds = Credentials(
-                None,
-                refresh_token=self.refresh_token,
-                client_id=self.client_id,
-                client_secret=self.client_secret,
-                token_uri="https://oauth2.googleapis.com/token"
-            )
-            service = build('drive', 'v3', credentials=creds)
-            
-            # 3. Upload to Google Drive
-            file_metadata = {
-                'name': filename,
-                'parents': [self.folder_id]
-            }
-            media = MediaIoBaseUpload(buffer, mimetype='application/zip', resumable=True)
-            
-            file = service.files().create(
-                body=file_metadata,
-                media_body=media,
-                fields='id'
-            ).execute()
+            # 1. Dump database to a temporary file to avoid RAM exhaustion and closed file errors
+            with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as temp_file:
+                temp_file_path = temp_file.name
+                
+            try:
+                with open(temp_file_path, 'wb') as f:
+                    db.dump_db(db_name, f, backup_format='zip')
+                
+                # 2. Authenticate with Google OAuth2
+                creds = Credentials(
+                    None,
+                    refresh_token=self.refresh_token,
+                    client_id=self.client_id,
+                    client_secret=self.client_secret,
+                    token_uri="https://oauth2.googleapis.com/token"
+                )
+                service = build('drive', 'v3', credentials=creds)
+                
+                # 3. Upload to Google Drive
+                file_metadata = {
+                    'name': filename,
+                    'parents': [self.folder_id]
+                }
+                
+                with open(temp_file_path, 'rb') as f:
+                    media = MediaIoBaseUpload(f, mimetype='application/zip', resumable=True)
+                    
+                    file = service.files().create(
+                        body=file_metadata,
+                        media_body=media,
+                        fields='id'
+                    ).execute()
+            finally:
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
             
             _logger.info(f"Backup uploaded successfully to Google Drive. File ID: {file.get('id')}")
             

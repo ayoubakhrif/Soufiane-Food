@@ -2,9 +2,13 @@ import logging
 import os
 import datetime
 import io
+import datetime
+import io
 import os
 import tempfile
 import base64
+import threading
+import odoo
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.service import db
@@ -94,7 +98,35 @@ class DbBackupDriveConfig(models.Model):
     def action_backup_now(self):
         """Manually trigger the backup."""
         self.ensure_one()
-        self._perform_backup()
+        # Run in a background thread to avoid HTTP timeouts for large DBs
+        threaded_backup = threading.Thread(target=self._run_backup_in_new_thread)
+        threaded_backup.start()
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Sauvegarde Démarrée',
+                'message': 'Le backup a été lancé en arrière-plan. Cela peut prendre quelques minutes. Veuillez rafraîchir la page plus tard pour voir le statut.',
+                'sticky': False,
+                'type': 'info',
+            }
+        }
+
+    def _run_backup_in_new_thread(self):
+        db_name = self.env.cr.dbname
+        registry = odoo.registry(db_name)
+        with registry.cursor() as cr:
+            env = api.Environment(cr, odoo.SUPERUSER_ID, {})
+            config = self.with_env(env)
+            # Need to re-fetch the record in the new environment
+            config = config.browse(self.id)
+            try:
+                config._perform_backup()
+                cr.commit()
+            except Exception as e:
+                cr.rollback()
+                _logger.exception("Background backup failed")
 
     @api.model
     def _run_scheduled_backup(self):

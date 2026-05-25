@@ -15,6 +15,7 @@
         'views/deletion_request.xml',
         'views/cheque_request.xml',
         'views/edit_request_view.xml',
+        'views/encaissement_physique_view.xml',
         'views/cheque_encaisse_view.xml',
         'views/logistics_integration_view.xml',
         'views/finance_deduction_view.xml',

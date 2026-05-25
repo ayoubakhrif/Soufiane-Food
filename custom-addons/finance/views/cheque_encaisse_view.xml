@@ -119,11 +119,22 @@
             </field>
         </record>
 
-        <!-- Menu -->
-        <menuitem id="menu_finance_cheque_encaisse"
+        <!-- Menus -->
+        <menuitem id="menu_finance_cheque_encaisse_root"
                   name="Chèques Encaissés"
                   parent="finance_root_menu"
-                  action="action_finance_cheque_encaisse"
                   sequence="11"/>
+
+        <menuitem id="menu_finance_encaissement_physique"
+                  name="Encaissement Physique"
+                  parent="menu_finance_cheque_encaisse_root"
+                  action="action_finance_encaissement_physique"
+                  sequence="10"/>
+
+        <menuitem id="menu_finance_cheque_encaisse"
+                  name="Répartitions Encaissées"
+                  parent="menu_finance_cheque_encaisse_root"
+                  action="action_finance_cheque_encaisse"
+                  sequence="20"/>
     </data>
 </odoo>

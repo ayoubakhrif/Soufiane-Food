@@ -23,6 +23,8 @@ class FinanceChequeEncaisse(models.Model):
         ('divers', 'Divers'),
     ], store=True, string='Type', tracking=True)
 
+    encaissement_physique_id = fields.Many2one('finance.encaissement.physique', string="Encaissement Physique Parent", ondelete='cascade')
+
     # Editable fields to sync
     amount = fields.Float(string='Montant', required=True, tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', required=True, tracking=True)

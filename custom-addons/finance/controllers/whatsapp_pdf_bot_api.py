@@ -123,6 +123,7 @@ class WhatsAppFinancePdfController(http.Controller):
                 vals = {
                     'amount': inv_amount,
                     'type': inv_type,
+                    'journal': base_cheque.journal,
                 }
 
                 if benif_record:

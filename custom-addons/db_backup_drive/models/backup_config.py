@@ -98,8 +98,12 @@ class DbBackupDriveConfig(models.Model):
     def action_backup_now(self):
         """Manually trigger the backup."""
         self.ensure_one()
+        # Extract necessary info before the current transaction closes
+        db_name = self.env.cr.dbname
+        record_id = self.id
+        
         # Run in a background thread to avoid HTTP timeouts for large DBs
-        threaded_backup = threading.Thread(target=self._run_backup_in_new_thread)
+        threaded_backup = threading.Thread(target=self._run_backup_in_new_thread_static, args=(db_name, record_id))
         threaded_backup.start()
         
         return {
@@ -113,14 +117,13 @@ class DbBackupDriveConfig(models.Model):
             }
         }
 
-    def _run_backup_in_new_thread(self):
-        db_name = self.env.cr.dbname
+    @api.model
+    def _run_backup_in_new_thread_static(self, db_name, record_id):
+        import odoo
         registry = odoo.registry(db_name)
         with registry.cursor() as cr:
             env = api.Environment(cr, odoo.SUPERUSER_ID, {})
-            config = self.with_env(env)
-            # Need to re-fetch the record in the new environment
-            config = config.browse(self.id)
+            config = env['db.backup.drive.config'].browse(record_id)
             try:
                 config._perform_backup()
                 cr.commit()

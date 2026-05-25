@@ -7,8 +7,8 @@ class FinanceChequePhysical(models.Model):
     _rec_name = 'display_name_custom'
 
     active = fields.Boolean(string='Actif', default=True)
-    name = fields.Char(string='N° Chèque', required=True, index=True, tracking=True)
-    ste_id = fields.Many2one('finance.ste', string='Société', required=True, tracking=True)
+    name = fields.Char(string='N° Chèque', required=False, index=True, tracking=True)
+    ste_id = fields.Many2one('finance.ste', string='Société', required=False, tracking=True)
     
     datacheque_ids = fields.One2many('datacheque', 'physical_cheque_id', string='Répartitions (Datacheque)')
     

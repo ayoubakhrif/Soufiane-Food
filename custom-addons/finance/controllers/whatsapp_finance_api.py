@@ -183,8 +183,17 @@ class WhatsAppFinanceController(http.Controller):
                     f"• 🟡 *Réserve* : {reserve_count} chèques\n"
                     f"• 🔵 *Bureau* : {bureau_count} chèques\n"
                     f"• 🔴 *Annulés* : {annule_count} chèques\n\n"
-                    f"📂 _Les rapports PDF et Excel détaillés ont été générés et sont joints ci-dessous._"
                 )
+
+                active_talons = request.env['finance.talon'].sudo().search([('etat', '=', 'actif')], order='ste_id asc')
+                if active_talons:
+                    summary_msg += "🧾 *Derniers chèques sortis* :\n"
+                    for talon in active_talons:
+                        chq_val = talon.last_used_chq if talon.last_used_chq else "Aucun"
+                        summary_msg += f"• {talon.ste_id.name} : *{chq_val}*\n"
+                    summary_msg += "\n"
+
+                summary_msg += f"📂 _Les rapports PDF et Excel détaillés ont été générés et sont joints ci-dessous._"
 
                 from odoo import fields
                 today_str = fields.Date.today().strftime('%d/%m/%Y').replace('/', '_')

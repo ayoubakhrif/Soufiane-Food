@@ -274,6 +274,11 @@ Exemple:
 
             existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
             if not existing_dc:
+                # Clean journal text to integer
+                raw_journal = str(result.get('journal', '0'))
+                clean_journal = "".join(filter(str.isdigit, raw_journal))
+                journal_num = int(clean_journal) if clean_journal else 0
+
                 dc_vals = {
                     'chq': final_chq,
                     'ste_id': final_ste_id,
@@ -281,6 +286,7 @@ Exemple:
                     'state': 'reserve',
                     'type': 'reserve',
                     'facture': 'm',
+                    'journal': journal_num,
                     'physical_cheque_id': rec.id,
                 }
                 if benif_record:

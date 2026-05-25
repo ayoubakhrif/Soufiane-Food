@@ -159,7 +159,12 @@ class FinanceChequePhysical(models.Model):
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque.
 Votre but est d'extraire les informations suivantes.
 1. "chq": Le numéro du chèque (généralement 7 chiffres, ex: 2102888).
-2. "ste": L'abréviation de la société émettrice. Essayez de faire correspondre exactement avec l'une de ces abréviations : {stes_names}. (Ex: si 'SOUFIANE NUTS' sur le chèque, répondez 'SN').
+2. "ste": L'abréviation de la société émettrice. Essayez de faire correspondre exactement avec l'une de ces abréviations : {stes_names}. 
+   - Soufiane Nuts = SN
+   - Soufiane Foods = SF
+   - Leader One = LO
+   - Pacific Fruit = PF
+   - Maruk = MR
 3. "amount": Le montant du chèque (uniquement des chiffres).
 4. "beneficiaire": Le bénéficiaire (à l'ordre de). Essayez de faire correspondre avec l'un de ces noms : {benifs_names}.
 5. "date_echeance": La date écrite sur le chèque (en haut à droite, ex: 16/05/2026), au format YYYY-MM-DD.
@@ -257,20 +262,23 @@ Exemple:
             final_chq = result.get('chq') or rec.name
             final_ste_id = ste_record.id if ste_record else rec.ste_id.id
 
-            if not final_ste_id:
-                from odoo.exceptions import ValidationError
-                raise ValidationError(f"L'IA n'a pas pu identifier la société ({ste_code}) et aucune société n'a été saisie manuellement. Veuillez remplir le champ Société.")
-            if not final_chq:
-                from odoo.exceptions import ValidationError
-                raise ValidationError("L'IA n'a pas pu identifier le numéro de chèque et il n'a pas été saisi. Veuillez le remplir manuellement.")
-
-            if final_chq != rec.name:
+            if final_chq and final_chq != rec.name:
                 update_vals['name'] = final_chq
-            if final_ste_id != rec.ste_id.id:
+            if final_ste_id and final_ste_id != rec.ste_id.id:
                 update_vals['ste_id'] = final_ste_id
             
             if update_vals:
                 rec.sudo().write(update_vals)
+
+            if not final_ste_id or not final_chq:
+                from markupsafe import Markup
+                rec.message_post(body=Markup(
+                    "<div style='border-left:4px solid #ffc107;padding:8px 12px;background:#fff8e1;border-radius:4px;'>"
+                    "<span style='color:#ffc107;font-size:15px;'><i class='fa fa-exclamation-triangle'></i>&nbsp;<b>IA : Extraction incomplète</b></span>"
+                    f"<p style='margin:4px 0 0;'>L'IA n'a pas pu identifier le numéro de chèque ou la société ({ste_code}). L'enregistrement du datacheque n'a pas été créé automatiquement. Veuillez remplir ces champs manuellement.</p>"
+                    "</div>"
+                ))
+                continue
 
             existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
             if not existing_dc:

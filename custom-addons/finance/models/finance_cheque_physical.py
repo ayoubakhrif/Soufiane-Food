@@ -290,7 +290,7 @@ Exemple:
                 dc_vals = {
                     'chq': final_chq,
                     'ste_id': final_ste_id,
-                    'amount': float(result.get('amount', 0)),
+                    'amount': float(result.get('amount') or 0),
                     'state': 'reserve',
                     'type': 'reserve',
                     'facture': 'm',

@@ -170,7 +170,7 @@ Votre but est d'extraire les informations suivantes.
 5. "date_echeance": La date écrite sur le chèque (en haut à droite, ex: 16/05/2026), au format YYYY-MM-DD.
 6. "date_emission": La date écrite sur le tampon ou cachet (souvent à gauche, ex: 18/05/2026), au format YYYY-MM-DD.
 7. "personne": Le nom de la personne (le deuxième nom écrit sur les tampons en bas, après "Remis à"). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
-8. "journal": Le numéro du journal (le chiffre écrit en haut du chèque, parfois à l'intérieur d'un cercle). Retournez UNIQUEMENT le chiffre (ex: 27 ou 1).
+8. "journal": Le numéro du journal (le chiffre entouré d'un cercle, souvent écrit au stylo en haut). Cherchez attentivement un chiffre encerclé (ex: 1, 2, 3...). Retournez UNIQUEMENT ce chiffre (ex: 1).
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown.
 Exemple:
@@ -182,7 +182,7 @@ Exemple:
   "date_echeance": "2026-05-16",
   "date_emission": "2026-05-18",
   "personne": "Abderzak",
-  "journal": 27
+  "journal": 1
 }}"""
 
             payload = {
@@ -282,10 +282,11 @@ Exemple:
 
             existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
             if not existing_dc:
-                # Clean journal text to integer
+                # Extract first sequence of digits for journal
                 raw_journal = str(result.get('journal', '0'))
-                clean_journal = "".join(filter(str.isdigit, raw_journal))
-                journal_num = int(clean_journal) if clean_journal else 0
+                import re
+                match = re.search(r'\d+', raw_journal)
+                journal_num = int(match.group()) if match else 0
 
                 dc_vals = {
                     'chq': final_chq,

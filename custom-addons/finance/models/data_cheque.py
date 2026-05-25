@@ -62,6 +62,7 @@ class DataCheque(models.Model):
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
         ('fret', 'Fret'),
+        ('thc', 'THC'),
         ('divers', 'Divers'),
         ('inspection', 'Inspection'),
         ('reserve', 'Reserve'),
@@ -329,14 +330,14 @@ class DataCheque(models.Model):
     #     ('unique_chq_ste', 'unique(chq, ste_id, type)', '⚠️ Ce numéro du chèque existe déja pour cette société pour ce type.')
     # ]
 
-    @api.constrains('chq', 'ste_id', 'benif_id', 'type')
+    @api.constrains('chq', 'ste_id', 'benif_id', 'type', 'state')
     def _check_custom_uniqueness(self):
         """Enforces strict uniqueness rules backend-side."""
         for rec in self:
             if not rec.chq or not rec.ste_id:
                 continue
 
-            if rec.type == 'reserve':
+            if rec.state == 'reserve':
                 continue
 
             domain = [
@@ -347,7 +348,7 @@ class DataCheque(models.Model):
             existing_records = self.search(domain)
 
             for ex in existing_records:
-                if ex.type == 'reserve':
+                if ex.state == 'reserve':
                     continue
 
                 # Same logic as Onchange

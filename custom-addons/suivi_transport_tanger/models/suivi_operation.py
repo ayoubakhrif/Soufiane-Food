@@ -24,7 +24,8 @@ class SuiviTransportTangerOperation(models.Model):
     state = fields.Selection([
         ('initial', 'Initial'),
         ('paid', 'Payé'),
-        ('validated', 'Validé')
+        ('validated', 'Validé'),
+        ('cancelled', 'Annulé')
     ], string='État', default='initial', tracking=True)
 
     line_ids = fields.One2many('suivi.transport.tanger.operation.line', 'operation_id', string='Détails des opérations')
@@ -61,22 +62,52 @@ class SuiviTransportTangerOperation(models.Model):
             if rec.credit > 0:
                 raise ValidationError(_("La validation n'est possible que si le crédit est de 0."))
             
-            # Créer l'avance si un client a payé un montant
+            # Créer ou mettre à jour l'avance si un client a payé un montant
             if rec.casa_payer_id and rec.montant > 0:
-                self.env['casa.client.advance'].sudo().with_context(is_transport_operation=True).create({
-                    'client_id': rec.casa_payer_id.id,
-                    'amount': rec.montant,
-                    'date': rec.date,
-                    'payment_mode': 'transport',
-                    'ville': rec.ville,
-                    'comment': f"Paiement transport {rec.name}",
-                    'state': 'confirmed',
-                })
+                existing_advance = self.env['casa.client.advance'].sudo().search([('comment', '=', f"Paiement transport {rec.name}")], limit=1)
+                if existing_advance:
+                    existing_advance.with_context(is_transport_operation=True).write({
+                        'client_id': rec.casa_payer_id.id,
+                        'amount': rec.montant,
+                        'date': rec.date,
+                        'ville': rec.ville,
+                        'state': 'confirmed',
+                    })
+                else:
+                    self.env['casa.client.advance'].sudo().with_context(is_transport_operation=True).create({
+                        'client_id': rec.casa_payer_id.id,
+                        'amount': rec.montant,
+                        'date': rec.date,
+                        'payment_mode': 'transport',
+                        'ville': rec.ville,
+                        'comment': f"Paiement transport {rec.name}",
+                        'state': 'confirmed',
+                    })
 
             rec.sudo().write({'state': 'validated'})
 
     def action_set_initial(self):
-        self.write({'state': 'initial'})
+        for rec in self:
+            rec.write({'state': 'initial'})
+            advance = self.env['casa.client.advance'].sudo().search([('comment', '=', f"Paiement transport {rec.name}")])
+            if advance:
+                advance.with_context(is_transport_operation=True).action_draft()
+
+    def action_cancel(self):
+        for rec in self:
+            rec.write({'state': 'cancelled'})
+            advance = self.env['casa.client.advance'].sudo().search([('comment', '=', f"Paiement transport {rec.name}")])
+            if advance:
+                advance.with_context(is_transport_operation=True).action_cancel()
+
+    def unlink(self):
+        for rec in self:
+            if rec.state not in ('initial', 'cancelled'):
+                raise ValidationError(_("Vous ne pouvez supprimer que les opérations à l'état Initial ou Annulé."))
+            advance = self.env['casa.client.advance'].sudo().search([('comment', '=', f"Paiement transport {rec.name}")])
+            if advance:
+                advance.with_context(is_transport_operation=True).unlink()
+        return super(SuiviTransportTangerOperation, self).unlink()
 
 class SuiviTransportTangerOperationLine(models.Model):
     _name = 'suivi.transport.tanger.operation.line'

@@ -33,6 +33,7 @@
                             <field name="type" widget="radio" options="{'horizontal': true}"/>
                         </group>
                         <group string="Synthèse">
+                            <field name="total_gasoil_sale" readonly="1" decoration-bf="1" invisible="type != 'gasoil'"/>
                             <field name="total_profit" readonly="1" decoration-bf="1"/>
                             <field name="distributed_amount" readonly="1" decoration-info="1"/>
                             <field name="remaining_amount" readonly="1" decoration-success="remaining_amount &gt; 0" decoration-danger="remaining_amount &lt; 0"/>

@@ -20,6 +20,12 @@ class TransportResultFollowup(models.Model):
         tracking=True
     )
     
+    total_gasoil_sale = fields.Float(
+        string='Total Vente Gazoil',
+        compute='_compute_total_profit',
+        store=False,
+    )
+    
     distributed_amount = fields.Float(
         string='Montant Distribué', 
         compute='_compute_amounts', 
@@ -47,8 +53,10 @@ class TransportResultFollowup(models.Model):
     @api.depends('type', 'line_ids.amount')
     def _compute_total_profit(self):
         for rec in self:
+            rec.total_gasoil_sale = 0.0
             if rec.type == 'gasoil':
                 records = self.env['gasoil.sale'].search([])
+                rec.total_gasoil_sale = sum(records.mapped('amount'))
             elif rec.type == 'transport_remorque':
                 records = self.env['transport.trip.remorque'].search([])
             else:

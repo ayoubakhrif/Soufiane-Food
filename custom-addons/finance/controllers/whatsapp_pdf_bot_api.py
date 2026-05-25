@@ -98,17 +98,18 @@ class WhatsAppFinancePdfController(http.Controller):
         messages = []
 
         try:
-            # Aggregate factures by type to avoid duplicate (chq, ste_id, type) constraints
-            aggregated_factures = {}
-            for inv in factures:
-                inv_type = inv.get('type', 'divers').lower()
-                inv_benif_name = inv.get('beneficiaire', '')
+            for idx, inv_data in enumerate(factures):
+                inv_amount = float(inv_data.get('montant', 0))
+                inv_type = inv_data.get('type', 'divers').lower()
+                inv_benif_name = inv_data.get('beneficiaire', '')
+                inv_facture_num = str(inv_data.get('numero_facture', '')).strip()
 
-                # Force the type according to beneficiary rules
+                # Match Beneficiaire
                 benif_record = False
                 if inv_benif_name:
                     benif_record = request.env['finance.benif'].sudo().search([('name', 'ilike', inv_benif_name)], limit=1)
 
+                # Force the type according to beneficiary rules
                 if benif_record:
                     if benif_record.type == 'divers':
                         inv_type = 'divers'
@@ -117,31 +118,6 @@ class WhatsAppFinancePdfController(http.Controller):
 
                 if inv_type not in ['magasinage', 'surestarie', 'change', 'fret', 'thc', 'divers', 'inspection']:
                     inv_type = 'divers'
-                    
-                if inv_type not in aggregated_factures:
-                    aggregated_factures[inv_type] = {
-                        'type': inv_type,
-                        'montant': 0.0,
-                        'beneficiaire': inv_benif_name,
-                        'numero_facture': []
-                    }
-                
-                aggregated_factures[inv_type]['montant'] += float(inv.get('montant', 0))
-                num = str(inv.get('numero_facture', '')).strip()
-                if num and num.lower() != 'none':
-                    if num not in aggregated_factures[inv_type]['numero_facture']:
-                        aggregated_factures[inv_type]['numero_facture'].append(num)
-
-            for idx, inv_data in enumerate(aggregated_factures.values()):
-                inv_amount = inv_data['montant']
-                inv_type = inv_data['type']
-                inv_benif_name = inv_data['beneficiaire']
-                inv_facture_nums = inv_data['numero_facture']
-
-                # Match Beneficiaire again for ID
-                benif_record = False
-                if inv_benif_name:
-                    benif_record = request.env['finance.benif'].sudo().search([('name', 'ilike', inv_benif_name)], limit=1)
 
                 # Prepare values
                 vals = {
@@ -152,10 +128,9 @@ class WhatsAppFinancePdfController(http.Controller):
                 if benif_record:
                     vals['benif_id'] = benif_record.id
 
-                if inv_facture_nums:
+                if inv_facture_num and inv_facture_num.lower() != 'none':
                     vals['facture'] = 'fact'
-                    # Join multiple invoice numbers
-                    vals['serie'] = ", ".join(inv_facture_nums)[:100]
+                    vals['serie'] = inv_facture_num[:100]
                 else:
                     vals['facture'] = 'm'
                     vals['serie'] = False
@@ -202,9 +177,9 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
    - Le "type" de frais. 
 
 Règles strictes pour le "type" de frais :
-- Si la facture indique (Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention...) -> choisissez "thc"
-- Si la facture indique (Free det, detention, demurage fee, demurage...) -> choisissez "surestarie"
-- Si la facture indique (Terminal storage, taxe regional) -> choisissez "magasinage"
+- Si la facture indique (THC, Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention...) -> choisissez "thc"
+- Si la facture indique (Surestarie, Free det, detention, demurage fee, demurage...) -> choisissez "surestarie"
+- Si la facture indique (Magasinage, Terminal storage, taxe regional) -> choisissez "magasinage"
 
 - Voici la liste des bénéficiaires de type IMPORTATION : {import_list_str}. Si le bénéficiaire correspond à l'un de ces noms (ou s'il s'agit d'un acteur maritime/portuaire/douanier), vous NE DEVEZ JAMAIS choisir "divers". Vous devez OBLIGATOIREMENT choisir l'un de ces types : "magasinage", "surestarie", "thc", "inspection", "change", ou "fret".
 - Voici la liste des bénéficiaires de type DIVERS : {divers_list_str}. Si le bénéficiaire correspond à l'un de ces noms, vous DEVEZ OBLIGATOIREMENT choisir "divers".{feedback_instruction}

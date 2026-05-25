@@ -215,80 +215,90 @@ Exemple:
                 if resp.status_code != 200:
                     continue
                 ai_data = resp.json()
-
-                raw_content = ""
-                for output_item in ai_data.get("output", []):
-                    for content_item in output_item.get("content", []):
-                        if content_item.get("type") == "output_text":
-                            raw_content = content_item.get("text", "")
-                            break
-
-                if not raw_content:
-                    continue
-
-                result = json.loads(raw_content)
-
-                ste_code = result.get('ste', '')
-                ste_record = False
-                if ste_code:
-                    ste_record = self.env['finance.ste'].search([('name', '=ilike', ste_code)], limit=1)
-                
-                benif_name = result.get('beneficiaire', '')
-                benif_record = False
-                if benif_name:
-                    benif_record = self.env['finance.benif'].search([('name', '=ilike', benif_name)], limit=1)
-                    if not benif_record:
-                        benif_record = self.env['finance.benif'].search([('name', 'ilike', benif_name)], limit=1)
-
-                perso_name = result.get('personne', '')
-                perso_record = False
-                if perso_name:
-                    perso_record = self.env['finance.perso'].search([('name', '=ilike', perso_name)], limit=1)
-                    if not perso_record:
-                        perso_record = self.env['finance.perso'].search([('name', 'ilike', perso_name)], limit=1)
-
-                update_vals = {}
-                if result.get('chq') and result.get('chq') != rec.name:
-                    update_vals['name'] = result.get('chq')
-                if ste_record and ste_record.id != rec.ste_id.id:
-                    update_vals['ste_id'] = ste_record.id
-                
-                if update_vals:
-                    rec.sudo().write(update_vals)
-
-                existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
-                if not existing_dc:
-                    dc_vals = {
-                        'chq': result.get('chq') or rec.name,
-                        'ste_id': ste_record.id if ste_record else rec.ste_id.id,
-                        'amount': float(result.get('amount', 0)),
-                        'state': 'reserve',
-                        'type': 'reserve',
-                        'facture': 'm',
-                        'physical_cheque_id': rec.id,
-                    }
-                    if benif_record:
-                        dc_vals['benif_id'] = benif_record.id
-                    if perso_record:
-                        dc_vals['perso_id'] = perso_record.id
-                    if result.get('date_emission'):
-                        dc_vals['date_emission'] = result.get('date_emission')
-                    if result.get('date_echeance'):
-                        dc_vals['date_echeance'] = result.get('date_echeance')
-                        
-                    self.env['datacheque'].sudo().create(dc_vals)
-                    
-                    from markupsafe import Markup
-                    rec.message_post(body=Markup(
-                        "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
-                        "<span style='color:#007bff;font-size:15px;'><i class='fa fa-robot'></i>&nbsp;<b>IA : Datacheque Créé</b></span>"
-                        "<p style='margin:4px 0 0;'>Le système a extrait les données du PDF 'chèque vide' et a créé le datacheque automatiquement.</p>"
-                        "</div>"
-                    ))
-
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).error(f"Error AI extract datacheque: {str(e)}")
+                continue
+
+            raw_content = ""
+            for output_item in ai_data.get("output", []):
+                for content_item in output_item.get("content", []):
+                    if content_item.get("type") == "output_text":
+                        raw_content = content_item.get("text", "")
+                        break
+
+            if not raw_content:
+                continue
+
+            result = json.loads(raw_content)
+
+            ste_code = result.get('ste', '')
+            ste_record = False
+            if ste_code:
+                ste_record = self.env['finance.ste'].search([('name', '=ilike', ste_code)], limit=1)
+            
+            benif_name = result.get('beneficiaire', '')
+            benif_record = False
+            if benif_name:
+                benif_record = self.env['finance.benif'].search([('name', '=ilike', benif_name)], limit=1)
+                if not benif_record:
+                    benif_record = self.env['finance.benif'].search([('name', 'ilike', benif_name)], limit=1)
+
+            perso_name = result.get('personne', '')
+            perso_record = False
+            if perso_name:
+                perso_record = self.env['finance.perso'].search([('name', '=ilike', perso_name)], limit=1)
+                if not perso_record:
+                    perso_record = self.env['finance.perso'].search([('name', 'ilike', perso_name)], limit=1)
+
+            update_vals = {}
+            final_chq = result.get('chq') or rec.name
+            final_ste_id = ste_record.id if ste_record else rec.ste_id.id
+
+            if not final_ste_id:
+                from odoo.exceptions import ValidationError
+                raise ValidationError(f"L'IA n'a pas pu identifier la société ({ste_code}) et aucune société n'a été saisie manuellement. Veuillez remplir le champ Société.")
+            if not final_chq:
+                from odoo.exceptions import ValidationError
+                raise ValidationError("L'IA n'a pas pu identifier le numéro de chèque et il n'a pas été saisi. Veuillez le remplir manuellement.")
+
+            if final_chq != rec.name:
+                update_vals['name'] = final_chq
+            if final_ste_id != rec.ste_id.id:
+                update_vals['ste_id'] = final_ste_id
+            
+            if update_vals:
+                rec.sudo().write(update_vals)
+
+            existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
+            if not existing_dc:
+                dc_vals = {
+                    'chq': final_chq,
+                    'ste_id': final_ste_id,
+                    'amount': float(result.get('amount', 0)),
+                    'state': 'reserve',
+                    'type': 'reserve',
+                    'facture': 'm',
+                    'physical_cheque_id': rec.id,
+                }
+                if benif_record:
+                    dc_vals['benif_id'] = benif_record.id
+                if perso_record:
+                    dc_vals['perso_id'] = perso_record.id
+                if result.get('date_emission'):
+                    dc_vals['date_emission'] = result.get('date_emission')
+                if result.get('date_echeance'):
+                    dc_vals['date_echeance'] = result.get('date_echeance')
+                    
+                self.env['datacheque'].sudo().create(dc_vals)
+                
+                from markupsafe import Markup
+                rec.message_post(body=Markup(
+                    "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
+                    "<span style='color:#007bff;font-size:15px;'><i class='fa fa-robot'></i>&nbsp;<b>IA : Datacheque Créé</b></span>"
+                    "<p style='margin:4px 0 0;'>Le système a extrait les données du PDF 'chèque vide' et a créé le datacheque automatiquement.</p>"
+                    "</div>"
+                ))
 
     def action_verify_cheque_ai(self):
         self.ensure_one()

@@ -118,6 +118,178 @@ class FinanceChequePhysical(models.Model):
     # ------------------------------------------------------------
     # VÉRIFICATION IA — Copie physique du chèque
     # ------------------------------------------------------------
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super(FinanceChequePhysical, self).create(vals_list)
+        for rec in records:
+            if rec.chq_vide_pdf:
+                rec._extract_and_create_datacheque()
+        return records
+
+    def write(self, vals):
+        res = super(FinanceChequePhysical, self).write(vals)
+        if 'chq_vide_pdf' in vals and vals['chq_vide_pdf']:
+            for rec in self:
+                rec._extract_and_create_datacheque()
+        return res
+
+    def _extract_and_create_datacheque(self):
+        for rec in self:
+            if not rec.chq_vide_pdf:
+                continue
+
+            api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+            if not api_key:
+                continue
+
+            import requests
+            import json
+
+            pdf_b64 = rec.chq_vide_pdf.decode('utf-8') if isinstance(rec.chq_vide_pdf, bytes) else rec.chq_vide_pdf
+
+            benifs = self.env['finance.benif'].sudo().search([])
+            benifs_names = ", ".join(benifs.mapped('name'))
+
+            persos = self.env['finance.perso'].sudo().search([])
+            persos_names = ", ".join(persos.mapped('name'))
+            
+            stes = self.env['finance.ste'].sudo().search([])
+            stes_names = ", ".join(stes.mapped('name'))
+
+            prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque.
+Votre but est d'extraire les informations suivantes.
+1. "chq": Le numéro du chèque (généralement 7 chiffres, ex: 2102888).
+2. "ste": L'abréviation de la société émettrice. Essayez de faire correspondre exactement avec l'une de ces abréviations : {stes_names}. (Ex: si 'SOUFIANE NUTS' sur le chèque, répondez 'SN').
+3. "amount": Le montant du chèque (uniquement des chiffres).
+4. "beneficiaire": Le bénéficiaire (à l'ordre de). Essayez de faire correspondre avec l'un de ces noms : {benifs_names}.
+5. "date_echeance": La date écrite sur le chèque (en haut à droite, ex: 16/05/2026), au format YYYY-MM-DD.
+6. "date_emission": La date écrite sur le tampon ou cachet (souvent à gauche, ex: 18/05/2026), au format YYYY-MM-DD.
+7. "personne": Le nom de la personne (le deuxième nom écrit sur les tampons en bas, après "Remis à"). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
+
+Retournez UNIQUEMENT un objet JSON valide, sans markdown.
+Exemple:
+{{
+  "chq": "2102888",
+  "ste": "SN",
+  "amount": 18746.43,
+  "beneficiaire": "AFRICONTAINER",
+  "date_echeance": "2026-05-16",
+  "date_emission": "2026-05-18",
+  "personne": "Abderzak"
+}}"""
+
+            payload = {
+                "model": "gpt-4o",
+                "input": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "input_file",
+                                "filename": "cheque.pdf",
+                                "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                            },
+                            {
+                                "type": "input_text",
+                                "text": prompt_text
+                            }
+                        ]
+                    }
+                ],
+                "text": {
+                    "format": {
+                        "type": "json_object"
+                    }
+                },
+                "temperature": 0.0,
+                "max_output_tokens": 800
+            }
+
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+
+            try:
+                resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=60)
+                if resp.status_code != 200:
+                    continue
+                ai_data = resp.json()
+
+                raw_content = ""
+                for output_item in ai_data.get("output", []):
+                    for content_item in output_item.get("content", []):
+                        if content_item.get("type") == "output_text":
+                            raw_content = content_item.get("text", "")
+                            break
+
+                if not raw_content:
+                    continue
+
+                result = json.loads(raw_content)
+
+                ste_code = result.get('ste', '')
+                ste_record = False
+                if ste_code:
+                    ste_record = self.env['finance.ste'].search([('name', '=ilike', ste_code)], limit=1)
+                
+                benif_name = result.get('beneficiaire', '')
+                benif_record = False
+                if benif_name:
+                    benif_record = self.env['finance.benif'].search([('name', '=ilike', benif_name)], limit=1)
+                    if not benif_record:
+                        benif_record = self.env['finance.benif'].search([('name', 'ilike', benif_name)], limit=1)
+
+                perso_name = result.get('personne', '')
+                perso_record = False
+                if perso_name:
+                    perso_record = self.env['finance.perso'].search([('name', '=ilike', perso_name)], limit=1)
+                    if not perso_record:
+                        perso_record = self.env['finance.perso'].search([('name', 'ilike', perso_name)], limit=1)
+
+                update_vals = {}
+                if result.get('chq') and result.get('chq') != rec.name:
+                    update_vals['name'] = result.get('chq')
+                if ste_record and ste_record.id != rec.ste_id.id:
+                    update_vals['ste_id'] = ste_record.id
+                
+                if update_vals:
+                    rec.sudo().write(update_vals)
+
+                existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
+                if not existing_dc:
+                    dc_vals = {
+                        'chq': result.get('chq') or rec.name,
+                        'ste_id': ste_record.id if ste_record else rec.ste_id.id,
+                        'amount': float(result.get('amount', 0)),
+                        'state': 'reserve',
+                        'type': 'reserve',
+                        'facture': 'm',
+                        'physical_cheque_id': rec.id,
+                    }
+                    if benif_record:
+                        dc_vals['benif_id'] = benif_record.id
+                    if perso_record:
+                        dc_vals['perso_id'] = perso_record.id
+                    if result.get('date_emission'):
+                        dc_vals['date_emission'] = result.get('date_emission')
+                    if result.get('date_echeance'):
+                        dc_vals['date_echeance'] = result.get('date_echeance')
+                        
+                    self.env['datacheque'].sudo().create(dc_vals)
+                    
+                    from markupsafe import Markup
+                    rec.message_post(body=Markup(
+                        "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
+                        "<span style='color:#007bff;font-size:15px;'><i class='fa fa-robot'></i>&nbsp;<b>IA : Datacheque Créé</b></span>"
+                        "<p style='margin:4px 0 0;'>Le système a extrait les données du PDF 'chèque vide' et a créé le datacheque automatiquement.</p>"
+                        "</div>"
+                    ))
+
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Error AI extract datacheque: {str(e)}")
+
     def action_verify_cheque_ai(self):
         self.ensure_one()
 

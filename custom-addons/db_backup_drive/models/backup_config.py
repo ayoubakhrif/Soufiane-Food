@@ -40,7 +40,8 @@ class DbBackupDriveConfig(models.Model):
     last_backup_date = fields.Datetime(string="Last Backup Date", readonly=True)
     last_backup_status = fields.Selection([
         ('success', 'Success'),
-        ('failed', 'Failed')
+        ('failed', 'Failed'),
+        ('in_progress', 'In Progress')
     ], string="Last Backup Status", readonly=True)
     error_message = fields.Text(string="Error Message", readonly=True)
 
@@ -125,10 +126,19 @@ class DbBackupDriveConfig(models.Model):
             env = api.Environment(cr, odoo.SUPERUSER_ID, {})
             config = env['db.backup.drive.config'].browse(record_id)
             try:
+                config.write({
+                    'last_backup_status': 'in_progress',
+                    'error_message': 'Le backup est en cours d\'exécution en arrière-plan...'
+                })
+                cr.commit()
                 config._perform_backup()
                 cr.commit()
             except Exception as e:
                 # Commit the error state so the user can see it in the UI!
+                config.write({
+                    'last_backup_status': 'failed',
+                    'error_message': f'Erreur critique du thread: {str(e)}'
+                })
                 cr.commit()
                 _logger.exception("Background backup failed: " + str(e))
 
@@ -164,6 +174,9 @@ class DbBackupDriveConfig(models.Model):
             try:
                 with open(temp_file_path, 'wb') as f:
                     db.dump_db(db_name, f, backup_format='zip')
+                
+                file_size_mb = os.path.getsize(temp_file_path) / (1024 * 1024)
+                _logger.info(f"Database dump completed successfully. File size: {file_size_mb:.2f} MB. Starting upload to Google Drive...")
                 
                 # 2. Authenticate with Google OAuth2
                 creds = Credentials(

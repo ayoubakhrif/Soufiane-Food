@@ -165,6 +165,7 @@ Votre but est d'extraire les informations suivantes.
 5. "date_echeance": La date écrite sur le chèque (en haut à droite, ex: 16/05/2026), au format YYYY-MM-DD.
 6. "date_emission": La date écrite sur le tampon ou cachet (souvent à gauche, ex: 18/05/2026), au format YYYY-MM-DD.
 7. "personne": Le nom de la personne (le deuxième nom écrit sur les tampons en bas, après "Remis à"). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
+8. "journal": Le numéro du journal (le chiffre écrit en haut du chèque, parfois à l'intérieur d'un cercle). Retournez UNIQUEMENT le chiffre (ex: 27 ou 1).
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown.
 Exemple:
@@ -175,7 +176,8 @@ Exemple:
   "beneficiaire": "AFRICONTAINER",
   "date_echeance": "2026-05-16",
   "date_emission": "2026-05-18",
-  "personne": "Abderzak"
+  "personne": "Abderzak",
+  "journal": 27
 }}"""
 
             payload = {

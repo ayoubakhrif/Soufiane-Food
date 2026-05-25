@@ -125,8 +125,9 @@ class DbBackupDriveConfig(models.Model):
                 config._perform_backup()
                 cr.commit()
             except Exception as e:
-                cr.rollback()
-                _logger.exception("Background backup failed")
+                # Commit the error state so the user can see it in the UI!
+                cr.commit()
+                _logger.exception("Background backup failed: " + str(e))
 
     @api.model
     def _run_scheduled_backup(self):

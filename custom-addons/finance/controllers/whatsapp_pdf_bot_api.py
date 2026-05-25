@@ -212,17 +212,17 @@ Règles strictes pour le "type" de frais :
 Règles de formatage :
 - Retournez UNIQUEMENT un objet JSON valide, sans formatage markdown, sans explications.
 - Le JSON doit suivre cette structure exacte :
-{
+{{
   "chq_number": "1234567",
   "factures": [
-    {
+    {{
       "montant": 10500.50,
       "beneficiaire": "Tanger Med",
       "type": "magasinage",
-      "numero_facture": "F-2023-001"
-    }
+      "numero_facture": "2023-001"
+    }}
   ]
-}
+}}
 """
         
         payload = {

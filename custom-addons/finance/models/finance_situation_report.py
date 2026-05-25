@@ -27,6 +27,10 @@ class ReportFinanceSituation(models.AbstractModel):
             if data and data.get('encours_only') and state in ['bureau', 'annule']:
                 continue
 
+            # Exclude cheques that have an encashment date since they are already cashed
+            if data and data.get('encours_only') and any(d.date_encaissement for d in physical.datacheque_ids):
+                continue
+
             type_selection = {
                 'magasinage': 'Magasinage',
                 'surestarie': 'Surestarie',

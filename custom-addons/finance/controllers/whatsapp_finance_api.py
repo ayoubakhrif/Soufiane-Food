@@ -527,6 +527,8 @@ class WhatsAppFinanceController(http.Controller):
             summary_msg += f"• Utilisés: {stats['used']}\n"
             summary_msg += f"• Restants: {stats['remaining']}\n"
             summary_msg += f"• État: *{stats['etat']}*"
+            if talon.last_used_chq:
+                summary_msg += f"\n• Dernier chèque sorti: *{talon.last_used_chq}*"
 
             from odoo import fields
             return {

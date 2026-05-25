@@ -185,9 +185,10 @@
                         <thead>
                             <tr>
                                 <th style="width: 12%;">N° Chèque</th>
-                                <th style="text-align: left; width: 20%;">Société</th>
+                                <th style="text-align: left; width: 15%;">Société</th>
                                 <th style="text-align: left; width: 25%;">Bénéficiaire</th>
-                                <th style="text-align: left; width: 20%;">Personne</th>
+                                <th style="text-align: left; width: 15%;">Personne</th>
+                                <th style="text-align: left; width: 10%;">Type</th>
                                 <th style="width: 10%;">Échéance</th>
                                 <th style="text-align: right; width: 13%;">Montant</th>
                             </tr>
@@ -199,6 +200,7 @@
                                     <td class="ste-cell" style="text-align: left;"><t t-esc="item['ste']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['benif']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['perso']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['type']"/></td>
                                     <td>
                                         <t t-if="item['date_echeance']">
                                             <t t-esc="item['date_echeance'].strftime('%d/%m/%Y')"/>
@@ -209,14 +211,14 @@
                             </t>
                             <t t-if="not reserve_list">
                                 <tr>
-                                    <td colspan="6" style="padding: 15px; font-style: italic; color: #666;">
+                                    <td colspan="7" style="padding: 15px; font-style: italic; color: #666;">
                                         Aucun chèque en réserve.
                                     </td>
                                 </tr>
                             </t>
                             <t t-if="reserve_list">
                                 <tr class="total-cell">
-                                    <td colspan="5" style="text-align: left; font-weight: bold;">TOTAL RÉSERVE</td>
+                                    <td colspan="6" style="text-align: left; font-weight: bold;">TOTAL RÉSERVE</td>
                                     <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_reserve_amount).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
@@ -229,9 +231,10 @@
                         <thead>
                             <tr>
                                 <th style="width: 15%;">N° Chèque</th>
-                                <th style="text-align: left; width: 25%;">Société</th>
-                                <th style="text-align: left; width: 25%;">Bénéficiaire</th>
-                                <th style="text-align: left; width: 20%;">Personne</th>
+                                <th style="text-align: left; width: 20%;">Société</th>
+                                <th style="text-align: left; width: 20%;">Bénéficiaire</th>
+                                <th style="text-align: left; width: 15%;">Personne</th>
+                                <th style="text-align: left; width: 15%;">Type</th>
                                 <th style="text-align: right; width: 15%;">Montant</th>
                             </tr>
                         </thead>
@@ -242,19 +245,20 @@
                                     <td class="ste-cell" style="text-align: left;"><t t-esc="item['ste']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['benif']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['perso']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['type']"/></td>
                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
                             <t t-if="not bureau_list">
                                 <tr>
-                                    <td colspan="5" style="padding: 15px; font-style: italic; color: #666;">
+                                    <td colspan="6" style="padding: 15px; font-style: italic; color: #666;">
                                         Aucun chèque bureau.
                                     </td>
                                 </tr>
                             </t>
                             <t t-if="bureau_list">
                                 <tr class="total-cell">
-                                    <td colspan="4" style="text-align: left; font-weight: bold;">TOTAL BUREAU</td>
+                                    <td colspan="5" style="text-align: left; font-weight: bold;">TOTAL BUREAU</td>
                                     <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_bureau_amount).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
@@ -267,9 +271,10 @@
                         <thead>
                             <tr>
                                 <th style="width: 15%;">N° Chèque</th>
-                                <th style="text-align: left; width: 25%;">Société</th>
-                                <th style="text-align: left; width: 25%;">Bénéficiaire</th>
-                                <th style="text-align: left; width: 20%;">Personne</th>
+                                <th style="text-align: left; width: 20%;">Société</th>
+                                <th style="text-align: left; width: 20%;">Bénéficiaire</th>
+                                <th style="text-align: left; width: 15%;">Personne</th>
+                                <th style="text-align: left; width: 15%;">Type</th>
                                 <th style="text-align: right; width: 15%;">Montant</th>
                             </tr>
                         </thead>
@@ -280,19 +285,20 @@
                                     <td class="ste-cell" style="text-align: left;"><t t-esc="item['ste']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['benif']"/></td>
                                     <td style="text-align: left;"><t t-esc="item['perso']"/></td>
+                                    <td style="text-align: left;"><t t-esc="item['type']"/></td>
                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(item['amount']).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>
                             <t t-if="not annule_list">
                                 <tr>
-                                    <td colspan="5" style="padding: 15px; font-style: italic; color: #666;">
+                                    <td colspan="6" style="padding: 15px; font-style: italic; color: #666;">
                                         Aucun chèque annulé.
                                     </td>
                                 </tr>
                             </t>
                             <t t-if="annule_list">
                                 <tr class="total-cell">
-                                    <td colspan="4" style="text-align: left; font-weight: bold;">TOTAL ANNULÉS</td>
+                                    <td colspan="5" style="text-align: left; font-weight: bold;">TOTAL ANNULÉS</td>
                                     <td class="amount-cell" style="text-align: right;"><t t-esc="'{:,.2f}'.format(total_annule_amount).replace(',', ' ')"/> DH</td>
                                 </tr>
                             </t>

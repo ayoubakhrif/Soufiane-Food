@@ -3,7 +3,8 @@ const {
     useMultiFileAuthState,
     DisconnectReason,
     getContentType,
-    fetchLatestBaileysVersion
+    fetchLatestBaileysVersion,
+    downloadMediaMessage
 } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
 const qrcode = require('qrcode-terminal');
@@ -24,6 +25,7 @@ const DOUANE_GROUP_ID = "120363406635335778@g.us";
 const SORTIE_GROUP_ID = "120363424919316319@g.us";
 const CASA_CORRECTION_GROUP_ID = "120363049891261462@g.us";
 const PRICE_GROUP_ID = "120363428923348892@g.us";
+const FINANCE_PDF_GROUP_ID = "120363426857783962@g.us";
 
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
@@ -35,6 +37,7 @@ const LOGISTICS_PAYMENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whats
 const DOUANE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/douane?db=soufianefoods";
 const SORTIE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/sortie?db=soufianefoods";
 const CASA_CORRECTION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/casa_correction?db=soufianefoods";
+const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance/pdf?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -92,10 +95,13 @@ async function connectToWhatsApp() {
             if (!msg.message || msg.key.fromMe) continue;
 
             const from = msg.key.remoteJid;
-            const text = (getContentType(msg.message) === 'conversation') ? msg.message.conversation :
-                (getContentType(msg.message) === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : '';
+            let text = (getContentType(msg.message) === 'conversation') ? msg.message.conversation :
+                (getContentType(msg.message) === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : 
+                (getContentType(msg.message) === 'documentWithCaptionMessage') ? msg.message.documentWithCaptionMessage.message.documentMessage.caption : '';
 
-            if (!text) continue;
+            const isDocument = !!(msg.message.documentMessage || msg.message.documentWithCaptionMessage);
+
+            if (!text && !isDocument) continue;
 
             console.log(`Message de ${from} : "${text}"`);
             let realMessage = text;
@@ -130,6 +136,9 @@ async function connectToWhatsApp() {
                 isClientRequest = false;
             } else if (from === CASA_CORRECTION_GROUP_ID) {
                 targetOdooUrl = CASA_CORRECTION_ODOO_URL;
+                isClientRequest = false;
+            } else if (from === FINANCE_PDF_GROUP_ID) {
+                targetOdooUrl = FINANCE_PDF_ODOO_URL;
                 isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
@@ -190,15 +199,39 @@ async function connectToWhatsApp() {
                 else if (from === DOUANE_GROUP_ID) typeStr = "DOUANE";
                 else if (from === SORTIE_GROUP_ID) typeStr = "SORTIE";
                 else if (from === CASA_CORRECTION_GROUP_ID) typeStr = "CASA_CORR";
+                else if (from === FINANCE_PDF_GROUP_ID) typeStr = "FINANCE_PDF";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
+                
+                const requestParams = {
+                    message: realMessage,
+                    sender: from, // Used by stock_kal3iya
+                    group_id: from // Used by others
+                };
+
+                // Si c'est un PDF pour le bot finance, on le télécharge
+                if (from === FINANCE_PDF_GROUP_ID && isDocument) {
+                    try {
+                        console.log("Téléchargement du document PDF...");
+                        const buffer = await downloadMediaMessage(
+                            msg,
+                            'buffer',
+                            { },
+                            { logger: pino({ level: 'silent' }), reuploadRequest: sock.updateMediaMessage }
+                        );
+                        requestParams.pdf_base64 = buffer.toString('base64');
+                        
+                        const docMsg = msg.message.documentMessage || msg.message.documentWithCaptionMessage?.message?.documentMessage;
+                        requestParams.file_name = docMsg?.fileName || 'document.pdf';
+                        console.log(`Fichier ${requestParams.file_name} prêt à être envoyé à Odoo.`);
+                    } catch (err) {
+                        console.error("Erreur de téléchargement du media:", err);
+                    }
+                }
+
                 const response = await axios.post(targetOdooUrl, {
                     jsonrpc: "2.0",
-                    params: {
-                        message: realMessage,
-                        sender: from, // Used by stock_kal3iya
-                        group_id: from // Used by others
-                    }
+                    params: requestParams
                 }, {
                     headers: {
                         'X-Api-Key': API_KEY,

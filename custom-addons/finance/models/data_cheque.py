@@ -63,6 +63,7 @@ class DataCheque(models.Model):
         ('change', 'Change'),
         ('fret', 'Fret'),
         ('divers', 'Divers'),
+        ('inspection', 'Inspection'),
         ('reserve', 'Reserve'),
         ('bureau','Bureau'),
         ('annule','Annulé'),
@@ -323,15 +324,19 @@ class DataCheque(models.Model):
             if rec.chq and len(rec.chq) != 7:
                 raise ValidationError("Le numéro de chèque doit contenir exactement 7 caractères.")
 
-    _sql_constraints = [
-        ('unique_chq_ste', 'unique(chq, ste_id, type)', '⚠️ Ce numéro du chèque existe déja pour cette société pour ce type.')
-    ]
+    # Les contraintes SQL ont été retirées pour permettre les doublons si type == 'reserve'
+    # _sql_constraints = [
+    #     ('unique_chq_ste', 'unique(chq, ste_id, type)', '⚠️ Ce numéro du chèque existe déja pour cette société pour ce type.')
+    # ]
 
     @api.constrains('chq', 'ste_id', 'benif_id', 'type')
     def _check_custom_uniqueness(self):
         """Enforces strict uniqueness rules backend-side."""
         for rec in self:
             if not rec.chq or not rec.ste_id:
+                continue
+
+            if rec.type == 'reserve':
                 continue
 
             domain = [
@@ -342,6 +347,9 @@ class DataCheque(models.Model):
             existing_records = self.search(domain)
 
             for ex in existing_records:
+                if ex.type == 'reserve':
+                    continue
+
                 # Same logic as Onchange
                 current_is_import = (rec.benif_id.type == 'import')
                 ex_is_import = (ex.benif_id.type == 'import')

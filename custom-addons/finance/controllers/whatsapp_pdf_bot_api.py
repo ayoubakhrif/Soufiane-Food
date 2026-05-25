@@ -173,13 +173,14 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
 2. Pour chaque facture, extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.
-   - Le numéro de la facture (UNIQUEMENT le numéro exact de la facture, sans le préfixe F/ ou Facture). S'il n'y en a pas, mettez une chaine vide "".
+   - Le numéro de la facture (UNIQUEMENT le numéro exact, sans le préfixe F/ ou Facture. Cherchez les numéros isolés en haut comme TI-...). S'il n'y en a pas, mettez une chaine vide "".
    - Le "type" de frais. 
 
 Règles strictes pour le "type" de frais :
-- Si la facture indique (THC, Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention, change...) -> choisissez "thc"
-- Si la facture indique (Surestarie, Free det, detention, demurage fee, demurage...) -> choisissez "surestarie"
-- Si la facture indique (Magasinage, Magasinage eurogate, Terminal storage, taxe regional) -> choisissez "magasinage"
+- Si la facture indique (Magasinage, Magasinage Eurogate, Terminal storage, taxe regional) -> VOUS DEVEZ ABSOLUMENT choisir "magasinage".
+- Si la facture indique (Surestarie, Free det, detention, demurage fee, demurage...) -> choisissez "surestarie".
+- Si la facture indique (THC, Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention...) -> choisissez "thc".
+- PRIORITÉ: Si le mot "MAGASINAGE" apparait, c'est obligatoirement "magasinage".
 
 - Voici la liste des bénéficiaires de type IMPORTATION : {import_list_str}. Si le bénéficiaire correspond à l'un de ces noms (ou s'il s'agit d'un acteur maritime/portuaire/douanier), vous NE DEVEZ JAMAIS choisir "divers". Vous devez OBLIGATOIREMENT choisir l'un de ces types : "magasinage", "surestarie", "thc", "inspection", "change", ou "fret".
 - Voici la liste des bénéficiaires de type DIVERS : {divers_list_str}. Si le bénéficiaire correspond à l'un de ces noms, vous DEVEZ OBLIGATOIREMENT choisir "divers".{feedback_instruction}

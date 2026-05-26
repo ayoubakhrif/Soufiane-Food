@@ -1,9 +1,9 @@
-from odoo import models, fields, api
+ï»¿from odoo import models, fields, api
 
 
 class TresoreriePaiement(models.Model):
     _name = 'tresorerie_chq.paiement'
-    _description = 'Paiement (TrÃ©sorerie ChÃ¨ques & Effets)'
+    _description = 'Paiement (TrÃƒÂ©sorerie ChÃƒÂ¨ques & Effets)'
     _order = 'create_date desc'
 
     client_id = fields.Many2one(
@@ -14,7 +14,7 @@ class TresoreriePaiement(models.Model):
     )
 
     payment_type = fields.Selection([
-        ('cheque', 'ChÃ¨ques'),
+        ('cheque', 'ChÃƒÂ¨ques'),
         ('effet', 'Effets'),
     ], string='Type de paiement', required=True, default='cheque')
 
@@ -30,12 +30,12 @@ class TresoreriePaiement(models.Model):
     )
 
     # ------------------------------------------------------------------
-    # ChÃ¨ques et Effets: separate detail lines
+    # ChÃƒÂ¨ques et Effets: separate detail lines
     # ------------------------------------------------------------------
     cheque_line_ids = fields.One2many(
         'tresorerie_chq.cheque',
         'paiement_id',
-        string='ChÃ¨ques',
+        string='ChÃƒÂ¨ques',
     )
 
     effet_line_ids = fields.One2many(
@@ -54,7 +54,7 @@ class TresoreriePaiement(models.Model):
 
     # Computed single check date for backward/sorting compatibility
     check_date = fields.Date(
-        string='Date d\'Ã©chÃ©ance',
+        string='Date d\'ÃƒÂ©chÃƒÂ©ance',
         compute='_compute_check_date',
         store=True,
     )
@@ -97,12 +97,12 @@ class TresoreriePaiement(models.Model):
         self.ensure_one()
         if not self.scan_document:
             from odoo.exceptions import UserError
-            raise UserError("Veuillez d'abord uploader un document scanné.")
+            raise UserError("Veuillez d'abord uploader un document scannÃ©.")
 
         api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not api_key:
             from odoo.exceptions import UserError
-            raise UserError("La clé API OpenAI n'est pas configurée (whatsapp_stock.openai_key).")
+            raise UserError("La clÃ© API OpenAI n'est pas configurÃ©e (whatsapp_stock.openai_key).")
 
         import requests
         import json
@@ -112,19 +112,19 @@ class TresoreriePaiement(models.Model):
         banks = self.env['tresorerie_chq.bank'].sudo().search([])
         bank_names = ", ".join(banks.mapped('name'))
 
-        doc_type = "chèques" if self.payment_type == 'cheque' else "effets"
+        doc_type = "chÃ¨ques" if self.payment_type == 'cheque' else "effets"
 
-        prompt_text = f\"\"\"Vous êtes un assistant financier. Vous recevez un scan PDF contenant un ou plusieurs {doc_type}.
-Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvé dans le document.
+        prompt_text = f\"\"\"Vous Ãªtes un assistant financier. Vous recevez un scan PDF contenant un ou plusieurs {doc_type}.
+Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvÃ© dans le document.
 
-Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste nommée "items".
-Pour chaque élément, extrayez :
-1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres pour un chèque).
+Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste nommÃ©e "items".
+Pour chaque Ã©lÃ©ment, extrayez :
+1. "numero": Le numÃ©ro du {doc_type[:-1]} (gÃ©nÃ©ralement 7 chiffres pour un chÃ¨que).
 2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50).
-3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
+3. "date_echeance": La date d'Ã©chÃ©ance Ã©crite sur le document, au format YYYY-MM-DD.
 4. "banque": Le nom de la banque visible sur le document. Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
 
-Exemple de réponse attendue:
+Exemple de rÃ©ponse attendue:
 {{
   "items": [
     {{
@@ -189,18 +189,18 @@ Exemple de réponse attendue:
 
         if not raw_content:
             from odoo.exceptions import UserError
-            raise UserError("L'IA n'a retourné aucune donnée lisible.")
+            raise UserError("L'IA n'a retournÃ© aucune donnÃ©e lisible.")
 
         try:
             result = json.loads(raw_content)
         except Exception:
             from odoo.exceptions import UserError
-            raise UserError(f"L'IA a retourné un format JSON invalide : {raw_content}")
+            raise UserError(f"L'IA a retournÃ© un format JSON invalide : {raw_content}")
 
         items = result.get('items', [])
         if not items:
             from odoo.exceptions import UserError
-            raise UserError("Aucun chèque/effet n'a pu être identifié dans ce document.")
+            raise UserError("Aucun chÃ¨que/effet n'a pu Ãªtre identifiÃ© dans ce document.")
 
         lines_to_create = []
         for item in items:

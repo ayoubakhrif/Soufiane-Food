@@ -146,8 +146,8 @@ class TresorerieChqCheque(models.Model):
                 num = rec.note.strip()
                 if not num.isdigit():
                     raise ValidationError("❌ Le numéro de chèque doit contenir uniquement des chiffres.")
-                if len(num) != 7:
-                    raise ValidationError("❌ Le numéro de chèque doit comporter exactement 7 chiffres.")
+                if len(num) > 7:
+                    raise ValidationError("Le numéro de chèque doit comporter au maximum 7 chiffres.")
 
     @api.constrains('check_date', 'client_id', 'paiement_id')
     def _check_required_date(self):

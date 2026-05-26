@@ -1,4 +1,4 @@
-﻿from odoo import models, fields, api
+from odoo import models, fields, api
 
 
 class TresoreriePaiement(models.Model):
@@ -28,6 +28,21 @@ class TresoreriePaiement(models.Model):
         default=fields.Date.context_today,
         required=True,
     )
+
+    reception_date = fields.Date(
+        string='Date de réception',
+        default=fields.Date.context_today,
+    )
+
+    @api.onchange('reception_date')
+    def _onchange_reception_date(self):
+        if self.reception_date:
+            for line in self.cheque_line_ids:
+                if not line.reception_date:
+                    line.reception_date = self.reception_date
+            for line in self.effet_line_ids:
+                if not line.reception_date:
+                    line.reception_date = self.reception_date
 
     # ------------------------------------------------------------------
     # ChÃ¨ques et Effets: separate detail lines
@@ -229,6 +244,8 @@ Exemple de réponse attendue:
                 'bank_id': bank_id,
                 'owner_id': owner_id,
             }
+            if self.reception_date:
+                vals['reception_date'] = self.reception_date
             if item.get('date_echeance'):
                 vals['check_date'] = item.get('date_echeance')
             

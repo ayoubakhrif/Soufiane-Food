@@ -419,9 +419,10 @@ class WhatsAppFinanceController(http.Controller):
                             <th>N° Journal</th>
                             <th>Bénéficiaire</th>
                             <th>Type</th>
+                            <th>Statut</th>
                             <th>Montant (DH)</th>
                             <th>Montant Global (DH)</th>
-                            <th>État</th>
+                            <th>État Global</th>
                         </tr>
             """
             
@@ -442,15 +443,19 @@ class WhatsAppFinanceController(http.Controller):
                     benif_name = dq.benif_id.name if dq.benif_id else "N/A"
                     t_selection = dict(dq._fields['type'].selection or {})
                     t_label = t_selection.get(dq.type) or dq.type or "N/A"
+                    
+                    s_selection = dict(dq._fields['state'].selection or {})
+                    s_label = s_selection.get(dq.state) or dq.state or "N/A"
+
                     dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
                     
                     if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
-                        grouped_rows[-1]['items'].append({'type': t_label, 'amount': dq_amount})
+                        grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount})
                     else:
                         grouped_rows.append({
                             'journal': journal_val,
                             'benif': benif_name,
-                            'items': [{'type': t_label, 'amount': dq_amount}]
+                            'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount}]
                         })
 
                 phys_rowspan = sum(len(group['items']) for group in grouped_rows)
@@ -477,6 +482,7 @@ class WhatsAppFinanceController(http.Controller):
                             
                         html_content += f"""
                                 <td>{item['type']}</td>
+                                <td>{item['state']}</td>
                                 <td>{item['amount']}</td>
                         """
                         

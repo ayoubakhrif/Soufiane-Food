@@ -23,3 +23,5 @@ from . import finance_contact
 from . import finance_situation_report
 from . import finance_talons_global_report
 from . import encaissement_physique
+
+from . import finance_ai_training

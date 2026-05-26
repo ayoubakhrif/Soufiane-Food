@@ -890,6 +890,32 @@ class DataCheque(models.Model):
             self._onchange_find_talon()
             self._sync_pdf_url()
             self._sync_physical_cheque()
+            
+        # --- AI Training Data Tracking ---
+        ai_tracked_fields = ['ste_id', 'benif_id', 'perso_id', 'amount', 'type', 'journal', 'bl', 'date_emission', 'date_echeance', 'facture', 'serie']
+        if any(f in vals for f in ai_tracked_fields):
+            import json
+            for rec in self:
+                trainings = self.env['finance.ai.training'].sudo().search([('datacheque_id', '=', rec.id)])
+                if trainings:
+                    current_state = {
+                        'chq': rec.chq,
+                        'ste': rec.ste_id.name if rec.ste_id else False,
+                        'beneficiaire': rec.benif_id.name if rec.benif_id else False,
+                        'personne': rec.perso_id.name if rec.perso_id else False,
+                        'amount': rec.amount,
+                        'type': rec.type,
+                        'journal': rec.journal,
+                        'bl': rec.bl,
+                        'numero_facture': rec.serie,
+                        'date_emission': str(rec.date_emission) if rec.date_emission else False,
+                        'date_echeance': str(rec.date_echeance) if rec.date_echeance else False,
+                    }
+                    trainings.write({
+                        'is_corrected': True,
+                        'final_result_json': json.dumps(current_state, ensure_ascii=False, indent=2)
+                    })
+
         return res
 
     # 8) Bouton ouverture PDF

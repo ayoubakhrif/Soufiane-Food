@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Sequence for finance.ai.training -->
+    <record id="seq_finance_ai_training" model="ir.sequence">
+        <field name="name">AI Training Sequence</field>
+        <field name="code">finance.ai.training</field>
+        <field name="prefix">TRN-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="view_finance_ai_training_tree" model="ir.ui.view">
+        <field name="name">finance.ai.training.tree</field>
+        <field name="model">finance.ai.training</field>
+        <field name="arch" type="xml">
+            <tree string="Données d'Entraînement IA" decoration-success="is_corrected == False" decoration-warning="is_corrected == True">
+                <field name="name"/>
+                <field name="create_date"/>
+                <field name="source"/>
+                <field name="is_corrected"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_finance_ai_training_form" model="ir.ui.view">
+        <field name="name">finance.ai.training.form</field>
+        <field name="model">finance.ai.training</field>
+        <field name="arch" type="xml">
+            <form string="Donnée d'Entraînement IA">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="source" readonly="1"/>
+                            <field name="is_corrected" readonly="1"/>
+                            <field name="create_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="datacheque_id" readonly="1"/>
+                            <field name="physical_cheque_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Résultats et Corrections">
+                            <group>
+                                <field name="ai_result_json" widget="text" readonly="1"/>
+                                <field name="final_result_json" widget="text" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Prompt Utilisé">
+                            <field name="prompt_text" widget="text" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_finance_ai_training" model="ir.actions.act_window">
+        <field name="name">Données d'Entraînement IA</field>
+        <field name="res_model">finance.ai.training</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu Item (visible only to Admin/Settings under Configuration) -->
+    <menuitem id="menu_finance_ai_training"
+              name="Données d'Entraînement IA"
+              parent="finance.menu_finance_config"
+              action="action_finance_ai_training"
+              sequence="100"
+              groups="base.group_system"/>
+
+</odoo>

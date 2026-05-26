@@ -145,11 +145,29 @@ class WhatsAppFinancePdfController(http.Controller):
                     base_cheque.write(vals)
                     created_records.append(base_cheque)
                     messages.append(f"Mise à jour du chèque {chq_number} : {inv_amount} DH (Type: {vals['type']})")
+                    
+                    # Log AI Training
+                    request.env['finance.ai.training'].sudo().create({
+                        'source': 'whatsapp',
+                        'prompt_text': ai_result.get('_prompt', ''),
+                        'ai_result_json': ai_result.get('_raw_json', ''),
+                        'final_result_json': ai_result.get('_raw_json', ''),
+                        'datacheque_id': base_cheque.id,
+                    })
                 else:
                     # Duplicate cheque for the remaining invoices
                     new_cheque = base_cheque.copy(default=vals)
                     created_records.append(new_cheque)
                     messages.append(f"Création d'une répartition pour {chq_number} : {inv_amount} DH (Type: {vals['type']})")
+                    
+                    # Log AI Training
+                    request.env['finance.ai.training'].sudo().create({
+                        'source': 'whatsapp',
+                        'prompt_text': ai_result.get('_prompt', ''),
+                        'ai_result_json': ai_result.get('_raw_json', ''),
+                        'final_result_json': ai_result.get('_raw_json', ''),
+                        'datacheque_id': new_cheque.id,
+                    })
             
             return {
                 'status': 'success',
@@ -174,11 +192,12 @@ class WhatsAppFinancePdfController(http.Controller):
         prompt_text = f"""Vous êtes un assistant comptable spécialisé dans l'importation et la finance. Vous recevez un document (PDF) qui contient généralement un chèque et une ou plusieurs factures.
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
-1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs).
-2. Pour chaque facture, extrayez :
+1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs). S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
+   (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", les frais de "magasinage" et de "surestarie" apparaissent souvent sur la MÊME facture. Vous DEVEZ obligatoirement diviser et extraire ces deux frais comme DEUX éléments séparés dans votre tableau JSON, l'un avec le type "magasinage" et l'autre avec le type "surestarie", en extrayant le montant exact pour chacun).
+2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.
-   - Le numéro de la facture (UNIQUEMENT le numéro exact, sans le préfixe F/ ou Facture. Cherchez les numéros isolés en haut comme TI-...). S'il n'y en a pas, mettez une chaine vide "".
+   - Le numéro de la facture (UNIQUEMENT le numéro exact, sans le préfixe F/ ou Facture. Cherchez les numéros isolés en haut comme TI-...). S'il n'y en a pas, mettez une chaine vide "". (Note importante: pour le bénéficiaire CMA, la facture commence souvent par MAMI).
    - Le BL (Bill of Lading, Connaissement maritime, ex: YMJAM450339005). Cherchez "BL", "B/L", ou une longue référence alphanumérique liée au navire/conteneur. S'il n'y en a pas, mettez une chaine vide "".
    - Le "type" de frais. 
 
@@ -256,6 +275,8 @@ Règles de formatage :
 
             # The response is expected to be JSON string
             result = json.loads(raw_content)
+            result['_raw_json'] = raw_content
+            result['_prompt'] = prompt_text
             return result
 
         except requests.exceptions.HTTPError as e:

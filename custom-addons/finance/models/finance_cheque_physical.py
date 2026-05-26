@@ -281,34 +281,47 @@ Exemple:
                 continue
 
             existing_dc = self.env['datacheque'].search([('physical_cheque_id', '=', rec.id)])
-            if not existing_dc:
-                # Extract first sequence of digits for journal
-                raw_journal = str(result.get('journal', '0'))
-                import re
-                match = re.search(r'\d+', raw_journal)
-                journal_num = int(match.group()) if match else 0
+            
+            # Extract first sequence of digits for journal
+            raw_journal = str(result.get('journal', '0'))
+            import re
+            match = re.search(r'\d+', raw_journal)
+            journal_num = int(match.group()) if match else 0
 
-                dc_vals = {
-                    'chq': final_chq,
-                    'ste_id': final_ste_id,
-                    'amount': float(result.get('amount') or 0),
+            dc_vals = {
+                'chq': final_chq,
+                'ste_id': final_ste_id,
+                'amount': float(result.get('amount') or 0),
+                'journal': journal_num,
+            }
+            if benif_record:
+                dc_vals['benif_id'] = benif_record.id
+            if perso_record:
+                dc_vals['perso_id'] = perso_record.id
+            if result.get('date_emission'):
+                dc_vals['date_emission'] = result.get('date_emission')
+            if result.get('date_echeance'):
+                dc_vals['date_echeance'] = result.get('date_echeance')
+
+            if not existing_dc:
+                dc_vals.update({
                     'state': 'reserve',
                     'type': 'reserve',
                     'facture': 'm',
-                    'journal': journal_num,
                     'physical_cheque_id': rec.id,
-                }
-                if benif_record:
-                    dc_vals['benif_id'] = benif_record.id
-                if perso_record:
-                    dc_vals['perso_id'] = perso_record.id
-                if result.get('date_emission'):
-                    dc_vals['date_emission'] = result.get('date_emission')
-                if result.get('date_echeance'):
-                    dc_vals['date_echeance'] = result.get('date_echeance')
-                    
-                self.env['datacheque'].sudo().create(dc_vals)
+                })
+                new_dc = self.env['datacheque'].sudo().create(dc_vals)
                 
+                # Log Training Data
+                self.env['finance.ai.training'].sudo().create({
+                    'source': 'physical_cheque',
+                    'prompt_text': prompt_text,
+                    'ai_result_json': raw_content,
+                    'final_result_json': raw_content,
+                    'datacheque_id': new_dc.id,
+                    'physical_cheque_id': rec.id,
+                })
+
                 from markupsafe import Markup
                 rec.message_post(body=Markup(
                     "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
@@ -316,6 +329,28 @@ Exemple:
                     "<p style='margin:4px 0 0;'>Le système a extrait les données du PDF 'chèque vide' et a créé le datacheque automatiquement.</p>"
                     "</div>"
                 ))
+            else:
+                bureau_dcs = existing_dc.filtered(lambda d: d.state == 'bureau')
+                if bureau_dcs:
+                    bureau_dcs.sudo().write(dc_vals)
+                    
+                    # Log Training Data for the first updated one
+                    self.env['finance.ai.training'].sudo().create({
+                        'source': 'physical_cheque',
+                        'prompt_text': prompt_text,
+                        'ai_result_json': raw_content,
+                        'final_result_json': raw_content,
+                        'datacheque_id': bureau_dcs[0].id,
+                        'physical_cheque_id': rec.id,
+                    })
+
+                    from markupsafe import Markup
+                    rec.message_post(body=Markup(
+                        "<div style='border-left:4px solid #17a2b8;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
+                        "<span style='color:#17a2b8;font-size:15px;'><i class='fa fa-edit'></i>&nbsp;<b>IA : Datacheque Mis à Jour</b></span>"
+                        "<p style='margin:4px 0 0;'>Le système a mis à jour les informations extraites sur les répartitions existantes à l'état 'bureau'.</p>"
+                        "</div>"
+                    ))
 
     def action_verify_cheque_ai(self):
         self.ensure_one()

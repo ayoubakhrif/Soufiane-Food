@@ -105,3 +105,5 @@ access_finance_contact_manager,access.finance.contact.manager,model_finance_cont
 access_finance_contact_employee,access.finance.contact.employee,model_finance_contact,group_finance_employee,1,1,1,1
 access_finance_contact_viewer,access.finance.contact.viewer,model_finance_contact,group_finance_viewer,1,0,0,0
 access_finance_encaissement_physique,finance.encaissement.physique,model_finance_encaissement_physique,finance.group_finance_user,1,1,1,1
+
+access_finance_ai_training_admin,finance.ai.training.admin,model_finance_ai_training,base.group_system,1,1,1,1

@@ -137,8 +137,8 @@ Pour chaque élément, extrayez :
 1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres pour un chèque).
 2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50).
 3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
-4. "banque": Le nom de la banque visible sur le document. Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
-5. "porteur": Le nom de la personne ou société bénéficiaire / porteur (à l'ordre de).
+4. "banque": Le nom de la banque (à lire souvent dans le logo en HAUT à GAUCHE ou au CENTRE du chèque). Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
+5. "porteur": Le nom du titulaire du compte / porteur. C'est le nom imprimé situé en BAS au CENTRE, généralement juste en dessous du "Compte n°". NE CHOISISSEZ PAS le nom de l'agence (qui se trouve à gauche sous "Payable à").
 
 Exemple de réponse attendue:
 {{

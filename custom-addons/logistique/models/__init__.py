@@ -15,3 +15,4 @@ from . import surest_mag_simulation
 from . import logistics_document
 from . import res_config_settings
 from . import maersk_service
+from . import document_config

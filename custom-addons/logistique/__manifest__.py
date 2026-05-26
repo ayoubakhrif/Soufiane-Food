@@ -31,6 +31,7 @@
         'data/server_actions.xml',
         'data/cron_terminal49.xml',
         'views/res_config_settings_views.xml',
+        'views/document_config_view.xml',
     ],
     'installable': True,
     'application': True,

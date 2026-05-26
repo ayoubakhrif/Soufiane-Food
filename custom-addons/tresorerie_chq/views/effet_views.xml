@@ -17,12 +17,6 @@
                   decoration-danger="state == 'impaye'">
                 
                 <field name="note" readonly="1"/>
-                <field name="scan_effet_name" column_invisible="True"/>
-                <field name="scan_effet"
-                       string="Scan"
-                       filename="scan_effet_name"
-                       widget="binary"
-                       optional="show"/>
                 <field name="bank_id" string="Banque" readonly="1" optional="show"/>
                 <field name="client_id" readonly="1"/>
                 <field name="core_ste_id" options="{'no_create': True}" optional="show"/>
@@ -146,11 +140,6 @@
                             <field name="bank_send_date"/>
                             <field name="unpaid_date"/>
                             <field name="is_manager" invisible="1"/>
-                            <field name="scan_effet_name" invisible="1"/>
-                            <field name="scan_effet"
-                                   string="Scan Effet"
-                                   filename="scan_effet_name"
-                                   widget="binary"/>
                         </group>
                         <group string="Acteurs">
                             <field name="paiement_id" string="Paiement d'origine" readonly="1"/>

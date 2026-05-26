@@ -103,6 +103,7 @@ class WhatsAppFinancePdfController(http.Controller):
                 inv_type = inv_data.get('type', 'divers').lower()
                 inv_benif_name = inv_data.get('beneficiaire', '')
                 inv_facture_num = str(inv_data.get('numero_facture', '')).strip()
+                inv_bl = str(inv_data.get('bl', '')).strip()
 
                 # Match Beneficiaire
                 benif_record = False
@@ -135,6 +136,9 @@ class WhatsAppFinancePdfController(http.Controller):
                 else:
                     vals['facture'] = 'm'
                     vals['serie'] = False
+                    
+                if inv_bl and inv_bl.lower() != 'none':
+                    vals['bl'] = inv_bl[:100]
 
                 if idx == 0:
                     # Update base cheque
@@ -175,6 +179,7 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.
    - Le numéro de la facture (UNIQUEMENT le numéro exact, sans le préfixe F/ ou Facture. Cherchez les numéros isolés en haut comme TI-...). S'il n'y en a pas, mettez une chaine vide "".
+   - Le BL (Bill of Lading, Connaissement maritime, ex: YMJAM450339005). Cherchez "BL", "B/L", ou une longue référence alphanumérique liée au navire/conteneur. S'il n'y en a pas, mettez une chaine vide "".
    - Le "type" de frais. 
 
 Règles strictes pour le "type" de frais :

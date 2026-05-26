@@ -14,7 +14,7 @@ class TresoreriePaiement(models.Model):
     )
 
     payment_type = fields.Selection([
-        ('cheque', 'ChÃ¨ques'),
+        ('cheque', 'Chèques'),
         ('effet', 'Effets'),
     ], string='Type de paiement', required=True, default='cheque')
 
@@ -38,11 +38,9 @@ class TresoreriePaiement(models.Model):
     def _onchange_reception_date(self):
         if self.reception_date:
             for line in self.cheque_line_ids:
-                if not line.reception_date:
-                    line.reception_date = self.reception_date
+                line.reception_date = self.reception_date
             for line in self.effet_line_ids:
-                if not line.reception_date:
-                    line.reception_date = self.reception_date
+                line.reception_date = self.reception_date
 
     # ------------------------------------------------------------------
     # ChÃ¨ques et Effets: separate detail lines

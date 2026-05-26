@@ -154,9 +154,12 @@
                     <filter string="Type de paiement"
                             name="group_type"
                             context="{'group_by': 'payment_type'}"/>
-                    <filter string="Date"
-                            name="group_date"
-                            context="{'group_by': 'date'}"/>
+                    <filter string="Mois"
+                            name="group_date_month"
+                            context="{'group_by': 'date:month'}"/>
+                    <filter string="Jour"
+                            name="group_date_day"
+                            context="{'group_by': 'date:day'}"/>
                 </group>
             </search>
         </field>
@@ -167,7 +170,7 @@
         <field name="name">Entrées (Chèques &amp; Effets)</field>
         <field name="res_model">tresorerie_chq.paiement</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_group_date': 1}</field>
+        <field name="context">{'search_default_group_date_month': 1, 'search_default_group_date_day': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Enregistrer un nouveau paiement par chèque ou effet

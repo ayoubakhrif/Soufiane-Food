@@ -114,7 +114,7 @@ class TresoreriePaiement(models.Model):
 
         doc_type = "chèques" if self.payment_type == 'cheque' else "effets"
 
-        prompt_text = f\"\"\"Vous êtes un assistant financier. Vous recevez un scan PDF contenant un ou plusieurs {doc_type}.
+        prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan PDF contenant un ou plusieurs {doc_type}.
 Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvé dans le document.
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste nommée "items".
@@ -134,7 +134,7 @@ Exemple de réponse attendue:
       "banque": "Attijariwafa Bank"
     }}
   ]
-}}\"\"\"
+}}"""
 
         payload = {
             "model": "gpt-4o",

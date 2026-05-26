@@ -104,4 +104,10 @@
               sequence="30"
               groups="achat.group_purchase_user,achat.group_purchase_manager"/>
 
+    <menuitem id="menu_achat_document_config"
+              name="Configuration Documents"
+              parent="menu_achat_data"
+              action="logistique.action_document_config"
+              sequence="90"/>
+
 </odoo>

@@ -123,6 +123,7 @@ Pour chaque élément, extrayez :
 2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50).
 3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
 4. "banque": Le nom de la banque visible sur le document. Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
+5. "porteur": Le nom de la personne ou société bénéficiaire / porteur (à l'ordre de).
 
 Exemple de réponse attendue:
 {{
@@ -131,7 +132,8 @@ Exemple de réponse attendue:
       "numero": "2102888",
       "montant": 18746.43,
       "date_echeance": "2026-05-16",
-      "banque": "Attijariwafa Bank"
+      "banque": "Attijariwafa Bank",
+      "porteur": "Ali Yassine"
     }}
   ]
 }}"""
@@ -213,10 +215,19 @@ Exemple de réponse attendue:
                 if bank_record:
                     bank_id = bank_record.id
 
+            owner_id = False
+            owner_name = item.get('porteur', '')
+            if owner_name:
+                owner_record = self.env['tresorerie_chq.effets.owner'].search([('name', '=ilike', owner_name)], limit=1)
+                if not owner_record:
+                    owner_record = self.env['tresorerie_chq.effets.owner'].create({'name': owner_name})
+                owner_id = owner_record.id
+
             vals = {
                 'note': item.get('numero', ''),
                 'amount': float(item.get('montant') or 0.0),
                 'bank_id': bank_id,
+                'owner_id': owner_id,
             }
             if item.get('date_echeance'):
                 vals['check_date'] = item.get('date_echeance')

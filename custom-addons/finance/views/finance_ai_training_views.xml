@@ -70,9 +70,9 @@
     <!-- Menu Item (visible only to Admin/Settings under Configuration) -->
     <menuitem id="menu_finance_ai_training"
               name="Données d'Entraînement IA"
-              parent="finance.finance_root_menu"
+              parent="finance.data_finance_menu"
               action="action_finance_ai_training"
               sequence="100"
-              groups="base.group_system"/>
+              groups="finance.group_finance_admin"/>
 
 </odoo>

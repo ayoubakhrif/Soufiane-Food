@@ -133,10 +133,10 @@ Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvé da
 Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste nommée "items".
 Pour chaque élément, extrayez :
 1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres pour un chèque).
-2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50).
+2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50). ATTENTION : Lisez attentivement le montant écrit en lettres (qui se trouve souvent au milieu du document, en arabe ou en français) et croisez-le avec le montant en chiffres (en haut à droite) pour garantir l'exactitude absolue du montant extrait.
 3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
 4. "banque": Le nom de la banque (à lire souvent dans le logo en HAUT à GAUCHE ou au CENTRE du chèque). Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
-5. "porteur": Le nom du titulaire du compte / porteur. C'est le nom imprimé situé en BAS au CENTRE, généralement juste en dessous du "Compte n°". NE CHOISISSEZ PAS le nom de l'agence (qui se trouve à gauche sous "Payable à").
+5. "porteur": Le nom du titulaire du compte / porteur. C'est le nom imprimé situé en BAS au CENTRE, généralement juste en dessous du "Compte n°". NE CHOISISSEZ PAS le nom de l'agence (qui se trouve à gauche sous "Payable à"). ATTENTION : Retirez ABSOLUMENT toutes les civilités et titres du texte extrait (comme MR, M., MONSIEUR, MME, MADAME, MLLE) pour ne garder strictement que le nom et le prénom.
 
 Exemple de réponse attendue:
 {{

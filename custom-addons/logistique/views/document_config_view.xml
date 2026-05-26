@@ -17,6 +17,7 @@
                             <field name="line_ids">
                                 <tree editable="bottom">
                                     <field name="name"/>
+                                    <field name="document_type"/>
                                 </tree>
                             </field>
                         </page>

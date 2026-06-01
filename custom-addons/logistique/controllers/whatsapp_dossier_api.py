@@ -71,19 +71,25 @@ INSTRUCTIONS DE VÉRIFICATION :
 
 LISTE EXACTE DES FICHIERS FOURNIS :
 
-{{
+Format de réponse ATTENDU (JSON uniquement) :
+{
     "documents": [
-        {{
+        {
             "file_name": "nom exact du fichier",
-            "is_valid": true/false,
-            "extracted_type": "Code du type de document identifié (ex: invoice, health...)",
-            "errors": [
-                "Message clair et concis expliquant quel champ manque ou est incohérent, ex: Le champ LOT est absent.",
-                "Le Numéro d'Invoice ne correspond pas à la Facture Commerciale jointe."
+            "extracted_type": "Code du type de document identifié",
+            "fields": [
+                {
+                    "name": "Nom du champ requis (ex: LOT)",
+                    "status": "present ou absent",
+                    "value": "La valeur extraite (vide si absent)"
+                }
             ]
-        }}
+        }
+    ],
+    "differences": [
+        "Explication claire d'une incohérence entre deux documents, ex: Le 'Container Number' est 'MSKU123' sur INVOICE mais 'MSKU999' sur PACKING."
     ]
-}}
+}
 """
 
             input_contents = []
@@ -101,7 +107,7 @@ LISTE EXACTE DES FICHIERS FOURNIS :
                         "file_data": f"data:application/pdf;base64,{pdf_b64}"
                     })
 
-            prompt_text += file_list_str + "\nFormat de réponse ATTENDU (JSON uniquement) :\n{\n    \"documents\": [\n        {\n            \"file_name\": \"nom exact du fichier\",\n            \"is_valid\": true/false,\n            \"extracted_type\": \"Code du type de document identifié (ex: invoice, health...)\",\n            \"errors\": [\n                \"Message clair et concis expliquant quel champ manque ou est incohérent, ex: Le champ LOT est absent.\",\n                \"Le Numéro d'Invoice ne correspond pas à la Facture Commerciale jointe.\"\n            ]\n        }\n    ]\n}\n"
+            prompt_text += file_list_str + "\nFormat de réponse ATTENDU (JSON uniquement) :\n{\n    \"documents\": [\n        {\n            \"file_name\": \"nom exact du fichier\",\n            \"extracted_type\": \"Code du type de document identifié\",\n            \"fields\": [\n                {\n                    \"name\": \"Nom du champ requis\",\n                    \"status\": \"present ou absent\",\n                    \"value\": \"La valeur extraite (vide si absent)\"\n                }\n            ]\n        }\n    ],\n    \"differences\": [\n        \"Le champ 'LOT' est '123' sur INVOICE mais '456' sur PACKING.\"\n    ]\n}\n"
 
             # Attach Prompt
             input_contents.append({
@@ -150,25 +156,22 @@ LISTE EXACTE DES FICHIERS FOURNIS :
 
             result_json = json.loads(raw_content)
             docs_result = result_json.get("documents", [])
+            differences = result_json.get("differences", [])
             
             reports = []
             
-            # Match AI results with the input documents to get the message_key
             for doc_res in docs_result:
                 file_name = doc_res.get('file_name')
-                is_valid = doc_res.get('is_valid')
-                errors = doc_res.get('errors', [])
                 extracted_type = doc_res.get('extracted_type', 'Inconnu')
+                fields_data = doc_res.get('fields', [])
                 
-                # Find corresponding original document with robust matching
+                # Match original doc to get message_key (still useful if we want to log it)
                 orig_doc = None
                 for d in documents:
                     if d.get('file_name', '').strip().lower() == file_name.strip().lower():
                         orig_doc = d
                         break
-                
                 if not orig_doc:
-                    # Try partial match
                     for d in documents:
                         if file_name.strip().lower() in d.get('file_name', '').strip().lower() or d.get('file_name', '').strip().lower() in file_name.strip().lower():
                             orig_doc = d
@@ -176,15 +179,34 @@ LISTE EXACTE DES FICHIERS FOURNIS :
                             
                 message_key = orig_doc.get('message_key') if orig_doc else None
                 
-                if is_valid:
-                    report_text = f"✅ *{file_name}* ({extracted_type.upper()})\nDocument validé avec succès ! Tous les champs requis sont présents et cohérents."
-                else:
-                    err_str = "\n".join([f"❌ {e}" for e in errors])
-                    report_text = f"⚠️ *{file_name}* ({extracted_type.upper()})\nErreurs détectées :\n{err_str}"
+                report_text = f"📄 *{file_name}* ({extracted_type.upper()})"
+                for f in fields_data:
+                    f_name = f.get('name', 'Champ')
+                    f_status = f.get('status', 'absent').lower()
+                    f_value = f.get('value', '')
                     
+                    if f_status == 'present':
+                        report_text += f"\n- {f_name} : ✅ Présent" + (f" ({f_value})" if f_value else "")
+                    else:
+                        report_text += f"\n- {f_name} : ❌ Absent"
+                        
                 reports.append({
                     'text': report_text,
                     'message_key': message_key
+                })
+
+            # Add differences report as a final message if any exist
+            if differences:
+                diff_text = "⚠️ *DIFFÉRENCES ENTRE LES DOCUMENTS :*\n"
+                diff_text += "\n".join([f"🔸 {d}" for d in differences])
+                reports.append({
+                    'text': diff_text,
+                    'message_key': None
+                })
+            elif len(docs_result) > 1:
+                reports.append({
+                    'text': "✅ *COHÉRENCE* : Aucune différence détectée entre les documents.",
+                    'message_key': None
                 })
 
             return {

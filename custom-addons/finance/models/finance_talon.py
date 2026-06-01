@@ -738,4 +738,78 @@ class FinanceTalon(models.Model):
             data.sort(key=lambda x: int(x['ref']) if (x['ref'] and x['ref'].isdigit()) else 0)
         except:
             pass
-        return data
+        return data
+
+    @api.constrains('etat')
+    def _check_single_unclosed_talon_alert(self):
+        for rec in self:
+            if rec.etat == 'cloture':
+                # Check how many unclosed talons remain for this company
+                unclosed_count = self.search_count([
+                    ('ste_id', '=', rec.ste_id.id),
+                    ('etat', 'in', ['actif', 'coffre'])
+                ])
+                
+                if unclosed_count == 1:
+                    rec._send_manager_finance_alert()
+
+    def _send_manager_finance_alert(self):
+        self.ensure_one()
+        import logging
+        import requests
+        _logger = logging.getLogger(__name__)
+
+        # Find Manager Finance
+        managers = self.env['core.employee'].search([
+            '|',
+            ('job_position_id.name', 'ilike', 'manager finance'),
+            ('job_title', 'ilike', 'manager finance')
+        ])
+        if not managers:
+            managers = self.env['core.employee'].search([
+                '|',
+                ('job_position_id.name', 'ilike', 'finance'),
+                ('job_title', 'ilike', 'finance')
+            ])
+            # Filter to ensure it's a manager
+            managers = managers.filtered(
+                lambda m: 'manager' in (m.job_position_id.name or '').lower() or
+                          'responsable' in (m.job_position_id.name or '').lower() or
+                          'manager' in (m.job_title or '').lower() or
+                          'responsable' in (m.job_title or '').lower()
+            )
+
+        if not managers:
+            _logger.warning("No Finance Manager found to send the talon alert.")
+            return
+
+        for manager in managers:
+            phone = manager.phone
+            email = manager.email
+            
+            msg = f"⚠️ *Alerte Talon* ⚠️\nLa société *{self.ste_id.name}* n'a plus qu'un seul talon non clôturé restant.\nVeuillez demander un nouveau talon."
+            
+            # WhatsApp
+            if phone:
+                try:
+                    payload = {
+                        "phone": phone,
+                        "text": msg
+                    }
+                    requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
+                    _logger.info(f"WhatsApp alert sent to Finance Manager ({phone})")
+                except Exception as e:
+                    _logger.error(f"Failed to send WhatsApp alert to {phone}: {e}")
+            
+            # Email
+            if email:
+                try:
+                    mail_values = {
+                        'subject': f"Alerte Talon - {self.ste_id.name}",
+                        'body_html': f"<p>Bonjour,</p><p>La société <strong>{self.ste_id.name}</strong> n'a plus qu'un seul talon non clôturé restant.</p><p>Veuillez demander un nouveau talon.</p>",
+                        'email_to': email,
+                    }
+                    self.env['mail.mail'].create(mail_values).send()
+                    _logger.info(f"Email alert sent to Finance Manager ({email})")
+                except Exception as e:
+                    _logger.error(f"Failed to send email alert to {email}: {e}")

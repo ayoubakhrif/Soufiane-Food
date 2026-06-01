@@ -67,8 +67,10 @@ INSTRUCTIONS DE VÉRIFICATION :
 3. RÈGLES DE COMPARAISON : 
    - Soyez tolérant sur la casse, les espaces, et les préfixes (ex: INV-2023 = 2023).
    - Les poids sont en tonnes (MT = T = Tonnes).
+   - Veillez à utiliser exactement les mêmes noms de fichiers que ceux fournis dans la liste ci-dessous.
 
-Format de réponse ATTENDU (JSON uniquement) :
+LISTE EXACTE DES FICHIERS FOURNIS :
+
 {{
     "documents": [
         {{
@@ -86,9 +88,11 @@ Format de réponse ATTENDU (JSON uniquement) :
 
             input_contents = []
             
-            # Attach PDFs
+            # Attach PDFs and build file list
+            file_list_str = ""
             for doc in documents:
                 file_name = doc.get('file_name', 'document.pdf')
+                file_list_str += f"- {file_name}\n"
                 pdf_b64 = doc.get('pdf_base64')
                 if pdf_b64:
                     input_contents.append({
@@ -96,6 +100,8 @@ Format de réponse ATTENDU (JSON uniquement) :
                         "filename": file_name,
                         "file_data": f"data:application/pdf;base64,{pdf_b64}"
                     })
+
+            prompt_text += file_list_str + "\nFormat de réponse ATTENDU (JSON uniquement) :\n{\n    \"documents\": [\n        {\n            \"file_name\": \"nom exact du fichier\",\n            \"is_valid\": true/false,\n            \"extracted_type\": \"Code du type de document identifié (ex: invoice, health...)\",\n            \"errors\": [\n                \"Message clair et concis expliquant quel champ manque ou est incohérent, ex: Le champ LOT est absent.\",\n                \"Le Numéro d'Invoice ne correspond pas à la Facture Commerciale jointe.\"\n            ]\n        }\n    ]\n}\n"
 
             # Attach Prompt
             input_contents.append({
@@ -154,12 +160,21 @@ Format de réponse ATTENDU (JSON uniquement) :
                 errors = doc_res.get('errors', [])
                 extracted_type = doc_res.get('extracted_type', 'Inconnu')
                 
-                # Find corresponding original document
-                orig_doc = next((d for d in documents if d.get('file_name') == file_name), None)
+                # Find corresponding original document with robust matching
+                orig_doc = None
+                for d in documents:
+                    if d.get('file_name', '').strip().lower() == file_name.strip().lower():
+                        orig_doc = d
+                        break
+                
                 if not orig_doc:
-                    continue
-                    
-                message_key = orig_doc.get('message_key')
+                    # Try partial match
+                    for d in documents:
+                        if file_name.strip().lower() in d.get('file_name', '').strip().lower() or d.get('file_name', '').strip().lower() in file_name.strip().lower():
+                            orig_doc = d
+                            break
+                            
+                message_key = orig_doc.get('message_key') if orig_doc else None
                 
                 if is_valid:
                     report_text = f"✅ *{file_name}* ({extracted_type.upper()})\nDocument validé avec succès ! Tous les champs requis sont présents et cohérents."

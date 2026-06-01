@@ -291,8 +291,17 @@ async function connectToWhatsApp() {
                     pendingChoices.set(from, result.choices);
                     await sock.sendMessage(from, { text: result.message }, { quoted: msg });
                 } else if (from === DOSSIER_VERIF_GROUP_ID && result && result.status === 'success' && result.reports) {
+                    console.log(`Envoi de ${result.reports.length} rapports au groupe...`);
+                    let fullReportText = "📄 *RAPPORT DE VÉRIFICATION DES DOSSIERS*\n━━━━━━━━━━━━━━━━━━\n\n";
                     for (const report of result.reports) {
-                        await sock.sendMessage(from, { text: report.text }, { quoted: report.message_key });
+                        fullReportText += report.text + "\n\n";
+                    }
+                    if (result.reports.length > 0) {
+                        try {
+                            await sock.sendMessage(from, { text: fullReportText.trim() });
+                        } catch (err) {
+                            console.error("Erreur envoi rapport global:", err);
+                        }
                     }
                 }
                 else {

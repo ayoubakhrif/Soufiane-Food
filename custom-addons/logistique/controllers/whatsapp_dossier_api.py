@@ -129,7 +129,7 @@ Format de réponse ATTENDU (JSON uniquement) :
                     }
                 },
                 "temperature": 0.0,
-                "max_output_tokens": 1500
+                "max_output_tokens": 4000
             }
 
             headers = {

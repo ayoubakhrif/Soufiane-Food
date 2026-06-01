@@ -72,24 +72,24 @@ INSTRUCTIONS DE VÉRIFICATION :
 LISTE EXACTE DES FICHIERS FOURNIS :
 
 Format de réponse ATTENDU (JSON uniquement) :
-{
+{{
     "documents": [
-        {
+        {{
             "file_name": "nom exact du fichier",
             "extracted_type": "Code du type de document identifié",
             "fields": [
-                {
+                {{
                     "name": "Nom du champ requis (ex: LOT)",
                     "status": "present ou absent",
                     "value": "La valeur extraite (vide si absent)"
-                }
+                }}
             ]
-        }
+        }}
     ],
     "differences": [
         "Explication claire d'une incohérence entre deux documents, ex: Le 'Container Number' est 'MSKU123' sur INVOICE mais 'MSKU999' sur PACKING."
     ]
-}
+}}
 """
 
             input_contents = []

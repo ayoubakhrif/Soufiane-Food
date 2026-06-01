@@ -25,20 +25,16 @@ class WhatsappDossierVerificationApi(http.Controller):
             documents = kw.get('documents', [])
             if not documents:
                 return {
-                    'result': {
-                        'status': 'ignored',
-                        'message': 'Aucun document à vérifier.'
-                    }
+                    'status': 'ignored',
+                    'message': 'Aucun document à vérifier.'
                 }
 
             # Prepare OpenAI Call
             openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
             if not openai_key:
                 return {
-                    'result': {
-                        'status': 'error',
-                        'message': 'Clé OpenAI non configurée.'
-                    }
+                    'status': 'error',
+                    'message': 'Clé OpenAI non configurée.'
                 }
 
             # Fetch document configurations from DB
@@ -142,10 +138,8 @@ Format de réponse ATTENDU (JSON uniquement) :
 
             if not raw_content:
                 return {
-                    'result': {
-                        'status': 'error',
-                        'message': "L'IA n'a retourné aucune réponse."
-                    }
+                    'status': 'error',
+                    'message': "L'IA n'a retourné aucune réponse."
                 }
 
             result_json = json.loads(raw_content)
@@ -179,17 +173,13 @@ Format de réponse ATTENDU (JSON uniquement) :
                 })
 
             return {
-                'result': {
-                    'status': 'success',
-                    'reports': reports
-                }
+                'status': 'success',
+                'reports': reports
             }
 
         except Exception as e:
             _logger.error("Erreur API WhatsApp Dossier Verification : %s", str(e))
             return {
-                'result': {
-                    'status': 'error',
-                    'message': f"Erreur interne : {str(e)}"
-                }
+                'status': 'error',
+                'message': f"Erreur interne : {str(e)}"
             }

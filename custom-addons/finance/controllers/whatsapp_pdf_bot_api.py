@@ -189,7 +189,7 @@ class WhatsAppFinancePdfController(http.Controller):
 
         feedback_instruction = f"\n\nATTENTION ERREUR PRÉCÉDENTE À CORRIGER :\n{feedback}\nVeuillez revérifier et corriger le 'type' pour ces factures." if feedback else ""
 
-        prompt_text = f"""Vous êtes un assistant comptable spécialisé dans l'importation et la finance. Vous recevez un document (PDF) qui contient généralement un chèque et une ou plusieurs factures.
+        prompt_text = """Vous êtes un assistant comptable spécialisé dans l'importation et la finance. Vous recevez un document (PDF) qui contient généralement un chèque et une ou plusieurs factures.
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs). S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
@@ -207,24 +207,28 @@ Règles strictes pour le "type" de frais :
 - Si la facture indique (THC, Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention...) -> choisissez "thc".
 - PRIORITÉ: Si le mot "MAGASINAGE" apparait, c'est obligatoirement "magasinage".
 
-- Voici la liste des bénéficiaires de type IMPORTATION : {import_list_str}. Si le bénéficiaire correspond à l'un de ces noms (ou s'il s'agit d'un acteur maritime/portuaire/douanier), vous NE DEVEZ JAMAIS choisir "divers". Vous devez OBLIGATOIREMENT choisir l'un de ces types : "magasinage", "surestarie", "thc", "inspection", "change", ou "fret".
-- Voici la liste des bénéficiaires de type DIVERS : {divers_list_str}. Si le bénéficiaire correspond à l'un de ces noms, vous DEVEZ OBLIGATOIREMENT choisir "divers".{feedback_instruction}
+- Voici la liste des bénéficiaires de type IMPORTATION : [IMPORT_LIST]. Si le bénéficiaire correspond à l'un de ces noms (ou s'il s'agit d'un acteur maritime/portuaire/douanier), vous NE DEVEZ JAMAIS choisir "divers". Vous devez OBLIGATOIREMENT choisir l'un de ces types : "magasinage", "surestarie", "thc", "inspection", "change", ou "fret".
+- Voici la liste des bénéficiaires de type DIVERS : [DIVERS_LIST]. Si le bénéficiaire correspond à l'un de ces noms, vous DEVEZ OBLIGATOIREMENT choisir "divers".[FEEDBACK]
 
 Règles de formatage :
 - Retournez UNIQUEMENT un objet JSON valide, sans formatage markdown, sans explications.
 - Le JSON doit suivre cette structure exacte :
-{{
+{
   "chq_number": "1234567",
   "factures": [
-    {{
+    {
       "montant": 10500.50,
       "beneficiaire": "Tanger Med",
       "type": "magasinage",
       "numero_facture": "2023-001"
-    }}
+    }
   ]
-}}
+}
 """
+        
+        prompt_text = prompt_text.replace("[IMPORT_LIST]", import_list_str)
+        prompt_text = prompt_text.replace("[DIVERS_LIST]", divers_list_str)
+        prompt_text = prompt_text.replace("[FEEDBACK]", feedback_instruction)
         
         payload = {
             "model": "gpt-4o",

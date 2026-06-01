@@ -25,6 +25,12 @@ class LogisticsEntry(models.Model):
         help="Coché automatiquement par l'IA si l'Invoice ne correspond pas aux données. L'admin peut le décocher manuellement."
     )
 
+    ai_status = fields.Selection([
+        ('unverified', 'Non vérifié'),
+        ('validated', 'Validé'),
+        ('error', 'Erreur')
+    ], string='Statut IA', default='unverified', tracking=True)
+
     is_onicl_applicable = fields.Boolean(
         string='Applicable ONICL',
         compute='_compute_is_onicl_applicable',
@@ -219,9 +225,8 @@ class LogisticsEntry(models.Model):
                     )
 
     def action_confirm_purchase(self):
-        # FIX: Allow regular purchase users to confirm too
-        if not self.env.user.has_group('achat.group_purchase_user'):
-            raise ValidationError("Only Purchase Users/Managers can confirm a dossier.")
+        if not self.env.user.has_group('achat.group_purchase_manager'):
+            raise ValidationError("Seul un Manager peut confirmer un dossier.")
         self.write({'purchase_state': 'confirmed'})
 
     def action_reset_to_initial(self):

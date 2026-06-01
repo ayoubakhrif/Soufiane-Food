@@ -26,6 +26,7 @@ const SORTIE_GROUP_ID = "120363424919316319@g.us";
 const CASA_CORRECTION_GROUP_ID = "120363049891261462@g.us";
 const PRICE_GROUP_ID = "120363428923348892@g.us";
 const FINANCE_PDF_GROUP_ID = "120363426857783962@g.us";
+const DOSSIER_VERIF_GROUP_ID = "120363408433779149@g.us";
 
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
@@ -38,11 +39,13 @@ const DOUANE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/douane?
 const SORTIE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/sortie?db=soufianefoods";
 const CASA_CORRECTION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/casa_correction?db=soufianefoods";
 const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance/pdf?db=soufianefoods";
+const DOSSIER_VERIF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_verification?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
 let odooSessionCookie = '';
 const pendingChoices = new Map(); // Garde en mémoire les menus interactifs par groupe
+const dossierVerifBuffer = []; // Buffer for dossier verification docs
 
 let sock; // Global socket variable
 
@@ -134,12 +137,42 @@ async function connectToWhatsApp() {
             } else if (from === SORTIE_GROUP_ID) {
                 targetOdooUrl = SORTIE_ODOO_URL;
                 isClientRequest = false;
-            } else if (from === CASA_CORRECTION_GROUP_ID) {
-                targetOdooUrl = CASA_CORRECTION_ODOO_URL;
-                isClientRequest = false;
             } else if (from === FINANCE_PDF_GROUP_ID) {
                 targetOdooUrl = FINANCE_PDF_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === DOSSIER_VERIF_GROUP_ID) {
+                targetOdooUrl = DOSSIER_VERIF_ODOO_URL;
+                isClientRequest = false;
+                
+                if (isDocument) {
+                    try {
+                        const buffer = await downloadMediaMessage(
+                            msg,
+                            'buffer',
+                            { },
+                            { logger: pino({ level: 'silent' }), reuploadRequest: sock.updateMediaMessage }
+                        );
+                        const docMsg = msg.message.documentMessage || msg.message.documentWithCaptionMessage?.message?.documentMessage;
+                        const fileName = docMsg?.fileName || 'document.pdf';
+                        dossierVerifBuffer.push({
+                            pdf_base64: buffer.toString('base64'),
+                            file_name: fileName,
+                            message_key: msg.key
+                        });
+                        console.log(`Document ${fileName} mis en file d'attente pour vérification.`);
+                    } catch (err) {
+                        console.error("Erreur téléchargement document:", err);
+                    }
+                    continue; // Do not call Odoo yet
+                } else if (realMessage && (realMessage.includes("➖➖➖➖➖➖➖➖➖➖➖") || realMessage.includes("----------"))) {
+                    if (dossierVerifBuffer.length === 0) {
+                        console.log("Série de tirets reçue mais aucun document en file d'attente.");
+                        continue;
+                    }
+                    console.log(`Lancement de la vérification pour ${dossierVerifBuffer.length} documents.`);
+                } else {
+                    continue; // Ignore other texts in this group
+                }
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -197,9 +230,9 @@ async function connectToWhatsApp() {
                 else if (from === LOGISTICS_GROUP_ID) typeStr = "LOGISTICS";
                 else if (from === LOGISTICS_PAYMENT_GROUP_ID) typeStr = "LOG_PAYMENT";
                 else if (from === DOUANE_GROUP_ID) typeStr = "DOUANE";
-                else if (from === SORTIE_GROUP_ID) typeStr = "SORTIE";
                 else if (from === CASA_CORRECTION_GROUP_ID) typeStr = "CASA_CORR";
                 else if (from === FINANCE_PDF_GROUP_ID) typeStr = "FINANCE_PDF";
+                else if (from === DOSSIER_VERIF_GROUP_ID) typeStr = "DOSSIER_VERIF";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 
@@ -208,6 +241,11 @@ async function connectToWhatsApp() {
                     sender: from, // Used by stock_kal3iya
                     group_id: from // Used by others
                 };
+
+                if (from === DOSSIER_VERIF_GROUP_ID) {
+                    requestParams.documents = [...dossierVerifBuffer];
+                    dossierVerifBuffer.length = 0; // Clear the buffer
+                }
 
                 // Si c'est un PDF pour le bot finance, on le télécharge
                 if (from === FINANCE_PDF_GROUP_ID && isDocument) {
@@ -252,6 +290,10 @@ async function connectToWhatsApp() {
                     // C'est un menu de sélection
                     pendingChoices.set(from, result.choices);
                     await sock.sendMessage(from, { text: result.message }, { quoted: msg });
+                } else if (from === DOSSIER_VERIF_GROUP_ID && result && result.status === 'success' && result.reports) {
+                    for (const report of result.reports) {
+                        await sock.sendMessage(from, { text: report.text }, { quoted: report.message_key });
+                    }
                 }
                 else {
                     let hasAction = false;

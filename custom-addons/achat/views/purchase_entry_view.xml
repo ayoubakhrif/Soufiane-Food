@@ -6,11 +6,12 @@
         <field name="model">logistique.entry</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <tree string="Dossiers Achat" decoration-danger="is_faux == True">
+            <tree string="Dossiers Achat" decoration-danger="is_faux == True or ai_status == 'error'" decoration-success="ai_status == 'validated'">
                 <field name="bl_number"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
+                <field name="ai_status" widget="badge" decoration-success="ai_status == 'validated'" decoration-danger="ai_status == 'error'" optional="show"/>
                 <!-- Faux : readonly pour les agents, éditable pour les admins -->
                 <field name="is_faux" readonly="1" optional="show" groups="!achat.group_purchase_admin"/>
                 <field name="is_faux" optional="show" groups="achat.group_purchase_admin"/>

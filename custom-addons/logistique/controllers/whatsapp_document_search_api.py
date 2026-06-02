@@ -70,7 +70,7 @@ class WhatsappDocumentSearchApi(http.Controller):
                         # doc.file is binary base64 stored as bytes in py3
                         base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
                         documents_to_send.append({
-                            'name': file_name,
+                            'file_name': file_name,
                             'base64': base64_str,
                             'mimetype': 'application/pdf'
                         })

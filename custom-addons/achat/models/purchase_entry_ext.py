@@ -304,6 +304,7 @@ RÈGLES DE COMPARAISON STRICTES :
    - Ignorez les ZÉROS INUTILES au début et les préfixes/suffixes.
    - Exemple : Odoo="152" match avec PDF="A26/202600152" (car 152 est le coeur du numéro).
    - Exemple : Odoo="358" match avec PDF="358/2026".
+   - 🚫 RÈGLE ABSOLUE : Si les valeurs Odoo et PDF sont identiques (ex: 35853 et 35853), c'est une correspondance PARFAITE. Ne les ajoutez JAMAIS dans 'mismatches'.
 2. POIDS : Le poids en Odoo est en TONNES. Valeurs équivalentes : 44 tonnes = 44 MT = 44 T = 44,000 KG = 44.000 KG.
 3. MONTANT TOTAL (CFR) : Comparaison stricte sur le nombre total de la facture (souvent marqué comme 'Total Amount', 'CFR Value', 'Balance', 'Total CFR', etc.). "80300" = "80,300" = "80.300" = "US$80,300.00".
 4. BÉNÉFICE DU DOUTE : Soyez très tolérant. Ne mettez is_faux=true que si les chiffres sont totalement différents et sans aucun lien logique.

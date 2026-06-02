@@ -27,6 +27,7 @@ const CASA_CORRECTION_GROUP_ID = "120363049891261462@g.us";
 const PRICE_GROUP_ID = "120363428923348892@g.us";
 const FINANCE_PDF_GROUP_ID = "120363426857783962@g.us";
 const DOSSIER_VERIF_GROUP_ID = "120363408433779149@g.us";
+const DOSSIER_SEARCH_GROUP_ID = "120363425063313711@g.us";
 
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
@@ -40,6 +41,7 @@ const SORTIE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/sortie?
 const CASA_CORRECTION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/casa_correction?db=soufianefoods";
 const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance/pdf?db=soufianefoods";
 const DOSSIER_VERIF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_verification?db=soufianefoods";
+const DOSSIER_SEARCH_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_search?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -139,6 +141,9 @@ async function connectToWhatsApp() {
                 isClientRequest = false;
             } else if (from === FINANCE_PDF_GROUP_ID) {
                 targetOdooUrl = FINANCE_PDF_ODOO_URL;
+                isClientRequest = false;
+            } else if (from === DOSSIER_SEARCH_GROUP_ID) {
+                targetOdooUrl = DOSSIER_SEARCH_ODOO_URL;
                 isClientRequest = false;
             } else if (from === DOSSIER_VERIF_GROUP_ID) {
                 targetOdooUrl = DOSSIER_VERIF_ODOO_URL;

@@ -30,6 +30,7 @@
                             <field name="scan_document_name" invisible="1"/>
                             <field name="scan_document" string="Scan du document" filename="scan_document_name" widget="binary"/>
                             <button name="action_parse_pdf_via_ai" type="object" string="Analyser le document (IA)" class="btn-primary" icon="fa-robot" invisible="not scan_document" help="Extrait automatiquement les chèques ou effets à partir du PDF scanné."/>
+                            <button name="action_confirm_ai_data" type="object" string="Confirmer les données IA" class="btn-secondary" icon="fa-check" invisible="not scan_document" help="Enregistre les corrections pour améliorer l'IA lors des prochains entraînements."/>
                         </group>
                         <group string="Montant">
                              <!-- Computed read-only total -->

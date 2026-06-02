@@ -241,6 +241,8 @@ Exemple de réponse attendue:
                 'amount': float(item.get('montant') or 0.0),
                 'bank_id': bank_id,
                 'owner_id': owner_id,
+                'ai_raw_prediction': json.dumps(item, ensure_ascii=False),
+                'is_ai_extracted': True,
             }
             if self.reception_date:
                 vals['reception_date'] = self.reception_date
@@ -254,3 +256,57 @@ Exemple de réponse attendue:
                 self.write({'cheque_line_ids': lines_to_create})
             else:
                 self.write({'effet_line_ids': lines_to_create})
+
+    def action_confirm_ai_data(self):
+        """Parcourt les lignes extraites par l'IA et crée les données d'entraînement avec les valeurs actuelles."""
+        self.ensure_one()
+        import json
+        lines = self.cheque_line_ids if self.payment_type == 'cheque' else self.effet_line_ids
+        
+        ai_lines = lines.filtered(lambda l: l.is_ai_extracted and l.ai_raw_prediction)
+        if not ai_lines:
+            from odoo.exceptions import UserError
+            raise UserError("Aucune donnée extraite par l'IA n'a été trouvée pour ce paiement.")
+        
+        training_obj = self.env['tresorerie_chq.ai.training']
+        created_count = 0
+        updated_count = 0
+        
+        for line in ai_lines:
+            validated = {
+                'numero': line.note,
+                'montant': line.amount,
+                'date_echeance': str(line.check_date) if line.check_date else '',
+                'banque': line.bank_id.name if line.bank_id else '',
+                'porteur': line.owner_id.name if line.owner_id else '',
+            }
+            
+            existing = training_obj.search([
+                ('paiement_id', '=', self.id),
+                ('document_type', '=', self.payment_type),
+                ('ai_prediction', '=', line.ai_raw_prediction)
+            ], limit=1)
+            
+            if existing:
+                existing.write({'validated_data': json.dumps(validated, ensure_ascii=False)})
+                updated_count += 1
+            else:
+                training_obj.create({
+                    'paiement_id': self.id,
+                    'document_type': self.payment_type,
+                    'ai_prediction': line.ai_raw_prediction,
+                    'validated_data': json.dumps(validated, ensure_ascii=False),
+                })
+                created_count += 1
+                
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Succès',
+                'message': f'{created_count} créés, {updated_count} mis à jour dans le dataset IA.',
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+

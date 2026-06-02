@@ -16,6 +16,7 @@
         'views/paiement_views.xml',
         'views/cheque_views.xml',
         'views/effet_views.xml',
+        'views/ai_training_views.xml',
     ],
     'installable': True,
     'application': True,

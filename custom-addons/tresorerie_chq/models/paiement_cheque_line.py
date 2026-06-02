@@ -69,6 +69,9 @@ class TresorerieChqCheque(models.Model):
     )
     scan_chq_name = fields.Char(string="Nom du fichier chèque")
 
+    ai_raw_prediction = fields.Text(string="Prédiction IA brute", readonly=True)
+    is_ai_extracted = fields.Boolean(string="Extrait par IA", readonly=True)
+
     core_ste_id = fields.Many2one('core.ste', string='Société')
     reception_date = fields.Date(string='Date de réception')
     bank_send_date = fields.Date(string="Date d'envoi au banque")
@@ -266,6 +269,9 @@ class TresorerieChqEffet(models.Model):
         help="Fichier de scan ou photo de l'effet"
     )
     scan_effet_name = fields.Char(string="Nom du fichier effet")
+
+    ai_raw_prediction = fields.Text(string="Prédiction IA brute", readonly=True)
+    is_ai_extracted = fields.Boolean(string="Extrait par IA", readonly=True)
 
     core_ste_id = fields.Many2one('core.ste', string='Société')
     reception_date = fields.Date(string='Date de réception')

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_tresorerie_chq_ai_training_tree" model="ir.ui.view">
+        <field name="name">tresorerie.chq.ai.training.tree</field>
+        <field name="model">tresorerie_chq.ai.training</field>
+        <field name="arch" type="xml">
+            <tree string="Données d'entraînement IA">
+                <field name="create_date" string="Date de collecte"/>
+                <field name="name"/>
+                <field name="paiement_id"/>
+                <field name="document_type"/>
+                <field name="is_corrected" decoration-danger="is_corrected" decoration-success="not is_corrected"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tresorerie_chq_ai_training_form" model="ir.ui.view">
+        <field name="name">tresorerie.chq.ai.training.form</field>
+        <field name="model">tresorerie_chq.ai.training</field>
+        <field name="arch" type="xml">
+            <form string="Données d'entraînement IA">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="paiement_id"/>
+                            <field name="document_type"/>
+                            <field name="is_corrected"/>
+                            <field name="create_date"/>
+                        </group>
+                        <group>
+                            <field name="scan_document_name" invisible="1"/>
+                            <field name="scan_document" filename="scan_document_name" widget="binary"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Données">
+                            <group>
+                                <field name="ai_prediction" widget="text"/>
+                                <field name="validated_data" widget="text"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tresorerie_chq_ai_training" model="ir.actions.act_window">
+        <field name="name">Données d'entraînement IA</field>
+        <field name="res_model">tresorerie_chq.ai.training</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune donnée d'entraînement collectée pour le moment.
+            </p>
+            <p>
+                Ces données sont générées automatiquement lorsque les utilisateurs valident les informations extraites par l'IA sur les chèques et effets.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_tresorerie_chq_ai_training"
+              name="Données IA"
+              parent="tresorerie_chq.menu_tresorerie_chq_config"
+              action="action_tresorerie_chq_ai_training"
+              groups="tresorerie_chq.group_tresorerie_chq_manager"
+              sequence="100"/>
+
+</odoo>

@@ -9,9 +9,6 @@ class WhatsappDocumentSearchApi(http.Controller):
 
     @http.route('/api/whatsapp/dossier_search', type='json', auth='none', methods=['POST'], csrf=False)
     def handle_dossier_search(self, **kw):
-        """
-        Endpoint called by Whatsapp bridge to search a dossier and return attached documents.
-        """
         try:
             # Check API Key
             api_key = request.httprequest.headers.get('X-Api-Key')
@@ -26,16 +23,39 @@ class WhatsappDocumentSearchApi(http.Controller):
                     'message': 'Aucun critère de recherche fourni.'
                 }
 
-            # Search sequence (Invoice -> BL -> DUM -> Lot)
-            # Find all matching entries for the first criteria that returns a match
+            # Handle Document Fetch
+            if query.startswith('FETCH_DOC_SEARCH:'):
+                parts = query.split(':')
+                if len(parts) == 3:
+                    doc_model = parts[1]
+                    doc_id = int(parts[2])
+                    doc = request.env[doc_model].sudo().browse(doc_id)
+                    if doc.exists() and doc.file:
+                        doc_type_dict = dict(doc._fields['document_type'].selection)
+                        doc_name = doc_type_dict.get(doc.document_type, str(doc.document_type))
+                        file_name = doc.file_name or f"{doc_name}.pdf"
+                        
+                        base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
+                        return {
+                            'status': 'success',
+                            'response': f"Voici le document *{file_name}* demandé.",
+                            'files': [{
+                                'file_name': file_name,
+                                'base64': base64_str,
+                                'mimetype': 'application/pdf'
+                            }]
+                        }
+                return {
+                    'status': 'success',
+                    'response': '❌ Impossible de récupérer le document demandé.'
+                }
+
+            # Handle Search
             entries = request.env['logistique.entry'].sudo().search([('invoice_number', 'ilike', query)])
-            
             if not entries:
                 entries = request.env['logistique.entry'].sudo().search([('bl_number', 'ilike', query)])
-                
             if not entries:
                 entries = request.env['logistique.entry'].sudo().search([('dum', 'ilike', query)])
-                
             if not entries:
                 entries = request.env['logistique.entry'].sudo().search([('lot', 'ilike', query)])
 
@@ -46,9 +66,10 @@ class WhatsappDocumentSearchApi(http.Controller):
                 }
 
             text_response = f"📁 *Dossiers trouvés pour '{query}'* :\n\n"
-            documents_to_send = []
+            choices = []
+            choice_idx = 1
 
-            for idx, entry in enumerate(entries):
+            for entry in entries:
                 bl = entry.bl_number or 'N/A'
                 invoice = entry.invoice_number or 'N/A'
                 text_response += f"🔹 *BL:* {bl} | *Facture:* {invoice}\n"
@@ -57,29 +78,32 @@ class WhatsappDocumentSearchApi(http.Controller):
                     text_response += "Aucun document attaché.\n\n"
                     continue
                 
-                text_response += "Documents :\n"
-                for doc_idx, doc in enumerate(entry.document_ids):
-                    # Get translated/readable document type name
+                for doc in entry.document_ids:
+                    if not doc.file:
+                        continue
+                        
                     doc_type_dict = dict(doc._fields['document_type'].selection)
                     doc_name = doc_type_dict.get(doc.document_type, str(doc.document_type))
-                    
                     file_name = doc.file_name or f"{doc_name}.pdf"
-                    text_response += f"{doc_idx + 1}. {file_name}\n"
                     
-                    if doc.file:
-                        # doc.file is binary base64 stored as bytes in py3
-                        base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
-                        documents_to_send.append({
-                            'file_name': file_name,
-                            'base64': base64_str,
-                            'mimetype': 'application/pdf'
-                        })
+                    text_response += f"{choice_idx}. {file_name}\n"
+                    choices.append(f"FETCH_DOC_SEARCH:logistique.entry.document:{doc.id}")
+                    choice_idx += 1
+                
                 text_response += "\n"
 
+            if not choices:
+                return {
+                    'status': 'success',
+                    'response': text_response.strip()
+                }
+
+            text_response += "👉 *Répondez par le numéro du document que vous souhaitez télécharger.*"
+
             return {
-                'status': 'success',
-                'response': text_response.strip(),
-                'files': documents_to_send
+                'status': 'multiple_choices',
+                'message': text_response.strip(),
+                'choices': choices
             }
 
         except Exception as e:

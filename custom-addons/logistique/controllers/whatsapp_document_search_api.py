@@ -42,7 +42,7 @@ class WhatsappDocumentSearchApi(http.Controller):
             if not entries:
                 return {
                     'status': 'success',
-                    'message': f"❌ Aucun dossier trouvé pour '{query}'."
+                    'response': f"❌ Aucun dossier trouvé pour '{query}'."
                 }
 
             text_response = f"📁 *Dossiers trouvés pour '{query}'* :\n\n"
@@ -78,8 +78,8 @@ class WhatsappDocumentSearchApi(http.Controller):
 
             return {
                 'status': 'success',
-                'message': text_response.strip(),
-                'documents_to_send': documents_to_send
+                'response': text_response.strip(),
+                'files': documents_to_send
             }
 
         except Exception as e:

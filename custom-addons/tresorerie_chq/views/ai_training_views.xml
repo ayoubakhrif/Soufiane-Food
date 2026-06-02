@@ -67,7 +67,7 @@
 
     <menuitem id="menu_tresorerie_chq_ai_training"
               name="Données IA"
-              parent="tresorerie_chq.menu_tresorerie_chq_config"
+              parent="tresorerie_chq.menu_tresorerie_chq_donnees"
               action="action_tresorerie_chq_ai_training"
               groups="tresorerie_chq.group_tresorerie_chq_manager"
               sequence="100"/>

@@ -34,7 +34,7 @@ class WhatsappDocumentSearchApi(http.Controller):
                 entries = request.env['logistique.entry'].sudo().search([('bl_number', 'ilike', query)])
                 
             if not entries:
-                entries = request.env['logistique.entry'].sudo().search(['|', ('prov_number', 'ilike', query), ('def_number', 'ilike', query)])
+                entries = request.env['logistique.entry'].sudo().search([('dum', 'ilike', query)])
                 
             if not entries:
                 entries = request.env['logistique.entry'].sudo().search([('lot', 'ilike', query)])

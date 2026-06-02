@@ -29,6 +29,11 @@
                             type="object"
                             groups="base.group_system"
                             invisible="state not in ('annule',)"/>
+                    <button name="action_verify_portnet_ai"
+                            string="Vérifier par IA"
+                            type="object"
+                            class="btn-success"
+                            invisible="not portnet_pdf"/>
                     <field name="state"
                            widget="statusbar"
                            statusbar_visible="new,domicilied,regle"/>
@@ -101,6 +106,14 @@
                     <group string="Notes">
                         <field name="note" nolabel="1"/>
                     </group>
+
+                    <!-- ROW 4: AI verification (visible after state != 'new') -->
+                    <group string="Vérification IA" invisible="state == 'new'">
+                        <field name="portnet_pdf" filename="portnet_pdf_name" widget="binary"/>
+                        <field name="portnet_pdf_name" invisible="1"/>
+                        <field name="ai_status" readonly="1" invisible="not portnet_pdf"/>
+                        <field name="is_faux" readonly="1" invisible="not portnet_pdf"/>
+                    </group>
                     <div class="oe_chatter">
                         <field name="message_follower_ids"/>
                         <field name="activity_ids"/>
@@ -116,10 +129,13 @@
         <field name="name">portnet.entry.tree</field>
         <field name="model">portnet.entry</field>
         <field name="arch" type="xml">
-            <tree string="Entrées Portnet" decoration-info="state == 'new'"
-                  decoration-success="state == 'regle'"
-                  decoration-warning="state == 'domicilied'"
-                  decoration-danger="state == 'annule'">
+            <tree string="Entrées Portnet"
+                  decoration-danger="is_faux == True"
+                  decoration-success="is_faux == False and ai_status == 'validated'"
+                  decoration-info="state == 'new'"
+                  decoration-warning="state == 'domicilied'">
+                <field name="is_faux" column_invisible="True"/>
+                <field name="ai_status" column_invisible="True"/>
                 <field name="name"/>
                 <field name="article_id"/>
                 <field name="origin_id"/>

@@ -38,7 +38,7 @@ class FinanceLogisticsTracking(models.Model):
     # Display fields - computed from related logistics entries
     ste_id = fields.Many2one('logistique.ste', string='Société', compute='_compute_entry_data', store=False)
     supplier_id = fields.Many2one('logistique.supplier', string='Fournisseur', compute='_compute_entry_data', store=False)
-    article_id = fields.Many2one('achat.article', string='Article', compute='_compute_entry_data', store=False)
+    article_id = fields.Many2one('logistique.article', string='Article', compute='_compute_entry_data', store=False)
     shipping_id = fields.Many2one('logistique.shipping', string='Compagnie Maritime', compute='_compute_entry_data', store=False)
     week = fields.Char(string='Semaine', compute='_compute_entry_data', store=False)
     invoice_number = fields.Char(string='Facture', compute='_compute_entry_data', store=False)

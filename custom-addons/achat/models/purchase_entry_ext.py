@@ -31,6 +31,14 @@ class LogisticsEntry(models.Model):
         ('error', 'Erreur')
     ], string='Statut IA', default='unverified', tracking=True)
 
+    def write(self, vals):
+        if 'is_faux' in vals:
+            if not vals.get('is_faux'):
+                vals['ai_status'] = 'validated'
+            else:
+                vals['ai_status'] = 'error'
+        return super(LogisticsEntry, self).write(vals)
+
     is_onicl_applicable = fields.Boolean(
         string='Applicable ONICL',
         compute='_compute_is_onicl_applicable',

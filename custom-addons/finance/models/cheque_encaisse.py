@@ -20,7 +20,13 @@ class FinanceChequeEncaisse(models.Model):
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
         ('change', 'Change'),
+        ('fret', 'Fret'),
+        ('thc', 'THC'),
         ('divers', 'Divers'),
+        ('inspection', 'Inspection'),
+        ('reserve', 'Reserve'),
+        ('bureau', 'Bureau'),
+        ('annule', 'Annulé'),
     ], store=True, string='Type', tracking=True)
 
     encaissement_physique_id = fields.Many2one('finance.encaissement.physique', string="Encaissement Physique Parent", ondelete='cascade')

@@ -154,11 +154,14 @@ class WhatsAppLogisticsPdfController(http.Controller):
         shippings = request.env['logistique.shipping'].sudo().search([]).mapped('name')
         shipping_list_str = ", ".join(shippings) if shippings else "Aucun"
 
-        prompt_text = """Vous êtes un assistant logistique. Vous recevez un document (PDF) qui contient généralement un chèque, une ou plusieurs factures, et parfois un Bon à Délivrer (BAD).
+        prompt_text = f"""Vous êtes un assistant logistique. Vous recevez un document (PDF) qui contient généralement un chèque, une ou plusieurs factures, et parfois un Bon à Délivrer (BAD).
+Le nom du fichier est : {file_name}
+
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs). S'il n'y en a pas, mettez une chaîne vide "".
 2. Trouvez le numéro de BL (Bill of Lading, Connaissement maritime, ex: YMJAM450339005). Cherchez "BL", "B/L", ou une longue référence alphanumérique liée au navire/conteneur. Obligatoire.
+   IMPORTANT: Si le nom du fichier contient le BL (ex: bl CFA0903943 ou blCFA0903943), fiez-vous au numéro du BL indiqué dans le nom du fichier en priorité. Assurez-vous de le recopier très précisément sans ajouter ni retirer de zéros (par exemple CFA0903943 au lieu de CFA0093943).
 3. Trouvez la date du BAD (Bon à Délivrer). Si vous trouvez une date associée au BAD, retournez-la au format YYYY-MM-DD. Sinon, "".
 4. Pour chaque facture (ou ligne de frais séparée) associée, extrayez :
    - Le montant TTC (numérique).

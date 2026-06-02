@@ -377,7 +377,10 @@ OU si tout est correct :
                 reason = result.get("reason", "")
                 mismatches = result.get("mismatches", [])
 
-                rec.sudo().write({'is_faux': is_faux_val})
+                rec.sudo().write({
+                    'is_faux': is_faux_val,
+                    'ai_status': 'error' if is_faux_val else 'validated'
+                })
 
                 if is_faux_val:
                     details = Markup("")

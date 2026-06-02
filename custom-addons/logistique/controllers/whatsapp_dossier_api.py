@@ -65,7 +65,7 @@ INSTRUCTIONS DE VÉRIFICATION :
    a. Les champs ayant une signification identique (ex: LOT, Numéro d'Invoice, Navire) doivent avoir la même valeur sur tous les documents.
    b. Si un champ requis précise "(Doit correspondre au document: X)", vous devez vérifier que la valeur correspond exactement à la valeur extraite dans le document de type X fourni dans ce lot.
 3. RÈGLES DE COMPARAISON : 
-   - Soyez tolérant sur la casse, les espaces, et les préfixes (ex: INV-2023 = 2023).
+   - IGNOREZ TOTALEMENT la casse (majuscules/minuscules) et les espaces. Ne signalez AUCUNE différence si les mots sont identiques à la casse près (ex: 'SOUFIANE' et 'Soufiane' sont considérés comme 100% identiques, ne les mettez pas dans "differences").
    - Les poids sont en tonnes (MT = T = Tonnes).
    - Veillez à utiliser exactement les mêmes noms de fichiers que ceux fournis dans la liste ci-dessous.
 

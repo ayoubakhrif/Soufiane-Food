@@ -38,11 +38,11 @@ class WhatsappDocumentSearchApi(http.Controller):
                         base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
                         return {
                             'status': 'success',
-                            'response': f"Voici le document *{file_name}* demandé.",
                             'files': [{
                                 'file_name': file_name,
                                 'base64': base64_str,
-                                'mimetype': 'application/pdf'
+                                'mimetype': 'application/pdf',
+                                'caption': f"Voici le document *{file_name}* demandé."
                             }]
                         }
                 return {

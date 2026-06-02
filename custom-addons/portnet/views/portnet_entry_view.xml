@@ -102,11 +102,6 @@
                                    invisible="incoterm != 'cfr'"/>
                         </group>
                     </group>
-
-                    <group string="Notes">
-                        <field name="note" nolabel="1"/>
-                    </group>
-
                     <!-- ROW 4: AI verification (visible after state != 'new') -->
                     <group string="Vérification IA" invisible="state == 'new'">
                         <field name="portnet_pdf" filename="portnet_pdf_name" widget="binary"/>

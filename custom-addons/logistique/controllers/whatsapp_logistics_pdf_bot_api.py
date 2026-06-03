@@ -160,8 +160,7 @@ Le nom du fichier est : {file_name}
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs). S'il n'y en a pas, mettez une chaîne vide "".
-2. Trouvez le numéro de BL (Bill of Lading, Connaissement maritime, ex: YMJAM450339005). Cherchez "BL", "B/L", ou une longue référence alphanumérique liée au navire/conteneur. Obligatoire.
-   IMPORTANT: Si le nom du fichier contient le BL (ex: bl CFA0903943 ou blCFA0903943), fiez-vous au numéro du BL indiqué dans le nom du fichier en priorité. Assurez-vous de le recopier très précisément sans ajouter ni retirer de zéros (par exemple CFA0903943 au lieu de CFA0093943).
+2. Le numéro de BL (Bill of Lading) doit être extrait EXCLUSIVEMENT à partir du nom du fichier fourni. Ne cherchez surtout pas le numéro de BL à l'intérieur du document PDF. Par exemple, si le nom du fichier est 'bl CFA0903943 CMA S-N .pdf', le BL est 'CFA0903943'. Recopiez-le très précisément sans ajouter ni retirer de zéros.
 3. Trouvez la date du BAD (Bon à Délivrer). Si vous trouvez une date associée au BAD, retournez-la au format YYYY-MM-DD. Sinon, "".
 4. Pour chaque facture (ou ligne de frais séparée) associée, extrayez :
    - Le montant TTC (numérique).

@@ -58,8 +58,11 @@ Votre mission est de vérifier que tous les champs obligatoires sont présents e
 
 INSTRUCTIONS DE VÉRIFICATION :
 1. Pour CHAQUE fichier PDF fourni, vous devez :
-   a. L'analyser et déterminer à quel type de configuration il correspond (Code). S'il ne correspond à aucun, marquez-le comme "other".
-   b. Extraire la valeur de TOUS les "champs requis" définis dans sa configuration.
+   a. L'analyser et déterminer à quel(s) type(s) de configuration il correspond (Code). 
+      - ATTENTION : L'utilisateur peut envoyer les documents séparément (1 fichier = 1 document), fusionnés (1 fichier = plusieurs documents sur différentes pages), ou un mélange des deux. Scrutez minutieusement chaque page pour ne rater aucun document !
+      - Si vous trouvez plusieurs documents dans un même fichier PDF, vous DEVEZ créer une entrée distincte dans le tableau JSON "documents" pour CHAQUE document trouvé, en utilisant le même "file_name".
+      - Faites preuve d'intelligence pour faire correspondre le type de document trouvé au Code de configuration (ex: 'Commercial Invoice' = 'invoice', 'Bill of Lading' = 'bl', 'Phytosanitary' = 'phyto'). Ne marquez 'other' que s'il n'y a VRAIMENT aucune correspondance logique.
+   b. Pour chaque document identifié (hors 'other'), extraire la valeur de TOUS les "champs requis" définis dans sa configuration.
    c. Si un champ requis est INTROUVABLE, c'est une erreur.
 2. ENSUITE, vous devez vérifier la COHÉRENCE CROISÉE :
    a. Les champs ayant une signification identique (ex: LOT, Numéro d'Invoice, Navire) doivent avoir la même valeur sur tous les documents.

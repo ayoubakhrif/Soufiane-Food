@@ -57,26 +57,31 @@ class WhatsAppLogisticsPdfController(http.Controller):
 
         factures = ai_result.get('factures', [])
         chq_number = ai_result.get('chq_number', '')
-        bl_number = ai_result.get('bl_number', '')
+        bl_number = str(ai_result.get('bl_number', '')).strip().upper()
+        bl_number_filename = str(ai_result.get('bl_number_filename', '')).strip().upper()
         bad_date_str = ai_result.get('bad_date', '')
 
-        if not bl_number:
-            return {'status': 'error', 'message': "L'IA n'a pas pu identifier le numéro de BL dans le PDF. La recherche du dossier est impossible."}
-        
-        # Format BL Number to match logic in entry
-        bl_number = str(bl_number).strip().upper()
+        if not bl_number and not bl_number_filename:
+            return {'status': 'error', 'message': "L'IA n'a pas pu identifier le numéro de BL dans le PDF ni dans le nom du fichier."}
 
         # 5. Find Dossier and Entry
-        # Search by BL Number on logistique.dossier
-        dossier = request.env['logistique.dossier'].sudo().search([('name', '=ilike', bl_number)], limit=1)
+        # Try finding by document BL first
+        dossier = request.env['logistique.dossier'].sudo().search([('name', '=ilike', bl_number)], limit=1) if bl_number else False
+        
+        # If not found, try finding by filename BL
+        if not dossier and bl_number_filename:
+            dossier_fallback = request.env['logistique.dossier'].sudo().search([('name', '=ilike', bl_number_filename)], limit=1)
+            if dossier_fallback:
+                dossier = dossier_fallback
+                bl_number = bl_number_filename
         
         if not dossier:
-             return {'status': 'error', 'message': f"Aucun dossier trouvé pour le BL: {bl_number}."}
+             return {'status': 'error', 'message': f"Aucun dossier trouvé pour le BL: {bl_number or bl_number_filename}."}
 
         entry = request.env['logistique.entry'].sudo().search([('dossier_id', '=', dossier.id)], limit=1)
         
         if not entry:
-            return {'status': 'error', 'message': f"Aucune entrée logistique trouvée pour le dossier BL: {bl_number}."}
+            return {'status': 'error', 'message': f"Aucune entrée logistique trouvée pour le dossier BL: {dossier.name}."}
 
         messages = []
         messages.append(f"✅ Dossier identifié : {dossier.name}")
@@ -160,9 +165,10 @@ Le nom du fichier est : {file_name}
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs). S'il n'y en a pas, mettez une chaîne vide "".
-2. Le numéro de BL (Bill of Lading) doit être extrait EXCLUSIVEMENT à partir du nom du fichier fourni. Ne cherchez surtout pas le numéro de BL à l'intérieur du document PDF. Par exemple, si le nom du fichier est 'bl CFA0903943 CMA S-N .pdf', le BL est 'CFA0903943'. Recopiez-le très précisément sans ajouter ni retirer de zéros.
-3. Trouvez la date du BAD (Bon à Délivrer). Si vous trouvez une date associée au BAD, retournez-la au format YYYY-MM-DD. Sinon, "".
-4. Pour chaque facture (ou ligne de frais séparée) associée, extrayez :
+2. Trouvez le numéro de BL (Bill of Lading, Connaissement maritime, ex: YMJAM450339005) à l'intérieur du document PDF. Cherchez "BL", "B/L", ou une longue référence alphanumérique liée au navire/conteneur. Mettez le résultat dans "bl_number".
+3. Extrayez également le numéro de BL indiqué dans le nom du fichier (qui est : {file_name}) et mettez-le dans "bl_number_filename". Ne le cherchez pas dans le document, lisez uniquement le nom du fichier. Par exemple, si le nom est 'bl CFA0903943.pdf', renvoyez 'CFA0903943'. S'il n'y a pas de BL dans le nom, mettez "".
+4. Trouvez la date du BAD (Bon à Délivrer). Si vous trouvez une date associée au BAD, retournez-la au format YYYY-MM-DD. Sinon, "".
+5. Pour chaque facture (ou ligne de frais séparée) associée, extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur. Voici la liste des compagnies maritimes connues : [SHIPPING_LIST]. Essayez de mapper le bénéficiaire à l'un de ces noms.
    - Le "type" de frais.
@@ -181,6 +187,7 @@ Règles de formatage :
 {{
   "chq_number": "1234567",
   "bl_number": "YMJAM450339005",
+  "bl_number_filename": "CFA0903943",
   "bad_date": "2023-10-15",
   "factures": [
     {{

@@ -73,12 +73,13 @@ class FinanceChequePhysical(models.Model):
         for rec in self:
             rec.amount_total = sum(rec.datacheque_ids.mapped('amount'))
 
-    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement')
+    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state')
     def _compute_shared_info(self):
         for rec in self:
             if rec.datacheque_ids:
-                # Take info from the first one found (assuming they should be consistent for the same physical cheque)
-                first = rec.datacheque_ids[0]
+                # Prefer active datacheque to get the real beneficiary and dates (ignore annule/bureau if possible)
+                active_splits = rec.datacheque_ids.filtered(lambda d: d.state == 'actif')
+                first = active_splits[0] if active_splits else rec.datacheque_ids[0]
                 rec.date_emission = first.date_emission
                 rec.date_echeance = first.date_echeance
                 rec.benif_id = first.benif_id

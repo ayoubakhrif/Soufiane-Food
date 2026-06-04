@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_fix_old_transport_tanger" model="ir.actions.server">
+            <field name="name">Corriger les anciennes opérations (/)</field>
+            <field name="model_id" ref="suivi_transport_tanger.model_suivi_transport_tanger_operation"/>
+            <field name="binding_model_id" ref="suivi_transport_tanger.model_suivi_transport_tanger_operation"/>
+            <field name="state">code</field>
+            <field name="code">
+for record in records:
+    if record.name == '/':
+        new_name = env['ir.sequence'].next_by_code('suivi.transport.tanger.operation')
+        record.write({'name': new_name})
+        if record.state == 'validated' and record.casa_payer_id and record.montant > 0:
+            adv = env['casa.client.advance'].search([('comment', '=', "Paiement transport " + str(new_name))], limit=1)
+            if not adv:
+                env['casa.client.advance'].sudo().with_context(is_transport_operation=True).create({
+                    'client_id': record.casa_payer_id.id,
+                    'amount': record.montant,
+                    'date': record.date,
+                    'payment_mode': 'transport',
+                    'ville': record.ville,
+                    'comment': "Paiement transport " + str(new_name),
+                    'state': 'confirmed',
+                })
+
+bad_advances = env['casa.client.advance'].search([('comment', '=', "Paiement transport /")])
+if bad_advances:
+    bad_advances.sudo().with_context(is_transport_operation=True).unlink()
+            </field>
+        </record>
+    </data>
+</odoo>

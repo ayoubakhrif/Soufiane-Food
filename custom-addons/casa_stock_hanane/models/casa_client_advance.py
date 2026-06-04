@@ -50,7 +50,7 @@ class CasaClientAdvance(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state == 'confirmed' and any(f != 'state' for f in vals):
+            if not self.env.context.get('is_transport_operation') and rec.state == 'confirmed' and any(f != 'state' for f in vals):
                  raise UserError(_("Vous ne pouvez pas modifier une avance validée. Veuillez d'abord la remettre en brouillon."))
         return super().write(vals)
 

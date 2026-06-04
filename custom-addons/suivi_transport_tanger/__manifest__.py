@@ -14,6 +14,7 @@
     'website': '',
     'depends': ['base', 'company_data', 'custom_employee', 'casa_stock', 'stock_kal3iya'],
     'data': [
+        'data/sequence.xml',
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/suivi_operation_views.xml',

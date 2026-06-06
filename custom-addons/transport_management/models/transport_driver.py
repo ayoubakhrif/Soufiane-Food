@@ -5,6 +5,7 @@ class TransportDriver(models.Model):
     _description = 'Chauffeurs Transport'
 
     name = fields.Char(string='Nom', required=True)
+    alias = fields.Char(string='Alias/Surnom')
     employee_id = fields.Many2one(
         'core.employee', 
         string='Employé', 

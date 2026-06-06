@@ -43,7 +43,7 @@ class WhatsAppTransportController(http.Controller):
             return {'status': 'ignored', 'message': 'This agent only handles the Transport Group.'}
 
         # 4. Check for direct match first
-        exact_driver = request.env['transport.driver'].sudo().search([('name', '=ilike', message_text.strip())], limit=1)
+        exact_driver = request.env['transport.driver'].sudo().search(['|', ('name', '=ilike', message_text.strip()), ('alias', '=ilike', message_text.strip())], limit=1)
         
         if exact_driver:
             drivers = exact_driver
@@ -56,7 +56,7 @@ class WhatsAppTransportController(http.Controller):
 
             # Fetch all driver names
             all_drivers = request.env['transport.driver'].sudo().search([])
-            driver_names_list = [d.name for d in all_drivers if d.name]
+            driver_names_list = [f"{d.name} (Alias: {d.alias})" if d.alias else d.name for d in all_drivers if d.name]
             
             extracted_name = self._extract_driver_name(message_text, openai_key, driver_names_list)
             
@@ -68,14 +68,14 @@ class WhatsAppTransportController(http.Controller):
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le chauffeur dans votre message."}
 
             # Handle partial match via search
-            drivers = request.env['transport.driver'].sudo().search([('name', 'ilike', extracted_name)])
+            drivers = request.env['transport.driver'].sudo().search(['|', ('name', 'ilike', extracted_name), ('alias', 'ilike', extracted_name)])
 
         if not drivers:
             return {'status': 'not_found', 'message': f"Aucun chauffeur trouvé pour : '{extracted_name}'."}
 
         # Check for absolute exact match among multiple results
         if len(drivers) > 1:
-            absolute_match = drivers.filtered(lambda d: d.name.lower() == extracted_name.lower())
+            absolute_match = drivers.filtered(lambda d: d.name.lower() == extracted_name.lower() or (d.alias and d.alias.lower() == extracted_name.lower()))
             if absolute_match:
                 drivers = absolute_match[0]
 
@@ -101,7 +101,7 @@ class WhatsAppTransportController(http.Controller):
 
                 summary_msg = f"Voici le rapport pour le chauffeur *{driver.name}*.\n\n"
                 summary_msg += f"📊 *Détails* :\n"
-                summary_msg += f"• Nom: {driver.name}\n"
+                summary_msg += f"• Nom: {driver.name}" + (f" ({driver.alias})" if driver.alias else "") + "\n"
                 summary_msg += f"• Voyages Totaux: {total_trips}\n"
                 summary_msg += f"• Chiffre d'Affaires: {'{:,.2f}'.format(total_price).replace(',', ' ')} DH\n"
                 summary_msg += f"• Total Charges: {'{:,.2f}'.format(total_charges).replace(',', ' ')} DH\n"
@@ -240,59 +240,98 @@ class WhatsAppTransportController(http.Controller):
 
                 <div class="info-box">
                     <p><strong>Nom :</strong> {driver.name}</p>
+                    <p><strong>Alias :</strong> {driver.alias or 'Aucun'}</p>
                     <p><strong>Remorque :</strong> {'Oui' if driver.remorque else 'Non'}</p>
                     <p><strong>Salaire Actuel :</strong> {'{:,.2f}'.format(driver.current_monthly_salary).replace(',', ' ')} DH</p>
                 </div>
         """
         
-        # Add Trips section
+        # Add Trips section grouped by month
         all_trips = list(trips) + list(remorque_trips)
         all_trips.sort(key=lambda t: t.date or fields.Date.today(), reverse=True)
         
         if all_trips:
-            html += """
-                <h3>Derniers Voyages (Top 30)</h3>
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Client</th>
-                        <th>Type / Dest.</th>
-                        <th>Chiffre d'Aff.</th>
-                        <th>Charges</th>
-                        <th>Bénéfice</th>
-                        <th>Payé</th>
-                    </tr>
-            """
-            for trip in all_trips[:30]:
-                date_str = trip.date.strftime('%d/%m/%Y') if trip.date else ''
-                client = trip.client_id.name if hasattr(trip, 'client_id') and trip.client_id else ''
-                
-                # Check if it's a remorque trip or regular trip for type/dest
-                if hasattr(trip, 'destination'):
-                    trip_type = dict(trip._fields['destination'].selection or {}).get(trip.destination, trip.destination or '')
-                    trip_type += " (Remorque)"
+            from collections import defaultdict
+            months_fr = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+            trips_by_month = defaultdict(list)
+            
+            for trip in all_trips:
+                if trip.date:
+                    month_key = f"{trip.date.year}-{trip.date.month:02d}"
+                    month_label = f"{months_fr[trip.date.month - 1]} {trip.date.year}"
                 else:
-                    trip_type = dict(trip._fields['trip_type'].selection or {}).get(trip.trip_type, trip.trip_type or '')
+                    month_key = "0000-00"
+                    month_label = "Date Inconnue"
+                trips_by_month[(month_key, month_label)].append(trip)
+            
+            # Sort by month descending
+            sorted_months = sorted(trips_by_month.keys(), key=lambda x: x[0], reverse=True)
+            
+            for (month_key, month_label) in sorted_months:
+                month_trips = trips_by_month[(month_key, month_label)]
                 
-                ca = '{:,.2f}'.format(trip.total_price).replace(',', ' ') if trip.total_price else '0.00'
-                charges = '{:,.2f}'.format(trip.total_amount).replace(',', ' ') if trip.total_amount else '0.00'
-                profit = '{:,.2f}'.format(trip.profit).replace(',', ' ') if trip.profit else '0.00'
-                paid = "Oui" if trip.is_paid else "Non"
-                
-                profit_color = "green" if trip.profit and trip.profit > 0 else ("red" if trip.profit and trip.profit < 0 else "black")
+                # Month Totals
+                m_price = sum(t.total_price for t in month_trips if t.total_price)
+                m_charges = sum(t.total_amount for t in month_trips if t.total_amount)
+                m_profit = sum(t.profit for t in month_trips if t.profit)
                 
                 html += f"""
-                    <tr>
-                        <td>{date_str}</td>
-                        <td>{client}</td>
-                        <td>{trip_type}</td>
-                        <td>{ca}</td>
-                        <td>{charges}</td>
-                        <td style="color: {profit_color}; font-weight: bold;">{profit}</td>
-                        <td>{paid}</td>
-                    </tr>
+                    <div style="background-color: #2c3e50; color: white; padding: 5px 10px; margin-top: 20px; border-radius: 3px;">
+                        <h3 style="margin: 0; color: white;">{month_label} - <em>(CA: {'{:,.2f}'.format(m_price).replace(',', ' ')} DH | Bénéfice: {'{:,.2f}'.format(m_profit).replace(',', ' ')} DH)</em></h3>
+                    </div>
+                    <table>
+                        <tr>
+                            <th>Date</th>
+                            <th>Client & Dest.</th>
+                            <th>Prix (Allée/Retour/Total)</th>
+                            <th>Détails des Charges</th>
+                            <th>Bénéfice</th>
+                            <th>Payé</th>
+                        </tr>
                 """
-            html += "</table>"
+                for trip in month_trips:
+                    date_str = trip.date.strftime('%d/%m/%Y') if trip.date else ''
+                    client = trip.client_id.name if hasattr(trip, 'client_id') and trip.client_id else ''
+                    
+                    if hasattr(trip, 'destination'):
+                        trip_type = dict(trip._fields['destination'].selection or {}).get(trip.destination, trip.destination or '')
+                        trip_type += " (Remorque)"
+                    else:
+                        trip_type = dict(trip._fields['trip_type'].selection or {}).get(trip.trip_type, trip.trip_type or '')
+                    
+                    p_going = '{:,.2f}'.format(trip.going_price).replace(',', ' ') if trip.going_price else '0.00'
+                    p_ret = '{:,.2f}'.format(trip.returning_price).replace(',', ' ') if trip.returning_price else '0.00'
+                    p_tot = '{:,.2f}'.format(trip.total_price).replace(',', ' ') if trip.total_price else '0.00'
+                    
+                    c_fuel = '{:,.2f}'.format(trip.charge_fuel).replace(',', ' ') if trip.charge_fuel else '0.00'
+                    c_dep = '{:,.2f}'.format(trip.charge_driver).replace(',', ' ') if trip.charge_driver else '0.00'
+                    c_adblue = '{:,.2f}'.format(trip.charge_adblue).replace(',', ' ') if trip.charge_adblue else '0.00'
+                    c_mix_val = '{:,.2f}'.format(trip.charge_mixed).replace(',', ' ') if trip.charge_mixed else '0.00'
+                    c_mix_note = trip.note if trip.note else ''
+                    c_tot = '{:,.2f}'.format(trip.total_amount).replace(',', ' ') if trip.total_amount else '0.00'
+                    
+                    mix_str = f" | Div: {c_mix_val}"
+                    if c_mix_note:
+                        mix_str += f" ({c_mix_note})"
+                    
+                    profit = '{:,.2f}'.format(trip.profit).replace(',', ' ') if trip.profit else '0.00'
+                    paid = "Oui" if trip.is_paid else "Non"
+                    profit_color = "green" if trip.profit and trip.profit > 0 else ("red" if trip.profit and trip.profit < 0 else "black")
+                    
+                    html += f"""
+                        <tr>
+                            <td>{date_str}</td>
+                            <td><strong>{client}</strong><br/><span style="color:#7f8c8d; font-size:10px;">{trip_type}</span></td>
+                            <td><span style="color:#7f8c8d; font-size:10px;">Allée: {p_going}<br/>Retour: {p_ret}</span><br/><strong>Total: {p_tot}</strong></td>
+                            <td style="font-size:10px;">
+                                Gaz: {c_fuel} | Dép: {c_dep} | AdB: {c_adblue}{mix_str}<br/>
+                                <strong>Total: {c_tot}</strong>
+                            </td>
+                            <td style="color: {profit_color}; font-weight: bold;">{profit}</td>
+                            <td>{paid}</td>
+                        </tr>
+                    """
+                html += "</table>"
             
         html += """
             </body>

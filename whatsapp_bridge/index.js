@@ -29,6 +29,7 @@ const FINANCE_PDF_GROUP_ID = "120363426857783962@g.us";
 const DOSSIER_VERIF_GROUP_ID = "120363408433779149@g.us";
 const DOSSIER_SEARCH_GROUP_ID = "120363425063313711@g.us";
 const LOGISTICS_PDF_GROUP_ID = "120363428159815503@g.us";
+const TRANSPORT_GROUP_ID = "120363409412071351@g.us";
 
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
@@ -44,6 +45,7 @@ const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/fi
 const DOSSIER_VERIF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_verification?db=soufianefoods";
 const DOSSIER_SEARCH_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_search?db=soufianefoods";
 const LOGISTICS_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistique/pdf?db=soufianefoods";
+const TRANSPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/transport?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -183,6 +185,9 @@ async function connectToWhatsApp() {
                 } else {
                     continue; // Ignore other texts in this group
                 }
+            } else if (from === TRANSPORT_GROUP_ID) {
+                targetOdooUrl = TRANSPORT_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -244,6 +249,7 @@ async function connectToWhatsApp() {
                 else if (from === FINANCE_PDF_GROUP_ID) typeStr = "FINANCE_PDF";
                 else if (from === LOGISTICS_PDF_GROUP_ID) typeStr = "LOGISTICS_PDF";
                 else if (from === DOSSIER_VERIF_GROUP_ID) typeStr = "DOSSIER_VERIF";
+                else if (from === TRANSPORT_GROUP_ID) typeStr = "TRANSPORT";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 
@@ -335,6 +341,7 @@ async function connectToWhatsApp() {
                         if (from === DOUANE_GROUP_ID) reportType = "douane (DUM)";
                         if (from === SORTIE_GROUP_ID) reportType = "de sorties";
                         if (from === LOGISTICS_GROUP_ID) reportType = "logistique";
+                        if (from === TRANSPORT_GROUP_ID) reportType = "chauffeur";
 
                         console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 

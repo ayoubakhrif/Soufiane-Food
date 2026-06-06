@@ -83,8 +83,16 @@ class WhatsAppTransportController(http.Controller):
             # UNIQUE DRIVER -> GENERATE PDF
             driver = drivers[0]
             
+            trips = request.env['transport.trip'].sudo().search([('driver_id', '=', driver.id)])
+            remorque_trips = request.env['transport.trip.remorque'].sudo().search([('driver_remorque_id', '=', driver.id)])
+            
+            total_trips = len(trips) + len(remorque_trips)
+            total_price = sum(trips.mapped('total_price')) + sum(remorque_trips.mapped('total_price'))
+            total_charges = sum(trips.mapped('total_amount')) + sum(remorque_trips.mapped('total_amount'))
+            total_profit = sum(trips.mapped('profit')) + sum(remorque_trips.mapped('profit'))
+            
             # Generate HTML Content for PDF
-            html_content = self._generate_driver_html(driver)
+            html_content = self._generate_driver_html(driver, trips, remorque_trips)
             
             report_action = request.env['ir.actions.report'].sudo()
             try:
@@ -94,6 +102,10 @@ class WhatsAppTransportController(http.Controller):
                 summary_msg = f"Voici le rapport pour le chauffeur *{driver.name}*.\n\n"
                 summary_msg += f"📊 *Détails* :\n"
                 summary_msg += f"• Nom: {driver.name}\n"
+                summary_msg += f"• Voyages Totaux: {total_trips}\n"
+                summary_msg += f"• Chiffre d'Affaires: {'{:,.2f}'.format(total_price).replace(',', ' ')} DH\n"
+                summary_msg += f"• Total Charges: {'{:,.2f}'.format(total_charges).replace(',', ' ')} DH\n"
+                summary_msg += f"• Bénéfices: {'{:,.2f}'.format(total_profit).replace(',', ' ')} DH\n"
                 summary_msg += f"• Remorque: {'Oui' if driver.remorque else 'Non'}\n"
                 summary_msg += f"• Salaire Actuel: {'{:,.2f}'.format(driver.current_monthly_salary).replace(',', ' ')} DH\n"
 
@@ -156,7 +168,20 @@ class WhatsAppTransportController(http.Controller):
             _logger.error(f"OpenAI Transport Extraction Error: {str(e)}")
             return None
 
-    def _generate_driver_html(self, driver):
+    def _generate_driver_html(self, driver, trips, remorque_trips):
+        total_trips = len(trips) + len(remorque_trips)
+        
+        # Totals
+        total_price = sum(trips.mapped('total_price')) + sum(remorque_trips.mapped('total_price'))
+        total_charges = sum(trips.mapped('total_amount')) + sum(remorque_trips.mapped('total_amount'))
+        total_profit = sum(trips.mapped('profit')) + sum(remorque_trips.mapped('profit'))
+        
+        # Detailed charges
+        total_fuel = sum(trips.mapped('charge_fuel')) + sum(remorque_trips.mapped('charge_fuel'))
+        total_dep = sum(trips.mapped('charge_driver')) + sum(remorque_trips.mapped('charge_driver'))
+        total_adblue = sum(trips.mapped('charge_adblue')) + sum(remorque_trips.mapped('charge_adblue'))
+        total_mixed = sum(trips.mapped('charge_mixed')) + sum(remorque_trips.mapped('charge_mixed'))
+        
         html = f"""
         <html>
             <head>
@@ -165,15 +190,54 @@ class WhatsAppTransportController(http.Controller):
                     body {{ font-family: sans-serif; font-size: 14px; color: #333; }}
                     h2 {{ text-align: center; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }}
                     h3 {{ color: #2980b9; margin-top: 20px; }}
-                    table {{ border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 13px; }}
-                    th, td {{ border: 1px solid #bdc3c7; padding: 8px 10px; text-align: left; vertical-align: middle; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 11px; }}
+                    th, td {{ border: 1px solid #bdc3c7; padding: 6px 8px; text-align: left; vertical-align: middle; }}
                     th {{ background-color: #ecf0f1; font-weight: bold; color: #2c3e50; }}
                     .info-box {{ background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
-                    .info-box p {{ margin: 5px 0; }}
+                    .info-box p {{ margin: 5px 0; display: inline-block; width: 48%; }}
+                    .stats-box {{ display: flex; justify-content: space-between; margin-bottom: 20px; }}
+                    .stat-item {{ background-color: #e8f4f8; padding: 15px; border-radius: 5px; flex: 1; margin: 0 5px; text-align: center; border: 1px solid #bce8f1; }}
+                    .stat-item:first-child {{ margin-left: 0; }}
+                    .stat-item:last-child {{ margin-right: 0; }}
+                    .stat-value {{ font-size: 16px; font-weight: bold; color: #31708f; margin-top: 5px; }}
+                    .charges-box {{ background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
+                    .charges-box h4 {{ margin-top: 0; color: #856404; margin-bottom: 10px; }}
+                    .charges-grid {{ display: flex; flex-wrap: wrap; }}
+                    .charge-item {{ width: 25%; margin-bottom: 10px; font-size: 13px; }}
                 </style>
             </head>
             <body>
                 <h2>Rapport Chauffeur : {driver.name}</h2>
+                
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <div>Voyages Totaux</div>
+                        <div class="stat-value">{total_trips}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Chiffre d'Affaires</div>
+                        <div class="stat-value">{'{:,.2f}'.format(total_price).replace(',', ' ')}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Charges Totales</div>
+                        <div class="stat-value">{'{:,.2f}'.format(total_charges).replace(',', ' ')}</div>
+                    </div>
+                    <div class="stat-item" style="background-color: #dff0d8; border-color: #d6e9c6;">
+                        <div style="color: #3c763d;">Bénéfices Totaux</div>
+                        <div class="stat-value" style="color: #3c763d;">{'{:,.2f}'.format(total_profit).replace(',', ' ')}</div>
+                    </div>
+                </div>
+
+                <div class="charges-box">
+                    <h4>Détail des charges :</h4>
+                    <div class="charges-grid">
+                        <div class="charge-item"><strong>Gazoil :</strong> {'{:,.2f}'.format(total_fuel).replace(',', ' ')} DH</div>
+                        <div class="charge-item"><strong>Déplacement :</strong> {'{:,.2f}'.format(total_dep).replace(',', ' ')} DH</div>
+                        <div class="charge-item"><strong>AdBlue :</strong> {'{:,.2f}'.format(total_adblue).replace(',', ' ')} DH</div>
+                        <div class="charge-item"><strong>Mixe :</strong> {'{:,.2f}'.format(total_mixed).replace(',', ' ')} DH</div>
+                    </div>
+                </div>
+
                 <div class="info-box">
                     <p><strong>Nom :</strong> {driver.name}</p>
                     <p><strong>Remorque :</strong> {'Oui' if driver.remorque else 'Non'}</p>
@@ -181,30 +245,51 @@ class WhatsAppTransportController(http.Controller):
                 </div>
         """
         
-        # Add Avances section
-        if driver.advance_ids:
+        # Add Trips section
+        all_trips = list(trips) + list(remorque_trips)
+        all_trips.sort(key=lambda t: t.date or fields.Date.today(), reverse=True)
+        
+        if all_trips:
             html += """
-                <h3>Dernières Avances</h3>
+                <h3>Derniers Voyages (Top 30)</h3>
                 <table>
                     <tr>
                         <th>Date</th>
-                        <th>Montant (DH)</th>
-                        <th>Description</th>
-                        <th>État</th>
+                        <th>Client</th>
+                        <th>Type / Dest.</th>
+                        <th>Chiffre d'Aff.</th>
+                        <th>Charges</th>
+                        <th>Bénéfice</th>
+                        <th>Payé</th>
                     </tr>
             """
-            for advance in driver.advance_ids.sorted(key=lambda a: a.create_date, reverse=True)[:10]:
-                date_str = advance.date.strftime('%d/%m/%Y') if hasattr(advance, 'date') and advance.date else ''
-                amount = '{:,.2f}'.format(advance.amount).replace(',', ' ') if hasattr(advance, 'amount') else '0.00'
-                desc = advance.name if hasattr(advance, 'name') else ''
-                state = advance.state if hasattr(advance, 'state') else ''
+            for trip in all_trips[:30]:
+                date_str = trip.date.strftime('%d/%m/%Y') if trip.date else ''
+                client = trip.client_id.name if hasattr(trip, 'client_id') and trip.client_id else ''
+                
+                # Check if it's a remorque trip or regular trip for type/dest
+                if hasattr(trip, 'destination'):
+                    trip_type = dict(trip._fields['destination'].selection or {}).get(trip.destination, trip.destination or '')
+                    trip_type += " (Remorque)"
+                else:
+                    trip_type = dict(trip._fields['trip_type'].selection or {}).get(trip.trip_type, trip.trip_type or '')
+                
+                ca = '{:,.2f}'.format(trip.total_price).replace(',', ' ') if trip.total_price else '0.00'
+                charges = '{:,.2f}'.format(trip.total_amount).replace(',', ' ') if trip.total_amount else '0.00'
+                profit = '{:,.2f}'.format(trip.profit).replace(',', ' ') if trip.profit else '0.00'
+                paid = "Oui" if trip.is_paid else "Non"
+                
+                profit_color = "green" if trip.profit and trip.profit > 0 else ("red" if trip.profit and trip.profit < 0 else "black")
                 
                 html += f"""
                     <tr>
                         <td>{date_str}</td>
-                        <td>{amount}</td>
-                        <td>{desc}</td>
-                        <td>{state}</td>
+                        <td>{client}</td>
+                        <td>{trip_type}</td>
+                        <td>{ca}</td>
+                        <td>{charges}</td>
+                        <td style="color: {profit_color}; font-weight: bold;">{profit}</td>
+                        <td>{paid}</td>
                     </tr>
                 """
             html += "</table>"

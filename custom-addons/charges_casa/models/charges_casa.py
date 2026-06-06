@@ -29,6 +29,7 @@ class ChargesCasa(models.Model):
 
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today, tracking=True)
     client_id = fields.Many2one('casa.client', string='Client', tracking=True)
+    paye_par_caisse = fields.Boolean(string='Payé par caisse', default=False, tracking=True)
     ville = fields.Selection([
         ('agadir', 'Agadir'),
         ('tanger', 'Tanger'),
@@ -74,6 +75,9 @@ class ChargesCasa(models.Model):
 
     def _create_client_advances(self):
         self.ensure_one()
+        if self.paye_par_caisse:
+            return
+            
         for line in self.line_ids:
             if line.amount <= 0:
                 continue

@@ -36,7 +36,8 @@
                     <group>
                         <group>
                             <field name="date" readonly="state != 'draft'"/>
-                            <field name="client_id" readonly="state != 'draft'"/>
+                            <field name="paye_par_caisse" readonly="state != 'draft'"/>
+                            <field name="client_id" readonly="state != 'draft'" invisible="paye_par_caisse"/>
                             <field name="ville" readonly="state != 'draft'"/>
                         </group>
                         <group>

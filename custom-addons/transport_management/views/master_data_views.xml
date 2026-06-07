@@ -42,7 +42,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Voyages Remorque" attrs="{'invisible': [('remorque', '=', False)]}">
+                        <page string="Voyages Remorque" invisible="not remorque">
                             <field name="remorque_trip_ids">
                                 <tree>
                                     <field name="date"/>

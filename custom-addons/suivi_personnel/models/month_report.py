@@ -88,8 +88,8 @@ class SuiviMonthReport(models.Model):
             cat_expenses = daily_expenses.filtered(lambda e: e.category_id == cat)
             spent = sum(cat_expenses.mapped('amount'))
             
-            # Using monthly limit from category definition
-            limit = cat.monthly_limit
+            # Using monthly limit from category definition / objectives
+            limit = cat.get_monthly_limit_for_period(self.period_id)
             remaining = limit - spent
 
             lines_to_create.append({

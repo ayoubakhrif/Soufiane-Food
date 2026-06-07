@@ -21,3 +21,5 @@ access_suivi_personne_mgr,suivi.personne,model_suivi_personne,group_suivi_manage
 access_suivi_personne_user,suivi.personne,model_suivi_personne,group_suivi_user,1,1,1,1
 access_suivi_credit_mgr,suivi.credit,model_suivi_credit,group_suivi_manager,1,1,1,1
 access_suivi_credit_user,suivi.credit,model_suivi_credit,group_suivi_user,1,1,1,1
+access_expense_category_objective_mgr,suivi.expense.category.objective,model_suivi_expense_category_objective,group_suivi_manager,1,1,1,1
+access_expense_category_objective_user,suivi.expense.category.objective,model_suivi_expense_category_objective,group_suivi_user,1,0,0,0

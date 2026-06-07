@@ -2,6 +2,18 @@ from odoo import models, fields, api
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 
+class ExpenseCategoryObjective(models.Model):
+    _name = 'suivi.expense.category.objective'
+    _description = 'Objectif Mensuel de Catégorie'
+    
+    category_id = fields.Many2one('suivi.expense.category', string='Catégorie', required=True, ondelete='cascade')
+    period_id = fields.Many2one('suivi.period', string='Période', required=True)
+    amount = fields.Float(string='Objectif Mensuel', required=True)
+
+    _sql_constraints = [
+        ('category_period_uniq', 'unique(category_id, period_id)', 'Il ne peut y avoir qu\'un seul objectif par période pour une catégorie !')
+    ]
+
 class ExpenseCategory(models.Model):
     _name = 'suivi.expense.category'
     _description = 'Catégorie de Dépense'
@@ -12,7 +24,12 @@ class ExpenseCategory(models.Model):
     active = fields.Boolean(string='Actif', default=True)
     monthly_limit = fields.Float(
         string='Limite mensuelle',
-        help='Le montant maximum à dépenser par mois'
+        help='Le montant maximum à dépenser par mois (Valeur par défaut)'
+    )
+    objective_ids = fields.One2many(
+        'suivi.expense.category.objective', 
+        'category_id', 
+        string='Objectifs Mensuels'
     )
     is_daily = fields.Boolean(
         string='Journalière/Mensuelle',
@@ -49,7 +66,31 @@ class ExpenseCategory(models.Model):
 
         return month_start, today
     
-    @api.depends('monthly_limit', 'is_daily', 'expense_ids.amount', 'expense_ids.date')
+    def get_monthly_limit_for_period(self, period=None):
+        self.ensure_one()
+        if not period:
+            today = fields.Date.today()
+            period = self.env['suivi.period'].search([
+                ('date_start', '<=', today),
+                ('date_end', '>=', today)
+            ], limit=1)
+
+        if period:
+            objective = self.env['suivi.expense.category.objective'].search([
+                ('category_id', '=', self.id),
+                ('period_id', '=', period.id)
+            ], limit=1)
+            if objective:
+                return objective.amount
+
+        # fallback: first objective created/chronological
+        if self.objective_ids:
+            first_objective = self.objective_ids.sorted(lambda o: o.period_id.date_start)[0]
+            return first_objective.amount
+
+        return self.monthly_limit
+
+    @api.depends('monthly_limit', 'objective_ids.amount', 'is_daily', 'expense_ids.amount', 'expense_ids.date')
     def _compute_current_situation(self):
         Expense = self.env['suivi.expense.daily']
 
@@ -64,13 +105,15 @@ class ExpenseCategory(models.Model):
 
             total_spent = sum(expenses.mapped('amount'))
 
-            if not category.monthly_limit:
+            limit = category.get_monthly_limit_for_period()
+
+            if not limit:
                 category.current_balance = 0.0
                 category.limit_exceeded = False
                 continue
 
             # 🔹 Calcul Simplifié : Solde = Limite Mensuelle - Dépenses Totales
-            category.current_balance = category.monthly_limit - total_spent
+            category.current_balance = limit - total_spent
             category.limit_exceeded = category.current_balance < 0
 
 

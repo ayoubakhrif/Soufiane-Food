@@ -10,6 +10,7 @@
                 <field name="alias"/>
                 <field name="employee_id"/>
                 <field name="remorque"/>
+                <field name="total_trip_count"/>
             </tree>
         </field>
     </record>
@@ -28,6 +29,32 @@
                             <field name="remorque"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Voyages">
+                            <field name="trip_ids">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="client_id"/>
+                                    <field name="trip_type"/>
+                                    <field name="total_price" sum="Total"/>
+                                    <field name="profit" sum="Bénéfice"/>
+                                    <field name="is_paid"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Voyages Remorque" attrs="{'invisible': [('remorque', '=', False)]}">
+                            <field name="remorque_trip_ids">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="client_id"/>
+                                    <field name="destination"/>
+                                    <field name="total_price" sum="Total"/>
+                                    <field name="profit" sum="Bénéfice"/>
+                                    <field name="is_paid"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

@@ -23,6 +23,20 @@ class TransportDriver(models.Model):
 
     monthly_summary_ids = fields.One2many('transport.driver.monthly.summary', 'driver_id', string='Suivi Salaire')
     advance_ids = fields.One2many('transport.driver.advance', 'driver_id', string='Avances')
+    
+    trip_ids = fields.One2many('transport.trip', 'driver_id', string='Voyages')
+    remorque_trip_ids = fields.One2many('transport.trip.remorque', 'driver_remorque_id', string='Voyages Remorque')
+
+    total_trip_count = fields.Integer(
+        string='Nombre de Voyages',
+        compute='_compute_total_trip_count',
+        store=False
+    )
+
+    @api.depends('trip_ids', 'remorque_trip_ids')
+    def _compute_total_trip_count(self):
+        for rec in self:
+            rec.total_trip_count = len(rec.trip_ids) + len(rec.remorque_trip_ids)
 
     @api.depends('employee_id')
     def _compute_current_monthly_salary(self):

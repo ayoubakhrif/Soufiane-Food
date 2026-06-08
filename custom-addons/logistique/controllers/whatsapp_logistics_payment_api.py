@@ -96,9 +96,6 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"👤 *Fournisseur* : {supplier_name}\n"
         response += f"📦 *Article* : {article_name}\n"
         response += f"🌐 *Incoterm* : {incoterm_val}\n"
-        response += f"🧾 *Facture N°* : {invoice_val}\n"
-        response += f"📅 *Semaine* : {week_val}\n"
-        response += f"✍️ *Saisi par* : {saisi_par_val}\n"
 
         # Additional Fields from Image Section 1 & 2
         shipping_name = 'N/A'
@@ -131,7 +128,10 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"🔠 *N° Conteneurs* : {container_names}\n"
         response += f"📐 *Taille* : {size_val}\n"
         response += f"⚓ *Port Status* : {port_status_val}\n"
-        response += f"⏳ *Franchise confirmée* : {franchise_val}\n\n"
+        response += f"⏳ *Franchise confirmée* : {franchise_val}\n"
+        response += f"🧾 *Facture N°* : {invoice_val}\n"
+        response += f"📅 *Semaine* : {week_val}\n"
+        response += f"✍️ *Saisi par* : {saisi_par_val}\n\n"
         
         # Additional Dates from Image Section 3
         bad_date_str = entry.bad_date.strftime('%d/%m/%Y') if entry and entry.bad_date else 'N/A'

@@ -42,7 +42,8 @@ class FinanceMarglory(models.Model):
     journal = fields.Char(string='Journal', tracking=True)
     type = fields.Selection([
         ('THC', 'THC'),
-        ('FRET', 'FRET')
+        ('FRET', 'FRET'),
+        ('ASSURANCE', 'Assurance')
     ], string="Type", required=True, default='THC', tracking=True)
     
     facture_marglory = fields.Char(string='Facture Marglory', tracking=True, required=True)

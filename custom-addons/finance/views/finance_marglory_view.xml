@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Marglory Dossiers">
                 <field name="facture_marglory"/>
-                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'"/>
+                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'" decoration-success="type == 'ASSURANCE'"/>
                 <field name="bl_number" />
                 <field name="dum"/>
                 <field name="dossier_reglement"/>

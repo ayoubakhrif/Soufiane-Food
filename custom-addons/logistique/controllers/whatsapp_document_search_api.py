@@ -72,7 +72,9 @@ class WhatsappDocumentSearchApi(http.Controller):
             for entry in entries:
                 bl = entry.bl_number or 'N/A'
                 invoice = entry.invoice_number or 'N/A'
-                text_response += f"🔹 *BL:* {bl} | *Facture:* {invoice}\n"
+                week = entry.week or 'N/A'
+                saisi_par = entry.saisi_par or 'N/A'
+                text_response += f"🔹 *BL:* {bl} | *Facture:* {invoice} | *Week:* {week} | *Saisi par:* {saisi_par}\n"
                 
                 if not entry.document_ids:
                     text_response += "Aucun document attaché.\n\n"

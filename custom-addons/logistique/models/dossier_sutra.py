@@ -54,6 +54,7 @@ class LogistiqueDossierSutra(models.Model):
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
         ('fret', 'FRET'),
+        ('assurance', 'Assurance'),
         ('autres', 'Autres factures'),
     ], string='Type')
     beneficiary_id = fields.Many2one(

@@ -26,6 +26,7 @@
                 <field name="thc_amount" sum="THC"/>
                 <field name="surestarie_amount" sum="Surestarie"/>
                 <field name="magasinage_amount" sum="Magasinage"/>
+                <field name="assurance_amount" sum="Assurance"/>
                 <field name="charge_transport_local" sum="Charge transport local"/>
                 <field name="bad_date"/>
                 <field name="exit_date"/>
@@ -109,6 +110,7 @@
                             <field name="surestarie_amount" readonly="1"/>
                             <field name="thc_amount" readonly="1"/>
                             <field name="magasinage_amount" readonly="1"/>
+                            <field name="assurance_amount" readonly="1"/>
                         </group>
                     </group>
                     <notebook>
@@ -233,6 +235,7 @@
                 <field name="thc_amount" type="measure"/>
                 <field name="surestarie_amount" type="measure"/>
                 <field name="magasinage_amount" type="measure"/>
+                <field name="assurance_amount" type="measure"/>
             </pivot>
         </field>
     </record>

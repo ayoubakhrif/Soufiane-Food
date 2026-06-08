@@ -338,6 +338,12 @@ class LogisticsEntry(models.Model):
         store=True,
         readonly=True
     )
+    assurance_amount = fields.Float(
+        string="Assurance",
+        compute="_compute_charges",
+        store=True,
+        readonly=True
+    )
 
     @api.depends(
         'cheque_ids.amount', 'cheque_ids.type',
@@ -351,26 +357,31 @@ class LogisticsEntry(models.Model):
             thc_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'thc')
             magasinage_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'magasinage')
             fret_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'fret')
+            assurance_cheques = sum(c.amount for c in rec.cheque_ids if c.type == 'assurance')
 
             surestarie_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'surestarie')
             thc_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'thc')
             magasinage_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'magasinage')
             fret_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'fret')
+            assurance_deductions = sum(d.amount for d in rec.deduction_ids if d.type == 'assurance')
 
             surestarie_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'surestarie')
             thc_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'thc')
             magasinage_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'magasinage')
             fret_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'fret')
+            assurance_transfers = sum(t.amount for t in rec.transfer_ids if t.type == 'assurance')
 
             surestarie_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'surestarie')
             thc_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'thc')
             magasinage_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'magasinage')
             fret_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'fret')
+            assurance_sutra = sum(s.amount for s in rec.sutra_ids if s.type == 'assurance')
 
             rec.surestarie_amount = surestarie_cheques + surestarie_deductions + surestarie_transfers + surestarie_sutra
             rec.thc_amount = thc_cheques + thc_deductions + thc_transfers + thc_sutra
             rec.magasinage_amount = magasinage_cheques + magasinage_deductions + magasinage_transfers + magasinage_sutra
             rec.fret = fret_cheques + fret_deductions + fret_transfers + fret_sutra
+            rec.assurance_amount = assurance_cheques + assurance_deductions + assurance_transfers + assurance_sutra
 
     def action_move_to_draft(self):
         self.write({'purchase_state': 'draft'})

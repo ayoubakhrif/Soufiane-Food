@@ -126,7 +126,7 @@ class WhatsAppLogisticsPdfController(http.Controller):
                 if inv_benif_name:
                     benif_record = request.env['logistique.shipping'].sudo().search([('name', 'ilike', inv_benif_name)], limit=1)
 
-                if inv_type not in ['thc', 'magasinage', 'fret', 'surestarie', 'autres']:
+                if inv_type not in ['thc', 'magasinage', 'fret', 'surestarie', 'assurance', 'autres']:
                     inv_type = 'autres'
 
                 # Prepare values
@@ -191,6 +191,7 @@ Règles strictes pour le "type" de frais :
 - Si la facture indique (Surestarie, Free det, detention, demurage fee, demurage...) -> choisissez "surestarie".
 - Si la facture indique (THC, Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention...) -> choisissez "thc".
 - Si la facture indique (Fret, Freight, Sea Freight...) -> choisissez "fret".
+- Si la facture indique (Assurance, Premium, Prime...) -> choisissez "assurance".
 - PRIORITÉ: Si le mot "MAGASINAGE" apparait, c'est obligatoirement "magasinage".
 - Si aucun de ces types ne correspond, mettez "autres".
 

@@ -32,6 +32,7 @@ class LogistiqueDossierCheque(models.Model):
         ('magasinage', 'Magasinage'),
         ('fret', 'FRET'),
         ('surestarie', 'Surestarie'),
+        ('assurance', 'Assurance'),
         ('autres', 'Autres factures'),
     ], string='Type')
     entry_id = fields.Many2one(

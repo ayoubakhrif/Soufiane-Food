@@ -19,6 +19,7 @@ class LogistiqueDossierDeduction(models.Model):
         ('magasinage', 'Magasinage'),
         ('surestarie', 'Surestarie'),
         ('fret', 'FRET'),
+        ('assurance', 'Assurance'),
         ('autres', 'Autres factures'),
     ], string='Type', required=True)
 

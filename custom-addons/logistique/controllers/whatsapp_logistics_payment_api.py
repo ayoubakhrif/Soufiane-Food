@@ -152,7 +152,8 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         response += f"• 🚢 *Fret* : {dossier.fret_amount:,.2f} DH\n"
         response += f"• ⚓ *THC* : {dossier.thc_amount:,.2f} DH\n"
         response += f"•     Magasinage : {dossier.magasinage_amount:,.2f} DH\n"
-        response += f"• ⏳ *Surestarie* : {dossier.surestarie_amount:,.2f} DH\n\n"
+        response += f"• ⏳ *Surestarie* : {dossier.surestarie_amount:,.2f} DH\n"
+        response += f"• 🛡️ *Assurance* : {dossier.assurance_amount:,.2f} DH\n\n"
 
         # Apply Moroccan Dirham spacing format
         response = response.replace(',', ' ')
@@ -161,8 +162,8 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         if dossier.cheque_ids:
             response += f"🧾 *Détails des Chèques* :\n"
             
-            # Grouping/sorting order: fret, thc, magasinage, surestarie, autres
-            type_order = ['fret', 'thc', 'magasinage', 'surestarie', 'autres']
+            # Grouping/sorting order: fret, thc, magasinage, surestarie, assurance, autres
+            type_order = ['fret', 'thc', 'magasinage', 'surestarie', 'assurance', 'autres']
             cheques_by_type = {t: [] for t in type_order}
             
             for c in dossier.cheque_ids:
@@ -174,6 +175,7 @@ class WhatsAppLogisticsPaymentController(http.Controller):
                 'thc': '⚓ *THC*',
                 'magasinage': '📦 *Magasinage*',
                 'surestarie': '⏳ *Surestarie*',
+                'assurance': '🛡️ *Assurance*',
                 'autres': '➕ *Autres factures*'
             }
             

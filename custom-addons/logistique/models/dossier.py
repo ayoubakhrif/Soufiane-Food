@@ -85,6 +85,11 @@ class LogistiqueDossier(models.Model):
         compute="_compute_charges",
         store=True
     )
+    assurance_amount = fields.Float(
+        string="Assurance",
+        compute="_compute_charges",
+        store=True
+    )
 
     @api.depends('entry_ids.container_ids', 'cheque_ids')
     def _compute_counts(self):
@@ -159,4 +164,12 @@ class LogistiqueDossier(models.Model):
                 sum(d.amount for d in rec.deduction_ids if d.type == 'fret') +
                 sum(t.amount for t in rec.transfer_ids if t.type == 'fret') +
                 sum(s.amount for s in rec.sutra_ids if s.type == 'fret')
+            )
+
+            # --- Assurance ---
+            rec.assurance_amount = (
+                sum(c.amount for c in rec.cheque_ids if c.type == 'assurance') +
+                sum(d.amount for d in rec.deduction_ids if d.type == 'assurance') +
+                sum(t.amount for t in rec.transfer_ids if t.type == 'assurance') +
+                sum(s.amount for s in rec.sutra_ids if s.type == 'assurance')
             )

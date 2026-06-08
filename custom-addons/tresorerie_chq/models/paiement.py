@@ -129,6 +129,7 @@ class TresoreriePaiement(models.Model):
 
         prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan PDF contenant un ou plusieurs {doc_type}.
 Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvé dans le document.
+Il est ABSOLUMENT CRUCIAL que vous retourniez les éléments dans l'ordre exact où ils apparaissent dans le document PDF (de haut en bas, page par page).
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste nommée "items".
 Pour chaque élément, extrayez :
@@ -218,6 +219,7 @@ Exemple de réponse attendue:
             raise UserError("Aucun chèque/effet n'a pu être identifié dans ce document.")
 
         lines_to_create = []
+        current_sequence = 10
         for item in items:
             bank_id = False
             bank_name = item.get('banque', '')
@@ -237,6 +239,7 @@ Exemple de réponse attendue:
                 owner_id = owner_record.id
 
             vals = {
+                'sequence': current_sequence,
                 'note': item.get('numero', ''),
                 'amount': float(item.get('montant') or 0.0),
                 'bank_id': bank_id,
@@ -250,6 +253,7 @@ Exemple de réponse attendue:
                 vals['check_date'] = item.get('date_echeance')
             
             lines_to_create.append((0, 0, vals))
+            current_sequence += 10
 
         if lines_to_create:
             if self.payment_type == 'cheque':

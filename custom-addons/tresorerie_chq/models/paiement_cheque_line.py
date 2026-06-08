@@ -8,8 +8,10 @@ class TresorerieChqCheque(models.Model):
     """
     _name = 'tresorerie_chq.cheque'
     _description = 'Suivi de Chèque'
-    _order = 'check_date, id'
+    _order = 'sequence, check_date, id'
 
+    sequence = fields.Integer(string='Séquence', default=10)
+    
     paiement_id = fields.Many2one(
         'tresorerie_chq.paiement',
         string='Paiement',
@@ -214,7 +216,9 @@ class TresorerieChqEffet(models.Model):
     """
     _name = 'tresorerie_chq.effet'
     _description = 'Suivi d\'Effet'
-    _order = 'check_date, id'
+    _order = 'sequence, check_date, id'
+
+    sequence = fields.Integer(string='Séquence', default=10)
 
     paiement_id = fields.Many2one(
         'tresorerie_chq.paiement',

@@ -11,6 +11,7 @@
                 <field name="bl_number" />
                 <field name="dum"/>
                 <field name="dossier_reglement"/>
+                <field name="journal" optional="show"/>
                 <field name="container_names" string="Conteneurs"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
@@ -47,6 +48,7 @@
                         <!-- FINANCE INFO -->
                         <group string="Informations Finance (Editable)">
                             <field name="dossier_reglement"/>
+                            <field name="journal"/>
                             <field name="type"/>
                             <field name="facture_marglory"/>
                             <field name="scan_marglory"/>

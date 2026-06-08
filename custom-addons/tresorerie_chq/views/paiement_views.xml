@@ -47,6 +47,7 @@
                         <page string="Chèques" name="cheque_lines" invisible="payment_type != 'cheque'">
                             <field name="cheque_line_ids" context="{'default_reception_date': reception_date}">
                                 <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
                                     <field name="owner_id"
                                            string="Porteur"
                                            optional="show"
@@ -91,6 +92,7 @@
                         <page string="Effets" name="effet_lines" invisible="payment_type != 'effet'">
                             <field name="effet_line_ids" context="{'default_reception_date': reception_date}">
                                 <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
                                     <field name="owner_id"
                                            string="Porteur"
                                            optional="show"

@@ -17,6 +17,7 @@ class FinanceTalon(models.Model):
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     num_chq = fields.Integer(string='Nombres de chqs', required=True)
     serie = fields.Char(string='Série', required=True)
+    date_reception = fields.Date(string='Date de réception de talon', tracking=True)
     etat = fields.Selection([
         ('actif', 'Actif'),
         ('cloture', 'Cloturé'),

@@ -38,6 +38,7 @@
                         <field name="name"/>
                         <field name="ste_id"/>
                         <field name="serie"/>
+                        <field name="date_reception"/>
                         <field name="etat" readonly="1"/>
                     </group>
                     <field name="summary_card" widget="html"/>
@@ -62,6 +63,7 @@
                 <field name="name"/>
                 <field name="ste_id"/>
                 <field name="serie"/>
+                <field name="date_reception" optional="show"/>
                 <field name="etat"/>
                 <field name="used_chqs"/>
                 <field name="unused_chqs"/>

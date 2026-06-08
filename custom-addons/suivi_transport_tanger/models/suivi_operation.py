@@ -61,6 +61,15 @@ class SuiviTransportTangerOperation(models.Model):
                 raise ValidationError(_("Impossible de passer à l'état 'Payé' tant que le crédit n'est pas nul."))
             rec.state = 'paid'
 
+    def action_toggle_paid_by_caisse(self):
+        for rec in self:
+            if not self.env.user.has_group('casa_stock.group_manager') and not self.env.user.has_group('suivi_transport_tanger.group_suivi_tanger_manager'):
+                raise ValidationError(_("Vous n'avez pas les droits pour effectuer cette action."))
+            if rec.paid_by_caisse:
+                rec.sudo().write({'paid_by_caisse': False})
+            else:
+                rec.sudo().write({'paid_by_caisse': True, 'casa_payer_id': False})
+
     def action_validate(self):
         for rec in self:
             if not self.env.user.has_group('casa_stock.group_manager'):

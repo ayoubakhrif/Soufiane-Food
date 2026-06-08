@@ -25,6 +25,8 @@
                 <header>
                     <button name="action_pay" string="Confirmer Paiement" type="object" class="oe_highlight" groups="suivi_transport_tanger.group_suivi_tanger_user" invisible="state != 'initial'"/>
                     <button name="action_validate" string="Valider" type="object" class="oe_highlight" groups="casa_stock.group_manager" invisible="state != 'paid'"/>
+                    <button name="action_toggle_paid_by_caisse" string="Marquer Payé par Caisse" type="object" groups="casa_stock.group_manager" invisible="paid_by_caisse == True or state == 'validated'"/>
+                    <button name="action_toggle_paid_by_caisse" string="Démarquer Payé par Caisse" type="object" groups="casa_stock.group_manager" invisible="paid_by_caisse == False or state == 'validated'"/>
                     <button name="action_set_initial" string="Remettre en Initial" type="object" groups="suivi_transport_tanger.group_suivi_tanger_manager" invisible="state == 'initial'"/>
                     <button name="action_cancel" string="Annuler" type="object" groups="suivi_transport_tanger.group_suivi_tanger_manager" invisible="state in ('cancelled', 'validated')"/>
                     <field name="state" widget="statusbar" statusbar_visible="initial,paid,validated,cancelled"/>

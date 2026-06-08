@@ -24,30 +24,42 @@ class WhatsappDocumentSearchApi(http.Controller):
                 }
 
             # Handle Document Fetch
-            if query.startswith('FETCH_DOC_SEARCH:'):
-                parts = query.split(':')
-                if len(parts) == 3:
-                    doc_model = parts[1]
-                    doc_id = int(parts[2])
-                    doc = request.env[doc_model].sudo().browse(doc_id)
-                    if doc.exists() and doc.file:
-                        doc_type_dict = dict(doc._fields['document_type'].selection)
-                        doc_name = doc_type_dict.get(doc.document_type, str(doc.document_type))
-                        file_name = doc.file_name or f"{doc_name}.pdf"
-                        
-                        base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
+            if 'FETCH_DOC_SEARCH:' in query:
+                parts = [p for p in query.split('|') if p.startswith('FETCH_DOC_SEARCH:')]
+                if parts:
+                    documents_to_send = []
+                    names_to_send = []
+                    
+                    for part in parts:
+                        subparts = part.split(':')
+                        if len(subparts) == 3:
+                            doc_model = subparts[1]
+                            doc_id = int(subparts[2])
+                            doc = request.env[doc_model].sudo().browse(doc_id)
+                            if doc.exists() and doc.file:
+                                doc_type_dict = dict(doc._fields['document_type'].selection)
+                                doc_name = doc_type_dict.get(doc.document_type, str(doc.document_type))
+                                file_name = doc.file_name or f"{doc_name}.pdf"
+                                
+                                base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
+                                documents_to_send.append({
+                                    'file_name': file_name,
+                                    'base64': base64_str,
+                                    'mimetype': 'application/pdf',
+                                    'caption': f"Voici le document *{file_name}* demandé."
+                                })
+                                names_to_send.append(file_name)
+                    
+                    if documents_to_send:
+                        # Ensure the response has 'files' mapped to our list
                         return {
                             'status': 'success',
-                            'files': [{
-                                'file_name': file_name,
-                                'base64': base64_str,
-                                'mimetype': 'application/pdf',
-                                'caption': f"Voici le document *{file_name}* demandé."
-                            }]
+                            'files': documents_to_send
                         }
+                        
                 return {
                     'status': 'success',
-                    'response': '❌ Impossible de récupérer le document demandé.'
+                    'response': '❌ Impossible de récupérer les documents demandés.'
                 }
 
             # Handle Search

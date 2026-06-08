@@ -197,20 +197,29 @@ async function connectToWhatsApp() {
             if (pendingChoices.has(from)) {
                 const choices = pendingChoices.get(from);
                 const trimmedText = text.trim();
-                const choiceNum = parseInt(trimmedText);
+                
+                const parts = trimmedText.split(/[\s,-]+/).filter(p => p);
+                let allValid = true;
+                const selectedChoices = [];
+                
+                for (const part of parts) {
+                    const choiceNum = parseInt(part);
+                    if (isNaN(choiceNum) || choiceNum <= 0 || choiceNum > choices.length) {
+                        allValid = false;
+                        break;
+                    }
+                    selectedChoices.push(choices[choiceNum - 1]);
+                }
 
-                // Si c'est un numéro de choix valide (ex: 1, 2, 3)
-                if (!isNaN(choiceNum) && choiceNum > 0 && choiceNum <= choices.length && trimmedText.length <= 2) {
-                    realMessage = choices[choiceNum - 1];
-                    console.log(`Sélection utilisateur : Option ${choiceNum} -> "${realMessage}"`);
+                if (parts.length > 0 && allValid) {
+                    realMessage = selectedChoices.join('|');
+                    console.log(`Sélection utilisateur multiple : ${trimmedText} -> "${realMessage}"`);
                     pendingChoices.delete(from); // Clear menu once selected
-                } 
-                // Si c'est un numéro mais court/ambigu (ex: 5 alors qu'il y a 3 choix), on signale l'erreur
-                else if (!isNaN(choiceNum) && trimmedText.length <= 2) {
-                    await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par le bon numéro." }, { quoted: msg });
+                }
+                else if (parts.length > 0 && !allValid && parts.every(p => !isNaN(parseInt(p)) && p.length <= 2)) {
+                    await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par un ou plusieurs numéros valides (ex: 1 3 5)." }, { quoted: msg });
                     continue; // Skip Odoo call
-                } 
-                // Si c'est une phrase ou un long numéro (référence probable), on abandonne le menu et on traite normalement
+                }
                 else {
                     console.log(`Menu abandonné pour une nouvelle saisie : "${trimmedText}"`);
                     pendingChoices.delete(from);

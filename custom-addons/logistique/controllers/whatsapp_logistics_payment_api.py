@@ -88,10 +88,17 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         if entry and entry.incoterm:
             incoterm_val = dict(entry._fields['incoterm'].selection or {}).get(entry.incoterm, entry.incoterm).upper()
         
+        invoice_val = entry.invoice_number if entry and entry.invoice_number else 'N/A'
+        week_val = entry.week if entry and entry.week else 'N/A'
+        saisi_par_val = entry.saisi_par if entry and entry.saisi_par else 'N/A'
+
         response += f"🏢 *Société* : {ste_name}\n"
         response += f"👤 *Fournisseur* : {supplier_name}\n"
         response += f"📦 *Article* : {article_name}\n"
         response += f"🌐 *Incoterm* : {incoterm_val}\n"
+        response += f"🧾 *Facture N°* : {invoice_val}\n"
+        response += f"📅 *Semaine* : {week_val}\n"
+        response += f"✍️ *Saisi par* : {saisi_par_val}\n"
 
         # Additional Fields from Image Section 1 & 2
         shipping_name = 'N/A'

@@ -75,6 +75,8 @@ class LogistiqueDossierDeduction(models.Model):
 
     @api.constrains('entry_id', 'amount', 'type', 'date', 'beneficiary_id')
     def _check_entry_status(self):
+        if self.env.context.get('from_bot'):
+            return
         for rec in self:
             if rec.entry_id and rec.entry_id.status == 'in_progress':
                 raise ValidationError("Vous ne pouvez pas ajouter ou modifier des déductions tant que le dossier est 'En cours'. Veuillez d'abord le passer en 'Gate Out'.")

@@ -144,13 +144,13 @@ class WhatsAppLogisticsPdfController(http.Controller):
                     vals['beneficiary_id'] = benif_record.id
 
                 try:
-                    request.env['logistique.dossier.cheque'].sudo().create(vals)
+                    request.env['logistique.dossier.cheque'].sudo().with_context(from_bot=True).create(vals)
                     benif_display = benif_record.name if benif_record else inv_benif_name
                     factures_msgs.append(f"  • *{inv_amount:,.2f} DH* ({vals['type'].capitalize()}) - {benif_display}")
                 except Exception as e:
-                    factures_msgs.append(f"  ❌ Erreur sur {inv_amount} DH : {str(e)}")
+                    pass  # Ignorer l'affichage de l'erreur sur WhatsApp selon la demande
 
-        final_response = "✅ *Données saisies avec succès dans Odoo :*\n━━━━━━━━━━━━━━━━━━\n"
+        final_response = "✅ *Données saisies avec succès dans Gestia :*\n━━━━━━━━━━━━━━━━━━\n"
         final_response += f"{dossier_msg}\n"
         if bad_msg:
             final_response += f"{bad_msg}\n"

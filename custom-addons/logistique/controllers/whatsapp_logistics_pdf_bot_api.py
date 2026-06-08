@@ -62,7 +62,7 @@ class WhatsAppLogisticsPdfController(http.Controller):
         bad_date_str = ai_result.get('bad_date', '')
 
         if not bl_number and not bl_number_filename:
-            return {'status': 'error', 'message': "L'IA n'a pas pu identifier le numéro de BL dans le PDF ni dans le nom du fichier."}
+            return {'status': 'success', 'response': "❌ L'IA n'a pas pu identifier le numéro de BL dans le PDF ni dans le nom du fichier."}
 
         # 5. Find Dossier and Entry
         # Try finding by document BL first
@@ -76,15 +76,19 @@ class WhatsAppLogisticsPdfController(http.Controller):
                 bl_number = bl_number_filename
         
         if not dossier:
-             return {'status': 'error', 'message': f"Aucun dossier trouvé pour le BL: {bl_number or bl_number_filename}."}
+             return {'status': 'not_found', 'message': f"❌ Aucun dossier trouvé pour le BL: {bl_number or bl_number_filename}."}
 
         entry = request.env['logistique.entry'].sudo().search([('dossier_id', '=', dossier.id)], limit=1)
         
         if not entry:
-            return {'status': 'error', 'message': f"Aucune entrée logistique trouvée pour le dossier BL: {dossier.name}."}
+            return {'status': 'not_found', 'message': f"❌ Aucune entrée logistique trouvée pour le dossier BL: {dossier.name}."}
 
         messages = []
-        messages.append(f"✅ Dossier identifié : {dossier.name}")
+        
+        dossier_msg = f"🔹 *Dossier (BL)* : {dossier.name}"
+        bad_msg = ""
+        chq_msg = ""
+        factures_msgs = []
 
         # 6. Update BAD Date
         if bad_date_str and bad_date_str.lower() != 'none':
@@ -92,17 +96,16 @@ class WhatsAppLogisticsPdfController(http.Controller):
                 # the AI is instructed to return YYYY-MM-DD
                 bad_date_obj = datetime.strptime(bad_date_str, '%Y-%m-%d').date()
                 entry.write({'bad_date': bad_date_obj})
-                messages.append(f"📅 Date de BAD mise à jour : {bad_date_str}")
+                bad_msg = f"📅 *Date de BAD* : {bad_date_obj.strftime('%d/%m/%Y')}"
             except Exception as e:
-                messages.append(f"⚠️ Impossible de parser la date de BAD extraite ({bad_date_str}): {str(e)}")
+                bad_msg = f"⚠️ *Date de BAD* : Impossible de parser ({bad_date_str})"
 
         if not chq_number:
-            messages.append("⚠️ Aucun numéro de chèque identifié dans le document.")
+            chq_msg = "⚠️ Aucun numéro de chèque identifié."
         elif not factures:
-            messages.append("⚠️ Aucune facture identifiée dans le document à répartir.")
+            chq_msg = "⚠️ Aucune facture identifiée dans le document."
         else:
-            # 7. Create Cheque Divisions
-            messages.append(f"🧾 Traitement du chèque N° {chq_number}")
+            chq_msg = f"🧾 *Chèque N°* : {chq_number}"
             
             # Check if any divisions for this cheque already exist in the dossier (optional protection)
             existing_cheques = request.env['logistique.dossier.cheque'].sudo().search([
@@ -111,7 +114,7 @@ class WhatsAppLogisticsPdfController(http.Controller):
             ])
             
             if existing_cheques:
-                messages.append(f"ℹ️ Le chèque {chq_number} est déjà réparti dans ce dossier. Nouvelles lignes ajoutées.")
+                factures_msgs.append("ℹ️ _(Des lignes existent déjà pour ce chèque dans ce dossier, de nouvelles ont été ajoutées)_")
 
             for idx, inv_data in enumerate(factures):
                 inv_amount = float(inv_data.get('montant', 0))
@@ -143,14 +146,24 @@ class WhatsAppLogisticsPdfController(http.Controller):
                 try:
                     request.env['logistique.dossier.cheque'].sudo().create(vals)
                     benif_display = benif_record.name if benif_record else inv_benif_name
-                    messages.append(f"➕ Répartition créée : {inv_amount} DH (Type: {vals['type']}, Bénéficiaire: {benif_display})")
+                    factures_msgs.append(f"  • *{inv_amount:,.2f} DH* ({vals['type'].capitalize()}) - {benif_display}")
                 except Exception as e:
-                    messages.append(f"❌ Erreur création répartition {inv_amount} DH : {str(e)}")
+                    factures_msgs.append(f"  ❌ Erreur sur {inv_amount} DH : {str(e)}")
+
+        final_response = "✅ *Données saisies avec succès dans Odoo :*\n━━━━━━━━━━━━━━━━━━\n"
+        final_response += f"{dossier_msg}\n"
+        if bad_msg:
+            final_response += f"{bad_msg}\n"
+        if chq_msg:
+            final_response += f"{chq_msg}\n"
+        
+        if factures_msgs:
+            final_response += "\n📊 *Factures réparties :*\n"
+            final_response += "\n".join(factures_msgs).replace(',', ' ')
             
         return {
             'status': 'success',
-            'message': "Traitement logistique réussi.",
-            'details': "\n".join(messages)
+            'response': final_response
         }
 
     def _extract_data_from_pdf(self, pdf_b64, file_name, api_key):

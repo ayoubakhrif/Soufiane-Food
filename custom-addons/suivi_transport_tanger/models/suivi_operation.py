@@ -20,7 +20,14 @@ class SuiviTransportTangerOperation(models.Model):
     montant = fields.Float(string='Montant', default=0.0)
     credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
     casa_payer_id = fields.Many2one('casa.client', string='Qui a payé')
+    paid_by_caisse = fields.Boolean(string='Payé par la caisse', default=False)
     available_client_ids = fields.Many2many('casa.client', compute='_compute_available_client_ids', store=False)
+
+    @api.onchange('paid_by_caisse')
+    def _onchange_paid_by_caisse(self):
+        if self.paid_by_caisse:
+            self.casa_payer_id = False
+
     state = fields.Selection([
         ('initial', 'Initial'),
         ('paid', 'Payé'),

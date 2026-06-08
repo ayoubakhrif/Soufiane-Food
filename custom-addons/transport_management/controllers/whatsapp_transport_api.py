@@ -43,7 +43,7 @@ class WhatsAppTransportController(http.Controller):
             return {'status': 'ignored', 'message': 'This agent only handles the Transport Group.'}
 
         # 4. Check for direct match first
-        exact_driver = request.env['transport.driver'].sudo().search(['|', ('name', '=ilike', message_text.strip()), ('alias', '=ilike', message_text.strip())], limit=1)
+        exact_driver = request.env['transport.driver'].sudo().search(['|', ('name', '=ilike', message_text.strip()), ('alias_ids.name', '=ilike', message_text.strip())], limit=1)
         
         if exact_driver:
             drivers = exact_driver
@@ -56,7 +56,14 @@ class WhatsAppTransportController(http.Controller):
 
             # Fetch all driver names
             all_drivers = request.env['transport.driver'].sudo().search([])
-            driver_names_list = [f"{d.name} (Alias: {d.alias})" if d.alias else d.name for d in all_drivers if d.name]
+            driver_names_list = []
+            for d in all_drivers:
+                if d.name:
+                    aliases = [a.name for a in d.alias_ids if a.name]
+                    if aliases:
+                        driver_names_list.append(f"{d.name} (Alias: {', '.join(aliases)})")
+                    else:
+                        driver_names_list.append(d.name)
             
             extracted_name = self._extract_driver_name(message_text, openai_key, driver_names_list)
             
@@ -68,14 +75,14 @@ class WhatsAppTransportController(http.Controller):
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le chauffeur dans votre message."}
 
             # Handle partial match via search
-            drivers = request.env['transport.driver'].sudo().search(['|', ('name', 'ilike', extracted_name), ('alias', 'ilike', extracted_name)])
+            drivers = request.env['transport.driver'].sudo().search(['|', ('name', 'ilike', extracted_name), ('alias_ids.name', 'ilike', extracted_name)])
 
         if not drivers:
             return {'status': 'not_found', 'message': f"Aucun chauffeur trouvé pour : '{extracted_name}'."}
 
         # Check for absolute exact match among multiple results
         if len(drivers) > 1:
-            absolute_match = drivers.filtered(lambda d: d.name.lower() == extracted_name.lower() or (d.alias and d.alias.lower() == extracted_name.lower()))
+            absolute_match = drivers.filtered(lambda d: d.name.lower() == extracted_name.lower() or any(a.name.lower() == extracted_name.lower() for a in d.alias_ids))
             if absolute_match:
                 drivers = absolute_match[0]
 
@@ -101,7 +108,9 @@ class WhatsAppTransportController(http.Controller):
 
                 summary_msg = f"Voici le rapport pour le chauffeur *{driver.name}*.\n\n"
                 summary_msg += f"📊 *Détails* :\n"
-                summary_msg += f"• Nom: {driver.name}" + (f" ({driver.alias})" if driver.alias else "") + "\n"
+                summary_msg += f"• Nom: {driver.name}\n"
+                if driver.vehicle_type:
+                    summary_msg += f"• Type de véhicule: {driver.vehicle_type}\n"
                 summary_msg += f"• Voyages Totaux: {total_trips}\n"
                 summary_msg += f"• Chiffre d'Affaires: {'{:,.2f}'.format(total_price).replace(',', ' ')} DH\n"
                 summary_msg += f"• Total Charges: {'{:,.2f}'.format(total_charges).replace(',', ' ')} DH\n"
@@ -240,7 +249,7 @@ class WhatsAppTransportController(http.Controller):
 
                 <div class="info-box">
                     <p><strong>Nom :</strong> {driver.name}</p>
-                    <p><strong>Alias :</strong> {driver.alias or 'Aucun'}</p>
+                    <p><strong>Type de véhicule :</strong> {driver.vehicle_type or 'Non spécifié'}</p>
                     <p><strong>Remorque :</strong> {'Oui' if driver.remorque else 'Non'}</p>
                     <p><strong>Salaire Actuel :</strong> {'{:,.2f}'.format(driver.current_monthly_salary).replace(',', ' ')} DH</p>
                 </div>

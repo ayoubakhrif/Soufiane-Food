@@ -5,7 +5,8 @@ class TransportDriver(models.Model):
     _description = 'Chauffeurs Transport'
 
     name = fields.Char(string='Nom', required=True)
-    alias = fields.Char(string='Alias/Surnom')
+    vehicle_type = fields.Char(string='Type de véhicule')
+    alias_ids = fields.One2many('transport.driver.alias', 'driver_id', string='Alias')
     employee_id = fields.Many2one(
         'core.employee', 
         string='Employé', 

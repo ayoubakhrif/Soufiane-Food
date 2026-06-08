@@ -39,5 +39,5 @@ access_transport_driver_payment_line_arab_manager,transport.driver.payment.line.
 access_transport_driver_payment_line_arab_user,transport.driver.payment.line.arab.user,model_transport_driver_payment_line_arab,group_transport_user,1,1,1,1
 access_transport_driver_payment_line_arab_viewer,transport.driver.payment.line.arab.viewer,model_transport_driver_payment_line_arab,group_transport_viewer,1,0,0,0
 access_transport_driver_payment_line_arab_grp,transport.driver.payment.line.arab.grp,model_transport_driver_payment_line_arab,group_transport_remorque_arab,1,1,1,1
-
+access_transport_driver_alias,transport.driver.alias,model_transport_driver_alias,group_transport_user,1,1,1,1
 

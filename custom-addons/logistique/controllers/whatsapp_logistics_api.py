@@ -534,54 +534,52 @@ class WhatsAppLogisticsController(http.Controller):
         exited_entries = entries.filtered(lambda e: e.port_status == 'exited')
         closed_entries = entries.filtered(lambda e: e.status == 'closed')
         
-        # 4- Nom personne en charge du week en cours
-        saisi_par_list = [e.saisi_par for e in entries if e.saisi_par]
-        saisi_par_str = ", ".join(set(saisi_par_list)) if saisi_par_list else "N/A"
-        
         response = f"📋 *ÉTAT DE CONTRÔLE : {week}*\n"
-        response += f"👤 *En charge* : {saisi_par_str}\n"
         response += "━━━━━━━━━━━━━━━━━━\n\n"
         
         # 1- Au port
         response += f"🚢 *1. AU PORT ({len(on_port_entries)} dossiers)*\n"
+        response += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
         for e in on_port_entries:
             tc_names = e.container_names or "N/A"
             eta_str = e.eta.strftime('%d/%m/%Y') if e.eta else "N/A"
             free_time = e.free_time or 0
-            response += f"  • BL: {e.bl_number or 'N/A'}\n"
-            response += f"    - TC: {tc_names}\n"
-            response += f"    - ETA: {eta_str} | Franchise: {free_time}j\n"
+            saisi_par = e.saisi_par or "N/A"
             
-        response += "\n"
-        
+            response += f"🔹 *BL : {e.bl_number or 'N/A'}*\n"
+            response += f"   👤 Saisi par : *{saisi_par}*\n"
+            response += f"   📦 TC : *{tc_names}*\n"
+            response += f"   📅 ETA : *{eta_str}* | Franchise : *{free_time}j*\n\n"
+            
         # 2- Sortie du port
         response += f"🚪 *2. SORTIE DU PORT ({len(exited_entries)} dossiers)*\n"
+        response += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
         for e in exited_entries:
             bad_str = e.bad_date.strftime('%d/%m/%Y') if e.bad_date else "N/A"
             exit_str = e.exit_date.strftime('%d/%m/%Y') if e.exit_date else "N/A"
             entry_str = e.entry_date.strftime('%d/%m/%Y') if e.entry_date else "N/A"
+            saisi_par = e.saisi_par or "N/A"
             
-            # Chèques
-            chq_series = [c.cheque_serie for c in e.cheque_ids if c.cheque_serie]
+            # Chèques (Supprimer les doublons)
+            chq_series = list(set([c.cheque_serie for c in e.cheque_ids if c.cheque_serie]))
             chq_str = ", ".join(chq_series) if chq_series else "Aucun"
             
             thc = f"{e.thc_amount:,.2f}".replace(',', ' ')
             mag = f"{e.magasinage_amount:,.2f}".replace(',', ' ')
             sur = f"{e.surestarie_amount:,.2f}".replace(',', ' ')
             
-            response += f"  • BL: {e.bl_number or 'N/A'}\n"
-            response += f"    - Dates (BAD: {bad_str} | Sortie: {exit_str} | Entrée: {entry_str})\n"
-            response += f"    - Frais: THC={thc} DH, Mag={mag} DH, Sur={sur} DH\n"
-            response += f"    - Chèques: {chq_str}\n"
+            response += f"🔹 *BL : {e.bl_number or 'N/A'}*\n"
+            response += f"   👤 Saisi par : *{saisi_par}*\n"
+            response += f"   🗓️ Dates : BAD *{bad_str}* | Sortie *{exit_str}* | Entrée *{entry_str}*\n"
+            response += f"   💰 Frais : THC *{thc} DH* | Mag *{mag} DH* | Sur *{sur} DH*\n"
+            response += f"   🧾 Chèques : *{chq_str}*\n\n"
             
-        response += "\n"
-        
         # 3- Dossiers clôturés
-        response += f"✅ *3. DOSSIERS CLÔTURÉS* : {len(closed_entries)}\n\n"
+        response += f"✅ *3. DOSSIERS CLÔTURÉS* : *{len(closed_entries)}*\n\n"
         
         # 5- Restant (Nombre TC au port)
         restant_tc = sum(e.container_count for e in on_port_entries)
-        response += f"📦 *5. RESTANT* : {restant_tc} TC au port\n"
+        response += f"📦 *5. RESTANT* : *{restant_tc}* TC au port\n"
         
         return {
             'status': 'response',

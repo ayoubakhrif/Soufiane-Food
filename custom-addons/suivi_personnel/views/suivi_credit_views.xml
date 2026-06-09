@@ -13,6 +13,8 @@
                 <field name="description"/>
                 <field name="type" widget="badge" decoration-danger="type == 'credit'" decoration-success="type == 'debit'"/>
                 <field name="amount" sum="Montant Total"/>
+                <field name="state" widget="badge" decoration-success="state == 'paid'" decoration-info="state == 'draft'"/>
+                <button name="action_pay" type="object" string="Payé" icon="fa-check" class="btn-success" invisible="state == 'paid'"/>
             </tree>
         </field>
     </record>
@@ -23,6 +25,10 @@
         <field name="model">suivi.credit</field>
         <field name="arch" type="xml">
             <form string="Crédit / Débit">
+                <header>
+                    <button name="action_pay" type="object" string="Marquer comme Payé" class="oe_highlight" invisible="state == 'paid'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,paid"/>
+                </header>
                 <sheet>
                     <group>
                         <group string="Informations Générales">
@@ -95,6 +101,7 @@
         <field name="res_model">suivi.credit</field>
         <field name="view_mode">tree,form,pivot,graph</field>
         <field name="search_view_id" ref="view_suivi_credit_search"/>
+        <field name="domain">[('state', '!=', 'paid')]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Enregistrez une opération de crédit ou débit !

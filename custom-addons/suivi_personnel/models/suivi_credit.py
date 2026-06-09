@@ -26,4 +26,13 @@ class SuiviCredit(models.Model):
         ('debit', 'Débit')
     ], string='Type', required=True, default='credit')
     
+    state = fields.Selection([
+        ('draft', 'Non Payé'),
+        ('paid', 'Payé')
+    ], string='État', default='draft')
+    
     description = fields.Char(string='Détails')
+
+    def action_pay(self):
+        for rec in self:
+            rec.write({'state': 'paid'})

@@ -577,10 +577,10 @@ class WhatsAppLogisticsController(http.Controller):
         # 3- Dossiers clôturés
         response += f"✅ *3. DOSSIERS CLÔTURÉS* : *{len(closed_entries)}*\n\n"
         
-        # 5- Restant (Nombre TC au port)
+        # 4- Restant (Nombre TC au port)
         # On calcule les restants à partir des dossiers "En cours"
         restant_tc = sum(e.container_count for e in in_progress_entries)
-        response += f"📦 *5. RESTANT* : *{restant_tc}* TC au port\n"
+        response += f"📦 *4. RESTANT* : *{restant_tc}* TC au port\n"
         
         return {
             'status': 'response',

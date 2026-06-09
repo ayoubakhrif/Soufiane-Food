@@ -14,8 +14,7 @@ class SuiviPersonne(models.Model):
     credit_ids = fields.One2many(
         'suivi.credit', 
         'personne_id', 
-        string='Crédits & Débits',
-        domain=[('state', '!=', 'paid')]
+        string='Crédits & Débits'
     )
     
     total_credit = fields.Float(
@@ -32,7 +31,7 @@ class SuiviPersonne(models.Model):
         string='Solde', 
         compute='_compute_totals', 
         store=True,
-        help="Total Crédit - Total Débit"
+        help="Total Débit - Total Crédit"
     )
 
     @api.depends('credit_ids.amount', 'credit_ids.type', 'credit_ids.state')
@@ -42,7 +41,7 @@ class SuiviPersonne(models.Model):
             debits = sum(line.amount for line in rec.credit_ids if line.type == 'debit' and line.state != 'paid')
             rec.total_credit = credits
             rec.total_debit = debits
-            rec.balance = credits - debits
+            rec.balance = debits - credits
 
     def action_view_credits(self):
         self.ensure_one()

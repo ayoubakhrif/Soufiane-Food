@@ -530,17 +530,17 @@ class WhatsAppLogisticsController(http.Controller):
                 'response': f"📋 *ÉTAT DE CONTRÔLE : {week}*\n━━━━━━━━━━━━━━━━━━\nAucun dossier trouvé pour cette semaine."
             }
             
-        on_port_entries = entries.filtered(lambda e: e.port_status == 'on_port')
-        exited_entries = entries.filtered(lambda e: e.port_status == 'exited')
+        in_progress_entries = entries.filtered(lambda e: e.status == 'in_progress')
+        get_out_entries = entries.filtered(lambda e: e.status == 'get_out')
         closed_entries = entries.filtered(lambda e: e.status == 'closed')
         
         response = f"📋 *ÉTAT DE CONTRÔLE : {week}*\n"
         response += "━━━━━━━━━━━━━━━━━━\n\n"
         
-        # 1- Au port
-        response += f"🚢 *1. AU PORT ({len(on_port_entries)} dossiers)*\n"
+        # 1- En cours
+        response += f"🚢 *1. EN COURS / AU PORT ({len(in_progress_entries)} dossiers)*\n"
         response += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
-        for e in on_port_entries:
+        for e in in_progress_entries:
             tc_names = e.container_names or "N/A"
             eta_str = e.eta.strftime('%d/%m/%Y') if e.eta else "N/A"
             free_time = e.free_time or 0
@@ -551,10 +551,10 @@ class WhatsAppLogisticsController(http.Controller):
             response += f"   📦 TC : *{tc_names}*\n"
             response += f"   📅 ETA : *{eta_str}* | Franchise : *{free_time}j*\n\n"
             
-        # 2- Sortie du port
-        response += f"🚪 *2. SORTIE DU PORT ({len(exited_entries)} dossiers)*\n"
+        # 2- Gate Out
+        response += f"🚪 *2. GATE OUT / SORTIE DU PORT ({len(get_out_entries)} dossiers)*\n"
         response += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
-        for e in exited_entries:
+        for e in get_out_entries:
             bad_str = e.bad_date.strftime('%d/%m/%Y') if e.bad_date else "N/A"
             exit_str = e.exit_date.strftime('%d/%m/%Y') if e.exit_date else "N/A"
             entry_str = e.entry_date.strftime('%d/%m/%Y') if e.entry_date else "N/A"
@@ -578,7 +578,8 @@ class WhatsAppLogisticsController(http.Controller):
         response += f"✅ *3. DOSSIERS CLÔTURÉS* : *{len(closed_entries)}*\n\n"
         
         # 5- Restant (Nombre TC au port)
-        restant_tc = sum(e.container_count for e in on_port_entries)
+        # On calcule les restants à partir des dossiers "En cours"
+        restant_tc = sum(e.container_count for e in in_progress_entries)
         response += f"📦 *5. RESTANT* : *{restant_tc}* TC au port\n"
         
         return {

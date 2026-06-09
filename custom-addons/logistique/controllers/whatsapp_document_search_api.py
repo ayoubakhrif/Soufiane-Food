@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from odoo import http
 from odoo.http import request
 
@@ -22,6 +23,12 @@ class WhatsappDocumentSearchApi(http.Controller):
                     'status': 'ignored',
                     'message': 'Aucun critère de recherche fourni.'
                 }
+
+            # Handle Situation Report
+            situation_match = re.match(r'^situation\s+(w\d{2})$', query, re.IGNORECASE)
+            if situation_match:
+                week = situation_match.group(1).upper()
+                return self._generate_situation_report(week)
 
             # Handle Document Fetch
             if 'FETCH_DOC_SEARCH:' in query:
@@ -126,3 +133,70 @@ class WhatsappDocumentSearchApi(http.Controller):
                 'status': 'error',
                 'message': f"Erreur interne : {str(e)}"
             }
+
+    def _generate_situation_report(self, week):
+        entries = request.env['logistique.entry'].sudo().search([('week', '=ilike', week)])
+        
+        if not entries:
+            return {
+                'status': 'success',
+                'response': f"📋 *ÉTAT DE CONTRÔLE : {week}*\n━━━━━━━━━━━━━━━━━━\nAucun dossier trouvé pour cette semaine."
+            }
+            
+        on_port_entries = entries.filtered(lambda e: e.port_status == 'on_port')
+        exited_entries = entries.filtered(lambda e: e.port_status == 'exited')
+        closed_entries = entries.filtered(lambda e: e.status == 'closed')
+        
+        # 4- Nom personne en charge du week en cours
+        saisi_par_list = [e.saisi_par for e in entries if e.saisi_par]
+        saisi_par_str = ", ".join(set(saisi_par_list)) if saisi_par_list else "N/A"
+        
+        response = f"📋 *ÉTAT DE CONTRÔLE : {week}*\n"
+        response += f"👤 *En charge* : {saisi_par_str}\n"
+        response += "━━━━━━━━━━━━━━━━━━\n\n"
+        
+        # 1- Au port
+        response += f"🚢 *1. AU PORT ({len(on_port_entries)} dossiers)*\n"
+        for e in on_port_entries:
+            tc_names = e.container_names or "N/A"
+            eta_str = e.eta.strftime('%d/%m/%Y') if e.eta else "N/A"
+            free_time = e.free_time or 0
+            response += f"  • BL: {e.bl_number or 'N/A'}\n"
+            response += f"    - TC: {tc_names}\n"
+            response += f"    - ETA: {eta_str} | Franchise: {free_time}j\n"
+            
+        response += "\n"
+        
+        # 2- Sortie du port
+        response += f"🚪 *2. SORTIE DU PORT ({len(exited_entries)} dossiers)*\n"
+        for e in exited_entries:
+            bad_str = e.bad_date.strftime('%d/%m/%Y') if e.bad_date else "N/A"
+            exit_str = e.exit_date.strftime('%d/%m/%Y') if e.exit_date else "N/A"
+            entry_str = e.entry_date.strftime('%d/%m/%Y') if e.entry_date else "N/A"
+            
+            # Chèques
+            chq_series = [c.cheque_serie for c in e.cheque_ids if c.cheque_serie]
+            chq_str = ", ".join(chq_series) if chq_series else "Aucun"
+            
+            thc = f"{e.thc_amount:,.2f}".replace(',', ' ')
+            mag = f"{e.magasinage_amount:,.2f}".replace(',', ' ')
+            sur = f"{e.surestarie_amount:,.2f}".replace(',', ' ')
+            
+            response += f"  • BL: {e.bl_number or 'N/A'}\n"
+            response += f"    - Dates (BAD: {bad_str} | Sortie: {exit_str} | Entrée: {entry_str})\n"
+            response += f"    - Frais: THC={thc} DH, Mag={mag} DH, Sur={sur} DH\n"
+            response += f"    - Chèques: {chq_str}\n"
+            
+        response += "\n"
+        
+        # 3- Dossiers clôturés
+        response += f"✅ *3. DOSSIERS CLÔTURÉS* : {len(closed_entries)}\n\n"
+        
+        # 5- Restant (Nombre TC au port)
+        restant_tc = sum(e.container_count for e in on_port_entries)
+        response += f"📦 *5. RESTANT* : {restant_tc} TC au port\n"
+        
+        return {
+            'status': 'success',
+            'response': response
+        }

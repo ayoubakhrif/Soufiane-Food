@@ -527,6 +527,57 @@ class WhatsAppFinanceController(http.Controller):
                 _logger.error(f"Error generating week PDF: {error_trace}")
                 return {'status': 'error', 'message': f"Erreur lors de la génération du PDF ({week_str}) : {str(e)}\n\nTrace: {error_trace}"}
 
+        # 5.6 Handle Manque Search (Missing PDFs)
+        if msg_clean == "manque" or msg_clean.startswith("manque "):
+            param = msg_clean[6:].strip()
+            domain = []
+            filter_desc = "globale"
+
+            if param:
+                week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", param)
+                if week_match:
+                    week_num = int(week_match.group(1))
+                    week_str = f"W{week_num:02d}"
+                    domain.append(('datacheque_ids.week', '=', week_str))
+                    filter_desc = f"pour la semaine {week_str}"
+                else:
+                    domain.append(('ste_id.name', 'ilike', param))
+                    filter_desc = f"pour la société '{param}'"
+
+            # Search cheques with missing PDFs
+            domain.extend(['|', ('doc_pdf', '=', False), ('chq_vide_pdf', '=', False)])
+            
+            phys_cheques = request.env['finance.cheque.physical'].sudo().search(domain, order='date_emission desc', limit=100)
+            
+            if not phys_cheques:
+                return {'status': 'not_found', 'message': f"✅ Aucun chèque manquant de PDF trouvé ({filter_desc})."}
+            
+            msg = f"📄 *Chèques avec PDF manquants ({filter_desc})*\n\n"
+            count = 0
+            for phys in phys_cheques:
+                missing = []
+                phys_check = phys.sudo().with_context(bin_size=True)
+                if not phys_check.doc_pdf:
+                    missing.append("Documentation")
+                if not phys_check.chq_vide_pdf:
+                    missing.append("Chèque vide")
+                
+                if missing:
+                    ste_name = phys.ste_id.name if phys.ste_id else 'N/A'
+                    msg += f"• *{phys.name}* ({ste_name}) ❌ Manque : {', '.join(missing)}\n"
+                    count += 1
+            
+            if count == 0:
+                return {'status': 'not_found', 'message': f"✅ Aucun chèque manquant de PDF trouvé ({filter_desc})."}
+
+            if len(phys_cheques) == 100:
+                msg += "\n⚠️ _Seuls les 100 premiers résultats sont affichés._"
+                
+            return {
+                'status': 'success',
+                'response': msg
+            }
+
         # 6. Handle Exact Matches (Talon Name or Beneficiary Name)
         exact_talon = request.env['finance.talon'].sudo().search([('name_shown', '=ilike', message_text)], limit=1)
         if exact_talon:

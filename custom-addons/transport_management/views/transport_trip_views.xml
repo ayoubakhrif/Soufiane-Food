@@ -39,19 +39,35 @@
                         <group>
                             <field name="driver_id"/>
                             <field name="client_id"/>
-                            <field name="going_price"/>
+                            <label for="going_price"/>
+                            <div class="o_row">
+                                <field name="going_price"/>
+                                <field name="is_going_price_paid" widget="boolean_toggle" nolabel="1"/>
+                            </div>
                         </group>
                         <group>
                             <field name="trip_type"/>
-                            <field name="returning_price"/>
+                            <label for="returning_price"/>
+                            <div class="o_row">
+                                <field name="returning_price"/>
+                                <field name="is_returning_price_paid" widget="boolean_toggle" nolabel="1"/>
+                            </div>
                         </group>
                     </group>
 
                     <!-- ================= CHARGES ================= -->
                     <group string="Charges">
                         <group>
-                            <field name="charge_fuel"/>
-                            <field name="charge_driver"/>
+                            <label for="charge_fuel"/>
+                            <div class="o_row">
+                                <field name="charge_fuel"/>
+                                <field name="is_charge_fuel_paid" widget="boolean_toggle" nolabel="1"/>
+                            </div>
+                            <label for="charge_driver"/>
+                            <div class="o_row">
+                                <field name="charge_driver"/>
+                                <field name="is_charge_driver_paid" widget="boolean_toggle" nolabel="1"/>
+                            </div>
                             <field name="charge_adblue"/>
                             <field name="charge_mixed"/>
                             <field name="note" invisible="charge_mixed == 0" required="charge_mixed &gt; 0"/>

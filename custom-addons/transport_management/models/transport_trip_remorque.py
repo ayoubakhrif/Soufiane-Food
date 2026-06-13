@@ -27,12 +27,16 @@ class TransportTripRemorque(models.Model):
         ('fenideq', 'Fenideq'),
     ], string='Destination', tracking=True)
     charge_fuel = fields.Float(string='Gazoil', tracking=True)
+    is_charge_fuel_paid = fields.Boolean(string='Payé', default=False, tracking=True)
     charge_driver = fields.Float(string='Déplacement Chauffeur', tracking=True)
+    is_charge_driver_paid = fields.Boolean(string='Payé', default=False, tracking=True)
     charge_adblue = fields.Float(string='AdBlue', tracking=True)
     charge_mixed = fields.Float(string='Mixe (A préciser sur commentaire)', tracking=True)
     note = fields.Text(string='Commentaire (Mixe)')
     going_price = fields.Float(string='Prix allée', tracking=True)
+    is_going_price_paid = fields.Boolean(string='Payé', default=False, tracking=True)
     returning_price = fields.Float(string='Prix de retour', tracking=True)
+    is_returning_price_paid = fields.Boolean(string='Payé', default=False, tracking=True)
     total_price = fields.Float(
         string='Prix allée retour',
         compute='_compute_total_price',

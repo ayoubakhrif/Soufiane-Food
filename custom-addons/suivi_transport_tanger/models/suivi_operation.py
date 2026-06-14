@@ -30,6 +30,7 @@ class SuiviTransportTangerOperation(models.Model):
 
     state = fields.Selection([
         ('initial', 'Initial'),
+        ('credit', 'Crédit'),
         ('paid', 'Payé'),
         ('validated', 'Validé'),
         ('cancelled', 'Annulé')
@@ -54,6 +55,10 @@ class SuiviTransportTangerOperation(models.Model):
     def _compute_available_client_ids(self):
         for rec in self:
             rec.available_client_ids = rec.line_ids.mapped('casa_client_id')
+
+    def action_credit(self):
+        for rec in self:
+            rec.state = 'credit'
 
     def action_pay(self):
         for rec in self:

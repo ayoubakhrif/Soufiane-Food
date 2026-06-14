@@ -118,6 +118,24 @@ class WhatsAppTransportController(http.Controller):
                 summary_msg += f"• Remorque: {'Oui' if driver.remorque else 'Non'}\n"
                 summary_msg += f"• Salaire Actuel: {'{:,.2f}'.format(driver.current_monthly_salary).replace(',', ' ')} DH\n"
 
+                # Check unpaid items
+                all_trips = list(trips) + list(remorque_trips)
+                total_unpaid_going = sum(t.going_price for t in all_trips if getattr(t, 'is_going_price_unpaid', False))
+                total_unpaid_returning = sum(t.returning_price for t in all_trips if getattr(t, 'is_returning_price_unpaid', False))
+                total_unpaid_fuel = sum(t.charge_fuel for t in all_trips if getattr(t, 'is_charge_fuel_unpaid', False))
+                total_unpaid_driver = sum(t.charge_driver for t in all_trips if getattr(t, 'is_charge_driver_unpaid', False))
+                
+                if total_unpaid_going > 0 or total_unpaid_returning > 0 or total_unpaid_fuel > 0 or total_unpaid_driver > 0:
+                    summary_msg += f"\n⚠️ *Détails Non Payés* :\n"
+                    if total_unpaid_going > 0:
+                        summary_msg += f"• Prix d'allée: {'{:,.2f}'.format(total_unpaid_going).replace(',', ' ')} DH\n"
+                    if total_unpaid_returning > 0:
+                        summary_msg += f"• Prix de retour: {'{:,.2f}'.format(total_unpaid_returning).replace(',', ' ')} DH\n"
+                    if total_unpaid_fuel > 0:
+                        summary_msg += f"• Gazoil: {'{:,.2f}'.format(total_unpaid_fuel).replace(',', ' ')} DH\n"
+                    if total_unpaid_driver > 0:
+                        summary_msg += f"• Déplacement: {'{:,.2f}'.format(total_unpaid_driver).replace(',', ' ')} DH\n"
+
                 return {
                     'status': 'success',
                     'product_name': driver.name,
@@ -309,11 +327,23 @@ class WhatsAppTransportController(http.Controller):
                         trip_type = dict(trip._fields['trip_type'].selection or {}).get(trip.trip_type, trip.trip_type or '')
                     
                     p_going = '{:,.2f}'.format(trip.going_price).replace(',', ' ') if trip.going_price else '0.00'
+                    if getattr(trip, 'is_going_price_unpaid', False):
+                        p_going += " <span style='color:red;font-weight:bold;font-size:10px;'>(X)</span>"
+
                     p_ret = '{:,.2f}'.format(trip.returning_price).replace(',', ' ') if trip.returning_price else '0.00'
+                    if getattr(trip, 'is_returning_price_unpaid', False):
+                        p_ret += " <span style='color:red;font-weight:bold;font-size:10px;'>(X)</span>"
+
                     p_tot = '{:,.2f}'.format(trip.total_price).replace(',', ' ') if trip.total_price else '0.00'
                     
                     c_fuel = '{:,.2f}'.format(trip.charge_fuel).replace(',', ' ') if trip.charge_fuel else '0.00'
+                    if getattr(trip, 'is_charge_fuel_unpaid', False):
+                        c_fuel += " <span style='color:red;font-weight:bold;font-size:10px;'>(X)</span>"
+
                     c_dep = '{:,.2f}'.format(trip.charge_driver).replace(',', ' ') if trip.charge_driver else '0.00'
+                    if getattr(trip, 'is_charge_driver_unpaid', False):
+                        c_dep += " <span style='color:red;font-weight:bold;font-size:10px;'>(X)</span>"
+
                     c_adblue = '{:,.2f}'.format(trip.charge_adblue).replace(',', ' ') if trip.charge_adblue else '0.00'
                     c_mix_val = '{:,.2f}'.format(trip.charge_mixed).replace(',', ' ') if trip.charge_mixed else '0.00'
                     c_mix_note = trip.note if trip.note else ''

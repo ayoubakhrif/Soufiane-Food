@@ -12,7 +12,7 @@
                 <field name="montant" sum="Total Montant" invisible="ville == 'casa'"/>
                 <field name="credit" sum="Total Crédit" invisible="ville == 'casa'"/>
                 <field name="casa_payer_id"/>
-                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-success="state == 'paid'" decoration-primary="state == 'validated'"/>
+                <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-warning="state == 'credit'" decoration-success="state == 'paid'" decoration-primary="state == 'validated'"/>
             </tree>
         </field>
     </record>
@@ -23,13 +23,14 @@
         <field name="arch" type="xml">
             <form string="Fiche Opération">
                 <header>
-                    <button name="action_pay" string="Confirmer Paiement" type="object" class="oe_highlight" groups="suivi_transport_tanger.group_suivi_tanger_user" invisible="state != 'initial'"/>
+                    <button name="action_credit" string="Mettre en Crédit" type="object" class="oe_highlight" groups="suivi_transport_tanger.group_suivi_tanger_user" invisible="state != 'initial'"/>
+                    <button name="action_pay" string="Confirmer Paiement" type="object" class="oe_highlight" groups="suivi_transport_tanger.group_suivi_tanger_user" invisible="state not in ('initial', 'credit')"/>
                     <button name="action_validate" string="Valider" type="object" class="oe_highlight" groups="casa_stock.group_manager" invisible="state != 'paid'"/>
                     <button name="action_toggle_paid_by_caisse" string="Marquer Payé par Caisse" type="object" groups="casa_stock.group_manager" invisible="paid_by_caisse == True or state == 'validated'"/>
                     <button name="action_toggle_paid_by_caisse" string="Démarquer Payé par Caisse" type="object" groups="casa_stock.group_manager" invisible="paid_by_caisse == False or state == 'validated'"/>
                     <button name="action_set_initial" string="Remettre en Initial" type="object" groups="suivi_transport_tanger.group_suivi_tanger_manager" invisible="state == 'initial'"/>
                     <button name="action_cancel" string="Annuler" type="object" groups="suivi_transport_tanger.group_suivi_tanger_manager" invisible="state in ('cancelled', 'validated')"/>
-                    <field name="state" widget="statusbar" statusbar_visible="initial,paid,validated,cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="initial,credit,paid,validated,cancelled"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

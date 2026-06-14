@@ -68,7 +68,10 @@ class TransportResultFollowup(models.Model):
         for rec in self:
             distributed = sum(rec.line_ids.mapped('amount'))
             rec.distributed_amount = distributed
-            rec.remaining_amount = rec.total_profit - rec.distributed_amount
+            if rec.type == 'gasoil':
+                rec.remaining_amount = rec.total_gasoil_sale - rec.distributed_amount
+            else:
+                rec.remaining_amount = rec.total_profit - rec.distributed_amount
 
     def action_refresh(self):
         """Refreshes the view to update computed fields."""
@@ -114,14 +117,16 @@ class TransportResultLine(models.Model):
             # We can use the parent's relation which should include this new/modified record in memory
             total_distributed = sum(parent.line_ids.mapped('amount'))
             
-            if total_distributed > parent.total_profit:
-                remaining = parent.total_profit - (total_distributed - line.amount)
+            max_amount = parent.total_gasoil_sale if parent.type == 'gasoil' else parent.total_profit
+            
+            if total_distributed > max_amount:
+                remaining = max_amount - (total_distributed - line.amount)
                 raise ValidationError(
                     _("Opération bloquée !\n"
                       "Le montant saisi ({saisi}) dépasse le montant restant ({reste}).\n"
-                      "Bénéfice Total: {total}").format(
+                      "Bénéfice/Total Vente: {total}").format(
                         saisi=line.amount,
                         reste=remaining,
-                        total=parent.total_profit
+                        total=max_amount
                     )
                 )

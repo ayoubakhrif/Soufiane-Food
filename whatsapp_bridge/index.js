@@ -410,6 +410,13 @@ async function connectToWhatsApp() {
                 if (error.response) {
                     console.error("Status Erreur :", error.response.status);
                     console.error("Data Erreur :", error.response.data);
+                    
+                    // Si le proxy Odoo retourne une 404 ou 401, il se peut que la session ait expiré.
+                    // On vide le cookie pour forcer une reconnexion au prochain message.
+                    if (error.response.status === 404 || error.response.status === 401) {
+                        console.log("Session Odoo potentiellement expirée (404/401). Nettoyage du cookie...");
+                        odooSessionCookie = '';
+                    }
                 }
             }
         }

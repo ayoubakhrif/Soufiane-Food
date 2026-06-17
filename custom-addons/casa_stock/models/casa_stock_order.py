@@ -296,11 +296,11 @@ class CasaStockOrderLine(models.Model):
                 line.available_qty = 0.0
                 continue
             total_stock = line.stock_id.quantity
-            used_qty = sum(
-                other_line.qty 
-                for other_line in line.order_id.order_line_ids 
-                if other_line.stock_id == line.stock_id and other_line != line
-            )
+            used_qty = 0.0
+            if line.order_id:
+                for other_line in line.order_id.order_line_ids:
+                    if other_line.stock_id.id == line.stock_id.id and other_line != line:
+                        used_qty += other_line.qty
             line.available_qty = total_stock - used_qty
 
     @api.depends('qty', 'weight', 'price_sale', 'price_purchase')
@@ -344,7 +344,7 @@ class CasaStockOrderLine(models.Model):
                 total_ordered = sum(
                     other_line.qty 
                     for other_line in line.order_id.order_line_ids 
-                    if other_line.stock_id == line.stock_id
+                    if other_line.stock_id.id == line.stock_id.id
                 )
                 if total_ordered > line.stock_id.quantity:
                     raise UserError(_(

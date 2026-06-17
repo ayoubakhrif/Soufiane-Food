@@ -49,6 +49,7 @@
                 <field name="week"/>
                 <field name="journal"/>
                 <field name="date_echeance"/>
+                <field name="date_limite" optional="show"/>
                 <field name="date_encaissement"/>
                 <field name="amount" sum="Total"/>
                 <field name="type"/>
@@ -164,6 +165,7 @@
                     <group string="Échéances et montant">
                         <group>
                             <field name="date_echeance" required="state not in ['bureau', 'annule']"/>
+                            <field name="date_limite"/>
                             <field name="date_encaissement" readonly="1" invisible="not date_encaissement"/>
                         </group>
                         <group>

@@ -73,6 +73,7 @@
                                     <field name="product_id" column_invisible="True"/>
                                     <field name="ste_id" options="{'no_create': True, 'no_create_edit': True}"/>
                                     <field name="ville"/>
+                                    <field name="available_qty" readonly="1" force_save="1"/>
                                     <field name="qty"/>
                                     <field name="weight" string="Poids (Kg)"/>
                                     <field name="poids" column_invisible="True"/>

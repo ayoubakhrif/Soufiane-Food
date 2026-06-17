@@ -140,11 +140,14 @@ class WhatsAppFinancePdfController(http.Controller):
                 if inv_bl and inv_bl.lower() != 'none':
                     vals['bl'] = inv_bl[:100]
 
+                bl_str = f", BL: {vals['bl']}" if vals.get('bl') else ""
+                fact_str = f", Fact: {vals['serie']}" if vals.get('serie') else ""
+
                 if idx == 0:
                     # Update base cheque
                     base_cheque.write(vals)
                     created_records.append(base_cheque)
-                    messages.append(f"Mise à jour du chèque {chq_number} : {inv_amount} DH (Type: {vals['type']})")
+                    messages.append(f"• {inv_amount} DH ({vals['type']}) pour {benif_record.name if benif_record else inv_benif_name}{bl_str}{fact_str}")
                     
                     # Log AI Training
                     request.env['finance.ai.training'].sudo().create({
@@ -158,7 +161,7 @@ class WhatsAppFinancePdfController(http.Controller):
                     # Duplicate cheque for the remaining invoices
                     new_cheque = base_cheque.copy(default=vals)
                     created_records.append(new_cheque)
-                    messages.append(f"Création d'une répartition pour {chq_number} : {inv_amount} DH (Type: {vals['type']})")
+                    messages.append(f"• {inv_amount} DH ({vals['type']}) pour {benif_record.name if benif_record else inv_benif_name}{bl_str}{fact_str}")
                     
                     # Log AI Training
                     request.env['finance.ai.training'].sudo().create({
@@ -219,7 +222,8 @@ Règles de formatage :
       "montant": 10500.50,
       "beneficiaire": "Tanger Med",
       "type": "magasinage",
-      "numero_facture": "2023-001"
+      "numero_facture": "2023-001",
+      "bl": "YMJAM450339005"
     }
   ]
 }

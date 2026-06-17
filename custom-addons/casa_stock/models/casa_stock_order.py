@@ -287,6 +287,21 @@ class CasaStockOrderLine(models.Model):
     poids = fields.Char(string='Poids', compute='_compute_poids')
     mt_vente = fields.Float(string='Montant Vente', compute='_compute_mt_vente', store=True)
     mt_achat = fields.Float(string='Montant Achat', compute='_compute_mt_vente', store=True)
+    available_qty = fields.Float(string='Qté Dispo', compute='_compute_available_qty')
+
+    @api.depends('stock_id', 'order_id.order_line_ids.qty', 'order_id.order_line_ids.stock_id')
+    def _compute_available_qty(self):
+        for line in self:
+            if not line.stock_id:
+                line.available_qty = 0.0
+                continue
+            total_stock = line.stock_id.quantity
+            used_qty = sum(
+                other_line.qty 
+                for other_line in line.order_id.order_line_ids 
+                if other_line.stock_id == line.stock_id and other_line != line
+            )
+            line.available_qty = total_stock - used_qty
 
     @api.depends('qty', 'weight', 'price_sale', 'price_purchase')
     def _compute_mt_vente(self):
@@ -325,14 +340,20 @@ class CasaStockOrderLine(models.Model):
     @api.constrains('qty', 'stock_id')
     def _check_stock_availability(self):
         for line in self:
-            if line.stock_id and line.qty > line.stock_id.quantity:
-                raise UserError(_(
-                    "Quantité insuffisante pour l'article %(product)s.\n"
-                    "Demandée: %(req)s, Disponible: %(avail)s",
-                    product=line.product_id.name,
-                    req=line.qty,
-                    avail=line.stock_id.quantity
-                ))
+            if line.stock_id:
+                total_ordered = sum(
+                    other_line.qty 
+                    for other_line in line.order_id.order_line_ids 
+                    if other_line.stock_id == line.stock_id
+                )
+                if total_ordered > line.stock_id.quantity:
+                    raise UserError(_(
+                        "Quantité globale insuffisante pour l'article %(product)s.\n"
+                        "Demandée au total: %(req)s, Disponible: %(avail)s",
+                        product=line.product_id.name,
+                        req=total_ordered,
+                        avail=line.stock_id.quantity
+                    ))
 
     def unlink(self):
         is_manager = self.env.user.has_group('casa_stock.group_manager')

@@ -36,6 +36,7 @@ class DataCheque(models.Model):
     date_payment = fields.Date(string='Date Paiement')
     cheque_count = fields.Integer(string='Nombre chèques', default=1, store=True)
     date_emission = fields.Date(string='Date d’émission', tracking=True)
+    date_limite = fields.Date(string='Date limite', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
     date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True, readonly=False)

@@ -14,6 +14,12 @@
               action="action_suivi_operation"
               sequence="10"/>
 
+    <menuitem id="menu_suivi_transport_gazoil"
+              name="Gazoil &amp; Dépenses"
+              parent="menu_suivi_transport_root"
+              action="action_suivi_gazoil"
+              sequence="12"/>
+
     <!-- Data Menu -->
     <menuitem id="menu_suivi_transport_data"
               name="Données"

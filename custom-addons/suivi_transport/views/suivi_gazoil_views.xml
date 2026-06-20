@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_gazoil_tree" model="ir.ui.view">
+        <field name="name">suivi.gazoil.tree</field>
+        <field name="model">suivi.gazoil</field>
+        <field name="arch" type="xml">
+            <tree string="Dépenses Gazoil">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="chauffeur_id"/>
+                <field name="kilometrage"/>
+                <field name="prix_litre"/>
+                <field name="litres" sum="Total Litres"/>
+                <field name="montant" sum="Total Montant (MAD)"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_gazoil_form" model="ir.ui.view">
+        <field name="name">suivi.gazoil.form</field>
+        <field name="model">suivi.gazoil</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Gazoil">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chauffeur_id" options="{'no_create': True}"/>
+                            <field name="date"/>
+                            <field name="kilometrage"/>
+                        </group>
+                        <group>
+                            <field name="prix_litre"/>
+                            <field name="montant"/>
+                            <field name="litres"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Remarques">
+                            <field name="note" placeholder="Notes additionnelles..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_suivi_gazoil_search" model="ir.ui.view">
+        <field name="name">suivi.gazoil.search</field>
+        <field name="model">suivi.gazoil</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Gazoil">
+                <field name="name"/>
+                <field name="chauffeur_id"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Chauffeur" name="group_by_chauffeur" context="{'group_by': 'chauffeur_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_suivi_gazoil_pivot" model="ir.ui.view">
+        <field name="name">suivi.gazoil.pivot</field>
+        <field name="model">suivi.gazoil</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Gazoil" display_quantity="true">
+                <field name="date" type="row" interval="month"/>
+                <field name="chauffeur_id" type="row"/>
+                <field name="litres" type="measure"/>
+                <field name="montant" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_suivi_gazoil" model="ir.actions.act_window">
+        <field name="name">Gazoil &amp; Dépenses</field>
+        <field name="res_model">suivi.gazoil</field>
+        <field name="view_mode">tree,form,pivot</field>
+    </record>
+</odoo>

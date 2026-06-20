@@ -43,16 +43,19 @@
                         <group>
                             <field name="montant" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
                             <field name="credit" invisible="ville == 'casa'" required="ville != 'casa'" readonly="state == 'validated'"/>
-                            <field name="payer_id" options="{'no_create': True}" readonly="state == 'validated'"/>
+                            <field name="payer_id" options="{'no_create': True}" readonly="state == 'validated'" domain="[('ville', '=', ville)]"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Détails" name="lines_details">
                             <field name="line_ids" readonly="state == 'validated'">
                                 <tree editable="bottom">
-                                    <field name="client_id" required="1"/>
-                                    <field name="article_id" required="1"/>
-                                    <field name="lot"/>
+                                    <field name="client_id" required="1" domain="[('ville', '=', parent.ville)]"/>
+                                    <field name="stock_id" domain="[('quantity', '>', 0), ('ville', '=', parent.ville)]" options="{'no_create': True}"/>
+                                    <field name="article_id" required="1" readonly="stock_id != False"/>
+                                    <field name="qty"/>
+                                    <field name="lot" readonly="stock_id != False"/>
+                                    <field name="dum" readonly="stock_id != False"/>
                                 </tree>
                             </field>
                         </page>

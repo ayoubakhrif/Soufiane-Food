@@ -131,8 +131,8 @@
                             <field name="charge_transport"/>
                         </group>
                         <group>
-                            <field name="fournisseur_id" readonly="state in ('confirmed', 'done')"/>
-                            <field name="chauffeur_id" readonly="state in ('confirmed', 'done')"/>
+                            <field name="fournisseur_id" readonly="state in ('confirmed', 'done')" options="{'no_create': True}"/>
+                            <field name="chauffeur_id" readonly="state in ('confirmed', 'done')" options="{'no_create': True}"/>
                         </group>
                     </group>
                     <group>

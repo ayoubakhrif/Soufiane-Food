@@ -36,7 +36,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="chauffeur_id" readonly="state == 'validated'"/>
+                            <field name="chauffeur_id" readonly="state == 'validated'" options="{'no_create': True}"/>
                             <field name="date" readonly="state == 'validated'"/>
                             <field name="ville" readonly="state == 'validated'"/>
                         </group>
@@ -50,12 +50,12 @@
                         <page string="Détails" name="lines_details">
                             <field name="line_ids" readonly="state == 'validated'">
                                 <tree editable="bottom">
-                                    <field name="client_id" required="1" domain="[('ville', '=', parent.ville)]"/>
+                                    <field name="client_id" required="1" domain="[('ville', '=', parent.ville)]" options="{'no_create': True}"/>
                                     <field name="stock_id" domain="[('quantity', '>', 0), ('ville', '=', parent.ville)]" options="{'no_create': True}"/>
-                                    <field name="article_id" required="1" readonly="stock_id != False" force_save="1"/>
+                                    <field name="article_id" required="1" readonly="1" force_save="1"/>
                                     <field name="qty"/>
-                                    <field name="lot" readonly="stock_id != False" force_save="1"/>
-                                    <field name="dum" readonly="stock_id != False" force_save="1"/>
+                                    <field name="lot" readonly="1" force_save="1"/>
+                                    <field name="dum" readonly="1" force_save="1"/>
                                 </tree>
                             </field>
                         </page>

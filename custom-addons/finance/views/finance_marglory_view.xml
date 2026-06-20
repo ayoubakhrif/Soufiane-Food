@@ -5,18 +5,28 @@
         <field name="name">finance.marglory.tree</field>
         <field name="model">finance.marglory</field>
         <field name="arch" type="xml">
-            <tree string="Marglory Dossiers">
-                <field name="facture_marglory"/>
-                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'" decoration-success="type == 'ASSURANCE'"/>
-                <field name="bl_number" />
-                <field name="dum"/>
+            <tree string="Marglory Dossiers" default_order="create_date desc">
                 <field name="dossier_reglement"/>
-                <field name="journal" optional="show"/>
-                <field name="container_names" string="Conteneurs"/>
                 <field name="ste_id"/>
+                <field name="journal"/>
+                <field name="facture_marglory"/>
+                <field name="cheque_number"/>
+                <field name="cheque_amount" sum="Total Chq"/>
+                <field name="cheque_date_emission"/>
+                <field name="cheque_date_limite"/>
+                <field name="cheque_date_echeance"/>
+                <field name="cheque_encours" string="D. Encaissement"/>
+                <field name="amount" string="FRET ( Dollar )" sum="Total Fret"/>
                 <field name="supplier_id"/>
-                <field name="eta"/>
-                <field name="amount" sum="Total"/>
+                <field name="article_id"/>
+                <field name="fac_comm"/>
+                
+                <!-- Champs masqués par défaut (non présents sur l'image) -->
+                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'" decoration-success="type == 'ASSURANCE'" optional="show"/>
+                <field name="bl_number" optional="hide"/>
+                <field name="dum" optional="hide"/>
+                <field name="container_names" string="Conteneurs" optional="hide"/>
+                <field name="eta" optional="hide"/>
             </tree>
         </field>
     </record>

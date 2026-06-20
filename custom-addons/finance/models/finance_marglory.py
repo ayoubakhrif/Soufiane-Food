@@ -69,6 +69,12 @@ class FinanceMarglory(models.Model):
     cheque_number = fields.Char(related='cheque_id.name', string='N° Chèque', readonly=True)
     cheque_date_emission = fields.Date(related='cheque_id.date_emission', string="Date d'émission", readonly=True)
     cheque_date_echeance = fields.Date(related='cheque_id.date_echeance', string="Date d'échéance", readonly=True)
+    cheque_date_limite = fields.Date(related='cheque_id.date_limite', string="D. limite", readonly=True)
+    cheque_amount = fields.Float(related='cheque_id.amount_total', string="Montant chq", readonly=True)
+    cheque_encours = fields.Selection(related='cheque_id.encours', string="D. Encaissement", readonly=True)
+    
+    fac_comm = fields.Char(related='douane_id.invoice_number', string="Fac comm", store=True, readonly=True)
+    article_id = fields.Many2one(related='douane_id.article_id', string="Article", store=True, readonly=True)
     
     is_encaisse = fields.Boolean(string='Encaissé', compute='_compute_is_encaisse', store=True)
 

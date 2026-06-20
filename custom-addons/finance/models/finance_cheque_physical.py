@@ -16,6 +16,7 @@ class FinanceChequePhysical(models.Model):
     
     # Computed fields from the first linked datacheque (source of truth for shared data)
     date_emission = fields.Date(string="Date d'émission", compute='_compute_shared_info', store=True)
+    date_limite = fields.Date(string="Date limite", compute='_compute_shared_info', store=True)
     date_echeance = fields.Date(string="Date d'échéance", compute='_compute_shared_info', store=True)
     date_encaissement = fields.Date(string="Date d'encaissement", compute='_compute_shared_info', store=True)
     benif_id = fields.Many2one('finance.benif', string='Bénéficiaire', compute='_compute_shared_info', store=True)
@@ -73,7 +74,7 @@ class FinanceChequePhysical(models.Model):
         for rec in self:
             rec.amount_total = sum(rec.datacheque_ids.mapped('amount'))
 
-    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state')
+    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.date_limite', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state')
     def _compute_shared_info(self):
         for rec in self:
             if rec.datacheque_ids:
@@ -81,12 +82,14 @@ class FinanceChequePhysical(models.Model):
                 active_splits = rec.datacheque_ids.filtered(lambda d: d.state == 'actif')
                 first = active_splits[0] if active_splits else rec.datacheque_ids[0]
                 rec.date_emission = first.date_emission
+                rec.date_limite = first.date_limite
                 rec.date_echeance = first.date_echeance
                 rec.benif_id = first.benif_id
                 # Search for the first non-empty cashing date among splits
                 rec.date_encaissement = next((d.date_encaissement for d in rec.datacheque_ids if d.date_encaissement), False)
             else:
                 rec.date_emission = False
+                rec.date_limite = False
                 rec.date_echeance = False
                 rec.benif_id = False
                 rec.date_encaissement = False

@@ -11,6 +11,7 @@
                 <field name="chauffeur_id"/>
                 <field name="montant" sum="Total Montant" invisible="ville == 'casa'"/>
                 <field name="credit" sum="Total Crédit" invisible="ville == 'casa'"/>
+                <field name="charge_transport" sum="Total Charge Transport"/>
                 <field name="payer_id"/>
                 <field name="state" widget="badge" decoration-info="state == 'initial'" decoration-success="state == 'paid'" decoration-primary="state == 'validated'"/>
             </tree>

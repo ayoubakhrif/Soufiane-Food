@@ -26,6 +26,18 @@ class SuiviOperation(models.Model):
         ('validated', 'Validé')
     ], string='État', default='initial', tracking=True)
 
+    charge_transport = fields.Float(
+        string='Charge Transport',
+        compute='_compute_charge_transport',
+        store=True
+    )
+
+    @api.depends('line_ids.qty', 'line_ids.stock_id.weight')
+    def _compute_charge_transport(self):
+        for rec in self:
+            tonnage = sum((line.qty * (line.stock_id.weight or 0.0)) for line in rec.line_ids if line.stock_id)
+            rec.charge_transport = tonnage * 0.02
+
     line_ids = fields.One2many('suivi.operation.line', 'operation_id', string='Détails des opérations')
 
     @api.model

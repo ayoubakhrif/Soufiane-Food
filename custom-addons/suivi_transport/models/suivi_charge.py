@@ -14,6 +14,9 @@ class SuiviCharge(models.Model):
         ('pneus', 'Pneus'),
         ('vidange', 'Vidange'),
         ('mecanique', 'Mécanique'),
+        ('assurance', 'Assurance'),
+        ('vignette', 'Vignette'),
+        ('visite', 'La visite'),
         ('autres', 'Autres')
     ], string='Type de Charge', required=True)
     

@@ -321,7 +321,7 @@
         <field name="name">suivi.stock.move.tree</field>
         <field name="model">suivi.stock.move</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false" delete="false" decoration-info="move_type == 'entry'" decoration-danger="move_type == 'exit'" decoration-warning="move_type in ('cancel_entry', 'cancel_exit')">
+            <tree create="false" edit="false" decoration-info="move_type == 'entry'" decoration-danger="move_type == 'exit'" decoration-warning="move_type in ('cancel_entry', 'cancel_exit')">
                 <field name="date"/>
                 <field name="reference"/>
                 <field name="product_id"/>

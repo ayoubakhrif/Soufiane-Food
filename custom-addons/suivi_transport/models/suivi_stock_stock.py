@@ -1,4 +1,4 @@
-from odoo import models, fields, tools
+from odoo import models, fields, tools, api
 
 class SuiviStockStock(models.Model):
     _name = 'suivi.stock.stock'
@@ -25,6 +25,29 @@ class SuiviStockStock(models.Model):
     scan_dum = fields.Char(string='Scan DUM (Drive)', readonly=True)
     
     total_weight = fields.Float(string='Tonnage', readonly=True)
+
+    @api.depends('product_id.name', 'lot', 'dum', 'quantity')
+    def _compute_display_name(self):
+        for rec in self:
+            name_parts = [rec.product_id.name] if rec.product_id else ['Inconnu']
+            if rec.lot:
+                name_parts.append(f"Lot: {rec.lot}")
+            if rec.dum:
+                name_parts.append(f"DUM: {rec.dum}")
+            
+            qty_str = f"{rec.quantity} ({(rec.quantity * rec.weight):.2f}Kg)"
+            name_parts.append(f"Dispo: {qty_str}")
+                
+            rec.display_name = ' - '.join(name_parts)
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, **kwargs):
+        args = args or []
+        domain = []
+        if name:
+            domain = ['|', '|', ('product_id.name', operator, name), ('lot', operator, name), ('dum', operator, name)]
+        order = kwargs.get('order', self._order)
+        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid, order=order)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)

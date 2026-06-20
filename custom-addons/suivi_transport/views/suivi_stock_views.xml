@@ -101,9 +101,9 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" states="draft"/>
-                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" states="confirmed"/>
-                    <button name="action_cancel" string="Annuler" type="object" states="confirmed,done" confirm="Êtes-vous sûr de vouloir annuler cette entrée ?"/>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Annuler" type="object" invisible="state not in ('confirmed', 'done')" confirm="Êtes-vous sûr de vouloir annuler cette entrée ?"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                 </header>
                 <sheet>
@@ -115,24 +115,24 @@
                     </div>
                     <group>
                         <group>
-                            <field name="product_id" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
-                            <field name="date" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="product_id" readonly="state in ('confirmed', 'done')"/>
+                            <field name="date" readonly="state in ('confirmed', 'done')"/>
                             <field name="ville"/>
                         </group>
                         <group>
-                            <field name="lot" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
-                            <field name="dum" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
-                            <field name="calibre" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="lot" readonly="state in ('confirmed', 'done')"/>
+                            <field name="dum" readonly="state in ('confirmed', 'done')"/>
+                            <field name="calibre" readonly="state in ('confirmed', 'done')"/>
                         </group>
                         <group>
-                            <field name="qty" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
-                            <field name="weight" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="qty" readonly="state in ('confirmed', 'done')"/>
+                            <field name="weight" readonly="state in ('confirmed', 'done')"/>
                             <field name="tonnage"/>
                             <field name="charge_transport"/>
                         </group>
                         <group>
-                            <field name="fournisseur_id" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
-                            <field name="chauffeur_id" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="fournisseur_id" readonly="state in ('confirmed', 'done')"/>
+                            <field name="chauffeur_id" readonly="state in ('confirmed', 'done')"/>
                         </group>
                     </group>
                     <group>
@@ -140,10 +140,10 @@
                         <button name="action_open_dum" string="Chercher Scan DUM (Drive)" type="object" class="oe_highlight"/>
                     </group>
                     <notebook>
-                        <page string="Traçabilité" attrs="{'invisible': [('move_id', '=', False)]}">
+                        <page string="Traçabilité" invisible="not move_id">
                             <group>
                                 <field name="move_id"/>
-                                <field name="cancel_move_id" attrs="{'invisible': [('cancel_move_id', '=', False)]}"/>
+                                <field name="cancel_move_id" invisible="not cancel_move_id"/>
                                 <field name="validation_user_id"/>
                             </group>
                         </page>

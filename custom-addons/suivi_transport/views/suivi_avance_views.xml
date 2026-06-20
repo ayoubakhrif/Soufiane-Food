@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_avance_tree" model="ir.ui.view">
+        <field name="name">suivi.avance.tree</field>
+        <field name="model">suivi.avance</field>
+        <field name="arch" type="xml">
+            <tree string="Avances">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="chauffeur_id"/>
+                <field name="montant" sum="Total Avances (MAD)"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_avance_form" model="ir.ui.view">
+        <field name="name">suivi.avance.form</field>
+        <field name="model">suivi.avance</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Avance">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chauffeur_id" options="{'no_create': True}"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="montant"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Remarques">
+                            <field name="note" placeholder="Détails de l'avance..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_suivi_avance_pivot" model="ir.ui.view">
+        <field name="name">suivi.avance.pivot</field>
+        <field name="model">suivi.avance</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Avances" display_quantity="true">
+                <field name="date" type="row" interval="month"/>
+                <field name="chauffeur_id" type="row"/>
+                <field name="montant" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_suivi_avance" model="ir.actions.act_window">
+        <field name="name">Avances</field>
+        <field name="res_model">suivi.avance</field>
+        <field name="view_mode">tree,form,pivot</field>
+    </record>
+</odoo>

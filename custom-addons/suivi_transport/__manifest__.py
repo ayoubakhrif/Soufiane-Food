@@ -22,6 +22,8 @@
         'views/suivi_operation_views.xml',
         'views/suivi_stock_views.xml',
         'views/suivi_gazoil_views.xml',
+        'views/suivi_avance_views.xml',
+        'views/suivi_charge_views.xml',
         'views/menus.xml',
     ],
     'installable': True,

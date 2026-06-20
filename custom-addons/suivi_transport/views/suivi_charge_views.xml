@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_charge_tree" model="ir.ui.view">
+        <field name="name">suivi.charge.tree</field>
+        <field name="model">suivi.charge</field>
+        <field name="arch" type="xml">
+            <tree string="Charges et Entretien">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="chauffeur_id"/>
+                <field name="type_charge"/>
+                <field name="montant" sum="Total Charges (MAD)"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_charge_form" model="ir.ui.view">
+        <field name="name">suivi.charge.form</field>
+        <field name="model">suivi.charge</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Charge">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chauffeur_id" options="{'no_create': True}"/>
+                            <field name="date"/>
+                            <field name="type_charge"/>
+                        </group>
+                        <group>
+                            <field name="montant"/>
+                            <field name="facture" filename="facture_name"/>
+                            <field name="facture_name" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="note" placeholder="Détails de l'entretien ou de la charge..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_suivi_charge_pivot" model="ir.ui.view">
+        <field name="name">suivi.charge.pivot</field>
+        <field name="model">suivi.charge</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse Charges" display_quantity="true">
+                <field name="date" type="row" interval="month"/>
+                <field name="type_charge" type="row"/>
+                <field name="chauffeur_id" type="col"/>
+                <field name="montant" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_suivi_charge" model="ir.actions.act_window">
+        <field name="name">Charges et Entretien</field>
+        <field name="res_model">suivi.charge</field>
+        <field name="view_mode">tree,form,pivot</field>
+    </record>
+</odoo>

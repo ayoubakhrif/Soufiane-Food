@@ -8,5 +8,9 @@ class SuiviClient(models.Model):
     ville = fields.Selection([
         ('tanger', 'Tanger'),
         ('casa', 'Casa'),
-        # Add more if needed, standardizing based on other modules
+        ('kenitra', 'Kenitra'),
+        ('agadir', 'Agadir'),
+        ('merakech', 'Merakech'),
+        ('fes', 'Fes'),
+        ('houssima', 'Houssima'),
     ], string='Ville')

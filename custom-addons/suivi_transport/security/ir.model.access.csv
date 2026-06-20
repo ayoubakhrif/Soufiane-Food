@@ -23,3 +23,7 @@ access_suivi_stock_entry_user,suivi.stock.entry user,model_suivi_stock_entry,gro
 access_suivi_stock_entry_manager,suivi.stock.entry manager,model_suivi_stock_entry,group_suivi_manager,1,1,1,1
 access_suivi_gazoil_user,suivi.gazoil user,model_suivi_gazoil,group_suivi_user,1,1,1,0
 access_suivi_gazoil_manager,suivi.gazoil manager,model_suivi_gazoil,group_suivi_manager,1,1,1,1
+access_suivi_avance_user,suivi.avance user,model_suivi_avance,group_suivi_user,1,1,1,0
+access_suivi_avance_manager,suivi.avance manager,model_suivi_avance,group_suivi_manager,1,1,1,1
+access_suivi_charge_user,suivi.charge user,model_suivi_charge,group_suivi_user,1,1,1,0
+access_suivi_charge_manager,suivi.charge manager,model_suivi_charge,group_suivi_manager,1,1,1,1

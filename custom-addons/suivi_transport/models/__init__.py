@@ -7,3 +7,5 @@ from . import suivi_stock_move
 from . import suivi_stock_stock
 from . import suivi_stock_entry
 from . import suivi_gazoil
+from . import suivi_avance
+from . import suivi_charge

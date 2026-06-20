@@ -53,8 +53,8 @@ class SuiviOperation(models.Model):
                 if line.stock_id:
                     self.env['suivi.stock.move'].create({
                         'product_id': line.stock_id.product_id.id,
-                        'lot': line.lot,
-                        'dum': line.dum,
+                        'lot': line.stock_id.lot,
+                        'dum': line.stock_id.dum,
                         'ville': rec.ville,
                         'qty': -line.qty,
                         'move_type': 'exit',

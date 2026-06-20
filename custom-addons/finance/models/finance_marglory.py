@@ -74,7 +74,7 @@ class FinanceMarglory(models.Model):
     cheque_encours = fields.Selection(related='cheque_id.encours', string="D. Encaissement", readonly=True)
     
     fac_comm = fields.Char(related='douane_id.invoice_number', string="Fac comm", readonly=True)
-    article_id = fields.Many2one(related='douane_id.article_id', string="Article", readonly=True)
+    article_id = fields.Many2one(related='douane_id.achat_article_id', string="Article", readonly=True)
     
     is_encaisse = fields.Boolean(string='Encaissé', compute='_compute_is_encaisse', store=True)
 

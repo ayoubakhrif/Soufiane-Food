@@ -8,5 +8,13 @@
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>
+
+        <record id="seq_suivi_stock_entry" model="ir.sequence">
+            <field name="name">Séquence Entrée Stock Transport</field>
+            <field name="code">suivi.stock.entry</field>
+            <field name="prefix">TRE/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
     </data>
 </odoo>

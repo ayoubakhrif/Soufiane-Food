@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ==================== SUIVI PRODUIT ==================== -->
+    <record id="view_suivi_produit_tree" model="ir.ui.view">
+        <field name="name">suivi.produit.tree</field>
+        <field name="model">suivi.produit</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="article_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_produit_form" model="ir.ui.view">
+        <field name="name">suivi.produit.form</field>
+        <field name="model">suivi.produit</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du Produit"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="article_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_produit" model="ir.actions.act_window">
+        <field name="name">Produits</field>
+        <field name="res_model">suivi.produit</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ==================== SUIVI FOURNISSEUR ==================== -->
+    <record id="view_suivi_fournisseur_tree" model="ir.ui.view">
+        <field name="name">suivi.fournisseur.tree</field>
+        <field name="model">suivi.fournisseur</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="phone"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_fournisseur_form" model="ir.ui.view">
+        <field name="name">suivi.fournisseur.form</field>
+        <field name="model">suivi.fournisseur</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du Fournisseur"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="phone"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_fournisseur" model="ir.actions.act_window">
+        <field name="name">Fournisseurs</field>
+        <field name="res_model">suivi.fournisseur</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ==================== SUIVI STOCK ENTRY ==================== -->
+    <record id="view_suivi_stock_entry_tree" model="ir.ui.view">
+        <field name="name">suivi.stock.entry.tree</field>
+        <field name="model">suivi.stock.entry</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-warning="state == 'confirmed'" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="qty"/>
+                <field name="tonnage"/>
+                <field name="ville"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-warning="state == 'confirmed'" decoration-muted="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_stock_entry_form" model="ir.ui.view">
+        <field name="name">suivi.stock.entry.form</field>
+        <field name="model">suivi.stock.entry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" states="confirmed"/>
+                    <button name="action_cancel" string="Annuler" type="object" states="confirmed,done" confirm="Êtes-vous sûr de vouloir annuler cette entrée ?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="product_id" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="date" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="ville"/>
+                        </group>
+                        <group>
+                            <field name="lot" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="dum" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="calibre" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                        </group>
+                        <group>
+                            <field name="qty" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="weight" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="tonnage"/>
+                            <field name="charge_transport"/>
+                        </group>
+                        <group>
+                            <field name="fournisseur_id" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                            <field name="chauffeur_id" attrs="{'readonly': [('state', 'in', ['confirmed', 'done'])]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="scan_dum" widget="url"/>
+                        <button name="action_open_dum" string="Chercher Scan DUM (Drive)" type="object" class="oe_highlight"/>
+                    </group>
+                    <notebook>
+                        <page string="Traçabilité" attrs="{'invisible': [('move_id', '=', False)]}">
+                            <group>
+                                <field name="move_id"/>
+                                <field name="cancel_move_id" attrs="{'invisible': [('cancel_move_id', '=', False)]}"/>
+                                <field name="validation_user_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_stock_entry" model="ir.actions.act_window">
+        <field name="name">Entrées de Stock</field>
+        <field name="res_model">suivi.stock.entry</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ==================== SUIVI STOCK STOCK ==================== -->
+    <record id="view_suivi_stock_stock_tree" model="ir.ui.view">
+        <field name="name">suivi.stock.stock.tree</field>
+        <field name="model">suivi.stock.stock</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false" decoration-muted="quantity == 0">
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="ville"/>
+                <field name="quantity"/>
+                <field name="weight"/>
+                <field name="calibre"/>
+                <field name="total_weight"/>
+                <field name="write_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_stock_stock_search" model="ir.ui.view">
+        <field name="name">suivi.stock.stock.search</field>
+        <field name="model">suivi.stock.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <filter string="En Stock (Qte > 0)" name="in_stock" domain="[('quantity', '>', 0)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Produit" name="group_product" context="{'group_by':'product_id'}"/>
+                    <filter string="Lot" name="group_lot" context="{'group_by':'lot'}"/>
+                    <filter string="DUM" name="group_dum" context="{'group_by':'dum'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_suivi_stock_stock" model="ir.actions.act_window">
+        <field name="name">État du Stock</field>
+        <field name="res_model">suivi.stock.stock</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_in_stock': 1}</field>
+    </record>
+
+    <!-- ==================== SUIVI STOCK MOVE ==================== -->
+    <record id="view_suivi_stock_move_tree" model="ir.ui.view">
+        <field name="name">suivi.stock.move.tree</field>
+        <field name="model">suivi.stock.move</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false" decoration-info="move_type == 'entry'" decoration-danger="move_type == 'exit'" decoration-warning="move_type in ('cancel_entry', 'cancel_exit')">
+                <field name="date"/>
+                <field name="reference"/>
+                <field name="product_id"/>
+                <field name="move_type"/>
+                <field name="qty"/>
+                <field name="tonnage"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_suivi_stock_move" model="ir.actions.act_window">
+        <field name="name">Mouvements de Stock</field>
+        <field name="res_model">suivi.stock.move</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+</odoo>

@@ -11,3 +11,13 @@ access_core_employee_suivi_user,core.employee suivi user,custom_employee.model_c
 access_core_employee_suivi_manager,core.employee suivi manager,custom_employee.model_core_employee,group_suivi_manager,1,0,0,0
 access_core_job_position_suivi_user,core.job.position suivi user,custom_employee.model_core_job_position,group_suivi_user,1,0,0,0
 access_core_job_position_suivi_manager,core.job.position suivi manager,custom_employee.model_core_job_position,group_suivi_manager,1,0,0,0
+access_suivi_produit_user,suivi.produit user,model_suivi_produit,group_suivi_user,1,1,1,0
+access_suivi_produit_manager,suivi.produit manager,model_suivi_produit,group_suivi_manager,1,1,1,1
+access_suivi_fournisseur_user,suivi.fournisseur user,model_suivi_fournisseur,group_suivi_user,1,1,1,0
+access_suivi_fournisseur_manager,suivi.fournisseur manager,model_suivi_fournisseur,group_suivi_manager,1,1,1,1
+access_suivi_stock_move_user,suivi.stock.move user,model_suivi_stock_move,group_suivi_user,1,0,0,0
+access_suivi_stock_move_manager,suivi.stock.move manager,model_suivi_stock_move,group_suivi_manager,1,1,1,1
+access_suivi_stock_stock_user,suivi.stock.stock user,model_suivi_stock_stock,group_suivi_user,1,0,0,0
+access_suivi_stock_stock_manager,suivi.stock.stock manager,model_suivi_stock_stock,group_suivi_manager,1,0,0,0
+access_suivi_stock_entry_user,suivi.stock.entry user,model_suivi_stock_entry,group_suivi_user,1,1,1,0
+access_suivi_stock_entry_manager,suivi.stock.entry manager,model_suivi_stock_entry,group_suivi_manager,1,1,1,1

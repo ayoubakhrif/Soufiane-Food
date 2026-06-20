@@ -20,6 +20,7 @@
         'views/suivi_client_views.xml',
         'views/suivi_chauffeur_views.xml',
         'views/suivi_operation_views.xml',
+        'views/suivi_stock_views.xml',
         'views/menus.xml',
     ],
     'installable': True,

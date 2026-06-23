@@ -42,12 +42,11 @@ class WhatsappDossierVerificationApi(http.Controller):
             config_desc = "CONFIGURATIONS DISPONIBLES:\n"
             for conf in configs:
                 config_desc += f"- {conf.name.upper()} (Code: {conf.name})\n"
-                if conf.comment:
-                    config_desc += f"  Notes IA: {conf.comment}\n"
                 config_desc += "  Champs requis:\n"
                 for line in conf.line_ids:
                     linked = f" (Doit correspondre au document: {line.document_type})" if line.document_type else ""
-                    config_desc += f"    * {line.name}{linked}\n"
+                    comment = f" [Note IA: {line.comment}]" if line.comment else ""
+                    config_desc += f"    * {line.name}{linked}{comment}\n"
             
             if not configs:
                 config_desc = "Aucune configuration de document trouvée dans Odoo."

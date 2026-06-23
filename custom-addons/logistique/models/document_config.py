@@ -17,7 +17,6 @@ class DocumentConfig(models.Model):
     ], string='Document', required=True)
 
     line_ids = fields.One2many('logistique.document.config.line', 'config_id', string='Champs Requis')
-    comment = fields.Text(string='Commentaire', help="Notes que l'IA doit prendre en considération")
 
 
 class DocumentConfigLine(models.Model):
@@ -26,6 +25,7 @@ class DocumentConfigLine(models.Model):
 
     config_id = fields.Many2one('logistique.document.config', string='Configuration', ondelete='cascade')
     name = fields.Char(string='Champ', required=True)
+    comment = fields.Char(string='Commentaire', help="Notes que l'IA doit prendre en considération")
     
     document_type = fields.Selection([
         ('invoice', 'Facture Commerciale'),

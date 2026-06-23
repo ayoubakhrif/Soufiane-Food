@@ -69,6 +69,7 @@ class DataCheque(models.Model):
         ('reserve', 'Reserve'),
         ('bureau','Bureau'),
         ('annule','Annulé'),
+        ('assurance', 'Assurance'),
     ], store=True, string='Type', tracking=True, required=True)
     
     # New Fields

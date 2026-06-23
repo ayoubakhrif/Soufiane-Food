@@ -151,7 +151,7 @@
                         <group>
                             <field name="talon_id" readonly="1"/>
                             <field name="benif_id" options="{'no_create': True}"/>
-                            <field name="bl" invisible="benif_type != 'import'"/>
+                            <field name="bl" invisible="benif_type != 'import'" required="benif_type == 'import'"/>
                             <field name="perso_id" readonly="state == 'annule'" options="{'no_create': True}"/>
                         </group>
                         <group>

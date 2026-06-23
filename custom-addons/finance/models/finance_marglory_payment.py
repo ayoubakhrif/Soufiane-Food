@@ -8,6 +8,7 @@ class FinanceMargloryPayment(models.Model):
     _rec_name = 'cheque_id'
 
     date = fields.Date(string='Date de paiement', default=fields.Date.context_today, required=True, tracking=True)
+    dossier_reglement = fields.Char(string="Réglement N°", tracking=True)
     
     physical_cheque_id = fields.Many2one(
         'finance.cheque.physical',

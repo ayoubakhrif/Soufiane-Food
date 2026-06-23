@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Paiements Marglory" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'">
                 <field name="date"/>
+                <field name="dossier_reglement"/>
                 <field name="physical_cheque_id"/>
                 <field name="amount_total" sum="Total"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'"/>
@@ -33,6 +34,7 @@
                     <group>
                         <group>
                             <field name="date" readonly="state != 'draft'"/>
+                            <field name="dossier_reglement" readonly="state != 'draft'"/>
                             <field name="cheque_amount" readonly="1"/>
                         </group>
                         <group>

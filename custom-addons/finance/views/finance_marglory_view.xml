@@ -10,6 +10,7 @@
                 <field name="ste_id"/>
                 <field name="journal"/>
                 <field name="facture_marglory"/>
+                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'" decoration-success="type == 'ASSURANCE'"/>
                 <field name="cheque_number"/>
                 <field name="cheque_amount" sum="Total Chq"/>
                 <field name="cheque_date_emission"/>
@@ -22,7 +23,6 @@
                 <field name="fac_comm"/>
                 
                 <!-- Champs masqués par défaut (non présents sur l'image) -->
-                <field name="type" widget="badge" decoration-info="type == 'THC'" decoration-warning="type == 'FRET'" decoration-success="type == 'ASSURANCE'" optional="show"/>
                 <field name="bl_number" optional="hide"/>
                 <field name="dum" optional="hide"/>
                 <field name="container_names" string="Conteneurs" optional="hide"/>

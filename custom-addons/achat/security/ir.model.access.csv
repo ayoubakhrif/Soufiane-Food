@@ -107,5 +107,5 @@ access_ste_change_purchase_manager,ste.change.purchase.manager,model_ste_change,
 access_ste_change_achat_compta,ste.change.achat.compta,model_ste_change,group_achat_compta,1,0,0,0
 access_achat_article_alias_user,company.article.alias.user,model_company_article_alias,group_purchase_user,1,1,1,1
 access_achat_article_alias_manager,company.article.alias.manager,model_company_article_alias,group_purchase_manager,1,1,1,1
-a c c e s s _ l o g i s t i q u e _ e n t r y _ d o c u m e n t _ l o g i s t i q u e _ m a n a g e r , l o g i s t i q u e . e n t r y . d o c u m e n t . l o g i s t i q u e . m a n a g e r , m o d e l _ l o g i s t i q u e _ e n t r y _ d o c u m e n t , l o g i s t i q u e . g r o u p _ l o g i s t i q u e _ m a n a g e r , 1 , 1 , 1 , 1  
- access_logistique_entry_document_logistique_manager,logistique.entry.document.logistique.manager,model_logistique_entry_document,logistique.group_logistique_manager,1,1,1,1
+access_logistique_entry_document_logistique_manager,logistique.entry.document.logistique.manager,model_logistique_entry_document,logistique.group_logistique_manager,1,1,1,1
+access_logistique_entry_document_logistique_manager,logistique.entry.document.logistique.manager,model_logistique_entry_document,logistique.group_logistique_manager,1,1,1,1

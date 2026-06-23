@@ -17,6 +17,7 @@ class DocumentConfig(models.Model):
     ], string='Document', required=True)
 
     line_ids = fields.One2many('logistique.document.config.line', 'config_id', string='Champs Requis')
+    comment = fields.Text(string='Commentaire', help="Notes que l'IA doit prendre en considération")
 
 
 class DocumentConfigLine(models.Model):

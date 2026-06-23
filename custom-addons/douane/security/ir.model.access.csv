@@ -22,4 +22,3 @@ access_logistique_consolidator_douane_user,logistique.consolidator.douane.user,l
 access_logistique_doc_douane_user,logistique.doc.douane.user,logistique.model_logistique_doc,group_douane_user,1,0,0,0
 access_logistique_entry_document_douane_user,logistique.entry.document.douane.user,achat.model_logistique_entry_document,group_douane_user,1,0,0,0
 access_logistique_entry_document_douane_admin,logistique.entry.document.douane.admin,achat.model_logistique_entry_document,group_douane_admin,1,1,1,1
-access_logistique_entry_document_douane_admin,logistique.entry.document.douane.admin,achat.model_logistique_entry_document,group_douane_admin,1,1,1,1

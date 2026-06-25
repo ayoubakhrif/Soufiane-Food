@@ -2,7 +2,7 @@ import base64
 import json
 import logging
 import requests
-from odoo import http, SUPERUSER_ID
+from odoo import http, SUPERUSER_ID, fields
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -127,6 +127,11 @@ class WhatsAppFinancePdfController(http.Controller):
                     'journal': base_cheque.journal,
                     'state': 'reserve',
                 }
+
+                if base_cheque.state == 'bureau' or not base_cheque.date_emission:
+                    vals['date_emission'] = fields.Date.context_today(base_cheque)
+                if base_cheque.state == 'bureau' or not base_cheque.date_echeance:
+                    vals['date_echeance'] = fields.Date.context_today(base_cheque)
 
                 if benif_record:
                     vals['benif_id'] = benif_record.id

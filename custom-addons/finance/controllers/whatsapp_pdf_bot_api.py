@@ -83,16 +83,16 @@ class WhatsAppFinancePdfController(http.Controller):
         if not factures:
             return {'status': 'error', 'response': "❌ *Erreur:* L'IA n'a pas trouvé de factures valides dans le PDF."}
 
-        # 5. Find the DataCheque in reserve
-        domain = [('chq', '=', chq_number), ('state', '=', 'reserve')]
+        # 5. Find the DataCheque in reserve or bureau
+        domain = [('chq', '=', chq_number), ('state', 'in', ['reserve', 'bureau'])]
         base_cheque = request.env['datacheque'].sudo().search(domain, order='id asc', limit=1)
 
         if not base_cheque:
             # Let's search if any cheque exists even if not in reserve to provide a better error
             existing = request.env['datacheque'].sudo().search([('chq', '=', chq_number)])
             if existing:
-                return {'status': 'error', 'response': f"❌ *Erreur:* Le chèque {chq_number} existe mais n'est pas à l'état réserve."}
-            return {'status': 'error', 'response': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas ou n'est pas en réserve."}
+                return {'status': 'error', 'response': f"❌ *Erreur:* Le chèque {chq_number} existe mais n'est pas à l'état réserve ou bureau."}
+            return {'status': 'error', 'response': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas ou n'est pas en attente (réserve ou bureau)."}
 
         created_records = []
         messages = []
@@ -125,6 +125,7 @@ class WhatsAppFinancePdfController(http.Controller):
                     'amount': inv_amount,
                     'type': inv_type,
                     'journal': base_cheque.journal,
+                    'state': 'reserve',
                 }
 
                 if benif_record:

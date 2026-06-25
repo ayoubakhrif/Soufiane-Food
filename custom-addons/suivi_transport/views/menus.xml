@@ -91,6 +91,7 @@
               name="Mouvements de Stock"
               parent="menu_suivi_transport_stock"
               action="action_suivi_stock_move"
+              groups="suivi_transport.group_suivi_manager"
               sequence="30"/>
 
     <!-- Mirror Menu in Stock Casa -->

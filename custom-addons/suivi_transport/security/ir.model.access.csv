@@ -15,7 +15,7 @@ access_suivi_produit_user,suivi.produit user,model_suivi_produit,group_suivi_use
 access_suivi_produit_manager,suivi.produit manager,model_suivi_produit,group_suivi_manager,1,1,1,1
 access_suivi_fournisseur_user,suivi.fournisseur user,model_suivi_fournisseur,group_suivi_user,1,1,1,0
 access_suivi_fournisseur_manager,suivi.fournisseur manager,model_suivi_fournisseur,group_suivi_manager,1,1,1,1
-access_suivi_stock_move_user,suivi.stock.move user,model_suivi_stock_move,group_suivi_user,1,0,0,0
+access_suivi_stock_move_user,suivi.stock.move user,model_suivi_stock_move,group_suivi_user,1,1,1,0
 access_suivi_stock_move_manager,suivi.stock.move manager,model_suivi_stock_move,group_suivi_manager,1,1,1,1
 access_suivi_stock_stock_user,suivi.stock.stock user,model_suivi_stock_stock,group_suivi_user,1,0,0,0
 access_suivi_stock_stock_manager,suivi.stock.stock manager,model_suivi_stock_stock,group_suivi_manager,1,0,0,0
@@ -27,3 +27,5 @@ access_suivi_avance_user,suivi.avance user,model_suivi_avance,group_suivi_user,1
 access_suivi_avance_manager,suivi.avance manager,model_suivi_avance,group_suivi_manager,1,1,1,1
 access_suivi_charge_user,suivi.charge user,model_suivi_charge,group_suivi_user,1,1,1,0
 access_suivi_charge_manager,suivi.charge manager,model_suivi_charge,group_suivi_manager,1,1,1,1
+access_company_article_suivi_user,company.article suivi user,company_data.model_company_article,group_suivi_user,1,1,1,0
+access_company_article_suivi_manager,company.article suivi manager,company_data.model_company_article,group_suivi_manager,1,1,1,1

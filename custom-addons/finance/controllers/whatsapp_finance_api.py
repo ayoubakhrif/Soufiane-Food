@@ -416,7 +416,7 @@ class WhatsAppFinanceController(http.Controller):
         if len(message_text) > 1:
             facture_cheques = request.env['datacheque'].sudo().search([('serie', '=ilike', message_text)], limit=50)
             if facture_cheques:
-                physicals = facture_cheques.mapped('cheque_id').filtered(lambda c: c)
+                physicals = facture_cheques.mapped('physical_cheque_id').filtered(lambda c: c)
                 if physicals:
                     if len(physicals) == 1:
                         return self._format_physical_cheque_details(physicals[0])

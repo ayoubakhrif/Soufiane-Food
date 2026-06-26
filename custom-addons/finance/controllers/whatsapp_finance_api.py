@@ -329,6 +329,16 @@ class WhatsAppFinanceController(http.Controller):
                 else:
                     return {'status': 'not_found', 'message': f"Société '{company_part}' non trouvée."}
 
+        # 4.5 Handle "dernier chèque"
+        if msg_clean in ["dernier cheque", "dernier chèque", "derniers cheques", "derniers chèques"]:
+            active_talons = request.env['finance.talon'].sudo().search([('etat', '=', 'actif')], order='ste_id asc')
+            if not active_talons:
+                return {'status': 'not_found', 'message': "✅ Aucun talon actif trouvé."}
+            msg = "📄 *Derniers chèques par talon actif*\n\n"
+            for t in active_talons:
+                msg += f"• *{t.ste_id.name}* : {t.last_used_chq or 'Aucun'}\n"
+            return {'status': 'success', 'response': msg}
+
         # 5. Handle Cheque Number Search
         import re
         is_cheque_search = False
@@ -370,6 +380,61 @@ class WhatsAppFinanceController(http.Controller):
                         'message': choices_text,
                         'choices': choices
                     }
+
+        # 5.2 Handle Amount Search
+        is_amount = False
+        amount_val = 0.0
+        try:
+            clean_amt = message_text.replace(' ', '').replace(',', '.')
+            amount_val = float(clean_amt)
+            is_amount = True
+        except ValueError:
+            pass
+
+        if is_amount and amount_val > 0:
+            phys_amount = request.env['finance.cheque.physical'].sudo().search([('amount_total', '=', amount_val)], order='date_emission desc', limit=30)
+            if phys_amount:
+                if len(phys_amount) == 1:
+                    return self._format_physical_cheque_details(phys_amount[0])
+                else:
+                    unique_choices = []
+                    choices_text = f"Plusieurs chèques trouvés avec le montant *{'{:,.2f}'.format(amount_val).replace(',', ' ')} DH*. Veuillez choisir :\n"
+                    idx = 1
+                    for c in phys_amount:
+                        choice_txt = f"CHQ {c.name} ({c.ste_id.name})"
+                        if choice_txt not in unique_choices:
+                            unique_choices.append(choice_txt)
+                            choices_text += f"{idx}- {choice_txt}\n"
+                            idx += 1
+                    return {
+                        'status': 'multiple_choices',
+                        'message': choices_text,
+                        'choices': unique_choices
+                    }
+
+        # 5.3 Handle Facture (Invoice) Search
+        if len(message_text) > 1:
+            facture_cheques = request.env['datacheque'].sudo().search([('serie', '=ilike', message_text)], limit=50)
+            if facture_cheques:
+                physicals = facture_cheques.mapped('cheque_id').filtered(lambda c: c)
+                if physicals:
+                    if len(physicals) == 1:
+                        return self._format_physical_cheque_details(physicals[0])
+                    else:
+                        unique_choices = []
+                        choices_text = f"La facture *{message_text}* est payée par plusieurs chèques. Veuillez choisir :\n"
+                        idx = 1
+                        for c in physicals:
+                            choice_txt = f"CHQ {c.name} ({c.ste_id.name})"
+                            if choice_txt not in unique_choices:
+                                unique_choices.append(choice_txt)
+                                choices_text += f"{idx}- {choice_txt}\n"
+                                idx += 1
+                        return {
+                            'status': 'multiple_choices',
+                            'message': choices_text,
+                            'choices': unique_choices
+                        }
 
         # 5.5 Handle Week Search
         week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", msg_clean)

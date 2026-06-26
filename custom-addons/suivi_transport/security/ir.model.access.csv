@@ -29,3 +29,5 @@ access_suivi_charge_user,suivi.charge user,model_suivi_charge,group_suivi_user,1
 access_suivi_charge_manager,suivi.charge manager,model_suivi_charge,group_suivi_manager,1,1,1,1
 access_company_article_suivi_user,company.article suivi user,company_data.model_company_article,group_suivi_user,1,1,1,0
 access_company_article_suivi_manager,company.article suivi manager,company_data.model_company_article,group_suivi_manager,1,1,1,1
+access_company_article_category_suivi_user,company.article.category suivi user,company_data.model_company_article_category,group_suivi_user,1,1,1,0
+access_company_article_category_suivi_manager,company.article.category suivi manager,company_data.model_company_article_category,group_suivi_manager,1,1,1,1

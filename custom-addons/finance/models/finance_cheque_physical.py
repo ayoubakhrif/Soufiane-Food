@@ -442,9 +442,12 @@ OU si tout est correct :
     "reason": ""
 }}"""
 
+        # Retrieve custom model from config, or default to the fine-tuned one
+        custom_model = self.env['ir.config_parameter'].sudo().get_param('finance.ai.physiq_chq_model', 'ft:gpt-4o-mini-2024-07-18:ayoub:physiq-chq:Dv3F7S8K')
+        
         # Utilisation de l'API Responses OpenAI
         payload = {
-            "model": "gpt-4o",
+            "model": custom_model,
             "input": [
                 {
                     "role": "user",

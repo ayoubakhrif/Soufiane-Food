@@ -7,6 +7,7 @@ class TransportTrip(models.Model):
     _name = 'transport.trip'
     _description = 'Transport Trip'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'create_date desc'
 
     date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
     driver_id = fields.Many2one('transport.driver', string='Chauffeur', required=True, tracking=True)

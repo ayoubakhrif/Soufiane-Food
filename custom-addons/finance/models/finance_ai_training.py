@@ -50,15 +50,37 @@ class FinanceAITraining(models.Model):
             
             # Injection dynamique du PDF si c'est un chèque physique
             if rec.source == 'physical_cheque' and rec.physical_cheque_id and rec.physical_cheque_id.cheque_copy_pdf:
-                # Convert the binary field to base64 string
+                try:
+                    import fitz  # PyMuPDF
+                except ImportError:
+                    from odoo.exceptions import UserError
+                    raise UserError("La librairie 'PyMuPDF' n'est pas installée sur le serveur. Elle est indispensable pour convertir les PDF en images pour l'entraînement OpenAI. Veuillez exécuter 'pip install PyMuPDF'.")
+                
                 import base64
-                pdf_b64 = rec.physical_cheque_id.cheque_copy_pdf.decode('utf-8')
-                user_content.append({
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:application/pdf;base64,{pdf_b64}"
-                    }
-                })
+                pdf_bytes = base64.b64decode(rec.physical_cheque_id.cheque_copy_pdf)
+                
+                try:
+                    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+                    if len(doc) > 0:
+                        # Rendre la première page en image JPEG
+                        page = doc.load_page(0)
+                        # Zoom optionnel pour une meilleure qualité
+                        matrix = fitz.Matrix(2.0, 2.0)
+                        pix = page.get_pixmap(matrix=matrix)
+                        img_bytes = pix.tobytes("jpeg")
+                        img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+                        
+                        user_content.append({
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_b64}"
+                            }
+                        })
+                    doc.close()
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).error(f"Erreur de conversion PDF pour le chèque {rec.physical_cheque_id.id} : {e}")
+                    # On ignore silencieusement pour ne pas bloquer l'export global, ou on pourrait lever une erreur.
             
             # Ajouter le texte du prompt
             user_content.append({

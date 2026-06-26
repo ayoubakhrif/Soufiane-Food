@@ -49,10 +49,10 @@ class FinanceAITraining(models.Model):
             user_content = []
             
             # Injection dynamique du PDF si c'est un chèque physique
-            if rec.source == 'physical_cheque' and rec.physical_cheque_id and rec.physical_cheque_id.chq_pdf:
+            if rec.source == 'physical_cheque' and rec.physical_cheque_id and rec.physical_cheque_id.cheque_copy_pdf:
                 # Convert the binary field to base64 string
                 import base64
-                pdf_b64 = rec.physical_cheque_id.chq_pdf.decode('utf-8')
+                pdf_b64 = rec.physical_cheque_id.cheque_copy_pdf.decode('utf-8')
                 user_content.append({
                     "type": "image_url",
                     "image_url": {

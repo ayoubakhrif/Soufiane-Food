@@ -36,7 +36,8 @@
                                 <field name="ste_id" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="benif_id" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="physical_cheque_id" options="{'no_create': True, 'no_open': True}" 
-                                       invisible="not ste_id or not benif_id"/>
+                                       invisible="not ste_id or not benif_id"
+                                       domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id), ('encours', '!=', 'encaisse')]"/>
                             </group>
                             <group string="Validation" invisible="not physical_cheque_id">
                                 <field name="amount" widget="monetary"/>

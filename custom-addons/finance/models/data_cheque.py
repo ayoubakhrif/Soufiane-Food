@@ -718,6 +718,9 @@ class DataCheque(models.Model):
             
             if rec.physical_cheque_id != phys:
                 rec.physical_cheque_id = phys
+                # Force compute values for safety
+                phys._compute_shared_info()
+                phys._compute_encours()
 
     # ------------------------------------------------------------
     # DELETION REQUEST

@@ -188,6 +188,10 @@ class WhatsAppSurestarieReportController(http.Controller):
             
             log_details = log_entries.read(['bad_date', 'bl_number', 'article_id', 'supplier_id', 'container_count', 'surestarie_amount', 'magasinage_amount'])
 
+            # Fetch the actual logistique.entry to get payment details (cheques, deductions, etc.)
+            real_entries = request.env['logistique.entry'].sudo().browse(log_entries.ids)
+            entry_map = {e.id: e for e in real_entries}
+
             totals = {
                 'container_count': 0,
                 'log_surestarie': 0.0,
@@ -200,6 +204,31 @@ class WhatsAppSurestarieReportController(http.Controller):
                 totals['container_count'] += l.get('container_count') or 0
                 totals['log_surestarie'] += l.get('surestarie_amount') or 0.0
                 totals['log_magasinage'] += l.get('magasinage_amount') or 0.0
+
+                # Compute Payment Type & Cheque Numbers
+                entry = entry_map.get(l['id'])
+                payment_types = []
+                if entry:
+                    # Chèques
+                    chqs = [c.cheque_id.chq for c in entry.cheque_ids if c.type in ('surestarie', 'magasinage') and c.cheque_id.chq]
+                    if chqs:
+                        payment_types.append(f"Chèque ({', '.join(chqs)})")
+                    elif any(c.type in ('surestarie', 'magasinage') for c in entry.cheque_ids):
+                        payment_types.append("Chèque")
+                    
+                    # Déductions
+                    if any(d.type in ('surestarie', 'magasinage') for d in entry.deduction_ids):
+                        payment_types.append("Déduction")
+                        
+                    # Virements
+                    if any(t.type in ('surestarie', 'magasinage') for t in entry.transfer_ids):
+                        payment_types.append("Virement")
+                        
+                    # Sutra
+                    if hasattr(entry, 'sutra_ids') and any(s.type in ('surestarie', 'magasinage') for s in entry.sutra_ids):
+                        payment_types.append("Sutra")
+
+                l['payment_info'] = " + ".join(payment_types) if payment_types else "Non spécifié"
 
             # 2. Finance Cheques
             cheques_list = request.env['datacheque'].sudo().search([

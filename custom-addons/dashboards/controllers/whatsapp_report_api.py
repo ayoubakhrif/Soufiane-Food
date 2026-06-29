@@ -137,6 +137,15 @@ class WhatsAppSurestarieReportController(http.Controller):
                 totals['diff_surestarie'] += diff_sur
                 totals['diff_magasinage'] += diff_mag
 
+            if totals['container_count'] > 0:
+                totals['log_global_avg'] = (totals['log_surestarie'] + totals['log_magasinage']) / totals['container_count']
+                totals['fin_global_avg'] = (totals['fin_surestarie'] + totals['fin_magasinage']) / totals['container_count']
+                totals['diff_global_avg'] = totals['log_global_avg'] - totals['fin_global_avg']
+            else:
+                totals['log_global_avg'] = 0.0
+                totals['fin_global_avg'] = 0.0
+                totals['diff_global_avg'] = 0.0
+
             report_values = {
                 'report_data': report_data,
                 'totals': totals

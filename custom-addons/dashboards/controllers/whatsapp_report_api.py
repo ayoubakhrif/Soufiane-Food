@@ -1,5 +1,6 @@
 import base64
 import logging
+import re
 from collections import defaultdict
 from odoo import http, SUPERUSER_ID
 from odoo.http import request
@@ -34,9 +35,19 @@ class WhatsAppSurestarieReportController(http.Controller):
         if group_id != TARGET_GROUP_ID:
             return {'status': 'ignored', 'message': 'Not the correct group.'}
 
-        if message_text != 'rapport':
+        # Check for specific week request
+        week_match = re.match(r'^(?:w|s|semaine|week)\s*0?(\d{1,2})$', message_text)
+        
+        if message_text == 'rapport':
+            return self._generate_global_report()
+        elif week_match:
+            week_number = int(week_match.group(1))
+            target_week = f"W{week_number:02d}"
+            return self._generate_week_details_report(target_week)
+        else:
             return {'status': 'ignored', 'message': 'Command not recognized.'}
 
+    def _generate_global_report(self):
         try:
             # 1. Fetch Logistique Data
             log_data_list = request.env['surestarie.magasinage.report'].sudo().read_group(
@@ -165,5 +176,94 @@ class WhatsAppSurestarieReportController(http.Controller):
             }
 
         except Exception as e:
-            _logger.error(f"Error generating surestarie report: {str(e)}")
-            return {'status': 'error', 'response': f"❌ *Erreur lors de la génération du rapport:* {str(e)}"}
+            _logger.error(f"Error generating surestarie report: {str(e)}", exc_info=True)
+            return {'status': 'error', 'message': f'Erreur interne: {str(e)}'}
+
+    def _generate_week_details_report(self, target_week):
+        try:
+            # 1. Logistique Data
+            log_entries = request.env['surestarie.magasinage.report'].sudo().search([
+                ('week', '=', target_week)
+            ], order='bad_date desc')
+            
+            log_details = log_entries.read(['bad_date', 'bl_number', 'article_id', 'supplier_id', 'container_count', 'surestarie_amount', 'magasinage_amount'])
+
+            totals = {
+                'container_count': 0,
+                'log_surestarie': 0.0,
+                'log_magasinage': 0.0,
+                'fin_surestarie': 0.0,
+                'fin_magasinage': 0.0,
+            }
+
+            for l in log_details:
+                totals['container_count'] += l.get('container_count') or 0
+                totals['log_surestarie'] += l.get('surestarie_amount') or 0.0
+                totals['log_magasinage'] += l.get('magasinage_amount') or 0.0
+
+            # 2. Finance Cheques
+            cheques_list = request.env['datacheque'].sudo().search([
+                ('type', 'in', ['surestarie', 'magasinage']),
+                ('state', '!=', 'annule'),
+                ('week', '=', target_week)
+            ], order='date_emission desc')
+            
+            fin_cheques_details = cheques_list.read(['chq', 'benif_id', 'date_emission', 'type', 'amount'])
+            
+            for c in fin_cheques_details:
+                if c.get('type') == 'surestarie':
+                    totals['fin_surestarie'] += c.get('amount', 0.0)
+                elif c.get('type') == 'magasinage':
+                    totals['fin_magasinage'] += c.get('amount', 0.0)
+
+            # 3. Finance Deductions
+            # We can't search directly by 'week' if it's not a stored field on finance.deduction.payment.
+            # We must fetch all deductions and filter in python, OR fetch the ones roughly around this month.
+            # Since deductions aren't millions, we can fetch all or search by date range. Let's fetch all and filter.
+            all_deductions = request.env['finance.deduction.payment'].sudo().search([
+                ('type', 'in', ['surestarie', 'magasinage'])
+            ], order='date desc')
+            
+            fin_deductions_details = []
+            for ded in all_deductions:
+                if not ded.date:
+                    continue
+                w = request.env['datacheque'].french_week_number(ded.date)
+                if w == target_week:
+                    fin_deductions_details.append({
+                        'date': ded.date,
+                        'benif_id': [ded.benif_id.id, ded.benif_id.name] if ded.benif_id else False,
+                        'operation_ref': ded.operation_ref,
+                        'bl_id': [ded.bl_id.id, ded.bl_id.name] if ded.bl_id else False,
+                        'type': ded.type,
+                        'amount': ded.amount
+                    })
+                    if ded.type == 'surestarie':
+                        totals['fin_surestarie'] += ded.amount
+                    elif ded.type == 'magasinage':
+                        totals['fin_magasinage'] += ded.amount
+
+            report_values = {
+                'week_name': target_week,
+                'log_details': log_details,
+                'fin_cheques_details': fin_cheques_details,
+                'fin_deductions_details': fin_deductions_details,
+                'totals': totals
+            }
+
+            # 4. Generate PDF
+            pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf(
+                'dashboards.action_report_surestarie_week_details', [1], data=report_values)
+            
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+            return {
+                'status': 'success',
+                'message': f"Voici le rapport détaillé pour la semaine {target_week} :",
+                'pdf_base64': pdf_base64,
+                'file_name': f'Details_Surestarie_{target_week}.pdf'
+            }
+
+        except Exception as e:
+            _logger.error(f"Error generating week details report: {str(e)}", exc_info=True)
+            return {'status': 'error', 'message': f'Erreur interne (Détails semaine): {str(e)}'}

@@ -122,4 +122,142 @@
             </t>
         </t>
     </template>
+
+    <record id="action_report_surestarie_week_details" model="ir.actions.report">
+        <field name="name">Détail Surestarie Semaine</field>
+        <field name="model">surestarie.magasinage.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dashboards.report_surestarie_week_details_template</field>
+        <field name="report_file">dashboards.report_surestarie_week_details_template</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <template id="report_surestarie_week_details_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; padding: 20px;">
+                    
+                    <!-- En-tête -->
+                    <div class="text-center mt-4 mb-4" style="border-bottom: 2px solid #2C3E50; padding-bottom: 10px;">
+                        <h2 style="color: #2C3E50; font-weight: bold; text-transform: uppercase;">Détail de la Semaine <span t-esc="week_name"/></h2>
+                        <h5 style="color: #7F8C8D;">Surestarie &amp; Magasinage (Logistique vs Finance)</h5>
+                    </div>
+
+                    <!-- Synthèse de la semaine -->
+                    <div style="background-color: #F8F9FA; padding: 15px; border-radius: 5px; border-left: 4px solid #34495E; margin-bottom: 30px;">
+                        <h4 style="color: #2C3E50; margin-top: 0; font-weight: bold;">Synthèse</h4>
+                        <div class="row">
+                            <div class="col-4">
+                                <strong>Nb Conteneurs : </strong> <span t-esc="totals['container_count']"/><br/>
+                            </div>
+                            <div class="col-4">
+                                <strong style="color: #2980B9;">Logistique Brut : </strong> 
+                                S: <span t-esc="totals['log_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> | 
+                                M: <span t-esc="totals['log_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            </div>
+                            <div class="col-4">
+                                <strong style="color: #27AE60;">Finance Payé : </strong> 
+                                S: <span t-esc="totals['fin_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> | 
+                                M: <span t-esc="totals['fin_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1. LOGISTIQUE -->
+                    <h4 style="color: #2980B9; border-bottom: 1px solid #2980B9; padding-bottom: 5px; margin-top: 20px;">Détails Logistique (Déclaré)</h4>
+                    <table class="table table-sm" style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background-color: #ECF0F1; color: #2C3E50;">
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Date BAD</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">BL</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Article</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Fournisseur</th>
+                                <th class="text-center" style="border: 1px solid #BDC3C7; padding: 5px;">Nb CT</th>
+                                <th class="text-right" style="border: 1px solid #BDC3C7; padding: 5px;">Surestarie</th>
+                                <th class="text-right" style="border: 1px solid #BDC3C7; padding: 5px;">Magasinage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="log_details" t-as="log">
+                                <tr>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="log['bad_date']" t-options="{'widget': 'date'}"/></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><strong><span t-esc="log['bl_number']"/></strong></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="log['article_id'][1] if log['article_id'] else ''"/></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="log['supplier_id'][1] if log['supplier_id'] else ''"/></td>
+                                    <td class="text-center" style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="log['container_count']"/></td>
+                                    <td class="text-right" style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="log['surestarie_amount']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                    <td class="text-right" style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="log['magasinage_amount']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="not log_details">
+                                <tr><td colspan="7" class="text-center" style="border: 1px solid #BDC3C7; padding: 10px;"><em>Aucun enregistrement logistique pour cette semaine.</em></td></tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 2. FINANCE CHEQUES -->
+                    <h4 style="color: #27AE60; border-bottom: 1px solid #27AE60; padding-bottom: 5px; margin-top: 30px;">Détails Finance - Chèques Payés</h4>
+                    <table class="table table-sm" style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background-color: #ECF0F1; color: #2C3E50;">
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">N° Chèque</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Bénéficiaire</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Date Émission</th>
+                                <th class="text-center" style="border: 1px solid #BDC3C7; padding: 5px;">Type</th>
+                                <th class="text-right" style="border: 1px solid #BDC3C7; padding: 5px;">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="fin_cheques_details" t-as="chq">
+                                <tr>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><strong><span t-esc="chq['chq']"/></strong></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="chq['benif_id'][1] if chq.get('benif_id') else ''"/></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="chq['date_emission']" t-options="{'widget': 'date'}"/></td>
+                                    <td class="text-center" style="border: 1px solid #BDC3C7; padding: 5px; text-transform: capitalize;"><span t-esc="chq['type']"/></td>
+                                    <td class="text-right" style="border: 1px solid #BDC3C7; padding: 5px; color: #27AE60; font-weight: bold;"><span t-esc="chq['amount']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="not fin_cheques_details">
+                                <tr><td colspan="5" class="text-center" style="border: 1px solid #BDC3C7; padding: 10px;"><em>Aucun chèque pour cette semaine.</em></td></tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 3. FINANCE DEDUCTIONS -->
+                    <h4 style="color: #8E44AD; border-bottom: 1px solid #8E44AD; padding-bottom: 5px; margin-top: 30px;">Détails Finance - Déductions Payées</h4>
+                    <table class="table table-sm" style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background-color: #ECF0F1; color: #2C3E50;">
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Date Opération</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Bénéficiaire</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">Réf Facture/Opé</th>
+                                <th style="border: 1px solid #BDC3C7; padding: 5px;">BL (Dossier)</th>
+                                <th class="text-center" style="border: 1px solid #BDC3C7; padding: 5px;">Type</th>
+                                <th class="text-right" style="border: 1px solid #BDC3C7; padding: 5px;">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="fin_deductions_details" t-as="ded">
+                                <tr>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="ded['date']" t-options="{'widget': 'date'}"/></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="ded['benif_id'][1] if ded.get('benif_id') else ''"/></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><span t-esc="ded['operation_ref']"/></td>
+                                    <td style="border: 1px solid #BDC3C7; padding: 5px;"><strong><span t-esc="ded['bl_id'][1] if ded.get('bl_id') else ''"/></strong></td>
+                                    <td class="text-center" style="border: 1px solid #BDC3C7; padding: 5px; text-transform: capitalize;"><span t-esc="ded['type']"/></td>
+                                    <td class="text-right" style="border: 1px solid #BDC3C7; padding: 5px; color: #8E44AD; font-weight: bold;"><span t-esc="ded['amount']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="not fin_deductions_details">
+                                <tr><td colspan="6" class="text-center" style="border: 1px solid #BDC3C7; padding: 10px;"><em>Aucune déduction pour cette semaine.</em></td></tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-5 text-right" style="font-size: 11px; color: #7F8C8D; border-top: 1px solid #ECF0F1; padding-top: 10px;">
+                        <em>This document is generated by Gestia</em>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
 </odoo>

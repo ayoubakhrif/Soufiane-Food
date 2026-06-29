@@ -30,10 +30,12 @@ const DOSSIER_VERIF_GROUP_ID = "120363408433779149@g.us";
 const DOSSIER_SEARCH_GROUP_ID = "120363425063313711@g.us";
 const LOGISTICS_PDF_GROUP_ID = "120363428159815503@g.us";
 const TRANSPORT_GROUP_ID = "120363409412071351@g.us";
+const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
 
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
+const SURESTARIE_REPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/surestarie_report?db=soufianefoods";
 const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_kal3iya/chat";
 const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance?db=soufianefoods";
 const LOGISTICS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics?db=soufianefoods";
@@ -187,6 +189,9 @@ async function connectToWhatsApp() {
                 }
             } else if (from === TRANSPORT_GROUP_ID) {
                 targetOdooUrl = TRANSPORT_ODOO_URL;
+                isClientRequest = false;
+            } else if (from === SURESTARIE_REPORT_GROUP_ID) {
+                targetOdooUrl = SURESTARIE_REPORT_ODOO_URL;
                 isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);

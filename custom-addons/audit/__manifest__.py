@@ -13,6 +13,7 @@
         'security/audit_security.xml',
         'security/ir.model.access.csv',
         'views/audit_invoice_views.xml',
+        'views/audit_test_views.xml',
         'views/audit_menu.xml',
     ],
     'installable': True,

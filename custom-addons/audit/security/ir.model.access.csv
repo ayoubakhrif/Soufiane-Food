@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_audit_invoice_user,audit.invoice.user,model_audit_invoice,group_audit_user,1,1,1,0
 access_audit_invoice_manager,audit.invoice.manager,model_audit_invoice,group_audit_manager,1,1,1,1
+access_audit_test_user,audit.test.user,model_audit_test,group_audit_user,1,1,1,0
+access_audit_test_manager,audit.test.manager,model_audit_test,group_audit_manager,1,1,1,1

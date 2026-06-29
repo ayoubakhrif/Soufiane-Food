@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_audit_test_form" model="ir.ui.view">
+        <field name="name">audit.test.form</field>
+        <field name="model">audit.test</field>
+        <field name="arch" type="xml">
+            <form string="Test Audit">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Titre du test..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="test_type"/>
+                            <field name="date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Documents PDF">
+                            <field name="document_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_audit_test_tree" model="ir.ui.view">
+        <field name="name">audit.test.tree</field>
+        <field name="model">audit.test</field>
+        <field name="arch" type="xml">
+            <tree string="Tests Audit">
+                <field name="name"/>
+                <field name="test_type"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_audit_test" model="ir.actions.act_window">
+        <field name="name">Tests</field>
+        <field name="res_model">audit.test</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

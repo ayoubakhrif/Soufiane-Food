@@ -5,4 +5,5 @@
 
     <!-- Sub Menu -->
     <menuitem id="menu_audit_factures" name="Factures d'Achats" parent="menu_audit_root" action="action_audit_invoice" sequence="10"/>
+    <menuitem id="menu_audit_test" name="Tests" parent="menu_audit_root" action="action_audit_test" sequence="20"/>
 </odoo>

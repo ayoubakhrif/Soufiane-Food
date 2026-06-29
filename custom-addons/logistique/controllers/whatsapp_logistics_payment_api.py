@@ -358,12 +358,12 @@ class WhatsAppLogisticsPaymentController(http.Controller):
             }
             prompt = (
                 "Tu es un assistant logistique et financier. Ta tâche est d'identifier la référence du BL (Bill of Lading / Bon de Livraison) mentionnée dans le message WhatsApp de l'utilisateur.\n"
-                "La référence d'un BL est généralement une chaîne alphanumérique (par exemple : MEDUT7846505, HLCUBSC2511BEGMO, MSCU1234567, etc.) ou parfois plus courte.\n"
+                "La référence d'un BL peut être une chaîne alphanumérique (par exemple : MEDUT7846505, HLCUBSC2511) OU composée uniquement de chiffres (par exemple : 26018888, 269731478).\n"
                 "Message de l'utilisateur : " + text + "\n\n"
                 "Règles :\n"
-                "1. Extrais uniquement la référence brute du BL.\n"
+                "1. Extrais uniquement la référence brute du BL, même si elle n'est composée que de chiffres.\n"
                 "2. S'il n'y a pas de référence de BL identifiable, réponds uniquement 'NONE'.\n"
-                "3. Si le message ne contient que des salutations, emojis ou caractères non pertinents, réponds uniquement 'IGNORE'.\n"
+                "3. Si le message ne contient que des salutations, emojis ou caractères non pertinents sans rapport, réponds uniquement 'IGNORE'.\n"
                 "Retourne UNIQUEMENT le résultat (sans explications, sans markdown)."
             )
             data = {

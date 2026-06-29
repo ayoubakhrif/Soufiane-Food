@@ -51,17 +51,19 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         bl_code = self._extract_bl_code(message_text, openai_key)
 
-        if not bl_code or bl_code.upper() == 'IGNORE':
+        if not bl_code or (isinstance(bl_code, str) and bl_code.upper() == 'IGNORE'):
             _logger.info(f"Ignoring message in Logistics Payment Bot: {message_text}")
             return {'status': 'ignored'}
 
-        if bl_code.upper() == 'NONE':
-            return {'status': 'not_found', 'message': "❌ Aucun numéro de BL n'a pu être identifié dans votre message. Veuillez envoyer un numéro de BL valide."}
+        if isinstance(bl_code, str) and bl_code.upper() == 'NONE':
+            return {'status': 'not_found', 'message': "❌ Aucune référence (BL, Facture, Lot, Conteneur) n'a pu être identifiée dans votre message."}
 
         # 5. Search for the dossier / BL
         dossier = self._find_dossier_by_ref(bl_code)
+        
+        ref_str = bl_code.get('ref', str(bl_code)) if isinstance(bl_code, dict) else str(bl_code)
         if not dossier:
-            return {'status': 'not_found', 'message': f"❌ Aucun dossier trouvé pour le BL '{bl_code}'."}
+            return {'status': 'not_found', 'message': f"❌ Aucun dossier trouvé pour la référence '{ref_str}'."}
 
         # 6. Format Response
         response = f"📋 *Paiements du BL : {dossier.name}*\n"
@@ -357,14 +359,15 @@ class WhatsAppLogisticsPaymentController(http.Controller):
                 "Authorization": f"Bearer {api_key}"
             }
             prompt = (
-                "Tu es un assistant logistique et financier. Ta tâche est d'identifier la référence du BL (Bill of Lading / Bon de Livraison) mentionnée dans le message WhatsApp de l'utilisateur.\n"
-                "La référence d'un BL peut être une chaîne alphanumérique (par exemple : MEDUT7846505, HLCUBSC2511) OU composée uniquement de chiffres (par exemple : 26018888, 269731478).\n"
+                "Tu es un assistant logistique et financier. Ta tâche est d'identifier la référence mentionnée dans le message WhatsApp de l'utilisateur.\n"
+                "La référence peut être un BL (Bill of Lading), un numéro de Facture, un Lot, ou un Numéro de Conteneur.\n"
                 "Message de l'utilisateur : " + text + "\n\n"
                 "Règles :\n"
-                "1. Extrais uniquement la référence brute du BL, même si elle n'est composée que de chiffres.\n"
-                "2. S'il n'y a pas de référence de BL identifiable, réponds uniquement 'NONE'.\n"
-                "3. Si le message ne contient que des salutations, emojis ou caractères non pertinents sans rapport, réponds uniquement 'IGNORE'.\n"
-                "Retourne UNIQUEMENT le résultat (sans explications, sans markdown)."
+                "1. Identifie la référence et son type (BL, FACTURE, LOT, ou CONTENEUR).\n"
+                "2. Si le message ne contient que des salutations, emojis ou caractères non pertinents sans rapport, réponds uniquement 'IGNORE'.\n"
+                "3. S'il n'y a pas de référence identifiable, réponds uniquement 'NONE'.\n"
+                "4. Sinon, retourne UNIQUEMENT un objet JSON valide avec les clés 'type' (BL, FACTURE, LOT, CONTENEUR) et 'ref' (la référence brute).\n"
+                "Exemple : {\"type\": \"BL\", \"ref\": \"26018888\"}"
             )
             data = {
                 "model": "gpt-4o-mini",
@@ -375,7 +378,18 @@ class WhatsAppLogisticsPaymentController(http.Controller):
                 response = requests.post(url, headers=headers, json=data, timeout=10)
                 result = response.json()
                 extracted = result['choices'][0]['message']['content'].strip()
-                if extracted:
+                if extracted.upper() in ['NONE', 'IGNORE']:
+                    return extracted
+                try:
+                    import json
+                    if extracted.startswith('```json'):
+                        extracted = extracted.replace('```json', '').replace('```', '').strip()
+                    elif extracted.startswith('```'):
+                        extracted = extracted.replace('```', '').strip()
+                    data = json.loads(extracted)
+                    return data
+                except Exception as parse_e:
+                    _logger.error(f"OpenAI JSON Parse Error: {str(parse_e)} - Content: {extracted}")
                     return extracted
             except Exception as e:
                 _logger.error(f"OpenAI BL Extraction Error: {str(e)}")
@@ -387,10 +401,35 @@ class WhatsAppLogisticsPaymentController(http.Controller):
             
         return text_clean
 
-    def _find_dossier_by_ref(self, ref):
-        """Search all dossiers and filter by normalized name."""
+    def _find_dossier_by_ref(self, ref_data):
+        """Search all dossiers and filter by normalized name or specific fields."""
+        if not ref_data:
+            return None
+            
+        ref_type = 'BL'
+        ref = ref_data
+        if isinstance(ref_data, dict):
+            ref_type = ref_data.get('type', 'BL').upper()
+            ref = ref_data.get('ref', '')
+            
         if not ref:
             return None
+            
+        # Search based on type
+        if ref_type == 'FACTURE':
+            entry = request.env['logistique.entry'].sudo().search([('invoice_number', 'ilike', ref)], limit=1)
+            if entry and entry.dossier_id:
+                return entry.dossier_id
+        elif ref_type == 'LOT':
+            entry = request.env['logistique.entry'].sudo().search([('lot', 'ilike', ref)], limit=1)
+            if entry and entry.dossier_id:
+                return entry.dossier_id
+        elif ref_type == 'CONTENEUR':
+            container = request.env['logistique.container'].sudo().search([('name', 'ilike', ref)], limit=1)
+            if container and container.entry_id and container.entry_id.dossier_id:
+                return container.entry_id.dossier_id
+                
+        # Fallback to standard BL search
         norm_ref = self.normalize_ref(ref)
         
         # Exact match check first

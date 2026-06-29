@@ -12,65 +12,88 @@
     <template id="report_surestarie_compare_template">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
-                <div class="page">
-                    <h2 class="text-center mt-4 mb-4">Rapport Surestarie et Magasinage (Logistique vs Finance)</h2>
+                <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px;">
                     
-                    <table class="table table-bordered table-sm mt-4">
-                        <thead class="bg-light text-center">
-                            <tr>
-                                <th>Semaine</th>
-                                <th>Nb Conteneurs</th>
-                                <th>Logistique<br/>(Surestarie / Magasinage)</th>
-                                <th>Finance<br/>(Surestarie / Magasinage)</th>
-                                <th>Écart (Log - Fin)<br/>(Surestarie / Magasinage)</th>
-                                <th>Moyenne<br/>(Sur/Conteneur)</th>
-                                <th>Moyenne<br/>(Mag/Conteneur)</th>
+                    <!-- En-tête du Rapport -->
+                    <div class="text-center mt-4 mb-5" style="border-bottom: 2px solid #2C3E50; padding-bottom: 15px;">
+                        <h2 style="color: #2C3E50; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Rapport de Surestarie &amp; Magasinage</h2>
+                        <h4 style="color: #7F8C8D; margin-top: 5px;">Analyse Comparative : Logistique vs Finance</h4>
+                    </div>
+                    
+                    <table class="table table-sm mt-4" style="border-collapse: collapse; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <thead>
+                            <tr style="background-color: #34495E; color: #FFFFFF; font-size: 12px; text-transform: uppercase;">
+                                <th class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">Semaine</th>
+                                <th class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">Nb Conteneurs</th>
+                                <th class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50; background-color: #2980B9;">Logistique<br/><span style="font-size:10px; font-weight:normal;">(Surestarie / Magasinage)</span></th>
+                                <th class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50; background-color: #27AE60;">Finance<br/><span style="font-size:10px; font-weight:normal;">(Surestarie / Magasinage)</span></th>
+                                <th class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50; background-color: #E74C3C;">Écart (Log - Fin)<br/><span style="font-size:10px; font-weight:normal;">(Surestarie / Magasinage)</span></th>
+                                <th class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50; background-color: #8E44AD;">Moyennes globales<br/><span style="font-size:10px; font-weight:normal;">(Sur/Ct | Mag/Ct)</span></th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-foreach="report_data" t-as="row">
-                                <tr class="text-center">
-                                    <td><strong><span t-esc="row['week']"/></strong></td>
-                                    <td><span t-esc="row['container_count']"/></td>
-                                    <td>
+                                <tr t-att-style="row_parity == 'even' and 'border-bottom: 1px solid #BDC3C7; background-color: #F8F9FA;' or 'border-bottom: 1px solid #BDC3C7; background-color: #FFFFFF;'">
+                                    <td class="text-center align-middle" style="padding: 10px; border-left: 1px solid #BDC3C7; border-right: 1px solid #BDC3C7;">
+                                        <strong><span t-esc="row['week']"/></strong>
+                                    </td>
+                                    <td class="text-center align-middle" style="padding: 10px; border-right: 1px solid #BDC3C7; font-weight: bold; color: #2C3E50;">
+                                        <span t-esc="row['container_count']"/>
+                                    </td>
+                                    
+                                    <!-- Logistique -->
+                                    <td class="text-center align-middle" style="padding: 10px; border-right: 1px solid #BDC3C7; color: #2980B9; font-weight: bold;">
                                         <span t-esc="row['log_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
                                         <span t-esc="row['log_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
                                     </td>
-                                    <td>
+                                    
+                                    <!-- Finance -->
+                                    <td class="text-center align-middle" style="padding: 10px; border-right: 1px solid #BDC3C7; color: #27AE60; font-weight: bold;">
                                         <span t-esc="row['fin_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
                                         <span t-esc="row['fin_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
                                     </td>
-                                    <td>
-                                        <span t-esc="row['diff_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
-                                        <span t-esc="row['diff_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    
+                                    <!-- Ecarts -->
+                                    <td class="text-center align-middle" style="padding: 10px; border-right: 1px solid #BDC3C7; font-weight: bold;">
+                                        <span t-esc="row['diff_surestarie']" t-options="{'widget': 'float', 'precision': 2}" t-att-style="row['diff_surestarie'] != 0 and 'color: #C0392B;' or 'color: #2C3E50;'"/> / 
+                                        <span t-esc="row['diff_magasinage']" t-options="{'widget': 'float', 'precision': 2}" t-att-style="row['diff_magasinage'] != 0 and 'color: #C0392B;' or 'color: #2C3E50;'"/>
                                     </td>
-                                    <td><span t-esc="row['avg_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/></td>
-                                    <td><span t-esc="row['avg_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                    
+                                    <!-- Moyennes -->
+                                    <td class="text-center align-middle" style="padding: 10px; border-right: 1px solid #BDC3C7; color: #8E44AD; font-weight: bold;">
+                                        <span t-esc="row['avg_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> | 
+                                        <span t-esc="row['avg_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
                                 </tr>
                             </t>
+                            
                             <!-- Ligne de totalisation -->
                             <t t-if="totals">
-                                <tr class="bg-light text-center" style="font-weight: bold;">
-                                    <td>TOTAL</td>
-                                    <td><span t-esc="totals['container_count']"/></td>
-                                    <td>
+                                <tr style="background-color: #2C3E50; color: #FFFFFF; font-weight: bold; font-size: 14px;">
+                                    <td class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">TOTAL</td>
+                                    <td class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;"><span t-esc="totals['container_count']"/></td>
+                                    <td class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">
                                         <span t-esc="totals['log_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
                                         <span t-esc="totals['log_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
                                     </td>
-                                    <td>
+                                    <td class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">
                                         <span t-esc="totals['fin_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
                                         <span t-esc="totals['fin_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
                                     </td>
-                                    <td>
+                                    <td class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">
                                         <span t-esc="totals['diff_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
                                         <span t-esc="totals['diff_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
                                     </td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td class="text-center align-middle" style="padding: 12px; border: 1px solid #2C3E50;">-</td>
                                 </tr>
                             </t>
                         </tbody>
                     </table>
+                    
+                    <!-- Note de bas de page -->
+                    <div class="mt-5 text-right" style="font-size: 11px; color: #7F8C8D; border-top: 1px solid #ECF0F1; padding-top: 10px;">
+                        <em>Document généré automatiquement par l'assistant virtuel.</em>
+                    </div>
                 </div>
             </t>
         </t>

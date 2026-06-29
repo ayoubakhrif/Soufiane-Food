@@ -14,7 +14,7 @@ class FinanceEncaissementPhysique(models.Model):
         'finance.cheque.physical', 
         string='Chèque Physique', 
         required=True,
-        domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id), ('encours', '=', 'non_encaisse')]"
+        domain="[('ste_id', '=', ste_id), ('benif_id', '=', benif_id), ('encours', '!=', 'encaisse')]"
     )
 
     amount = fields.Float(string='Montant', required=True, tracking=True)

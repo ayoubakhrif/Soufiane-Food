@@ -219,7 +219,7 @@
                 <separator/>
                 <filter name="filter_chq_bank" string="Chq de banque" domain="[('chq_bank', '=', True)]"/>
                 <filter name="filter_chq_certifie" string="Chq certifié" domain="[('chq_certifie', '=', True)]"/>
-                <filter name="encours" string="Cheques in progress" domain="[('encours', '=', 'non_encaisse')]"/>
+                <filter name="encours" string="Cheques in progress" domain="[('encours', '!=', 'encaisse')]"/>
                 <filter name="no_pdf" string="Liens inexistants" domain="['|', '|', ('chq_pdf_url', '=', False), ('dem_pdf_url', '=', False), ('doc_pdf_url', '=', False)]"/>
                 <separator/>
                 <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>

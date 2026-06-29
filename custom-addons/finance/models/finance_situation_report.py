@@ -9,7 +9,7 @@ class ReportFinanceSituation(models.AbstractModel):
         # Fetch physical cheques instead of datacheques (répartitions)
         domain = []
         if data and data.get('encours_only'):
-            domain = [('encours', '=', 'non_encaisse')]
+            domain = [('encours', '!=', 'encaisse')]
         physical_recs = self.env['finance.cheque.physical'].sudo().search(domain)
         
         active_list_phys = []

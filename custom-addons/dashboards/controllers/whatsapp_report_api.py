@@ -149,7 +149,7 @@ class WhatsAppSurestarieReportController(http.Controller):
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
             return {
-                'status': 'document',
+                'status': 'success',
                 'message': "Voici le rapport comparatif Surestarie et Magasinage généré :",
                 'pdf_base64': pdf_base64,
                 'file_name': 'Rapport_Surestarie.pdf'

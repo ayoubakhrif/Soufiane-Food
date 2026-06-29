@@ -356,6 +356,7 @@ async function connectToWhatsApp() {
                         if (from === SORTIE_GROUP_ID) reportType = "de sorties";
                         if (from === LOGISTICS_GROUP_ID) reportType = "logistique";
                         if (from === TRANSPORT_GROUP_ID) reportType = "chauffeur";
+                        if (from === SURESTARIE_REPORT_GROUP_ID) reportType = "comparatif Surestarie/Magasinage";
 
                         console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 

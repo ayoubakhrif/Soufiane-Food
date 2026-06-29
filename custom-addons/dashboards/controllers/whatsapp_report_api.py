@@ -210,7 +210,7 @@ class WhatsAppSurestarieReportController(http.Controller):
                 payment_types = []
                 if entry:
                     # Chèques
-                    chqs = [c.cheque_id.chq for c in entry.cheque_ids if c.type in ('surestarie', 'magasinage') and c.cheque_id.chq]
+                    chqs = [c.cheque_serie for c in entry.cheque_ids if c.type in ('surestarie', 'magasinage') and c.cheque_serie]
                     if chqs:
                         payment_types.append(f"Chèque ({', '.join(chqs)})")
                     elif any(c.type in ('surestarie', 'magasinage') for c in entry.cheque_ids):

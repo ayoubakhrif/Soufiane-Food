@@ -30,6 +30,13 @@ class FinanceChequePhysical(models.Model):
         ('encaisse', 'Encaissé'),
         ('non_encaisse', 'Non encaissé'),
     ], string='Status Encaissement', compute='_compute_encours', store=True)
+    
+    is_encaisse = fields.Boolean(
+        string='Est Encaissé', 
+        compute='_compute_encours', 
+        store=True, 
+        tracking=True
+    )
 
     # ------------------------------------------------------------
     # DOCUMENTS PDF EN BASE
@@ -116,8 +123,10 @@ class FinanceChequePhysical(models.Model):
             # Logic: If any datacheque has date_encaissement, then physical is 'encaisse'
             if any(d.date_encaissement for d in rec.datacheque_ids):
                 rec.encours = 'encaisse'
+                rec.is_encaisse = True
             else:
                 rec.encours = 'non_encaisse'
+                rec.is_encaisse = False
 
     # ------------------------------------------------------------
     # VÉRIFICATION IA — Copie physique du chèque

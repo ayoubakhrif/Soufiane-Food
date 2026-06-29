@@ -76,8 +76,15 @@ class DataCheque(models.Model):
     bl = fields.Char(string='BL', tracking=True)
     encours = fields.Selection([
         ('encaisse', 'Encaissé'),
-        ('non_encaisse', 'Non encaissé'),
-    ], string='Status Encaissement', compute='_compute_encours', store=True)
+        ('non_encaisse', 'Non encaissé')
+    ], string='Encaissement', default='non_encaisse', compute='_compute_encours', store=True, tracking=True)
+    
+    is_encaisse = fields.Boolean(
+        string='Est Encaissé', 
+        compute='_compute_encours', 
+        store=True, 
+        tracking=True
+    )
 
     benif_type = fields.Selection(related="benif_id.type", store=True)
     chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)
@@ -313,8 +320,10 @@ class DataCheque(models.Model):
         for rec in self:
             if rec.date_encaissement:
                 rec.encours = 'encaisse'
+                rec.is_encaisse = True
             else:
                 rec.encours = 'non_encaisse'
+                rec.is_encaisse = False
 
     # ------------------------------------------------------------
     # CONTRAINTES

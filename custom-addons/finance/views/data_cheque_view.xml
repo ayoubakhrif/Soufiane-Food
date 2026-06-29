@@ -51,6 +51,7 @@
                 <field name="date_echeance"/>
                 <field name="date_limite" optional="show"/>
                 <field name="date_encaissement"/>
+                <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
                 <field name="amount" sum="Total"/>
                 <field name="type"/>
                 <field name="state" optional="1"/>
@@ -167,6 +168,7 @@
                             <field name="date_echeance" required="state not in ['bureau', 'annule']"/>
                             <field name="date_limite"/>
                             <field name="date_encaissement" readonly="1" invisible="not date_encaissement"/>
+                            <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
                         </group>
                         <group>
                             <field name="amount" readonly="date_encaissement"/>

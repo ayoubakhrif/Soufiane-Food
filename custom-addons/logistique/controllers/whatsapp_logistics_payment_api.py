@@ -406,41 +406,39 @@ class WhatsAppLogisticsPaymentController(http.Controller):
         if not ref_data:
             return None
             
-        ref_type = 'BL'
         ref = ref_data
         if isinstance(ref_data, dict):
-            ref_type = ref_data.get('type', 'BL').upper()
             ref = ref_data.get('ref', '')
             
         if not ref:
             return None
             
-        # Search based on type
-        if ref_type == 'FACTURE':
-            entry = request.env['logistique.entry'].sudo().search([('invoice_number', 'ilike', ref)], limit=1)
-            if entry and entry.dossier_id:
-                return entry.dossier_id
-        elif ref_type == 'LOT':
-            entry = request.env['logistique.entry'].sudo().search([('lot', 'ilike', ref)], limit=1)
-            if entry and entry.dossier_id:
-                return entry.dossier_id
-        elif ref_type == 'CONTENEUR':
-            container = request.env['logistique.container'].sudo().search([('name', 'ilike', ref)], limit=1)
-            if container and container.entry_id and container.entry_id.dossier_id:
-                return container.entry_id.dossier_id
-                
-        # Fallback to standard BL search
         norm_ref = self.normalize_ref(ref)
         
-        # Exact match check first
+        # 1. Exact match BL
         exact_dossier = request.env['logistique.dossier'].sudo().search([('name', '=', ref)], limit=1)
         if exact_dossier:
             return exact_dossier
-
-        # Fuzzy normalized search using wildcards
-        flexible_search = '%' + '%'.join(list(norm_ref)) + '%'
-        candidates = request.env['logistique.dossier'].sudo().search([('name', 'ilike', flexible_search)])
-        for d in candidates:
-            if self.normalize_ref(d.name) == norm_ref or norm_ref in self.normalize_ref(d.name):
+            
+        # 2. Search BL Normalized
+        norm_dossiers = request.env['logistique.dossier'].sudo().search([])
+        for d in norm_dossiers:
+            if self.normalize_ref(d.name) == norm_ref:
                 return d
+                
+        # 3. Search Invoice (Case-insensitive)
+        entry = request.env['logistique.entry'].sudo().search([('invoice_number', 'ilike', ref)], limit=1)
+        if entry and entry.dossier_id:
+            return entry.dossier_id
+            
+        # 4. Search Lot (Case-insensitive)
+        entry = request.env['logistique.entry'].sudo().search([('lot', 'ilike', ref)], limit=1)
+        if entry and entry.dossier_id:
+            return entry.dossier_id
+            
+        # 5. Search Container (Case-insensitive)
+        container = request.env['logistique.container'].sudo().search([('name', 'ilike', ref)], limit=1)
+        if container and container.entry_id and container.entry_id.dossier_id:
+            return container.entry_id.dossier_id
+            
         return None

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_surestarie_compare" model="ir.actions.report">
+        <field name="name">Rapport Comparatif Surestarie</field>
+        <field name="model">surestarie.magasinage.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dashboards.report_surestarie_compare_template</field>
+        <field name="report_file">dashboards.report_surestarie_compare_template</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <template id="report_surestarie_compare_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 class="text-center mt-4 mb-4">Rapport Surestarie et Magasinage (Logistique vs Finance)</h2>
+                    
+                    <table class="table table-bordered table-sm mt-4">
+                        <thead class="bg-light text-center">
+                            <tr>
+                                <th>Semaine</th>
+                                <th>Nb Conteneurs</th>
+                                <th>Logistique<br/>(Surestarie / Magasinage)</th>
+                                <th>Finance<br/>(Surestarie / Magasinage)</th>
+                                <th>Écart (Log - Fin)<br/>(Surestarie / Magasinage)</th>
+                                <th>Moyenne<br/>(Sur/Conteneur)</th>
+                                <th>Moyenne<br/>(Mag/Conteneur)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="report_data" t-as="row">
+                                <tr class="text-center">
+                                    <td><strong><span t-esc="row['week']"/></strong></td>
+                                    <td><span t-esc="row['container_count']"/></td>
+                                    <td>
+                                        <span t-esc="row['log_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
+                                        <span t-esc="row['log_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="row['fin_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
+                                        <span t-esc="row['fin_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="row['diff_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
+                                        <span t-esc="row['diff_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td><span t-esc="row['avg_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                    <td><span t-esc="row['avg_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                </tr>
+                            </t>
+                            <!-- Ligne de totalisation -->
+                            <t t-if="totals">
+                                <tr class="bg-light text-center" style="font-weight: bold;">
+                                    <td>TOTAL</td>
+                                    <td><span t-esc="totals['container_count']"/></td>
+                                    <td>
+                                        <span t-esc="totals['log_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
+                                        <span t-esc="totals['log_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="totals['fin_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
+                                        <span t-esc="totals['fin_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="totals['diff_surestarie']" t-options="{'widget': 'float', 'precision': 2}"/> / 
+                                        <span t-esc="totals['diff_magasinage']" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

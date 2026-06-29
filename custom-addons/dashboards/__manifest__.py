@@ -12,7 +12,7 @@
     'author': "Ayoub Akhrif",
     'category': 'Reporting',
     'version': '0.1',
-    'depends': ['base', 'kal3iya', 'logistique', 'claims', 'achat'],
+    'depends': ['base', 'kal3iya', 'logistique', 'claims', 'achat', 'finance'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -21,6 +21,7 @@
         'views/surest_mag_dashboard_views.xml',
         'views/management_dashboard_views.xml',
         'views/surest_mag_report_view.xml',
+        'reports/surestarie_report_template.xml',
     ],
     'demo': [],
     'installable': True,

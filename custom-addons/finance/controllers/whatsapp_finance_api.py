@@ -131,6 +131,22 @@ class WhatsAppFinanceController(http.Controller):
 
         if is_benif_situation_cmd or is_situation_cmd or is_encours_cmd:
             try:
+                # Extract state filter if provided (e.g., "situation annule")
+                state_filter = None
+                if is_situation_cmd and not is_benif_situation_cmd:
+                    possible_states = {
+                        "actif": "actif", "actifs": "actif",
+                        "reserve": "reserve", "réserve": "reserve", "reserves": "reserve",
+                        "bureau": "bureau",
+                        "annule": "annule", "annulé": "annule", "annulés": "annule",
+                        "encaissé": "encaisse", "encaisse": "encaisse", "encaisses": "encaisse", "encaissés": "encaisse"
+                    }
+                    parts = msg_clean.split()
+                    for p in parts[1:]:
+                        if p in possible_states:
+                            state_filter = possible_states[p]
+                            break
+
                 # Set dynamic configuration based on command type
                 by_benif = is_benif_situation_cmd
                 encours_only = is_encours_cmd and not by_benif
@@ -140,6 +156,8 @@ class WhatsAppFinanceController(http.Controller):
                     data_arg['encours_only'] = True
                 if by_benif:
                     data_arg['by_benif'] = True
+                if state_filter:
+                    data_arg['state_filter'] = state_filter
                 
                 # 1. Render QWeb PDF report
                 report_action = request.env['ir.actions.report'].sudo()
@@ -156,7 +174,14 @@ class WhatsAppFinanceController(http.Controller):
                 bureau_count = report_values.get('total_bureau_count', 0)
                 annule_count = report_values.get('total_annule_count', 0)
 
-                if by_benif:
+                if state_filter:
+                    state_display = state_filter.capitalize()
+                    title_msg = f"📋 *Situation des Chèques ({state_display})* 📋"
+                    caption_pdf = f"Situation {state_display} - Version PDF 📄"
+                    caption_xlsx = f"Situation {state_display} - Version Excel 📊"
+                    file_prefix = f"Situation_{state_display}"
+                    prod_name = f"Situation {state_display}"
+                elif by_benif:
                     title_msg = "📋 *Situation des Chèques par Bénéficiaire* 📋"
                     caption_pdf = "Situation par Bénéficiaire - Version PDF 📄"
                     caption_xlsx = "Situation par Bénéficiaire - Version Excel 📊"

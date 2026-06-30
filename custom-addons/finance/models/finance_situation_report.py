@@ -23,6 +23,10 @@ class ReportFinanceSituation(models.AbstractModel):
             first_datacheque = physical.datacheque_ids[0]
             state = first_datacheque.state or 'reserve'
 
+            # Apply state filter if provided
+            if data and data.get('state_filter') and state != data.get('state_filter'):
+                continue
+
             # Exclude Bureau and Annulé from outstanding (encours) analysis
             if data and data.get('encours_only') and state in ['bureau', 'annule']:
                 continue

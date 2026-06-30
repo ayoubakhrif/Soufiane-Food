@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tresorerie_chq_ai_training_export_form" model="ir.ui.view">
+        <field name="name">tresorerie.chq.ai.training.export.form</field>
+        <field name="model">tresorerie_chq.ai.training.export</field>
+        <field name="arch" type="xml">
+            <form string="Export pour Fine-Tuning">
+                <field name="state" invisible="1"/>
+                
+                <div invisible="state != 'choose'">
+                    <p class="text-muted">
+                        Cet assistant va générer un fichier JSONL prêt à être envoyé à l'API de Fine-Tuning d'OpenAI.
+                    </p>
+                    <group>
+                        <field name="export_type" widget="radio"/>
+                    </group>
+                </div>
+                
+                <div invisible="state != 'get'">
+                    <p class="text-success">
+                        <strong>Export réussi !</strong> Votre fichier est prêt à être téléchargé.
+                    </p>
+                    <group>
+                        <field name="file_name" invisible="1"/>
+                        <field name="file_data" filename="file_name" readonly="1" widget="binary"/>
+                    </group>
+                </div>
+
+                <footer>
+                    <button name="action_export" string="Générer l'export" type="object" class="btn-primary" invisible="state != 'choose'"/>
+                    <button special="cancel" string="Fermer" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tresorerie_chq_ai_training_export" model="ir.actions.act_window">
+        <field name="name">Exporter pour Fine-Tuning</field>
+        <field name="res_model">tresorerie_chq.ai.training.export</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Action menu to call export from ai training tree view -->
+    <record id="action_server_export_fine_tuning" model="ir.actions.server">
+        <field name="name">Exporter pour Fine-Tuning</field>
+        <field name="model_id" ref="tresorerie_chq.model_tresorerie_chq_ai_training"/>
+        <field name="binding_model_id" ref="tresorerie_chq.model_tresorerie_chq_ai_training"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = env.ref('tresorerie_chq.action_tresorerie_chq_ai_training_export').read()[0]
+        </field>
+    </record>
+
+</odoo>

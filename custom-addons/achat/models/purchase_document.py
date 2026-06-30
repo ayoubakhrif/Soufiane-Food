@@ -17,6 +17,7 @@ class PurchaseEntryDocument(models.Model):
         ('fito', 'Fito sanitaire'),
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
+        ('engagement', 'Engagement'),
         ('other', 'Other certificates'),
     ], string='Document Type', required=True)
     

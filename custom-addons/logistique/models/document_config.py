@@ -13,6 +13,7 @@ class DocumentConfig(models.Model):
         ('origin', 'Certificate of Origin'),
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
+        ('engagement', 'Engagement'),
         ('other', 'Autre')
     ], string='Document', required=True)
 
@@ -35,6 +36,7 @@ class DocumentConfigLine(models.Model):
         ('origin', 'Certificate of Origin'),
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
+        ('engagement', 'Engagement'),
         ('other', 'Autre')
     ], string='Document Lié', required=False)
 

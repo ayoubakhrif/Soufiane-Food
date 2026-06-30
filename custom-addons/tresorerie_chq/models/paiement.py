@@ -204,7 +204,7 @@ Exemple de réponse attendue:
             "Content-Type": "application/json"
         }
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
 
         try:
             resp = requests.post(url, headers=headers, json=payload, timeout=120)

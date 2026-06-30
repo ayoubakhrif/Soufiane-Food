@@ -370,6 +370,10 @@ class DataCheque(models.Model):
                     if rec.type and ex.type and rec.type != ex.type:
                         continue 
                 
+                # Allow duplicate if BL is different
+                if rec.bl and ex.bl and rec.bl != ex.bl:
+                    continue
+                
                 raise ValidationError(f"Le chèque {rec.chq} existe déjà pour la société {rec.ste_id.name} (Doublon non autorisé).")
 
     @api.constrains('state')

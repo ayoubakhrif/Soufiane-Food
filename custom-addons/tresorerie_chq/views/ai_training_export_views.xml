@@ -10,19 +10,10 @@
                 <div invisible="state != 'choose'">
                     <p class="text-muted">
                         Cet assistant va générer un fichier JSONL prêt à être envoyé à l'API de Fine-Tuning d'OpenAI.
+                        Le téléchargement démarrera automatiquement.
                     </p>
                     <group>
                         <field name="export_type" widget="radio"/>
-                    </group>
-                </div>
-                
-                <div invisible="state != 'get'">
-                    <p class="text-success">
-                        <strong>Export réussi !</strong> Votre fichier est prêt à être téléchargé.
-                    </p>
-                    <group>
-                        <field name="file_name" invisible="1"/>
-                        <field name="file_data" filename="file_name" readonly="1" widget="binary"/>
                     </group>
                 </div>
 

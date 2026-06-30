@@ -112,10 +112,10 @@ class TresoreriePaiement(models.Model):
             from odoo.exceptions import UserError
             raise UserError("Veuillez d'abord uploader un document scanné.")
 
-        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+        api_key = self.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key')
         if not api_key:
             from odoo.exceptions import UserError
-            raise UserError("La clé API OpenAI n'est pas configurée (whatsapp_stock.openai_key).")
+            raise UserError("La clé API Google Gemini n'est pas configurée (tresorerie_chq.gemini_key).")
 
         import requests
         import json
@@ -153,57 +153,48 @@ Exemple de réponse attendue:
 }}"""
 
         payload = {
-            "model": "gpt-4o",
-            "input": [
+            "contents": [
                 {
-                    "role": "user",
-                    "content": [
+                    "parts": [
                         {
-                            "type": "input_file",
-                            "filename": "scan.pdf",
-                            "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                            "text": prompt_text
                         },
                         {
-                            "type": "input_text",
-                            "text": prompt_text
+                            "inlineData": {
+                                "mimeType": "application/pdf",
+                                "data": pdf_b64
+                            }
                         }
                     ]
                 }
             ],
-            "text": {
-                "format": {
-                    "type": "json_object"
-                }
-            },
-            "temperature": 0.0,
-            "max_output_tokens": 1500
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": 0.0
+            }
         }
 
         headers = {
-            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+
         try:
-            resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
+            resp = requests.post(url, headers=headers, json=payload, timeout=120)
             if resp.status_code != 200:
                 err_msg = resp.json().get("error", {}).get("message", resp.text)
                 from odoo.exceptions import UserError
-                raise UserError(f"Erreur de l'API OpenAI : {err_msg}")
+                raise UserError(f"Erreur de l'API Gemini : {err_msg}")
             
             ai_data = resp.json()
         except Exception as e:
             from odoo.exceptions import UserError
             raise UserError(f"Erreur de communication avec l'IA : {str(e)}")
 
-        raw_content = ""
-        for output_item in ai_data.get("output", []):
-            for content_item in output_item.get("content", []):
-                if content_item.get("type") == "output_text":
-                    raw_content = content_item.get("text", "")
-                    break
-
-        if not raw_content:
+        try:
+            raw_content = ai_data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError):
             from odoo.exceptions import UserError
             raise UserError("L'IA n'a retourné aucune donnée lisible.")
 

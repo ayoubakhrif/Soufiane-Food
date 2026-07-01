@@ -38,9 +38,9 @@ class AuditTest(models.Model):
         if not self.facture_ids or not self.compta_excel:
             raise ValidationError("Veuillez d'abord uploader au moins une facture (PDF) ET les sélections de comptabilité (Excel).")
 
-        api_key = self.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key')
+        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not api_key:
-            raise ValidationError("La clé API Google Gemini n'est pas configurée (tresorerie_chq.gemini_key).")
+            raise ValidationError("La clé API OpenAI n'est pas configurée (whatsapp_stock.openai_key).")
 
         # Lecture du fichier Excel
         try:
@@ -112,46 +112,60 @@ Exemple attendu :
         for facture in self.facture_ids:
             full_message += f"<b>Facture: {facture.name}</b><ul>"
             
-            # Upload PDF to Gemini
-            pdf_bytes = base64.b64decode(facture.datas)
-            upload_url = f"https://generativelanguage.googleapis.com/upload/v1beta/files?key={api_key}"
-            upload_headers = {
-                "X-Goog-Upload-Protocol": "raw",
-                "X-Goog-Upload-Header-Content-Type": "application/pdf",
-                "Content-Type": "application/pdf"
-            }
-            try:
-                upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes, timeout=120)
-                if upload_resp.status_code != 200:
-                    err_msg = upload_resp.json().get("error", {}).get("message", upload_resp.text)
-                    raise ValidationError(f"Erreur d'upload pour {facture.name} : {err_msg}")
-                file_uri = upload_resp.json().get("file", {}).get("uri")
-            except Exception as e:
-                raise ValidationError(f"Erreur upload {facture.name} : {str(e)}")
-
-            # Gemini Prompt
+            # Prepare OpenAI Payload
+            facture_b64 = facture.datas.decode('utf-8') if isinstance(facture.datas, bytes) else facture.datas
             payload = {
-                "contents": [
+                "model": "gpt-4o",
+                "input": [
                     {
-                        "parts": [
-                            {"text": prompt_text},
-                            {"fileData": {"mimeType": "application/pdf", "fileUri": file_uri}}
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "input_file",
+                                "filename": facture.name or "facture.pdf",
+                                "file_data": f"data:application/pdf;base64,{facture_b64}"
+                            },
+                            {
+                                "type": "input_text",
+                                "text": prompt_text
+                            }
                         ]
                     }
                 ],
-                "generationConfig": {"responseMimeType": "application/json", "temperature": 0.0}
+                "text": {
+                    "format": {
+                        "type": "json_object"
+                    }
+                },
+                "temperature": 0.0,
+                "max_output_tokens": 800
             }
-            
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+
             try:
-                resp = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=120)
+                resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
                 if resp.status_code != 200:
                     err_msg = resp.json().get("error", {}).get("message", resp.text)
-                    raise ValidationError(f"Erreur Gemini pour {facture.name} : {err_msg}")
-                raw_content = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    raise ValidationError(f"Erreur OpenAI pour {facture.name} : {err_msg}")
+                
+                ai_data = resp.json()
+                raw_content = ""
+                for output_item in ai_data.get("output", []):
+                    for content_item in output_item.get("content", []):
+                        if content_item.get("type") == "output_text":
+                            raw_content = content_item.get("text", "")
+                            break
+
+                if not raw_content:
+                    raise ValidationError(f"L'IA n'a retourné aucune réponse pour {facture.name}.")
+                    
                 result = json.loads(raw_content)
             except Exception as e:
-                raise ValidationError(f"Erreur analyse Gemini pour {facture.name} : {str(e)}")
+                raise ValidationError(f"Erreur analyse OpenAI pour {facture.name} : {str(e)}")
 
             # Evaluate Results
             # 1. Exactitude

@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Python dependencies for Google Drive integration
 RUN pip3 install --no-cache-dir --upgrade \
     matplotlib \
+    openpyxl \
     google-auth \
     google-auth-oauthlib \
     google-api-python-client \

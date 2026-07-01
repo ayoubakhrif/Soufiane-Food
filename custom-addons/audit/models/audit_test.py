@@ -76,7 +76,7 @@ DONNÉES COMPTABLES (CSV) :
 {compta_text[:20000]}
 
 Votre tâche :
-1. Lire le numéro de la facture et son montant total TTC (ou à payer) dans le PDF de la facture.
+1. Lire le numéro de la facture et son montant total HT (Hors Taxes) dans le PDF de la facture.
 2. Chercher ce numéro de facture dans les données comptables CSV fournies ci-dessus. Sachez que le numéro de la facture se trouve spécifiquement dans la colonne 'Numéro Fact' (qui correspond à la colonne H dans le fichier d'origine).
 3. Extraire le montant qui est associé à cette facture dans le CSV.
 4. Vérifier si les deux montants sont égaux (attention aux formats de nombres, ex: 1000.50 et 1 000,50).

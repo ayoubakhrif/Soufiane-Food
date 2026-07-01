@@ -69,7 +69,7 @@ class SuiviOperation(models.Model):
                         'product_id': line.stock_id.product_id.id,
                         'lot': line.stock_id.lot,
                         'dum': line.stock_id.dum,
-                        'ville': rec.ville,
+                        'ville': line.stock_id.ville,
                         'qty': -line.qty,
                         'move_type': 'exit',
                         'state': 'done',

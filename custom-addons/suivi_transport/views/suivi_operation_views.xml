@@ -52,7 +52,7 @@
                             <field name="line_ids" readonly="state == 'validated'">
                                 <tree editable="bottom">
                                     <field name="client_id" required="1" domain="[('ville', '=', parent.ville)]" options="{'no_create': True}"/>
-                                    <field name="stock_id" domain="[('quantity', '>', 0), ('ville', '=', parent.ville)]" options="{'no_create': True}"/>
+                                    <field name="stock_id" domain="[('quantity', '>', 0)]" options="{'no_create': True}"/>
                                     <field name="article_id" required="1" readonly="1" force_save="1"/>
                                     <field name="qty"/>
                                     <field name="lot" readonly="1" force_save="1"/>

@@ -23,7 +23,7 @@
                     </div>
                     <notebook>
                         <page string="Employés" name="employees">
-                            <field name="line_ids" context="{'group_by':'ville'}">
+                            <field name="line_ids">
                                 <tree default_order="ville desc, employee_id asc">
                                     <field name="ville" column_invisible="True"/>
                                     <field name="employee_id"/>

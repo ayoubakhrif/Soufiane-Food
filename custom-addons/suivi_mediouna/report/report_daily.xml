@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_daily" model="ir.actions.report">
+        <field name="name">Rapport Journalier</field>
+        <field name="model">suivi_mediouna.daily_report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">suivi_mediouna.report_daily_template</field>
+        <field name="report_file">suivi_mediouna.report_daily_template</field>
+        <field name="print_report_name">'Rapport_Journalier_%s' % (object.date)</field>
+        <field name="binding_model_id" ref="model_suivi_mediouna_daily_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_daily_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="row text-center mb-4">
+                            <h2>Rapport Journalier - <t t-esc="doc.date.strftime('%d/%m/%Y')"/> - <t t-esc="doc.ville.capitalize()"/></h2>
+                        </div>
+
+                        <!-- Fetching daily records for the doc date -->
+                        <t t-set="daily_records" t-value="request.env['suivi_mediouna.daily_record'].search([('date', '=', doc.date)])" />
+                        <t t-set="lines" t-value="daily_records.mapped('line_ids').filtered(lambda l: l.ville == doc.ville)" />
+
+                        <table class="table table-sm table-bordered mt-4">
+                            <thead style="background-color: #f2f2f2;">
+                                <tr>
+                                    <th>Nom et Prénom</th>
+                                    <th>Salaire Mensuel</th>
+                                    <th>Salaire de Jour</th>
+                                    <th>Ville</th>
+                                    <th>Entrée</th>
+                                    <th>Sortie</th>
+                                    <th>Heures Supp.</th>
+                                    <th>Montant H. Supp.</th>
+                                    <th>Total Jour</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="lines" t-as="line">
+                                    <tr>
+                                        <td><t t-esc="line.employee_id.name"/></td>
+                                        <td><t t-esc="line.employee_id.monthly_salary"/></td>
+                                        <td><t t-esc="line.salaire_journalier" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><t t-esc="line.ville"/></td>
+                                        <td>
+                                            <t t-if="line.heure_entree">
+                                                <t t-esc="line.heure_entree.astimezone(request.env.user.tz or 'Africa/Casablanca').strftime('%H:%M')"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <t t-if="line.heure_sortie">
+                                                <t t-esc="line.heure_sortie.astimezone(request.env.user.tz or 'Africa/Casablanca').strftime('%H:%M')"/>
+                                            </t>
+                                        </td>
+                                        <td><t t-esc="line.heures_supp" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><t t-esc="line.montant_heures_supp" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><t t-esc="line.total_jour" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="row mt-5">
+                            <div class="col-6 offset-6">
+                                <table class="table table-bordered">
+                                    <thead class="bg-primary text-white text-center">
+                                        <tr>
+                                            <th colspan="2">Calcul <t t-esc="doc.ville.capitalize()"/></th>
+                                        </tr>
+                                        <tr>
+                                            <th>Désignation</th>
+                                            <th>En DH</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Production</td>
+                                            <td class="text-right"><t t-esc="doc.production_jour" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Salaire Total (Jour)</td>
+                                            <td class="text-right"><t t-esc="doc.charges_jour" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        </tr>
+                                        <tr class="bg-success text-white">
+                                            <td><strong>Bénéfice</strong></td>
+                                            <td class="text-right"><strong><t t-esc="doc.benefice" t-options='{"widget": "float", "precision": 2}'/></strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

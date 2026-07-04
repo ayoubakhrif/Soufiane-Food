@@ -23,13 +23,16 @@
                     </div>
                     <notebook>
                         <page string="Employés" name="employees">
-                            <field name="line_ids">
-                                <tree>
+                            <field name="line_ids" context="{'group_by':'ville'}">
+                                <tree default_order="ville desc, employee_id asc">
+                                    <field name="ville" column_invisible="True"/>
                                     <field name="employee_id"/>
-                                    <field name="ville"/>
                                     <field name="heure_entree"/>
                                     <field name="heure_sortie"/>
-                                    <field name="salaire_journalier" sum="Total Charges"/>
+                                    <field name="salaire_journalier" sum="Total Base"/>
+                                    <field name="heures_supp" sum="Total H. Supp"/>
+                                    <field name="montant_heures_supp" sum="Total Montant H. Supp"/>
+                                    <field name="total_jour" sum="Total Jour"/>
                                 </tree>
                             </field>
                         </page>

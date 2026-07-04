@@ -6,6 +6,10 @@ class Production(models.Model):
     _order = 'date desc'
 
     date = fields.Date(string='Jour', required=True, default=fields.Date.context_today)
+    ville = fields.Selection([
+        ('mediouna', 'Mediouna'),
+        ('agadir', 'Agadir')
+    ], string='Ville', required=True, default='mediouna')
     produit = fields.Char(string='Produit', required=True)
     quantite = fields.Float(string='Quantité', required=True)
     montant = fields.Float(string='Montant', required=True)

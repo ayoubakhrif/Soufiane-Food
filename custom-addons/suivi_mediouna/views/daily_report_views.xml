@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Rapports Journaliers">
                 <field name="date"/>
+                <field name="ville"/>
                 <field name="production_jour" sum="Total Production"/>
                 <field name="charges_jour" sum="Total Charges"/>
                 <field name="benefice" sum="Total Bénéfice"/>
@@ -18,6 +19,9 @@
         <field name="model">suivi_mediouna.daily_report</field>
         <field name="arch" type="xml">
             <form string="Rapport Journalier">
+                <header>
+                    <button name="action_print_pdf" type="object" string="Imprimer PDF" class="oe_highlight"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
@@ -26,11 +30,12 @@
                     </div>
                     <group>
                         <group>
-                            <field name="production_jour"/>
-                            <field name="charges_jour"/>
+                            <field name="ville"/>
                         </group>
                         <group>
-                            <field name="benefice"/>
+                            <field name="production_jour"/>
+                            <field name="charges_jour"/>
+                            <field name="benefice" class="fw-bold fs-3 text-success"/>
                         </group>
                     </group>
                 </sheet>
@@ -44,6 +49,7 @@
         <field name="arch" type="xml">
             <graph string="Analyse des Bénéfices" type="bar">
                 <field name="date" type="row"/>
+                <field name="ville" type="col"/>
                 <field name="benefice" type="measure"/>
             </graph>
         </field>

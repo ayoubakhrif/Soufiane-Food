@@ -12,6 +12,7 @@
     'author': 'Antigravity',
     'depends': ['base', 'suivi_presence'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/production_views.xml',
         'views/daily_record_views.xml',

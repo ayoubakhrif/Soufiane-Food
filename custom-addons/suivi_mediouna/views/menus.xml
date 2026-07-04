@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_suivi_mediouna_root" name="Suivi Mediouna" web_icon="suivi_mediouna,static/description/icon.png" sequence="50"/>
+
+    <menuitem id="menu_suivi_mediouna_operations" name="Opérations" parent="menu_suivi_mediouna_root" sequence="10"/>
+    <menuitem id="menu_suivi_mediouna_reports" name="Rapports" parent="menu_suivi_mediouna_root" sequence="20"/>
+
+    <menuitem id="menu_suivi_mediouna_production" name="Production" parent="menu_suivi_mediouna_operations" action="action_suivi_mediouna_production" sequence="10"/>
+    <menuitem id="menu_suivi_mediouna_daily_record" name="Records Journaliers" parent="menu_suivi_mediouna_operations" action="action_suivi_mediouna_daily_record" sequence="20"/>
+    <menuitem id="menu_suivi_mediouna_daily_report" name="Rapports Journaliers" parent="menu_suivi_mediouna_reports" action="action_suivi_mediouna_daily_report" sequence="10"/>
+</odoo>

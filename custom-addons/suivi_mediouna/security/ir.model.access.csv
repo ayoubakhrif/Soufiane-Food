@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_suivi_mediouna_production,suivi_mediouna.production,model_suivi_mediouna_production,,1,1,1,1
+access_suivi_mediouna_daily_record,suivi_mediouna.daily_record,model_suivi_mediouna_daily_record,,1,1,1,1
+access_suivi_mediouna_daily_record_line,suivi_mediouna.daily_record_line,model_suivi_mediouna_daily_record_line,,1,1,1,1
+access_suivi_mediouna_daily_report,suivi_mediouna.daily_report,model_suivi_mediouna_daily_report,,1,1,1,1

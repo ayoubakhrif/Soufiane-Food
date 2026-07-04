@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_mediouna_production_tree" model="ir.ui.view">
+        <field name="name">suivi_mediouna.production.tree</field>
+        <field name="model">suivi_mediouna.production</field>
+        <field name="arch" type="xml">
+            <tree string="Productions">
+                <field name="date"/>
+                <field name="produit"/>
+                <field name="quantite"/>
+                <field name="montant" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_mediouna_production_form" model="ir.ui.view">
+        <field name="name">suivi_mediouna.production.form</field>
+        <field name="model">suivi_mediouna.production</field>
+        <field name="arch" type="xml">
+            <form string="Production">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="produit"/>
+                        </group>
+                        <group>
+                            <field name="quantite"/>
+                            <field name="montant"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_mediouna_production" model="ir.actions.act_window">
+        <field name="name">Production</field>
+        <field name="res_model">suivi_mediouna.production</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

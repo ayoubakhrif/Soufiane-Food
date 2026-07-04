@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_suivi_mediouna_daily_record_tree" model="ir.ui.view">
+        <field name="name">suivi_mediouna.daily_record.tree</field>
+        <field name="model">suivi_mediouna.daily_record</field>
+        <field name="arch" type="xml">
+            <tree string="Records Journaliers">
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_mediouna_daily_record_form" model="ir.ui.view">
+        <field name="name">suivi_mediouna.daily_record.form</field>
+        <field name="model">suivi_mediouna.daily_record</field>
+        <field name="arch" type="xml">
+            <form string="Record Journalier">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="date" />
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page string="Employés" name="employees">
+                            <field name="line_ids">
+                                <tree>
+                                    <field name="employee_id"/>
+                                    <field name="ville"/>
+                                    <field name="heure_entree"/>
+                                    <field name="heure_sortie"/>
+                                    <field name="salaire_journalier" sum="Total Charges"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suivi_mediouna_daily_record" model="ir.actions.act_window">
+        <field name="name">Records Journaliers</field>
+        <field name="res_model">suivi_mediouna.daily_record</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

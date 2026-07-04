@@ -84,8 +84,14 @@ class SuiviTransportTangerOperation(models.Model):
 
     def action_validate(self):
         for rec in self:
-            if not self.env.user.has_group('casa_stock.group_manager'):
-                raise ValidationError(_("Seul le responsable de stock_casa peut valider les opérations."))
+            is_casa_manager = self.env.user.has_group('casa_stock.group_manager')
+            is_tanger_manager = self.env.user.has_group('suivi_transport_tanger.group_suivi_tanger_manager')
+            
+            if not is_casa_manager and not (is_tanger_manager and rec.paid_by_tresorerie):
+                if is_tanger_manager:
+                    raise ValidationError(_("Vous ne pouvez valider que les opérations payées par trésorerie. Les autres doivent être validées par le responsable de stock_casa."))
+                else:
+                    raise ValidationError(_("Seul le responsable de stock_casa (ou le responsable transport pour la trésorerie) peut valider les opérations."))
             
             if rec.credit > 0:
                 raise ValidationError(_("La validation n'est possible que si le crédit est de 0."))

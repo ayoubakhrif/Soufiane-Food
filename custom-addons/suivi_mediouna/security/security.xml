@@ -12,7 +12,7 @@
         <record id="group_suivi_mediouna_user" model="res.groups">
             <field name="name">Utilisateur</field>
             <field name="category_id" ref="module_category_suivi_mediouna"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('suivi_presence.group_suivi_viewer'))]"/>
             <field name="comment">Peut consulter et créer des records de production et présences.</field>
         </record>
 

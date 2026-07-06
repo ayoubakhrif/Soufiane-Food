@@ -20,6 +20,7 @@ class SuiviTransportTangerOperation(models.Model):
     montant = fields.Float(string='Montant', default=0.0)
     credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
     casa_payer_id = fields.Many2one('casa.client', string='Qui a payé')
+    comment = fields.Text(string='Commentaire')
     paid_by_caisse = fields.Boolean(string='Payé par la caisse', default=False)
     paid_by_tresorerie = fields.Boolean(string='Payé par tresorerie', default=False)
     available_client_ids = fields.Many2many('casa.client', compute='_compute_available_client_ids', store=False)
@@ -34,6 +35,13 @@ class SuiviTransportTangerOperation(models.Model):
         if self.paid_by_tresorerie:
             self.credit = 0.0
             self.state = 'paid'
+            self.casa_payer_id = False
+
+    @api.constrains('paid_by_caisse', 'paid_by_tresorerie', 'casa_payer_id')
+    def _check_payer_conflict(self):
+        for rec in self:
+            if (rec.paid_by_caisse or rec.paid_by_tresorerie) and rec.casa_payer_id:
+                raise ValidationError(_("Vous ne pouvez pas sélectionner un client payeur si l'opération est payée par caisse ou par trésorerie."))
 
     state = fields.Selection([
         ('initial', 'Initial'),

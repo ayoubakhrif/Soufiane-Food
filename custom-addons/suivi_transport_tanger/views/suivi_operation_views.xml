@@ -50,7 +50,8 @@
                             <field name="available_client_ids" invisible="1"/>
                             <field name="paid_by_caisse" readonly="state == 'validated'"/>
                             <field name="paid_by_tresorerie" readonly="state == 'validated'"/>
-                            <field name="casa_payer_id" options="{'no_create': True}" readonly="state == 'validated'" invisible="paid_by_caisse == True"/>
+                            <field name="casa_payer_id" options="{'no_create': True}" readonly="state == 'validated'" invisible="paid_by_caisse == True or paid_by_tresorerie == True"/>
+                            <field name="comment" readonly="state == 'validated'"/>
                         </group>
                     </group>
                     <notebook>

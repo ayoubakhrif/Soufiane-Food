@@ -46,14 +46,10 @@
                                         <td><t t-esc="line.salaire_journalier" t-options='{"widget": "float", "precision": 2}'/></td>
                                         <td><t t-esc="line.ville"/></td>
                                         <td>
-                                            <t t-if="line.heure_entree">
-                                                <t t-esc="line.heure_entree.astimezone(request.env.user.tz or 'Africa/Casablanca').strftime('%H:%M')"/>
-                                            </t>
+                                            <span t-field="line.heure_entree" t-options="{'widget': 'datetime', 'format': 'HH:mm'}"/>
                                         </td>
                                         <td>
-                                            <t t-if="line.heure_sortie">
-                                                <t t-esc="line.heure_sortie.astimezone(request.env.user.tz or 'Africa/Casablanca').strftime('%H:%M')"/>
-                                            </t>
+                                            <span t-field="line.heure_sortie" t-options="{'widget': 'datetime', 'format': 'HH:mm'}"/>
                                         </td>
                                         <td><t t-esc="line.heures_supp" t-options='{"widget": "float", "precision": 2}'/></td>
                                         <td><t t-esc="line.montant_heures_supp" t-options='{"widget": "float", "precision": 2}'/></td>

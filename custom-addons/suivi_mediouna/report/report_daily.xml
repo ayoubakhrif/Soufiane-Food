@@ -15,79 +15,142 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
-                    <div class="page">
-                        <div class="row text-center mb-4">
-                            <h2>Rapport Journalier - <t t-esc="doc.date.strftime('%d/%m/%Y')"/> - <t t-esc="doc.ville.capitalize()"/></h2>
-                        </div>
-
+                    <div class="page" style="font-size: 12px; font-family: sans-serif;">
+                        
                         <!-- Fetching daily records for the doc date -->
                         <t t-set="daily_records" t-value="request.env['suivi_mediouna.daily_record'].search([('date', '=', doc.date)])" />
                         <t t-set="lines" t-value="daily_records.mapped('line_ids').filtered(lambda l: l.ville == doc.ville)" />
 
-                        <table class="table table-sm table-bordered mt-4">
-                            <thead style="background-color: #f2f2f2;">
-                                <tr>
-                                    <th>Nom et Prénom</th>
-                                    <th>Salaire Mensuel</th>
-                                    <th>Salaire de Jour</th>
-                                    <th>Ville</th>
-                                    <th>Entrée</th>
-                                    <th>Sortie</th>
-                                    <th>Heures Supp.</th>
-                                    <th>Montant H. Supp.</th>
-                                    <th>Total Jour</th>
+                        <!-- Top Header simulating Excel Date -->
+                        <div class="row mb-2" style="margin-left: 0;">
+                            <div class="col-2 text-center" style="background-color: #00ff00; border: 1px solid black; font-weight: bold;">
+                                Date
+                            </div>
+                            <div class="col-3 text-center" style="background-color: #d9d9d9; border: 1px solid black; font-weight: bold;">
+                                <t t-esc="doc.date.strftime('%d/%m/%Y')"/>
+                            </div>
+                            <div class="col-2 text-center" style="background-color: #00ff00; border: 1px solid black; font-weight: bold; text-transform: lowercase;">
+                                <!-- Simple fallback for day name, as strftime('%A') might not be localized or desired -->
+                                <t t-esc="doc.date.strftime('%A')"/>
+                            </div>
+                        </div>
+
+                        <!-- Main Table -->
+                        <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; margin-bottom: 30px;">
+                            <thead>
+                                <tr style="background-color: #ffff00; font-weight: bold; border: 1px solid black;">
+                                    <th style="border: 1px solid black; padding: 4px;">effectif</th>
+                                    <th style="border: 1px solid black; padding: 4px;">Nom et Prénom</th>
+                                    <th style="border: 1px solid black; padding: 4px;">salaire</th>
+                                    <th style="border: 1px solid black; padding: 4px;">salaire de jour</th>
+                                    <th style="border: 1px solid black; padding: 4px;">Détails</th>
+                                    <th style="border: 1px solid black; padding: 4px;">entree</th>
+                                    <th style="border: 1px solid black; padding: 4px;">sortie</th>
+                                    <th style="border: 1px solid black; padding: 4px;">heure sup</th>
+                                    <th style="border: 1px solid black; padding: 4px;">montant sup</th>
+                                    <th style="border: 1px solid black; padding: 4px;">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <t t-set="total_mensuel" t-value="0.0"/>
+                                <t t-set="total_jour" t-value="0.0"/>
+                                
                                 <t t-foreach="lines" t-as="line">
+                                    <t t-set="total_mensuel" t-value="total_mensuel + line.employee_id.monthly_salary"/>
+                                    <t t-set="total_jour" t-value="total_jour + line.salaire_journalier"/>
+
+                                    <t t-set="is_agadir" t-value="line.ville == 'agadir'"/>
+                                    
+                                    <t t-set="bg_col1_4" t-value="'#8faadc'" t-if="is_agadir"/>
+                                    <t t-set="bg_col1_4" t-value="'#a9d08e'" t-if="not is_agadir"/>
+                                    
+                                    <t t-set="bg_col5_8" t-value="'#00ff00'" t-if="is_agadir"/>
+                                    <t t-set="bg_col5_8" t-value="'#00ffff'" t-if="not is_agadir"/>
+
+                                    <t t-set="bg_col9" t-value="'#ffff00'" t-if="is_agadir and line.montant_heures_supp > 0"/>
+                                    <t t-set="bg_col9" t-value="'transparent'" t-if="not (is_agadir and line.montant_heures_supp > 0)"/>
+
                                     <tr>
-                                        <td><t t-esc="line.employee_id.name"/></td>
-                                        <td><t t-esc="line.employee_id.monthly_salary"/></td>
-                                        <td><t t-esc="line.salaire_journalier" t-options='{"widget": "float", "precision": 2}'/></td>
-                                        <td><t t-esc="line.ville"/></td>
-                                        <td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col1_4}};"><t t-esc="line_index + 1"/></td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col1_4}};"><t t-esc="line.employee_id.name"/></td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col1_4}};"><t t-esc="line.employee_id.monthly_salary" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col1_4}};"><t t-esc="line.salaire_journalier" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col5_8}};"><t t-esc="line.ville"/></td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col5_8}};">
                                             <span t-field="line.heure_entree" t-options="{'widget': 'datetime', 'format': 'HH:mm'}"/>
                                         </td>
-                                        <td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col5_8}};">
                                             <span t-field="line.heure_sortie" t-options="{'widget': 'datetime', 'format': 'HH:mm'}"/>
                                         </td>
-                                        <td><t t-esc="line.heures_supp" t-options='{"widget": "float", "precision": 2}'/></td>
-                                        <td><t t-esc="line.montant_heures_supp" t-options='{"widget": "float", "precision": 2}'/></td>
-                                        <td><t t-esc="line.total_jour" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col5_8}};">
+                                            <!-- Simple representation of duration -->
+                                            <t t-esc="'%.2f' % line.heures_supp"/>
+                                        </td>
+                                        
+                                        <td t-attf-style="border: 1px solid black; padding: 4px; background-color: {{bg_col9}};">
+                                            <t t-esc="line.montant_heures_supp" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                        <td style="border: 1px solid black; padding: 4px;">
+                                            <t t-esc="line.total_jour" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
                                     </tr>
                                 </t>
                             </tbody>
+                            <!-- Footer Totals -->
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" style="border: 1px solid transparent;"></td>
+                                    <td style="border: 1px solid black; background-color: #ffff00; font-weight: bold; padding: 4px;">
+                                        <t t-esc="total_mensuel" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="border: 1px solid black; background-color: #ffff00; font-weight: bold; padding: 4px;">
+                                        <t t-esc="total_jour" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="border: 1px solid transparent; text-align: left; padding-left: 5px; font-size: 10px;">
+                                        <t t-esc="doc.ville"/>
+                                    </td>
+                                    <td colspan="5" style="border: 1px solid transparent;"></td>
+                                </tr>
+                            </tfoot>
                         </table>
 
-                        <div class="row mt-5">
-                            <div class="col-6 offset-6">
-                                <table class="table table-bordered">
-                                    <thead class="bg-primary text-white text-center">
+                        <!-- Calcul Block (Right Side Simulation) -->
+                        <div class="row">
+                            <div class="col-5 offset-7">
+                                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black;">
+                                    <thead>
                                         <tr>
-                                            <th colspan="2">Calcul <t t-esc="doc.ville.capitalize()"/></th>
+                                            <th colspan="2" style="background-color: #00ffff; border: 1px solid black; padding: 5px; font-size: 14px;">
+                                                calcul <t t-esc="doc.ville"/>
+                                            </th>
                                         </tr>
                                         <tr>
-                                            <th>Désignation</th>
-                                            <th>En DH</th>
+                                            <th style="background-color: #8faadc; border: 1px solid black; padding: 4px;">désignation</th>
+                                            <th style="background-color: #8faadc; border: 1px solid black; padding: 4px;">en dh</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Production</td>
-                                            <td class="text-right"><t t-esc="doc.production_jour" t-options='{"widget": "float", "precision": 2}'/></td>
+                                            <!-- Since we don't have detailed designation list in the report, we just show "Production" -->
+                                            <td style="border: 1px solid black; padding: 4px; background-color: #ff9900; font-weight: bold;">Production</td>
+                                            <td style="border: 1px solid black; padding: 4px;"><t t-esc="doc.production_jour" t-options='{"widget": "float", "precision": 2}'/></td>
                                         </tr>
                                         <tr>
-                                            <td>Salaire Total (Jour)</td>
-                                            <td class="text-right"><t t-esc="doc.charges_jour" t-options='{"widget": "float", "precision": 2}'/></td>
+                                            <td style="border: 1px solid black; padding: 4px; background-color: #ffff00; font-weight: bold;">salaire</td>
+                                            <td style="border: 1px solid black; padding: 4px;"><t t-esc="doc.charges_jour" t-options='{"widget": "float", "precision": 2}'/></td>
                                         </tr>
-                                        <tr class="bg-success text-white">
-                                            <td><strong>Bénéfice</strong></td>
-                                            <td class="text-right"><strong><t t-esc="doc.benefice" t-options='{"widget": "float", "precision": 2}'/></strong></td>
+                                        <tr>
+                                            <td style="border: 1px solid transparent; padding: 4px;"></td>
+                                            <td style="border: 1px solid black; background-color: #00ff00; padding: 4px; font-weight: bold; font-size: 14px;">
+                                                <t t-esc="doc.benefice" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+
                     </div>
                 </t>
             </t>

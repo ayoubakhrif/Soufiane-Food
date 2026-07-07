@@ -20,6 +20,7 @@ This module provides a robust stock management system based on an immutable move
         'data/data.xml',
         'wizard/casa_client_invoice_wizard_view.xml',
         'wizard/casa_stock_change_price_wizard_view.xml',
+        'wizard/casa_stock_change_data_wizard_view.xml',
         'reports/report_client_invoice.xml',
         'reports/report_client_history.xml',
         'reports/report_clients_total.xml',

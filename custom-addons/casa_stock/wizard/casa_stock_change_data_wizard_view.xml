@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_casa_stock_change_data_wizard_form" model="ir.ui.view">
+        <field name="name">casa.stock.change.data.wizard.form</field>
+        <field name="model">casa.stock.change.data.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Changer les données du Stock">
+                <sheet>
+                    <group>
+                        <group string="Informations actuelles">
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="price_purchase"/>
+                        </group>
+                        <group string="Nouvelles valeurs">
+                            <field name="lot"/>
+                            <field name="calibre"/>
+                            <field name="dum"/>
+                            <field name="weight"/>
+                            <field name="ste_id" options="{'no_create': True}"/>
+                            <field name="stock_soufiane"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" string="Confirmer" type="object" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

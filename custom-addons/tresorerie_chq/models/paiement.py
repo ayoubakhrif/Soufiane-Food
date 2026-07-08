@@ -23,6 +23,11 @@ class TresoreriePaiement(models.Model):
         string='Est Soufiane',
     )
 
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('validated', 'Validé')
+    ], string='Statut', default='draft', required=True, tracking=True)
+
     date = fields.Date(
         string='Date du paiement',
         default=fields.Date.context_today,
@@ -106,6 +111,13 @@ class TresoreriePaiement(models.Model):
             elif rec.payment_type == 'effet' and rec.effet_line_ids:
                 dates = [l.check_date for l in rec.effet_line_ids if l.check_date]
             rec.check_date = min(dates) if dates else False
+    # ------------------------------------------------------------------
+    # Actions
+    # ------------------------------------------------------------------
+    def action_validate(self):
+        for rec in self:
+            rec.state = 'validated'
+
     def action_parse_pdf_via_ai(self):
         self.ensure_one()
         if not self.scan_document:

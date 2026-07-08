@@ -76,3 +76,60 @@ Exemple de réponse attendue:
             ('Content-Disposition', 'attachment; filename="dataset_finetuning.jsonl"'),
         ]
         return Response(generate(), headers=headers, direct_passthrough=True)
+
+    @http.route('/api/whatsapp/tresorerie_chq/pdf', type='json', auth='public', csrf=False)
+    def whatsapp_tresorerie_chq_pdf(self, **kwargs):
+        file_name = kwargs.get('file_name', '')
+        pdf_base64 = kwargs.get('pdf_base64')
+        group_id = kwargs.get('group_id')
+        
+        if not file_name or not pdf_base64:
+            return {"status": "error", "message": "Fichier PDF manquant."}
+            
+        import re
+        from datetime import datetime
+        
+        # Parse file name: LCN-HAMZA BASSIT-06-07-2026.pdf
+        match = re.match(r'^(CHQ|LCN)-(.*?)-(\d{2}-\d{2}-\d{4})\.pdf$', file_name, re.IGNORECASE)
+        if not match:
+            return {"status": "error", "message": f"❌ Nom de fichier invalide: {file_name}. Le format doit être TYPE-CLIENT-DD-MM-YYYY.pdf"}
+            
+        doc_type_str = match.group(1).upper()
+        client_name = match.group(2).strip()
+        date_str = match.group(3)
+        
+        payment_type = 'cheque' if doc_type_str == 'CHQ' else 'effet'
+        
+        try:
+            date_obj = datetime.strptime(date_str, '%d-%m-%Y').date()
+        except ValueError:
+            return {"status": "error", "message": f"❌ Format de date invalide: {date_str}. Attendu: DD-MM-YYYY"}
+            
+        # Search client
+        Client = request.env['tresorerie_chq.client'].sudo()
+        client_id = Client.search([('name', 'ilike', client_name)], limit=1)
+        if not client_id:
+            return {"status": "success", "message": f"❌ Le client '{client_name}' n'a pas été trouvé dans la base de données."}
+            
+        # Create paiement
+        Paiement = request.env['tresorerie_chq.paiement'].sudo()
+        paiement_val = {
+            'client_id': client_id.id,
+            'payment_type': payment_type,
+            'date': date_obj,
+            'reception_date': date_obj,
+            'scan_document_name': file_name,
+            'scan_document': pdf_base64,
+            'state': 'draft'
+        }
+        
+        paiement_id = Paiement.create(paiement_val)
+        
+        # Trigger AI
+        try:
+            paiement_id.action_parse_pdf_via_ai()
+            lines_count = len(paiement_id.cheque_line_ids) if payment_type == 'cheque' else len(paiement_id.effet_line_ids)
+            doc_name = "Chèque(s)" if payment_type == 'cheque' else "Effet(s)"
+            return {"status": "success", "message": f"✅ {doc_name} enregistré(s) avec succès pour {client_id.name}.\nL'IA a extrait {lines_count} ligne(s)."}
+        except Exception as e:
+            return {"status": "success", "message": f"⚠️ Document créé pour {client_id.name} mais l'IA a échoué : {str(e)}"}

@@ -20,13 +20,17 @@
         <field name="model">tresorerie_chq.paiement</field>
         <field name="arch" type="xml">
             <form string="Entrée Trésorerie">
+                <header>
+                    <button name="action_validate" type="object" string="Valider" class="oe_highlight" invisible="state == 'validated'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,validated"/>
+                </header>
                 <sheet>
                     <group>
                         <group string="Informations générales">
-                            <field name="client_id"/>
-                            <field name="date"/>
-                            <field name="reception_date"/>
-                            <field name="payment_type" widget="radio"/>
+                            <field name="client_id" readonly="state == 'validated'"/>
+                            <field name="date" readonly="state == 'validated'"/>
+                            <field name="reception_date" readonly="state == 'validated'"/>
+                            <field name="payment_type" widget="radio" readonly="state == 'validated'"/>
                             <field name="scan_document_name" invisible="1"/>
                             <field name="scan_document" string="Scan du document" filename="scan_document_name" widget="binary"/>
                             <button name="action_parse_pdf_via_ai" type="object" string="Analyser le document (IA)" class="btn-primary" icon="fa-robot" invisible="not scan_document" help="Extrait automatiquement les chèques ou effets à partir du PDF scanné."/>
@@ -45,7 +49,7 @@
                     <notebook>
                         <!-- Page for Chèques -->
                         <page string="Chèques" name="cheque_lines" invisible="payment_type != 'cheque'">
-                            <field name="cheque_line_ids" context="{'default_reception_date': reception_date}">
+                            <field name="cheque_line_ids" context="{'default_reception_date': reception_date}" readonly="state == 'validated'">
                                 <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="owner_id"
@@ -90,7 +94,7 @@
 
                         <!-- Page for Effets -->
                         <page string="Effets" name="effet_lines" invisible="payment_type != 'effet'">
-                            <field name="effet_line_ids" context="{'default_reception_date': reception_date}">
+                            <field name="effet_line_ids" context="{'default_reception_date': reception_date}" readonly="state == 'validated'">
                                 <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="owner_id"

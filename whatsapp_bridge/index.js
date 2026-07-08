@@ -32,6 +32,8 @@ const LOGISTICS_PDF_GROUP_ID = "120363428159815503@g.us";
 const TRANSPORT_GROUP_ID = "120363409412071351@g.us";
 const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
 
+const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
+const TRESORERIE_CHQ_GROUP_ID = "120363427689661439@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -48,6 +50,8 @@ const DOSSIER_VERIF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/
 const DOSSIER_SEARCH_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_search?db=soufianefoods";
 const LOGISTICS_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistique/pdf?db=soufianefoods";
 const TRANSPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/transport?db=soufianefoods";
+const TRANSPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/transport?db=soufianefoods";
+const TRESORERIE_CHQ_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/tresorerie_chq/pdf?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -193,6 +197,9 @@ async function connectToWhatsApp() {
             } else if (from === SURESTARIE_REPORT_GROUP_ID) {
                 targetOdooUrl = SURESTARIE_REPORT_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === TRESORERIE_CHQ_GROUP_ID) {
+                targetOdooUrl = TRESORERIE_CHQ_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -264,6 +271,7 @@ async function connectToWhatsApp() {
                 else if (from === LOGISTICS_PDF_GROUP_ID) typeStr = "LOGISTICS_PDF";
                 else if (from === DOSSIER_VERIF_GROUP_ID) typeStr = "DOSSIER_VERIF";
                 else if (from === TRANSPORT_GROUP_ID) typeStr = "TRANSPORT";
+                else if (from === TRESORERIE_CHQ_GROUP_ID) typeStr = "TRESORERIE_CHQ";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 
@@ -278,8 +286,8 @@ async function connectToWhatsApp() {
                     dossierVerifBuffer.length = 0; // Clear the buffer
                 }
 
-                // Si c'est un PDF pour le bot finance ou logistique, on le télécharge
-                if ((from === FINANCE_PDF_GROUP_ID || from === LOGISTICS_PDF_GROUP_ID) && isDocument) {
+                // Si c'est un PDF pour le bot finance, logistique, ou trésorerie, on le télécharge
+                if ((from === FINANCE_PDF_GROUP_ID || from === LOGISTICS_PDF_GROUP_ID || from === TRESORERIE_CHQ_GROUP_ID) && isDocument) {
                     try {
                         console.log("Téléchargement du document PDF...");
                         const buffer = await downloadMediaMessage(
@@ -392,6 +400,9 @@ async function connectToWhatsApp() {
                                 fileName: result.file_name,
                                 caption: result.message || `Voici le rapport ${reportType} pour *${identifier}*.`
                             }, { quoted: msg });
+                        } else if (from === TRESORERIE_CHQ_GROUP_ID && result.message) {
+                            // Fallback for TRESORERIE_CHQ_GROUP_ID
+                            await sock.sendMessage(from, { text: result.message }, { quoted: msg });
                         }
                         hasAction = true;
                     }

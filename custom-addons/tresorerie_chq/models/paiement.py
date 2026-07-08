@@ -224,11 +224,16 @@ Exemple de réponse attendue:
             from odoo.exceptions import UserError
             raise UserError("L'IA n'a retourné aucune donnée lisible.")
 
+        import re
+        clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
+        clean_content = re.sub(r'```$', '', clean_content.strip())
+        clean_content = clean_content.strip()
+
         try:
-            result = json.loads(raw_content)
-        except Exception:
+            result = json.loads(clean_content)
+        except Exception as e:
             from odoo.exceptions import UserError
-            raise UserError(f"L'IA a retourné un format JSON invalide : {raw_content}")
+            raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
 
         items = result.get('items', [])
         if not items:

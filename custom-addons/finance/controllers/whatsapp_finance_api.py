@@ -657,7 +657,7 @@ class WhatsAppFinanceController(http.Controller):
                     ste_name = phys.ste_id.name if phys.ste_id else 'N/A'
                     factures = ", ".join(filter(None, [d.serie for d in phys.datacheque_ids]))
                     
-                    fact_display = f" [Facture: {factures}]" if factures else ""
+                    fact_display = f" [Série de facture: {factures}]" if factures else ""
                     msg += f"• *{phys.name}*{fact_display} ({ste_name}) ❌ Manque : {', '.join(missing)}\n"
                     
                     excel_data.append({
@@ -686,7 +686,7 @@ class WhatsAppFinanceController(http.Controller):
             workbook = xlsxwriter.Workbook(output, {'in_memory': True})
             sheet = workbook.add_worksheet('Manque PDF')
             
-            headers = ["N° Chèque", "Société", "Facture(s)", "Bénéficiaire", "Montant", "Date Emission", "Manque"]
+            headers = ["N° Chèque", "Société", "Série de facture", "Bénéficiaire", "Montant", "Date Emission", "Manque"]
             for col, h in enumerate(headers):
                 sheet.write(0, col, h)
                 

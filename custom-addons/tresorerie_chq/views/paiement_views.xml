@@ -63,7 +63,7 @@
                                     <field name="allow_no_date" column_invisible="True"/>
                                     <field name="check_date"
                                            string="Date d'échéance"
-                                           required="not allow_no_date"/>
+                                           optional="show"/>
                                     <field name="amount"
                                            string="Montant (MAD)"
                                            sum="Total"/>
@@ -108,7 +108,7 @@
                                     <field name="allow_no_date" column_invisible="True"/>
                                     <field name="check_date"
                                            string="Date d'échéance"
-                                           required="not allow_no_date"/>
+                                           optional="show"/>
                                     <field name="amount"
                                            string="Montant (MAD)"
                                            sum="Total"/>

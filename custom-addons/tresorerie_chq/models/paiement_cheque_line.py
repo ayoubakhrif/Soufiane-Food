@@ -154,12 +154,7 @@ class TresorerieChqCheque(models.Model):
                 if len(num) > 7:
                     raise ValidationError("Le numéro de chèque doit comporter au maximum 7 chiffres.")
 
-    @api.constrains('check_date', 'client_id', 'paiement_id')
-    def _check_required_date(self):
-        for rec in self:
-            client = rec.client_id or rec.paiement_id.client_id
-            if not rec.check_date and (not client or not client.allow_no_date):
-                raise ValidationError("❌ La date d'échéance est requise pour ce client.")
+
 
     # ------------------------------------------------------------------
     # Workflow Actions
@@ -347,12 +342,7 @@ class TresorerieChqEffet(models.Model):
     # ------------------------------------------------------------------
     # Constraints
     # ------------------------------------------------------------------
-    @api.constrains('check_date', 'client_id', 'paiement_id')
-    def _check_required_date(self):
-        for rec in self:
-            client = rec.client_id or rec.paiement_id.client_id
-            if not rec.check_date and (not client or not client.allow_no_date):
-                raise ValidationError("❌ La date d'échéance est requise pour ce client.")
+
 
     # ------------------------------------------------------------------
     # Workflow Actions

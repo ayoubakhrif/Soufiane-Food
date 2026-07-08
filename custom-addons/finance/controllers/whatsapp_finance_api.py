@@ -644,6 +644,7 @@ class WhatsAppFinanceController(http.Controller):
             
             msg = f"📄 *Chèques avec PDF manquants ({filter_desc})*\n\n"
             count = 0
+            excel_data = []
             for phys in phys_cheques:
                 missing = []
                 phys_check = phys.sudo().with_context(bin_size=True)
@@ -654,7 +655,20 @@ class WhatsAppFinanceController(http.Controller):
                 
                 if missing:
                     ste_name = phys.ste_id.name if phys.ste_id else 'N/A'
-                    msg += f"• *{phys.name}* ({ste_name}) ❌ Manque : {', '.join(missing)}\n"
+                    factures = ", ".join(filter(None, [d.serie for d in phys.datacheque_ids]))
+                    
+                    fact_display = f" [Facture: {factures}]" if factures else ""
+                    msg += f"• *{phys.name}*{fact_display} ({ste_name}) ❌ Manque : {', '.join(missing)}\n"
+                    
+                    excel_data.append({
+                        'chq': phys.name or "",
+                        'ste': ste_name,
+                        'facture': factures,
+                        'benif': phys.benif_id.name if phys.benif_id else "",
+                        'montant': phys.amount_total or 0.0,
+                        'date': str(phys.date_emission) if phys.date_emission else "",
+                        'manque': ", ".join(missing)
+                    })
                     count += 1
             
             if count == 0:
@@ -663,9 +677,42 @@ class WhatsAppFinanceController(http.Controller):
             if len(phys_cheques) == 100:
                 msg += "\n⚠️ _Seuls les 100 premiers résultats sont affichés._"
                 
+            # Generate Excel
+            import io
+            import xlsxwriter
+            import base64
+            
+            output = io.BytesIO()
+            workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+            sheet = workbook.add_worksheet('Manque PDF')
+            
+            headers = ["N° Chèque", "Société", "Facture(s)", "Bénéficiaire", "Montant", "Date Emission", "Manque"]
+            for col, h in enumerate(headers):
+                sheet.write(0, col, h)
+                
+            for row_idx, data_row in enumerate(excel_data, 1):
+                sheet.write(row_idx, 0, data_row['chq'])
+                sheet.write(row_idx, 1, data_row['ste'])
+                sheet.write(row_idx, 2, data_row['facture'])
+                sheet.write(row_idx, 3, data_row['benif'])
+                sheet.write(row_idx, 4, data_row['montant'])
+                sheet.write(row_idx, 5, data_row['date'])
+                sheet.write(row_idx, 6, data_row['manque'])
+                
+            workbook.close()
+            xlsx_base64 = base64.b64encode(output.getvalue()).decode('utf-8')
+
             return {
                 'status': 'success',
-                'response': msg
+                'product_name': f"Chèques manquants",
+                'response': msg,
+                'files': [
+                    {
+                        'pdf_base64': xlsx_base64,
+                        'file_name': f"Manque_Cheques.xlsx",
+                        'caption': f"Détails des chèques manquants {filter_desc}"
+                    }
+                ]
             }
 
         # 6. Handle Exact Matches (Talon Name or Beneficiary Name)

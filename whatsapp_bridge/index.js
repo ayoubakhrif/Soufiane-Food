@@ -31,8 +31,6 @@ const DOSSIER_SEARCH_GROUP_ID = "120363425063313711@g.us";
 const LOGISTICS_PDF_GROUP_ID = "120363428159815503@g.us";
 const TRANSPORT_GROUP_ID = "120363409412071351@g.us";
 const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
-
-const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
 const TRESORERIE_CHQ_GROUP_ID = "120363427689661439@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
@@ -49,7 +47,6 @@ const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/fi
 const DOSSIER_VERIF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_verification?db=soufianefoods";
 const DOSSIER_SEARCH_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_search?db=soufianefoods";
 const LOGISTICS_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistique/pdf?db=soufianefoods";
-const TRANSPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/transport?db=soufianefoods";
 const TRANSPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/transport?db=soufianefoods";
 const TRESORERIE_CHQ_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/tresorerie_chq/pdf?db=soufianefoods";
 

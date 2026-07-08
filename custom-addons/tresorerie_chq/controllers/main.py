@@ -125,11 +125,13 @@ Exemple de réponse attendue:
         
         paiement_id = Paiement.create(paiement_val)
         
+        client_name_str = client_id.name
+        
         # Trigger AI
         try:
             paiement_id.action_parse_pdf_via_ai()
             lines_count = len(paiement_id.cheque_line_ids) if payment_type == 'cheque' else len(paiement_id.effet_line_ids)
             doc_name = "Chèque(s)" if payment_type == 'cheque' else "Effet(s)"
-            return {"status": "success", "message": f"✅ {doc_name} enregistré(s) avec succès pour {client_id.name}.\nL'IA a extrait {lines_count} ligne(s)."}
+            return {"status": "success", "message": f"✅ {doc_name} enregistré(s) avec succès pour {client_name_str}.\nL'IA a extrait {lines_count} ligne(s)."}
         except Exception as e:
-            return {"status": "success", "message": f"⚠️ Document créé pour {client_id.name} mais l'IA a échoué : {str(e)}"}
+            return {"status": "success", "message": f"⚠️ Document créé pour {client_name_str} mais l'IA a échoué : {str(e)}"}

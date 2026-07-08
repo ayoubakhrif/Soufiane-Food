@@ -284,7 +284,13 @@ Exemple de réponse attendue:
             if self.reception_date:
                 vals['reception_date'] = self.reception_date
             if item.get('date_echeance'):
-                vals['check_date'] = item.get('date_echeance')
+                date_str = str(item.get('date_echeance')).strip()
+                try:
+                    from datetime import datetime
+                    datetime.strptime(date_str, '%Y-%m-%d')
+                    vals['check_date'] = date_str
+                except ValueError:
+                    pass
             
             lines_to_create.append((0, 0, vals))
             current_sequence += 10

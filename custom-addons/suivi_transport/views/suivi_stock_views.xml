@@ -159,6 +159,29 @@
         </field>
     </record>
 
+    <record id="view_suivi_stock_entry_search" model="ir.ui.view">
+        <field name="name">suivi.stock.entry.search</field>
+        <field name="model">suivi.stock.entry</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Entrées">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="lot"/>
+                <field name="dum"/>
+                <field name="fournisseur_id"/>
+                <filter string="Brouillon" name="state_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="state_confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Validé" name="state_done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Fournisseur" name="group_fournisseur" context="{'group_by': 'fournisseur_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_suivi_stock_entry" model="ir.actions.act_window">
         <field name="name">Entrées de Stock</field>
         <field name="res_model">suivi.stock.entry</field>

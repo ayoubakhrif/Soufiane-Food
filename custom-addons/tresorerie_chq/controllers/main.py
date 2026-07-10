@@ -109,7 +109,13 @@ Exemple de réponse attendue:
         Client = request.env['tresorerie_chq.client'].sudo()
         client_id = Client.search([('name', 'ilike', client_name)], limit=1)
         if not client_id:
-            return {"status": "success", "message": f"❌ Le client '{client_name}' n'a pas été trouvé dans la base de données."}
+            Alias = request.env['tresorerie_chq.client.alias'].sudo()
+            alias_id = Alias.search([('name', 'ilike', client_name)], limit=1)
+            if alias_id:
+                client_id = alias_id.client_id
+                
+        if not client_id:
+            return {"status": "success", "message": f"❌ Le client '{client_name}' n'a pas été trouvé dans la base de données (ni dans les alias)."}
             
         # Create paiement
         Paiement = request.env['tresorerie_chq.paiement'].sudo()

@@ -1,5 +1,12 @@
 from odoo import models, fields
 
+class TresorerieChqClientAlias(models.Model):
+    _name = 'tresorerie_chq.client.alias'
+    _description = 'Alias Client'
+
+    name = fields.Char(string='Alias', required=True)
+    client_id = fields.Many2one('tresorerie_chq.client', string='Client', required=True, ondelete='cascade')
+
 class TresorerieChqClient(models.Model):
     _name = 'tresorerie_chq.client'
     _description = 'Client (Trésorerie Chèques & Effets)'
@@ -16,4 +23,5 @@ class TresorerieChqClient(models.Model):
     )
     
     paiement_ids = fields.One2many('tresorerie_chq.paiement', 'client_id', string='Paiements')
+    alias_ids = fields.One2many('tresorerie_chq.client.alias', 'client_id', string='Alias')
 

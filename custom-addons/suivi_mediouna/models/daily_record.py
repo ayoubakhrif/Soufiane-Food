@@ -38,27 +38,32 @@ class DailyRecord(models.Model):
             dt_start = user_tz.localize(datetime.combine(record.date, time.min)).astimezone(pytz.utc)
             dt_end = user_tz.localize(datetime.combine(record.date, time.max)).astimezone(pytz.utc)
 
-            presences = self.env['suivi.presence'].search([
-                ('datetime', '>=', dt_start),
-                ('datetime', '<=', dt_end),
-                ('site', 'in', ['mediouna', 'agadir'])
+            employees = self.env['suivi.employee'].search([
+                ('payroll_site', 'in', ['mediouna', 'agadir'])
             ])
 
             emp_data = {}
+            for emp in employees:
+                emp_data[emp] = {
+                    'entree': False,
+                    'sortie': False,
+                    'ville': emp.payroll_site,
+                    'salaire_journalier': (emp.monthly_salary / 26.0) if emp.monthly_salary else 0.0,
+                }
+
+            presences = self.env['suivi.presence'].search([
+                ('employee_id', 'in', employees.ids),
+                ('datetime', '>=', dt_start),
+                ('datetime', '<=', dt_end)
+            ])
+
             for p in presences:
                 emp = p.employee_id
-                if emp not in emp_data:
-                    emp_data[emp] = {
-                        'entree': False,
-                        'sortie': False,
-                        'ville': p.site,
-                        'salaire_journalier': (emp.monthly_salary / 26.0) if emp.monthly_salary else 0.0,
-                    }
-                
-                if p.type == 'entree':
-                    emp_data[emp]['entree'] = p.datetime
-                elif p.type == 'sortie':
-                    emp_data[emp]['sortie'] = p.datetime
+                if emp in emp_data:
+                    if p.type == 'entree':
+                        emp_data[emp]['entree'] = p.datetime
+                    elif p.type == 'sortie':
+                        emp_data[emp]['sortie'] = p.datetime
 
             lines = [(5, 0, 0)]
             for emp, data in emp_data.items():

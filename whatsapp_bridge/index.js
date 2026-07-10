@@ -12,6 +12,7 @@ const axios = require('axios');
 const fs = require('fs');
 const pino = require('pino');
 const express = require('express');
+const { PDFDocument } = require('pdf-lib');
 
 
 // CONFIGURATION
@@ -367,6 +368,9 @@ async function connectToWhatsApp() {
 
                         // Support for multiple files
                         if (result.files && Array.isArray(result.files)) {
+                            const pdfFiles = [];
+                            const nonPdfFiles = [];
+
                             for (const file of result.files) {
                                 const base64Data = file.pdf_base64 || file.base64;
                                 if (!base64Data) continue;
@@ -382,10 +386,51 @@ async function connectToWhatsApp() {
                                     }
                                 }
                                 
+                                if (mimeType === 'application/pdf' || file.file_name.endsWith('.pdf')) {
+                                    pdfFiles.push({ base64: base64Data, name: file.file_name });
+                                } else {
+                                    nonPdfFiles.push({ base64: base64Data, mimeType, name: file.file_name, caption: file.caption });
+                                }
+                            }
+
+                            // 1. Merge and send PDFs if any
+                            if (pdfFiles.length > 0) {
+                                try {
+                                    if (pdfFiles.length === 1) {
+                                        await sock.sendMessage(from, {
+                                            document: Buffer.from(pdfFiles[0].base64, 'base64'),
+                                            mimetype: 'application/pdf',
+                                            fileName: pdfFiles[0].name,
+                                            caption: `Document pour *${identifier}*.`
+                                        }, { quoted: msg });
+                                    } else {
+                                        // Merge multiple PDFs
+                                        const mergedPdf = await PDFDocument.create();
+                                        for (const pdfFile of pdfFiles) {
+                                            const pdfDoc = await PDFDocument.load(Buffer.from(pdfFile.base64, 'base64'));
+                                            const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                                            copiedPages.forEach((page) => mergedPdf.addPage(page));
+                                        }
+                                        const mergedPdfBytes = await mergedPdf.save();
+                                        await sock.sendMessage(from, {
+                                            document: Buffer.from(mergedPdfBytes),
+                                            mimetype: 'application/pdf',
+                                            fileName: `Dossier_Complet_${identifier}.pdf`,
+                                            caption: `Documents fusionnés pour *${identifier}*.`
+                                        }, { quoted: msg });
+                                    }
+                                } catch (err) {
+                                    console.error("Erreur lors de la fusion des PDF:", err);
+                                    await sock.sendMessage(from, { text: "Erreur technique lors de la fusion des PDF." }, { quoted: msg });
+                                }
+                            }
+
+                            // 2. Send non-PDF files separately
+                            for (const file of nonPdfFiles) {
                                 await sock.sendMessage(from, {
-                                    document: Buffer.from(base64Data, 'base64'),
-                                    mimetype: mimeType,
-                                    fileName: file.file_name,
+                                    document: Buffer.from(file.base64, 'base64'),
+                                    mimetype: file.mimeType,
+                                    fileName: file.name,
                                     caption: file.caption || `Document pour *${identifier}*.`
                                 }, { quoted: msg });
                             }

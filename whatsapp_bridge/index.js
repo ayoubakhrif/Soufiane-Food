@@ -420,8 +420,16 @@ async function connectToWhatsApp() {
                                         }, { quoted: msg });
                                     }
                                 } catch (err) {
-                                    console.error("Erreur lors de la fusion des PDF:", err);
-                                    await sock.sendMessage(from, { text: "Erreur technique lors de la fusion des PDF." }, { quoted: msg });
+                                    console.error("Erreur lors de la fusion des PDF, fallback envoi séparé:", err);
+                                    await sock.sendMessage(from, { text: "⚠️ Certains de ces documents PDF sont protégés ou mal formatés (scan). Ils vont vous être envoyés séparément." }, { quoted: msg });
+                                    for (const file of pdfFiles) {
+                                        await sock.sendMessage(from, {
+                                            document: Buffer.from(file.base64, 'base64'),
+                                            mimetype: 'application/pdf',
+                                            fileName: file.name,
+                                            caption: `Document pour *${identifier}*.`
+                                        }, { quoted: msg });
+                                    }
                                 }
                             }
 

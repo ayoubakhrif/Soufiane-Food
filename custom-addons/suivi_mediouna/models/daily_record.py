@@ -110,6 +110,7 @@ class DailyRecord(models.Model):
                     'heure_entree': entree,
                     'heure_sortie': sortie,
                     'ville': p_site,
+                    'site_travail': site_travail,
                     'salaire_journalier': data['salaire_journalier'],
                     'heures_supp': heures_supp,
                     'montant_heures_supp': montant_heures_supp,
@@ -131,7 +132,12 @@ class DailyRecordLine(models.Model):
         ('mediouna', 'Mediouna'),
         ('casa', 'Casa'),
         ('agadir', 'Agadir')
-    ], string='Ville de Travail')
+    ], string='Site de Paie')
+    site_travail = fields.Selection([
+        ('mediouna', 'Mediouna'),
+        ('casa', 'Casa'),
+        ('agadir', 'Agadir')
+    ], string='Site de Travail')
     salaire_journalier = fields.Float(string='Salaire de Base (Jour)')
     heures_supp = fields.Float(string='Heures Supp.')
     montant_heures_supp = fields.Float(string='Montant H. Supp.')

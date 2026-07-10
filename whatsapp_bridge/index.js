@@ -204,8 +204,19 @@ async function connectToWhatsApp() {
             }
 
             // GESTION DU MENU INTERACTIF
-            if (pendingChoices.has(from)) {
-                const choices = pendingChoices.get(from);
+            const quotedMsgId = msg.message?.extendedTextMessage?.contextInfo?.stanzaId;
+            let choices = null;
+            let usedKey = null;
+
+            if (quotedMsgId && pendingChoices.has(quotedMsgId)) {
+                choices = pendingChoices.get(quotedMsgId);
+                usedKey = quotedMsgId;
+            } else if (pendingChoices.has(from)) {
+                choices = pendingChoices.get(from);
+                usedKey = from;
+            }
+
+            if (choices) {
                 const trimmedText = text.trim();
                 
                 const parts = trimmedText.split(/[\s,-]+/).filter(p => p);
@@ -223,8 +234,8 @@ async function connectToWhatsApp() {
 
                 if (parts.length > 0 && allValid) {
                     realMessage = selectedChoices.join('|');
-                    console.log(`Sélection utilisateur multiple : ${trimmedText} -> "${realMessage}"`);
-                    pendingChoices.delete(from); // Clear menu once selected
+                    console.log(`Sélection utilisateur multiple (clé: ${usedKey}) : ${trimmedText} -> "${realMessage}"`);
+                    if (usedKey === from) pendingChoices.delete(from); // Clear fallback, but keep quoted msg IDs active
                 }
                 else if (parts.length > 0 && !allValid && parts.every(p => !isNaN(parseInt(p)) && p.length <= 2)) {
                     await sock.sendMessage(from, { text: "⚠️ Choix invalide. Veuillez répondre par un ou plusieurs numéros valides (ex: 1 3 5)." }, { quoted: msg });
@@ -232,7 +243,7 @@ async function connectToWhatsApp() {
                 }
                 else {
                     console.log(`Menu abandonné pour une nouvelle saisie : "${trimmedText}"`);
-                    pendingChoices.delete(from);
+                    if (usedKey === from) pendingChoices.delete(from);
                 }
             }
 
@@ -325,8 +336,11 @@ async function connectToWhatsApp() {
 
                 if (result && result.status === 'multiple_choices') {
                     // C'est un menu de sélection
-                    pendingChoices.set(from, result.choices);
-                    await sock.sendMessage(from, { text: result.message }, { quoted: msg });
+                    pendingChoices.set(from, result.choices); // Fallback classique
+                    const sentMsg = await sock.sendMessage(from, { text: result.message }, { quoted: msg });
+                    if (sentMsg && sentMsg.key && sentMsg.key.id) {
+                        pendingChoices.set(sentMsg.key.id, result.choices); // Sauvegarde par ID du message menu
+                    }
                 } else if (from === DOSSIER_VERIF_GROUP_ID && result && result.status === 'success' && result.reports) {
                     console.log(`Envoi de ${result.reports.length} rapports au groupe...`);
                     let fullReportText = "📄 *RAPPORT DE VÉRIFICATION DES DOSSIERS*\n━━━━━━━━━━━━━━━━━━\n\n";
@@ -395,40 +409,57 @@ async function connectToWhatsApp() {
 
                             // 1. Merge and send PDFs if any
                             if (pdfFiles.length > 0) {
-                                try {
-                                    if (pdfFiles.length === 1) {
-                                        await sock.sendMessage(from, {
-                                            document: Buffer.from(pdfFiles[0].base64, 'base64'),
-                                            mimetype: 'application/pdf',
-                                            fileName: pdfFiles[0].name,
-                                            caption: `Document pour *${identifier}*.`
-                                        }, { quoted: msg });
-                                    } else {
-                                        // Merge multiple PDFs
-                                        const mergedPdf = await PDFDocument.create();
-                                        for (const pdfFile of pdfFiles) {
+                                if (pdfFiles.length === 1) {
+                                    await sock.sendMessage(from, {
+                                        document: Buffer.from(pdfFiles[0].base64, 'base64'),
+                                        mimetype: 'application/pdf',
+                                        fileName: pdfFiles[0].name,
+                                        caption: `Document pour *${identifier}*.`
+                                    }, { quoted: msg });
+                                } else {
+                                    // Merge multiple PDFs, handle individual failures
+                                    const mergedPdf = await PDFDocument.create();
+                                    let mergedCount = 0;
+                                    const failedPdfs = [];
+
+                                    for (const pdfFile of pdfFiles) {
+                                        try {
                                             const pdfDoc = await PDFDocument.load(Buffer.from(pdfFile.base64, 'base64'), { ignoreEncryption: true });
                                             const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
                                             copiedPages.forEach((page) => mergedPdf.addPage(page));
+                                            mergedCount++;
+                                        } catch (err) {
+                                            console.error("Impossible de fusionner le PDF:", pdfFile.name, err.message);
+                                            failedPdfs.push(pdfFile);
                                         }
-                                        const mergedPdfBytes = await mergedPdf.save();
-                                        await sock.sendMessage(from, {
-                                            document: Buffer.from(mergedPdfBytes),
-                                            mimetype: 'application/pdf',
-                                            fileName: `Dossier_Complet_${identifier}.pdf`,
-                                            caption: `Documents fusionnés pour *${identifier}*.`
-                                        }, { quoted: msg });
                                     }
-                                } catch (err) {
-                                    console.error("Erreur lors de la fusion des PDF, fallback envoi séparé:", err);
-                                    await sock.sendMessage(from, { text: "⚠️ Certains de ces documents PDF sont protégés ou mal formatés (scan). Ils vont vous être envoyés séparément." }, { quoted: msg });
-                                    for (const file of pdfFiles) {
-                                        await sock.sendMessage(from, {
-                                            document: Buffer.from(file.base64, 'base64'),
-                                            mimetype: 'application/pdf',
-                                            fileName: file.name,
-                                            caption: `Document pour *${identifier}*.`
-                                        }, { quoted: msg });
+
+                                    if (mergedCount > 0) {
+                                        try {
+                                            const mergedPdfBytes = await mergedPdf.save();
+                                            await sock.sendMessage(from, {
+                                                document: Buffer.from(mergedPdfBytes),
+                                                mimetype: 'application/pdf',
+                                                fileName: `Dossier_Partiel_${identifier}.pdf`,
+                                                caption: `Documents fusionnés pour *${identifier}*.`
+                                            }, { quoted: msg });
+                                        } catch (saveErr) {
+                                            console.error("Erreur lors de la sauvegarde du PDF fusionné:", saveErr);
+                                            // En cas d'erreur fatale de sauvegarde, on renvoie tout en failed
+                                            for(const f of pdfFiles) { if (!failedPdfs.includes(f)) failedPdfs.push(f); }
+                                        }
+                                    }
+
+                                    if (failedPdfs.length > 0) {
+                                        await sock.sendMessage(from, { text: "⚠️ Certains documents n'ont pas pu être fusionnés (format de scan non supporté) et sont envoyés séparément ci-dessous :" }, { quoted: msg });
+                                        for (const file of failedPdfs) {
+                                            await sock.sendMessage(from, {
+                                                document: Buffer.from(file.base64, 'base64'),
+                                                mimetype: 'application/pdf',
+                                                fileName: file.name,
+                                                caption: `Document séparé pour *${identifier}*.`
+                                            }, { quoted: msg });
+                                        }
                                     }
                                 }
                             }

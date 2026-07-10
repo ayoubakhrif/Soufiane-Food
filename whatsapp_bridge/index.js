@@ -439,10 +439,10 @@ async function connectToWhatsApp() {
 
 // EXPRESS SERVER FOR PROACTIVE MESSAGES (Started once)
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.post('/api/send', async (req, res) => {
-    const { group_id, text } = req.body;
+    const { group_id, text, document, fileName } = req.body;
     if (!group_id || !text) {
         return res.status(400).json({ status: 'error', message: 'Missing group_id or text' });
     }

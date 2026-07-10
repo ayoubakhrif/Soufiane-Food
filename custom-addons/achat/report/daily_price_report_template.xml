@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- QWeb Report Template -->
+    <template id="report_daily_price_changes_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 class="text-center mt-4 mb-4">Rapport Journalier des Changements de Prix</h2>
+                    <h4 class="text-center mb-5">
+                        <span t-esc="report_date"/>
+                    </h4>
+
+                    <table class="table table-sm table-bordered">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th>Article</th>
+                                <th>Fournisseur</th>
+                                <th>Origine</th>
+                                <th>Crop</th>
+                                <th>Incoterm</th>
+                                <th class="text-end">Ancien Prix</th>
+                                <th class="text-end">Nouveau Prix</th>
+                                <th class="text-center">Tendance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="changes" t-as="c">
+                                <tr>
+                                    <td><span t-esc="c['article']"/></td>
+                                    <td><span t-esc="c['fournisseur']"/></td>
+                                    <td><span t-esc="c['origine']"/></td>
+                                    <td><span t-esc="c['crop']"/></td>
+                                    <td><span t-esc="c['incoterm']"/></td>
+                                    <td class="text-end">
+                                        <span t-esc="'%.2f' % c['old_price']"/> <span t-esc="c['currency']"/><br/>
+                                        <small class="text-muted"><span t-esc="c['old_date']"/></small>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong><span t-esc="'%.2f' % c['new_price']"/> <span t-esc="c['currency']"/></strong>
+                                    </td>
+                                    <td class="text-center">
+                                        <t t-if="c['trend'] == 'up'">
+                                            <span style="color: red; font-weight: bold;">🔺 Hausse</span>
+                                        </t>
+                                        <t t-if="c['trend'] == 'down'">
+                                            <span style="color: green; font-weight: bold;">🔻 Baisse</span>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_daily_price_changes">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="achat.report_daily_price_changes_document"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="action_report_daily_price_changes" model="ir.actions.report">
+        <field name="name">Rapport Journalier Prix</field>
+        <field name="model">achat.article.price</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">achat.report_daily_price_changes_document</field>
+        <field name="report_file">achat.report_daily_price_changes_document</field>
+        <field name="print_report_name">'Rapport_Prix'</field>
+    </record>
+</odoo>

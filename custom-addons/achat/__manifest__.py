@@ -26,6 +26,8 @@
         'views/contract_advance_views.xml',
         'views/operational_actions.xml',
         'views/onicl_views.xml',
+        'report/daily_price_report_template.xml',
+        'data/cron_daily_price_report.xml',
         'views/menu.xml',
 
     ],

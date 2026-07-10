@@ -123,51 +123,111 @@ class AchatArticlePrice(models.Model):
             new_price = vals.get('price', record.price)
 
             # If price changed, send notification
-            _logger.info("Price Bot: Article %s - Old: %s, New: %s", record.article_id.name, old_price, new_price)
-            if old_price != 0 and old_price != new_price:
-                try:
-                    # Determine trend
-                    if new_price > old_price:
-                        trend_msg = "🔺 *AUGMENTATION*"
-                        icon = "📈"
-                    else:
-                        trend_msg = "🔻 *DIMINUTION*"
-                        icon = "📉"
-
-                    # Affichage de la traduction (champ traduction de logistique.article)
-                    article_sudo = record.article_id.sudo()
-                    article_display = article_sudo.traduction
-
-                    # Dates pour l'affichage
-                    old_date_str = previous_price_rec.date.strftime('%d/%m') if previous_price_rec and previous_price_rec.date else "??"
-                    new_date_str = record.date.strftime('%d/%m') if record.date else "??"
-                    
-                    # Libellé Incoterm
-                    incoterm_val = dict(self._fields['incoterm'].selection).get(record.incoterm, record.incoterm or 'N/A')
-
-                    msg = f"📢 *CHANGEMENT DE PRIX ({incoterm_val.upper()})* 📢\n"
-                    msg += f"------------------------------------\n"
-                    msg += f"📦 *Article:* {article_display}\n"
-                    if record.crop:
-                        crop_display = "Nouvelle récolte (New crop)" if record.crop == 'new_crop' else "Ancienne récolte (Old crop)"
-                        msg += f"🌱 *Crop:* {crop_display}\n"
-                    msg += f"🏢 *Fournisseur:* {record.supplier_id.name}\n"
-                    msg += f"🌍 *Origine:* {record.origin_id.name or 'Inconnu'}\n\n"
-                    msg += f"{icon} {trend_msg}\n"
-                    msg += f"📉 Ancien: {old_price:.2f} {record.currency_id.symbol or 'Dh'} ({old_date_str})\n"
-                    msg += f"📈 Nouveau: {new_price:.2f} {record.currency_id.symbol or 'Dh'} ({new_date_str})\n"
-                    msg += f"👤 Saisi par: {self.env.user.name}"
-
-
-                    payload = {
-                        "group_id": "120363428923348892@g.us",
-                        "text": msg
-                    }
-                    
-                    # Send to bridge API (same server, host from docker)
-                    requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
-                    _logger.info(f"Price Bot notification sent for article {record.article_id.name}")
-                except Exception as e:
-                    _logger.error(f"Failed to send Price Bot notification: {str(e)}")
-
         return records
+
+    @api.model
+    def _cron_send_daily_price_report(self):
+        import logging
+        import base64
+        import requests
+        from datetime import datetime, time
+        import pytz
+
+        _logger = logging.getLogger(__name__)
+
+        user_tz = pytz.timezone(self.env.user.tz or 'Africa/Casablanca')
+        today_local = datetime.now(user_tz).date()
+        
+        start_of_day_local = user_tz.localize(datetime.combine(today_local, time.min))
+        end_of_day_local = user_tz.localize(datetime.combine(today_local, time.max))
+        
+        start_of_day_utc = start_of_day_local.astimezone(pytz.utc).replace(tzinfo=None)
+        end_of_day_utc = end_of_day_local.astimezone(pytz.utc).replace(tzinfo=None)
+
+        todays_prices = self.search([
+            ('create_date', '>=', start_of_day_utc),
+            ('create_date', '<=', end_of_day_utc),
+            ('article_id.to_follow', '=', True)
+        ], order='create_date desc')
+
+        if not todays_prices:
+            _logger.info("Daily Price Report: No price changes for followed articles today.")
+            return
+
+        processed_keys = set()
+        final_changes = []
+
+        for record in todays_prices:
+            key = (record.article_id.id, record.incoterm, record.crop, record.origin_id.id, record.supplier_id.id)
+            if key in processed_keys:
+                continue
+            processed_keys.add(key)
+
+            previous_price_rec = self.search([
+                ('article_id', '=', record.article_id.id),
+                ('incoterm', '=', record.incoterm),
+                ('crop', '=', record.crop),
+                ('origin_id', '=', record.origin_id.id),
+                ('supplier_id', '=', record.supplier_id.id),
+                ('create_date', '<', start_of_day_utc)
+            ], order='date desc, id desc', limit=1)
+
+            old_price = previous_price_rec.price if previous_price_rec else 0.0
+            new_price = record.price
+
+            if old_price != new_price:
+                final_changes.append({
+                    'record': record,
+                    'old_price': old_price,
+                    'new_price': new_price,
+                    'trend': 'up' if new_price > old_price else 'down',
+                    'old_date': previous_price_rec.date.strftime('%d/%m/%Y') if previous_price_rec and previous_price_rec.date else "N/A",
+                })
+
+        if not final_changes:
+            _logger.info("Daily Price Report: No ACTUAL price changes for followed articles today.")
+            return
+
+        # Prepare dummy dicts for the report since QWeb records can be heavy
+        changes_data = []
+        for c in final_changes:
+            rec = c['record']
+            crop_display = "New crop" if rec.crop == 'new_crop' else "Old crop" if rec.crop == 'old_crop' else "N/A"
+            changes_data.append({
+                'article': rec.article_id.traduction or rec.article_id.name,
+                'fournisseur': rec.supplier_id.name,
+                'origine': rec.origin_id.name or 'N/A',
+                'crop': crop_display,
+                'incoterm': dict(self._fields['incoterm'].selection).get(rec.incoterm, rec.incoterm or 'N/A'),
+                'old_price': c['old_price'],
+                'new_price': c['new_price'],
+                'trend': c['trend'],
+                'currency': rec.currency_id.symbol or 'Dh',
+                'old_date': c['old_date']
+            })
+
+        data = {
+            'changes': changes_data,
+            'report_date': today_local.strftime('%d/%m/%Y')
+        }
+        
+        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+            'achat.action_report_daily_price_changes', 
+            res_ids=[], 
+            data=data
+        )
+
+        pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+        try:
+            payload = {
+                "group_id": "120363428923348892@g.us",
+                "text": f"📢 *Rapport Journalier des Prix* ({today_local.strftime('%d/%m/%Y')})\n\nVoici le récapitulatif des changements de prix pour les articles suivis.",
+                "document": pdf_base64,
+                "fileName": f"Rapport_Prix_{today_local.strftime('%Y%m%d')}.pdf"
+            }
+            response = requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=15)
+            response.raise_for_status()
+            _logger.info("Daily Price Report PDF sent successfully.")
+        except Exception as e:
+            _logger.error(f"Failed to send Daily Price Report PDF: {str(e)}")

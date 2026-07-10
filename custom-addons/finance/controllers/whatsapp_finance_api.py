@@ -680,7 +680,6 @@ class WhatsAppFinanceController(http.Controller):
             # Generate Excel
             import io
             import xlsxwriter
-            import base64
             
             output = io.BytesIO()
             workbook = xlsxwriter.Workbook(output, {'in_memory': True})

@@ -48,6 +48,7 @@ class DailyRecord(models.Model):
                     'entree': False,
                     'sortie': False,
                     'ville': emp.payroll_site,
+                    'site_travail': False,
                     'salaire_journalier': (emp.monthly_salary / 26.0) if emp.monthly_salary else 0.0,
                 }
 
@@ -62,14 +63,20 @@ class DailyRecord(models.Model):
                 if emp in emp_data:
                     if p.type == 'entree':
                         emp_data[emp]['entree'] = p.datetime
+                        emp_data[emp]['site_travail'] = p.site
                     elif p.type == 'sortie':
                         emp_data[emp]['sortie'] = p.datetime
+                        # In case entry is missing but sortie exists
+                        if not emp_data[emp]['site_travail']:
+                            emp_data[emp]['site_travail'] = p.site
 
             lines = [(5, 0, 0)]
             for emp, data in emp_data.items():
                 entree = data['entree']
                 sortie = data['sortie']
                 p_site = data['ville']
+                site_travail = data['site_travail']
+
                 
                 heures_supp = 0.0
                 montant_heures_supp = 0.0

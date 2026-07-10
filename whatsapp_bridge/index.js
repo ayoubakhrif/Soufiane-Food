@@ -407,7 +407,7 @@ async function connectToWhatsApp() {
                                         // Merge multiple PDFs
                                         const mergedPdf = await PDFDocument.create();
                                         for (const pdfFile of pdfFiles) {
-                                            const pdfDoc = await PDFDocument.load(Buffer.from(pdfFile.base64, 'base64'));
+                                            const pdfDoc = await PDFDocument.load(Buffer.from(pdfFile.base64, 'base64'), { ignoreEncryption: true });
                                             const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
                                             copiedPages.forEach((page) => mergedPdf.addPage(page));
                                         }

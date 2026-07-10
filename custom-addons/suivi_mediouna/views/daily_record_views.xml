@@ -27,6 +27,7 @@
                                 <tree default_order="ville desc, employee_id asc">
                                     <field name="ville" column_invisible="True"/>
                                     <field name="employee_id"/>
+                                    <field name="site_travail"/>
                                     <field name="heure_entree"/>
                                     <field name="heure_sortie"/>
                                     <field name="salaire_journalier" sum="Total Base"/>

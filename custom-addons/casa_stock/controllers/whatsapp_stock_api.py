@@ -50,7 +50,7 @@ class WhatsAppStockController(http.Controller):
 
         # 2. FAST TRACK: Search Name in Odoo directly before AI
         fast_articles = request.env['company.article'].sudo().search([
-            ('name', 'ilike', message_text)
+            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
         ])
         
         # Check for absolute exact match to break loops from bridge
@@ -92,7 +92,10 @@ class WhatsAppStockController(http.Controller):
             all_articles = request.env['company.article'].sudo().search([])
             article_names_list = list(set([a.name for a in all_articles if a.name]))
             
-            extracted_name = self._extract_product_name(message_text, openai_key, article_names_list)
+            all_aliases = request.env['company.article.alias'].sudo().search([])
+            darija_aliases_list = [f"{a.name} -> {a.article_id.name}" for a in all_aliases if a.article_id]
+            
+            extracted_name = self._extract_product_name(message_text, openai_key, article_names_list, darija_aliases_list)
             
             if not extracted_name or extracted_name.upper() == 'IGNORE':
                 return {'status': 'ignored'}
@@ -106,7 +109,7 @@ class WhatsAppStockController(http.Controller):
             final_extracted_str = extracted_name
             # Re-search based on AI extraction
             articles = request.env['company.article'].sudo().search([
-                ('name', 'ilike', final_extracted_str)
+                '|', ('name', 'ilike', final_extracted_str), ('alias_ids.name', 'ilike', final_extracted_str)
             ])
             if len(articles) > 1:
                 exact_match = articles.filtered(lambda a: a.name.lower() == final_extracted_str.lower())
@@ -175,7 +178,7 @@ class WhatsAppStockController(http.Controller):
             'pdf_name': f"Situation_Generale_Stock_{fields.Date.today()}.pdf"
         }
 
-    def _extract_product_name(self, text, api_key, article_names_list):
+    def _extract_product_name(self, text, api_key, article_names_list, darija_aliases=None):
         """Use OpenAI to extract the product name from a natural language sentence."""
         url = "https://api.openai.com/v1/chat/completions"
         headers = {
@@ -185,15 +188,18 @@ class WhatsAppStockController(http.Controller):
         
         # Convert list to string for the prompt
         db_names = ", ".join(article_names_list) if article_names_list else "Aucun article disponible"
+        synonyms = "\n".join(darija_aliases) if darija_aliases else "Aucun synonyme défini."
         
         prompt = (
             "Tu es un assistant logistique. Ta tâche est d'identifier le nom correct de l'article demandé.\n"
             "Voici la liste stricte des articles de la base de données :\n"
             f"[{db_names}]\n\n"
+            "Voici un dictionnaire de synonymes/Darija spécifique à l'entreprise pour t'aider :\n"
+            f"{synonyms}\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
             "1. Si l'utilisateur demande une situation globale, le stock général ou le stock total (même avec des fautes comme 'stok genial'), réponds UNIQUEMENT 'GLOBAL_STOCK_REPORT'.\n"
-            "2. Sinon, identifie le nom de l'article. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre').\n"
+            "2. Sinon, identifie le nom de l'article. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus.\n"
             "3. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact.\n"
             "4. IMPORTANT : Si le message ne contient QUE des symboles/caractères spéciaux sans sens (ex: '???', '...', '---') ou ne contient QUE des emojis (ex: '🚀🚀', '👍'), réponds UNIQUEMENT 'IGNORE'.\n"
             "5. Pour tout autre message qui ressemble à un mot, un nom ou une phrase (ex: 'Akajo', 'Salut', 'Poivree'), tente d'identifier l'article ou réponds 'None' si aucun ne correspond.\n"

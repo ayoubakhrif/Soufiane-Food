@@ -158,6 +158,7 @@
             <tree create="false" delete="false">
                 <field name="date"/>
                 <field name="product_id"/>
+                <field name="calibre"/>
                 <field name="lot"/>
                 <field name="dum"/>
                 <field name="ville"/>

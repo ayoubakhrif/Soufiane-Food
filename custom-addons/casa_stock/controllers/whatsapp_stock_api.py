@@ -48,14 +48,17 @@ class WhatsAppStockController(http.Controller):
         if is_general:
             return self._send_global_report()
 
+        search_term = message_text.strip()
         # 2. FAST TRACK: Search Name in Odoo directly before AI
         fast_articles = request.env['company.article'].sudo().search([
-            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+            '|', ('name', 'ilike', search_term), ('alias_ids.name', 'ilike', search_term)
         ])
         
         # Check for absolute exact match to break loops from bridge
         if len(fast_articles) > 1:
-            exact_match = fast_articles.filtered(lambda a: a.name.lower() == message_text.lower())
+            exact_match = fast_articles.filtered(
+                lambda a: a.name.lower() == search_term.lower() or any(al.name.lower() == search_term.lower() for al in a.alias_ids)
+            )
             if exact_match:
                 fast_articles = exact_match[0]
         
@@ -108,11 +111,14 @@ class WhatsAppStockController(http.Controller):
 
             final_extracted_str = extracted_name
             # Re-search based on AI extraction
+            final_search_term = final_extracted_str.strip()
             articles = request.env['company.article'].sudo().search([
-                '|', ('name', 'ilike', final_extracted_str), ('alias_ids.name', 'ilike', final_extracted_str)
+                '|', ('name', 'ilike', final_search_term), ('alias_ids.name', 'ilike', final_search_term)
             ])
             if len(articles) > 1:
-                exact_match = articles.filtered(lambda a: a.name.lower() == final_extracted_str.lower())
+                exact_match = articles.filtered(
+                    lambda a: a.name.lower() == final_search_term.lower() or any(al.name.lower() == final_search_term.lower() for al in a.alias_ids)
+                )
                 if exact_match:
                     articles = exact_match[0]
 
@@ -199,7 +205,7 @@ class WhatsAppStockController(http.Controller):
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
             "1. Si l'utilisateur demande une situation globale, le stock général ou le stock total (même avec des fautes comme 'stok genial'), réponds UNIQUEMENT 'GLOBAL_STOCK_REPORT'.\n"
-            "2. Sinon, identifie le nom de l'article. Utilise tes connaissances générales pour traduire les mots (ex: 'ibzar' -> 'Poivre'). Si tu ne trouves pas ou si tu as un doute, réfère-toi au dictionnaire de synonymes ci-dessus.\n"
+            "2. Sinon, identifie le nom de l'article de la base de données. Si tu reconnais le terme dans le dictionnaire de synonymes (gauche -> droite), renvoie EXACTEMENT le nom de droite.\n"
             "3. Si la demande est très précise (ex: 'Poivre B1'), renvoie le nom exact.\n"
             "4. IMPORTANT : Si le message ne contient QUE des symboles/caractères spéciaux sans sens (ex: '???', '...', '---') ou ne contient QUE des emojis (ex: '🚀🚀', '👍'), réponds UNIQUEMENT 'IGNORE'.\n"
             "5. Pour tout autre message qui ressemble à un mot, un nom ou une phrase (ex: 'Akajo', 'Salut', 'Poivree'), tente d'identifier l'article ou réponds 'None' si aucun ne correspond.\n"

@@ -508,6 +508,7 @@ class WhatsAppFinanceController(http.Controller):
                             <th>Société</th>
                             <th>N° Journal</th>
                             <th>Bénéficiaire</th>
+                            <th>Série de Facture</th>
                             <th>Type</th>
                             <th>Statut</th>
                             <th>Montant (DH)</th>
@@ -531,6 +532,7 @@ class WhatsAppFinanceController(http.Controller):
                 for dq in dqs:
                     journal_val = str(dq.journal) if dq.journal else "N/A"
                     benif_name = dq.benif_id.name if dq.benif_id else "N/A"
+                    serie_val = str(dq.serie) if dq.serie else "N/A"
                     t_selection = dict(dq._fields['type'].selection or {})
                     t_label = t_selection.get(dq.type) or dq.type or "N/A"
                     
@@ -540,12 +542,12 @@ class WhatsAppFinanceController(http.Controller):
                     dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
                     
                     if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
-                        grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount})
+                        grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val})
                     else:
                         grouped_rows.append({
                             'journal': journal_val,
                             'benif': benif_name,
-                            'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount}]
+                            'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val}]
                         })
 
                 phys_rowspan = sum(len(group['items']) for group in grouped_rows)
@@ -571,6 +573,7 @@ class WhatsAppFinanceController(http.Controller):
                             """
                             
                         html_content += f"""
+                                <td>{item['serie']}</td>
                                 <td>{item['type']}</td>
                                 <td>{item['state']}</td>
                                 <td>{item['amount']}</td>

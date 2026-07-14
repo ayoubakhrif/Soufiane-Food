@@ -545,8 +545,18 @@ app.post('/api/send', async (req, res) => {
 
     try {
         console.log(`[BOT] Reçu demande d'envoi pour ${group_id}...`);
-        await sock.sendMessage(group_id, { text });
-        console.log(`[BOT] Message envoyé avec succès à ${group_id}`);
+        if (document) {
+            await sock.sendMessage(group_id, {
+                document: Buffer.from(document, 'base64'),
+                mimetype: 'application/pdf',
+                fileName: fileName || 'document.pdf',
+                caption: text
+            });
+            console.log(`[BOT] Document PDF envoyé avec succès à ${group_id}`);
+        } else {
+            await sock.sendMessage(group_id, { text });
+            console.log(`[BOT] Message envoyé avec succès à ${group_id}`);
+        }
         res.json({ status: 'success' });
     } catch (err) {
         console.error(`[BOT] ÉCHEC envoi message :`, err.message);

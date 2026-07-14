@@ -517,7 +517,14 @@ class WhatsAppFinanceController(http.Controller):
                         </tr>
             """
             
-            for phys, dqs in grouped_dqs.items():
+            # Sort by minimum non-zero journal number to guarantee order
+            def get_min_journal(dqs_list):
+                journals = [dq.journal for dq in dqs_list if dq.journal]
+                return min(journals) if journals else float('inf')
+                
+            sorted_phys = sorted(grouped_dqs.items(), key=lambda item: get_min_journal(item[1]))
+            
+            for phys, dqs in sorted_phys:
                 chq_name = phys.name or "N/A"
                 ste_name = phys.ste_id.name if phys.ste_id else "N/A"
                 phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')

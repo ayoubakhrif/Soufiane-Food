@@ -425,8 +425,6 @@ class DataCheque(models.Model):
                 if bureau_perso:
                     rec.perso_id = bureau_perso
 
-                # Clear dates LAST to ensure they aren't overwritten by relation changes triggering computes
-                rec.date_emission = False
                 rec.date_echeance = False
 
     @api.constrains('state', 'facture', 'date_emission', 'date_echeance')
@@ -468,8 +466,6 @@ class DataCheque(models.Model):
                 if annule_benif:
                     rec.benif_id = annule_benif
 
-                # Clear dates LAST
-                rec.date_emission = False
                 rec.date_echeance = False
                 
     # -------------------------------------------------------------------
@@ -807,7 +803,6 @@ class DataCheque(models.Model):
             if vals.get('facture') != 'bureau':
                 vals['facture'] = 'bureau'
             vals['journal'] = 0
-            vals['date_emission'] = False
             vals['date_echeance'] = False
 
             # Force Relationship : Person
@@ -829,7 +824,6 @@ class DataCheque(models.Model):
             if vals.get('facture') != 'annule':
                 vals['facture'] = 'annule'
             vals['journal'] = 0
-            vals['date_emission'] = False
             vals['date_echeance'] = False
 
             # Force Relationship : Person

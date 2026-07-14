@@ -132,6 +132,16 @@ class AchatArticlePrice(models.Model):
         import requests
         from datetime import datetime, time
         import pytz
+        from dateutil.relativedelta import relativedelta
+        import io
+        
+        import matplotlib
+        try:
+            matplotlib.use('Agg')
+        except Exception:
+            pass
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
 
         _logger = logging.getLogger(__name__)
 
@@ -188,11 +198,57 @@ class AchatArticlePrice(models.Model):
             _logger.info("Daily Price Report: No ACTUAL price changes for followed articles today.")
             return
 
+        # Calculate date limit (6 months ago)
+        six_months_ago = (today_local - relativedelta(months=6))
+
         # Prepare dummy dicts for the report since QWeb records can be heavy
         changes_data = []
         for c in final_changes:
             rec = c['record']
             crop_display = "New crop" if rec.crop == 'new_crop' else "Old crop" if rec.crop == 'old_crop' else "N/A"
+            
+            # Fetch historical data for graph
+            history = self.search([
+                ('article_id', '=', rec.article_id.id),
+                ('incoterm', '=', rec.incoterm),
+                ('crop', '=', rec.crop),
+                ('origin_id', '=', rec.origin_id.id),
+                ('supplier_id', '=', rec.supplier_id.id),
+                ('date', '>=', six_months_ago)
+            ], order='date asc')
+
+            dates = []
+            prices = []
+            for h in history:
+                if h.date:
+                    dates.append(h.date)
+                    prices.append(h.price)
+
+            graph_b64 = ""
+            if len(dates) > 0:
+                try:
+                    plt.figure(figsize=(8, 4))
+                    plt.plot(dates, prices, marker='o', linestyle='-', color='#1f77b4', linewidth=2, markersize=6)
+                    plt.title(f"Évolution du prix (6 derniers mois)", fontsize=12, pad=10)
+                    plt.xlabel("Date", fontsize=10)
+                    plt.ylabel(f"Prix ({rec.currency_id.symbol or 'Dh'})", fontsize=10)
+                    plt.grid(True, linestyle='--', alpha=0.7)
+                    
+                    # Format X axis dates
+                    ax = plt.gca()
+                    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
+                    plt.xticks(rotation=45)
+                    plt.tight_layout()
+
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png', dpi=100)
+                    buf.seek(0)
+                    graph_b64 = base64.b64encode(buf.read()).decode('utf-8')
+                    buf.close()
+                    plt.close()
+                except Exception as e:
+                    _logger.error(f"Erreur génération graphe pour {rec.id}: {e}")
+
             changes_data.append({
                 'article': rec.article_id.traduction or rec.article_id.name,
                 'fournisseur': rec.supplier_id.name,
@@ -203,7 +259,8 @@ class AchatArticlePrice(models.Model):
                 'new_price': c['new_price'],
                 'trend': c['trend'],
                 'currency': rec.currency_id.symbol or 'Dh',
-                'old_date': c['old_date']
+                'old_date': c['old_date'],
+                'graph_b64': graph_b64
             })
 
         data = {

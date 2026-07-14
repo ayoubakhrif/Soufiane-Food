@@ -10,46 +10,50 @@
                         <span t-esc="report_date"/>
                     </h4>
 
-                    <table class="table table-sm table-bordered">
-                        <thead style="background-color: #f8f9fa;">
-                            <tr>
-                                <th>Article</th>
-                                <th>Fournisseur</th>
-                                <th>Origine</th>
-                                <th>Crop</th>
-                                <th>Incoterm</th>
-                                <th class="text-end">Ancien Prix</th>
-                                <th class="text-end">Nouveau Prix</th>
-                                <th class="text-center">Tendance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="changes" t-as="c">
-                                <tr>
-                                    <td><span t-esc="c['article']"/></td>
-                                    <td><span t-esc="c['fournisseur']"/></td>
-                                    <td><span t-esc="c['origine']"/></td>
-                                    <td><span t-esc="c['crop']"/></td>
-                                    <td><span t-esc="c['incoterm']"/></td>
-                                    <td class="text-end">
-                                        <span t-esc="'%.2f' % c['old_price']"/> <span t-esc="c['currency']"/><br/>
-                                        <small class="text-muted"><span t-esc="c['old_date']"/></small>
-                                    </td>
-                                    <td class="text-end">
-                                        <strong><span t-esc="'%.2f' % c['new_price']"/> <span t-esc="c['currency']"/></strong>
-                                    </td>
-                                    <td class="text-center">
-                                        <t t-if="c['trend'] == 'up'">
-                                            <span style="color: red; font-weight: bold;">🔺 Hausse</span>
+                    <div class="row">
+                        <t t-foreach="changes" t-as="c">
+                            <div class="col-12 mb-5" style="page-break-inside: avoid;">
+                                <div class="card" style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                                    <div class="card-header" style="background-color: #f8f9fa; border-bottom: 2px solid #1f77b4; padding: 15px;">
+                                        <h4 class="mb-0" style="color: #333;">
+                                            <strong><span t-esc="c['article']"/></strong>
+                                            <span style="font-size: 0.8em; color: #666; float: right;">
+                                                <t t-if="c['trend'] == 'up'">
+                                                    <span style="color: red;">🔺 Hausse: </span>
+                                                </t>
+                                                <t t-if="c['trend'] == 'down'">
+                                                    <span style="color: green;">🔻 Baisse: </span>
+                                                </t>
+                                                <span t-esc="'%.2f' % c['old_price']"/> ➡️ <strong><span t-esc="'%.2f' % c['new_price']"/> <span t-esc="c['currency']"/></strong>
+                                            </span>
+                                        </h4>
+                                    </div>
+                                    <div class="card-body" style="padding: 15px;">
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <p class="mb-1"><strong>Fournisseur:</strong> <span t-esc="c['fournisseur']"/></p>
+                                                <p class="mb-1"><strong>Origine:</strong> <span t-esc="c['origine']"/></p>
+                                            </div>
+                                            <div class="col-6">
+                                                <p class="mb-1"><strong>Crop:</strong> <span t-esc="c['crop']"/></p>
+                                                <p class="mb-1"><strong>Incoterm:</strong> <span t-esc="c['incoterm']"/></p>
+                                            </div>
+                                        </div>
+                                        <t t-if="c.get('graph_b64')">
+                                            <div class="text-center mt-3">
+                                                <img t-att-src="'data:image/png;base64,' + c['graph_b64']" style="max-width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px;"/>
+                                            </div>
                                         </t>
-                                        <t t-if="c['trend'] == 'down'">
-                                            <span style="color: green; font-weight: bold;">🔻 Baisse</span>
+                                        <t t-else="">
+                                            <div class="text-center mt-3" style="color: #999; font-style: italic;">
+                                                <p>Pas d'historique suffisant pour afficher le graphique.</p>
+                                            </div>
                                         </t>
-                                    </td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
                 </div>
             </t>
         </t>

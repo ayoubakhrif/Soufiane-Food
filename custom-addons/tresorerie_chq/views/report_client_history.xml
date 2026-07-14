@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_tresorerie_chq_client_history" model="ir.actions.report">
+        <field name="name">Historique Chèques et Effets Client</field>
+        <field name="model">tresorerie_chq.client</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tresorerie_chq.report_client_history_document</field>
+        <field name="report_file">tresorerie_chq.report_client_history_document</field>
+        <field name="binding_model_id" ref="model_tresorerie_chq_client"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_client_history_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="client">
+                <t t-call="web.basic_layout">
+                    <t t-set="all_cheques" t-value="client.get_all_cheques()"/>
+                    <t t-set="all_effets" t-value="client.get_all_effets()"/>
+                    
+                    <div class="page">
+                        <style>
+                            body {
+                                font-family: "DejaVu Sans", sans-serif !important;
+                                color: #1f2937;
+                            }
+                            .invoice-header {
+                                text-align: center;
+                                margin-bottom: 30px;
+                                border-bottom: 1px solid #e5e7eb;
+                                padding-bottom: 20px;
+                            }
+                            .invoice-title {
+                                font-size: 28px;
+                                font-weight: bold;
+                                color: #1e3a8a;
+                                margin-bottom: 10px;
+                            }
+                            .client-info {
+                                font-size: 16px;
+                                color: #1f2937;
+                                margin: 5px 0;
+                            }
+                            .section-title {
+                                font-size: 18px;
+                                font-weight: bold;
+                                color: white;
+                                padding: 8px 12px;
+                                margin-top: 20px;
+                                margin-bottom: 10px;
+                                border-radius: 6px;
+                            }
+                            .section-cheques { background: #2563eb; }
+                            .section-effets { background: #059669; }
+                            .section-recap { background: #1f2937; }
+                            
+                            .data-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 15px;
+                            }
+                            .data-table th {
+                                background: #f3f4f6;
+                                padding: 8px;
+                                text-align: left;
+                                font-size: 12px;
+                                font-weight: bold;
+                                border: 1px solid #e5e7eb;
+                            }
+                            .data-table td {
+                                padding: 6px 8px;
+                                border: 1px solid #f3f4f6;
+                                font-size: 11px;
+                            }
+                            .amount { text-align: right; font-weight: bold; }
+                            
+                            .recap-box {
+                                background: #fefce8;
+                                border: 1px solid #fef08a;
+                                border-radius: 8px;
+                                padding: 15px;
+                                margin-top: 20px;
+                            }
+                            .recap-line {
+                                display: flex;
+                                justify-content: space-between;
+                                padding: 4px 0;
+                                font-size: 14px;
+                            }
+                            .recap-total {
+                                border-top: 2px solid #2563eb;
+                                margin-top: 8px;
+                                padding-top: 8px;
+                                font-weight: bold;
+                                font-size: 16px;
+                                color: #1e3a8a;
+                            }
+                            
+                            .badge {
+                                padding: 3px 6px;
+                                border-radius: 4px;
+                                font-size: 10px;
+                                font-weight: bold;
+                                color: white;
+                            }
+                            .badge-brouillon { background-color: #6c757d; }
+                            .badge-stock { background-color: #17a2b8; }
+                            .badge-banque { background-color: #ffc107; color: black; }
+                            .badge-encaisse { background-color: #28a745; }
+                            .badge-impaye { background-color: #dc3545; }
+                            .badge-remis { background-color: #fd7e14; }
+                        </style>
+
+                        <!-- Header -->
+                        <div class="invoice-header">
+                            <div class="invoice-title">RAPPORT DE TRÉSORERIE</div>
+                            <div class="client-info"><strong>Client :</strong> <span t-field="client.name"/></div>
+                            <div class="client-info" t-if="client.cin"><strong>CIN :</strong> <span t-field="client.cin"/></div>
+                            <div class="client-info"><strong>Date d'édition :</strong> <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                        </div>
+
+                        <!-- Recap Box -->
+                        <div class="recap-box">
+                            <div class="section-title section-recap">RÉCAPITULATIF</div>
+                            <t t-set="total_chq" t-value="sum(all_cheques.mapped('amount'))"/>
+                            <t t-set="total_eff" t-value="sum(all_effets.mapped('amount'))"/>
+                            <t t-set="total_encaisse" t-value="sum(all_cheques.filtered(lambda x: x.state == 'encaisse').mapped('amount')) + sum(all_effets.filtered(lambda x: x.state == 'encaisse').mapped('amount'))"/>
+                            <t t-set="total_impaye" t-value="sum(all_cheques.filtered(lambda x: x.state == 'impaye').mapped('amount')) + sum(all_effets.filtered(lambda x: x.state == 'impaye').mapped('amount'))"/>
+                            
+                            <div class="recap-line">
+                                <span>Total Chèques (<span t-esc="len(all_cheques)"/>)</span>
+                                <span class="amount"><span t-esc="'{0:,.2f}'.format(total_chq).replace(',', ' ')"/> MAD</span>
+                            </div>
+                            <div class="recap-line">
+                                <span>Total Effets (<span t-esc="len(all_effets)"/>)</span>
+                                <span class="amount"><span t-esc="'{0:,.2f}'.format(total_eff).replace(',', ' ')"/> MAD</span>
+                            </div>
+                            <div class="recap-line recap-total">
+                                <span>TOTAL GÉNÉRAL</span>
+                                <span class="amount"><span t-esc="'{0:,.2f}'.format(total_chq + total_eff).replace(',', ' ')"/> MAD</span>
+                            </div>
+                            <br/>
+                            <div class="recap-line" style="color: #059669; font-weight: bold;">
+                                <span>Dont Encaissé</span>
+                                <span class="amount"><span t-esc="'{0:,.2f}'.format(total_encaisse).replace(',', ' ')"/> MAD</span>
+                            </div>
+                            <div class="recap-line" style="color: #dc3545; font-weight: bold;">
+                                <span>Dont Impayé</span>
+                                <span class="amount"><span t-esc="'{0:,.2f}'.format(total_impaye).replace(',', ' ')"/> MAD</span>
+                            </div>
+                        </div>
+
+                        <!-- Chèques -->
+                        <t t-if="all_cheques">
+                            <div class="section-title section-cheques">LISTE DES CHÈQUES</div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>N° Chèque</th>
+                                        <th>Échéance</th>
+                                        <th>Banque</th>
+                                        <th>Porteur</th>
+                                        <th>État</th>
+                                        <th class="amount">Montant</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="all_cheques" t-as="chq">
+                                        <td><span t-field="chq.note"/></td>
+                                        <td><span t-field="chq.check_date" t-options='{"widget": "date"}'/></td>
+                                        <td><span t-field="chq.bank_id.name"/></td>
+                                        <td><span t-field="chq.owner_id.name"/></td>
+                                        <td>
+                                            <t t-if="chq.state == 'brouillon'"><span class="badge badge-brouillon">Brouillon</span></t>
+                                            <t t-if="chq.state == 'stock'"><span class="badge badge-stock">En Stock</span></t>
+                                            <t t-if="chq.state == 'banque'"><span class="badge badge-banque">À la Banque</span></t>
+                                            <t t-if="chq.state == 'encaisse'"><span class="badge badge-encaisse">Encaissé</span></t>
+                                            <t t-if="chq.state == 'impaye'"><span class="badge badge-impaye">Impayé</span></t>
+                                            <t t-if="chq.state == 'remis'"><span class="badge badge-remis">Remis</span></t>
+                                        </td>
+                                        <td class="amount"><span t-field="chq.amount"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Effets -->
+                        <t t-if="all_effets">
+                            <div class="section-title section-effets">LISTE DES EFFETS</div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>N° Effet</th>
+                                        <th>Échéance</th>
+                                        <th>Porteur</th>
+                                        <th>État</th>
+                                        <th class="amount">Montant</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="all_effets" t-as="eff">
+                                        <td><span t-field="eff.note"/></td>
+                                        <td><span t-field="eff.check_date" t-options='{"widget": "date"}'/></td>
+                                        <td><span t-field="eff.owner_id.name"/></td>
+                                        <td>
+                                            <t t-if="eff.state == 'brouillon'"><span class="badge badge-brouillon">Brouillon</span></t>
+                                            <t t-if="eff.state == 'stock'"><span class="badge badge-stock">En Stock</span></t>
+                                            <t t-if="eff.state == 'banque'"><span class="badge badge-banque">À la Banque</span></t>
+                                            <t t-if="eff.state == 'encaisse'"><span class="badge badge-encaisse">Encaissé</span></t>
+                                            <t t-if="eff.state == 'impaye'"><span class="badge badge-impaye">Impayé</span></t>
+                                            <t t-if="eff.state == 'remis'"><span class="badge badge-remis">Remis</span></t>
+                                        </td>
+                                        <td class="amount"><span t-field="eff.amount"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Empty State -->
+                        <t t-if="not all_cheques and not all_effets">
+                            <p style="text-align: center; font-style: italic; color: #6b7280; margin-top: 30px;">
+                                Aucun chèque ni effet enregistré pour ce client.
+                            </p>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

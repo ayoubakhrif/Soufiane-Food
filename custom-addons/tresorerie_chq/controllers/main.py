@@ -1,5 +1,7 @@
 import json
-from odoo import http
+import base64
+import requests
+from odoo import http, SUPERUSER_ID
 from odoo.http import request, Response
 
 class AITrainingExportController(http.Controller):
@@ -141,3 +143,147 @@ Exemple de réponse attendue:
             return {"status": "success", "message": f"✅ {doc_name} enregistré(s) avec succès pour {client_name_str}.\nL'IA a extrait {lines_count} ligne(s)."}
         except Exception as e:
             return {"status": "success", "message": f"⚠️ Document créé pour {client_name_str} mais l'IA a échoué : {str(e)}"}
+
+    @http.route('/api/whatsapp/tresorerie_chq/report', type='json', auth='none', methods=['POST'], csrf=False)
+    def whatsapp_tresorerie_chq_report(self, **kwargs):
+        db_name = request.httprequest.args.get('db') or 'soufianefoods'
+        request.session.db = db_name
+        request.update_env(user=SUPERUSER_ID)
+        
+        # 1. Verification of API Key
+        headers = request.httprequest.headers
+        api_key = headers.get('X-Api-Key')
+        expected_api_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.api_key', 'default-secret-key')
+        if not api_key or api_key != expected_api_key:
+            return {'status': 'error', 'message': 'Unauthorized'}
+
+        try:
+            data = kwargs
+            message_text = data.get('message', '').strip()
+            group_id = data.get('group_id', '')
+        except Exception as e:
+            return {'status': 'error', 'message': f'Invalid JSON: {str(e)}'}
+
+        if not message_text:
+            return {'status': 'error', 'message': 'Empty message'}
+
+        TRESORERIE_REPORT_GROUP_ID = "120363429851164875@g.us"
+        if group_id != TRESORERIE_REPORT_GROUP_ID:
+            return {'status': 'ignored', 'message': 'This agent only handles the Tresorerie Report Group.'}
+
+        # 1. Fast match
+        Client = request.env['tresorerie_chq.client'].sudo()
+        fast_clients = Client.search([
+            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
+        ])
+        
+        if len(fast_clients) > 1:
+            exact_match = fast_clients.filtered(lambda c: c.name.lower() == message_text.lower())
+            if exact_match:
+                fast_clients = exact_match[0]
+                
+        if len(fast_clients) > 1:
+            choices = [c.name for c in fast_clients][:15]
+            choices_text = f"Plusieurs clients correspondent à '{message_text}'. Lequel voulez-vous ?\n"
+            for i, name in enumerate(choices, 1):
+                choices_text += f"{i}- {name}\n"
+            return {
+                'status': 'multiple_choices',
+                'message': choices_text,
+                'choices': choices
+            }
+        
+        if len(fast_clients) == 1:
+            clients = fast_clients
+            extracted_name = fast_clients.name
+        else:
+            # AI Fallback
+            openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+            if not openai_key:
+                return {'status': 'error', 'message': 'OpenAI API key not configured (parameter: whatsapp_stock.openai_key)'}
+
+            all_clients = Client.search([])
+            client_names_list = [c.name for c in all_clients if c.name]
+            
+            all_aliases = request.env['tresorerie_chq.client.alias'].sudo().search([])
+            alias_list = [f"{a.name} -> {a.client_id.name}" for a in all_aliases if a.client_id]
+            
+            extracted_name = self._extract_client_name(message_text, openai_key, client_names_list, alias_list)
+            
+            if not extracted_name or extracted_name.upper() == 'IGNORE':
+                return {'status': 'ignored'}
+
+            if not extracted_name or extracted_name.lower() == 'none':
+                return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
+
+            clients = Client.search([
+                '|', ('name', 'ilike', extracted_name), ('alias_ids.name', 'ilike', extracted_name)
+            ])
+
+        if not clients:
+            return {'status': 'not_found', 'message': f"Aucun client trouvé pour : '{extracted_name}'."}
+
+        if len(clients) > 1:
+            absolute_match = clients.filtered(lambda c: c.name.lower() == extracted_name.lower())
+            if absolute_match:
+                clients = absolute_match[0]
+
+        if len(clients) == 1:
+            client = clients[0]
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action._render_qweb_pdf('tresorerie_chq.action_report_tresorerie_chq_client_history', res_ids=client.ids)
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+            return {
+                'status': 'success',
+                'client_name': client.name,
+                'pdf_base64': pdf_base64,
+                'file_name': f"Rapport_Tresorerie_{client.name.replace(' ', '_')}.pdf"
+            }
+        else:
+            choices = [c.name for c in clients]
+            choices_text = "Plusieurs clients correspondent à votre demande. Veuillez préciser :\n"
+            for i, name in enumerate(choices, 1):
+                choices_text += f"{i}- {name}\n"
+            return {
+                'status': 'multiple_choices',
+                'message': choices_text,
+                'choices': choices
+            }
+
+    def _extract_client_name(self, text, api_key, client_names_list, alias_list=None):
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        db_names = ", ".join(client_names_list) if client_names_list else "Aucun client disponible"
+        synonyms = "\n".join(alias_list) if alias_list else "Aucun synonyme défini."
+        
+        prompt = (
+            "Tu es un assistant administratif. Ta tâche est d'identifier le nom correct du client demandé pour un rapport de trésorerie (chèques/effets).\n"
+            "Voici la liste des clients de la base de données :\n"
+            f"[{db_names}]\n\n"
+            "Voici un dictionnaire d'alias (synonymes) pour t'aider :\n"
+            f"{synonyms}\n\n"
+            "Message WhatsApp : " + text + "\n\n"
+            "Règles strictes :\n"
+            "1. Identifie le nom du client mentionné.\n"
+            "2. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
+            "3. IMPORTANT : Si la demande est vague (ex: 'taggada'), renvoie UNIQUEMENT le terme commun.\n"
+            "4. IMPORTANT : Si le message ne contient QUE des emojis ou des ponctuations (ex: '???', '...'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "5. Pour tout autre message, tente d'identifier le client de la base de données. Si vraiment aucun ne correspond de près ou de loin, réponds 'None'.\n"
+            "Retourne UNIQUEMENT le résultat (le nom du client ou IGNORE)."
+        )
+        data = {
+            "model": "gpt-4o-mini",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0
+        }
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=10)
+            result = response.json()
+            return result['choices'][0]['message']['content'].strip()
+        except Exception:
+            return None

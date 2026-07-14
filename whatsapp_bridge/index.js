@@ -33,6 +33,7 @@ const LOGISTICS_PDF_GROUP_ID = "120363428159815503@g.us";
 const TRANSPORT_GROUP_ID = "120363409412071351@g.us";
 const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
 const TRESORERIE_CHQ_GROUP_ID = "120363427689661439@g.us";
+const TRESORERIE_REPORT_GROUP_ID = "120363429851164875@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -50,6 +51,7 @@ const DOSSIER_SEARCH_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp
 const LOGISTICS_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistique/pdf?db=soufianefoods";
 const TRANSPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/transport?db=soufianefoods";
 const TRESORERIE_CHQ_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/tresorerie_chq/pdf?db=soufianefoods";
+const TRESORERIE_REPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/tresorerie_chq/report?db=soufianefoods";
 
 const API_KEY = "whatsapp_direct_quantity"; // À définir dans Odoo (Paramètres système)
 
@@ -198,6 +200,9 @@ async function connectToWhatsApp() {
             } else if (from === TRESORERIE_CHQ_GROUP_ID) {
                 targetOdooUrl = TRESORERIE_CHQ_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === TRESORERIE_REPORT_GROUP_ID) {
+                targetOdooUrl = TRESORERIE_REPORT_ODOO_URL;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -281,6 +286,7 @@ async function connectToWhatsApp() {
                 else if (from === DOSSIER_VERIF_GROUP_ID) typeStr = "DOSSIER_VERIF";
                 else if (from === TRANSPORT_GROUP_ID) typeStr = "TRANSPORT";
                 else if (from === TRESORERIE_CHQ_GROUP_ID) typeStr = "TRESORERIE_CHQ";
+                else if (from === TRESORERIE_REPORT_GROUP_ID) typeStr = "TRESORERIE_REPORT";
 
                 console.log(`Appel à Odoo (${typeStr}) pour : "${realMessage}"`);
                 
@@ -377,6 +383,7 @@ async function connectToWhatsApp() {
                         if (from === LOGISTICS_GROUP_ID) reportType = "logistique";
                         if (from === TRANSPORT_GROUP_ID) reportType = "chauffeur";
                         if (from === SURESTARIE_REPORT_GROUP_ID) reportType = "comparatif Surestarie/Magasinage";
+                        if (from === TRESORERIE_REPORT_GROUP_ID) reportType = "trésorerie chèques/effets";
 
                         console.log(`Entité identifiée : ${identifier}. Envoi du/des PDF(s)...`);
 

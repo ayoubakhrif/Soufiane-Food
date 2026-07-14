@@ -208,7 +208,8 @@ Exemple de réponse attendue:
             ],
             "generationConfig": {
                 "responseMimeType": "application/json",
-                "temperature": 0.0
+                "temperature": 0.0,
+                "maxOutputTokens": 8192
             }
         }
 
@@ -244,8 +245,17 @@ Exemple de réponse attendue:
         try:
             result = json.loads(clean_content)
         except Exception as e:
-            from odoo.exceptions import UserError
-            raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
+            # Attempt to auto-fix truncated JSON if it's missing closing brackets
+            try:
+                if clean_content.endswith('}'):
+                    result = json.loads(clean_content)
+                elif clean_content.endswith(']'):
+                    result = json.loads(clean_content + '}')
+                else:
+                    result = json.loads(clean_content + ']}')
+            except Exception:
+                from odoo.exceptions import UserError
+                raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
 
         items = result.get('items', [])
         if not items:

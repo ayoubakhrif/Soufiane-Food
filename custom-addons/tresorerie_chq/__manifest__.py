@@ -18,6 +18,7 @@
         'views/effet_views.xml',
         'views/ai_training_views.xml',
         'views/ai_training_export_views.xml',
+        'views/report_client_history.xml',
     ],
     'installable': True,
     'application': True,

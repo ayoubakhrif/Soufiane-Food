@@ -1,5 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- SEARCH VIEW -->
+    <record id="view_achat_contract_search" model="ir.ui.view">
+        <field name="name">achat.contract.search</field>
+        <field name="model">achat.contract</field>
+        <field name="arch" type="xml">
+            <search string="Search Purchase Contracts">
+                <field name="name" string="Contract Number" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="supplier_id"/>
+                <field name="ste_id"/>
+                <field name="article_id"/>
+                <field name="legacy_article_id"/>
+                <field name="incoterm"/>
+                <field name="origin_id"/>
+                
+                <separator/>
+                <filter string="Open" name="filter_open" domain="[('state', '=', 'open')]"/>
+                <filter string="Closed" name="filter_closed" domain="[('state', '=', 'closed')]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Supplier" name="group_supplier" context="{'group_by':'supplier_id'}"/>
+                    <filter string="Company" name="group_company" context="{'group_by':'ste_id'}"/>
+                    <filter string="Article" name="group_article" context="{'group_by':'article_id'}"/>
+                    <filter string="State" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Contract Date" name="group_date" context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
     <!-- TREE VIEW -->
     <record id="view_achat_contract_tree" model="ir.ui.view">
         <field name="name">achat.contract.tree</field>

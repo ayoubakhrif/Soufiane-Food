@@ -44,6 +44,9 @@
                     <button name="action_set_gate_out" string="Gate Out" type="object" class="btn-primary" invisible="status != 'in_progress'"/>
                     <button name="action_set_closed" string="Clôturer" type="object" class="btn-primary" invisible="status != 'get_out'"/>
                     
+                    <button name="action_set_in_progress" string="Remettre en cours" type="object" groups="logistique.group_logistique_manager" invisible="status not in ('get_out', 'closed')"/>
+                    <button name="action_set_gate_out" string="Remettre en Gate Out" type="object" groups="logistique.group_logistique_manager" invisible="status != 'closed'"/>
+                    
                     <button name="action_exit_port" string="Sortie Port" type="object" class="oe_highlight" 
                             invisible="port_status == 'exited'"
                             groups="logistique.group_logistique_user"/>

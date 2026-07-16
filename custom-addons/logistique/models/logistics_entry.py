@@ -386,6 +386,10 @@ class LogisticsEntry(models.Model):
     def action_move_to_draft(self):
         self.write({'purchase_state': 'draft'})
 
+    def action_set_in_progress(self):
+        for rec in self:
+            rec.write({'status': 'in_progress'})
+
     def action_set_gate_out(self):
         for rec in self:
             if not rec.bad_date and rec.incoterm != 'emirate':

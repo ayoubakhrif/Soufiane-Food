@@ -20,6 +20,7 @@ class FinanceEffet(models.Model):
     date_emission = fields.Date(string='Date d’émission', required=True, default=fields.Date.context_today, tracking=True)
     date_echeance = fields.Date(string='Date d’échéance', required=True, tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
+    week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     
     ste_id = fields.Many2one('finance.ste', string='Société', required=True, tracking=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', required=True, tracking=True)
@@ -42,6 +43,27 @@ class FinanceEffet(models.Model):
                 rec.state = 'encaisse'
             else:
                 rec.state = 'non_encaisse'
+
+    @staticmethod
+    def french_week_number(date_obj):
+        if not date_obj:
+            return False
+        from datetime import date, timedelta
+        first_jan = date(date_obj.year, 1, 1)
+        first_monday = first_jan - timedelta(days=first_jan.weekday())
+        if first_jan.weekday() > 3:
+            first_monday += timedelta(days=7)
+        delta_days = (date_obj - first_monday).days
+        week = (delta_days // 7) + 1
+        return f"W{week:02d}"
+
+    @api.depends('date_emission')
+    def _compute_week(self):
+        for rec in self:
+            if rec.date_emission:
+                rec.week = self.french_week_number(rec.date_emission)
+            else:
+                rec.week = False
 
     # -------------------------------------------------------------------
     # Calculate TALON

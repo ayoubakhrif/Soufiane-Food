@@ -27,16 +27,28 @@ class Cal3iyaClient(models.Model):
         'benif_id',
         string="Chèques Physiques"
     )
+    
+    effet_ids = fields.One2many(
+        'finance.effet',
+        'benif_id',
+        string="Effets"
+    )
 
     total_credit = fields.Float(string="Total Crédit", compute="_compute_chq_totals")
     total_debit = fields.Float(string="Total Encaissé", compute="_compute_chq_totals")
     solde = fields.Float(string="Solde à ce jour", compute="_compute_chq_totals")
 
-    @api.depends('physical_chq_ids.credit', 'physical_chq_ids.debit')
+    @api.depends('physical_chq_ids.credit', 'physical_chq_ids.debit', 'effet_ids.montant', 'effet_ids.date_encaissement')
     def _compute_chq_totals(self):
         for rec in self:
-            rec.total_credit = sum(rec.physical_chq_ids.mapped('credit'))
-            rec.total_debit = sum(rec.physical_chq_ids.mapped('debit'))
+            c_credit = sum(rec.physical_chq_ids.mapped('credit'))
+            e_credit = sum(rec.effet_ids.mapped('montant'))
+            rec.total_credit = c_credit + e_credit
+            
+            c_debit = sum(rec.physical_chq_ids.mapped('debit'))
+            e_debit = sum(e.montant for e in rec.effet_ids if e.date_encaissement)
+            rec.total_debit = c_debit + e_debit
+            
             rec.solde = rec.total_credit - rec.total_debit
 
     def get_financial_breakdown(self):
@@ -62,6 +74,22 @@ class Cal3iyaClient(models.Model):
             else:
                 breakdown[ste_name]['non_encaisse'] += chq.amount_total
                 breakdown[ste_name]['count_non_encaisse'] += 1
+                
+        for effet in self.effet_ids:
+            ste_name = effet.ste_id.name or 'Inconnue'
+            if ste_name not in breakdown:
+                breakdown[ste_name] = {
+                    'encaisse': 0.0, 
+                    'non_encaisse': 0.0,
+                    'count_encaisse': 0,
+                    'count_non_encaisse': 0
+                }
+            if effet.date_encaissement:
+                breakdown[ste_name]['encaisse'] += effet.montant
+                breakdown[ste_name]['count_encaisse'] += 1
+            else:
+                breakdown[ste_name]['non_encaisse'] += effet.montant
+                breakdown[ste_name]['count_non_encaisse'] += 1
         
         # Convert to list for easier iteration in QWeb
         result = []
@@ -78,10 +106,10 @@ class Cal3iyaClient(models.Model):
         return result
 
     def get_cheque_stats(self):
-        """Returns global statistics about cheque counts."""
+        """Returns global statistics about cheque and effet counts."""
         self.ensure_one()
-        total_chqs = len(self.physical_chq_ids)
-        encaisse_chqs = len(self.physical_chq_ids.filtered(lambda c: c.date_encaissement))
+        total_chqs = len(self.physical_chq_ids) + len(self.effet_ids)
+        encaisse_chqs = len(self.physical_chq_ids.filtered(lambda c: c.date_encaissement)) + len(self.effet_ids.filtered(lambda e: e.date_encaissement))
         non_encaisse_chqs = total_chqs - encaisse_chqs
         return {
             'total': total_chqs,
@@ -129,6 +157,20 @@ class Cal3iyaClient(models.Model):
                 'factures': ', '.join(filter(None, factures)),
                 'persons': ', '.join(filter(None, persons)),
                 'types': ', '.join(filter(None, types)),
+            })
+            
+        for effet in self.effet_ids:
+            detailed_chqs.append({
+                'name': 'EFFET ' + str(effet.serie or ''),
+                'ste': effet.ste_id.name if effet.ste_id else '',
+                'date_emission': effet.date_emission,
+                'date_echeance': effet.date_echeance,
+                'date_encaissement': effet.date_encaissement,
+                'amount': effet.montant,
+                'status': 'Encaissé' if effet.date_encaissement else 'Non encaissé',
+                'factures': '',
+                'persons': '',
+                'types': 'Effet',
             })
         
         # Sort by company (case-insensitive) first, then by date echeance
@@ -292,6 +334,42 @@ class Cal3iyaClient(models.Model):
             # Montants
             sheet.write_number(row, 11, float(chq.credit or 0.0), money_style)
             sheet.write_number(row, 12, float(chq.debit or 0.0), money_style)
+
+            row += 1
+            
+        for effet in self.effet_ids:
+            # Numéro
+            sheet.write(row, 0, 'EFFET ' + str(effet.serie or ''), cell_style)
+            # Société
+            sheet.write(row, 1, effet.ste_id.name if effet.ste_id else "", cell_style)
+            
+            # Dates
+            dt_em = to_xlsx_date(effet.date_emission)
+            if dt_em: sheet.write_datetime(row, 2, dt_em, date_style)
+            else: sheet.write(row, 2, "", cell_style)
+
+            dt_ech = to_xlsx_date(effet.date_echeance)
+            if dt_ech: sheet.write_datetime(row, 3, dt_ech, date_style)
+            else: sheet.write(row, 3, "", cell_style)
+
+            dt_enc = to_xlsx_date(effet.date_encaissement)
+            if dt_enc: sheet.write_datetime(row, 4, dt_enc, date_style)
+            else: sheet.write(row, 4, "", cell_style)
+
+            sheet.write(row, 5, '', cell_style) # Facture
+            sheet.write(row, 6, '', cell_style) # Personne
+            sheet.write(row, 7, 'Effet', cell_style) # Type
+            sheet.write(row, 8, '', cell_style) # Journal
+            sheet.write(row, 9, '', cell_style) # BL
+            
+            s_label = 'Encaissé' if effet.date_encaissement else 'Non encaissé'
+            sheet.write(row, 10, s_label, cell_style) # État
+
+            # Montants
+            credit = effet.montant or 0.0
+            debit = effet.montant if effet.date_encaissement else 0.0
+            sheet.write_number(row, 11, float(credit), money_style)
+            sheet.write_number(row, 12, float(debit), money_style)
 
             row += 1
 

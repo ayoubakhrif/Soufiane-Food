@@ -364,23 +364,21 @@ class WhatsAppFinanceController(http.Controller):
                 msg += f"• *{t.ste_id.name}* : {t.last_used_chq or 'Aucun'}\n"
             return {'status': 'success', 'response': msg}
 
-        # 5. Handle Cheque Number Search
+        # 5. Handle Cheque / Effet Number Search
         import re
-        is_cheque_search = False
-        cheque_number = None
+        is_direct_search = False
+        search_number = None
         
-        # A. Check if 7 digits numeric (Direct Search)
-        if message_text.isdigit() and len(message_text) == 7:
-            is_cheque_search = True
-            cheque_number = message_text
+        # A. Check if numeric (Direct Search)
+        if message_text.isdigit():
+            is_direct_search = True
+            search_number = message_text
         
         # B. Check if it's a choice result like "CHQ 2102572 (Company A)"
-        match = re.match(r"CHQ (\d{7}) \((.+)\)", message_text)
-        if match:
-            is_cheque_search = True
-            cheque_number = match.group(1)
-            company_name = match.group(2)
-            # Find specific physical cheque
+        match_chq = re.match(r"CHQ (\d{7}) \((.+)\)", message_text)
+        if match_chq:
+            cheque_number = match_chq.group(1)
+            company_name = match_chq.group(2)
             cheque = request.env['finance.cheque.physical'].sudo().search([
                 ('name', '=', cheque_number),
                 ('ste_id.name', '=', company_name)
@@ -388,23 +386,46 @@ class WhatsAppFinanceController(http.Controller):
             if cheque:
                 return self._format_physical_cheque_details(cheque)
 
-        if is_cheque_search:
-            # Search for PHYSICAL cheques (groups by company)
-            cheques = request.env['finance.cheque.physical'].sudo().search([('name', '=', cheque_number)])
-            if cheques:
-                if len(cheques) == 1:
+        # C. Check if it's a choice result like "EFFET 123 (Company A)"
+        match_effet = re.match(r"EFFET (\d+) \((.+)\)", message_text)
+        if match_effet:
+            effet_number = match_effet.group(1)
+            company_name = match_effet.group(2)
+            effet = request.env['finance.effet'].sudo().search([
+                ('serie', '=', effet_number),
+                ('ste_id.name', '=', company_name)
+            ], limit=1)
+            if effet:
+                return self._format_effet_details(effet)
+
+        if is_direct_search:
+            # Search for PHYSICAL cheques and EFFETS
+            cheques = request.env['finance.cheque.physical'].sudo().search([('name', '=', search_number)])
+            effets = request.env['finance.effet'].sudo().search([('serie', '=', search_number)])
+            
+            total_matches = len(cheques) + len(effets)
+            
+            if total_matches == 1:
+                if cheques:
                     return self._format_physical_cheque_details(cheques[0])
-                else:
-                    choices = [f"CHQ {c.name} ({c.ste_id.name})" for c in cheques]
-                    choices_text = f"Le chèque *{cheque_number}* existe pour plusieurs sociétés. Veuillez choisir :\n"
-                    for i, choice in enumerate(choices, 1):
-                        choices_text += f"{i}- {choice}\n"
+                elif effets:
+                    return self._format_effet_details(effets[0])
+            elif total_matches > 1:
+                choices = []
+                for c in cheques:
+                    choices.append(f"CHQ {c.name} ({c.ste_id.name})")
+                for e in effets:
+                    choices.append(f"EFFET {e.serie} ({e.ste_id.name})")
                     
-                    return {
-                        'status': 'multiple_choices',
-                        'message': choices_text,
-                        'choices': choices
-                    }
+                choices_text = f"Le numéro *{search_number}* correspond à plusieurs documents. Veuillez choisir :\n"
+                for i, choice in enumerate(choices, 1):
+                    choices_text += f"{i}- {choice}\n"
+                
+                return {
+                    'status': 'multiple_choices',
+                    'message': choices_text,
+                    'choices': choices
+                }
 
         # 5.2 Handle Amount Search
         is_amount = False
@@ -429,14 +450,23 @@ class WhatsAppFinanceController(http.Controller):
                         choice_txt = f"CHQ {c.name} ({c.ste_id.name})"
                         if choice_txt not in unique_choices:
                             unique_choices.append(choice_txt)
-                            choices_text += f"{idx}- {choice_txt}\n"
-                            idx += 1
-                    return {
-                        'status': 'multiple_choices',
-                        'message': choices_text,
-                        'choices': unique_choices
-                    }
-
+                            
+                    effets_amount = request.env['finance.effet'].sudo().search([('montant', '=', amount_val)], order='date_emission desc', limit=30)
+                    for e in effets_amount:
+                        choice_txt = f"EFFET {e.serie} ({e.ste_id.name})"
+                        if choice_txt not in unique_choices:
+                            unique_choices.append(choice_txt)
+                            
+                    if len(unique_choices) == 1:
+                        if phys_amount:
+                            return self._format_physical_cheque_details(phys_amount[0])
+                        elif effets_amount:
+                            return self._format_effet_details(effets_amount[0])
+                    elif len(unique_choices) > 1:
+                        choices_text = f"Plusieurs documents trouvés avec le montant *{'{:,.2f}'.format(amount_val).replace(',', ' ')} DH*. Veuillez choisir :\n"
+                        for idx, choice in enumerate(unique_choices, 1):
+                            choices_text += f"{idx}- {choice}\n"
+                        }
         # 5.3 Handle Facture (Invoice) Search
         if len(message_text) > 1:
             facture_cheques = request.env['datacheque'].sudo().search([('serie', '=ilike', message_text)], limit=50)
@@ -468,12 +498,16 @@ class WhatsAppFinanceController(http.Controller):
             week_str = f"W{week_num:02d}"
             
             datacheques = request.env['datacheque'].sudo().search([('week', '=', week_str)], order='journal asc')
-            if not datacheques:
-                return {'status': 'not_found', 'message': f"Aucun chèque trouvé pour la semaine {week_str}."}
+            effets = request.env['finance.effet'].sudo().search([('week', '=', week_str)])
+            
+            if not datacheques and not effets:
+                return {'status': 'not_found', 'message': f"Aucun document trouvé pour la semaine {week_str}."}
 
-            grouped_dqs = {}
+            documents = []
             total_amount = 0.0
-
+            
+            # Group datacheques by physical cheque
+            grouped_dqs = {}
             for dq in datacheques:
                 phys = dq.physical_cheque_id
                 if not phys:
@@ -482,6 +516,30 @@ class WhatsAppFinanceController(http.Controller):
                     grouped_dqs[phys] = []
                 grouped_dqs[phys].append(dq)
                 total_amount += dq.amount
+                
+            def get_min_journal(dqs_list):
+                journals = [dq.journal for dq in dqs_list if dq.journal]
+                return min(journals) if journals else float('inf')
+                
+            for phys, dqs in grouped_dqs.items():
+                documents.append({
+                    'type_doc': 'CHQ',
+                    'obj': phys,
+                    'items': dqs,
+                    'min_journal': get_min_journal(dqs)
+                })
+                
+            for e in effets:
+                documents.append({
+                    'type_doc': 'EFFET',
+                    'obj': e,
+                    'items': [e],
+                    'min_journal': float('inf') # Display effets at the bottom
+                })
+                total_amount += e.montant
+                
+            # Sort documents by journal
+            documents.sort(key=lambda d: d['min_journal'])
 
             html_content = f"""
             <html>
@@ -495,15 +553,14 @@ class WhatsAppFinanceController(http.Controller):
                         th {{ background-color: #ecf0f1; font-weight: bold; color: #2c3e50; }}
                         .total {{ text-align: right; margin-top: 20px; font-size: 18px; color: #2c3e50; font-weight: bold; }}
                         .chq-info {{ font-weight: bold; color: #2980b9; }}
-                        .chq-date {{ font-size: 11px; color: #7f8c8d; }}
-                        .chq-total {{ font-size: 11px; color: #e67e22; font-weight: bold; }}
+                        .effet-info {{ font-weight: bold; color: #8e44ad; }}
                     </style>
                 </head>
                 <body>
-                    <h2>Chèques de la Semaine {week_str}</h2>
+                    <h2>Documents de la Semaine {week_str}</h2>
                     <table>
                         <tr style="background-color: #ecf0f1;">
-                            <th>N° Chèque</th>
+                            <th>Document</th>
                             <th>Date d'émission</th>
                             <th>Société</th>
                             <th>N° Journal</th>
@@ -517,46 +574,59 @@ class WhatsAppFinanceController(http.Controller):
                         </tr>
             """
             
-            # Sort by minimum non-zero journal number to guarantee order
-            def get_min_journal(dqs_list):
-                journals = [dq.journal for dq in dqs_list if dq.journal]
-                return min(journals) if journals else float('inf')
-                
-            sorted_phys = sorted(grouped_dqs.items(), key=lambda item: get_min_journal(item[1]))
-            
-            for phys, dqs in sorted_phys:
-                chq_name = phys.name or "N/A"
-                ste_name = phys.ste_id.name if phys.ste_id else "N/A"
-                phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')
-                date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
-                
-                is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
-                etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
-                
-                chq_display = f"<div class='chq-info'>{chq_name}</div>"
-
-                grouped_rows = []
-                for dq in dqs:
-                    journal_val = str(dq.journal) if dq.journal else "N/A"
-                    benif_name = dq.benif_id.name if dq.benif_id else "N/A"
-                    serie_val = str(dq.serie) if dq.serie else "N/A"
-                    t_selection = dict(dq._fields['type'].selection or {})
-                    t_label = t_selection.get(dq.type) or dq.type or "N/A"
+            for doc in documents:
+                if doc['type_doc'] == 'CHQ':
+                    phys = doc['obj']
+                    dqs = doc['items']
                     
-                    s_selection = dict(dq._fields['state'].selection or {})
-                    s_label = s_selection.get(dq.state) or dq.state or "N/A"
-
-                    dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
+                    doc_name = phys.name or "N/A"
+                    ste_name = phys.ste_id.name if phys.ste_id else "N/A"
+                    phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')
+                    date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
                     
-                    if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
-                        grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val})
-                    else:
-                        grouped_rows.append({
-                            'journal': journal_val,
-                            'benif': benif_name,
-                            'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val}]
-                        })
-
+                    is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
+                    etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
+                    doc_display = f"<div class='chq-info'>CHQ {doc_name}</div>"
+                    
+                    grouped_rows = []
+                    for dq in dqs:
+                        journal_val = str(dq.journal) if dq.journal else "N/A"
+                        benif_name = dq.benif_id.name if dq.benif_id else "N/A"
+                        serie_val = str(dq.serie) if dq.serie else "N/A"
+                        t_selection = dict(dq._fields['type'].selection or {})
+                        t_label = t_selection.get(dq.type) or dq.type or "N/A"
+                        s_selection = dict(dq._fields['state'].selection or {})
+                        s_label = s_selection.get(dq.state) or dq.state or "N/A"
+                        dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
+                        
+                        if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
+                            grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val})
+                        else:
+                            grouped_rows.append({
+                                'journal': journal_val,
+                                'benif': benif_name,
+                                'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val}]
+                            })
+                            
+                else: # EFFET
+                    e = doc['obj']
+                    doc_name = e.serie or "N/A"
+                    ste_name = e.ste_id.name if e.ste_id else "N/A"
+                    phys_amount = '{:,.2f}'.format(e.montant).replace(',', ' ')
+                    date_em = e.date_emission.strftime('%d/%m/%Y') if e.date_emission else "N/A"
+                    
+                    is_encaisse = e.state == 'encaisse'
+                    etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
+                    doc_display = f"<div class='effet-info'>EFFET {doc_name}</div>"
+                    
+                    benif_name = e.benif_id.name if e.benif_id else "N/A"
+                    
+                    grouped_rows = [{
+                        'journal': 'N/A',
+                        'benif': benif_name,
+                        'items': [{'type': 'Effet', 'state': e.state or "N/A", 'amount': phys_amount, 'serie': 'N/A'}]
+                    }]
+                
                 phys_rowspan = sum(len(group['items']) for group in grouped_rows)
                 
                 first_group = True
@@ -565,33 +635,28 @@ class WhatsAppFinanceController(http.Controller):
                     first_item = True
                     for item in group['items']:
                         html_content += "<tr>"
-                        
                         if first_group and first_item:
                             html_content += f"""
-                                <td rowspan="{phys_rowspan}">{chq_display}</td>
+                                <td rowspan="{phys_rowspan}">{doc_display}</td>
                                 <td rowspan="{phys_rowspan}">{date_em}</td>
                                 <td rowspan="{phys_rowspan}">{ste_name}</td>
                             """
-                            
                         if first_item:
                             html_content += f"""
                                 <td rowspan="{group_rowspan}">{group['journal']}</td>
                                 <td rowspan="{group_rowspan}">{group['benif']}</td>
                             """
-                            
                         html_content += f"""
                                 <td>{item['serie']}</td>
                                 <td>{item['type']}</td>
                                 <td>{item['state']}</td>
                                 <td>{item['amount']}</td>
                         """
-                        
                         if first_group and first_item:
                             html_content += f"""
                                 <td rowspan="{phys_rowspan}"><strong>{phys_amount}</strong></td>
                                 <td rowspan="{phys_rowspan}">{etat_label}</td>
                             """
-                            
                         html_content += "</tr>"
                         first_item = False
                     first_group = False

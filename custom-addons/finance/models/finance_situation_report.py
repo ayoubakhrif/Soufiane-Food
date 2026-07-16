@@ -7,10 +7,14 @@ class ReportFinanceSituation(models.AbstractModel):
     @api.model
     def _get_report_values(self, docids, data=None):
         # Fetch physical cheques instead of datacheques (répartitions)
-        domain = []
+        domain_phys = []
+        domain_effet = []
         if data and data.get('encours_only'):
-            domain = [('encours', '!=', 'encaisse')]
-        physical_recs = self.env['finance.cheque.physical'].sudo().search(domain)
+            domain_phys = [('encours', '!=', 'encaisse')]
+            domain_effet = [('state', '=', 'non_encaisse')]
+            
+        physical_recs = self.env['finance.cheque.physical'].sudo().search(domain_phys)
+        effet_recs = self.env['finance.effet'].sudo().search(domain_effet)
         
         active_list_phys = []
         reserve_list_phys = []
@@ -66,6 +70,27 @@ class ReportFinanceSituation(models.AbstractModel):
                 bureau_list_phys.append(item)
             elif state == 'annule':
                 annule_list_phys.append(item)
+
+        for effet in effet_recs:
+            # Apply state filter if provided (effets are considered 'actif' equivalent)
+            if data and data.get('state_filter') and data.get('state_filter') != 'actif':
+                continue
+                
+            # Exclude cashed effects if encours_only
+            if data and data.get('encours_only') and effet.date_encaissement:
+                continue
+
+            item = {
+                'chq': 'EFFET ' + str(effet.serie or ''),
+                'ste': effet.ste_id.name or 'Inconnu',
+                'perso': 'N/A',
+                'benif': effet.benif_id.name or 'Inconnu',
+                'amount': effet.montant or 0.0,
+                'date_emission': effet.date_emission,
+                'date_echeance': effet.date_echeance,
+                'type': 'Effet',
+            }
+            active_list_phys.append(item)
 
         by_benif = data and data.get('by_benif')
 

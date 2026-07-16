@@ -109,15 +109,10 @@ Exemple de réponse attendue:
             
         # Search client
         Client = request.env['tresorerie_chq.client'].sudo()
-        client_id = Client.search([('name', 'ilike', client_name)], limit=1)
-        if not client_id:
-            Alias = request.env['tresorerie_chq.client.alias'].sudo()
-            alias_id = Alias.search([('name', 'ilike', client_name)], limit=1)
-            if alias_id:
-                client_id = alias_id.client_id
+        client_id = self._robust_client_search(client_name, Client)
                 
         if not client_id:
-            return {"status": "success", "message": f"❌ Le client '{client_name}' n'a pas été trouvé dans la base de données (ni dans les alias)."}
+            return {"status": "success", "message": f"❌ Le client '{client_name}' n'a pas été trouvé dans la base de données (ni par recherche floue)."}
             
         # Create paiement
         Paiement = request.env['tresorerie_chq.paiement'].sudo()
@@ -171,31 +166,12 @@ Exemple de réponse attendue:
         if group_id != TRESORERIE_REPORT_GROUP_ID:
             return {'status': 'ignored', 'message': 'This agent only handles the Tresorerie Report Group.'}
 
-        # 1. Fast match
+        # 1. Fast match & Fuzzy code search
         Client = request.env['tresorerie_chq.client'].sudo()
-        fast_clients = Client.search([
-            '|', ('name', 'ilike', message_text), ('alias_ids.name', 'ilike', message_text)
-        ])
+        client_id = self._robust_client_search(message_text, Client)
         
-        if len(fast_clients) > 1:
-            exact_match = fast_clients.filtered(lambda c: c.name.lower() == message_text.lower())
-            if exact_match:
-                fast_clients = exact_match[0]
-                
-        if len(fast_clients) > 1:
-            choices = [c.name for c in fast_clients][:15]
-            choices_text = f"Plusieurs clients correspondent à '{message_text}'. Lequel voulez-vous ?\n"
-            for i, name in enumerate(choices, 1):
-                choices_text += f"{i}- {name}\n"
-            return {
-                'status': 'multiple_choices',
-                'message': choices_text,
-                'choices': choices
-            }
-        
-        if len(fast_clients) == 1:
-            clients = fast_clients
-            extracted_name = fast_clients.name
+        if client_id:
+            clients = client_id
         else:
             # AI Fallback
             openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
@@ -221,10 +197,10 @@ Exemple de réponse attendue:
             ])
 
         if not clients:
-            return {'status': 'not_found', 'message': f"Aucun client trouvé pour : '{extracted_name}'."}
+            return {'status': 'not_found', 'message': f"Aucun client trouvé pour : '{message_text}'."}
 
         if len(clients) > 1:
-            absolute_match = clients.filtered(lambda c: c.name.lower() == extracted_name.lower())
+            absolute_match = clients.filtered(lambda c: c.name.lower() == message_text.lower() or c.name.lower() == extracted_name.lower())
             if absolute_match:
                 clients = absolute_match[0]
 
@@ -250,6 +226,45 @@ Exemple de réponse attendue:
                 'message': choices_text,
                 'choices': choices
             }
+
+    def _robust_client_search(self, text, ClientModel):
+        import difflib
+        import re
+        text_clean = text.lower().strip()
+        
+        # 1. Exact or ILIKE match
+        client_id = ClientModel.search([('name', 'ilike', text_clean)], limit=1)
+        if client_id:
+            return client_id
+            
+        AliasModel = request.env['tresorerie_chq.client.alias'].sudo()
+        alias_id = AliasModel.search([('name', 'ilike', text_clean)], limit=1)
+        if alias_id:
+            return alias_id.client_id
+            
+        # 2. Fuzzy match directly in Python (difflib)
+        def normalize_str(s):
+            return re.sub(r'[\W_]+', '', s.lower()) if s else ''
+            
+        text_norm = normalize_str(text_clean)
+        
+        all_clients = ClientModel.search([])
+        client_names_norm = {normalize_str(c.name): c for c in all_clients if c.name}
+        
+        # Check closest client name
+        closest_names = difflib.get_close_matches(text_norm, client_names_norm.keys(), n=1, cutoff=0.7)
+        if closest_names:
+            return client_names_norm[closest_names[0]]
+            
+        # Check closest alias
+        all_aliases = AliasModel.search([])
+        alias_names_norm = {normalize_str(a.name): a.client_id for a in all_aliases if a.name and a.client_id}
+        
+        closest_aliases = difflib.get_close_matches(text_norm, alias_names_norm.keys(), n=1, cutoff=0.7)
+        if closest_aliases:
+            return alias_names_norm[closest_aliases[0]]
+            
+        return False
 
     def _extract_client_name(self, text, api_key, client_names_list, alias_list=None):
         url = "https://api.openai.com/v1/chat/completions"

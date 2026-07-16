@@ -217,7 +217,7 @@ Exemple de réponse attendue:
             "Content-Type": "application/json"
         }
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={api_key}"
 
         try:
             resp = requests.post(url, headers=headers, json=payload, timeout=120)
@@ -245,15 +245,16 @@ Exemple de réponse attendue:
         try:
             result = json.loads(clean_content)
         except Exception as e:
-            # Attempt to auto-fix truncated JSON if it's missing closing brackets
-            try:
-                if clean_content.endswith('}'):
-                    result = json.loads(clean_content)
-                elif clean_content.endswith(']'):
-                    result = json.loads(clean_content + '}')
-                else:
-                    result = json.loads(clean_content + ']}')
-            except Exception:
+            # Attempt to auto-fix truncated JSON safely by finding the last valid object
+            last_brace_idx = clean_content.rfind('}')
+            if last_brace_idx != -1:
+                fixed_content = clean_content[:last_brace_idx+1]
+                try:
+                    result = json.loads(fixed_content + ']}')
+                except Exception:
+                    from odoo.exceptions import UserError
+                    raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
+            else:
                 from odoo.exceptions import UserError
                 raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
 

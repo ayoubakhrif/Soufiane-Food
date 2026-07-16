@@ -840,6 +840,8 @@ class WhatsAppFinanceController(http.Controller):
             if not extracted_name or extracted_name.upper() == 'IGNORE':
                 _logger.info(f"Ignoring off-topic message in Finance: {group_id}")
                 return {'status': 'ignored'}
+                
+            extracted_name = extracted_name.strip(' "\'')
 
             if not extracted_name or extracted_name.lower() == 'none':
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le bénéficiaire dans votre message."}

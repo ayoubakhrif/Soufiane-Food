@@ -334,11 +334,22 @@ async function connectToWhatsApp() {
 
                 if (response.data.error) {
                     console.error("Erreur Odoo (JSON-RPC) :", JSON.stringify(response.data.error, null, 2));
+                    let errMsg = "⚠️ Une erreur interne s'est produite lors du traitement du document.";
+                    if (response.data.error.data && response.data.error.data.message) {
+                        errMsg = `⚠️ Erreur : ${response.data.error.data.message}`;
+                    }
+                    await sock.sendMessage(from, { text: errMsg }, { quoted: msg });
                     return;
                 }
 
                 const result = response.data.result;
                 console.log("Résultat Odoo :", result ? result.status : "AUCUN RESULTAT", result ? (result.message || "") : "");
+                
+                if (result && result.status === 'error') {
+                    console.log(`Erreur renvoyée par Odoo : ${result.message}`);
+                    await sock.sendMessage(from, { text: result.message || "⚠️ Une erreur s'est produite." }, { quoted: msg });
+                    return;
+                }
 
                 if (result && result.status === 'multiple_choices') {
                     // C'est un menu de sélection
@@ -512,6 +523,8 @@ async function connectToWhatsApp() {
 
             } catch (error) {
                 console.error("Erreur d'appel Odoo :", error.message);
+                await sock.sendMessage(from, { text: `⚠️ Le serveur n'est pas joignable pour le moment (${error.message}). Veuillez réessayer plus tard.` }, { quoted: msg });
+                
                 if (error.response) {
                     console.error("Status Erreur :", error.response.status);
                     console.error("Data Erreur :", error.response.data);

@@ -91,8 +91,8 @@ Exemple de réponse attendue:
         import re
         from datetime import datetime
         
-        # Parse file name: LCN-HAMZA BASSIT-06-07-2026.pdf
-        match = re.match(r'^(CHQ|LCN)-(.*?)-(\d{2}-\d{2}-\d{4})\.pdf$', file_name, re.IGNORECASE)
+        # Parse file name: LCN-HAMZA BASSIT-06-07-2026 (1).pdf (allow optional spaces and WhatsApp duplicate suffix)
+        match = re.match(r'^\s*(CHQ|LCN)\s*-\s*(.*?)\s*-\s*(\d{2}-\d{2}-\d{4})(?:\s*\(\d+\))?\s*\.pdf\s*$', file_name, re.IGNORECASE)
         if not match:
             return {"status": "error", "message": f"❌ Nom de fichier invalide: {file_name}. Le format doit être TYPE-CLIENT-DD-MM-YYYY.pdf"}
             

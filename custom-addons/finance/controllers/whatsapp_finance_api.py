@@ -466,6 +466,10 @@ class WhatsAppFinanceController(http.Controller):
                         choices_text = f"Plusieurs documents trouvés avec le montant *{'{:,.2f}'.format(amount_val).replace(',', ' ')} DH*. Veuillez choisir :\n"
                         for idx, choice in enumerate(unique_choices, 1):
                             choices_text += f"{idx}- {choice}\n"
+                        return {
+                            'status': 'multiple_choices',
+                            'message': choices_text,
+                            'choices': unique_choices
                         }
         # 5.3 Handle Facture (Invoice) Search
         if len(message_text) > 1:

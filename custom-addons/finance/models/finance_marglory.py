@@ -176,7 +176,7 @@ class FinanceMarglory(models.Model):
 
         # Columns configuration
         columns = [
-            ("SN", 10), ("11", 10), ("N° Chèque", 15), ("A l'ordre de", 20),
+            ("Dos", 10), ("SN", 10), ("Journal", 10), ("N° Chèque", 15), ("A l'ordre de", 20),
             ("MT. CHQ", 15), ("Type", 12), ("D. Encaisse", 12), ("D. limite", 12),
             ("Echéance", 12), ("Fournisseur", 20), ("Article", 15), ("Fac comm", 15)
         ]
@@ -188,10 +188,11 @@ class FinanceMarglory(models.Model):
         row = 2
         total_amount = 0.0
 
+        # Collect data for sorting
+        data_rows = []
         for rec in self:
-            # Gather data
             ste_name = rec.ste_id.name if rec.ste_id else "SN"
-            journal = str(rec.journal) if rec.journal else ""
+            journal = rec.journal or 0
             
             chq = rec.payment_id.physical_cheque_id
             chq_name = chq.name if chq else ""
@@ -200,52 +201,80 @@ class FinanceMarglory(models.Model):
             total_amount += amount
             
             m_type = rec.type or ""
-            if m_type == 'FRET':
-                type_style = red_bg_style
-            else:
-                type_style = cell_style
                 
             splits = chq.datacheque_ids if chq else []
             d_encaisse = splits[0].date_encaissement if splits and splits[0].date_encaissement else False
             d_limite = splits[0].date_limite if splits and splits[0].date_limite else False
             echeance = chq.date_echeance if chq else False
+            date_emission = chq.date_emission if chq else False
+            
+            if date_emission:
+                dos_val = date_emission.strftime('%m/%y')
+            else:
+                dos_val = ""
             
             fournisseur = rec.supplier_id.name if rec.supplier_id else ""
             article = rec.douane_id.article_id.name if rec.douane_id and rec.douane_id.article_id else ""
             fac_comm = rec.douane_id.invoice_number if rec.douane_id else ""
-
-            # Write row
-            sheet.write(row, 0, ste_name, cell_style)
-            sheet.write(row, 1, journal, cell_style)
-            sheet.write(row, 2, chq_name, cell_style)
-            sheet.write(row, 3, benif_name, cell_style)
-            sheet.write_number(row, 4, amount, money_style)
-            sheet.write(row, 5, m_type, type_style)
             
-            if d_encaisse:
-                sheet.write_datetime(row, 6, d_encaisse, date_style)
+            data_rows.append({
+                'dos': dos_val,
+                'ste': ste_name,
+                'journal': journal,
+                'chq_name': chq_name,
+                'benif': benif_name,
+                'amount': amount,
+                'm_type': m_type,
+                'd_encaisse': d_encaisse,
+                'd_limite': d_limite,
+                'echeance': echeance,
+                'fournisseur': fournisseur,
+                'article': article,
+                'fac_comm': fac_comm
+            })
+
+        # Sort by Dos then journal
+        data_rows.sort(key=lambda x: (x['dos'], x['journal']))
+
+        for item in data_rows:
+            if item['m_type'] == 'FRET':
+                type_style = red_bg_style
             else:
-                sheet.write(row, 6, "N", cell_style)
+                type_style = cell_style
                 
-            if d_limite:
-                sheet.write_datetime(row, 7, d_limite, date_style)
+            # Write row
+            sheet.write(row, 0, item['dos'], cell_style)
+            sheet.write(row, 1, item['ste'], cell_style)
+            sheet.write(row, 2, str(item['journal']) if item['journal'] else "", cell_style)
+            sheet.write(row, 3, item['chq_name'], cell_style)
+            sheet.write(row, 4, item['benif'], cell_style)
+            sheet.write_number(row, 5, item['amount'], money_style)
+            sheet.write(row, 6, item['m_type'], type_style)
+            
+            if item['d_encaisse']:
+                sheet.write_datetime(row, 7, item['d_encaisse'], date_style)
             else:
-                sheet.write(row, 7, "", cell_style)
+                sheet.write(row, 7, "N", cell_style)
                 
-            if echeance:
-                sheet.write_datetime(row, 8, echeance, red_font_style)
+            if item['d_limite']:
+                sheet.write_datetime(row, 8, item['d_limite'], date_style)
             else:
-                sheet.write(row, 8, "", red_font_style)
+                sheet.write(row, 8, "", cell_style)
                 
-            sheet.write(row, 9, fournisseur, red_font_style)
-            sheet.write(row, 10, article, cell_style)
-            sheet.write(row, 11, fac_comm, cell_style)
+            if item['echeance']:
+                sheet.write_datetime(row, 9, item['echeance'], red_font_style)
+            else:
+                sheet.write(row, 9, "", red_font_style)
+                
+            sheet.write(row, 10, item['fournisseur'], red_font_style)
+            sheet.write(row, 11, item['article'], cell_style)
+            sheet.write(row, 12, item['fac_comm'], cell_style)
             
             row += 1
 
         # Total row
-        sheet.write(row, 3, "Total", header_style)
-        sheet.write_number(row, 4, total_amount, workbook.add_format({'bold': True, 'bg_color': '#FFFF00', 'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '#,##0.00'}))
+        sheet.write(row, 4, "Total", header_style)
+        sheet.write_number(row, 5, total_amount, workbook.add_format({'bold': True, 'bg_color': '#FFFF00', 'border': 1, 'align': 'center', 'valign': 'vcenter', 'num_format': '#,##0.00'}))
 
         workbook.close()
         output.seek(0)

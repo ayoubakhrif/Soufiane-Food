@@ -118,7 +118,7 @@ class WhatsAppFinanceController(http.Controller):
         # 3.2 Handle Situation / Encours Logic
         msg_clean = message_text.lower().strip()
         is_situation_cmd = msg_clean == "situation" or msg_clean.startswith("situation ")
-        is_encours_cmd = msg_clean in ["encours", "en cours"] or msg_clean.startswith("encours ") or msg_clean.startswith("en cours ")
+        is_encours_cmd = (msg_clean in ["encours", "en cours"] or msg_clean.startswith("encours ") or msg_clean.startswith("en cours ")) and "marglory" not in msg_clean
         
         # Check if they want the global situation grouped by beneficiary
         benif_triggers = [

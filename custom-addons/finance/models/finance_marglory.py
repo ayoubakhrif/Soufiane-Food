@@ -214,7 +214,7 @@ class FinanceMarglory(models.Model):
                 dos_val = ""
             
             fournisseur = rec.supplier_id.name if rec.supplier_id else ""
-            article = rec.douane_id.article_id.name if rec.douane_id and rec.douane_id.article_id else ""
+            article = rec.article_id.name if rec.article_id else ""
             fac_comm = rec.douane_id.invoice_number if rec.douane_id else ""
             
             data_rows.append({

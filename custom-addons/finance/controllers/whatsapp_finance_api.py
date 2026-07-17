@@ -507,6 +507,16 @@ class WhatsAppFinanceController(http.Controller):
             if not datacheques and not effets:
                 return {'status': 'not_found', 'message': f"Aucun document trouvé pour la semaine {week_str}."}
 
+            # Calculate missing journals
+            missing_journals = []
+            if datacheques:
+                journals = [int(dq.journal) for dq in datacheques if dq.journal and int(dq.journal) > 0]
+                if journals:
+                    max_j = max(journals)
+                    expected_set = set(range(1, max_j + 1))
+                    actual_set = set(journals)
+                    missing_journals = sorted(list(expected_set - actual_set))
+
             documents = []
             total_amount = 0.0
             
@@ -681,7 +691,8 @@ class WhatsAppFinanceController(http.Controller):
                 return {
                     'status': 'success',
                     'product_name': f"Chèques Semaine {week_str}",
-                    'response': f"Voici le rapport des chèques pour la semaine *{week_str}*.",
+                    'response': f"Voici le rapport des chèques pour la semaine *{week_str}*." + 
+                                (f"\n\n⚠️ *Journaux manquants :* {', '.join(map(str, missing_journals))}" if missing_journals else ""),
                     'files': [
                         {
                             'pdf_base64': pdf_base64,

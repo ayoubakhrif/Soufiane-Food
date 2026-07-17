@@ -160,6 +160,13 @@ class Cal3iyaClient(models.Model):
             })
             
         for effet in self.effet_ids:
+            if effet.is_annule:
+                s_label = 'Annulé'
+            elif effet.date_encaissement:
+                s_label = 'Encaissé'
+            else:
+                s_label = 'Non encaissé'
+                
             detailed_chqs.append({
                 'name': 'EFFET ' + str(effet.serie or ''),
                 'ste': effet.ste_id.name if effet.ste_id else '',
@@ -167,7 +174,7 @@ class Cal3iyaClient(models.Model):
                 'date_echeance': effet.date_echeance,
                 'date_encaissement': effet.date_encaissement,
                 'amount': effet.montant,
-                'status': 'Encaissé' if effet.date_encaissement else 'Non encaissé',
+                'status': s_label,
                 'factures': '',
                 'persons': '',
                 'types': 'Effet',
@@ -252,13 +259,18 @@ class Cal3iyaClient(models.Model):
         row += 2  # Espace
 
         # -------------------------
-        # Bloc Liste des Chèques
+        # Bloc Liste des Chèques / Effets
         # -------------------------
-        sheet.merge_range(row, 0, row, 12, "Détails des Chèques Physiques", section_style)
+        has_chqs = bool(self.physical_chq_ids)
+        has_effets = bool(self.effet_ids)
+        doc_label_title = "Documents" if (has_chqs and has_effets) else ("Effets" if has_effets else "Chèques Physiques")
+        num_label = "N° Document" if (has_chqs and has_effets) else ("N° Effet" if has_effets else "N° Chèque")
+
+        sheet.merge_range(row, 0, row, 12, f"Détails des {doc_label_title}", section_style)
         row += 1
 
         headers = [
-            "N° Chèque", "Société", "Date d'émission", "Date d'échéance",
+            num_label, "Société", "Date d'émission", "Date d'échéance",
             "Date d'encaissement", "Facture", "Personne", "Type", 
             "Journal", "BL", "État", "Crédit", "Débit"
         ]
@@ -362,7 +374,13 @@ class Cal3iyaClient(models.Model):
             sheet.write(row, 8, '', cell_style) # Journal
             sheet.write(row, 9, '', cell_style) # BL
             
-            s_label = 'Encaissé' if effet.date_encaissement else 'Non encaissé'
+            if effet.is_annule:
+                s_label = 'Annulé'
+            elif effet.date_encaissement:
+                s_label = 'Encaissé'
+            else:
+                s_label = 'Non encaissé'
+                
             sheet.write(row, 10, s_label, cell_style) # État
 
             # Montants

@@ -27,7 +27,7 @@
                 <field name="date_echeance"/>
                 <field name="date_encaissement"/>
                 <field name="montant" sum="Total"/>
-                <field name="state" widget="badge" decoration-success="state == 'encaisse'" decoration-info="state == 'non_encaisse'"/>
+                <field name="state" widget="badge" decoration-success="state == 'encaisse'" decoration-info="state == 'non_encaisse'" decoration-danger="state == 'annule'"/>
             </tree>
         </field>
     </record>
@@ -57,6 +57,7 @@
                             <field name="date_echeance"/>
                             <field name="date_encaissement"/>
                             <field name="montant"/>
+                            <field name="is_annule"/>
                         </group>
                     </group>
                     <group>

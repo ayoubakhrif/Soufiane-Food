@@ -70,11 +70,15 @@
 
                         <!-- Cheque Counts Summary -->
                         <t t-set="stats" t-value="o.get_cheque_stats()"/>
+                        <t t-set="has_chqs" t-value="bool(o.physical_chq_ids)"/>
+                        <t t-set="has_effets" t-value="bool(o.effet_ids)"/>
+                        <t t-set="doc_label" t-value="'DOCUMENTS' if (has_chqs and has_effets) else ('EFFETS' if has_effets else 'CHÈQUES')"/>
+                        <t t-set="num_label" t-value="'N° DOC' if (has_chqs and has_effets) else ('N° EFFET' if has_effets else 'N° CHQ')"/>
                         <table class="summary-table" style="margin-top: -10px;">
                             <tr>
-                                <td class="label-peach" style="width: 33%;">NB TOTAL CHÈQUES</td>
-                                <td class="label-peach" style="width: 33%;">NB CHÈQUES ENCAISSÉS</td>
-                                <td class="label-peach" style="width: 33%;">NB CHÈQUES RESTANTS</td>
+                                <td class="label-peach" style="width: 33%;">NB TOTAL <t t-esc="doc_label"/></td>
+                                <td class="label-peach" style="width: 33%;">NB <t t-esc="doc_label"/> ENCAISSÉS</td>
+                                <td class="label-peach" style="width: 33%;">NB <t t-esc="doc_label"/> RESTANTS</td>
                             </tr>
                             <tr>
                                 <td class="val-blue"><t t-esc="stats['total']"/></td>
@@ -123,14 +127,14 @@
 
                         <!-- Detailed Cheques Section -->
                         <div class="section-header" style="page-break-before: always;">
-                            DÉTAIL DES CHÈQUES
+                            DÉTAIL DES <t t-esc="doc_label"/>
                         </div>
                         
                         <t t-set="detailed_chqs" t-value="o.get_detailed_cheques()"/>
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>N° CHQ</th>
+                                    <th><t t-esc="num_label"/></th>
                                     <th>Société</th>
                                     <th>Échéance</th>
                                     <th>Montant</th>

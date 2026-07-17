@@ -72,12 +72,14 @@ class ReportFinanceSituation(models.AbstractModel):
                 annule_list_phys.append(item)
 
         for effet in effet_recs:
-            # Apply state filter if provided (effets are considered 'actif' equivalent)
-            if data and data.get('state_filter') and data.get('state_filter') != 'actif':
+            effet_state = 'annule' if effet.is_annule else 'actif'
+            
+            # Apply state filter if provided
+            if data and data.get('state_filter') and data.get('state_filter') != effet_state:
                 continue
                 
-            # Exclude cashed effects if encours_only
-            if data and data.get('encours_only') and effet.date_encaissement:
+            # Exclude cashed effects or cancelled effects if encours_only
+            if data and data.get('encours_only') and (effet.date_encaissement or effet.is_annule):
                 continue
 
             item = {
@@ -90,7 +92,10 @@ class ReportFinanceSituation(models.AbstractModel):
                 'date_echeance': effet.date_echeance,
                 'type': 'Effet',
             }
-            active_list_phys.append(item)
+            if effet_state == 'annule':
+                annule_list_phys.append(item)
+            else:
+                active_list_phys.append(item)
 
         by_benif = data and data.get('by_benif')
 

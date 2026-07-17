@@ -865,9 +865,21 @@ class WhatsAppFinanceController(http.Controller):
             pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
+            has_chqs = bool(benif.physical_chq_ids)
+            has_effets = bool(benif.effet_ids)
+            if has_chqs and has_effets:
+                doc_title = "Chèques et Effets"
+                doc_short = "docs"
+            elif has_effets:
+                doc_title = "Effets"
+                doc_short = "effets"
+            else:
+                doc_title = "Chèques"
+                doc_short = "chqs"
+
             stats = benif.get_cheque_stats()
             summary_msg = f"Voici le rapport financier pour *{benif.name}*.\n\n"
-            summary_msg += f"📊 *Analyse des Chèques* :\n"
+            summary_msg += f"📊 *Analyse des {doc_title}* :\n"
             summary_msg += f"• Total: {stats['total']}\n"
             summary_msg += f"• Encaissés: {stats['encaisse']}\n"
             summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
@@ -880,9 +892,9 @@ class WhatsAppFinanceController(http.Controller):
                 for b_item in breakdown_data:
                     summary_msg += (
                         f"• *{b_item['ste']}* :\n"
-                        f"   ↳ Total: {b_item['count_total']} chqs ({'{:,.2f}'.format(b_item['total']).replace(',', ' ')} DH)\n"
-                        f"   ↳ Encaissés: {b_item['count_encaisse']} chqs ({'{:,.2f}'.format(b_item['encaisse']).replace(',', ' ')} DH)\n"
-                        f"   ↳ Restants: {b_item['count_non_encaisse']} chqs ({'{:,.2f}'.format(b_item['non_encaisse']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Total: {b_item['count_total']} {doc_short} ({'{:,.2f}'.format(b_item['total']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Encaissés: {b_item['count_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['encaisse']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Restants: {b_item['count_non_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['non_encaisse']).replace(',', ' ')} DH)\n"
                     )
 
             from odoo import fields
@@ -1016,4 +1028,31 @@ class WhatsAppFinanceController(http.Controller):
             'response': msg,
             'files': files,
             'product_name': f"Chèque #{physical.name}"
+        }
+
+    def _format_effet_details(self, effet):
+        if effet.is_annule:
+            status_label = "Annulé"
+        elif effet.date_encaissement:
+            status_label = "Encaissé"
+        else:
+            status_label = "Non encaissé"
+            
+        msg = f"📄 *Détails de l'Effet #{effet.serie}*\n\n"
+        msg += f"🏢 *Société:* {effet.ste_id.name if effet.ste_id else 'Inconnu'}\n"
+        msg += f"👤 *Bénéficiaire:* {effet.benif_id.name if effet.benif_id else 'Inconnu'}\n"
+        msg += f"💰 *Montant:* {'{:,.2f}'.format(effet.montant).replace(',', ' ')} DH\n"
+        msg += f"📅 *Émission:* {effet.date_emission.strftime('%d/%m/%Y') if effet.date_emission else 'N/A'}\n"
+        msg += f"⏳ *Échéance:* {effet.date_echeance.strftime('%d/%m/%Y') if effet.date_echeance else 'N/A'}\n"
+        
+        if effet.date_encaissement:
+            msg += f"✅ *Encaissé le:* {effet.date_encaissement.strftime('%d/%m/%Y')}\n"
+
+        msg += f"📊 *État Global:* *{status_label}*\n"
+        
+        return {
+            'status': 'success',
+            'response': msg,
+            'files': [],
+            'product_name': f"Effet #{effet.serie}"
         }

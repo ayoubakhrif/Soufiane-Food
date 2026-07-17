@@ -33,13 +33,18 @@ class FinanceEffet(models.Model):
     state = fields.Selection([
         ('encaisse', 'Encaissé'),
         ('non_encaisse', 'Non encaissé'),
+        ('annule', 'Annulé'),
     ], string='État', compute='_compute_state', store=True, tracking=True)
+    
+    is_annule = fields.Boolean(string='Est Annulé', default=False, tracking=True)
 
     # Business Logic
-    @api.depends('date_encaissement')
+    @api.depends('date_encaissement', 'is_annule')
     def _compute_state(self):
         for rec in self:
-            if rec.date_encaissement:
+            if rec.is_annule:
+                rec.state = 'annule'
+            elif rec.date_encaissement:
                 rec.state = 'encaisse'
             else:
                 rec.state = 'non_encaisse'
@@ -174,11 +179,11 @@ class FinanceEffet(models.Model):
 
 
     # Constraints
-    @api.constrains('montant')
+    @api.constrains('montant', 'is_annule')
     def _check_amount(self):
         for rec in self:
-            if rec.montant <= 0:
-                raise ValidationError("Le montant doit être supérieur à 0.")
+            if not rec.is_annule and rec.montant <= 0:
+                raise ValidationError("Le montant doit être supérieur à 0 (sauf si l'effet est annulé).")
 
     @api.constrains('date_emission', 'date_echeance')
     def _check_dates(self):

@@ -153,7 +153,28 @@ class FinanceMarglory(models.Model):
 
     def action_export_excel(self):
         """
+        Action called by the UI to download the Excel report.
+        """
+        b64_data = self._generate_excel_base64()
+        
+        attachment = self.env['ir.attachment'].create({
+            'name': f'Rapport_Marglory_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
+            'type': 'binary',
+            'datas': b64_data,
+            'res_model': 'finance.marglory',
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }
+
+    def _generate_excel_base64(self):
+        """
         Exports the selected Marglory records to an Excel file formatted like the user's requested layout.
+        Returns the base64 encoded string of the Excel file.
         """
         import xlsxwriter
 
@@ -279,20 +300,7 @@ class FinanceMarglory(models.Model):
         workbook.close()
         output.seek(0)
         
-        # Save attachment
-        attachment = self.env['ir.attachment'].create({
-            'name': f'Rapport_Marglory_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
-            'type': 'binary',
-            'datas': base64.b64encode(output.read()),
-            'res_model': 'finance.marglory',
-            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        })
-
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f'/web/content/{attachment.id}?download=true',
-            'target': 'self',
-        }
+        return base64.b64encode(output.read())
 
     def name_get(self):
         result = []

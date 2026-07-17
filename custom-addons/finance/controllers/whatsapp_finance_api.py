@@ -495,6 +495,48 @@ class WhatsAppFinanceController(http.Controller):
                             'choices': unique_choices
                         }
 
+        # 5.4.5 Handle Encours Marglory
+        marglory_match = re.match(r"^encours marglory(?:\s+(0[1-9]|1[0-2])\/\d{2})?$", msg_clean)
+        if msg_clean.startswith("encours marglory"):
+            import calendar
+            month_str = None
+            if len(msg_clean.split()) > 2:
+                month_str = msg_clean.split()[2]
+                
+            domain = []
+            if month_str:
+                try:
+                    month, year = month_str.split('/')
+                    year = "20" + year if len(year) == 2 else year
+                    start_date = f"{year}-{month}-01"
+                    last_day = calendar.monthrange(int(year), int(month))[1]
+                    end_date = f"{year}-{month}-{last_day}"
+                    domain.append(('payment_id.physical_cheque_id.date_emission', '>=', start_date))
+                    domain.append(('payment_id.physical_cheque_id.date_emission', '<=', end_date))
+                except:
+                    pass
+                    
+            marglorys = request.env['finance.marglory'].sudo().search(domain)
+            if not marglorys:
+                return {'status': 'not_found', 'message': f"Aucun encours Marglory trouvé pour {month_str or 'tous les mois'}."}
+                
+            b64_data = marglorys._generate_excel_base64()
+            file_name = f"Encours_Marglory_{month_str.replace('/', '_')}.xlsx" if month_str else "Encours_Marglory_Global.xlsx"
+            caption_xlsx = f"Encours Marglory {month_str or 'Global'} 📊"
+            
+            return {
+                'status': 'success',
+                'product_name': f"Encours Marglory {month_str or 'Global'}",
+                'response': f"Voici le rapport Excel des encours Marglory pour *{month_str or 'tous les dossiers'}*.",
+                'files': [
+                    {
+                        'pdf_base64': b64_data.decode('utf-8') if isinstance(b64_data, bytes) else b64_data,
+                        'file_name': file_name,
+                        'caption': caption_xlsx
+                    }
+                ]
+            }
+
         # 5.5 Handle Week Search
         week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", msg_clean)
         if week_match:

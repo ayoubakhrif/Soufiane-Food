@@ -15,6 +15,12 @@ class AchatArticle(models.Model):
         required=True
     )
 
+    to_follow = fields.Boolean(
+        string='A suivre (Prix)',
+        default=False,
+        help="Cochez cette case pour inclure cet article dans le rapport journalier des prix sur WhatsApp."
+    )
+
     is_onicl = fields.Boolean(
         string='Est ONICL',
         default=False,

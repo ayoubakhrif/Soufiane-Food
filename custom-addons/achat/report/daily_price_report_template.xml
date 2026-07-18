@@ -24,6 +24,9 @@
                                                 <t t-if="c['trend'] == 'down'">
                                                     <span style="color: green;">🔻 Baisse: </span>
                                                 </t>
+                                                <t t-if="c['trend'] == 'flat'">
+                                                    <span style="color: gray;">➖ Stable: </span>
+                                                </t>
                                                 <span t-esc="'%.2f' % c['old_price']"/> ➡️ <strong><span t-esc="'%.2f' % c['new_price']"/> <span t-esc="c['currency']"/></strong>
                                             </span>
                                         </h4>

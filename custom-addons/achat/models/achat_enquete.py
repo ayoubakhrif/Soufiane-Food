@@ -154,45 +154,49 @@ class AchatArticlePrice(models.Model):
         start_of_day_utc = start_of_day_local.astimezone(pytz.utc).replace(tzinfo=None)
         end_of_day_utc = end_of_day_local.astimezone(pytz.utc).replace(tzinfo=None)
 
-        todays_prices = self.search([
-            ('create_date', '>=', start_of_day_utc),
-            ('create_date', '<=', end_of_day_utc),
-            ('article_id.to_follow', '=', True)
-        ], order='create_date desc')
+        followed_articles = self.env['achat.article'].search([('to_follow', '=', True)])
 
-        if not todays_prices:
-            _logger.info("Daily Price Report: No price changes for followed articles today.")
+        if not followed_articles:
+            _logger.info("Daily Price Report: No followed articles found.")
             return
 
-        processed_keys = set()
         final_changes = []
 
-        for record in todays_prices:
-            key = (record.article_id.id, record.incoterm, record.crop, record.origin_id.id, record.supplier_id.id)
-            if key in processed_keys:
-                continue
-            processed_keys.add(key)
-
-            previous_price_rec = self.search([
-                ('article_id', '=', record.article_id.id),
-                ('incoterm', '=', record.incoterm),
-                ('crop', '=', record.crop),
-                ('origin_id', '=', record.origin_id.id),
-                ('supplier_id', '=', record.supplier_id.id),
-                ('create_date', '<', start_of_day_utc)
+        for article in followed_articles:
+            latest_price_rec = self.search([
+                ('article_id', '=', article.id)
             ], order='date desc, id desc', limit=1)
 
-            old_price = previous_price_rec.price if previous_price_rec else 0.0
-            new_price = record.price
+            if not latest_price_rec:
+                continue
 
-            if old_price != new_price:
-                final_changes.append({
-                    'record': record,
-                    'old_price': old_price,
-                    'new_price': new_price,
-                    'trend': 'up' if new_price > old_price else 'down',
-                    'old_date': previous_price_rec.date.strftime('%d/%m/%Y') if previous_price_rec and previous_price_rec.date else "N/A",
-                })
+            previous_price_rec = self.search([
+                ('article_id', '=', article.id),
+                ('incoterm', '=', latest_price_rec.incoterm),
+                ('crop', '=', latest_price_rec.crop),
+                ('origin_id', '=', latest_price_rec.origin_id.id),
+                ('supplier_id', '=', latest_price_rec.supplier_id.id),
+                ('id', '!=', latest_price_rec.id),
+                ('date', '<=', latest_price_rec.date)
+            ], order='date desc, id desc', limit=1)
+
+            old_price = previous_price_rec.price if previous_price_rec else latest_price_rec.price
+            new_price = latest_price_rec.price
+
+            if new_price > old_price:
+                trend = 'up'
+            elif new_price < old_price:
+                trend = 'down'
+            else:
+                trend = 'flat'
+
+            final_changes.append({
+                'record': latest_price_rec,
+                'old_price': old_price,
+                'new_price': new_price,
+                'trend': trend,
+                'old_date': previous_price_rec.date.strftime('%d/%m/%Y') if previous_price_rec and previous_price_rec.date else "N/A",
+            })
 
         if not final_changes:
             _logger.info("Daily Price Report: No ACTUAL price changes for followed articles today.")
@@ -236,6 +240,7 @@ class AchatArticlePrice(models.Model):
                     
                     # Format X axis dates
                     ax = plt.gca()
+                    ax.set_xticks(dates)
                     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
                     plt.xticks(rotation=45)
                     plt.tight_layout()

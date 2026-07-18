@@ -18,9 +18,32 @@ class SuiviCredit(models.Model):
         default=fields.Date.context_today
     )
     amount = fields.Float(
-        string='Montant', 
+        string='Montant Absolu', 
         required=True
     )
+    signed_amount = fields.Float(
+        string='Montant',
+        compute='_compute_signed_amount',
+        inverse='_inverse_signed_amount',
+        store=True
+    )
+    
+    @api.depends('amount', 'type')
+    def _compute_signed_amount(self):
+        for rec in self:
+            if rec.type == 'credit':
+                rec.signed_amount = -abs(rec.amount)
+            else:
+                rec.signed_amount = abs(rec.amount)
+
+    def _inverse_signed_amount(self):
+        for rec in self:
+            rec.amount = abs(rec.signed_amount)
+            if rec.signed_amount < 0:
+                rec.type = 'credit'
+            elif rec.signed_amount > 0:
+                rec.type = 'debit'
+
     type = fields.Selection([
         ('credit', 'Crédit'),
         ('debit', 'Débit')

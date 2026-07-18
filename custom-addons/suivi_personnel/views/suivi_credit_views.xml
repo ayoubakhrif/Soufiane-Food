@@ -12,7 +12,7 @@
                 <field name="personne_id"/>
                 <field name="description"/>
                 <field name="type" widget="badge" decoration-danger="type == 'credit'" decoration-success="type == 'debit'"/>
-                <field name="amount" sum="Montant Total"/>
+                <field name="signed_amount" sum="Montant Total"/>
                 <field name="state" widget="badge" decoration-success="state == 'paid'" decoration-info="state == 'draft'"/>
                 <button name="action_pay" type="object" string="Payé" icon="fa-check" class="btn-success" invisible="state == 'paid'"/>
             </tree>
@@ -37,7 +37,7 @@
                         </group>
                         <group string="Transaction">
                             <field name="type" widget="radio" options="{'horizontal': true}"/>
-                            <field name="amount" widget="monetary"/>
+                            <field name="signed_amount" widget="monetary"/>
                         </group>
                     </group>
                     <group string="Détails de l'opération">
@@ -56,7 +56,7 @@
             <pivot string="Analyse des Crédits &amp; Débits">
                 <field name="personne_id" type="row"/>
                 <field name="type" type="col"/>
-                <field name="amount" type="measure"/>
+                <field name="signed_amount" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -69,7 +69,7 @@
             <graph string="Statistiques de Crédit / Débit" type="bar">
                 <field name="personne_id"/>
                 <field name="type"/>
-                <field name="amount" type="measure"/>
+                <field name="signed_amount" type="measure"/>
             </graph>
         </field>
     </record>

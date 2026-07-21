@@ -197,7 +197,7 @@ class FinanceMarglory(models.Model):
 
         # Columns configuration
         columns = [
-            ("Dos", 10), ("SN", 10), ("Journal", 10), ("N° Chèque", 15), ("A l'ordre de", 20),
+            ("Réglement", 10), ("SN", 10), ("Journal", 10), ("N° Chèque", 15), ("A l'ordre de", 20),
             ("MT. CHQ", 15), ("Type", 12), ("D. Encaisse", 12), ("D. limite", 12),
             ("Echéance", 12), ("Fournisseur", 20), ("Article", 15), ("Fac comm", 15)
         ]
@@ -229,17 +229,14 @@ class FinanceMarglory(models.Model):
             echeance = chq.date_echeance if chq else False
             date_emission = chq.date_emission if chq else False
             
-            if date_emission:
-                dos_val = date_emission.strftime('%m/%y')
-            else:
-                dos_val = ""
+            reglement_val = rec.dossier_reglement or ""
             
             fournisseur = rec.supplier_id.name if rec.supplier_id else ""
             article = rec.article_id.name if rec.article_id else ""
             fac_comm = rec.douane_id.invoice_number if rec.douane_id else ""
             
             data_rows.append({
-                'dos': dos_val,
+                'dos': reglement_val,
                 'ste': ste_name,
                 'journal': journal,
                 'chq_name': chq_name,

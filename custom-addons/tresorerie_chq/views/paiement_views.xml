@@ -151,6 +151,8 @@
             <search string="Recherche Entrées">
                 <field name="client_id"/>
                 <field name="payment_type"/>
+                <field name="cheque_line_ids" string="N° Chèque" filter_domain="[('cheque_line_ids.note', 'ilike', self)]"/>
+                <field name="effet_line_ids" string="N° Effet" filter_domain="[('effet_line_ids.note', 'ilike', self)]"/>
                 <filter string="Chèques" name="type_cheque"
                         domain="[('payment_type', '=', 'cheque')]"/>
                 <filter string="Effets" name="type_effet"

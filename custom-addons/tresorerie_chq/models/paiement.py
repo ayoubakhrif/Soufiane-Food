@@ -39,13 +39,7 @@ class TresoreriePaiement(models.Model):
         default=fields.Date.context_today,
     )
 
-    @api.onchange('reception_date')
-    def _onchange_reception_date(self):
-        if self.reception_date:
-            for line in self.cheque_line_ids:
-                line.reception_date = self.reception_date
-            for line in self.effet_line_ids:
-                line.reception_date = self.reception_date
+    # The reception_date on cheques and effets is now a related field.
 
     # ------------------------------------------------------------------
     # ChÃ¨ques et Effets: separate detail lines
@@ -117,6 +111,14 @@ class TresoreriePaiement(models.Model):
     def action_validate(self):
         for rec in self:
             rec.state = 'validated'
+
+    def action_draft(self):
+        # Allow admin (e.g., Tresorerie Manager) to revert to draft
+        if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
+            from odoo.exceptions import AccessError
+            raise AccessError("Seul un responsable peut remettre le paiement en brouillon.")
+        for rec in self:
+            rec.state = 'draft'
 
     def action_parse_pdf_via_ai(self):
         self.ensure_one()

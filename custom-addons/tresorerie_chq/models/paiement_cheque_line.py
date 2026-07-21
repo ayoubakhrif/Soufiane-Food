@@ -75,7 +75,7 @@ class TresorerieChqCheque(models.Model):
     is_ai_extracted = fields.Boolean(string="Extrait par IA", readonly=True)
 
     core_ste_id = fields.Many2one('core.ste', string='Société')
-    reception_date = fields.Date(string='Date de réception')
+    reception_date = fields.Date(string='Date de réception', related='paiement_id.reception_date', store=True, readonly=True)
     bank_send_date = fields.Date(string="Date d'envoi au banque")
     unpaid_date = fields.Date(string="Date impayé")
 
@@ -273,7 +273,7 @@ class TresorerieChqEffet(models.Model):
     is_ai_extracted = fields.Boolean(string="Extrait par IA", readonly=True)
 
     core_ste_id = fields.Many2one('core.ste', string='Société')
-    reception_date = fields.Date(string='Date de réception')
+    reception_date = fields.Date(string='Date de réception', related='paiement_id.reception_date', store=True, readonly=True)
     bank_send_date = fields.Date(string="Date d'envoi au banque")
     unpaid_date = fields.Date(string="Date impayé")
 

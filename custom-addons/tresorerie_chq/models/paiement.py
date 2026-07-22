@@ -145,8 +145,12 @@ class TresoreriePaiement(models.Model):
 Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvé dans le document.
 Il est ABSOLUMENT CRUCIAL que vous retourniez les éléments dans l'ordre exact où ils apparaissent dans le document PDF (de haut en bas, page par page).
 
-Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste nommée "items".
-Pour chaque élément, extrayez :
+⚠️ RÈGLE DE VIE OU DE MORT : Vous DEVEZ extraire ABSOLUMENT TOUS LES CHÈQUES présents dans le document. Même s'il y a 20, 30 ou 50 chèques répartis sur plusieurs pages, vous ne devez SOUS AUCUN PRÉTEXTE vous arrêter en cours de route. Un chèque oublié est une faute grave. Traitez chaque page de la première à la dernière ligne.
+
+Retournez UNIQUEMENT un objet JSON valide, sans markdown, structuré de cette façon :
+1. "total_attendu": (Entier) Le nombre TOTAL exact de chèques/effets que vous avez trouvés et que vous allez extraire. Comptez-les bien tous.
+2. "items": La liste de ces chèques.
+Pour chaque élément de la liste, extrayez :
 1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres ou moin pour un chèque).
 2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50). ATTENTION : Lisez attentivement le montant écrit en lettres (qui se trouve souvent au milieu du document, en arabe ou en français) et croisez-le avec le montant en chiffres (en haut à droite) pour garantir l'exactitude absolue du montant extrait.
 3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
@@ -155,6 +159,7 @@ Pour chaque élément, extrayez :
 
 Exemple de réponse attendue:
 {{
+  "total_attendu": 1,
   "items": [
     {{
       "numero": "2102888",
@@ -313,6 +318,11 @@ Exemple de réponse attendue:
                 self.write({'cheque_line_ids': lines_to_create})
             else:
                 self.write({'effet_line_ids': lines_to_create})
+
+        return {
+            'total_expected': result.get('total_attendu', 0),
+            'extracted_count': len(lines_to_create)
+        }
 
     def action_confirm_ai_data(self):
         """Parcourt les lignes extraites par l'IA et crée les données d'entraînement avec les valeurs actuelles."""

@@ -132,10 +132,19 @@ Exemple de réponse attendue:
         
         # Trigger AI
         try:
-            paiement_id.action_parse_pdf_via_ai()
+            ai_stats = paiement_id.action_parse_pdf_via_ai() or {}
             lines_count = len(paiement_id.cheque_line_ids) if payment_type == 'cheque' else len(paiement_id.effet_line_ids)
             doc_name = "Chèque(s)" if payment_type == 'cheque' else "Effet(s)"
-            return {"status": "success", "message": f"✅ {doc_name} enregistré(s) avec succès pour {client_name_str}.\nL'IA a extrait {lines_count} ligne(s)."}
+            
+            total_expected = ai_stats.get('total_expected', 0)
+            
+            msg = f"✅ {doc_name} enregistré(s) avec succès pour {client_name_str}.\nL'IA a extrait {lines_count} ligne(s)."
+            
+            if total_expected > lines_count:
+                missing = total_expected - lines_count
+                msg += f"\n\n⚠️ ALERTE : L'IA avait détecté un total de {total_expected} {doc_name.lower()} sur le document, mais s'est arrêtée avant la fin (limite mémoire atteinte). Il manque **{missing}** {doc_name.lower()} à saisir manuellement !"
+                
+            return {"status": "success", "message": msg}
         except Exception as e:
             return {"status": "success", "message": f"⚠️ Document créé pour {client_name_str} mais l'IA a échoué : {str(e)}"}
 

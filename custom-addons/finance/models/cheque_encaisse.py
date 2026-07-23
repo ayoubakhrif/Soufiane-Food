@@ -24,6 +24,7 @@ class FinanceChequeEncaisse(models.Model):
         ('thc', 'THC'),
         ('divers', 'Divers'),
         ('inspection', 'Inspection'),
+        ('assurance', 'Assurance'),
         ('reserve', 'Reserve'),
         ('bureau', 'Bureau'),
         ('annule', 'Annulé'),

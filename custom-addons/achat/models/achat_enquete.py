@@ -154,7 +154,7 @@ class AchatArticlePrice(models.Model):
         start_of_day_utc = start_of_day_local.astimezone(pytz.utc).replace(tzinfo=None)
         end_of_day_utc = end_of_day_local.astimezone(pytz.utc).replace(tzinfo=None)
 
-        followed_articles = self.env['achat.article'].search([('to_follow', '=', True)])
+        followed_articles = self.env['logistique.article'].search([('to_follow', '=', True)])
 
         if not followed_articles:
             _logger.info("Daily Price Report: No followed articles found.")

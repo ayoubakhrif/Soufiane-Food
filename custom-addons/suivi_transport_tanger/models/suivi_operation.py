@@ -20,7 +20,7 @@ class SuiviTransportTangerOperation(models.Model):
     montant = fields.Float(string='Montant', default=0.0)
     credit = fields.Float(string='Crédit', help="Si la commande n'est pas payée", default=0.0)
     casa_payer_id = fields.Many2one('casa.client', string='Qui a payé')
-    comment = fields.Text(string='Commentaire')
+    comment = fields.Char(string='Commentaire')
     paid_by_caisse = fields.Boolean(string='Payé par la caisse', default=False)
     paid_by_tresorerie = fields.Boolean(string='Payé par tresorerie', default=False)
     available_client_ids = fields.Many2many('casa.client', compute='_compute_available_client_ids', store=False)
@@ -79,6 +79,9 @@ class SuiviTransportTangerOperation(models.Model):
         for rec in self:
             if rec.credit > 0:
                 raise ValidationError(_("Impossible de passer à l'état 'Payé' tant que le crédit n'est pas nul."))
+            if not rec.paid_by_caisse and not rec.paid_by_tresorerie:
+                if not rec.casa_payer_id:
+                    raise ValidationError(_("Vous devez sélectionner un client payeur (Qui a payé) ou cocher 'Payé par caisse/trésorerie'. Si le client n'apparaît pas, vérifiez qu'il est bien renseigné sur les lignes de détail."))
             rec.state = 'paid'
 
     def action_toggle_paid_by_caisse(self):
@@ -156,7 +159,7 @@ class SuiviTransportTangerOperationLine(models.Model):
     _description = 'Ligne Opération Suivi Transport Tanger'
 
     operation_id = fields.Many2one('suivi.transport.tanger.operation', string='Opération', required=True, ondelete='cascade')
-    casa_client_id = fields.Many2one('casa.client', string='Client', required=True)
+    casa_client_id = fields.Many2one('casa.client', string='Client')
     use_client2 = fields.Boolean(related='casa_client_id.use_client2', string='Utiliser Client 2', readonly=True)
     client2 = fields.Char(string='Client 2')
     article_id = fields.Many2one('stock.kal3iya.product', string='Article')

@@ -51,6 +51,35 @@
         </field>
     </record>
 
+    <!-- Client Views -->
+    <record id="view_stock_kal3iya_client_tree" model="ir.ui.view">
+        <field name="name">stock.kal3iya.client.tree</field>
+        <field name="model">stock.kal3iya.client</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="casa_client_id" options="{'no_create': True}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_stock_kal3iya_client_form" model="ir.ui.view">
+        <field name="name">stock.kal3iya.client.form</field>
+        <field name="model">stock.kal3iya.client</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="casa_client_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <!-- Client Action -->
     <record id="action_stock_kal3iya_client" model="ir.actions.act_window">
         <field name="name">Clients</field>

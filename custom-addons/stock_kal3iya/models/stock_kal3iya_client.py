@@ -5,6 +5,7 @@ class StockKal3iyaClient(models.Model):
     _description = 'Clients Stock Kal3iya'
 
     name = fields.Char(string='Nom', required=True)
+    casa_client_id = fields.Many2one('casa.client', string='Client Casa')
 
     exit_ids = fields.One2many(
         'stock.kal3iya.exit',

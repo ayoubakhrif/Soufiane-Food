@@ -155,11 +155,8 @@ class StockKal3iyaExit(models.Model):
                     })
                 
                 casa_client_id = False
-                if rec.client_id:
-                    casa_client = self.env['casa.client'].sudo().search([('name', '=', rec.client_id.name)], limit=1)
-                    if not casa_client:
-                        casa_client = self.env['casa.client'].sudo().create({'name': rec.client_id.name})
-                    casa_client_id = casa_client.id
+                if rec.client_id and rec.client_id.casa_client_id:
+                    casa_client_id = rec.client_id.casa_client_id.id
 
                 self.env['suivi.transport.tanger.operation.line'].sudo().create({
                     'operation_id': suivi_op.id,

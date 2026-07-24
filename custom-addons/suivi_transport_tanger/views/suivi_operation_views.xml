@@ -58,7 +58,7 @@
                         <page string="Détails" name="lines_details">
                             <field name="line_ids" readonly="state == 'validated'">
                                 <tree editable="bottom">
-                                    <field name="casa_client_id" options="{'no_create': True, 'no_create_edit': True}" required="1"/>
+                                    <field name="casa_client_id" options="{'no_create': True, 'no_create_edit': True}"/>
                                     <field name="use_client2" column_invisible="True"/>
                                     <field name="client2" invisible="not use_client2" required="use_client2"/>
                                     <field name="article_id" required="1"/>

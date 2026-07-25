@@ -38,6 +38,7 @@
                         <group string="Transaction">
                             <field name="type" widget="radio" options="{'horizontal': true}"/>
                             <field name="signed_amount" widget="monetary"/>
+                            <field name="amount" invisible="1"/>
                         </group>
                     </group>
                     <group string="Détails de l'opération">

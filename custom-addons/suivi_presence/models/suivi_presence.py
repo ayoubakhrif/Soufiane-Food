@@ -56,10 +56,6 @@ class SuiviPresence(models.Model):
     @api.constrains('employee_id', 'type', 'datetime')
     def _check_presence_constraints(self):
         for rec in self:
-            # Bypass for admins and special users
-            if self.env.user.has_group('suivi_presence.group_suivi_admin') or self.env.user.has_group('suivi_presence.group_suivi_user_special'):
-                continue
-
             # Timezone setup
             user_tz = pytz.timezone('Africa/Casablanca')
             dt = rec.datetime
@@ -69,6 +65,22 @@ class SuiviPresence(models.Model):
             rec_dt = dt.astimezone(user_tz)
             start_of_day = rec_dt.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.utc)
             end_of_day = rec_dt.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.utc)
+
+            # 3. SORTIE REQUIREMENTS (Applies to everyone)
+            if rec.type == 'sortie':
+                # Must have an 'entree' record today
+                domain_entree = [
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('type', '=', 'entree'),
+                    ('datetime', '>=', start_of_day),
+                    ('datetime', '<=', end_of_day),
+                ]
+                if self.search_count(domain_entree) == 0:
+                    raise exceptions.ValidationError("Vous ne pouvez pas enregistrer une sortie sans avoir d'entrée pour le même jour.")
+
+            # Bypass for admins and special users
+            if self.env.user.has_group('suivi_presence.group_suivi_admin') or self.env.user.has_group('suivi_presence.group_suivi_user_special'):
+                continue
 
             # 1. ABSENT EXCLUSIVITY & DOUBLE RECORDS
             if rec.type == 'absent':
@@ -104,18 +116,7 @@ class SuiviPresence(models.Model):
                 if self.search_count(domain_unique) > 0:
                      raise exceptions.ValidationError(f"Cet employé a déjà un enregistrement de type '{rec.type}' pour ce jour.")
 
-            # 3. SORTIE REQUIREMENTS
             if rec.type == 'sortie':
-                # Must have an 'entree' record today
-                domain_entree = [
-                    ('employee_id', '=', rec.employee_id.id),
-                    ('type', '=', 'entree'),
-                    ('datetime', '>=', start_of_day),
-                    ('datetime', '<=', end_of_day),
-                ]
-                if self.search_count(domain_entree) == 0:
-                    raise exceptions.ValidationError("Vous ne pouvez pas enregistrer une sortie sans avoir d'entrée pour le même jour.")
-
                 # Check previous day for missing sortie
                 from datetime import timedelta
                 prev_day_dt = rec_dt - timedelta(days=1)

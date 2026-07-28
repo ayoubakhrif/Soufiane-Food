@@ -139,6 +139,40 @@ class SuiviSalary(models.Model):
                         unpaid_leave_days.add(curr)
                     curr += timedelta(days=1)
 
+            # --- VALIDATION DES ANOMALIES DE PRESENCE ---
+            missing_issues = []
+            today_date = date.today()
+            
+            for day in range(1, num_days + 1):
+                curr_date = date(y, m, day)
+                is_holiday = curr_date in holidays_map
+                is_off_day = curr_date.weekday() == non_working_day
+                has_leave = curr_date in paid_leave_days or curr_date in unpaid_leave_days
+                
+                events = day_records.get(curr_date, [])
+                
+                # 1. Vérification des jours de travail totalement manquants (jusqu'à aujourd'hui)
+                if curr_date <= today_date:
+                    if not is_holiday and not is_off_day and not has_leave:
+                        if not events:
+                            missing_issues.append(f"- {curr_date.strftime('%d/%m/%Y')} : Jour sans pointage ni absence justifiée.")
+                
+                # 2. Vérification des paires incomplètes
+                if events:
+                    if len(events) == 1 and events[0].type == 'absent':
+                        continue
+                    
+                    entree_count = sum(1 for e in events if e.type == 'entree')
+                    sortie_count = sum(1 for e in events if e.type == 'sortie')
+                    
+                    if entree_count != sortie_count:
+                        missing_issues.append(f"- {curr_date.strftime('%d/%m/%Y')} : Pointages incomplets ({entree_count} Entrée(s) / {sortie_count} Sortie(s)).")
+            
+            if missing_issues:
+                error_msg = "Impossible de calculer le salaire. Des anomalies ont été détectées pour cet employé :\n\n" + "\n".join(missing_issues) + "\n\nVeuillez régulariser la situation (ajouter les pointages ou marquer comme 'Absent') avant de générer le bulletin."
+                raise exceptions.ValidationError(error_msg)
+            # ----------------------------------------------
+
             # B. Iterate Days
             for day in range(1, num_days + 1):
                 curr_date = date(y, m, day)

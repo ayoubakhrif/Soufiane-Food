@@ -177,9 +177,9 @@
                 <group expand="0" string="Group By">
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Date de réception" name="group_reception" context="{'group_by': 'reception_date:day'}"/>
-                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
-                    <filter string="Société" name="group_ste" context="{'group_by': 'core_ste_id'}"/>
                     <filter string="Date d'échéance" name="group_date" context="{'group_by': 'check_date:day'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by': 'core_ste_id'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                 </group>
             </search>
         </field>

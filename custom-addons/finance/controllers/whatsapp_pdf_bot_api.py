@@ -239,22 +239,43 @@ Règles de formatage :
         prompt_text = prompt_text.replace("[DIVERS_LIST]", divers_list_str)
         prompt_text = prompt_text.replace("[FEEDBACK]", feedback_instruction)
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={api_key}"
+        # 1. Upload the PDF to Gemini File API
+        import base64
+        pdf_bytes = base64.b64decode(pdf_b64)
+        upload_url = f"https://generativelanguage.googleapis.com/upload/v1beta/files?key={api_key}"
+        upload_headers = {
+            "X-Goog-Upload-Protocol": "raw",
+            "X-Goog-Upload-Header-Content-Type": "application/pdf",
+            "Content-Type": "application/pdf"
+        }
+        try:
+            upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes, timeout=120)
+            if upload_resp.status_code != 200:
+                err_msg = upload_resp.json().get("error", {}).get("message", upload_resp.text)
+                return {'status': 'error', 'message': f"Erreur d'upload vers Gemini: {err_msg}"}
+            file_info = upload_resp.json().get("file", {})
+            file_uri = file_info.get("uri")
+            if not file_uri:
+                return {'status': 'error', 'message': "Impossible de récupérer l'URI du fichier après l'upload."}
+        except Exception as e:
+            return {'status': 'error', 'message': f"Erreur de communication lors de l'upload vers l'IA : {str(e)}"}
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
 
         payload = {
             "contents": [{
                 "parts": [
                     {"text": prompt_text},
                     {
-                        "inline_data": {
-                            "mime_type": "application/pdf",
-                            "data": pdf_b64
+                        "fileData": {
+                            "mimeType": "application/pdf",
+                            "fileUri": file_uri
                         }
                     }
                 ]
             }],
             "generationConfig": {
-                "response_mime_type": "application/json",
+                "responseMimeType": "application/json",
                 "temperature": 0.0
             }
         }

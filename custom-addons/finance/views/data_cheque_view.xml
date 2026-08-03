@@ -179,8 +179,8 @@
 
                     <group string="Facturation">
                         <group>
-                            <field name="facture"/>
-                            <field name="serie" invisible="facture in ['m', 'bureau']"/>
+                            <field name="facture" invisible="1"/>
+                            <field name="serie"/>
                             <field name="chq_bank"/>
                             <field name="chq_certifie"/>
                         </group>
@@ -212,7 +212,6 @@
                 <field name="chq"/>
                 <field name="week"/>
                 <field name="serie"/>
-                <field name="facture"/>
                 <field name="talon_id"/>
                 <field name="benif_id"/>
                 <field name="chq_bank"/>

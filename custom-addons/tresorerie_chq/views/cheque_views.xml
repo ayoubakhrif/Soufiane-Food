@@ -178,6 +178,7 @@
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Date de réception" name="group_reception" context="{'group_by': 'reception_date:day'}"/>
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by': 'core_ste_id'}"/>
                     <filter string="Date d'échéance" name="group_date" context="{'group_by': 'check_date:month'}"/>
                 </group>
             </search>
@@ -192,7 +193,7 @@
         <field name="res_model">tresorerie_chq.cheque</field>
         <field name="view_mode">tree</field>
         <field name="search_view_id" ref="view_tresorerie_chq_cheque_search"/>
-        <field name="context">{'search_default_group_state': 1, 'search_default_group_reception': 1, 'search_default_group_client': 1}</field>
+        <field name="context">{'search_default_group_date': 1, 'search_default_group_ste': 1, 'search_default_group_client': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucun chèque enregistré.

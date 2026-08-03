@@ -107,6 +107,12 @@ Exemple de réponse attendue:
         except ValueError:
             return {"status": "error", "message": f"❌ Format de date invalide: {date_str}. Attendu: DD-MM-YYYY"}
             
+        # Vérification anti-doublon (même nom de fichier)
+        Paiement = request.env['tresorerie_chq.paiement'].sudo()
+        existing_paiement = Paiement.search([('scan_document_name', '=', file_name)], limit=1)
+        if existing_paiement:
+            return {"status": "success", "message": f"⚠️ Le PDF '{file_name}' a déjà été enregistré précédemment (entrée #{existing_paiement.id}). Je l'ignore pour éviter de dupliquer les chèques/effets."}
+            
         # Search client
         Client = request.env['tresorerie_chq.client'].sudo()
         client_id = self._robust_client_search(client_name, Client)

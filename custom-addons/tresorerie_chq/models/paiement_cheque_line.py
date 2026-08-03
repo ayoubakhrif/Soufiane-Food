@@ -8,7 +8,7 @@ class TresorerieChqCheque(models.Model):
     """
     _name = 'tresorerie_chq.cheque'
     _description = 'Suivi de Chèque'
-    _order = 'sequence, check_date, id'
+    _order = 'check_date asc, core_ste_id asc, client_id asc, id desc'
 
     sequence = fields.Integer(string='Séquence', default=10)
     
@@ -211,7 +211,7 @@ class TresorerieChqEffet(models.Model):
     """
     _name = 'tresorerie_chq.effet'
     _description = 'Suivi d\'Effet'
-    _order = 'sequence, check_date, id'
+    _order = 'check_date asc, core_ste_id asc, client_id asc, id desc'
 
     sequence = fields.Integer(string='Séquence', default=10)
 

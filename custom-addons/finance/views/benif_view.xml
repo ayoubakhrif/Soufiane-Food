@@ -32,6 +32,7 @@
                                     <field name="date_emission"/>
                                     <field name="date_echeance"/>
                                     <field name="date_encaissement"/>
+                                    <field name="commentaire"/>
                                     <field name="credit" sum="Total Crédit"/>
                                     <field name="debit" sum="Total encaissé"/>
                                 </tree>

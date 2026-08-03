@@ -44,6 +44,8 @@ class FinanceChequePhysical(models.Model):
         store=True, 
         tracking=True
     )
+    
+    commentaire = fields.Text(string="Commentaire", compute='_compute_shared_info', store=True)
 
     # ------------------------------------------------------------
     # DOCUMENTS PDF EN BASE
@@ -100,6 +102,7 @@ class FinanceChequePhysical(models.Model):
                 rec.date_echeance = first.date_echeance
                 rec.benif_id = first.benif_id
                 rec.chq_state = first.state
+                rec.commentaire = first.commentaire
                 # Search for the first non-empty cashing date among splits
                 rec.date_encaissement = next((d.date_encaissement for d in rec.datacheque_ids if d.date_encaissement), False)
             else:
@@ -108,6 +111,7 @@ class FinanceChequePhysical(models.Model):
                 rec.date_echeance = False
                 rec.benif_id = False
                 rec.chq_state = False
+                rec.commentaire = False
                 rec.date_encaissement = False
 
     @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours', 'datacheque_ids.date_encaissement')

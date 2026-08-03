@@ -98,35 +98,33 @@ class TransportResultLine(models.Model):
     
     comment = fields.Char(string='Commentaire')
 
-    @api.constrains('amount')
-    def _check_amount(self):
-        for line in self:
-            if line.amount <= 0:
-                raise ValidationError(_("Le montant doit être supérieur à 0."))
+    @api.onchange('amount')
+    def _onchange_amount(self):
+        if self.amount < 0:
+            return {
+                'warning': {
+                    'title': _("Attention"),
+                    'message': _("Le montant devrait être positif.")
+                }
+            }
             
-            # Recompute remaining of the parent to be sure
-            # Actually, constraint might run before parent compute is flushed/updated in UI context
-            # So we check against (total_profit - ALREADY_DISTRIBUTED_WITHOUT_THIS_LINE - THIS_LINE)
-            
-            # Simple check: (Parent Total Profit) < (Sum of all lines including this one)
-            parent = line.followup_id
-            # Force recompute of total profit to be sure
+        if self.followup_id:
+            parent = self.followup_id
+            # Force recompute just in case
             parent._compute_total_profit()
             
-            # Calculate total distributed including current changes
-            # We can use the parent's relation which should include this new/modified record in memory
             total_distributed = sum(parent.line_ids.mapped('amount'))
-            
             max_amount = parent.total_gasoil_sale if parent.type == 'gasoil' else parent.total_profit
             
             if total_distributed > max_amount:
-                remaining = max_amount - (total_distributed - line.amount)
-                raise ValidationError(
-                    _("Opération bloquée !\n"
-                      "Le montant saisi ({saisi}) dépasse le montant restant ({reste}).\n"
-                      "Bénéfice/Total Vente: {total}").format(
-                        saisi=line.amount,
-                        reste=remaining,
-                        total=max_amount
-                    )
-                )
+                remaining = max_amount - (total_distributed - self.amount)
+                return {
+                    'warning': {
+                        'title': _("Dépassement"),
+                        'message': _("Attention ! Le montant saisi ({saisi}) dépasse le montant restant ({reste}).\n"
+                                     "Vous pouvez quand même sauvegarder.").format(
+                            saisi=self.amount,
+                            reste=remaining
+                        )
+                    }
+                }

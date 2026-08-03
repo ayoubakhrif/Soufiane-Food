@@ -79,7 +79,7 @@
                     <notebook>
                         <page string="Répartitions (Opérations)">
                             <field name="datacheque_ids">
-                                <tree>
+                                <tree editable="bottom">
                                     <field name="type"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="facture"/>

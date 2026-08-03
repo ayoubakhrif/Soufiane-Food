@@ -239,7 +239,7 @@ Règles de formatage :
         prompt_text = prompt_text.replace("[DIVERS_LIST]", divers_list_str)
         prompt_text = prompt_text.replace("[FEEDBACK]", feedback_instruction)
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={api_key}"
 
         payload = {
             "contents": [{

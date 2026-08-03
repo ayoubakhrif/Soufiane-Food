@@ -25,8 +25,8 @@
                     </group>
                     <notebook>
                         <page string="Chèques">
-                            <field name="physical_chq_ids" readonly="1">
-                                <tree>
+                            <field name="physical_chq_ids">
+                                <tree create="0" delete="0">
                                     <field name="name" string="Chèque"/>
                                     <field name="ste_id"/>
                                     <field name="date_emission"/>

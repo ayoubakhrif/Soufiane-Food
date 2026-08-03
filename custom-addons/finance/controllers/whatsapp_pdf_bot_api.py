@@ -23,7 +23,7 @@ class WhatsAppFinancePdfController(http.Controller):
         
         if not api_key or api_key != expected_api_key:
             _logger.warning("Unauthorized access attempt to WhatsApp Finance PDF API")
-            return {'status': 'error', 'response': '❌ *Erreur:* Accès non autorisé'}
+            return {'status': 'error', 'message': '❌ *Erreur:* Accès non autorisé'}
 
         # 2. Extract data from request
         try:
@@ -32,27 +32,27 @@ class WhatsAppFinancePdfController(http.Controller):
             pdf_base64 = data.get('pdf_base64', '') or data.get('document_base64', '') or data.get('base64', '')
             file_name = data.get('file_name', 'document.pdf')
         except Exception as e:
-            return {'status': 'error', 'response': f'❌ *Erreur JSON:* {str(e)}'}
+            return {'status': 'error', 'message': f'❌ *Erreur JSON:* {str(e)}'}
 
         # 3. Security: Check Group ID
         PDF_GROUP_ID = '120363426857783962@g.us'
         if group_id != PDF_GROUP_ID:
             _logger.info(f"Ignoring request from group {group_id} in Finance PDF Agent")
-            return {'status': 'ignored', 'response': 'Ce bot ne gère que le groupe Finance PDF.'}
+            return {'status': 'ignored', 'message': 'Ce bot ne gère que le groupe Finance PDF.'}
 
         if not pdf_base64:
             _logger.info("No PDF found in the request. Ignoring.")
-            return {'status': 'ignored', 'response': '❌ *Erreur:* Aucun document PDF fourni.'}
+            return {'status': 'ignored', 'message': '❌ *Erreur:* Aucun document PDF fourni.'}
 
         # 4. Call OpenAI to extract invoices
         openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not openai_key:
-            return {'status': 'error', 'response': '❌ *Erreur:* Clé API OpenAI non configurée'}
+            return {'status': 'error', 'message': '❌ *Erreur:* Clé API OpenAI non configurée'}
 
         ai_result = self._extract_data_from_pdf(pdf_base64, file_name, openai_key)
         
         if not ai_result or 'error' in ai_result:
-            return {'status': 'error', 'response': f"❌ *Erreur IA:* {ai_result.get('error', 'Erreur inconnue')}"}
+            return {'status': 'error', 'message': f"❌ *Erreur IA:* {ai_result.get('error', 'Erreur inconnue')}"}
 
         factures = ai_result.get('factures', [])
 
@@ -72,16 +72,16 @@ class WhatsAppFinancePdfController(http.Controller):
             _logger.info("Retrying AI extraction because of 'divers' assigned to 'import' benif")
             ai_result = self._extract_data_from_pdf(pdf_base64, file_name, openai_key, feedback="\n".join(feedback_msgs))
             if not ai_result or 'error' in ai_result:
-                return {'status': 'error', 'response': f"❌ *Erreur IA (2e essai):* {ai_result.get('error', 'Erreur inconnue')}"}
+                return {'status': 'error', 'message': f"❌ *Erreur IA (2e essai):* {ai_result.get('error', 'Erreur inconnue')}"}
             factures = ai_result.get('factures', [])
 
         chq_number = ai_result.get('chq_number', '')
 
         if not chq_number:
-            return {'status': 'error', 'response': "❌ *Erreur:* L'IA n'a pas pu identifier le numéro de chèque dans le PDF."}
+            return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas pu identifier le numéro de chèque dans le PDF."}
         
         if not factures:
-            return {'status': 'error', 'response': "❌ *Erreur:* L'IA n'a pas trouvé de factures valides dans le PDF."}
+            return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas trouvé de factures valides dans le PDF."}
 
         # 5. Find the DataCheque in reserve or bureau
         domain = [('chq', '=', chq_number), ('state', 'in', ['reserve', 'bureau'])]
@@ -91,8 +91,8 @@ class WhatsAppFinancePdfController(http.Controller):
             # Let's search if any cheque exists even if not in reserve to provide a better error
             existing = request.env['datacheque'].sudo().search([('chq', '=', chq_number)])
             if existing:
-                return {'status': 'error', 'response': f"❌ *Erreur:* Le chèque {chq_number} existe mais n'est pas à l'état réserve ou bureau."}
-            return {'status': 'error', 'response': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas ou n'est pas en attente (réserve ou bureau)."}
+                return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} existe mais n'est pas à l'état réserve ou bureau."}
+            return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas ou n'est pas en attente (réserve ou bureau)."}
 
         created_records = []
         messages = []
@@ -184,7 +184,7 @@ class WhatsAppFinancePdfController(http.Controller):
             }
         except Exception as e:
             _logger.error(f"Error updating/creating datacheques from PDF: {str(e)}")
-            return {'status': 'error', 'response': f"❌ *Erreur serveur:* {str(e)}"}
+            return {'status': 'error', 'message': f"❌ *Erreur serveur:* {str(e)}"}
 
     def _extract_data_from_pdf(self, pdf_b64, file_name, api_key, feedback=None):
         """Use OpenAI to extract cheque and invoice data from PDF."""

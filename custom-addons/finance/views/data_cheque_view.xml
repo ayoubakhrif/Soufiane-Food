@@ -160,6 +160,7 @@
                             <field name="week"/>
                             <field name="journal"/>
                             <field name="benif_type" invisible="1"/>
+                            <field name="commentaire"/>
                         </group>
                     </group>
 

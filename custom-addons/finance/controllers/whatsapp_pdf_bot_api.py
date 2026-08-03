@@ -45,9 +45,9 @@ class WhatsAppFinancePdfController(http.Controller):
             return {'status': 'ignored', 'message': '❌ *Erreur:* Aucun document PDF fourni.'}
 
         # 4. Call OpenAI to extract invoices
-        openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+        openai_key = request.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key')
         if not openai_key:
-            return {'status': 'error', 'message': '❌ *Erreur:* Clé API OpenAI non configurée'}
+            return {'status': 'error', 'message': '❌ *Erreur:* Clé API Gemini non configurée (tresorerie_chq.gemini_key)'}
 
         ai_result = self._extract_data_from_pdf(pdf_base64, file_name, openai_key)
         
@@ -239,52 +239,42 @@ Règles de formatage :
         prompt_text = prompt_text.replace("[DIVERS_LIST]", divers_list_str)
         prompt_text = prompt_text.replace("[FEEDBACK]", feedback_instruction)
         
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+
         payload = {
-            "model": "gpt-4o",
-            "input": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "input_file",
-                            "filename": file_name,
-                            "file_data": f"data:application/pdf;base64,{pdf_b64}"
-                        },
-                        {
-                            "type": "input_text",
-                            "text": prompt_text
+            "contents": [{
+                "parts": [
+                    {"text": prompt_text},
+                    {
+                        "inline_data": {
+                            "mime_type": "application/pdf",
+                            "data": pdf_b64
                         }
-                    ]
-                }
-            ],
-            "text": {
-                "format": {
-                    "type": "json_object"
-                }
-            },
-            "temperature": 0.0,
-            "max_output_tokens": 1000
+                    }
+                ]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+                "temperature": 0.0
+            }
         }
 
         headers = {
-            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 
         try:
-            resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
+            resp = requests.post(url, headers=headers, json=payload, timeout=120)
             resp.raise_for_status()
             ai_data = resp.json()
 
             raw_content = ""
-            for output_item in ai_data.get("output", []):
-                for content_item in output_item.get("content", []):
-                    if content_item.get("type") == "output_text":
-                        raw_content = content_item.get("text", "")
-                        break
+            candidates = ai_data.get("candidates", [])
+            if candidates and candidates[0].get("content", {}).get("parts"):
+                raw_content = candidates[0]["content"]["parts"][0].get("text", "")
 
             if not raw_content:
-                return {'error': "L'IA n'a retourné aucune réponse."}
+                return {'error': "L'IA Gemini n'a retourné aucune réponse."}
 
             # The response is expected to be JSON string
             result = json.loads(raw_content)

@@ -21,6 +21,12 @@
                     decoration-warning="state == 'mismatch'" 
                     decoration-danger="state == 'missing'"
                 />
+                <field name="chq_state" widget="badge"
+                    decoration-success="chq_state == 'actif'"
+                    decoration-warning="chq_state == 'reserve'"
+                    decoration-info="chq_state == 'bureau'"
+                    decoration-danger="chq_state == 'annule'"
+                />
             </tree>
         </field>
     </record>
@@ -43,6 +49,7 @@
                     <group string="Finance">
                         <field name="chq_number"/>
                         <field name="date_operation"/>
+                        <field name="chq_state"/>
                         <field name="ste_id"/>
                         <field name="benif_id"/>
                         <field name="finance_amount"/>
@@ -81,7 +88,8 @@
                 
                 <group expand="0" string="Grouper par">
                     <filter string="Société" name="group_ste" context="{'group_by': 'ste_id'}"/>
-                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="État Rapprochement" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="État Chèque" name="group_chq_state" context="{'group_by': 'chq_state'}"/>
                     <filter string="Bénéficiaire" name="group_benif" context="{'group_by': 'benif_id'}"/>
                 </group>
             </search>

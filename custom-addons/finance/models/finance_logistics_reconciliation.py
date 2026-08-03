@@ -26,6 +26,12 @@ class FinanceLogisticsReconciliation(models.Model):
         ('mismatch', 'Non Conforme'),
         ('missing', 'Non Trouvé'),
     ], string='État', readonly=True)
+    chq_state = fields.Selection([
+        ('reserve', 'Réserve'),
+        ('actif', 'Actif'),
+        ('annule', 'Annulé'),
+        ('bureau', 'Bureau'),
+    ], string='État Chèque', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -41,6 +47,7 @@ class FinanceLogisticsReconciliation(models.Model):
                     fcp.ste_id as ste_id,
                     fcp.benif_id as benif_id,
                     fcp.date_emission as date_operation,
+                    fcp.chq_state as chq_state,
                     
                     -- Logistics Info (Aggregated)
                     MAX(ldc.id) as logistics_cheque_id,

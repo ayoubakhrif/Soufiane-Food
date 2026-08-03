@@ -85,6 +85,7 @@ class DataCheque(models.Model):
         store=True, 
         tracking=True
     )
+    commentaire = fields.Text(string='Commentaire', tracking=True)
 
     benif_type = fields.Selection(related="benif_id.type", store=True)
     chq_pdf_url = fields.Char("Lien PDF CHQ", readonly=True)

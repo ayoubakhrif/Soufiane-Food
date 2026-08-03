@@ -31,6 +31,13 @@ class FinanceChequePhysical(models.Model):
         ('non_encaisse', 'Non encaissé'),
     ], string='Status Encaissement', compute='_compute_encours', store=True)
     
+    chq_state = fields.Selection([
+        ('reserve', 'Réserve'),
+        ('actif', 'Actif'),
+        ('annule', 'Annulé'),
+        ('bureau', 'Bureau'),
+    ], string='État', compute='_compute_shared_info', store=True)
+    
     is_encaisse = fields.Boolean(
         string='Est Encaissé', 
         compute='_compute_encours', 
@@ -92,6 +99,7 @@ class FinanceChequePhysical(models.Model):
                 rec.date_limite = first.date_limite
                 rec.date_echeance = first.date_echeance
                 rec.benif_id = first.benif_id
+                rec.chq_state = first.state
                 # Search for the first non-empty cashing date among splits
                 rec.date_encaissement = next((d.date_encaissement for d in rec.datacheque_ids if d.date_encaissement), False)
             else:
@@ -99,6 +107,7 @@ class FinanceChequePhysical(models.Model):
                 rec.date_limite = False
                 rec.date_echeance = False
                 rec.benif_id = False
+                rec.chq_state = False
                 rec.date_encaissement = False
 
     @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours', 'datacheque_ids.date_encaissement')

@@ -639,6 +639,9 @@ class WhatsAppFinanceController(http.Controller):
                         </tr>
             """
             
+            chq_vide_missing_journals = set()
+            doc_missing_journals = set()
+            
             for doc in documents:
                 if doc['type_doc'] == 'CHQ':
                     phys = doc['obj']
@@ -652,7 +655,12 @@ class WhatsAppFinanceController(http.Controller):
                     is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
                     etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
                     doc_display = f"<div class='chq-info'>CHQ {doc_name}</div>"
-                    chq_pdf_icon = "✅" if phys.chq_vide_pdf else "❌"
+                    chq_pdf_icon = "<span style='color:green; font-weight:bold;'>&#10003;</span>" if phys.chq_vide_pdf else "<span style='color:red; font-weight:bold;'>&#10007;</span>"
+                    
+                    if not phys.chq_vide_pdf:
+                        for dq in dqs:
+                            if dq.journal:
+                                chq_vide_missing_journals.add(str(dq.journal))
                     
                     grouped_rows = []
                     for dq in dqs:
@@ -664,7 +672,10 @@ class WhatsAppFinanceController(http.Controller):
                         s_selection = dict(dq._fields['state'].selection or {})
                         s_label = s_selection.get(dq.state) or dq.state or "N/A"
                         dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
-                        doc_pdf_icon = "✅" if dq.doc_pdf_url else "❌"
+                        doc_pdf_icon = "<span style='color:green; font-weight:bold;'>&#10003;</span>" if dq.doc_pdf_url else "<span style='color:red; font-weight:bold;'>&#10007;</span>"
+                        
+                        if not dq.doc_pdf_url and dq.journal:
+                            doc_missing_journals.add(str(dq.journal))
                         
                         if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
                             grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'doc_pdf_icon': doc_pdf_icon})
@@ -748,7 +759,9 @@ class WhatsAppFinanceController(http.Controller):
                     'status': 'success',
                     'product_name': f"Chèques Semaine {week_str}",
                     'response': f"Voici le rapport des chèques pour la semaine *{week_str}*." + 
-                                (f"\n\n⚠️ *Journaux manquants :* {', '.join(map(str, missing_journals))}" if missing_journals else ""),
+                                (f"\n\n⚠️ *Journaux manquants :* {', '.join(map(str, missing_journals))}" if missing_journals else "") +
+                                (f"\n\n❌ *Chq vide absent:* Les journaux des chqs sans pdf de chq vide: {', '.join(sorted(chq_vide_missing_journals))}" if chq_vide_missing_journals else "") +
+                                (f"\n\n❌ *Documentation absente:* Journaux des chqs sans pdf de documentation: {', '.join(sorted(doc_missing_journals))}" if doc_missing_journals else ""),
                     'files': [
                         {
                             'pdf_base64': pdf_base64,

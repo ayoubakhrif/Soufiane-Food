@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install --no-cache-dir --upgrade \
     matplotlib \
     openpyxl \
+    PyMuPDF \
     google-auth \
     google-auth-oauthlib \
     google-api-python-client \

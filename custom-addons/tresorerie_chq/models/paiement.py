@@ -256,7 +256,6 @@ Exemple de réponse attendue:
                 payload = {
                     "model": "claude-sonnet-5",
                     "max_tokens": 8192,
-                    "temperature": 0.0,
                     "messages": messages
                 }
                 resp = requests.post(url, headers=headers, json=payload, timeout=120)

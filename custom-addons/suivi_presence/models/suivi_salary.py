@@ -35,6 +35,8 @@ class SuiviSalary(models.Model):
     hours_agadir = fields.Float(string='Heures Agadir', compute='_compute_salary_details', store=True)
     salary_agadir = fields.Float(string='Salaire Agadir', compute='_compute_salary_details', store=True)
 
+    presence_ids = fields.Many2many('suivi.presence', compute='_compute_salary_details', string='Historique des pointages')
+
     final_salary = fields.Float(string='Salaire Final', compute='_compute_final_salary', store=True)
     
     state = fields.Selection([
@@ -55,6 +57,7 @@ class SuiviSalary(models.Model):
 
         for rec in self:
             if not rec.employee_id or not rec.month:
+                rec.presence_ids = [(5, 0, 0)]
                 continue
 
             try:
@@ -64,6 +67,7 @@ class SuiviSalary(models.Model):
                 start_date = date(y, m, 1)
                 end_date = date(y, m, num_days)
             except:
+                rec.presence_ids = [(5, 0, 0)]
                 continue
 
             # 1. Base Salary Snapshot
@@ -83,12 +87,13 @@ class SuiviSalary(models.Model):
             rec.hourly_salary = round(rate, 2)
 
             # 3. Calculate Hours from Presence Pairs
-            # 3. Calculate Hours from Presence Pairs
             presences = self.env['suivi.presence'].search([
                 ('employee_id', '=', rec.employee_id.id),
                 ('datetime', '>=', start_date),
                 ('datetime', '<=', end_date + timedelta(days=1)),
             ], order='datetime asc')
+
+            rec.presence_ids = presences
 
             # Group by Day
             day_records = {}

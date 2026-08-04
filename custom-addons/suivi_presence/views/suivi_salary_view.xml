@@ -55,6 +55,16 @@
                                 <field name="salary_agadir"/>
                             </group>
                         </page>
+                        <page string="Historique des pointages">
+                            <field name="presence_ids" readonly="1">
+                                <tree default_order="datetime desc">
+                                    <field name="datetime"/>
+                                    <field name="type"/>
+                                    <field name="site"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                     <group class="oe_subtotal_footer oe_right">
                         <field name="total_advances" widget="monetary"/>

@@ -153,7 +153,7 @@ Exemple de réponse attendue:
                 msg += f"\n\n⚠️ ALERTE : L'IA avait détecté un total de {total_expected} {doc_name.lower()} sur le document, mais s'est arrêtée avant la fin (limite mémoire atteinte). Il manque **{missing}** {doc_name.lower()} à saisir manuellement !"
                 
             if not is_consensus:
-                msg += f"\n\n🛑 ALERTE DE SÉCURITÉ (Dual-AI) : Les intelligences artificielles (Gemini et Claude 3.5 Sonnet) sont en désaccord sur l'extraction ! Ce document a été placé en BROUILLON et nécessite votre vérification manuelle sur Odoo."
+                msg += f"\n\n🛑 ALERTE DE SÉCURITÉ (Dual-AI) : Les intelligences artificielles (Gemini et Claude Sonnet 5) sont en désaccord sur l'extraction ! Ce document a été placé en BROUILLON et nécessite votre vérification manuelle sur Odoo."
                 if consensus_errors:
                     msg += "\n\nErreurs détectées :\n- " + "\n- ".join(consensus_errors)
                 

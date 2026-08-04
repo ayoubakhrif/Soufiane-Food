@@ -254,7 +254,7 @@ Exemple de réponse attendue:
                     "content-type": "application/json"
                 }
                 payload = {
-                    "model": "claude-3-5-sonnet-20240620",
+                    "model": "claude-sonnet-5",
                     "max_tokens": 8192,
                     "temperature": 0.0,
                     "messages": messages

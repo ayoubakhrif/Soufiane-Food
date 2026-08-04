@@ -5,7 +5,8 @@
         <field name="name">tresorerie_chq.paiement.tree</field>
         <field name="model">tresorerie_chq.paiement</field>
         <field name="arch" type="xml">
-            <tree string="Entrées" decoration-info="payment_type in ['cheque', 'effet']">
+            <tree string="Entrées" decoration-info="state == 'draft'" decoration-success="state == 'validated'">
+                <field name="state" column_invisible="True"/>
                 <field name="date"/>
                 <field name="client_id"/>
                 <field name="payment_type"/>

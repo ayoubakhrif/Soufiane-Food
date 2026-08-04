@@ -624,7 +624,7 @@ class WhatsAppFinanceController(http.Controller):
                     <table>
                         <tr style="background-color: #ecf0f1;">
                             <th>Document</th>
-                            <th>Chq PDF</th>
+                            <th>Chq Vide</th>
                             <th>Date d'émission</th>
                             <th>Société</th>
                             <th>N° Journal</th>
@@ -655,7 +655,7 @@ class WhatsAppFinanceController(http.Controller):
                     is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
                     etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
                     doc_display = f"<div class='chq-info'>CHQ {doc_name}</div>"
-                    chq_pdf_icon = "<span style='color:green; font-weight:bold;'>&#10003;</span>" if phys.chq_vide_pdf else "<span style='color:red; font-weight:bold;'>&#10007;</span>"
+                    chq_pdf_icon = "<span style='color:green; font-weight:bold; font-size:18px;'>&#10003;</span>" if phys.chq_vide_pdf else "<span style='color:red; font-weight:bold; font-size:18px;'>&#10007;</span>"
                     
                     if not phys.chq_vide_pdf:
                         for dq in dqs:
@@ -672,9 +672,9 @@ class WhatsAppFinanceController(http.Controller):
                         s_selection = dict(dq._fields['state'].selection or {})
                         s_label = s_selection.get(dq.state) or dq.state or "N/A"
                         dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
-                        doc_pdf_icon = "<span style='color:green; font-weight:bold;'>&#10003;</span>" if dq.doc_pdf_url else "<span style='color:red; font-weight:bold;'>&#10007;</span>"
+                        doc_pdf_icon = "<span style='color:green; font-weight:bold; font-size:18px;'>&#10003;</span>" if phys.doc_pdf else "<span style='color:red; font-weight:bold; font-size:18px;'>&#10007;</span>"
                         
-                        if not dq.doc_pdf_url and dq.journal:
+                        if not phys.doc_pdf and dq.journal:
                             doc_missing_journals.add(str(dq.journal))
                         
                         if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:

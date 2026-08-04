@@ -109,3 +109,7 @@ access_achat_article_alias_user,company.article.alias.user,model_company_article
 access_achat_article_alias_manager,company.article.alias.manager,model_company_article_alias,group_purchase_manager,1,1,1,1
 access_logistique_entry_document_logistique_manager,logistique.entry.document.logistique.manager,model_logistique_entry_document,logistique.group_logistique_manager,1,1,1,1
 access_logistique_entry_document_logistique_manager,logistique.entry.document.logistique.manager,model_logistique_entry_document,logistique.group_logistique_manager,1,1,1,1
+a c c e s s _ a c h a t _ a i _ t e m p l a t e _ u s e r , a c h a t . a i . t e m p l a t e . u s e r , m o d e l _ a c h a t _ a i _ t e m p l a t e , g r o u p _ p u r c h a s e _ u s e r , 1 , 1 , 1 , 0  
+ a c c e s s _ a c h a t _ a i _ t e m p l a t e _ m a n a g e r , a c h a t . a i . t e m p l a t e . m a n a g e r , m o d e l _ a c h a t _ a i _ t e m p l a t e , g r o u p _ p u r c h a s e _ m a n a g e r , 1 , 1 , 1 , 1  
+ a c c e s s _ a c h a t _ a i _ t e m p l a t e _ v i e w e r , a c h a t . a i . t e m p l a t e . v i e w e r , m o d e l _ a c h a t _ a i _ t e m p l a t e , g r o u p _ p u r c h a s e _ v i e w e r , 1 , 0 , 0 , 0  
+ 

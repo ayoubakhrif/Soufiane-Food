@@ -12,3 +12,4 @@ from . import logistique_ste_inherit
 from . import contract_advance
 from . import ste_change
 from . import company_article_alias
+from . import ai_template

@@ -126,12 +126,12 @@ class TresoreriePaiement(models.Model):
             from odoo.exceptions import UserError
             raise UserError("Aucun document scanné n'est rattaché à cette entrée.")
 
-        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.api_key', '')
-        openai_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key', '')
+        api_key = self.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key', '').strip()
+        openai_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key', '').strip()
         
         if not api_key:
             from odoo.exceptions import UserError
-            raise UserError("La clé API Gemini n'est pas configurée dans les paramètres systèmes (whatsapp_stock.api_key).")
+            raise UserError("La clé API Gemini n'est pas configurée dans les paramètres systèmes (tresorerie_chq.gemini_key).")
             
         banks = self.env['tresorerie_chq.bank'].search([])
         bank_names = ", ".join(banks.mapped('name'))

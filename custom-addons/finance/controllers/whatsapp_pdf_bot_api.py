@@ -276,7 +276,8 @@ Règles de formatage :
             }],
             "generationConfig": {
                 "responseMimeType": "application/json",
-                "temperature": 0.0
+                "temperature": 0.0,
+                "maxOutputTokens": 2048
             }
         }
 
@@ -300,10 +301,16 @@ Règles de formatage :
             # The response is expected to be JSON string
             import re
             
+            raw_content = raw_content.strip()
             # Clean markdown if any
             if raw_content.startswith("```"):
                 raw_content = re.sub(r"^```(?:json)?\s*", "", raw_content)
                 raw_content = re.sub(r"\s*```$", "", raw_content)
+                raw_content = raw_content.strip()
+            
+            # Simple fix for truncated JSON ending with ']'
+            if raw_content.endswith(']'):
+                raw_content += '}'
                 
             try:
                 result = json.loads(raw_content)

@@ -7,18 +7,11 @@ class AchatAITemplate(models.Model):
 
     name = fields.Char(string='Nom du Modèle', required=True)
     
-    document_type = fields.Selection([
-        ('invoice', 'Facture'),
-        ('bl', 'Bill of Lading (BL)'),
-        ('packing_list', 'Packing List'),
-        ('health_certificate', 'Certificat Sanitaire'),
-        ('origin_certificate', 'Certificat d\'Origine'),
-        ('other', 'Autre')
-    ], string='Type de document', required=True)
+    document_type_id = fields.Many2one('logistique.document.config', string='Type de document', required=True)
 
     # Optional linkages for smart targeting
     supplier_id = fields.Many2one('logistique.supplier', string='Fournisseur', help="Ce modèle s'appliquera aux documents de ce fournisseur.")
-    ste_id = fields.Many2one('logistique.ste', string='Compagnie / Société', help="Ce modèle s'appliquera aux documents de cette compagnie.")
+    shipping_id = fields.Many2one('logistique.shipping', string='Compagnie Maritime', help="Ce modèle s'appliquera aux documents de cette compagnie maritime.")
     origin_id = fields.Many2one('achat.origin', string='Origine', help="Ce modèle s'appliquera aux documents de cette origine.")
 
     instruction_filename = fields.Char(string='Nom du fichier')

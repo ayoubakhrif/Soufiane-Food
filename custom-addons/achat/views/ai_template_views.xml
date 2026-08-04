@@ -13,9 +13,9 @@
                     </div>
                     <group>
                         <group string="Ciblage">
-                            <field name="document_type"/>
+                            <field name="document_type_id"/>
                             <field name="supplier_id" options="{'no_create': True}"/>
-                            <field name="ste_id" options="{'no_create': True}"/>
+                            <field name="shipping_id" options="{'no_create': True}"/>
                             <field name="origin_id" options="{'no_create': True}"/>
                         </group>
                         <group string="Instructions">
@@ -39,9 +39,9 @@
         <field name="arch" type="xml">
             <tree string="Modèles IA">
                 <field name="name"/>
-                <field name="document_type"/>
+                <field name="document_type_id"/>
                 <field name="supplier_id"/>
-                <field name="ste_id"/>
+                <field name="shipping_id"/>
                 <field name="origin_id"/>
             </tree>
         </field>
@@ -89,11 +89,11 @@
         </field>
     </record>
 
-    <!-- Inherit Logistique Ste Form to add AI Template Button -->
-    <record id="view_logistique_ste_form_inherit_ai" model="ir.ui.view">
-        <field name="name">logistique.ste.form.inherit.ai</field>
-        <field name="model">logistique.ste</field>
-        <field name="inherit_id" ref="logistique.view_logistique_ste_form"/>
+    <!-- Inherit Logistique Shipping Form to add AI Template Button -->
+    <record id="view_logistique_shipping_form_inherit_ai" model="ir.ui.view">
+        <field name="name">logistique.shipping.form.inherit.ai</field>
+        <field name="model">logistique.shipping</field>
+        <field name="inherit_id" ref="logistique.view_logistique_shipping_form"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet/group" position="before">
                 <div class="oe_button_box" name="button_box">
@@ -101,7 +101,7 @@
                             type="action"
                             class="oe_stat_button"
                             icon="fa-cogs"
-                            context="{'search_default_ste_id': id, 'default_ste_id': id}">
+                            context="{'search_default_shipping_id': id, 'default_shipping_id': id}">
                         <div class="o_stat_info">
                             <span class="o_stat_text">Modèles IA</span>
                         </div>

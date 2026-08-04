@@ -298,7 +298,26 @@ Règles de formatage :
                 return {'error': "L'IA Gemini n'a retourné aucune réponse."}
 
             # The response is expected to be JSON string
-            result = json.loads(raw_content)
+            import re
+            
+            # Clean markdown if any
+            if raw_content.startswith("```"):
+                raw_content = re.sub(r"^```(?:json)?\s*", "", raw_content)
+                raw_content = re.sub(r"\s*```$", "", raw_content)
+                
+            try:
+                result = json.loads(raw_content)
+            except Exception as e:
+                return {'error': f"Erreur de parsing JSON: {str(e)}\n\nTexte brut:\n{raw_content}"}
+                
+            if isinstance(result, list):
+                if len(result) > 0 and isinstance(result[0], dict):
+                    result = result[0]
+                else:
+                    result = {}
+            elif not isinstance(result, dict):
+                result = {}
+
             result['_raw_json'] = raw_content
             result['_prompt'] = prompt_text
             return result

@@ -262,7 +262,11 @@ Exemple de réponse attendue:
                 if resp.status_code != 200:
                     return {"error": f"Erreur API Claude: {resp.text}"}
                     
-                raw_content = resp.json()["content"][0]["text"]
+                resp_json = resp.json()
+                try:
+                    raw_content = resp_json["content"][0]["text"]
+                except (KeyError, IndexError):
+                    return {"error": f"Format de réponse Claude inattendu: {json.dumps(resp_json)}"}
                 clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
                 clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
                 try:

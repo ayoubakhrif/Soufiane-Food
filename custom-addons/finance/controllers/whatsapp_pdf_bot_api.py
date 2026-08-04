@@ -275,7 +275,6 @@ Règles de formatage :
                 ]
             }],
             "generationConfig": {
-                "responseMimeType": "application/json",
                 "temperature": 0.0,
                 "maxOutputTokens": 2048
             },

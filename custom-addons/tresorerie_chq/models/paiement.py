@@ -264,7 +264,13 @@ Exemple de réponse attendue:
                     
                 resp_json = resp.json()
                 try:
-                    raw_content = resp_json["content"][0]["text"]
+                    raw_content = ""
+                    for item in resp_json.get("content", []):
+                        if item.get("type") == "text":
+                            raw_content = item.get("text", "")
+                            break
+                    if not raw_content:
+                        raise KeyError("Aucun bloc de texte trouvé")
                 except (KeyError, IndexError):
                     return {"error": f"Format de réponse Claude inattendu: {json.dumps(resp_json)}"}
                 clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)

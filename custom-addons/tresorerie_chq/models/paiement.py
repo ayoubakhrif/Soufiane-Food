@@ -127,7 +127,7 @@ class TresoreriePaiement(models.Model):
             raise UserError("Aucun document scanné n'est rattaché à cette entrée.")
 
         api_key = self.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key', '').strip()
-        openai_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key', '').strip()
+        claude_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.claude_key', '').strip()
         
         if not api_key:
             from odoo.exceptions import UserError
@@ -217,9 +217,9 @@ Exemple de réponse attendue:
             except Exception as e:
                 return {"error": f"Exception Gemini: {str(e)}"}
 
-        def call_openai():
-            if not openai_key:
-                return {"error": "Clé OpenAI manquante."}
+        def call_claude():
+            if not claude_key:
+                return {"error": "Clé Claude manquante."}
             try:
                 import fitz
                 doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -230,31 +230,40 @@ Exemple de réponse attendue:
                     img_bytes = pix.tobytes("png")
                     base64_images.append(base64.b64encode(img_bytes).decode('utf-8'))
                     
+                content_array = [{"type": "text", "text": prompt_text}]
+                for img in base64_images:
+                    content_array.append({
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": "image/png",
+                            "data": img
+                        }
+                    })
+                    
                 messages = [
                     {
                         "role": "user",
-                        "content": [{"type": "text", "text": prompt_text}] + [
-                            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img}"}}
-                            for img in base64_images
-                        ]
+                        "content": content_array
                     }
                 ]
-                url = "https://api.openai.com/v1/chat/completions"
+                url = "https://api.anthropic.com/v1/messages"
                 headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {openai_key}"
+                    "x-api-key": claude_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
                 }
                 payload = {
-                    "model": "gpt-4o",
-                    "messages": messages,
+                    "model": "claude-3-5-sonnet-20240620",
+                    "max_tokens": 8192,
                     "temperature": 0.0,
-                    "response_format": {"type": "json_object"}
+                    "messages": messages
                 }
                 resp = requests.post(url, headers=headers, json=payload, timeout=120)
                 if resp.status_code != 200:
-                    return {"error": f"Erreur API OpenAI: {resp.text}"}
+                    return {"error": f"Erreur API Claude: {resp.text}"}
                     
-                raw_content = resp.json()["choices"][0]["message"]["content"]
+                raw_content = resp.json()["content"][0]["text"]
                 clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
                 clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
                 try:
@@ -263,15 +272,15 @@ Exemple de réponse attendue:
                     last_brace_idx = clean_content.rfind('}')
                     if last_brace_idx != -1:
                         return json.loads(clean_content[:last_brace_idx+1] + ']}')
-                    return {"error": f"JSON OpenAI Invalide: {str(e)}"}
+                    return {"error": f"JSON Claude Invalide: {str(e)}"}
             except Exception as e:
-                return {"error": f"Exception OpenAI: {str(e)}"}
+                return {"error": f"Exception Claude: {str(e)}"}
 
         with ThreadPoolExecutor(max_workers=2) as executor:
             future_gemini = executor.submit(call_gemini)
-            future_openai = executor.submit(call_openai)
+            future_claude = executor.submit(call_claude)
             result_gemini = future_gemini.result()
-            result_openai = future_openai.result()
+            result_claude = future_claude.result()
 
         from odoo.exceptions import UserError
         if "error" in result_gemini:
@@ -285,15 +294,15 @@ Exemple de réponse attendue:
 
         is_consensus = True
         consensus_errors = []
-        if "error" in result_openai:
+        if "error" in result_claude:
             is_consensus = False
-            consensus_errors.append(f"Erreur OpenAI: {result_openai['error']}")
+            consensus_errors.append(f"Erreur Claude: {result_claude['error']}")
         else:
             g_items = result_gemini.get('items', [])
-            o_items = result_openai.get('items', [])
+            o_items = result_claude.get('items', [])
             if len(g_items) != len(o_items):
                 is_consensus = False
-                consensus_errors.append(f"Nombre différent : Gemini a trouvé {len(g_items)}, OpenAI a trouvé {len(o_items)}.")
+                consensus_errors.append(f"Nombre différent : Gemini a trouvé {len(g_items)}, Claude a trouvé {len(o_items)}.")
             else:
                 for i in range(len(g_items)):
                     g = g_items[i]

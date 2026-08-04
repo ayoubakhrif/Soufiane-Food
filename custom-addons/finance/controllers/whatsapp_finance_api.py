@@ -624,11 +624,13 @@ class WhatsAppFinanceController(http.Controller):
                     <table>
                         <tr style="background-color: #ecf0f1;">
                             <th>Document</th>
+                            <th>Chq PDF</th>
                             <th>Date d'émission</th>
                             <th>Société</th>
                             <th>N° Journal</th>
                             <th>Bénéficiaire</th>
                             <th>Série de Facture</th>
+                            <th>Doc PDF</th>
                             <th>Type</th>
                             <th>Statut</th>
                             <th>Montant (DH)</th>
@@ -650,6 +652,7 @@ class WhatsAppFinanceController(http.Controller):
                     is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
                     etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
                     doc_display = f"<div class='chq-info'>CHQ {doc_name}</div>"
+                    chq_pdf_icon = "✅" if phys.chq_vide_pdf else "❌"
                     
                     grouped_rows = []
                     for dq in dqs:
@@ -661,14 +664,15 @@ class WhatsAppFinanceController(http.Controller):
                         s_selection = dict(dq._fields['state'].selection or {})
                         s_label = s_selection.get(dq.state) or dq.state or "N/A"
                         dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
+                        doc_pdf_icon = "✅" if dq.doc_pdf_url else "❌"
                         
                         if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
-                            grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val})
+                            grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'doc_pdf_icon': doc_pdf_icon})
                         else:
                             grouped_rows.append({
                                 'journal': journal_val,
                                 'benif': benif_name,
-                                'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val}]
+                                'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'doc_pdf_icon': doc_pdf_icon}]
                             })
                             
                 else: # EFFET
@@ -681,13 +685,14 @@ class WhatsAppFinanceController(http.Controller):
                     is_encaisse = e.state == 'encaisse'
                     etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
                     doc_display = f"<div class='effet-info'>EFFET {doc_name}</div>"
+                    chq_pdf_icon = "-"
                     
                     benif_name = e.benif_id.name if e.benif_id else "N/A"
                     
                     grouped_rows = [{
                         'journal': 'N/A',
                         'benif': benif_name,
-                        'items': [{'type': 'Effet', 'state': e.state or "N/A", 'amount': phys_amount, 'serie': 'N/A'}]
+                        'items': [{'type': 'Effet', 'state': e.state or "N/A", 'amount': phys_amount, 'serie': 'N/A', 'doc_pdf_icon': '-'}]
                     }]
                 
                 phys_rowspan = sum(len(group['items']) for group in grouped_rows)
@@ -701,6 +706,7 @@ class WhatsAppFinanceController(http.Controller):
                         if first_group and first_item:
                             html_content += f"""
                                 <td rowspan="{phys_rowspan}">{doc_display}</td>
+                                <td rowspan="{phys_rowspan}" style="text-align:center;">{chq_pdf_icon}</td>
                                 <td rowspan="{phys_rowspan}">{date_em}</td>
                                 <td rowspan="{phys_rowspan}">{ste_name}</td>
                             """
@@ -711,6 +717,7 @@ class WhatsAppFinanceController(http.Controller):
                             """
                         html_content += f"""
                                 <td>{item['serie']}</td>
+                                <td style="text-align:center;">{item['doc_pdf_icon']}</td>
                                 <td>{item['type']}</td>
                                 <td>{item['state']}</td>
                                 <td>{item['amount']}</td>

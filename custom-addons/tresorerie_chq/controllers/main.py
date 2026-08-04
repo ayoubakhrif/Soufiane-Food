@@ -143,12 +143,19 @@ Exemple de réponse attendue:
             doc_name = "Chèque(s)" if payment_type == 'cheque' else "Effet(s)"
             
             total_expected = ai_stats.get('total_expected', 0)
+            is_consensus = ai_stats.get('is_consensus', True)
+            consensus_errors = ai_stats.get('consensus_errors', [])
             
             msg = f"✅ {doc_name} enregistré(s) avec succès pour {client_name_str}.\nL'IA a extrait {lines_count} ligne(s)."
             
             if total_expected > lines_count:
                 missing = total_expected - lines_count
                 msg += f"\n\n⚠️ ALERTE : L'IA avait détecté un total de {total_expected} {doc_name.lower()} sur le document, mais s'est arrêtée avant la fin (limite mémoire atteinte). Il manque **{missing}** {doc_name.lower()} à saisir manuellement !"
+                
+            if not is_consensus:
+                msg += f"\n\n🛑 ALERTE DE SÉCURITÉ (Dual-AI) : Les intelligences artificielles (Gemini et GPT-4o) sont en désaccord sur l'extraction ! Ce document a été placé en BROUILLON et nécessite votre vérification manuelle sur Odoo."
+                if consensus_errors:
+                    msg += "\n\nErreurs détectées :\n- " + "\n- ".join(consensus_errors)
                 
             return {"status": "success", "message": msg}
         except Exception as e:

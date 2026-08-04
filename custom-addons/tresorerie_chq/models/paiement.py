@@ -124,19 +124,16 @@ class TresoreriePaiement(models.Model):
         self.ensure_one()
         if not self.scan_document:
             from odoo.exceptions import UserError
-            raise UserError("Veuillez d'abord uploader un document scanné.")
+            raise UserError("Aucun document scanné n'est rattaché à cette entrée.")
 
-        api_key = self.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key')
+        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.api_key', '')
+        openai_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key', '')
+        
         if not api_key:
             from odoo.exceptions import UserError
-            raise UserError("La clé API Google Gemini n'est pas configurée (tresorerie_chq.gemini_key).")
-
-        import requests
-        import json
-
-        pdf_b64 = self.scan_document.decode('utf-8') if isinstance(self.scan_document, bytes) else self.scan_document
-
-        banks = self.env['tresorerie_chq.bank'].sudo().search([])
+            raise UserError("La clé API Gemini n'est pas configurée dans les paramètres systèmes (whatsapp_stock.api_key).")
+            
+        banks = self.env['tresorerie_chq.bank'].search([])
         bank_names = ", ".join(banks.mapped('name'))
 
         doc_type = "chèques" if self.payment_type == 'cheque' else "effets"
@@ -171,104 +168,157 @@ Exemple de réponse attendue:
   ]
 }}"""
 
-        # 1. Upload the PDF to Gemini File API
         import base64
         pdf_bytes = base64.b64decode(self.scan_document)
-        upload_url = f"https://generativelanguage.googleapis.com/upload/v1beta/files?key={api_key}"
-        upload_headers = {
-            "X-Goog-Upload-Protocol": "raw",
-            "X-Goog-Upload-Header-Content-Type": "application/pdf",
-            "Content-Type": "application/pdf"
-        }
-        try:
-            upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes, timeout=120)
-            if upload_resp.status_code != 200:
-                err_msg = upload_resp.json().get("error", {}).get("message", upload_resp.text)
-                from odoo.exceptions import UserError
-                raise UserError(f"Erreur lors de l'upload du PDF vers Gemini : {err_msg}")
-            
-            file_info = upload_resp.json().get("file", {})
-            file_uri = file_info.get("uri")
-            if not file_uri:
-                from odoo.exceptions import UserError
-                raise UserError("Impossible de récupérer l'URI du fichier après l'upload.")
-        except Exception as e:
-            from odoo.exceptions import UserError
-            raise UserError(f"Erreur de communication lors de l'upload vers l'IA : {str(e)}")
-
-        # 2. Generate Content using the uploaded file URI
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {
-                            "text": prompt_text
-                        },
-                        {
-                            "fileData": {
-                                "mimeType": "application/pdf",
-                                "fileUri": file_uri
-                            }
-                        }
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "temperature": 0.0,
-                "maxOutputTokens": 8192
-            }
-        }
-
-        headers = {
-            "Content-Type": "application/json"
-        }
-
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
-
-        try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=120)
-            if resp.status_code != 200:
-                err_msg = resp.json().get("error", {}).get("message", resp.text)
-                from odoo.exceptions import UserError
-                raise UserError(f"Erreur de l'API Gemini : {err_msg}")
-            
-            ai_data = resp.json()
-        except Exception as e:
-            from odoo.exceptions import UserError
-            raise UserError(f"Erreur de communication avec l'IA : {str(e)}")
-
-        try:
-            raw_content = ai_data["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError):
-            from odoo.exceptions import UserError
-            raise UserError("L'IA n'a retourné aucune donnée lisible.")
-
+        
+        # Lancer Gemini et OpenAI en parallèle
+        from concurrent.futures import ThreadPoolExecutor
+        import json
+        import requests
         import re
-        clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
-        clean_content = re.sub(r'```$', '', clean_content.strip())
-        clean_content = clean_content.strip()
 
-        try:
-            result = json.loads(clean_content)
-        except Exception as e:
-            # Attempt to auto-fix truncated JSON safely by finding the last valid object
-            last_brace_idx = clean_content.rfind('}')
-            if last_brace_idx != -1:
-                fixed_content = clean_content[:last_brace_idx+1]
+        def call_gemini():
+            upload_url = f"https://generativelanguage.googleapis.com/upload/v1beta/files?key={api_key}"
+            upload_headers = {
+                "X-Goog-Upload-Protocol": "raw",
+                "X-Goog-Upload-Header-Content-Type": "application/pdf",
+                "Content-Type": "application/pdf"
+            }
+            try:
+                upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes, timeout=120)
+                if upload_resp.status_code != 200:
+                    return {"error": f"Erreur Gemini Upload: {upload_resp.text}"}
+                
+                file_uri = upload_resp.json().get("file", {}).get("uri")
+                if not file_uri:
+                    return {"error": "Impossible de récupérer l'URI Gemini."}
+                    
+                payload = {
+                    "contents": [{"parts": [{"text": prompt_text}, {"fileData": {"mimeType": "application/pdf", "fileUri": file_uri}}]}],
+                    "generationConfig": {"responseMimeType": "application/json", "temperature": 0.0, "maxOutputTokens": 8192}
+                }
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
+                resp = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=120)
+                
+                if resp.status_code != 200:
+                    return {"error": f"Erreur API Gemini: {resp.text}"}
+                    
+                raw_content = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
+                clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
+                
                 try:
-                    result = json.loads(fixed_content + ']}')
-                except Exception:
-                    from odoo.exceptions import UserError
-                    raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
-            else:
-                from odoo.exceptions import UserError
-                raise UserError(f"Erreur JSON ({str(e)}) : {clean_content}")
+                    return json.loads(clean_content)
+                except Exception as e:
+                    last_brace_idx = clean_content.rfind('}')
+                    if last_brace_idx != -1:
+                        return json.loads(clean_content[:last_brace_idx+1] + ']}')
+                    return {"error": f"JSON Gemini Invalide: {str(e)}"}
+            except Exception as e:
+                return {"error": f"Exception Gemini: {str(e)}"}
 
-        items = result.get('items', [])
+        def call_openai():
+            if not openai_key:
+                return {"error": "Clé OpenAI manquante."}
+            try:
+                import fitz
+                doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+                base64_images = []
+                for page_num in range(len(doc)):
+                    page = doc.load_page(page_num)
+                    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                    img_bytes = pix.tobytes("png")
+                    base64_images.append(base64.b64encode(img_bytes).decode('utf-8'))
+                    
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [{"type": "text", "text": prompt_text}] + [
+                            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img}"}}
+                            for img in base64_images
+                        ]
+                    }
+                ]
+                url = "https://api.openai.com/v1/chat/completions"
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {openai_key}"
+                }
+                payload = {
+                    "model": "gpt-4o",
+                    "messages": messages,
+                    "temperature": 0.0,
+                    "response_format": {"type": "json_object"}
+                }
+                resp = requests.post(url, headers=headers, json=payload, timeout=120)
+                if resp.status_code != 200:
+                    return {"error": f"Erreur API OpenAI: {resp.text}"}
+                    
+                raw_content = resp.json()["choices"][0]["message"]["content"]
+                clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
+                clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
+                try:
+                    return json.loads(clean_content)
+                except Exception as e:
+                    last_brace_idx = clean_content.rfind('}')
+                    if last_brace_idx != -1:
+                        return json.loads(clean_content[:last_brace_idx+1] + ']}')
+                    return {"error": f"JSON OpenAI Invalide: {str(e)}"}
+            except Exception as e:
+                return {"error": f"Exception OpenAI: {str(e)}"}
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            future_gemini = executor.submit(call_gemini)
+            future_openai = executor.submit(call_openai)
+            result_gemini = future_gemini.result()
+            result_openai = future_openai.result()
+
+        from odoo.exceptions import UserError
+        if "error" in result_gemini:
+            raise UserError(f"Echec Gemini: {result_gemini['error']}")
+            
+        def similar(a, b):
+            from difflib import SequenceMatcher
+            if not a and not b: return True
+            if not a or not b: return False
+            return SequenceMatcher(None, str(a).lower(), str(b).lower()).ratio() > 0.8
+
+        is_consensus = True
+        consensus_errors = []
+        if "error" in result_openai:
+            is_consensus = False
+            consensus_errors.append(f"Erreur OpenAI: {result_openai['error']}")
+        else:
+            g_items = result_gemini.get('items', [])
+            o_items = result_openai.get('items', [])
+            if len(g_items) != len(o_items):
+                is_consensus = False
+                consensus_errors.append(f"Nombre différent : Gemini a trouvé {len(g_items)}, OpenAI a trouvé {len(o_items)}.")
+            else:
+                for i in range(len(g_items)):
+                    g = g_items[i]
+                    o = o_items[i]
+                    # Chiffres : Correspondance exacte
+                    if str(g.get('numero', '')).strip() != str(o.get('numero', '')).strip():
+                        is_consensus = False
+                        consensus_errors.append(f"Ligne {i+1}: Numéro différent ({g.get('numero')} vs {o.get('numero')})")
+                    if float(g.get('montant') or 0) != float(o.get('montant') or 0):
+                        is_consensus = False
+                        consensus_errors.append(f"Ligne {i+1}: Montant différent ({g.get('montant')} vs {o.get('montant')})")
+                    if str(g.get('date_echeance', '')).strip() != str(o.get('date_echeance', '')).strip():
+                        is_consensus = False
+                        consensus_errors.append(f"Ligne {i+1}: Date différente ({g.get('date_echeance')} vs {o.get('date_echeance')})")
+                    # Texte : Tolérance
+                    if not similar(g.get('banque'), o.get('banque')):
+                        is_consensus = False
+                        consensus_errors.append(f"Ligne {i+1}: Banque très différente ({g.get('banque')} vs {o.get('banque')})")
+                    if not similar(g.get('porteur'), o.get('porteur')):
+                        is_consensus = False
+                        consensus_errors.append(f"Ligne {i+1}: Porteur très différent ({g.get('porteur')} vs {o.get('porteur')})")
+
+        items = result_gemini.get('items', [])
         if not items:
-            from odoo.exceptions import UserError
-            raise UserError("Aucun chèque/effet n'a pu être identifié dans ce document.")
+            raise UserError("Aucun chèque/effet n'a pu être identifié par Gemini.")
 
         lines_to_create = []
         current_sequence = 10
@@ -318,10 +368,15 @@ Exemple de réponse attendue:
                 self.write({'cheque_line_ids': lines_to_create})
             else:
                 self.write({'effet_line_ids': lines_to_create})
+                
+        if is_consensus:
+            self.write({'state': 'validated'})
 
         return {
-            'total_expected': result.get('total_attendu', 0),
-            'extracted_count': len(lines_to_create)
+            'total_expected': result_gemini.get('total_attendu', 0),
+            'extracted_count': len(lines_to_create),
+            'is_consensus': is_consensus,
+            'consensus_errors': consensus_errors
         }
 
     def action_confirm_ai_data(self):

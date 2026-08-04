@@ -226,7 +226,8 @@ Exemple de réponse attendue:
                 base64_images = []
                 for page_num in range(len(doc)):
                     page = doc.load_page(page_num)
-                    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                    # Augmentation de la résolution de l'image (Zoom x4) pour éviter les hallucinations
+                    pix = page.get_pixmap(matrix=fitz.Matrix(4, 4))
                     img_bytes = pix.tobytes("png")
                     base64_images.append(base64.b64encode(img_bytes).decode('utf-8'))
                     
@@ -317,13 +318,13 @@ Exemple de réponse attendue:
                     g = g_items[i]
                     o = o_items[i]
                     # Chiffres : Correspondance exacte
-                    if str(g.get('numero', '')).strip() != str(o.get('numero', '')).strip():
+                    if str(g.get('numero') or '').strip() != str(o.get('numero') or '').strip():
                         is_consensus = False
                         consensus_errors.append(f"Ligne {i+1}: Numéro différent ({g.get('numero')} vs {o.get('numero')})")
                     if float(g.get('montant') or 0) != float(o.get('montant') or 0):
                         is_consensus = False
                         consensus_errors.append(f"Ligne {i+1}: Montant différent ({g.get('montant')} vs {o.get('montant')})")
-                    if str(g.get('date_echeance', '')).strip() != str(o.get('date_echeance', '')).strip():
+                    if str(g.get('date_echeance') or '').strip() != str(o.get('date_echeance') or '').strip():
                         is_consensus = False
                         consensus_errors.append(f"Ligne {i+1}: Date différente ({g.get('date_echeance')} vs {o.get('date_echeance')})")
                     # Texte : Tolérance

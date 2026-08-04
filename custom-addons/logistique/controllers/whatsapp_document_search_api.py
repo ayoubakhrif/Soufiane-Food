@@ -77,8 +77,8 @@ class WhatsappDocumentSearchApi(http.Controller):
                         for chq in phys_cheques:
                             if chq.cheque_copy_pdf:
                                 pdf_data_list.append(chq.cheque_copy_pdf)
-                            elif chq.chq_vide_pdf:
-                                pdf_data_list.append(chq.chq_vide_pdf)
+                            elif chq.doc_pdf:
+                                pdf_data_list.append(chq.doc_pdf)
                                 
                         if pdf_data_list:
                             import base64

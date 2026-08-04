@@ -15,6 +15,7 @@ class DouaneDocument(models.Model):
         ('bs', 'Bulletin de sortie'),
         ('dum', 'DUM'),
         ('estimation', 'Estimation'),
+        ('facture_companies', 'Factures des companies'),
     ], string='Type de document', required=True)
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)

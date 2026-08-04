@@ -32,12 +32,13 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Présences">
-                            <field name="presence_ids">
-                                <tree editable="bottom">
+                        <page string="Historique des pointages">
+                            <field name="presence_ids" readonly="1">
+                                <tree default_order="datetime desc">
                                     <field name="datetime"/>
                                     <field name="type"/>
-                                    <field name="absence_type" invisible="type != 'absent'" required="type == 'absent'"/>
+                                    <field name="site"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'"/>
                                 </tree>
                             </field>
                         </page>

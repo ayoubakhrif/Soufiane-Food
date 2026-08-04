@@ -16,6 +16,7 @@ class LogistiqueDoc(models.Model):
     document_type = fields.Selection([
         ('other', 'Autre'),
         ('engagement', 'Engagement'),
+        ('company_invoice', 'Factures companies'),
     ], string='Type de document', required=True)
 
     drive_link = fields.Char(

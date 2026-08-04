@@ -18,6 +18,7 @@ class PurchaseEntryDocument(models.Model):
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
         ('engagement', 'Engagement'),
+        ('company_invoice', 'Factures companies'),
         ('other', 'Other certificates'),
     ], string='Document Type', required=True)
     

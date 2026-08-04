@@ -14,6 +14,7 @@ class DocumentConfig(models.Model):
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
         ('engagement', 'Engagement'),
+        ('company_invoice', 'Factures companies'),
         ('other', 'Autre')
     ], string='Document', required=True)
 
@@ -37,6 +38,7 @@ class DocumentConfigLine(models.Model):
         ('health', 'Health Certificate'),
         ('fumigation', 'Fumigation Certificate'),
         ('engagement', 'Engagement'),
+        ('company_invoice', 'Factures companies'),
         ('other', 'Autre')
     ], string='Document Lié', required=False)
 

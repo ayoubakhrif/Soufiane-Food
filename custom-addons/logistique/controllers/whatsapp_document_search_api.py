@@ -63,6 +63,57 @@ class WhatsappDocumentSearchApi(http.Controller):
                     'response': '❌ Impossible de récupérer les documents demandés.'
                 }
 
+            # Handle Cheques Fetch
+            if 'FETCH_CHEQUES:' in query:
+                parts = [p for p in query.split('|') if p.startswith('FETCH_CHEQUES:')]
+                if parts:
+                    entry_id = int(parts[0].split(':')[1])
+                    entry = request.env['logistique.entry'].sudo().browse(entry_id)
+                    if entry.exists() and entry.cheque_ids:
+                        series = [c.cheque_serie for c in entry.cheque_ids if c.cheque_serie]
+                        phys_cheques = request.env['finance.cheque.physical'].sudo().search([('name', 'in', series)])
+                        
+                        pdf_data_list = []
+                        for chq in phys_cheques:
+                            if chq.cheque_copy_pdf:
+                                pdf_data_list.append(chq.cheque_copy_pdf)
+                            elif chq.chq_vide_pdf:
+                                pdf_data_list.append(chq.chq_vide_pdf)
+                                
+                        if pdf_data_list:
+                            import base64
+                            import io
+                            from PyPDF2 import PdfReader, PdfWriter
+                            
+                            writer = PdfWriter()
+                            for b64_pdf in pdf_data_list:
+                                try:
+                                    pdf_bytes = base64.b64decode(b64_pdf)
+                                    reader = PdfReader(io.BytesIO(pdf_bytes))
+                                    for page in reader.pages:
+                                        writer.add_page(page)
+                                except Exception as e:
+                                    _logger.error("Error merging PDF: %s", str(e))
+                            
+                            output = io.BytesIO()
+                            writer.write(output)
+                            merged_b64 = base64.b64encode(output.getvalue()).decode('utf-8')
+                            
+                            return {
+                                'status': 'success',
+                                'files': [{
+                                    'file_name': f"Cheques_BL_{entry.bl_number or 'Inconnu'}.pdf",
+                                    'base64': merged_b64,
+                                    'mimetype': 'application/pdf',
+                                    'caption': f"Voici les chèques fusionnés pour le BL *{entry.bl_number or 'Inconnu'}*."
+                                }]
+                            }
+                        else:
+                            return {
+                                'status': 'success',
+                                'response': '❌ Aucun chèque physique (PDF) trouvé dans la Finance pour ce dossier.'
+                            }
+                            
             # Handle Search
             entries = request.env['logistique.entry'].sudo().search([('invoice_number', 'ilike', query)])
             if not entries:
@@ -103,6 +154,11 @@ class WhatsappDocumentSearchApi(http.Controller):
                     
                     text_response += f"{choice_idx}. {file_name}\n"
                     choices.append(f"FETCH_DOC_SEARCH:logistique.entry.document:{doc.id}")
+                    choice_idx += 1
+                
+                if entry.cheque_ids:
+                    text_response += f"{choice_idx}. Chèques (Fusionnés)\n"
+                    choices.append(f"FETCH_CHEQUES:{entry.id}")
                     choice_idx += 1
                 
                 text_response += "\n"

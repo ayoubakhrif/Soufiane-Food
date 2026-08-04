@@ -91,8 +91,9 @@ class FinanceChequePhysical(models.Model):
             rec.amount_total = sum(rec.datacheque_ids.mapped('amount'))
 
     journal_numbers = fields.Char(string='N° Journal', compute='_compute_shared_info', store=True)
+    week = fields.Char(string='Semaine', compute='_compute_shared_info', store=True)
 
-    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.date_limite', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state', 'datacheque_ids.journal')
+    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.date_limite', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state', 'datacheque_ids.journal', 'datacheque_ids.week')
     def _compute_shared_info(self):
         for rec in self:
             if rec.datacheque_ids:
@@ -108,7 +109,11 @@ class FinanceChequePhysical(models.Model):
                 # Search for the first non-empty cashing date among splits
                 rec.date_encaissement = next((d.date_encaissement for d in rec.datacheque_ids if d.date_encaissement), False)
                 journals = [str(j) for j in rec.datacheque_ids.mapped('journal') if j]
-                rec.journal_numbers = ", ".join(journals) if journals else False
+                unique_journals = list(dict.fromkeys(journals))
+                rec.journal_numbers = ", ".join(unique_journals) if unique_journals else False
+                weeks = [w for w in rec.datacheque_ids.mapped('week') if w]
+                unique_weeks = list(dict.fromkeys(weeks))
+                rec.week = ", ".join(unique_weeks) if unique_weeks else False
             else:
                 rec.date_emission = False
                 rec.date_limite = False
@@ -118,6 +123,7 @@ class FinanceChequePhysical(models.Model):
                 rec.commentaire = False
                 rec.date_encaissement = False
                 rec.journal_numbers = False
+                rec.week = False
 
     @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours', 'datacheque_ids.date_encaissement')
     def _compute_credit_debit(self):

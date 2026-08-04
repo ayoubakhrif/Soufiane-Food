@@ -92,8 +92,9 @@ class FinanceChequePhysical(models.Model):
 
     journal_numbers = fields.Char(string='N° Journal', compute='_compute_shared_info', store=True)
     week = fields.Char(string='Semaine', compute='_compute_shared_info', store=True)
+    bl = fields.Char(string='BL', compute='_compute_shared_info', store=True)
 
-    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.date_limite', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state', 'datacheque_ids.journal', 'datacheque_ids.week')
+    @api.depends('datacheque_ids', 'datacheque_ids.date_emission', 'datacheque_ids.date_echeance', 'datacheque_ids.date_limite', 'datacheque_ids.benif_id', 'datacheque_ids.date_encaissement', 'datacheque_ids.state', 'datacheque_ids.journal', 'datacheque_ids.week', 'datacheque_ids.bl')
     def _compute_shared_info(self):
         for rec in self:
             if rec.datacheque_ids:
@@ -114,6 +115,9 @@ class FinanceChequePhysical(models.Model):
                 weeks = [w for w in rec.datacheque_ids.mapped('week') if w]
                 unique_weeks = list(dict.fromkeys(weeks))
                 rec.week = ", ".join(unique_weeks) if unique_weeks else False
+                bls = [b for b in rec.datacheque_ids.mapped('bl') if b]
+                unique_bls = list(dict.fromkeys(bls))
+                rec.bl = ", ".join(unique_bls) if unique_bls else False
             else:
                 rec.date_emission = False
                 rec.date_limite = False
@@ -124,6 +128,7 @@ class FinanceChequePhysical(models.Model):
                 rec.date_encaissement = False
                 rec.journal_numbers = False
                 rec.week = False
+                rec.bl = False
 
     @api.depends('amount_total', 'datacheque_ids.amount', 'datacheque_ids.encours', 'datacheque_ids.date_encaissement')
     def _compute_credit_debit(self):

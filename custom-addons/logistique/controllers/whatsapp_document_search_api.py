@@ -83,20 +83,33 @@ class WhatsappDocumentSearchApi(http.Controller):
                         if pdf_data_list:
                             import base64
                             import io
-                            from PyPDF2 import PdfReader, PdfWriter
-                            
-                            writer = PdfWriter()
-                            for b64_pdf in pdf_data_list:
-                                try:
-                                    pdf_bytes = base64.b64decode(b64_pdf)
-                                    reader = PdfReader(io.BytesIO(pdf_bytes))
-                                    for page in reader.pages:
-                                        writer.add_page(page)
-                                except Exception as e:
-                                    _logger.error("Error merging PDF: %s", str(e))
                             
                             output = io.BytesIO()
-                            writer.write(output)
+                            try:
+                                from PyPDF2 import PdfReader, PdfWriter
+                                writer = PdfWriter()
+                                for b64_pdf in pdf_data_list:
+                                    try:
+                                        pdf_bytes = base64.b64decode(b64_pdf)
+                                        reader = PdfReader(io.BytesIO(pdf_bytes))
+                                        for page in reader.pages:
+                                            writer.add_page(page)
+                                    except Exception as e:
+                                        _logger.error("Error merging PDF (v3): %s", str(e))
+                                writer.write(output)
+                            except ImportError:
+                                from PyPDF2 import PdfFileReader, PdfFileWriter
+                                writer = PdfFileWriter()
+                                for b64_pdf in pdf_data_list:
+                                    try:
+                                        pdf_bytes = base64.b64decode(b64_pdf)
+                                        reader = PdfFileReader(io.BytesIO(pdf_bytes))
+                                        for page_num in range(reader.getNumPages()):
+                                            writer.addPage(reader.getPage(page_num))
+                                    except Exception as e:
+                                        _logger.error("Error merging PDF (v1/v2): %s", str(e))
+                                writer.write(output)
+                            
                             merged_b64 = base64.b64encode(output.getvalue()).decode('utf-8')
                             
                             return {

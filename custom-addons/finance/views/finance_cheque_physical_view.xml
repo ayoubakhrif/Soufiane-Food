@@ -11,6 +11,7 @@
                 <field name="benif_id"/>
                 <field name="journal_numbers"/>
                 <field name="week"/>
+                <field name="bl"/>
                 <group expand="0" string="Group By">
                     <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
                     <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
@@ -33,6 +34,7 @@
                 <field name="date_echeance"/>
                 <field name="journal_numbers"/>
                 <field name="week"/>
+                <field name="bl"/>
                 <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
                 <field name="amount_total" sum="Total"/>
                 <field name="is_fault" invisible="1"/>
@@ -79,6 +81,7 @@
                             <field name="date_echeance" readonly="1"/>
                             <field name="journal_numbers" readonly="1"/>
                             <field name="week" readonly="1"/>
+                            <field name="bl" readonly="1"/>
                             <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
                         </group>
                     </group>

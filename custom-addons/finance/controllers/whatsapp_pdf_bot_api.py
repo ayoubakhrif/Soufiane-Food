@@ -278,7 +278,25 @@ Règles de formatage :
                 "responseMimeType": "application/json",
                 "temperature": 0.0,
                 "maxOutputTokens": 2048
-            }
+            },
+            "safetySettings": [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE"
+                }
+            ]
         }
 
         headers = {
@@ -292,11 +310,17 @@ Règles de formatage :
 
             raw_content = ""
             candidates = ai_data.get("candidates", [])
-            if candidates and candidates[0].get("content", {}).get("parts"):
-                raw_content = candidates[0]["content"]["parts"][0].get("text", "")
+            finish_reason = ""
+            if candidates:
+                finish_reason = candidates[0].get("finishReason", "")
+                if candidates[0].get("content", {}).get("parts"):
+                    raw_content = candidates[0]["content"]["parts"][0].get("text", "")
 
             if not raw_content:
-                return {'error': "L'IA Gemini n'a retourné aucune réponse."}
+                return {'error': f"L'IA Gemini n'a retourné aucune réponse. (Raison : {finish_reason})"}
+
+            if finish_reason and finish_reason not in ('STOP', 'MAX_TOKENS'):
+                return {'error': f"L'IA a interrompu la réponse. (Raison : {finish_reason})\nTexte brut:\n{raw_content}"}
 
             # The response is expected to be JSON string
             import re

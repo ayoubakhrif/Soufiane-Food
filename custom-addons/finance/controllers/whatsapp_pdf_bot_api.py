@@ -332,14 +332,17 @@ Règles de formatage :
                 raw_content = re.sub(r"\s*```$", "", raw_content)
                 raw_content = raw_content.strip()
             
-            # Simple fix for truncated JSON ending with ']'
-            if raw_content.endswith(']'):
-                raw_content += '}'
-                
             try:
                 result = json.loads(raw_content)
             except Exception as e:
-                return {'error': f"Erreur de parsing JSON: {str(e)}\n\nTexte brut:\n{raw_content}"}
+                # Fallback: maybe it's truncated? Try to append '}' just in case
+                if raw_content.endswith(']'):
+                    try:
+                        result = json.loads(raw_content + '}')
+                    except Exception:
+                        return {'error': f"Erreur de parsing JSON: {str(e)}\n\nTexte brut:\n{raw_content}"}
+                else:
+                    return {'error': f"Erreur de parsing JSON: {str(e)}\n\nTexte brut:\n{raw_content}"}
                 
             if isinstance(result, list):
                 if len(result) > 0 and isinstance(result[0], dict):

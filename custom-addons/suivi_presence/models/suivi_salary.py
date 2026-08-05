@@ -270,7 +270,7 @@ class SuiviSalary(models.Model):
                         
                         if is_holiday:
                             t_holi += raw_dur
-                            pair_cost += raw_dur * rate * 2 # Holiday Rate
+                            pair_cost += raw_dur * rate # Holiday Rate (100% bonus, base is already acquired)
                         else:
                             t_over += raw_dur
                             pair_cost += raw_dur * rate * ot_coeff # Overtime Rate

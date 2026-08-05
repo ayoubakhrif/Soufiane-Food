@@ -195,7 +195,7 @@ Exemple de réponse attendue:
                     
                 payload = {
                     "contents": [{"parts": [{"text": prompt_text}, {"fileData": {"mimeType": "application/pdf", "fileUri": file_uri}}]}],
-                    "generationConfig": {"temperature": 0.0, "maxOutputTokens": 8192}
+                    "generationConfig": {"responseMimeType": "application/json", "temperature": 0.0, "maxOutputTokens": 8192}
                 }
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
                 resp = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=120)
@@ -274,24 +274,15 @@ Exemple de réponse attendue:
                         raise KeyError("Aucun bloc de texte trouvé")
                 except (KeyError, IndexError):
                     return {"error": f"Format de réponse Claude inattendu: {json.dumps(resp_json)}"}
-                
-                raw_content = raw_content.strip()
-                json_match = re.search(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", raw_content, re.DOTALL)
-                if json_match:
-                    clean_content = json_match.group(1).strip()
-                else:
-                    start_idx = raw_content.find('{')
-                    start_arr_idx = raw_content.find('[')
-                    valid_starts = [i for i in (start_idx, start_arr_idx) if i != -1]
-                    if valid_starts:
-                        start = min(valid_starts)
-                        end_char = '}' if start == start_idx else ']'
-                        end = raw_content.rfind(end_char)
-                        clean_content = raw_content[start:end+1] if (end != -1 and end > start) else raw_content
-                    else:
-                        clean_content = raw_content
-                
-                return json.loads(clean_content)
+                clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
+                clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
+                try:
+                    return json.loads(clean_content)
+                except Exception as e:
+                    last_brace_idx = clean_content.rfind('}')
+                    if last_brace_idx != -1:
+                        return json.loads(clean_content[:last_brace_idx+1] + ']}')
+                    return {"error": f"JSON Claude Invalide: {str(e)}"}
             except Exception as e:
                 return {"error": f"Exception Claude: {str(e)}"}
 

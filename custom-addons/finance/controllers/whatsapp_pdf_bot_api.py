@@ -220,7 +220,7 @@ Règles strictes pour le "type" de frais :
 
 Règles de formatage :
 - Retournez UNIQUEMENT un objet JSON valide, sans formatage markdown, sans explications.
-- Le JSON doit suivre cette structure exacte (S'il n'y a aucune facture, retournez "factures": []):
+- Le JSON doit suivre cette structure exacte :
 {
   "chq_number": "1234567",
   "factures": [
@@ -239,67 +239,54 @@ Règles de formatage :
         prompt_text = prompt_text.replace("[DIVERS_LIST]", divers_list_str)
         prompt_text = prompt_text.replace("[FEEDBACK]", feedback_instruction)
         
-        # 1. Upload the PDF to Gemini File API
         import base64
-        pdf_bytes = base64.b64decode(pdf_b64)
-        upload_url = f"https://generativelanguage.googleapis.com/upload/v1beta/files?key={api_key}"
-        upload_headers = {
-            "X-Goog-Upload-Protocol": "raw",
-            "X-Goog-Upload-Header-Content-Type": "application/pdf",
-            "Content-Type": "application/pdf"
-        }
         try:
-            upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes, timeout=120)
-            if upload_resp.status_code != 200:
-                err_msg = upload_resp.json().get("error", {}).get("message", upload_resp.text)
-                return {'status': 'error', 'message': f"Erreur d'upload vers Gemini: {err_msg}"}
-            file_info = upload_resp.json().get("file", {})
-            file_uri = file_info.get("uri")
-            if not file_uri:
-                return {'status': 'error', 'message': "Impossible de récupérer l'URI du fichier après l'upload."}
+            import fitz  # PyMuPDF
+        except ImportError:
+            return {'error': "PyMuPDF (fitz) n'est pas installé sur le serveur pour lire le PDF vers OpenAI."}
+            
+        pdf_bytes = base64.b64decode(pdf_b64)
+        
+        try:
+            doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+            content_array = [
+                {"type": "text", "text": prompt_text}
+            ]
+            
+            # Limit to first 6 pages to avoid token explosion
+            for page_num in range(min(6, len(doc))):
+                page = doc.load_page(page_num)
+                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                img_bytes = pix.tobytes("jpeg")
+                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+                content_array.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{img_b64}",
+                        "detail": "high"
+                    }
+                })
         except Exception as e:
-            return {'status': 'error', 'message': f"Erreur de communication lors de l'upload vers l'IA : {str(e)}"}
+            return {'error': f"Erreur lors de la conversion du PDF en images : {str(e)}"}
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
+        url = "https://api.openai.com/v1/chat/completions"
 
         payload = {
-            "contents": [{
-                "parts": [
-                    {"text": prompt_text},
-                    {
-                        "fileData": {
-                            "mimeType": "application/pdf",
-                            "fileUri": file_uri
-                        }
-                    }
-                ]
-            }],
-            "generationConfig": {
-                "temperature": 0.0,
-                "maxOutputTokens": 2048
-            },
-            "safetySettings": [
+            "model": "gpt-4o",
+            "messages": [
                 {
-                    "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_NONE"
-                },
-                {
-                    "category": "HARM_CATEGORY_HATE_SPEECH",
-                    "threshold": "BLOCK_NONE"
-                },
-                {
-                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_NONE"
-                },
-                {
-                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_NONE"
+                    "role": "user",
+                    "content": content_array
                 }
-            ]
+            ],
+            "response_format": { "type": "json_object" },
+            "temperature": 0.0,
+            "max_tokens": 2048
         }
 
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
         }
 
         try:
@@ -308,18 +295,12 @@ Règles de formatage :
             ai_data = resp.json()
 
             raw_content = ""
-            candidates = ai_data.get("candidates", [])
-            finish_reason = ""
-            if candidates:
-                finish_reason = candidates[0].get("finishReason", "")
-                if candidates[0].get("content", {}).get("parts"):
-                    raw_content = candidates[0]["content"]["parts"][0].get("text", "")
+            choices = ai_data.get("choices", [])
+            if choices and choices[0].get("message", {}).get("content"):
+                raw_content = choices[0]["message"]["content"]
 
             if not raw_content:
-                return {'error': f"L'IA Gemini n'a retourné aucune réponse. (Raison : {finish_reason})"}
-
-            if finish_reason and finish_reason not in ('STOP', 'MAX_TOKENS'):
-                return {'error': f"L'IA a interrompu la réponse. (Raison : {finish_reason})\nTexte brut:\n{raw_content}"}
+                return {'error': "L'IA OpenAI n'a retourné aucune réponse."}
 
             # The response is expected to be JSON string
             import re
@@ -335,7 +316,6 @@ Règles de formatage :
                 start_idx = raw_content.find('{')
                 start_arr_idx = raw_content.find('[')
                 
-                # Determine which comes first, but valid (not -1)
                 valid_starts = [i for i in (start_idx, start_arr_idx) if i != -1]
                 if valid_starts:
                     start = min(valid_starts)
@@ -343,7 +323,7 @@ Règles de formatage :
                     end = raw_content.rfind(end_char)
                     if end != -1 and end > start:
                         raw_content = raw_content[start:end+1]
-            
+                        
             try:
                 result = json.loads(raw_content)
             except Exception as e:

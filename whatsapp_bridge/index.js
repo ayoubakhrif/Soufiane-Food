@@ -13,7 +13,7 @@ const fs = require('fs');
 const pino = require('pino');
 const express = require('express');
 const { PDFDocument } = require('pdf-lib');
-const writtenNumber = require('written-number');
+const n2words = require('n2words');
 
 
 // CONFIGURATION
@@ -262,31 +262,7 @@ async function connectToWhatsApp() {
                 let parsedNumber = parseFloat(textToConvert);
                 if (!isNaN(parsedNumber)) {
                     try {
-                        let wordsInFrench = "";
-                        const parts = textToConvert.split('.');
-                        
-                        let intPart = parseInt(parts[0], 10);
-                        if (isNaN(intPart)) intPart = 0;
-                        
-                        wordsInFrench = writtenNumber(intPart, { lang: 'fr' }) + " dirhams";
-                        
-                        if (parts.length > 1) {
-                            let decStr = parts[1];
-                            
-                            // Normaliser pour les centimes (ex: "5" -> "50", "05" -> "05", "532" -> "53" (ou on garde?))
-                            if (decStr.length === 1) {
-                                decStr += "0"; // ,5 devient ,50
-                            } else if (decStr.length > 2) {
-                                decStr = decStr.substring(0, 2); // On ne garde que 2 décimales pour les centimes
-                            }
-                            
-                            let decPart = parseInt(decStr, 10);
-                            
-                            if (!isNaN(decPart) && decPart > 0) {
-                                wordsInFrench += " et " + writtenNumber(decPart, { lang: 'fr' }) + " centimes";
-                            }
-                        }
-                        
+                        const wordsInFrench = n2words(parsedNumber, { lang: 'fr' });
                         await sock.sendMessage(from, { text: wordsInFrench }, { quoted: msg });
                     } catch (e) {
                         console.error("Erreur conversion nombre en lettres:", e);

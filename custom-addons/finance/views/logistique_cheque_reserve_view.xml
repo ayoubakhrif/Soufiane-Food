@@ -12,7 +12,7 @@
     <!-- Le menu parent_id utilise la référence externe de Logistique -->
     <menuitem id="menu_logistique_cheque_reserve"
               name="Stock Chèques (Réserve)"
-              parent="logistique.menu_root_logistique"
+              parent="logistique.menu_logistique_root"
               action="action_logistique_cheque_reserve"
               sequence="50"/>
 </odoo>

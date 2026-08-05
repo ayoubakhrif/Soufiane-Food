@@ -268,29 +268,22 @@ async function connectToWhatsApp() {
                         let intPart = parseInt(parts[0], 10);
                         if (isNaN(intPart)) intPart = 0;
                         
-                        wordsInFrench = writtenNumber(intPart, { lang: 'fr' });
+                        wordsInFrench = writtenNumber(intPart, { lang: 'fr' }) + " dirhams";
                         
                         if (parts.length > 1) {
                             let decStr = parts[1];
+                            
+                            // Normaliser pour les centimes (ex: "5" -> "50", "05" -> "05", "532" -> "53" (ou on garde?))
+                            if (decStr.length === 1) {
+                                decStr += "0"; // ,5 devient ,50
+                            } else if (decStr.length > 2) {
+                                decStr = decStr.substring(0, 2); // On ne garde que 2 décimales pour les centimes
+                            }
+                            
                             let decPart = parseInt(decStr, 10);
                             
-                            // Si la partie décimale existe (ex: ,5 ou ,50 ou ,05)
-                            if (!isNaN(decPart) && decStr.length > 0) {
-                                // Gérer les zéros initiaux comme "virgule zéro cinq"
-                                let zeroPrefix = "";
-                                for (let i = 0; i < decStr.length; i++) {
-                                    if (decStr[i] === '0') {
-                                        zeroPrefix += "zéro ";
-                                    } else {
-                                        break;
-                                    }
-                                }
-                                
-                                if (decPart === 0) {
-                                    // Si que des zéros (ex: 21,00) on ne dit rien, ou juste on ignore
-                                } else {
-                                    wordsInFrench += " virgule " + zeroPrefix + writtenNumber(decPart, { lang: 'fr' });
-                                }
+                            if (!isNaN(decPart) && decPart > 0) {
+                                wordsInFrench += " et " + writtenNumber(decPart, { lang: 'fr' }) + " centimes";
                             }
                         }
                         

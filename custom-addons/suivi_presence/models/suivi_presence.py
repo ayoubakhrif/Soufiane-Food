@@ -78,6 +78,20 @@ class SuiviPresence(models.Model):
                 if self.search_count(domain_entree) == 0:
                     raise exceptions.ValidationError("Vous ne pouvez pas enregistrer une sortie sans avoir d'entrée pour le même jour.")
 
+            # 4. SAME SITE REQUIREMENT (Applies to everyone)
+            if rec.type in ['entree', 'sortie']:
+                other_type = 'sortie' if rec.type == 'entree' else 'entree'
+                domain_other = [
+                    ('employee_id', '=', rec.employee_id.id),
+                    ('type', '=', other_type),
+                    ('datetime', '>=', start_of_day),
+                    ('datetime', '<=', end_of_day),
+                    ('id', '!=', rec.id)
+                ]
+                other_records = self.search(domain_other)
+                if other_records and any(other.site != rec.site for other in other_records):
+                    raise exceptions.ValidationError("L'entrée et la sortie du même jour doivent obligatoirement être effectuées sur le même site de travail.")
+
             # Bypass for admins and special users
             if self.env.user.has_group('suivi_presence.group_suivi_admin') or self.env.user.has_group('suivi_presence.group_suivi_user_special'):
                 continue

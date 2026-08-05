@@ -220,7 +220,7 @@ Règles strictes pour le "type" de frais :
 
 Règles de formatage :
 - Retournez UNIQUEMENT un objet JSON valide, sans formatage markdown, sans explications.
-- Le JSON doit suivre cette structure exacte :
+- Le JSON doit suivre cette structure exacte (S'il n'y a aucune facture, retournez "factures": []):
 {
   "chq_number": "1234567",
   "factures": [
@@ -260,7 +260,7 @@ Règles de formatage :
         except Exception as e:
             return {'status': 'error', 'message': f"Erreur de communication lors de l'upload vers l'IA : {str(e)}"}
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}"
 
         payload = {
             "contents": [{

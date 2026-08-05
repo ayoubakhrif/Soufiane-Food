@@ -197,7 +197,7 @@ Exemple de réponse attendue:
                     "contents": [{"parts": [{"text": prompt_text}, {"fileData": {"mimeType": "application/pdf", "fileUri": file_uri}}]}],
                     "generationConfig": {"responseMimeType": "application/json", "temperature": 0.0, "maxOutputTokens": 8192}
                 }
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}"
                 resp = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=120)
                 
                 if resp.status_code != 200:

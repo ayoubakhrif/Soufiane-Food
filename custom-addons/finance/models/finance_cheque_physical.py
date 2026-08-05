@@ -623,6 +623,11 @@ OU si tout est correct :
             "</div>"
         ))
 
+    def action_return_to_stock_logistique(self):
+        """Marque le chèque comme remis au stock par la logistique."""
+        self.ensure_one()
+        self.sudo().write({'logistique_is_returned': True})
+
     @api.model
     def _cron_check_logistique_cheques(self):
         """Cron to check logistics cheques taken > 5 days and send WhatsApp message."""

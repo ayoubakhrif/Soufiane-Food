@@ -90,7 +90,15 @@
                         <group>
                             <field name="logistique_person_id"/>
                             <field name="logistique_taken_date"/>
-                            <field name="logistique_is_returned"/>
+                            <label for="logistique_is_returned"/>
+                            <div class="o_row">
+                                <field name="logistique_is_returned" readonly="1"/>
+                                <button name="action_return_to_stock_logistique" 
+                                        type="object" 
+                                        string="Remettre au stock" 
+                                        class="btn-secondary btn-sm" 
+                                        invisible="logistique_is_returned"/>
+                            </div>
                         </group>
                         <group>
                             <!-- Empty group for layout balance if needed -->

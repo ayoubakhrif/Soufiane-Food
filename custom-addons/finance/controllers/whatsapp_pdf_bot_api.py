@@ -200,7 +200,7 @@ class WhatsAppFinancePdfController(http.Controller):
         prompt_text = """Vous êtes un assistant comptable spécialisé dans l'importation et la finance. Vous recevez un document (PDF) qui contient généralement un chèque et une ou plusieurs factures.
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
-1. Trouvez le numéro de chèque (généralement 7 chiffres consécutifs). ATTENTION: Le numéro de chèque se trouve TOUJOURS en haut à gauche. Ne le confondez pas avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
+1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
    (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", les frais de "magasinage" et de "surestarie" apparaissent souvent sur la MÊME facture. Vous DEVEZ obligatoirement diviser et extraire ces deux frais comme DEUX éléments séparés dans votre tableau JSON, l'un avec le type "magasinage" et l'autre avec le type "surestarie", en extrayant le montant exact pour chacun).
 2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).

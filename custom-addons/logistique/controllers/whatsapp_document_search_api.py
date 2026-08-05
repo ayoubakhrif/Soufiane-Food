@@ -38,8 +38,10 @@ class WhatsappDocumentSearchApi(http.Controller):
                             doc_id = int(subparts[2])
                             doc = request.env[doc_model].sudo().browse(doc_id)
                             if doc.exists() and doc.file:
-                                doc_type_dict = dict(doc._fields['document_type'].selection)
-                                doc_name = doc_type_dict.get(doc.document_type, str(doc.document_type))
+                                type_field = 'type' if doc_model == 'douane.document' else 'document_type'
+                                doc_type_val = getattr(doc, type_field)
+                                doc_type_dict = dict(doc._fields[type_field].selection)
+                                doc_name = doc_type_dict.get(doc_type_val, str(doc_type_val))
                                 file_name = doc.file_name or f"{doc_name}.pdf"
                                 
                                 base64_str = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
@@ -153,9 +155,7 @@ class WhatsappDocumentSearchApi(http.Controller):
                 saisi_par = entry.saisi_par or 'N/A'
                 text_response += f"🔹 *BL:* {bl} | *Facture:* {invoice} | *Week:* {week} | *Saisi par:* {saisi_par}\n"
                 
-                if not entry.document_ids:
-                    text_response += "Aucun document attaché.\n\n"
-                    continue
+                has_docs = False
                 
                 for doc in entry.document_ids:
                     if not doc.file:
@@ -168,12 +168,32 @@ class WhatsappDocumentSearchApi(http.Controller):
                     text_response += f"{choice_idx}. {file_name}\n"
                     choices.append(f"FETCH_DOC_SEARCH:logistique.entry.document:{doc.id}")
                     choice_idx += 1
+                    has_docs = True
                 
+                # Check for douane documents safely using hasattr
+                if hasattr(entry, 'douane_document_ids') and entry.douane_document_ids:
+                    for ddoc in entry.douane_document_ids:
+                        if not ddoc.file:
+                            continue
+                        
+                        doc_type_dict = dict(ddoc._fields['type'].selection)
+                        doc_name = doc_type_dict.get(ddoc.type, str(ddoc.type))
+                        file_name = ddoc.file_name or f"Douane - {doc_name}.pdf"
+                        
+                        text_response += f"{choice_idx}. {file_name}\n"
+                        choices.append(f"FETCH_DOC_SEARCH:douane.document:{ddoc.id}")
+                        choice_idx += 1
+                        has_docs = True
+
                 if entry.cheque_ids:
                     text_response += f"{choice_idx}. Chèques (Fusionnés)\n"
                     choices.append(f"FETCH_CHEQUES:{entry.id}")
                     choice_idx += 1
+                    has_docs = True
                 
+                if not has_docs:
+                    text_response += "Aucun document attaché.\n"
+                    
                 text_response += "\n"
 
             if not choices:

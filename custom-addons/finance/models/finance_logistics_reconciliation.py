@@ -95,6 +95,7 @@ class FinanceLogisticsReconciliation(models.Model):
                 WHERE
                     fb.type = 'import'
                     AND fcp.active = true
+                    AND fcp.chq_state = 'actif'
                 GROUP BY
                     fcp.id,
                     fcp.name,

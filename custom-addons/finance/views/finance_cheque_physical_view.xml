@@ -62,6 +62,11 @@
                             icon="fa-undo"
                             invisible="not is_fault"
                             groups="finance.group_finance_user"/>
+                    <button name="action_return_to_stock_logistique" 
+                            string="Remettre au stock" 
+                            type="object" 
+                            class="btn-secondary" 
+                            invisible="chq_state != 'reserve' or logistique_is_returned"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -90,15 +95,7 @@
                         <group>
                             <field name="logistique_person_id"/>
                             <field name="logistique_taken_date"/>
-                            <label for="logistique_is_returned"/>
-                            <div class="o_row">
-                                <field name="logistique_is_returned" readonly="1"/>
-                                <button name="action_return_to_stock_logistique" 
-                                        type="object" 
-                                        string="Remettre au stock" 
-                                        class="btn-secondary btn-sm" 
-                                        invisible="logistique_is_returned"/>
-                            </div>
+                            <field name="logistique_is_returned" readonly="1"/>
                         </group>
                         <group>
                             <!-- Empty group for layout balance if needed -->

@@ -13,6 +13,7 @@ const fs = require('fs');
 const pino = require('pino');
 const express = require('express');
 const { PDFDocument } = require('pdf-lib');
+const n2words = require('n2words');
 
 
 // CONFIGURATION
@@ -34,6 +35,7 @@ const TRANSPORT_GROUP_ID = "120363409412071351@g.us";
 const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
 const TRESORERIE_CHQ_GROUP_ID = "120363427689661439@g.us";
 const TRESORERIE_REPORT_GROUP_ID = "120363429851164875@g.us";
+const NUMBER_TO_WORDS_GROUP_ID = "120363409052445823@g.us";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -203,6 +205,9 @@ async function connectToWhatsApp() {
             } else if (from === TRESORERIE_REPORT_GROUP_ID) {
                 targetOdooUrl = TRESORERIE_REPORT_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === NUMBER_TO_WORDS_GROUP_ID) {
+                targetOdooUrl = null;
+                isClientRequest = false;
             } else {
                 console.log(`Ignoré (destinataire ${from} non autorisé)`);
                 continue;
@@ -250,6 +255,20 @@ async function connectToWhatsApp() {
                     console.log(`Menu abandonné pour une nouvelle saisie : "${trimmedText}"`);
                     if (usedKey === from) pendingChoices.delete(from);
                 }
+            }
+
+            if (from === NUMBER_TO_WORDS_GROUP_ID) {
+                let textToConvert = realMessage.trim().replace(',', '.');
+                let parsedNumber = parseFloat(textToConvert);
+                if (!isNaN(parsedNumber)) {
+                    try {
+                        const wordsInFrench = n2words(parsedNumber, { lang: 'fr' });
+                        await sock.sendMessage(from, { text: wordsInFrench }, { quoted: msg });
+                    } catch (e) {
+                        console.error("Erreur conversion nombre en lettres:", e);
+                    }
+                }
+                continue;
             }
 
             try {

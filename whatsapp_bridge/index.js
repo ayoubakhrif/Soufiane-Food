@@ -13,7 +13,7 @@ const fs = require('fs');
 const pino = require('pino');
 const express = require('express');
 const { PDFDocument } = require('pdf-lib');
-// removed n2words require
+const writtenNumber = require('written-number');
 
 
 // CONFIGURATION
@@ -262,9 +262,7 @@ async function connectToWhatsApp() {
                 let parsedNumber = parseFloat(textToConvert);
                 if (!isNaN(parsedNumber)) {
                     try {
-                        const n2wordsMod = await import('n2words');
-                        const n2words = n2wordsMod.default || n2wordsMod;
-                        const wordsInFrench = n2words(parsedNumber, { lang: 'fr' });
+                        const wordsInFrench = writtenNumber(parsedNumber, { lang: 'fr' });
                         await sock.sendMessage(from, { text: wordsInFrench }, { quoted: msg });
                     } catch (e) {
                         console.error("Erreur conversion nombre en lettres:", e);

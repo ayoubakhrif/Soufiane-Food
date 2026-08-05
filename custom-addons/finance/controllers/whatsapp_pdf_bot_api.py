@@ -92,7 +92,27 @@ class WhatsAppFinancePdfController(http.Controller):
             existing = request.env['datacheque'].sudo().search([('chq', '=', chq_number)])
             if existing:
                 return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} existe mais n'est pas à l'état réserve ou bureau."}
-            return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas ou n'est pas en attente (réserve ou bureau)."}
+            
+            # Fallback: Try extracting 7 digits from the filename
+            import re
+            filename_chq = None
+            if file_name:
+                match = re.search(r'\b(\d{7})\b', file_name)
+                if match:
+                    filename_chq = match.group(1)
+            
+            if filename_chq and filename_chq != chq_number:
+                chq_number = filename_chq
+                domain = [('chq', '=', chq_number), ('state', 'in', ['reserve', 'bureau'])]
+                base_cheque = request.env['datacheque'].sudo().search(domain, order='id asc', limit=1)
+                
+                if not base_cheque:
+                    existing = request.env['datacheque'].sudo().search([('chq', '=', chq_number)])
+                    if existing:
+                        return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} (trouvé dans le nom du fichier) existe mais n'est pas à l'état réserve ou bureau."}
+                    return {'status': 'error', 'message': f"❌ *Erreur:* Les chèques {ai_result.get('chq_number', '')} et {chq_number} n'existent pas ou ne sont pas en attente (réserve/bureau)."}
+            else:
+                return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas ou n'est pas en attente (réserve ou bureau)."}
 
         created_records = []
         messages = []
@@ -200,7 +220,7 @@ class WhatsAppFinancePdfController(http.Controller):
         prompt_text = """Vous êtes un assistant comptable spécialisé dans l'importation et la finance. Vous recevez un document (PDF) qui contient généralement un chèque et une ou plusieurs factures.
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
-1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
+1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le chèque se trouve TOUJOURS sur la dernière page du document. Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche du chèque (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
    (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", les frais de "magasinage" et de "surestarie" apparaissent souvent sur la MÊME facture. Vous DEVEZ obligatoirement diviser et extraire ces deux frais comme DEUX éléments séparés dans votre tableau JSON, l'un avec le type "magasinage" et l'autre avec le type "surestarie", en extrayant le montant exact pour chacun).
 2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).

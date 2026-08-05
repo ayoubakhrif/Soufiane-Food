@@ -8,6 +8,7 @@
     'data': [
         'security/groups.xml',
         'security/ir.model.access.csv',
+        'data/cron_cheque_reserve.xml',
         'views/data_cheque_view.xml',
         'views/data_views.xml',
         'views/benif_view.xml',
@@ -21,6 +22,7 @@
         'views/finance_deduction_view.xml',
         'views/finance_deduction_verification_view.xml',
         'views/finance_cheque_physical_view.xml',
+        'views/logistique_cheque_reserve_view.xml',
         'views/finance_sutra_view.xml',
         'views/finance_effet_views.xml',
         'views/finance_cheque_effet_calendar_view.xml',

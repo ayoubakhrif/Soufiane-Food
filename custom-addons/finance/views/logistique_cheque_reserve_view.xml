@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_logistique_cheque_reserve" model="ir.actions.act_window">
+        <field name="name">Stock Chèques (Réserve)</field>
+        <field name="res_model">finance.cheque.physical</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('chq_state', '=', 'reserve')]</field>
+        <field name="context">{'create': False, 'delete': False}</field>
+    </record>
+
+    <!-- Ajout du menu sous le root de Logistique -->
+    <!-- Le menu parent_id utilise la référence externe de Logistique -->
+    <menuitem id="menu_logistique_cheque_reserve"
+              name="Stock Chèques (Réserve)"
+              parent="logistique.menu_root_logistique"
+              action="action_logistique_cheque_reserve"
+              sequence="50"/>
+</odoo>

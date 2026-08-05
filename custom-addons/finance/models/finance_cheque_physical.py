@@ -75,6 +75,24 @@ class FinanceChequePhysical(models.Model):
         help="Coché automatiquement par l'IA si la copie du chèque ne correspond pas aux données saisies. L'admin peut le décocher manuellement."
     )
 
+    # ------------------------------------------------------------
+    # SUIVI LOGISTIQUE DES CHEQUES EN RESERVE
+    # ------------------------------------------------------------
+    logistique_person_id = fields.Many2one(
+        'finance.perso', 
+        string="Pris par (Logistique)", 
+        tracking=True
+    )
+    logistique_taken_date = fields.Date(
+        string="Date de prise", 
+        tracking=True
+    )
+    logistique_is_returned = fields.Boolean(
+        string="Remis au stock sans utilisation",
+        default=False,
+        tracking=True
+    )
+
     _sql_constraints = [
         ('unique_chq_ste', 'unique(name, ste_id)', 'Ce chèque physique existe déjà pour cette société.')
     ]
@@ -604,3 +622,48 @@ OU si tout est correct :
             "</span>"
             "</div>"
         ))
+
+    @api.model
+    def _cron_check_logistique_cheques(self):
+        """Cron to check logistics cheques taken > 5 days and send WhatsApp message."""
+        import datetime
+        import requests
+        import logging
+        _logger = logging.getLogger(__name__)
+
+        five_days_ago = fields.Date.today() - datetime.timedelta(days=5)
+        
+        domain = [
+            ('chq_state', '=', 'reserve'),
+            ('logistique_person_id', '!=', False),
+            ('logistique_is_returned', '=', False),
+            ('logistique_taken_date', '<', five_days_ago)
+        ]
+        
+        delayed_cheques = self.search(domain)
+        
+        if not delayed_cheques:
+            return
+            
+        group_id = "120363428159815503@g.us"
+        
+        for cheque in delayed_cheques:
+            person = cheque.logistique_person_id.name if cheque.logistique_person_id else 'Inconnu'
+            days_taken = (fields.Date.today() - cheque.logistique_taken_date).days if cheque.logistique_taken_date else 5
+            
+            msg = (
+                f"⚠️ *RAPPEL LOGISTIQUE - CHÈQUE EN ATTENTE* ⚠️\n\n"
+                f"Le chèque physique *{cheque.name}* a été pris par *{person}* le {cheque.logistique_taken_date} (il y a {days_taken} jours).\n"
+                f"Cependant, ce chèque est toujours à l'état *Réserve* par la Finance.\n\n"
+                f"Veuillez joindre le scan PDF sur le dossier et vous assurer que la Finance le passe en Actif, ou remettre le chèque en stock (cochez 'Remis au stock')."
+            )
+            
+            payload = {
+                "to": group_id,
+                "body": msg
+            }
+            
+            try:
+                requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=10)
+            except Exception as e:
+                _logger.error("Erreur lors de l'envoi de la notification WhatsApp (Cron logistique chèques) : %s", str(e))

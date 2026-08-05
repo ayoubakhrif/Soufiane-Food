@@ -97,6 +97,15 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Suivi Logistique (Réserve)" invisible="chq_state != 'reserve'">
+                            <group>
+                                <group>
+                                    <field name="logistique_person_id"/>
+                                    <field name="logistique_taken_date"/>
+                                    <field name="logistique_is_returned"/>
+                                </group>
+                            </group>
+                        </page>
                         <page string="Documents" name="cheque_documents">
                             <group>
                                 <group string="Fichiers PDF à uploader">

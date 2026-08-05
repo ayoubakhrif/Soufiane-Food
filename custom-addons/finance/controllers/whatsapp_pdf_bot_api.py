@@ -45,9 +45,9 @@ class WhatsAppFinancePdfController(http.Controller):
             return {'status': 'ignored', 'message': '❌ *Erreur:* Aucun document PDF fourni.'}
 
         # 4. Call OpenAI to extract invoices
-        openai_key = request.env['ir.config_parameter'].sudo().get_param('tresorerie_chq.gemini_key')
+        openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not openai_key:
-            return {'status': 'error', 'message': '❌ *Erreur:* Clé API Gemini non configurée (tresorerie_chq.gemini_key)'}
+            return {'status': 'error', 'message': '❌ *Erreur:* Clé API OpenAI non configurée (whatsapp_stock.openai_key)'}
 
         ai_result = self._extract_data_from_pdf(pdf_base64, file_name, openai_key)
         

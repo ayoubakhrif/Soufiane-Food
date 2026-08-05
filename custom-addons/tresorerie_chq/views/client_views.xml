@@ -38,6 +38,28 @@
                         </group>
                     </group>
                     <notebook>
+                        <page string="Chèques">
+                            <field name="cheque_ids" readonly="1">
+                                <tree>
+                                    <field name="note" string="Numéro"/>
+                                    <field name="check_date" string="Date d'échéance"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="bank_id"/>
+                                    <field name="state" decoration-success="state == 'validated'" decoration-info="state == 'draft'" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Effets">
+                            <field name="effet_ids" readonly="1">
+                                <tree>
+                                    <field name="note" string="Numéro"/>
+                                    <field name="check_date" string="Date d'échéance"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="bank_id"/>
+                                    <field name="state" decoration-success="state == 'validated'" decoration-info="state == 'draft'" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page string="Alias">
                             <field name="alias_ids">
                                 <tree editable="bottom">

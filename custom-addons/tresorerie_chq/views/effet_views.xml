@@ -26,7 +26,7 @@
                 <field name="owner_id" string="Porteur" required="0"/>
                 <field name="owner_cin" string="CIN Porteur" placeholder="CIN..."/>
                 
-                <field name="check_date" readonly="1"/>
+                <field name="check_date" readonly="state != 'stock'"/>
                 <field name="amount" sum="Total" readonly="1"/>
                 <field name="bank_send_date" optional="show"/>
                 <field name="unpaid_date" optional="show"/>

@@ -24,6 +24,9 @@ class TresorerieChqClient(models.Model):
     
     paiement_ids = fields.One2many('tresorerie_chq.paiement', 'client_id', string='Paiements')
     alias_ids = fields.One2many('tresorerie_chq.client.alias', 'client_id', string='Alias')
+    
+    cheque_ids = fields.One2many('tresorerie_chq.cheque', 'client_id', string='Chèques')
+    effet_ids = fields.One2many('tresorerie_chq.effet', 'client_id', string='Effets')
 
     def get_all_cheques(self):
         self.ensure_one()

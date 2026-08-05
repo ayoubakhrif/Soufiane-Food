@@ -331,9 +331,17 @@ Exemple de réponse attendue:
                     if not similar(g.get('banque'), o.get('banque')):
                         is_consensus = False
                         consensus_errors.append(f"Ligne {i+1}: Banque très différente ({g.get('banque')} vs {o.get('banque')})")
-                    if not similar(g.get('porteur'), o.get('porteur')):
+                    
+                    def clean_porteur(p):
+                        p_str = str(p or '').lower().strip()
+                        p_str = re.sub(r'^(mr|m|mme|mlle)\b\.?\s*', '', p_str)
+                        return p_str.replace(" ", "")
+                        
+                    porteur_g = clean_porteur(g.get('porteur'))
+                    porteur_o = clean_porteur(o.get('porteur'))
+                    if porteur_g != porteur_o:
                         is_consensus = False
-                        consensus_errors.append(f"Ligne {i+1}: Porteur très différent ({g.get('porteur')} vs {o.get('porteur')})")
+                        consensus_errors.append(f"Ligne {i+1}: Porteur différent ({g.get('porteur')} vs {o.get('porteur')})")
 
         items = result_gemini.get('items', [])
         if not items:

@@ -13,7 +13,7 @@ const fs = require('fs');
 const pino = require('pino');
 const express = require('express');
 const { PDFDocument } = require('pdf-lib');
-const n2words = require('n2words');
+// removed n2words require
 
 
 // CONFIGURATION
@@ -262,6 +262,8 @@ async function connectToWhatsApp() {
                 let parsedNumber = parseFloat(textToConvert);
                 if (!isNaN(parsedNumber)) {
                     try {
+                        const n2wordsMod = await import('n2words');
+                        const n2words = n2wordsMod.default || n2wordsMod;
                         const wordsInFrench = n2words(parsedNumber, { lang: 'fr' });
                         await sock.sendMessage(from, { text: wordsInFrench }, { quoted: msg });
                     } catch (e) {

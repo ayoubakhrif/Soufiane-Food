@@ -74,11 +74,8 @@ class SuiviSalary(models.Model):
             rec.base_salary = rec.employee_id.monthly_salary
 
             # 2. Working Days Calculation
-            working_days = 0
-            for day in range(1, num_days + 1):
-                d = date(y, m, day)
-                if d.weekday() != non_working_day and d not in holidays_map:
-                    working_days += 1
+            # Toujours 26 jours pour le calcul du taux horaire (Déclaration)
+            working_days = 26
             rec.working_days_count = working_days
             
             # Hourly Rate
@@ -205,6 +202,22 @@ class SuiviSalary(models.Model):
                 if curr_date in unpaid_leave_days:
                     continue
 
+                # -----------------------------------------------------
+                # AUTOMATIC HOLIDAY PAY (included in the 26 days)
+                # -----------------------------------------------------
+                if is_holiday:
+                    t_norm += daily_hours
+                    cost = daily_hours * rate
+                    if rec.employee_id.payroll_site == 'casa':
+                         h_casa += daily_hours
+                         s_casa += cost
+                    elif rec.employee_id.payroll_site == 'agadir':
+                         h_aga += daily_hours
+                         s_aga += cost
+                    else:
+                         h_med += daily_hours
+                         s_med += cost
+
                 events = day_records.get(curr_date, [])
                 day_normal = 0.0
                 
@@ -270,7 +283,9 @@ class SuiviSalary(models.Model):
                         
                         if is_holiday:
                             t_holi += raw_dur
-                            pair_cost += raw_dur * rate * 2 # Holiday Rate
+                            # Les heures de base du jour férié sont déjà comptabilisées.
+                            # On ajoute uniquement les heures additionnelles travaillées (x1).
+                            pair_cost += raw_dur * rate
                         else:
                             t_over += raw_dur
                             pair_cost += raw_dur * rate * ot_coeff # Overtime Rate

@@ -260,7 +260,7 @@ Règles de formatage :
         except Exception as e:
             return {'status': 'error', 'message': f"Erreur de communication lors de l'upload vers l'IA : {str(e)}"}
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
 
         payload = {
             "contents": [{

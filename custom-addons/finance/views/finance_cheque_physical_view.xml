@@ -86,6 +86,16 @@
                             <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
                         </group>
                     </group>
+                    <group string="Suivi Logistique (Réserve)" invisible="chq_state != 'reserve'">
+                        <group>
+                            <field name="logistique_person_id"/>
+                            <field name="logistique_taken_date"/>
+                            <field name="logistique_is_returned"/>
+                        </group>
+                        <group>
+                            <!-- Empty group for layout balance if needed -->
+                        </group>
+                    </group>
                     <notebook>
                         <page string="Répartitions (Opérations)">
                             <field name="datacheque_ids">
@@ -98,15 +108,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Suivi Logistique (Réserve)" invisible="chq_state != 'reserve'">
-                            <group>
-                                <group>
-                                    <field name="logistique_person_id"/>
-                                    <field name="logistique_taken_date"/>
-                                    <field name="logistique_is_returned"/>
-                                </group>
-                            </group>
-                        </page>
+
                         <page string="Documents" name="cheque_documents">
                             <group>
                                 <group string="Fichiers PDF à uploader">

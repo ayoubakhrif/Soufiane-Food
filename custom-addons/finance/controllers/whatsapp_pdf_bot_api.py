@@ -260,7 +260,7 @@ Règles de formatage :
         except Exception as e:
             return {'status': 'error', 'message': f"Erreur de communication lors de l'upload vers l'IA : {str(e)}"}
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={api_key}"
 
         payload = {
             "contents": [{
@@ -275,7 +275,6 @@ Règles de formatage :
                 ]
             }],
             "generationConfig": {
-                "responseMimeType": "application/json",
                 "temperature": 0.0,
                 "maxOutputTokens": 2048
             },
@@ -326,11 +325,24 @@ Règles de formatage :
             import re
             
             raw_content = raw_content.strip()
-            # Clean markdown if any
-            if raw_content.startswith("```"):
-                raw_content = re.sub(r"^```(?:json)?\s*", "", raw_content)
-                raw_content = re.sub(r"\s*```$", "", raw_content)
-                raw_content = raw_content.strip()
+            
+            # Robust JSON extraction: look for json code block first
+            json_match = re.search(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", raw_content, re.DOTALL)
+            if json_match:
+                raw_content = json_match.group(1).strip()
+            else:
+                # If no markdown block, try to find the first { or [ and last } or ]
+                start_idx = raw_content.find('{')
+                start_arr_idx = raw_content.find('[')
+                
+                # Determine which comes first, but valid (not -1)
+                valid_starts = [i for i in (start_idx, start_arr_idx) if i != -1]
+                if valid_starts:
+                    start = min(valid_starts)
+                    end_char = '}' if start == start_idx else ']'
+                    end = raw_content.rfind(end_char)
+                    if end != -1 and end > start:
+                        raw_content = raw_content[start:end+1]
             
             try:
                 result = json.loads(raw_content)

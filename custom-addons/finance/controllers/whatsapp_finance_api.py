@@ -630,6 +630,7 @@ class WhatsAppFinanceController(http.Controller):
                             <th>N° Journal</th>
                             <th>Bénéficiaire</th>
                             <th>Série de Facture</th>
+                            <th>BL</th>
                             <th>Doc PDF</th>
                             <th>Type</th>
                             <th>Statut</th>
@@ -667,6 +668,7 @@ class WhatsAppFinanceController(http.Controller):
                         journal_val = str(dq.journal) if dq.journal else "N/A"
                         benif_name = dq.benif_id.name if dq.benif_id else "N/A"
                         serie_val = str(dq.serie) if dq.serie else "N/A"
+                        bl_val = str(dq.bl) if dq.bl else "N/A"
                         t_selection = dict(dq._fields['type'].selection or {})
                         t_label = t_selection.get(dq.type) or dq.type or "N/A"
                         s_selection = dict(dq._fields['state'].selection or {})
@@ -678,12 +680,12 @@ class WhatsAppFinanceController(http.Controller):
                             doc_missing_journals.add(str(dq.journal))
                         
                         if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
-                            grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'doc_pdf_icon': doc_pdf_icon})
+                            grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'bl': bl_val, 'doc_pdf_icon': doc_pdf_icon})
                         else:
                             grouped_rows.append({
                                 'journal': journal_val,
                                 'benif': benif_name,
-                                'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'doc_pdf_icon': doc_pdf_icon}]
+                                'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'bl': bl_val, 'doc_pdf_icon': doc_pdf_icon}]
                             })
                             
                 else: # EFFET
@@ -703,7 +705,7 @@ class WhatsAppFinanceController(http.Controller):
                     grouped_rows = [{
                         'journal': 'N/A',
                         'benif': benif_name,
-                        'items': [{'type': 'Effet', 'state': e.state or "N/A", 'amount': phys_amount, 'serie': 'N/A', 'doc_pdf_icon': '-'}]
+                        'items': [{'type': 'Effet', 'state': e.state or "N/A", 'amount': phys_amount, 'serie': 'N/A', 'bl': 'N/A', 'doc_pdf_icon': '-'}]
                     }]
                 
                 phys_rowspan = sum(len(group['items']) for group in grouped_rows)
@@ -728,6 +730,7 @@ class WhatsAppFinanceController(http.Controller):
                             """
                         html_content += f"""
                                 <td>{item['serie']}</td>
+                                <td>{item['bl']}</td>
                                 <td style="text-align:center;">{item['doc_pdf_icon']}</td>
                                 <td>{item['type']}</td>
                                 <td>{item['state']}</td>

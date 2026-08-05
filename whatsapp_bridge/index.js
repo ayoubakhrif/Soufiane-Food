@@ -262,7 +262,38 @@ async function connectToWhatsApp() {
                 let parsedNumber = parseFloat(textToConvert);
                 if (!isNaN(parsedNumber)) {
                     try {
-                        const wordsInFrench = writtenNumber(parsedNumber, { lang: 'fr' });
+                        let wordsInFrench = "";
+                        const parts = textToConvert.split('.');
+                        
+                        let intPart = parseInt(parts[0], 10);
+                        if (isNaN(intPart)) intPart = 0;
+                        
+                        wordsInFrench = writtenNumber(intPart, { lang: 'fr' });
+                        
+                        if (parts.length > 1) {
+                            let decStr = parts[1];
+                            let decPart = parseInt(decStr, 10);
+                            
+                            // Si la partie décimale existe (ex: ,5 ou ,50 ou ,05)
+                            if (!isNaN(decPart) && decStr.length > 0) {
+                                // Gérer les zéros initiaux comme "virgule zéro cinq"
+                                let zeroPrefix = "";
+                                for (let i = 0; i < decStr.length; i++) {
+                                    if (decStr[i] === '0') {
+                                        zeroPrefix += "zéro ";
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                
+                                if (decPart === 0) {
+                                    // Si que des zéros (ex: 21,00) on ne dit rien, ou juste on ignore
+                                } else {
+                                    wordsInFrench += " virgule " + zeroPrefix + writtenNumber(decPart, { lang: 'fr' });
+                                }
+                            }
+                        }
+                        
                         await sock.sendMessage(from, { text: wordsInFrench }, { quoted: msg });
                     } catch (e) {
                         console.error("Erreur conversion nombre en lettres:", e);

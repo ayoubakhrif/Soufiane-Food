@@ -13,6 +13,7 @@ const fs = require('fs');
 const pino = require('pino');
 const express = require('express');
 const { PDFDocument } = require('pdf-lib');
+const writtenNumber = require('written-number');
 
 
 // CONFIGURATION
@@ -261,9 +262,31 @@ async function connectToWhatsApp() {
                 let parsedNumber = parseFloat(textToConvert);
                 if (!isNaN(parsedNumber)) {
                     try {
-                        const n2wordsModule = await import('n2words');
-                        const n2words = n2wordsModule.default || n2wordsModule;
-                        const wordsInFrench = n2words(parsedNumber, { lang: 'fr' });
+                        let wordsInFrench = "";
+                        const parts = textToConvert.split('.');
+                        
+                        let intPart = parseInt(parts[0], 10);
+                        if (isNaN(intPart)) intPart = 0;
+                        
+                        wordsInFrench = writtenNumber(intPart, { lang: 'fr' }) + " dirhams";
+                        
+                        if (parts.length > 1) {
+                            let decStr = parts[1];
+                            
+                            // Normaliser pour les centimes (ex: "5" -> "50", "05" -> "05", "532" -> "53")
+                            if (decStr.length === 1) {
+                                decStr += "0";
+                            } else if (decStr.length > 2) {
+                                decStr = decStr.substring(0, 2);
+                            }
+                            
+                            let decPart = parseInt(decStr, 10);
+                            
+                            if (!isNaN(decPart) && decPart > 0) {
+                                wordsInFrench += " et " + writtenNumber(decPart, { lang: 'fr' }) + " centimes";
+                            }
+                        }
+                        
                         await sock.sendMessage(from, { text: wordsInFrench }, { quoted: msg });
                     } catch (e) {
                         console.error("Erreur conversion nombre en lettres:", e);

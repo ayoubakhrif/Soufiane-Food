@@ -557,7 +557,10 @@ class DataCheque(models.Model):
                 break
         
         if not target_talon:
-             return # No talon found -> standard creation (or error elsewhere)
+             raise ValidationError(
+                 f"❌ Impossible d'enregistrer le chèque {chq_num}.\n"
+                 f"Ce numéro de chèque n'appartient à aucun talon enregistré pour la société sélectionnée."
+             )
 
         # 2. Find LAST EXISTING cheque for this talon
         last_cheque = self.search([

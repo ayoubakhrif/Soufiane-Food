@@ -59,7 +59,7 @@ class FinanceLogisticsReconciliation(models.Model):
                     
                     CASE
                         WHEN COUNT(ldc.id) = 0 THEN 'missing'
-                        WHEN ABS(fcp.amount_total - SUM(ldc.amount)) > 0.01 THEN 'mismatch'
+                        WHEN ABS(fcp.amount_total - SUM(ldc.amount)) > 1.00 THEN 'mismatch'
                         ELSE 'matches'
                     END as state
                     

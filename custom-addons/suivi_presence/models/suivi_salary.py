@@ -93,7 +93,7 @@ class SuiviSalary(models.Model):
                 ('datetime', '<=', end_date + timedelta(days=1)),
             ], order='datetime asc')
 
-            rec.presence_ids = presences
+            rec.presence_ids = presences.sorted(key=lambda p: p.datetime, reverse=True)
 
             # Group by Day
             day_records = {}

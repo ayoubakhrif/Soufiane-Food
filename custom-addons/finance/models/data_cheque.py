@@ -531,17 +531,18 @@ class DataCheque(models.Model):
         chq_str = vals.get('chq')
         ste_id = vals.get('ste_id')
 
-        if not chq_str or not ste_id or not str(chq_str).isdigit():
+        if not chq_str or not ste_id:
+            return
+
+        chq_str_clean = str(chq_str).strip()
+        if not chq_str_clean.isdigit():
             return # Skip check if data is invalid (constraints will handle it)
 
-        chq_num = int(chq_str)
+        chq_num = int(chq_str_clean)
 
         # We must find the talon that WOULD be assigned.
-        # Can't rely on 'talon_id' in vals because it might be computed later.
-        # We assume the standard logic applies.
-        
-        # Reuse logic logic but optimized for 'vals' context
-        talons = self.env['finance.talon'].search([
+        # Use sudo() to ensure no record rule issues.
+        talons = self.env['finance.talon'].sudo().search([
             ('ste_id', '=', ste_id),
             ('num_chq', '>', 0),
             ('name', '!=', False),
@@ -549,8 +550,9 @@ class DataCheque(models.Model):
         
         target_talon = False
         for talon in talons:
-            if not talon.name.isdigit(): continue
-            start = int(talon.name)
+            t_name = talon.name.strip()
+            if not t_name.isdigit(): continue
+            start = int(t_name)
             end = start + talon.num_chq - 1
             if start <= chq_num <= end:
                 target_talon = talon
@@ -558,7 +560,7 @@ class DataCheque(models.Model):
         
         if not target_talon:
              raise ValidationError(
-                 f"❌ Impossible d'enregistrer le chèque {chq_num}.\n"
+                 f"❌ Impossible d'enregistrer le chèque {chq_str_clean} (Société ID: {ste_id}).\n"
                  f"Ce numéro de chèque n'appartient à aucun talon enregistré pour la société sélectionnée."
              )
 

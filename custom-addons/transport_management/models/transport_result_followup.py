@@ -83,6 +83,7 @@ class TransportResultFollowup(models.Model):
 class TransportResultLine(models.Model):
     _name = 'transport.result.line'
     _description = 'Ligne de distribution Transport'
+    _order = 'date desc, id desc'
 
     followup_id = fields.Many2one('transport.result.followup', string='Suivi', required=True, ondelete='cascade')
     date = fields.Date(string='Date', default=fields.Date.context_today, required=True)

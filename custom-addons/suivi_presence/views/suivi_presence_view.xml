@@ -5,7 +5,7 @@
         <field name="name">suivi.presence.tree</field>
         <field name="model">suivi.presence</field>
         <field name="arch" type="xml">
-            <tree string="Suivi Présence" decoration-info="type == 'entree'" decoration-warning="type == 'sortie'">
+            <tree string="Suivi Présence" decoration-info="type == 'entree'" decoration-warning="type == 'sortie'" default_order="datetime desc">
                 <field name="datetime"/>
                 <field name="employee_id"/>
                 <field name="employee_phone" optional="hide"/>

@@ -16,18 +16,7 @@
                             <tree string="Résumé Mensuel" default_order="month desc">
                                 <field name="month"/>
                                 <field name="monthly_salary" widget="monetary"/>
-                                <field name="total_advances" widget="monetary" decoration-danger="total_advances &gt; monthly_salary"/>
                                 <field name="remaining_salary" widget="monetary" decoration-bf="1" decoration-danger="remaining_salary &lt; 0"/>
-                            </tree>
-                        </field>
-                    </page>
-                    <page string="Détail des Avances">
-                        <field name="advance_ids" context="{'default_driver_id': active_id}">
-                            <tree string="Avances" editable="bottom" default_order="date desc">
-                                <field name="date"/>
-                                <field name="month" readonly="1"/>
-                                <field name="amount" widget="monetary"/>
-                                <field name="comment"/>
                             </tree>
                         </field>
                     </page>
@@ -66,11 +55,4 @@
             </p>
         </field>
     </record>
-
-    <menuitem id="menu_transport_driver_advance"
-              name="Avances Salaires"
-              parent="transport_management.menu_transport_operations"
-              action="action_transport_driver_advance"
-              sequence="10"
-              groups="group_transport_viewer,group_transport_user,group_transport_manager"/>
 </odoo>

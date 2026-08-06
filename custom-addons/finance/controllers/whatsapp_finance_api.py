@@ -118,18 +118,21 @@ class WhatsAppFinanceController(http.Controller):
         # 3.2 Handle Situation / Encours Logic
         msg_clean = message_text.lower().strip()
         is_situation_cmd = msg_clean == "situation" or msg_clean.startswith("situation ")
-        is_encours_cmd = (msg_clean in ["encours", "en cours"] or msg_clean.startswith("encours ") or msg_clean.startswith("en cours ")) and "marglory" not in msg_clean
+        
+        is_global_encours = msg_clean in ["encours", "en cours", "encours global", "en cours global"]
         
         # Check if they want the global situation grouped by beneficiary
         benif_triggers = [
             "situation beneficiaire", "situation bénéficiaire", 
             "situation benif", "situation benef",
             "beneficiaires", "bénéficiaires", "benficiaires",
-            "benifs", "benif"
+            "benifs", "benif",
+            "encours beneficiaire", "encours bénéficiaire",
+            "encours benif", "encours benef"
         ]
-        is_benif_situation_cmd = (msg_clean in benif_triggers) or any(t in msg_clean for t in ["situation beneficiaire", "situation bénéficiaire", "situation benif", "situation benef", "situation benifs"])
+        is_benif_situation_cmd = (msg_clean in benif_triggers) or any(t in msg_clean for t in benif_triggers)
 
-        if is_benif_situation_cmd or is_situation_cmd or is_encours_cmd:
+        if is_benif_situation_cmd or is_situation_cmd or is_global_encours:
             try:
                 # Extract state filter if provided (e.g., "situation annule")
                 state_filter = None
@@ -149,7 +152,7 @@ class WhatsAppFinanceController(http.Controller):
 
                 # Set dynamic configuration based on command type
                 by_benif = is_benif_situation_cmd
-                encours_only = is_encours_cmd and not by_benif
+                encours_only = is_global_encours or "encours" in msg_clean or "en cours" in msg_clean
                 
                 data_arg = {}
                 if encours_only:
@@ -944,12 +947,17 @@ class WhatsAppFinanceController(http.Controller):
         if len(benifs) == 1:
             # UNIQUE BENEFICIARY -> GENERATE PDF
             benif = benifs[0]
+            wants_encours = message_text.lower().strip().startswith("encours") or message_text.lower().strip().startswith("en cours")
+            
             report_action = request.env['ir.actions.report'].sudo()
-            pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
+            pdf_content, _ = report_action.with_context(encours_only=wants_encours)._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-            has_chqs = bool(benif.physical_chq_ids)
-            has_effets = bool(benif.effet_ids)
+            # We need to re-fetch benif with context for stats
+            benif_with_ctx = benif.with_context(encours_only=wants_encours)
+
+            has_chqs = bool(benif_with_ctx.physical_chq_ids)
+            has_effets = bool(benif_with_ctx.effet_ids)
             if has_chqs and has_effets:
                 doc_title = "Chèques et Effets"
                 doc_short = "docs"
@@ -960,13 +968,19 @@ class WhatsAppFinanceController(http.Controller):
                 doc_title = "Chèques"
                 doc_short = "chqs"
 
-            stats = benif.get_cheque_stats()
-            summary_msg = f"Voici le rapport financier pour *{benif.name}*.\n\n"
+            stats = benif_with_ctx.get_cheque_stats()
+            
+            report_type_str = " (Encours seulement)" if wants_encours else ""
+            summary_msg = f"Voici le rapport financier{report_type_str} pour *{benif.name}*.\n\n"
             summary_msg += f"📊 *Analyse des {doc_title}* :\n"
             summary_msg += f"• Total: {stats['total']}\n"
             summary_msg += f"• Encaissés: {stats['encaisse']}\n"
             summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
-            summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
+            
+            if wants_encours:
+                summary_msg += f"💰 Reste à décaisser: *{'{:,.2f}'.format(sum(c.amount_total for c in benif.physical_chq_ids if not c.date_encaissement) + sum(e.montant for e in benif.effet_ids if not e.date_encaissement)).replace(',', ' ')} DH*"
+            else:
+                summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
 
             # Append company-wise breakdown if available
             breakdown_data = benif.get_financial_breakdown()

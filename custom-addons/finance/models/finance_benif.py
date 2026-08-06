@@ -58,7 +58,11 @@ class Cal3iyaClient(models.Model):
         """
         self.ensure_one()
         breakdown = {}
+        encours_only = self.env.context.get('encours_only')
         for chq in self.physical_chq_ids:
+            if encours_only and chq.date_encaissement:
+                continue
+
             ste_name = chq.ste_id.name or 'Inconnue'
             if ste_name not in breakdown:
                 breakdown[ste_name] = {
@@ -76,6 +80,9 @@ class Cal3iyaClient(models.Model):
                 breakdown[ste_name]['count_non_encaisse'] += 1
                 
         for effet in self.effet_ids:
+            if encours_only and effet.date_encaissement:
+                continue
+
             ste_name = effet.ste_id.name or 'Inconnue'
             if ste_name not in breakdown:
                 breakdown[ste_name] = {
@@ -108,8 +115,16 @@ class Cal3iyaClient(models.Model):
     def get_cheque_stats(self):
         """Returns global statistics about cheque and effet counts."""
         self.ensure_one()
-        total_chqs = len(self.physical_chq_ids) + len(self.effet_ids)
-        encaisse_chqs = len(self.physical_chq_ids.filtered(lambda c: c.date_encaissement)) + len(self.effet_ids.filtered(lambda e: e.date_encaissement))
+        encours_only = self.env.context.get('encours_only')
+
+        chqs = self.physical_chq_ids
+        effets = self.effet_ids
+        if encours_only:
+            chqs = chqs.filtered(lambda c: not c.date_encaissement)
+            effets = effets.filtered(lambda e: not e.date_encaissement)
+            
+        total_chqs = len(chqs) + len(effets)
+        encaisse_chqs = len(chqs.filtered(lambda c: c.date_encaissement)) + len(effets.filtered(lambda e: e.date_encaissement))
         non_encaisse_chqs = total_chqs - encaisse_chqs
         return {
             'total': total_chqs,
@@ -122,8 +137,12 @@ class Cal3iyaClient(models.Model):
         self.ensure_one()
         detailed_chqs = []
         facture_labels = {'m': 'M', 'bureau': 'Bureau', 'fact': 'F/', 'annule': 'Annulé'}
+        encours_only = self.env.context.get('encours_only')
         
         for chq in self.physical_chq_ids:
+            if encours_only and chq.date_encaissement:
+                continue
+
             # Aggregate data from splits
             factures = []
             persons = []
@@ -160,6 +179,9 @@ class Cal3iyaClient(models.Model):
             })
             
         for effet in self.effet_ids:
+            if encours_only and effet.date_encaissement:
+                continue
+
             if effet.is_annule:
                 s_label = 'Annulé'
             elif effet.date_encaissement:

@@ -95,14 +95,14 @@ class AchatArticlePrice(models.Model):
         """)
         super(AchatArticlePrice, self).init()
 
-    @api.constrains('article_id')
-    def _check_article_translation(self):
-        for record in self:
-            if record.article_id and (not record.article_id.traduction or not record.article_id.traduction.strip()):
-                raise ValidationError(
-                    f"Enregistrement impossible : L'article '{record.article_id.name}' n'a pas de traduction renseignée.\n"
-                    "Veuillez d'abord remplir le champ 'Traduction' sur la fiche article."
-                )
+    # @api.constrains('article_id')
+    # def _check_article_translation(self):
+    #     for record in self:
+    #         if record.article_id and (not record.article_id.traduction or not record.article_id.traduction.strip()):
+    #             raise ValidationError(
+    #                 f"Enregistrement impossible : L'article '{record.article_id.name}' n'a pas de traduction renseignée.\n"
+    #                 "Veuillez d'abord remplir le champ 'Traduction' sur la fiche article."
+    #             )
 
     @api.model_create_multi
     def create(self, vals_list):

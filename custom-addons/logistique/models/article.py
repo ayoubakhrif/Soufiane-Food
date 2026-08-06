@@ -13,3 +13,30 @@ class LogistiqueArticle(models.Model):
         'company.article',
         string='Article Société',
     )
+    
+    detail_ids = fields.One2many('logistique.article.detail', 'article_id', string='Détails')
+    packaging_ids = fields.One2many('logistique.article.packaging', 'article_id', string='Packagings')
+
+
+class LogistiqueArticleDetail(models.Model):
+    _name = 'logistique.article.detail'
+    _description = 'Détail de l\'article'
+
+    name = fields.Char(string='Détail', required=True)
+    article_id = fields.Many2one('logistique.article', string='Article', required=True, ondelete='cascade')
+
+
+class LogistiqueArticlePackaging(models.Model):
+    _name = 'logistique.article.packaging'
+    _description = 'Packaging de l\'article'
+
+    name = fields.Char(string='Packaging', required=True)
+    article_id = fields.Many2one('logistique.article', string='Article', required=True, ondelete='cascade')
+
+
+class LogistiqueContainerSize(models.Model):
+    _name = 'logistique.container.size'
+    _description = 'Taille de Conteneur'
+
+    name = fields.Char(string='Taille', required=True)
+

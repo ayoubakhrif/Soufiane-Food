@@ -75,9 +75,27 @@ class AchatArticlePrice(models.Model):
         readonly=True
     )
 
+    # Ancien champ (gardé pour historique si nécessaire, on peut le rendre invisible dans la vue)
     details = fields.Char(
-        string='Details',
+        string='Old Details',
         help='Additional information or remarks'
+    )
+
+    detail_id = fields.Many2one(
+        'logistique.article.detail',
+        string='Détails',
+        domain="[('article_id', '=', article_id)]"
+    )
+
+    packaging_id = fields.Many2one(
+        'logistique.article.packaging',
+        string='Packaging',
+        domain="[('article_id', '=', article_id)]"
+    )
+
+    container_size_id = fields.Many2one(
+        'logistique.container.size',
+        string='Container Size'
     )
 
     _sql_constraints = [

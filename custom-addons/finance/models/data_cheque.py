@@ -550,7 +550,7 @@ class DataCheque(models.Model):
         
         target_talon = False
         for talon in talons:
-            t_name = talon.name.strip()
+            t_name = talon.name.replace(' ', '').strip()
             if not t_name.isdigit(): continue
             start = int(t_name)
             end = start + talon.num_chq - 1
@@ -559,9 +559,13 @@ class DataCheque(models.Model):
                 break
         
         if not target_talon:
+             talon_list = "\n".join([f"- {t.name} ({t.num_chq} chqs) : {t.name} -> {int(t.name.replace(' ', '').strip()) + t.num_chq - 1}" for t in talons if t.name and t.name.replace(' ', '').strip().isdigit()])
+             if not talon_list:
+                 talon_list = "Aucun talon valide trouvé pour cette société."
              raise ValidationError(
                  f"❌ Impossible d'enregistrer le chèque {chq_str_clean} (Société ID: {ste_id}).\n"
-                 f"Ce numéro de chèque n'appartient à aucun talon enregistré pour la société sélectionnée."
+                 f"Ce numéro de chèque n'appartient à aucun talon enregistré pour la société sélectionnée.\n\n"
+                 f"Talons enregistrés pour cette société:\n{talon_list}"
              )
 
         # 2. Find LAST EXISTING cheque for this talon

@@ -26,7 +26,10 @@
                     <group>
                         <group string="Price Information">
                             <field name="article_id"/>
-                            <field name="details"/>
+                            <field name="details" invisible="1"/>
+                            <field name="detail_id" options="{'no_create': True}"/>
+                            <field name="packaging_id" options="{'no_create': True}"/>
+                            <field name="container_size_id"/>
                             <field name="supplier_id"/>
                             <field name="origin_id"/>
                             <field name="incoterm"/>

@@ -112,3 +112,13 @@ access_logistique_entry_document_logistique_manager,logistique.entry.document.lo
 access_achat_ai_template_user,achat.ai.template.user,model_achat_ai_template,group_purchase_user,1,1,1,0
 access_achat_ai_template_manager,achat.ai.template.manager,model_achat_ai_template,group_purchase_manager,1,1,1,1
 access_achat_ai_template_viewer,achat.ai.template.viewer,model_achat_ai_template,group_purchase_viewer,1,0,0,0
+
+access_achat_article_detail_user,access.achat.article.detail.user,logistique.model_logistique_article_detail,group_purchase_user,1,1,1,1
+access_achat_article_detail_manager,access.achat.article.detail.manager,logistique.model_logistique_article_detail,group_purchase_manager,1,1,1,1
+access_achat_article_detail_viewer,access.achat.article.detail.viewer,logistique.model_logistique_article_detail,group_purchase_viewer,1,0,0,0
+access_achat_article_packaging_user,access.achat.article.packaging.user,logistique.model_logistique_article_packaging,group_purchase_user,1,1,1,1
+access_achat_article_packaging_manager,access.achat.article.packaging.manager,logistique.model_logistique_article_packaging,group_purchase_manager,1,1,1,1
+access_achat_article_packaging_viewer,access.achat.article.packaging.viewer,logistique.model_logistique_article_packaging,group_purchase_viewer,1,0,0,0
+access_achat_container_size_user,access.achat.container.size.user,logistique.model_logistique_container_size,group_purchase_user,1,1,1,1
+access_achat_container_size_manager,access.achat.container.size.manager,logistique.model_logistique_container_size,group_purchase_manager,1,1,1,1
+access_achat_container_size_viewer,access.achat.container.size.viewer,logistique.model_logistique_container_size,group_purchase_viewer,1,0,0,0

@@ -19,6 +19,7 @@
         'views/suivi_salary_view.xml',
         'views/suivi_config_view.xml',
         'views/suivi_advance_view.xml',
+        'report/report_suivi_salary.xml',
         'views/suivi_menus.xml',
     ],
     'installable': True,

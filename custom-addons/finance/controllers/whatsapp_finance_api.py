@@ -983,7 +983,7 @@ class WhatsAppFinanceController(http.Controller):
                 summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
 
             # Append company-wise breakdown if available
-            breakdown_data = benif.get_financial_breakdown()
+            breakdown_data = benif_with_ctx.get_financial_breakdown()
             if breakdown_data:
                 summary_msg += "\n\n🏢 *Chiffres par Société* :\n"
                 for b_item in breakdown_data:

@@ -3,8 +3,12 @@
     <record id="view_finance_cheque_physical_logistique_search" model="ir.ui.view">
         <field name="name">finance.cheque.physical.logistique.search</field>
         <field name="model">finance.cheque.physical</field>
+        <field name="priority">99</field>
         <field name="arch" type="xml">
             <search>
+                <field name="name" string="N° Chèque"/>
+                <field name="ste_id"/>
+                <field name="benif_id" string="Bénéficiaire / Compagnie Maritime"/>
                 <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
                 <filter string="Compagnie Maritime" name="group_by_benif" context="{'group_by': 'benif_id'}"/>
             </search>

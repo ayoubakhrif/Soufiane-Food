@@ -107,3 +107,5 @@ access_finance_contact_viewer,access.finance.contact.viewer,model_finance_contac
 access_finance_encaissement_physique,finance.encaissement.physique,model_finance_encaissement_physique,finance.group_finance_user,1,1,1,1
 
 access_finance_ai_training_admin,finance.ai.training.admin,model_finance_ai_training,base.group_system,1,1,1,1
+a c c e s s _ f i n a n c e _ c h e q u e _ p h y s i c a l _ l o g i s t i q u e , a c c e s s . f i n a n c e . c h e q u e . p h y s i c a l . l o g i s t i q u e , m o d e l _ f i n a n c e _ c h e q u e _ p h y s i c a l , l o g i s t i q u e . g r o u p _ l o g i s t i q u e _ m a n a g e r , 1 , 1 , 0 , 0  
+ 

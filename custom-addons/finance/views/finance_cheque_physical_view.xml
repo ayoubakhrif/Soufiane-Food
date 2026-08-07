@@ -158,6 +158,166 @@
         <field name="view_mode">tree,form</field>
     </record>
     
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SEARCH -->
+    <record id="view_finance_cheque_physical_search" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.search</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Chèque Physique">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="journal_numbers"/>
+                <field name="week"/>
+                <field name="bl"/>
+                <group expand="0" string="Group By">
+                    <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
+                    <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
+                    <filter string="Faux" name="group_fault" context="{'group_by':'is_fault'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- TREE -->
+    <record id="view_finance_cheque_physical_tree" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.tree</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <tree string="Chèques Physiques" decoration-danger="is_fault == True">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="date_emission"/>
+                <field name="date_echeance"/>
+                <field name="journal_numbers"/>
+                <field name="week"/>
+                <field name="bl"/>
+                <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="is_fault" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_finance_cheque_physical_form" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.form</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <form string="Chèque Physique">
+                <header>
+                    <button name="action_verify_cheque_ai"
+                            string="🔍 Vérifier avec l'IA"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-robot"
+                            groups="finance.group_finance_user"/>
+                    <button name="action_reset_fault"
+                            string="✅ Réinitialiser le flag IA"
+                            type="object"
+                            class="btn-secondary"
+                            icon="fa-undo"
+                            invisible="not is_fault"
+                            groups="finance.group_finance_user"/>
+                    <button name="action_return_to_stock_logistique" 
+                            string="Remettre au stock" 
+                            type="object" 
+                            class="btn-secondary" 
+                            invisible="chq_state != 'reserve' or logistique_is_returned"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name_custom" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="chq_state" invisible="1"/>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="amount_total"/>
+                        </group>
+                        <group>
+                            <field name="benif_id" readonly="1"/>
+                            <field name="date_emission" readonly="1"/>
+                            <field name="date_echeance" readonly="1"/>
+                            <field name="journal_numbers" readonly="1"/>
+                            <field name="week" readonly="1"/>
+                            <field name="bl" readonly="1"/>
+                            <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group string="Suivi Logistique (Réserve)" invisible="chq_state != 'reserve'">
+                        <group>
+                            <field name="logistique_person_id"/>
+                            <field name="logistique_taken_date"/>
+                            <field name="logistique_is_returned" readonly="1"/>
+                        </group>
+                        <group>
+                            <!-- Empty group for layout balance if needed -->
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Répartitions (Opérations)">
+                            <field name="datacheque_ids">
+                                <tree editable="bottom">
+                                    <field name="type"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="facture"/>
+                                    <field name="serie" string="Série de facture"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Documents" name="cheque_documents">
+                            <group>
+                                <group string="Fichiers PDF à uploader">
+                                    <field name="chq_vide_pdf" widget="binary" filename="chq_vide_filename" string="Chèque vide (PDF)"/>
+                                    <field name="chq_vide_filename" invisible="1"/>
+
+                                    <field name="doc_pdf" widget="binary" filename="doc_filename" string="Documentation (PDF)"/>
+                                    <field name="doc_filename" invisible="1"/>
+
+                                    <field name="cheque_copy_pdf" widget="binary" filename="cheque_copy_filename" string="Chèque (PDF)"/>
+                                    <field name="cheque_copy_filename" invisible="1"/>
+                                </group>
+                                <group string="Détection d'anomalies (IA)">
+                                    <field name="is_fault"
+                                           string="🔴 Faux (détecté par l'IA)"
+                                           widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                            <div invisible="not is_fault"
+                                 style="margin-top:8px;padding:12px 16px;background:#fff5f5;border-left:4px solid #dc3545;border-radius:6px;">
+                                <span style="color:#dc3545;font-weight:700;">
+                                    <i class="fa fa-exclamation-triangle"/> Ce chèque physique a été marqué comme FAUX par l'IA.
+                                    Vérifiez le chatter pour le détail des incompatibilités.
+                                </span>
+                            </div>
+                        </page>
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter" groups="finance.group_finance_user">
+                     <field name="message_follower_ids"/>
+                     <field name="activity_ids"/>
+                     <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+ 
+    <record id="action_finance_cheque_physical" model="ir.actions.act_window">
+        <field name="name">Chèques Physiques</field>
+        <field name="res_model">finance.cheque.physical</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
 
     <menuitem id="menu_finance_cheque_physical"
               name="Chèques Physiques"
@@ -171,7 +331,7 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-            action = records.action_verify_cheque_ai()
+            action = records.sudo().action_verify_cheque_ai()
         </field>
     </record>
 

@@ -12,10 +12,13 @@
                 <field name="journal_numbers"/>
                 <field name="week"/>
                 <field name="bl"/>
+                <filter string="Validé par IA" name="filter_ai_validated" domain="[('ai_status','=','validated')]"/>
+                <filter string="Erreur IA" name="filter_ai_error" domain="[('ai_status','=','error')]"/>
+                <filter string="Pas vérifié" name="filter_ai_not_verified" domain="[('ai_status','=','not_verified')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>
                     <filter string="Bénéficiaire" name="group_benif" context="{'group_by':'benif_id'}"/>
-                    <filter string="Faux" name="group_fault" context="{'group_by':'is_fault'}"/>
+                    <filter string="Statut IA" name="group_ai_status" context="{'group_by':'ai_status'}"/>
                 </group>
             </search>
         </field>
@@ -37,6 +40,10 @@
                 <field name="bl"/>
                 <field name="is_encaisse" readonly="1" widget="boolean_toggle"/>
                 <field name="amount_total" sum="Total"/>
+                <field name="ai_status" widget="badge"
+                       decoration-success="ai_status == 'validated'"
+                       decoration-danger="ai_status == 'error'"
+                       decoration-muted="ai_status == 'not_verified'"/>
                 <field name="is_fault" invisible="1"/>
             </tree>
         </field>
@@ -53,20 +60,20 @@
                             string="🔍 Vérifier avec l'IA"
                             type="object"
                             class="btn-primary"
-                            icon="fa-robot"
                             groups="finance.group_finance_user"/>
                     <button name="action_reset_fault"
-                            string="✅ Réinitialiser le flag IA"
+                            string="↩ Réinitialiser la vérification IA"
                             type="object"
                             class="btn-secondary"
-                            icon="fa-undo"
-                            invisible="not is_fault"
+                            invisible="ai_status == 'not_verified'"
                             groups="finance.group_finance_user"/>
-                    <button name="action_return_to_stock_logistique" 
-                            string="Remettre au stock" 
-                            type="object" 
-                            class="btn-secondary" 
+                    <button name="action_return_to_stock_logistique"
+                            string="Remettre au stock"
+                            type="object"
+                            class="btn-secondary"
                             invisible="chq_state != 'reserve' or logistique_is_returned"/>
+                    <field name="ai_status" widget="statusbar"
+                           statusbar_visible="not_verified,validated,error"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -97,9 +104,7 @@
                             <field name="logistique_taken_date"/>
                             <field name="logistique_is_returned" readonly="1"/>
                         </group>
-                        <group>
-                            <!-- Empty group for layout balance if needed -->
-                        </group>
+                        <group/>
                     </group>
                     <notebook>
                         <page string="Répartitions (Opérations)">
@@ -119,14 +124,16 @@
                                 <group string="Fichiers PDF à uploader">
                                     <field name="chq_vide_pdf" widget="binary" filename="chq_vide_filename" string="Chèque vide (PDF)"/>
                                     <field name="chq_vide_filename" invisible="1"/>
-
                                     <field name="doc_pdf" widget="binary" filename="doc_filename" string="Documentation (PDF)"/>
                                     <field name="doc_filename" invisible="1"/>
-
                                     <field name="cheque_copy_pdf" widget="binary" filename="cheque_copy_filename" string="Chèque (PDF)"/>
                                     <field name="cheque_copy_filename" invisible="1"/>
                                 </group>
                                 <group string="Détection d'anomalies (IA)">
+                                    <field name="ai_status" widget="badge"
+                                           decoration-success="ai_status == 'validated'"
+                                           decoration-danger="ai_status == 'error'"
+                                           decoration-muted="ai_status == 'not_verified'"/>
                                     <field name="is_fault"
                                            string="🔴 Faux (détecté par l'IA)"
                                            widget="boolean_toggle"/>
@@ -141,23 +148,21 @@
                             </div>
                         </page>
                     </notebook>
-
                 </sheet>
                 <div class="oe_chatter" groups="finance.group_finance_user">
-                     <field name="message_follower_ids"/>
-                     <field name="activity_ids"/>
-                     <field name="message_ids"/>
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
                 </div>
             </form>
         </field>
     </record>
- 
+
     <record id="action_finance_cheque_physical" model="ir.actions.act_window">
         <field name="name">Chèques Physiques</field>
         <field name="res_model">finance.cheque.physical</field>
         <field name="view_mode">tree,form</field>
     </record>
-    
 
     <menuitem id="menu_finance_cheque_physical"
               name="Chèques Physiques"

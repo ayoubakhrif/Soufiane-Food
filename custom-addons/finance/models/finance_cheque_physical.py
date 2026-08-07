@@ -75,6 +75,12 @@ class FinanceChequePhysical(models.Model):
         help="Coché automatiquement par l'IA si la copie du chèque ne correspond pas aux données saisies. L'admin peut le décocher manuellement."
     )
 
+    ai_status = fields.Selection([
+        ('not_verified', 'Pas vérifié'),
+        ('validated', 'Validé par IA'),
+        ('error', 'Erreur'),
+    ], string='Statut IA', default='not_verified', tracking=True, readonly=True)
+
     # ------------------------------------------------------------
     # SUIVI LOGISTIQUE DES CHEQUES EN RESERVE
     # ------------------------------------------------------------
@@ -564,18 +570,29 @@ OU si tout est correct :
 
                 # Nettoyer la réponse si elle contient des backticks markdown
                 raw_content = raw_content.strip()
-                if raw_content.startswith("```"):
-                    raw_content = raw_content.split("```")[1]
-                    if raw_content.startswith("json"):
-                        raw_content = raw_content[4:]
-
-                result = json.loads(raw_content)
+                if "```json" in raw_content:
+                    raw_content = raw_content.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_content:
+                    raw_content = raw_content.split("```")[1].strip()
+                
+                try:
+                    result = json.loads(raw_content)
+                except json.JSONDecodeError as e:
+                    import logging
+                    logging.getLogger(__name__).error(f"Erreur JSON Gemini:\n{raw_content}")
+                    if len(self) == 1:
+                        from odoo.exceptions import ValidationError as VE
+                        raise VE(f"Gemini a renvoyé un format non valide. Contenu: {raw_content[:200]}")
+                    else:
+                        rec.message_post(body=Markup(f"<div style='color:red;'>Erreur format Gemini: {raw_content[:200]}</div>"))
+                        continue
 
                 is_fault_val = result.get("is_fault", False)
                 reason = result.get("reason", "")
                 mismatches = result.get("mismatches", [])
 
-                rec.sudo().write({'is_fault': is_fault_val})
+                ai_status_val = 'error' if is_fault_val else 'validated'
+                rec.sudo().write({'is_fault': is_fault_val, 'ai_status': ai_status_val})
 
                 if is_fault_val:
                     details = Markup("")
@@ -628,7 +645,7 @@ OU si tout est correct :
         """Permet à un manager Finance de réinitialiser manuellement le flag is_fault."""
         self.ensure_one()
         from markupsafe import Markup
-        self.sudo().write({'is_fault': False})
+        self.sudo().write({'is_fault': False, 'ai_status': 'not_verified'})
         self.message_post(body=Markup(
             "<div style='border-left:4px solid #6c757d;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
             "<span style='color:#6c757d;font-size:15px;'>"

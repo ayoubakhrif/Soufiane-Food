@@ -56,7 +56,7 @@
                                 <th style="width: 12%;">Heures Supp</th>
                                 <th style="width: 12%;">Heures Manq.</th>
                                 <th style="width: 13%;">Salaire Base</th>
-                                <th style="width: 12%; color: #B06000;">Avances</th>
+                                <th style="width: 12%;">Avances</th>
                                 <th style="width: 15%; text-align: right;">Salaire Final</th>
                             </tr>
                         </thead>

@@ -20,13 +20,6 @@
         </field>
     </record>
 
-        <field name="res_model">finance.cheque.physical</field>
-        <field name="view_mode">tree,form</field>
-        <field name="domain">[('chq_state', '=', 'reserve')]</field>
-        <field name="context">{'create': False, 'delete': False, 'search_default_group_by_ste_and_benif': 1}</field>
-        <field name="search_view_id" ref="view_finance_cheque_physical_logistique_search"/>
-    </record>
-
     <!-- Ajout du menu sous le root de Logistique -->
     <!-- Le menu parent_id utilise la référence externe de Logistique -->
     <menuitem id="menu_logistique_cheque_reserve"

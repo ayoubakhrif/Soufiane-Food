@@ -5,7 +5,18 @@
         <field name="res_model">finance.cheque.physical</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('chq_state', '=', 'reserve')]</field>
-        <field name="context">{'create': False, 'delete': False}</field>
+        <field name="context">{'create': False, 'delete': False, 'search_default_group_by_ste_and_benif': 1}</field>
+        <field name="search_view_id" ref="view_finance_cheque_physical_logistique_search"/>
+    </record>
+
+    <record id="view_finance_cheque_physical_logistique_search" model="ir.ui.view">
+        <field name="name">finance.cheque.physical.logistique.search</field>
+        <field name="model">finance.cheque.physical</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="Group by Société &amp; Compagnie" name="group_by_ste_and_benif" context="{'group_by': ['ste_id', 'benif_id']}"/>
+            </search>
+        </field>
     </record>
 
     <!-- Ajout du menu sous le root de Logistique -->

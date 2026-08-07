@@ -10,3 +10,5 @@ from . import transport_trip_remorque
 from . import transport_trip_remorque_arabic
 from . import transport_driver_balance_arabic
 from . import transport_driver_alias
+from . import transport_destination
+from . import transport_trip_advanced

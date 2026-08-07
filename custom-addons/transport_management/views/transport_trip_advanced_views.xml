@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_transport_trip_advanced_tree" model="ir.ui.view">
+        <field name="name">transport.trip.advanced.tree</field>
+        <field name="model">transport.trip.advanced</field>
+        <field name="arch" type="xml">
+            <tree string="Voyages Avancés" decoration-warning="state == 'confirmed'" decoration-success="state == 'validated'">
+                <field name="date"/>
+                <field name="driver_id"/>
+                <field name="destination_id"/>
+                <field name="going_price"/>
+                <field name="returning_price"/>
+                <field name="total_price"/>
+                <field name="total_amount" sum="Total charges"/>
+                <field name="profit" sum="Bénéfice"/>
+                <field name="state" widget="badge" decoration-warning="state == 'confirmed'" decoration-success="state == 'validated'" decoration-info="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_transport_trip_advanced_form" model="ir.ui.view">
+        <field name="name">transport.trip.advanced.form</field>
+        <field name="model">transport.trip.advanced</field>
+        <field name="arch" type="xml">
+            <form string="Voyage Avancé">
+                <header>
+                    <button name="action_confirm" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_validate" string="Valider" type="object" class="oe_highlight" invisible="state != 'confirmed'" groups="transport_management.group_transport_manager"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="date" class="oe_inline"/>
+                        </h1>
+                    </div>
+                    <group string="Informations du Voyage">
+                        <group>
+                            <field name="driver_id" readonly="state != 'draft'"/>
+                            <field name="destination_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="going_price" readonly="state != 'draft'"/>
+                            <field name="returning_price" readonly="state != 'draft'"/>
+                            <field name="return_type" invisible="returning_price == 0" required="returning_price &gt; 0" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Charges" invisible="state == 'draft'">
+                        <group>
+                            <field name="charge_fuel" readonly="state == 'validated'"/>
+                            <field name="charge_driver" readonly="state == 'validated'"/>
+                            <field name="charge_adblue" readonly="state == 'validated'"/>
+                            <field name="charge_mixed" readonly="state == 'validated'"/>
+                            <field name="note" invisible="charge_mixed == 0" required="charge_mixed &gt; 0" readonly="state == 'validated'"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Résumé" invisible="state == 'draft'">
+                        <group>
+                            <field name="total_amount" readonly="1" widget="monetary"/>
+                            <field name="total_price" readonly="1"/>
+                            <field name="profit" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_transport_trip_advanced_search" model="ir.ui.view">
+        <field name="name">transport.trip.advanced.search</field>
+        <field name="model">transport.trip.advanced</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Voyages Avancés">
+                <field name="driver_id"/>
+                <field name="destination_id"/>
+                <field name="date"/>
+                <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce Mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Chauffeur" name="group_driver" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Destination" name="group_dest" context="{'group_by': 'destination_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                    <filter string="Date de Création (Jour)" name="group_create_date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_transport_trip_advanced" model="ir.actions.act_window">
+        <field name="name">Voyages Avancés</field>
+        <field name="res_model">transport.trip.advanced</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_group_create_date': 1}</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_transport_trip_advanced"
+              name="Voyages Avancés"
+              parent="transport_management.menu_transport_operations"
+              action="action_transport_trip_advanced"
+              sequence="5"
+              groups="group_transport_viewer,group_transport_user,group_transport_manager"/>
+</odoo>

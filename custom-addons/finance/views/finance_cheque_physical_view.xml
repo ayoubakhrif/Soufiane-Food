@@ -164,4 +164,15 @@
               parent="finance_root_menu"
               action="action_finance_cheque_physical"
               sequence="15"/>
+    <record id="action_finance_cheque_physical_verify_ai_batch" model="ir.actions.server">
+        <field name="name">Vérifier via IA</field>
+        <field name="model_id" ref="model_finance_cheque_physical"/>
+        <field name="binding_model_id" ref="model_finance_cheque_physical"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.action_verify_cheque_ai()
+        </field>
+    </record>
+
 </odoo>

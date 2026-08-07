@@ -166,7 +166,8 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-            action = records.sudo().action_verify_cheque_ai()
+            chq_ids = records.ids
+            env['finance.cheque.physical'].sudo().browse(chq_ids).action_verify_cheque_ai()
         </field>
     </record>
 

@@ -462,7 +462,7 @@ Exemple:
                 "chq": rec.name or "",
                 "amount": rec.amount_total or 0.0,
                 "beneficiaire": rec.benif_id.name if rec.benif_id else "",
-                "date_emission": str(rec.date_emission) if rec.date_emission else "",
+                "date_echeance": str(rec.date_echeance) if rec.date_echeance else "",
                 "societe": societe_legale,
             }
 
@@ -474,8 +474,8 @@ Exemple:
                 fields_to_check.append(f"- Montant total : {data_to_verify['amount']} MAD (peut apparaître comme DH, MAD, ou sans unité)")
             if data_to_verify["beneficiaire"]:
                 fields_to_check.append(f"- Bénéficiaire (à l'ordre de) : '{data_to_verify['beneficiaire']}'")
-            if data_to_verify["date_emission"]:
-                fields_to_check.append(f"- Date d'émission : '{data_to_verify['date_emission']}' (format YYYY-MM-DD, comparer avec la date sur le chèque)")
+            if data_to_verify["date_echeance"]:
+                fields_to_check.append(f"- Date d'échéance : '{data_to_verify['date_echeance']}' (format YYYY-MM-DD, comparer avec la date inscrite sur le chèque)")
             if data_to_verify["societe"]:
                 fields_to_check.append(f"- Société émettrice (raison sociale) : '{data_to_verify['societe']}'")
 
@@ -500,7 +500,7 @@ RÈGLES DE COMPARAISON STRICTES :
 1. NUMÉRO : Comparez les 7 chiffres du numéro de chèque tel qu'il apparaît sur le chèque (zone MICR ou corps du chèque).
 2. MONTANT : Valeurs équivalentes : 100000 = 100,000 = 100.000 = 100 000 MAD = 100 000 DH. Ignorez les séparateurs de milliers. La comparaison doit être exacte.
 3. TEXTE (bénéficiaire, société) : Insensible à la casse, ignorez espaces/tirets/points superflus.
-4. DATE : Comparez la date d'émission au format jour/mois/année sur le chèque avec la date système.
+4. DATE : Comparez la date inscrite sur le chèque (souvent en haut ou en bas) avec la "Date d'échéance" fournie.
 5. BÉNÉFICE DU DOUTE : Si l'information est partiellement lisible ou absente du PDF, considérez-la comme CORRECTE. Ne signalez une erreur que si vous êtes CERTAIN à 100% qu'il y a une différence réelle.
 6. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
 

@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="action_logistique_cheque_reserve" model="ir.actions.act_window">
-        <field name="name">Stock Chèques (Réserve)</field>
-        <field name="res_model">finance.cheque.physical</field>
-        <field name="view_mode">tree,form</field>
-        <field name="domain">[('chq_state', '=', 'reserve')]</field>
-        <field name="context">{'create': False, 'delete': False, 'search_default_group_by_ste': 1, 'search_default_group_by_benif': 1}</field>
-        <field name="search_view_id" ref="view_finance_cheque_physical_logistique_search"/>
-    </record>
-
     <record id="view_finance_cheque_physical_logistique_search" model="ir.ui.view">
         <field name="name">finance.cheque.physical.logistique.search</field>
         <field name="model">finance.cheque.physical</field>
@@ -18,6 +9,15 @@
                 <filter string="Compagnie Maritime" name="group_by_benif" context="{'group_by': 'benif_id'}"/>
             </search>
         </field>
+    </record>
+
+    <record id="action_logistique_cheque_reserve" model="ir.actions.act_window">
+        <field name="name">Stock Chèques (Réserve)</field>
+        <field name="res_model">finance.cheque.physical</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('chq_state', '=', 'reserve')]</field>
+        <field name="context">{'create': False, 'delete': False, 'search_default_group_by_ste': 1, 'search_default_group_by_benif': 1}</field>
+        <field name="search_view_id" ref="view_finance_cheque_physical_logistique_search"/>
     </record>
 
     <!-- Ajout du menu sous le root de Logistique -->

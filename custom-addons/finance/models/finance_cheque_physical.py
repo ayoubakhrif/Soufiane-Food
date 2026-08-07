@@ -414,14 +414,18 @@ Exemple:
 
     def action_verify_cheque_ai(self):
         self = self.sudo()
-        api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+        api_key = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_api_key')
         if not api_key:
             from odoo.exceptions import ValidationError as VE
-            raise VE("La clé API OpenAI n'est pas configurée dans les Paramètres Système sous 'whatsapp_stock.openai_key'.")
+            raise VE("La clé API Gemini n'est pas configurée dans les Paramètres Système sous 'finance.gemini_api_key'.")
 
         import requests
         import json
         from markupsafe import Markup
+
+        # Modèle Gemini configurable (défaut : gemini-2.0-flash)
+        gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-2.0-flash')
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
 
         for rec in self:
             if not rec.doc_pdf:
@@ -468,17 +472,16 @@ Exemple:
                 fields_to_check.append(f"- Société émettrice (raison sociale) : '{data_to_verify['societe']}'")
 
             if not fields_to_check:
-                msg = Markup("<div style='color:red;'>Aucun champ renseigné à vérifier.</div>")
                 if len(self) == 1:
                     from odoo.exceptions import ValidationError as VE
                     raise VE("Aucun champ renseigné à vérifier. Veuillez saisir au minimum le numéro et le montant.")
                 else:
-                    rec.message_post(body=msg)
+                    rec.message_post(body=Markup("<div style='color:red;'>Aucun champ renseigné à vérifier.</div>"))
                     continue
 
             fields_str = "\n".join(fields_to_check)
 
-            prompt_text = f"""Vous êtes un agent de contrôle financier. Le document PDF ci-joint contient plusieurs pages (des factures suivies du chèque). 
+            prompt_text = f"""Vous êtes un agent de contrôle financier. Le document PDF ci-joint contient plusieurs pages (des factures suivies du chèque).
 ATTENTION : Le chèque se trouve TOUJOURS à la dernière page du document. Veuillez ignorer toutes les pages précédentes et analyser uniquement le chèque sur la dernière page.
 
 Voici les informations saisies dans le système pour ce chèque physique. Vérifiez UNIQUEMENT les champs listés ci-dessous :
@@ -508,61 +511,61 @@ OU si tout est correct :
     "reason": ""
 }}"""
 
-            # Retrieve custom model from config, or default to the fine-tuned one
-            custom_model = self.env['ir.config_parameter'].sudo().get_param('finance.ai.physiq_chq_model', 'ft:gpt-4o-mini-2024-07-18:ayoub:physiq-chq:Dv3F7S8K')
-            
-            # Utilisation de l'API Responses OpenAI
+            # Payload Gemini avec PDF inline en base64
             payload = {
-                "model": custom_model,
-                "input": [
+                "contents": [
                     {
-                        "role": "user",
-                        "content": [
+                        "parts": [
                             {
-                                "type": "input_file",
-                                "filename": rec.doc_filename or "documentation.pdf",
-                                "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                                "inline_data": {
+                                    "mime_type": "application/pdf",
+                                    "data": pdf_b64
+                                }
                             },
                             {
-                                "type": "input_text",
                                 "text": prompt_text
                             }
                         ]
                     }
                 ],
-                "text": {
-                    "format": {
-                        "type": "json_object"
-                    }
-                },
-                "temperature": 0.0,
-                "max_output_tokens": 800
+                "generationConfig": {
+                    "temperature": 0.0,
+                    "maxOutputTokens": 800,
+                    "responseMimeType": "application/json"
+                }
             }
 
             headers = {
-                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             }
 
             try:
-                resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=120)
+                resp = requests.post(gemini_url, headers=headers, json=payload, timeout=120)
                 resp.raise_for_status()
                 ai_data = resp.json()
 
+                # Extraire le texte de la réponse Gemini
                 raw_content = ""
-                for output_item in ai_data.get("output", []):
-                    for content_item in output_item.get("content", []):
-                        if content_item.get("type") == "output_text":
-                            raw_content = content_item.get("text", "")
-                            break
+                candidates = ai_data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        raw_content = parts[0].get("text", "")
 
                 if not raw_content:
                     if len(self) == 1:
                         from odoo.exceptions import ValidationError as VE
-                        raise VE("OpenAI n'a retourné aucune réponse. Vérifiez le fichier PDF.")
+                        raise VE("Gemini n'a retourné aucune réponse. Vérifiez le fichier PDF.")
                     else:
-                        rec.message_post(body=Markup("<div style='color:red;'>Erreur IA: Aucune réponse retournée.</div>"))
+                        rec.message_post(body=Markup("<div style='color:red;'>Erreur Gemini: Aucune réponse retournée.</div>"))
                         continue
+
+                # Nettoyer la réponse si elle contient des backticks markdown
+                raw_content = raw_content.strip()
+                if raw_content.startswith("```"):
+                    raw_content = raw_content.split("```")[1]
+                    if raw_content.startswith("json"):
+                        raw_content = raw_content[4:]
 
                 result = json.loads(raw_content)
 
@@ -594,7 +597,7 @@ OU si tout est correct :
                         "<div style='border-left:4px solid #dc3545;padding:8px 12px;background:#fff5f5;border-radius:4px;'>"
                         "<span style='color:#dc3545;font-size:15px;'>"
                         "<i class='fa fa-exclamation-triangle'></i>&nbsp;"
-                        "<b>Alerte IA — Incompatibilité détectée sur le document PDF</b>"
+                        "<b>Alerte Gemini IA — Incompatibilité détectée sur le document PDF</b>"
                         "</span>"
                         "{details}"
                         "<p style='color:#555;margin:4px 0 0;'><i>{reason}</i></p>"
@@ -605,20 +608,19 @@ OU si tout est correct :
                         "<div style='border-left:4px solid #28a745;padding:8px 12px;background:#f5fff8;border-radius:4px;'>"
                         "<span style='color:#28a745;font-size:15px;'>"
                         "<i class='fa fa-check-circle'></i>&nbsp;"
-                        "<b>IA : Chèque physique validé ✅</b>"
+                        "<b>Gemini IA : Chèque physique validé ✅</b>"
                         "</span>"
                         "<p style='color:#555;margin:4px 0 0;'>Le chèque dans le PDF correspond aux informations agrégées dans Odoo.</p>"
                         "</div>"
                     ))
             except Exception as e:
                 import logging
-                logging.getLogger(__name__).error("Verification IA failed: %s", str(e))
+                logging.getLogger(__name__).error("Verification Gemini IA failed: %s", str(e))
                 if len(self) == 1:
                     from odoo.exceptions import ValidationError as VE
-                    raise VE(f"Erreur de communication avec l'IA: {str(e)}")
+                    raise VE(f"Erreur de communication avec Gemini : {str(e)}")
                 else:
-                    rec.message_post(body=Markup(f"<div style='color:red;'>Erreur lors de la vérification IA: {str(e)}</div>"))
-
+                    rec.message_post(body=Markup(f"<div style='color:red;'>Erreur lors de la vérification Gemini IA: {str(e)}</div>"))
 
     def action_reset_fault(self):
         """Permet à un manager Finance de réinitialiser manuellement le flag is_fault."""

@@ -413,6 +413,7 @@ Exemple:
                     ))
 
     def action_verify_cheque_ai(self):
+        self = self.sudo()
         api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not api_key:
             from odoo.exceptions import ValidationError as VE

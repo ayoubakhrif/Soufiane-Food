@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class EffetsOwner(models.Model):
@@ -30,3 +30,12 @@ class EffetsOwner(models.Model):
         string='Effets',
         readonly=True,
     )
+
+    cheque_count = fields.Integer(string="Nombre de chèques", compute='_compute_counts')
+    effet_count = fields.Integer(string="Nombre d'effets", compute='_compute_counts')
+
+    @api.depends('cheque_line_ids', 'effet_line_ids')
+    def _compute_counts(self):
+        for rec in self:
+            rec.cheque_count = len(rec.cheque_line_ids)
+            rec.effet_count = len(rec.effet_line_ids)

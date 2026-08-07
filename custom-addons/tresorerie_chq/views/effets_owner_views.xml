@@ -10,6 +10,8 @@
         <field name="arch" type="xml">
             <tree string="Porteurs de Chèques / Effets">
                 <field name="name"/>
+                <field name="cheque_count" string="Chèques"/>
+                <field name="effet_count" string="Effets"/>
                 <field name="cin" optional="show"/>
                 <field name="phone"/>
             </tree>
@@ -35,6 +37,32 @@
                     <group>
                         <field name="note" placeholder="Remarques…"/>
                     </group>
+                    <notebook>
+                        <page string="Chèques">
+                            <field name="cheque_line_ids" readonly="1">
+                                <tree>
+                                    <field name="note" string="Numéro"/>
+                                    <field name="check_date" string="Date d'échéance"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="bank_id"/>
+                                    <field name="client_id"/>
+                                    <field name="state" decoration-success="state == 'validated'" decoration-info="state == 'draft'" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Effets">
+                            <field name="effet_line_ids" readonly="1">
+                                <tree>
+                                    <field name="note" string="Numéro"/>
+                                    <field name="check_date" string="Date d'échéance"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="bank_id"/>
+                                    <field name="client_id"/>
+                                    <field name="state" decoration-success="state == 'validated'" decoration-info="state == 'draft'" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

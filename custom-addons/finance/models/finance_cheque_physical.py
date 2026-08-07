@@ -464,6 +464,7 @@ Exemple:
                 "beneficiaire": rec.benif_id.name if rec.benif_id else "",
                 "date_echeance": str(rec.date_echeance) if rec.date_echeance else "",
                 "societe": societe_legale,
+                "bl": rec.bl or "",
             }
 
             # Construire uniquement les champs non-vides
@@ -478,6 +479,8 @@ Exemple:
                 fields_to_check.append(f"- Date d'échéance : '{data_to_verify['date_echeance']}' (format YYYY-MM-DD, comparer avec la date inscrite sur le chèque)")
             if data_to_verify["societe"]:
                 fields_to_check.append(f"- Société émettrice (raison sociale) : '{data_to_verify['societe']}'")
+            if data_to_verify["bl"]:
+                fields_to_check.append(f"- Bon de Livraison (BL) : '{data_to_verify['bl']}' (à vérifier sur les factures jointes au document)")
 
             if not fields_to_check:
                 if len(self) == 1:
@@ -489,20 +492,23 @@ Exemple:
 
             fields_str = "\n".join(fields_to_check)
 
-            prompt_text = f"""Vous êtes un agent de contrôle financier. Le document PDF ci-joint contient plusieurs pages (des factures suivies du chèque).
-ATTENTION : Le chèque se trouve TOUJOURS à la dernière page du document. Veuillez ignorer toutes les pages précédentes et analyser uniquement le chèque sur la dernière page.
+            prompt_text = f"""Vous êtes un agent de contrôle financier. Le document PDF ci-joint contient des factures suivies d'une copie du chèque.
+ATTENTION : 
+- Le chèque se trouve TOUJOURS à la dernière page du document. Utilisez cette dernière page pour vérifier le numéro, le montant, la date, le bénéficiaire et la société.
+- Les pages précédentes sont des factures. Utilisez-les UNIQUEMENT pour vérifier le numéro de BL (Bon de Livraison) si on vous le demande.
 
-Voici les informations saisies dans le système pour ce chèque physique. Vérifiez UNIQUEMENT les champs listés ci-dessous :
+Voici les informations saisies dans le système pour ce document. Vérifiez UNIQUEMENT les champs listés ci-dessous :
 
 {fields_str}
 
 RÈGLES DE COMPARAISON STRICTES :
-1. NUMÉRO : Comparez les 7 chiffres du numéro de chèque tel qu'il apparaît sur le chèque (zone MICR ou corps du chèque).
+1. NUMÉRO : Comparez les 7 chiffres du numéro de chèque tel qu'il apparaît sur le chèque (dernière page).
 2. MONTANT : Valeurs équivalentes : 100000 = 100,000 = 100.000 = 100 000 MAD = 100 000 DH. Ignorez les séparateurs de milliers. La comparaison doit être exacte.
 3. TEXTE (bénéficiaire, société) : Insensible à la casse, ignorez espaces/tirets/points superflus.
 4. DATE : Comparez la date inscrite sur le chèque (souvent en haut ou en bas) avec la "Date d'échéance" fournie.
-5. BÉNÉFICE DU DOUTE : Si l'information est partiellement lisible ou absente du PDF, considérez-la comme CORRECTE. Ne signalez une erreur que si vous êtes CERTAIN à 100% qu'il y a une différence réelle.
-6. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
+5. BL (BON DE LIVRAISON) : Si fourni, vérifiez que le numéro de BL ou un numéro similaire apparaît sur l'une des factures (pages précédentes). Ne signalez d'erreur que si le BL d'Odoo est complètement introuvable.
+6. BÉNÉFICE DU DOUTE : Si l'information est partiellement lisible ou absente du PDF, considérez-la comme CORRECTE. Ne signalez une erreur que si vous êtes CERTAIN à 100% qu'il y a une différence réelle.
+7. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
 
 Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown :
 {{

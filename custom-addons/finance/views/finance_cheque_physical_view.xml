@@ -165,10 +165,7 @@
         <field name="binding_model_id" ref="model_finance_cheque_physical"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">
-            chq_ids = records.ids
-            env['finance.cheque.physical'].sudo().browse(chq_ids).action_verify_cheque_ai()
-        </field>
+        <field name="code">env['finance.cheque.physical'].sudo().browse(records.ids).action_verify_cheque_ai()</field>
     </record>
 
 </odoo>

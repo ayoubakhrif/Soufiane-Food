@@ -498,7 +498,7 @@ Voici les informations saisies dans le système pour ce chèque physique. Vérif
 
 RÈGLES DE COMPARAISON STRICTES :
 1. NUMÉRO : Comparez les 7 chiffres du numéro de chèque tel qu'il apparaît sur le chèque (zone MICR ou corps du chèque).
-2. MONTANT : Valeurs équivalentes : 100000 = 100,000 = 100.000 = 100 000 MAD = 100 000 DH. Ignorez les séparateurs de milliers.
+2. MONTANT : Valeurs équivalentes : 100000 = 100,000 = 100.000 = 100 000 MAD = 100 000 DH. Ignorez les séparateurs de milliers. La comparaison doit être exacte.
 3. TEXTE (bénéficiaire, société) : Insensible à la casse, ignorez espaces/tirets/points superflus.
 4. DATE : Comparez la date d'émission au format jour/mois/année sur le chèque avec la date système.
 5. BÉNÉFICE DU DOUTE : Si l'information est partiellement lisible ou absente du PDF, considérez-la comme CORRECTE. Ne signalez une erreur que si vous êtes CERTAIN à 100% qu'il y a une différence réelle.
@@ -538,7 +538,7 @@ OU si tout est correct :
                 ],
                 "generationConfig": {
                     "temperature": 0.0,
-                    "maxOutputTokens": 800,
+                    "maxOutputTokens": 2048,
                     "responseMimeType": "application/json"
                 }
             }

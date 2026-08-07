@@ -1,6 +1,8 @@
-﻿id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_datacheque_employee,access.datacheque.employee,model_datacheque,group_finance_employee,1,1,1,0
 access_datacheque_manager,access.datacheque.manager,model_datacheque,group_finance_user,1,1,1,1
+access_datacheque_logistique,access.datacheque.logistique,model_datacheque,logistique.group_logistique_manager,1,0,0,0
+access_datacheque_base,access.datacheque.base,model_datacheque,base.group_user,1,0,0,0
 
 access_finance_benif_employee,access.finance.benif.employee,model_finance_benif,group_finance_employee,1,0,0,0
 access_finance_benif_manager,access.finance.benif.manager,model_finance_benif,group_finance_user,1,1,1,1

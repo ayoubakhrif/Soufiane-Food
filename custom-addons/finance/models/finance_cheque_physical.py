@@ -423,8 +423,8 @@ Exemple:
         import json
         from markupsafe import Markup
 
-        # Modèle Gemini configurable (défaut : gemini-2.0-flash)
-        gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-2.0-flash')
+        # Modèle Gemini configurable (défaut : gemini-1.5-flash)
+        gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-1.5-flash')
         gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
 
         for rec in self:

@@ -159,6 +159,12 @@
     </record>
     
 
+    <menuitem id="menu_finance_cheque_physical"
+              name="Chèques Physiques"
+              parent="finance_root_menu"
+              action="action_finance_cheque_physical"
+              sequence="15"/>
+
     <record id="action_finance_cheque_physical_verify_ai_batch" model="ir.actions.server">
         <field name="name">Vérifier via IA</field>
         <field name="model_id" ref="model_finance_cheque_physical"/>

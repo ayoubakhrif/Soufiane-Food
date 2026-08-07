@@ -31,8 +31,8 @@ class EffetsOwner(models.Model):
         readonly=True,
     )
 
-    cheque_count = fields.Integer(string="Nombre de chèques", compute='_compute_counts')
-    effet_count = fields.Integer(string="Nombre d'effets", compute='_compute_counts')
+    cheque_count = fields.Integer(string="Nombre de chèques", compute='_compute_counts', store=True)
+    effet_count = fields.Integer(string="Nombre d'effets", compute='_compute_counts', store=True)
 
     @api.depends('cheque_line_ids', 'effet_line_ids')
     def _compute_counts(self):

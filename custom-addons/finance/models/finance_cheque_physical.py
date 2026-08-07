@@ -415,9 +415,9 @@ Exemple:
     def action_verify_cheque_ai(self):
         self.ensure_one()
 
-        if not self.cheque_copy_pdf:
+        if not self.doc_pdf:
             from odoo.exceptions import ValidationError as VE
-            raise VE("Aucune copie PDF du chèque n'est attachée à cet enregistrement. Veuillez d'abord uploader le PDF dans l'onglet 'Copie Chèque'.")
+            raise VE("Aucun PDF de documentation n'est attaché à cet enregistrement. Veuillez d'abord uploader le PDF dans l'onglet 'Documentation'.")
 
         api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
         if not api_key:
@@ -429,7 +429,7 @@ Exemple:
         from markupsafe import Markup
 
         # Le fichier binaire est déjà stocké en base64 dans Odoo
-        pdf_b64 = self.cheque_copy_pdf.decode('utf-8') if isinstance(self.cheque_copy_pdf, bytes) else self.cheque_copy_pdf
+        pdf_b64 = self.doc_pdf.decode('utf-8') if isinstance(self.doc_pdf, bytes) else self.doc_pdf
 
         # Résoudre le nom légal complet de la société :
         societe_legale = ""
@@ -469,9 +469,10 @@ Exemple:
 
         fields_str = "\n".join(fields_to_check)
 
-        prompt_text = f"""Vous êtes un agent de contrôle financier. Lisez attentivement la copie du chèque joint (PDF).
+        prompt_text = f"""Vous êtes un agent de contrôle financier. Le document PDF ci-joint contient plusieurs pages (des factures suivies du chèque). 
+ATTENTION : Le chèque se trouve TOUJOURS à la dernière page du document. Veuillez ignorer toutes les pages précédentes et analyser uniquement le chèque sur la dernière page.
 
-Voici les informations saisies dans le système pour CE chèque physique (qui peut correspondre à plusieurs paiements répartis). Vérifiez UNIQUEMENT les champs listés ci-dessous :
+Voici les informations saisies dans le système pour ce chèque physique. Vérifiez UNIQUEMENT les champs listés ci-dessous :
 
 {fields_str}
 

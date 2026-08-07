@@ -39,7 +39,7 @@ class DataCheque(models.Model):
     date_limite = fields.Date(string='Date limite', tracking=True)
     week = fields.Char(string='Semaine', compute='_compute_week', store=True)
     serie = fields.Char(string='Série de facture', tracking=True)
-    date_echeance = fields.Date(string='Date d’échéance', tracking=True, compute="_compute_date_echeance", store=True, readonly=False)
+    date_echeance = fields.Date(string='Date d’échéance', tracking=True)
     date_encaissement = fields.Date(string='Date d’encaissement', tracking=True)
     ste_id = fields.Many2one('finance.ste', string='Société', tracking=True, required=True)
     benif_id = fields.Many2one('finance.benif', string='Bénificiaire', tracking=True, required=True)
@@ -306,15 +306,7 @@ class DataCheque(models.Model):
             else:
                 rec.week = False
 
-    @api.depends('date_emission', 'benif_id.days', 'benif_id', 'state')
-    def _compute_date_echeance(self):
-        for rec in self:
-            if rec.state in ['bureau', 'annule']:
-                rec.date_echeance = False
-            elif rec.date_emission and rec.benif_id and rec.benif_id.days:
-                rec.date_echeance = rec.date_emission + timedelta(days=rec.benif_id.days)
-            else:
-                rec.date_echeance = rec.date_emission
+    # _compute_date_echeance supprimé à la demande pour éviter le remplissage automatique
 
     @api.depends('date_encaissement')
     def _compute_encours(self):

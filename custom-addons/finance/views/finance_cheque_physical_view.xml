@@ -29,7 +29,7 @@
         <field name="name">finance.cheque.physical.tree</field>
         <field name="model">finance.cheque.physical</field>
         <field name="arch" type="xml">
-            <tree string="Chèques Physiques" decoration-danger="is_fault == True">
+            <tree string="Chèques Physiques" decoration-danger="is_fault == True" decoration-success="ai_status == 'validated'">
                 <field name="name"/>
                 <field name="ste_id"/>
                 <field name="benif_id"/>

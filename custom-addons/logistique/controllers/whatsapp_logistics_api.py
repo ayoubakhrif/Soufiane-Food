@@ -73,50 +73,80 @@ class WhatsAppLogisticsController(http.Controller):
             else:
                 return {'status': 'not_found', 'message': f"❌ Aucun dossier trouvé avec le BL '{bl_code}'."}
 
-        # B. Supplier Search: Supplier (name) or suplier name
-        # Flexibility: Supplier, Suplier, Suppier, Suuplier
-        supp_match = re.search(r"(?i)^(?:supplier|suplier|suppier|suuplier)\s*[:(\s]*([^)]+)\)?$", message_text)
-        if supp_match:
-            supp_name = supp_match.group(1).strip()
-            # Find supplier (direct match or AI fallback)
-            supplier = request.env['logistique.supplier'].sudo().search([('name', 'ilike', supp_name)], limit=1)
-            
-            if not supplier:
-                # Optional: Simple AI check for supplier name if direct fails
-                return {'status': 'not_found', 'message': f"❌ Fournisseur '{supp_name}' non reconnu."}
+        # B. Supplier Search
+        direct_supplier = request.env['logistique.supplier'].sudo().search([('name', 'ilike', message_text)])
+        supplier = False
+        if len(direct_supplier) == 1 and (direct_supplier.name.lower() == message_text.lower() or message_text.lower() in direct_supplier.name.lower()):
+            supplier = direct_supplier[0]
+        else:
+            supp_match = re.search(r"(?i)^(?:supplier|suplier|suppier|suuplier|fournisseur)\s*[:(\s]*([^)]+)\)?$", message_text)
+            if supp_match:
+                supp_name = supp_match.group(1).strip()
+                supplier = request.env['logistique.supplier'].sudo().search([('name', 'ilike', supp_name)], limit=1)
 
-            # Find all active dossiers for this supplier
+        if supplier:
+            # Find all active dossiers for this supplier (same filtering as article logic)
             entries = request.env['logistique.entry'].sudo().search([
                 ('supplier_id', '=', supplier.id),
-                ('port_status', '=', 'on_port')
+                '|', ('port_status', '=', 'on_port'), ('port_status', '=', 'exited')
             ], order='eta asc')
-            
+
             if not entries:
                 return {
                     'status': 'response',
-                    'response': f"📋 *Fournisseur : {supplier.name.upper()}*\n\n✅ Aucun dossier 'Sur Port' actuellement pour ce fournisseur."
+                    'response': f"📋 *Fournisseur : {supplier.name.upper()}*\n\n✅ Aucun dossier trouvé en base pour ce fournisseur."
                 }
 
-            # Format Supplier Response
-            response = f"📋 *Fournisseur : {supplier.name.upper()}*\n"
-            response += f"━━━━━━━━━━━━━━━━━━\n\n"
-            
-            # Group by Article
-            grouped = {}
-            for e in entries:
-                art = e.achat_article_id.name or e.article_id.name or "Inconnu"
-                if art not in grouped: grouped[art] = []
-                grouped[art].append(e)
-            
-            for art, r_entries in grouped.items():
-                response += f"🛳️ *{art.upper()}*\n"
-                for e in r_entries:
-                    eta_val = e.eta or (e.dossier_id and e.dossier_id.eta) or False
-                    eta_str = eta_val.strftime('%d/%m') if eta_val else "??"
-                    response += f"• BL {e.bl_number or '??'} : *{e.container_count}* cont. (ETA: {eta_str})\n"
-                response += "\n"
+            today = fields.Date.today()
+            at_port = []
+            upcoming = {}
+            exited_count = 0
+
+            for entry in entries:
+                if entry.port_status == 'exited':
+                    exited_count += 1
+                    continue
                 
-            response += f"_Total : {len(entries)} dossiers sur port_"
+                cnt = entry.container_count or 0
+                eta_val = entry.eta or (entry.dossier_id and entry.dossier_id.eta) or False
+                art_name = entry.achat_article_id.name or entry.article_id.name or "Inconnu"
+                
+                if eta_val and eta_val < today:
+                    at_port.append({
+                        'bl': entry.bl_number or 'Inconnu',
+                        'count': cnt,
+                        'eta': eta_val.strftime('%d/%m/%Y'),
+                        'art': art_name
+                    })
+                else:
+                    eta_str = eta_val.strftime('%d/%m/%Y') if eta_val else "Date inconnue/À venir"
+                    if eta_str not in upcoming:
+                        upcoming[eta_str] = []
+                    upcoming[eta_str].append({'count': cnt, 'art': art_name})
+
+            # Format Response matching the article style
+            response = f"🚢 *LOGISTIQUE - {supplier.name.upper()}*\n"
+            response += f"━━━━━━━━━━━━━━━━━━\n\n"
+
+            if exited_count > 0 and len(entries) == exited_count:
+                response += f"✅ Dossiers trouvés ({exited_count}), mais ils sont tous déjà changés (Status: Changé).\n"
+                return {'status': 'response', 'response': response}
+
+            if at_port:
+                total_at_port = sum(item['count'] for item in at_port)
+                response += f"⚓ *DÉJÀ SUR PORT ({total_at_port} conteneurs)*\n"
+                for item in at_port:
+                    response += f"• BL {item['bl']} : *{item['count']}* cont. | {item['art']} (ETA: {item['eta']})\n"
+                response += "\n"
+
+            if upcoming:
+                response += f"📅 *ARRIVAGES À VENIR*\n"
+                for eta_date in sorted(upcoming.keys()):
+                    response += f"• Le *{eta_date}* :\n"
+                    for u in upcoming[eta_date]:
+                        response += f"    - *{u['count']}* cont. | {u['art']}\n"
+
+            response += "\n_Statut : On Port uniquement_"
             return {'status': 'response', 'response': response}
 
         # C. Port Status: "port", "au port", "on port", "sur port", etc.

@@ -571,7 +571,8 @@ class LogisticsEntry(models.Model):
             grouped[art]['lines'].append({
                 'bl': e.bl_number or 'Inconnu',
                 'count': cnt,
-                'eta': eta_str
+                'eta': eta_str,
+                'supplier': e.supplier_id.name or 'Inconnu'
             })
 
         sorted_articles = [grouped[k] for k in sorted(grouped.keys())]

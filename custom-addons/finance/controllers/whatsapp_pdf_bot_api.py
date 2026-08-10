@@ -77,8 +77,15 @@ class WhatsAppFinancePdfController(http.Controller):
 
         chq_number = ai_result.get('chq_number', '')
 
+        # Fallback: Extract from filename early if AI didn't find it
+        if not chq_number and file_name:
+            import re
+            match = re.search(r'\b(\d{7})\b', file_name)
+            if match:
+                chq_number = match.group(1)
+
         if not chq_number:
-            return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas pu identifier le numéro de chèque dans le PDF."}
+            return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas pu identifier le numéro de chèque ni dans le PDF ni dans le nom du fichier (7 chiffres)."}
         
         if not factures:
             return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas trouvé de factures valides dans le PDF."}

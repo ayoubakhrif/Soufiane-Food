@@ -35,6 +35,11 @@ class TransportTrip(models.Model):
     is_going_price_unpaid = fields.Boolean(string='Non payé', default=False, tracking=True)
     returning_price = fields.Float(string='Prix de retour', tracking=True)
     is_returning_price_unpaid = fields.Boolean(string='Non payé', default=False, tracking=True)
+    return_receiver = fields.Selection([
+        ('simohamed', 'Simohamed'),
+        ('soufiane', 'Soufiane'),
+        ('mestapha', 'Si Mestapha')
+    ], string='Qui a touché retour', tracking=True)
     total_price = fields.Float(
         string='Prix allée retour',
         compute='_compute_total_price',

@@ -99,17 +99,18 @@ class AchatArticlePrice(models.Model):
     )
 
     _sql_constraints = [
-        ('article_supplier_date_crop_origin_uniq', 'unique(article_id, supplier_id, date, crop, origin_id)', 
-         'Ce produit existe déjà pour ce fournisseur à la même date avec ce crop et cette origine !'),
+        ('article_supplier_date_crop_origin_detail_pkg_uniq', 'unique(article_id, supplier_id, date, crop, origin_id, detail_id, packaging_id, container_size_id)', 
+         'Ce produit existe déjà pour ce fournisseur à la même date avec les mêmes options (crop, origine, détails, packaging, taille) !'),
         ('price_gt_zero', 'CHECK(price > 0)', 'Le prix doit être strictement supérieur à 0 !')
     ]
 
     def init(self):
-        # Drop the old unique constraints to allow the new unique constraint with crop and origin to take effect
+        # Drop the old unique constraints to allow the new unique constraint with crop, origin, details, packaging to take effect
         self.env.cr.execute("""
             ALTER TABLE achat_article_price 
             DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_uniq,
-            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_crop_uniq
+            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_crop_uniq,
+            DROP CONSTRAINT IF EXISTS achat_article_price_article_supplier_date_crop_origin_uniq
         """)
         super(AchatArticlePrice, self).init()
 

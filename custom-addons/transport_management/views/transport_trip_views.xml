@@ -52,6 +52,7 @@
                                 <field name="returning_price"/>
                                 <field name="is_returning_price_unpaid" widget="boolean_toggle" nolabel="1"/>
                             </div>
+                            <field name="return_receiver" invisible="returning_price == 0"/>
                         </group>
                     </group>
 

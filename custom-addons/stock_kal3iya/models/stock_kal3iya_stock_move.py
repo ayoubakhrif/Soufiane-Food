@@ -23,6 +23,7 @@ class StockKal3iyaMove(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
+        ('frigo', 'Frigo'),
     ], string='Garage')
     
     qty = fields.Float(string='Quantité', required=True)

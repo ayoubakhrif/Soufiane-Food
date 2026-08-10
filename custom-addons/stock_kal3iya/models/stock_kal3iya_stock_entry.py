@@ -34,6 +34,7 @@ class StockKal3iyaEntry(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
+        ('frigo', 'Frigo'),
     ], string='Garage')
     
     provider_id = fields.Many2one('stock.kal3iya.provider', string='Fournisseur')

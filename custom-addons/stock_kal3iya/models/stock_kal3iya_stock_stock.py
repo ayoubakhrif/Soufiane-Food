@@ -26,6 +26,7 @@ class StockKal3iyaStock(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
+        ('frigo', 'Frigo'),
     ], string='Garage')
     ste_id = fields.Many2one('stock.kal3iya.ste', string='Société', readonly=True)
     

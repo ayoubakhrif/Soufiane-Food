@@ -31,6 +31,7 @@ class StockKal3iyaExit(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
+        ('frigo', 'Frigo'),
     ], string='Garage', required=True)
     
     client_id = fields.Many2one('stock.kal3iya.client', string='Client')

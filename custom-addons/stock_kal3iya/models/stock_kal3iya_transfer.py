@@ -27,6 +27,7 @@ class StockKal3iyaTransfer(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
+        ('frigo', 'Frigo'),
     ], string='Garage Départ', required=True)
 
     garage_to = fields.Selection([
@@ -40,6 +41,7 @@ class StockKal3iyaTransfer(models.Model):
         ('garage8', 'Garage 8'),
         ('terrasse', 'Terrasse'),
         ('fenidek', 'Fenidek'),
+        ('frigo', 'Frigo'),
     ], string='Garage Arrivée', required=True)
     
     driver_id = fields.Many2one('stock.kal3iya.driver', string='Chauffeur')

@@ -765,9 +765,9 @@ class WhatsAppFinanceController(http.Controller):
                     'status': 'success',
                     'product_name': f"Chèques Semaine {week_str}",
                     'response': f"Voici le rapport des chèques pour la semaine *{week_str}*." + 
-                                (f"\n\n⚠️ *Journaux manquants :* {', '.join(map(str, missing_journals))}" if missing_journals else "") +
-                                (f"\n\n❌ *Chq vide absent:* Les journaux des chqs sans pdf de chq vide: {', '.join(sorted(chq_vide_missing_journals))}" if chq_vide_missing_journals else "") +
-                                (f"\n\n❌ *Documentation absente:* Journaux des chqs sans pdf de documentation: {', '.join(sorted(doc_missing_journals))}" if doc_missing_journals else ""),
+                                (f"\n\n⚠️ *Journaux manquants ({len(missing_journals)} chqs) :* {', '.join(map(str, missing_journals))}" if missing_journals else "") +
+                                (f"\n\n❌ *Chq vide absent ({len(chq_vide_missing_journals)} chqs) :* Les journaux des chqs sans pdf de chq vide: {', '.join(sorted(chq_vide_missing_journals))}" if chq_vide_missing_journals else "") +
+                                (f"\n\n❌ *Documentation absente ({len(doc_missing_journals)} chqs) :* Journaux des chqs sans pdf de documentation: {', '.join(sorted(doc_missing_journals))}" if doc_missing_journals else ""),
                     'files': [
                         {
                             'pdf_base64': pdf_base64,

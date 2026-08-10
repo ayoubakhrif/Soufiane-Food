@@ -301,7 +301,7 @@ class LogisticsEntry(models.Model):
     
     port_status = fields.Selection([
         ('on_port', 'On Port'),
-        ('exited', 'Exited'),
+        ('exited', 'Changé'),
     ], string='Port Status', default='on_port', tracking=True)
 
     exit_comment = fields.Text(string='Commentaire Sortie', tracking=True)
@@ -583,9 +583,12 @@ class LogisticsEntry(models.Model):
         }
 
     tanger_med_state = fields.Selection([
-        ('port', 'Au Port'),
-        ('sortie_port', 'Sortie de Port'),
-        ('arrive_stock', 'Arrivé au Stock'),
+        ('port', 'Dans le port'),
+        ('analyse', 'Analyse'),
+        ('visite', 'Visite'),
+        ('sortie_plein', 'Sortie plein'),
+        ('rentree_vide', 'Rentrée vide'),
+        ('arrive_depot', 'Arrivé au dépôt'),
     ], string='Statut Tanger Med', default='port', tracking=True)
 
     is_analyse = fields.Boolean(string='Analyse', default=False, tracking=True)
@@ -621,25 +624,43 @@ class LogisticsEntry(models.Model):
 
     @api.onchange('date_sortie_port')
     def _onchange_date_sortie_port(self):
-        if self.date_sortie_port:
-            self.tanger_med_state = 'sortie_port'
+        if self.date_sortie_port and self.tanger_med_state in ('port', 'analyse', 'visite'):
+            self.tanger_med_state = 'sortie_plein'
 
     @api.onchange('date_arrive_stock')
     def _onchange_date_arrive_stock(self):
         if self.date_arrive_stock:
-            self.tanger_med_state = 'arrive_stock'
+            self.tanger_med_state = 'arrive_depot'
 
-    def action_tanger_med_sortie_port(self):
+    def action_tanger_med_analyse(self):
         for rec in self:
             rec.write({
-                'tanger_med_state': 'sortie_port',
+                'tanger_med_state': 'analyse'
+            })
+
+    def action_tanger_med_visite(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'visite'
+            })
+
+    def action_tanger_med_sortie_plein(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'sortie_plein',
                 'date_sortie_port': fields.Date.context_today(rec)
             })
 
-    def action_tanger_med_arrive_stock(self):
+    def action_tanger_med_rentree_vide(self):
         for rec in self:
             rec.write({
-                'tanger_med_state': 'arrive_stock',
+                'tanger_med_state': 'rentree_vide'
+            })
+
+    def action_tanger_med_arrive_depot(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'arrive_depot',
                 'date_arrive_stock': fields.Date.context_today(rec)
             })
 

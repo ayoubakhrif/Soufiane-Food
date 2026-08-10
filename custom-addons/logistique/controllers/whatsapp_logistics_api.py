@@ -58,7 +58,7 @@ class WhatsAppLogisticsController(http.Controller):
                 
                 status = "⚓ DÉJÀ SUR PORT" if (eta_val and eta_val < date.today()) else "🚢 EN COURS / À VENIR"
                 if entry.port_status == 'exited':
-                    status = "✅ SORTI (EXITED)"
+                    status = "✅ CHANGÉ"
 
                 response = (
                     f"📋 *Dossier BL : {entry.bl_number}*\n"
@@ -240,7 +240,7 @@ class WhatsAppLogisticsController(http.Controller):
                 for art, r_entries in grouped.items():
                     response += f"🛳️ *{art.upper()}*\n"
                     for e in r_entries:
-                        status_lbl = "✅ Sorti" if e.port_status == 'exited' else "⚓ Au Port"
+                        status_lbl = "✅ Changé" if e.port_status == 'exited' else "⚓ Au Port"
                         bad_str = e.bad_date.strftime('%d/%m') if e.bad_date else "??"
                         supplier_name = e.supplier_id.name or "Inconnu"
                         containers = e.container_count or 0
@@ -459,8 +459,8 @@ class WhatsAppLogisticsController(http.Controller):
         response = f"🚢 *LOGISTIQUE - {target_name.upper()}*\n"
         response += f"━━━━━━━━━━━━━━━━━━\n\n"
 
-        if not at_port and not upcoming:
-            response += f"✅ Dossiers trouvés ({exited_count}), mais ils sont tous déjà sortis (Status: Exited).\n"
+        if exited_count > 0 and len(entries) == exited_count:
+            response += f"✅ Dossiers trouvés ({exited_count}), mais ils sont tous déjà changés (Status: Changé).\n"
             return {'status': 'response', 'response': response}
 
         # Section: At Port

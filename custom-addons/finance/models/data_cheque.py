@@ -378,13 +378,7 @@ class DataCheque(models.Model):
                 # The onchange and _force_state_logic handle the actual updates
                 pass
 
-    @api.constrains('date_emission')
-    def _check_date_emission_not_in_future(self):
-        """Empêche de saisir une date d’émission dans le futur."""
-        today = fields.Date.context_today(self)
-        for rec in self:
-            if rec.date_emission and rec.date_emission > today:
-                raise ValidationError("La date d’émission ne peut pas être supérieure à la date d’aujourd’hui.")
+    # Contrainte de date d'émission dans le futur supprimée à la demande
 
     # ------------------------------------------------------------
     # Bureau state

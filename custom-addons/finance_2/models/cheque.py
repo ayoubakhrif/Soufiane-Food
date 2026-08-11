@@ -95,6 +95,7 @@ Votre but est d'extraire les informations suivantes.
    - Maruk = MR
 3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
 4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
+5. "journal": Le numéro écrit manuellement en haut. Dans la majorité des cas, on voit un format comme Wxx-Journal (par exemple "W33-12"). Dans ce cas, extrayez uniquement le numéro du journal (ici "12").
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown.
 Exemple:
@@ -102,7 +103,8 @@ Exemple:
   "chq": "2102888",
   "ste": "SN",
   "date_emission": "2026-05-18",
-  "personne": "Abderzak"
+  "personne": "Abderzak",
+  "journal": "12"
 }}"""
 
             payload = {
@@ -187,6 +189,11 @@ Exemple:
             if result.get('date_emission'):
                 update_vals['date_emission'] = result.get('date_emission')
             
+            raw_journal = str(result.get('journal', ''))
+            match = re.search(r'\d+', raw_journal)
+            if match:
+                update_vals['journal'] = match.group()
+            
             if update_vals:
                 rec.sudo().write(update_vals)
 
@@ -203,7 +210,7 @@ Exemple:
                 rec.message_post(body=Markup(
                     "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
                     "<span style='color:#007bff;font-size:15px;'><i class='fa fa-robot'></i>&nbsp;<b>IA : Chèque identifié</b></span>"
-                    f"<p style='margin:4px 0 0;'>Le système a extrait le numéro <b>{final_chq}</b>, la société <b>{ste_code}</b>, la date d'émission <b>{result.get('date_emission', '')}</b> et la personne <b>{perso_name}</b>.</p>"
+                    f"<p style='margin:4px 0 0;'>Le système a extrait le numéro <b>{final_chq}</b>, la société <b>{ste_code}</b>, la date d'émission <b>{result.get('date_emission', '')}</b>, la personne <b>{perso_name}</b>, et le journal <b>{update_vals.get('journal', '')}</b>.</p>"
                     "</div>"
                 ))
 

@@ -781,15 +781,7 @@ class DataCheque(models.Model):
     def action_confirm_emission(self):
         for rec in self:
             if rec.state == 'reserve':
-                if rec.benif_type == 'import' and not rec.bl:
-                    raise ValidationError("Le champ BL est obligatoire pour confirmer l'émission (Bénéficiaire Import).")
                 rec.state = 'actif'
-
-    @api.constrains('state', 'bl', 'benif_type')
-    def _check_bl_required_for_actif(self):
-        for rec in self:
-            if rec.state == 'actif' and rec.benif_type == 'import' and not rec.bl:
-                raise ValidationError("Le champ BL est obligatoire pour les chèques actifs (Bénéficiaire Import).")
 
     # 7) Helper to force state relation logic in backend
     def _force_state_logic(self, vals):

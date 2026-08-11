@@ -96,7 +96,7 @@ Votre but est d'extraire les informations suivantes.
    - Maruk = MR
 3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
 4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
-5. "journal": Le numéro écrit manuellement en haut. Dans la majorité des cas, on voit un format comme Wxx-Journal (par exemple "W33-12"). Dans ce cas, extrayez uniquement le numéro du journal (ici "12").
+5. "journal": Le numéro écrit manuellement en haut. Il peut être sous forme "Wxx-Journal" (ex: "W33-12", extrayez uniquement "12") ou bien simplement un chiffre écrit seul (ex: "12"). Extrayez uniquement le numéro du journal.
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown.
 Exemple:

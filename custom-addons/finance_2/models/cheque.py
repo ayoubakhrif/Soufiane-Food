@@ -86,7 +86,7 @@ class Finance2Cheque(models.Model):
                 pdf_bytes_decoded = pdf_bytes # Just in case it's not base64 encoded properly
 
             stes = self.env['finance2.ste'].sudo().search([])
-            stes_names = ", ".join(stes.mapped('name'))
+            stes_names = ", ".join([f"{s.name} ({s.raison_social or ''})" for s in stes])
             
             persos = self.env['finance2.personne'].sudo().search([])
             persos_names = ", ".join(persos.mapped('name'))
@@ -97,12 +97,7 @@ class Finance2Cheque(models.Model):
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque vide.
 Votre but est d'extraire les informations suivantes.
 1. "chq": Le numéro du chèque (généralement 7 chiffres, ex: 2102888).
-2. "ste": L'abréviation de la société émettrice. Essayez de faire correspondre exactement avec l'une de ces abréviations : {stes_names}. 
-   - Soufiane Nuts = SN
-   - Soufiane Foods = SF
-   - Leader One = LO
-   - Pacific Fruit = PF
-   - Maruk = MR
+2. "ste": La société émettrice. Cherchez la raison sociale inscrite sur le chèque, et comparez avec la liste suivante : {stes_names}. Extrayez l'abréviation correspondante (la valeur avant les parenthèses).
 3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
 4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
 5. "journal": Le numéro écrit manuellement en haut. Il peut être sous forme "Wxx-Journal" (ex: "W33-12", extrayez uniquement "12") ou bien simplement un chiffre écrit seul (ex: "12"). Extrayez uniquement le numéro du journal.

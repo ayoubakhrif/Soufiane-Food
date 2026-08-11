@@ -12,6 +12,7 @@ class Finance2Ste(models.Model):
     _description = 'Société'
 
     name = fields.Char(string='Nom de la société', required=True)
+    raison_social = fields.Char(string='Raison Sociale')
     active = fields.Boolean(default=True)
 
 class Finance2Benif(models.Model):

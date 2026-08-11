@@ -41,13 +41,13 @@ const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
 const SURESTARIE_REPORT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/surestarie_report?db=soufianefoods";
 const STOCK_VALIDATION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/stock_kal3iya/chat";
-const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance?db=soufianefoods";
+const FINANCE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance2?db=soufianefoods";
 const LOGISTICS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics?db=soufianefoods";
 const LOGISTICS_PAYMENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistics_payment?db=soufianefoods";
 const DOUANE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/douane?db=soufianefoods";
 const SORTIE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/sortie?db=soufianefoods";
 const CASA_CORRECTION_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/casa_correction?db=soufianefoods";
-const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance/pdf?db=soufianefoods";
+const FINANCE_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/finance2/pdf?db=soufianefoods";
 const DOSSIER_VERIF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_verification?db=soufianefoods";
 const DOSSIER_SEARCH_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/dossier_search?db=soufianefoods";
 const LOGISTICS_PDF_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/logistique/pdf?db=soufianefoods";

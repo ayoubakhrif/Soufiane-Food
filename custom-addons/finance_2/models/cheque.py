@@ -84,6 +84,9 @@ class Finance2Cheque(models.Model):
             
             persos = self.env['finance2.personne'].sudo().search([])
             persos_names = ", ".join(persos.mapped('name'))
+            
+            benifs = self.env['finance2.benif'].sudo().search([])
+            benifs_names = ", ".join(benifs.mapped('name'))
 
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque vide.
 Votre but est d'extraire les informations suivantes.
@@ -97,6 +100,7 @@ Votre but est d'extraire les informations suivantes.
 3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
 4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
 5. "journal": Le numéro écrit manuellement en haut. Il peut être sous forme "Wxx-Journal" (ex: "W33-12", extrayez uniquement "12") ou bien simplement un chiffre écrit seul (ex: "12"). Extrayez uniquement le numéro du journal.
+6. "beneficiaire": Le bénéficiaire (à l'ordre de). Essayez de faire correspondre avec l'un de ces noms : {benifs_names}.
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown.
 Exemple:
@@ -105,7 +109,8 @@ Exemple:
   "ste": "SN",
   "date_emission": "2026-05-18",
   "personne": "Abderzak",
-  "journal": "12"
+  "journal": "12",
+  "beneficiaire": "AFRICONTAINER"
 }}"""
 
             payload = {
@@ -176,6 +181,13 @@ Exemple:
                 perso_record = self.env['finance2.personne'].search([('name', '=ilike', perso_name)], limit=1)
                 if not perso_record:
                     perso_record = self.env['finance2.personne'].search([('name', 'ilike', perso_name)], limit=1)
+                    
+            benif_name = result.get('beneficiaire', '')
+            benif_record = False
+            if benif_name:
+                benif_record = self.env['finance2.benif'].search([('name', '=ilike', benif_name)], limit=1)
+                if not benif_record:
+                    benif_record = self.env['finance2.benif'].search([('name', 'ilike', benif_name)], limit=1)
             
             update_vals = {}
             final_chq = result.get('chq')
@@ -187,6 +199,8 @@ Exemple:
                 update_vals['ste_id'] = final_ste_id
             if perso_record:
                 update_vals['personne_id'] = perso_record.id
+            if benif_record:
+                update_vals['benif_id'] = benif_record.id
             if result.get('date_emission'):
                 update_vals['date_emission'] = result.get('date_emission')
             
@@ -211,7 +225,7 @@ Exemple:
                 rec.message_post(body=Markup(
                     "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
                     "<span style='color:#007bff;font-size:15px;'><i class='fa fa-robot'></i>&nbsp;<b>IA : Chèque identifié</b></span>"
-                    f"<p style='margin:4px 0 0;'>Le système a extrait le numéro <b>{final_chq}</b>, la société <b>{ste_code}</b>, la date d'émission <b>{result.get('date_emission', '')}</b>, la personne <b>{perso_name}</b>, et le journal <b>{update_vals.get('journal', '')}</b>.</p>"
+                    f"<p style='margin:4px 0 0;'>Le système a extrait le numéro <b>{final_chq}</b>, la société <b>{ste_code}</b>, la date d'émission <b>{result.get('date_emission', '')}</b>, la personne <b>{perso_name}</b>, le journal <b>{update_vals.get('journal', '')}</b> et le bénéficiaire <b>{benif_name}</b>.</p>"
                     "</div>"
                 ))
 

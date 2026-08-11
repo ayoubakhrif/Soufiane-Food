@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue Formulaire : Chèque Physique -->
+    <record id="view_finance2_cheque_form" model="ir.ui.view">
+        <field name="name">finance2.cheque.form</field>
+        <field name="model">finance2.cheque</field>
+        <field name="arch" type="xml">
+            <form string="Chèque Physique">
+                <header>
+                    <button name="action_confirmer" string="Confirmer" type="object" class="oe_highlight" states="brouillon"/>
+                    
+                    <button name="action_mettre_actif" string="Mettre en Actif" type="object" class="oe_highlight" states="reserve"/>
+                    <button name="action_remettre_finance" string="Remettre à Finance" type="object" states="reserve"/>
+                    
+                    <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" states="actif"/>
+                    <button name="action_annuler" string="Annuler" type="object" states="actif,reserve"/>
+                    
+                    <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,annule"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="N° Chèque"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ste_id"/>
+                            <field name="benif_id"/>
+                            <field name="amount_total"/>
+                        </group>
+                        <group>
+                            <field name="date_emission"/>
+                            <field name="date_echeance"/>
+                            <field name="date_encaissement"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Logistique" attrs="{'invisible': [('state', 'in', ['brouillon'])]}">
+                        <field name="remis_a_id" attrs="{'required': [('state', '=', 'actif')]}"/>
+                        <field name="date_remise" readonly="1"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Répartitions">
+                            <field name="repartition_ids">
+                                <tree editable="bottom">
+                                    <field name="amount"/>
+                                    <field name="serie_facture"/>
+                                    <field name="bl"/>
+                                    <field name="journal"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Documentation">
+                            <group>
+                                <field name="chq_vide_filename" invisible="1"/>
+                                <field name="chq_vide_pdf" filename="chq_vide_filename"/>
+                                <field name="doc_filename" invisible="1"/>
+                                <field name="doc_pdf" filename="doc_filename"/>
+                            </group>
+                        </page>
+                        <page string="Commentaire">
+                            <field name="commentaire"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue Liste : Chèque Physique -->
+    <record id="view_finance2_cheque_tree" model="ir.ui.view">
+        <field name="name">finance2.cheque.tree</field>
+        <field name="model">finance2.cheque</field>
+        <field name="arch" type="xml">
+            <tree string="Chèques Physiques" decoration-muted="state == 'brouillon'" decoration-warning="state == 'reserve'" decoration-info="state == 'actif'" decoration-success="state == 'cloture'" decoration-danger="state == 'annule'">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="amount_total"/>
+                <field name="state" widget="badge" decoration-muted="state == 'brouillon'" decoration-warning="state == 'reserve'" decoration-info="state == 'actif'" decoration-success="state == 'cloture'" decoration-danger="state == 'annule'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_finance2_cheque" model="ir.actions.act_window">
+        <field name="name">Chèques Physiques</field>
+        <field name="res_model">finance2.cheque</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menus Principaux -->
+    <menuitem id="menu_finance2_root" name="Finance V2" sequence="10"/>
+    
+    <menuitem id="menu_finance2_cheques" name="Chèques" parent="menu_finance2_root" action="action_finance2_cheque" sequence="10"/>
+    
+    <menuitem id="menu_finance2_config" name="Configuration" parent="menu_finance2_root" sequence="90"/>
+    <menuitem id="menu_finance2_ste" name="Sociétés" parent="menu_finance2_config" action="action_finance2_ste" sequence="10"/>
+    <menuitem id="menu_finance2_benif" name="Bénéficiaires" parent="menu_finance2_config" action="action_finance2_benif" sequence="20"/>
+    <menuitem id="menu_finance2_personne" name="Personnes (Logistique)" parent="menu_finance2_config" action="action_finance2_personne" sequence="30"/>
+
+</odoo>

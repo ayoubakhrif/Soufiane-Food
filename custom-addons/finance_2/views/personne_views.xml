@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vues pour finance2.personne -->
+    <record id="view_finance2_personne_tree" model="ir.ui.view">
+        <field name="name">finance2.personne.tree</field>
+        <field name="model">finance2.personne</field>
+        <field name="arch" type="xml">
+            <tree string="Personnes Logistique">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_finance2_personne" model="ir.actions.act_window">
+        <field name="name">Personnes (Logistique)</field>
+        <field name="res_model">finance2.personne</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Vues pour finance2.ste -->
+    <record id="view_finance2_ste_tree" model="ir.ui.view">
+        <field name="name">finance2.ste.tree</field>
+        <field name="model">finance2.ste</field>
+        <field name="arch" type="xml">
+            <tree string="Sociétés">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_finance2_ste" model="ir.actions.act_window">
+        <field name="name">Sociétés</field>
+        <field name="res_model">finance2.ste</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Vues pour finance2.benif -->
+    <record id="view_finance2_benif_tree" model="ir.ui.view">
+        <field name="name">finance2.benif.tree</field>
+        <field name="model">finance2.benif</field>
+        <field name="arch" type="xml">
+            <tree string="Bénéficiaires">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_finance2_benif" model="ir.actions.act_window">
+        <field name="name">Bénéficiaires</field>
+        <field name="res_model">finance2.benif</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

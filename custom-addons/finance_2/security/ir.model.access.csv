@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_finance2_cheque,finance2.cheque,model_finance2_cheque,base.group_user,1,1,1,1
+access_finance2_repartition,finance2.repartition,model_finance2_repartition,base.group_user,1,1,1,1
+access_finance2_personne,finance2.personne,model_finance2_personne,base.group_user,1,1,1,1
+access_finance2_ste,finance2.ste,model_finance2_ste,base.group_user,1,1,1,1
+access_finance2_benif,finance2.benif,model_finance2_benif,base.group_user,1,1,1,1

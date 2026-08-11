@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Catégorie pour le module Finance 2 -->
+        <record model="ir.module.category" id="module_category_finance2">
+            <field name="name">Finance V2</field>
+            <field name="description">Gestion des accès pour le module Finance V2</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- Groupe : Utilisateur -->
+        <record id="group_finance2_user" model="res.groups">
+            <field name="name">Utilisateur</field>
+            <field name="category_id" ref="module_category_finance2"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">L'utilisateur peut créer et gérer les chèques physiques, mais n'a pas accès à la configuration.</field>
+        </record>
+
+        <!-- Groupe : Responsable (Administrateur) -->
+        <record id="group_finance2_manager" model="res.groups">
+            <field name="name">Responsable</field>
+            <field name="category_id" ref="module_category_finance2"/>
+            <field name="implied_ids" eval="[(4, ref('group_finance2_user'))]"/>
+            <field name="comment">Le responsable a un accès total (clôture, annulation, configuration).</field>
+        </record>
+    </data>
+</odoo>

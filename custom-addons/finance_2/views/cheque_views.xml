@@ -12,8 +12,8 @@
                     <button name="action_mettre_actif" string="Mettre en Actif" type="object" class="oe_highlight" invisible="state != 'reserve'"/>
                     <button name="action_remettre_finance" string="Remettre à Finance" type="object" invisible="state != 'reserve'"/>
                     
-                    <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'"/>
-                    <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('actif', 'reserve')"/>
+                    <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'" groups="finance_2.group_finance2_manager"/>
+                    <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('actif', 'reserve')" groups="finance_2.group_finance2_manager"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,annule"/>
                 </header>
@@ -97,11 +97,11 @@
     </record>
 
     <!-- Menus Principaux -->
-    <menuitem id="menu_finance2_root" name="Finance V2" sequence="10"/>
+    <menuitem id="menu_finance2_root" name="Finance V2" sequence="10" groups="finance_2.group_finance2_user"/>
     
     <menuitem id="menu_finance2_cheques" name="Chèques" parent="menu_finance2_root" action="action_finance2_cheque" sequence="10"/>
     
-    <menuitem id="menu_finance2_config" name="Configuration" parent="menu_finance2_root" sequence="90"/>
+    <menuitem id="menu_finance2_config" name="Configuration" parent="menu_finance2_root" sequence="90" groups="finance_2.group_finance2_manager"/>
     <menuitem id="menu_finance2_ste" name="Sociétés" parent="menu_finance2_config" action="action_finance2_ste" sequence="10"/>
     <menuitem id="menu_finance2_benif" name="Bénéficiaires" parent="menu_finance2_config" action="action_finance2_benif" sequence="20"/>
     <menuitem id="menu_finance2_personne" name="Personnes (Logistique)" parent="menu_finance2_config" action="action_finance2_personne" sequence="30"/>

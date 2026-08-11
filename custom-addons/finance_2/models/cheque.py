@@ -70,7 +70,9 @@ class Finance2Cheque(models.Model):
                 continue
 
             api_key = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_api_key')
+
             if not api_key:
+                rec.message_post(body="<div style='color:red;'>Erreur: finance.gemini_api_key est vide ou non configuré.</div>")
                 continue
 
             import requests
@@ -146,13 +148,11 @@ Exemple:
             try:
                 resp = requests.post(gemini_url, headers=headers, json=payload, timeout=120)
                 if resp.status_code != 200:
-                    import logging
-                    logging.getLogger(__name__).error(f"Error AI extract cheque_vide: {resp.text}")
+                    rec.message_post(body=f"<div style='color:red;'>Erreur API Gemini ({resp.status_code}): {resp.text[:500]}</div>")
                     continue
                 ai_data = resp.json()
             except Exception as e:
-                import logging
-                logging.getLogger(__name__).error(f"Error AI extract cheque_vide: {str(e)}")
+                rec.message_post(body=f"<div style='color:red;'>Exception API Gemini: {str(e)}</div>")
                 continue
 
             raw_content = ""
@@ -163,12 +163,15 @@ Exemple:
                     raw_content = parts[0].get("text", "")
 
             if not raw_content:
+                rec.message_post(body="<div style='color:red;'>Erreur: Contenu vide retourné par Gemini.</div>")
                 continue
 
             try:
                 result = json.loads(raw_content)
-            except Exception:
+            except Exception as e:
+                rec.message_post(body=f"<div style='color:red;'>Erreur de lecture JSON: {str(e)} - Contenu: {raw_content[:200]}</div>")
                 continue
+
 
             ste_code = result.get('ste', '')
             ste_record = False

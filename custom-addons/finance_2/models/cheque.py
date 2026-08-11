@@ -75,6 +75,7 @@ class Finance2Cheque(models.Model):
 
             import requests
             import json
+            import re
 
             pdf_b64 = rec.chq_vide_pdf.decode('utf-8') if isinstance(rec.chq_vide_pdf, bytes) else rec.chq_vide_pdf
             

@@ -90,15 +90,15 @@ class WhatsAppFinancePdfController(http.Controller):
         if not factures:
             return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas trouvé de factures valides dans le PDF."}
 
-        # 5. Find or Create the Cheque in finance_2
+        # 5. Find the Cheque in finance_2
         domain = [('name', '=', chq_number)]
         base_cheque = request.env['finance2.cheque'].sudo().search(domain, limit=1)
 
         if not base_cheque:
-            base_cheque = request.env['finance2.cheque'].sudo().create({
-                'name': chq_number,
-                'state': 'brouillon'
-            })
+            return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas dans Odoo. Vous devez d'abord créer le chèque vide."}
+            
+        if base_cheque.state != 'actif':
+            return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} a été trouvé mais il est à l'état '{base_cheque.state}'. Il doit être à l'état 'actif' pour pouvoir recevoir des répartitions."}
 
         # Save the document PDF on the cheque
         if pdf_base64:

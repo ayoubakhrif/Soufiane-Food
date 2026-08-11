@@ -1,5 +1,5 @@
 {
-    'name': 'Finance 2',
+    'name': 'finance_2',
     'version': '15.0.1.0.0',
     'category': 'Accounting/Finance',
     'summary': 'Gestion simplifiée des chèques physiques',

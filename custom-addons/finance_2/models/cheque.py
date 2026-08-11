@@ -281,3 +281,8 @@ class Finance2Repartition(models.Model):
     serie_facture = fields.Char(string='Série de facture')
     bl = fields.Char(string='BL')
     journal = fields.Char(string='Journal')
+    type = fields.Selection([
+        ('surestarie', 'Surestarie'),
+        ('magasinage', 'Magasinage'),
+        ('change', 'Change')
+    ], string='Type')

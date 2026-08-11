@@ -89,6 +89,9 @@
                 <field name="ste_id"/>
                 <field name="benif_id"/>
                 <field name="amount_total"/>
+                <field name="journal"/>
+                <field name="date_emission"/>
+                <field name="date_echeance"/>
                 <field name="state" widget="badge" decoration-muted="state == 'brouillon'" decoration-warning="state == 'reserve'" decoration-info="state == 'actif'" decoration-success="state == 'cloture'" decoration-danger="state == 'annule'"/>
             </tree>
         </field>

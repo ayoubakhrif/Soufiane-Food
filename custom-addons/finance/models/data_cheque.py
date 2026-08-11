@@ -431,8 +431,6 @@ class DataCheque(models.Model):
                 # Make dates required for other active states
                 if not rec.date_emission:
                     raise ValidationError("La date d'émission est requise sauf si l'état est 'Bureau' ou 'Annulé'.")
-                if not rec.date_echeance:
-                    raise ValidationError("La date d'échéance est requise sauf si l'état est 'Bureau' ou 'Annulé'.")
 
     # ------------------------------------------------------------
     # if state == Annulé

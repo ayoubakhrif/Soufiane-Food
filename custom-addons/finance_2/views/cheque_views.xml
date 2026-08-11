@@ -7,13 +7,13 @@
         <field name="arch" type="xml">
             <form string="Chèque Physique">
                 <header>
-                    <button name="action_confirmer" string="Confirmer" type="object" class="oe_highlight" states="brouillon"/>
+                    <button name="action_confirmer" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'brouillon'"/>
                     
-                    <button name="action_mettre_actif" string="Mettre en Actif" type="object" class="oe_highlight" states="reserve"/>
-                    <button name="action_remettre_finance" string="Remettre à Finance" type="object" states="reserve"/>
+                    <button name="action_mettre_actif" string="Mettre en Actif" type="object" class="oe_highlight" invisible="state != 'reserve'"/>
+                    <button name="action_remettre_finance" string="Remettre à Finance" type="object" invisible="state != 'reserve'"/>
                     
-                    <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" states="actif"/>
-                    <button name="action_annuler" string="Annuler" type="object" states="actif,reserve"/>
+                    <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'"/>
+                    <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('actif', 'reserve')"/>
                     
                     <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,annule"/>
                 </header>
@@ -36,8 +36,8 @@
                         </group>
                     </group>
                     
-                    <group string="Logistique" attrs="{'invisible': [('state', 'in', ['brouillon'])]}">
-                        <field name="remis_a_id" attrs="{'required': [('state', '=', 'actif')]}"/>
+                    <group string="Logistique" invisible="state == 'brouillon'">
+                        <field name="remis_a_id" required="state == 'actif'"/>
                         <field name="date_remise" readonly="1"/>
                     </group>
                     

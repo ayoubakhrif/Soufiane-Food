@@ -69,7 +69,7 @@ class Finance2Cheque(models.Model):
             if not rec.chq_vide_pdf:
                 continue
 
-            api_key = self.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+            api_key = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_api_key')
             if not api_key:
                 continue
 
@@ -113,41 +113,41 @@ Exemple:
   "beneficiaire": "AFRICONTAINER"
 }}"""
 
+            gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-1.5-flash-latest')
+            gemini_model = gemini_model.replace('models/', '')
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
+
             payload = {
-                "model": "gpt-4o",
-                "input": [
+                "contents": [
                     {
-                        "role": "user",
-                        "content": [
+                        "parts": [
                             {
-                                "type": "input_file",
-                                "filename": "cheque.pdf",
-                                "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                                "inline_data": {
+                                    "mime_type": "application/pdf",
+                                    "data": pdf_b64
+                                }
                             },
                             {
-                                "type": "input_text",
                                 "text": prompt_text
                             }
                         ]
                     }
                 ],
-                "text": {
-                    "format": {
-                        "type": "json_object"
-                    }
-                },
-                "temperature": 0.0,
-                "max_output_tokens": 800
+                "generationConfig": {
+                    "temperature": 0.0,
+                    "responseMimeType": "application/json"
+                }
             }
 
             headers = {
-                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             }
 
             try:
-                resp = requests.post("https://api.openai.com/v1/responses", headers=headers, json=payload, timeout=60)
+                resp = requests.post(gemini_url, headers=headers, json=payload, timeout=120)
                 if resp.status_code != 200:
+                    import logging
+                    logging.getLogger(__name__).error(f"Error AI extract cheque_vide: {resp.text}")
                     continue
                 ai_data = resp.json()
             except Exception as e:
@@ -156,11 +156,11 @@ Exemple:
                 continue
 
             raw_content = ""
-            for output_item in ai_data.get("output", []):
-                for content_item in output_item.get("content", []):
-                    if content_item.get("type") == "output_text":
-                        raw_content = content_item.get("text", "")
-                        break
+            candidates = ai_data.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if parts:
+                    raw_content = parts[0].get("text", "")
 
             if not raw_content:
                 continue

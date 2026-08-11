@@ -80,6 +80,9 @@ class Finance2Cheque(models.Model):
             
             stes = self.env['finance2.ste'].sudo().search([])
             stes_names = ", ".join(stes.mapped('name'))
+            
+            persos = self.env['finance2.personne'].sudo().search([])
+            persos_names = ", ".join(persos.mapped('name'))
 
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque vide.
 Votre but est d'extraire les informations suivantes.
@@ -90,12 +93,16 @@ Votre but est d'extraire les informations suivantes.
    - Leader One = LO
    - Pacific Fruit = PF
    - Maruk = MR
+3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
+4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
 
 Retournez UNIQUEMENT un objet JSON valide, sans markdown.
 Exemple:
 {{
   "chq": "2102888",
-  "ste": "SN"
+  "ste": "SN",
+  "date_emission": "2026-05-18",
+  "personne": "Abderzak"
 }}"""
 
             payload = {
@@ -159,6 +166,13 @@ Exemple:
             ste_record = False
             if ste_code:
                 ste_record = self.env['finance2.ste'].search([('name', '=ilike', ste_code)], limit=1)
+                
+            perso_name = result.get('personne', '')
+            perso_record = False
+            if perso_name:
+                perso_record = self.env['finance2.personne'].search([('name', '=ilike', perso_name)], limit=1)
+                if not perso_record:
+                    perso_record = self.env['finance2.personne'].search([('name', 'ilike', perso_name)], limit=1)
             
             update_vals = {}
             final_chq = result.get('chq')
@@ -168,6 +182,10 @@ Exemple:
                 update_vals['name'] = final_chq
             if final_ste_id:
                 update_vals['ste_id'] = final_ste_id
+            if perso_record:
+                update_vals['personne_id'] = perso_record.id
+            if result.get('date_emission'):
+                update_vals['date_emission'] = result.get('date_emission')
             
             if update_vals:
                 rec.sudo().write(update_vals)
@@ -185,7 +203,7 @@ Exemple:
                 rec.message_post(body=Markup(
                     "<div style='border-left:4px solid #007bff;padding:8px 12px;background:#f8f9fa;border-radius:4px;'>"
                     "<span style='color:#007bff;font-size:15px;'><i class='fa fa-robot'></i>&nbsp;<b>IA : Chèque identifié</b></span>"
-                    f"<p style='margin:4px 0 0;'>Le système a extrait le numéro <b>{final_chq}</b> et la société <b>{ste_code}</b>.</p>"
+                    f"<p style='margin:4px 0 0;'>Le système a extrait le numéro <b>{final_chq}</b>, la société <b>{ste_code}</b>, la date d'émission <b>{result.get('date_emission', '')}</b> et la personne <b>{perso_name}</b>.</p>"
                     "</div>"
                 ))
 

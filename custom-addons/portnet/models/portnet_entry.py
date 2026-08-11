@@ -144,13 +144,13 @@ class PortnetEntry(models.Model):
             if company_article:
                 self.nomenclature = company_article.nomenclature
 
-    @api.constrains('invoice')
+    @api.constrains('invoice', 'state')
     def _check_unique_invoice(self):
         for rec in self:
-            if rec.invoice:
-                domain = [('invoice', '=', rec.invoice), ('id', '!=', rec.id)]
+            if rec.invoice and rec.state != 'annule':
+                domain = [('invoice', '=', rec.invoice), ('id', '!=', rec.id), ('state', '!=', 'annule')]
                 if self.search_count(domain) > 0:
-                    raise ValidationError("La facture '%s' a déjà été saisie dans un autre enregistrement." % rec.invoice)
+                    raise ValidationError("La facture '%s' a déjà été saisie dans un autre enregistrement non annulé." % rec.invoice)
 
     # ── Valeur validation (only called on Domicilier) ───────────────────────
 

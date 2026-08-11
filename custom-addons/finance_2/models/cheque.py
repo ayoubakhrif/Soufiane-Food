@@ -70,7 +70,6 @@ class Finance2Cheque(models.Model):
                 continue
 
             api_key = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_api_key')
-
             if not api_key:
                 rec.message_post(body="<div style='color:red;'>Erreur: finance.gemini_api_key est vide ou non configuré.</div>")
                 continue
@@ -79,8 +78,13 @@ class Finance2Cheque(models.Model):
             import json
             import re
 
-            pdf_b64 = rec.chq_vide_pdf.decode('utf-8') if isinstance(rec.chq_vide_pdf, bytes) else rec.chq_vide_pdf
-            
+            pdf_bytes = rec.chq_vide_pdf.decode('utf-8') if isinstance(rec.chq_vide_pdf, bytes) else rec.chq_vide_pdf
+            import base64
+            try:
+                pdf_bytes_decoded = base64.b64decode(pdf_bytes)
+            except Exception:
+                pdf_bytes_decoded = pdf_bytes # Just in case it's not base64 encoded properly
+
             stes = self.env['finance2.ste'].sudo().search([])
             stes_names = ", ".join(stes.mapped('name'))
             
@@ -115,26 +119,42 @@ Exemple:
   "beneficiaire": "AFRICONTAINER"
 }}"""
 
-            gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-1.5-flash')
+            # 1. Upload the file to Gemini
+            upload_url = f"https://generativelanguage.googleapis.com/upload/v1beta/files?key={api_key}"
+            upload_headers = {
+                "X-Goog-Upload-Protocol": "raw",
+                "X-Goog-Upload-Header-Content-Type": "application/pdf",
+                "Content-Type": "application/pdf"
+            }
+            try:
+                upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes_decoded, timeout=120)
+                if upload_resp.status_code != 200:
+                    rec.message_post(body=f"<div style='color:red;'>Erreur Gemini Upload: {upload_resp.text[:500]}</div>")
+                    continue
+                
+                file_uri = upload_resp.json().get("file", {}).get("uri")
+                if not file_uri:
+                    rec.message_post(body="<div style='color:red;'>Impossible de récupérer l'URI Gemini.</div>")
+                    continue
+            except Exception as e:
+                rec.message_post(body=f"<div style='color:red;'>Exception Gemini Upload: {str(e)}</div>")
+                continue
+
+            # 2. Call generateContent
+            gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-pro-latest')
             gemini_model = gemini_model.replace('models/', '')
-            # Si l'utilisateur avait enregistré l'ancienne valeur par défaut erronée
-            if gemini_model == 'gemini-1.5-flash-latest' or gemini_model == 'gemini-flash-latest':
-                gemini_model = 'gemini-1.5-flash'
+            # Forcer gemini-pro-latest si la valeur est l'ancienne qui crashait
+            if gemini_model in ['gemini-1.5-flash-latest', 'gemini-flash-latest', 'gemini-1.5-flash']:
+                gemini_model = 'gemini-pro-latest'
+
             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
 
             payload = {
                 "contents": [
                     {
                         "parts": [
-                            {
-                                "inline_data": {
-                                    "mime_type": "application/pdf",
-                                    "data": pdf_b64
-                                }
-                            },
-                            {
-                                "text": prompt_text
-                            }
+                            {"text": prompt_text},
+                            {"fileData": {"mimeType": "application/pdf", "fileUri": file_uri}}
                         ]
                     }
                 ],
@@ -168,11 +188,14 @@ Exemple:
             if not raw_content:
                 rec.message_post(body="<div style='color:red;'>Erreur: Contenu vide retourné par Gemini.</div>")
                 continue
+                
+            clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
+            clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
 
             try:
-                result = json.loads(raw_content)
+                result = json.loads(clean_content)
             except Exception as e:
-                rec.message_post(body=f"<div style='color:red;'>Erreur de lecture JSON: {str(e)} - Contenu: {raw_content[:200]}</div>")
+                rec.message_post(body=f"<div style='color:red;'>Erreur de lecture JSON: {str(e)} - Contenu: {clean_content[:200]}</div>")
                 continue
 
 

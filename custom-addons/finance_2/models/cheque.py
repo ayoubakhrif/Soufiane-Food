@@ -115,8 +115,11 @@ Exemple:
   "beneficiaire": "AFRICONTAINER"
 }}"""
 
-            gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-1.5-flash-latest')
+            gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-1.5-flash')
             gemini_model = gemini_model.replace('models/', '')
+            # Si l'utilisateur avait enregistré l'ancienne valeur par défaut erronée
+            if gemini_model == 'gemini-1.5-flash-latest' or gemini_model == 'gemini-flash-latest':
+                gemini_model = 'gemini-1.5-flash'
             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
 
             payload = {

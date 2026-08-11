@@ -27,13 +27,21 @@
                         <group>
                             <field name="ste_id"/>
                             <field name="benif_id"/>
+                            <field name="personne_id"/>
                             <field name="amount_total"/>
+                            <field name="type"/>
                         </group>
                         <group>
                             <field name="date_emission"/>
                             <field name="date_echeance"/>
                             <field name="date_encaissement"/>
+                            <field name="chq_certifie"/>
+                            <field name="journal"/>
+                            <field name="serie_facture"/>
                         </group>
+                    </group>
+                    <group>
+                        <field name="commentaire"/>
                     </group>
                     
                     <group string="Logistique" invisible="state == 'brouillon'">
@@ -59,9 +67,6 @@
                                 <field name="doc_filename" invisible="1"/>
                                 <field name="doc_pdf" filename="doc_filename"/>
                             </group>
-                        </page>
-                        <page string="Commentaire">
-                            <field name="commentaire"/>
                         </page>
                     </notebook>
                 </sheet>

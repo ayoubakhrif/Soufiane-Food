@@ -15,6 +15,12 @@
                     <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'" groups="finance_2.group_finance2_manager"/>
                     <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('actif', 'reserve')" groups="finance_2.group_finance2_manager"/>
                     
+                    <!-- Boutons Admin -->
+                    <button name="force_brouillon" string="Forcer Brouillon" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'brouillon'"/>
+                    <button name="force_reserve" string="Forcer Réserve" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'reserve'"/>
+                    <button name="force_actif" string="Forcer Actif" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'actif'"/>
+                    <button name="force_cloture" string="Forcer Clôturé" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'cloture'"/>
+
                     <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,annule"/>
                 </header>
                 <sheet>

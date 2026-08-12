@@ -100,6 +100,9 @@ class WhatsAppFinancePdfController(http.Controller):
         if base_cheque.state != 'actif':
             return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} a été trouvé mais il est à l'état '{base_cheque.state}'. Il doit être à l'état 'actif' pour pouvoir recevoir des répartitions."}
 
+        if base_cheque.repartition_ids:
+            return {'status': 'error', 'message': f"❌ *Erreur:* Ce chèque ({chq_number}) a déjà des répartitions sur Gestia."}
+
         # Save the document PDF on the cheque
         if pdf_base64:
             base_cheque.sudo().write({

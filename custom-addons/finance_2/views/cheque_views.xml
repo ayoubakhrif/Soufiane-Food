@@ -68,11 +68,6 @@
                                 <field name="doc_pdf" filename="doc_filename"/>
                             </group>
                         </page>
-                        <page string="Administration" groups="finance_2.group_finance2_admin">
-                            <group>
-                                <field name="state" string="Forcer l'état"/>
-                            </group>
-                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">

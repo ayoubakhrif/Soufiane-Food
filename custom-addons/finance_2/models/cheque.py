@@ -33,6 +33,12 @@ class Finance2Cheque(models.Model):
     doc_filename = fields.Char(string='Nom du fichier Documentation')
     
     # Workflow Status
+    is_admin = fields.Boolean(compute='_compute_is_admin')
+
+    def _compute_is_admin(self):
+        for rec in self:
+            rec.is_admin = self.env.user.has_group('finance_2.group_finance2_admin')
+
     state = fields.Selection([
         ('brouillon', 'Brouillon'),
         ('reserve', 'Réserve'),

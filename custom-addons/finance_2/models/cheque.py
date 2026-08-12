@@ -12,6 +12,17 @@ class Finance2Cheque(models.Model):
     benif_id = fields.Many2one('finance2.benif', string='Bénéficiaire', tracking=True)
     
     amount_total = fields.Float(string='Montant Total', tracking=True)
+
+    total_surestarie = fields.Float(string='Total Surestarie', compute='_compute_totals')
+    total_magasinage = fields.Float(string='Total Magasinage', compute='_compute_totals')
+    total_change = fields.Float(string='Total Change', compute='_compute_totals')
+
+    @api.depends('repartition_ids.amount', 'repartition_ids.type')
+    def _compute_totals(self):
+        for rec in self:
+            rec.total_surestarie = sum(r.amount for r in rec.repartition_ids if r.type == 'surestarie')
+            rec.total_magasinage = sum(r.amount for r in rec.repartition_ids if r.type == 'magasinage')
+            rec.total_change = sum(r.amount for r in rec.repartition_ids if r.type == 'change')
     
     type = fields.Selection([('cheque', 'Chèque'), ('effet', 'Effet')], string='Type', default='cheque', tracking=True)
     chq_certifie = fields.Boolean(string='Chq certifié', tracking=True)

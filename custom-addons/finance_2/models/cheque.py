@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 from datetime import timedelta
 
 class Finance2Cheque(models.Model):
@@ -266,9 +267,7 @@ Exemple:
     def action_mettre_actif(self):
         for rec in self:
             if not rec.remis_a_id:
-                # Odoo will show a validation error if not present when required in view, 
-                # but we can enforce it here too
-                pass
+                raise UserError("Vous devez renseigner le champ 'Remis à' avant de passer le chèque à l'état Actif.")
             rec.state = 'actif'
             rec.date_remise = fields.Date.today()
             

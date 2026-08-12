@@ -23,5 +23,13 @@
             <field name="implied_ids" eval="[(4, ref('group_finance2_user'))]"/>
             <field name="comment">Le responsable a un accès total (clôture, annulation, configuration).</field>
         </record>
+
+        <!-- Groupe : Administrateur (Forçage) -->
+        <record id="group_finance2_admin" model="res.groups">
+            <field name="name">Administrateur</field>
+            <field name="category_id" ref="module_category_finance2"/>
+            <field name="implied_ids" eval="[(4, ref('group_finance2_manager'))]"/>
+            <field name="comment">L'administrateur a le droit de forcer les états librement.</field>
+        </record>
     </data>
 </odoo>

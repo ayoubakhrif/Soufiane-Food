@@ -316,3 +316,19 @@ class Finance2Repartition(models.Model):
         ('magasinage', 'Magasinage'),
         ('change', 'Change')
     ], string='Type')
+
+    def force_brouillon(self):
+        for rec in self:
+            rec.state = 'brouillon'
+
+    def force_reserve(self):
+        for rec in self:
+            rec.state = 'reserve'
+
+    def force_actif(self):
+        for rec in self:
+            rec.state = 'actif'
+
+    def force_cloture(self):
+        for rec in self:
+            rec.state = 'cloture'

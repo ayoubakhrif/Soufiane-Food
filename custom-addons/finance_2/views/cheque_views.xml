@@ -53,7 +53,7 @@
                         <page string="Répartitions">
                             <field name="repartition_ids">
                                 <tree editable="bottom">
-                                    <field name="amount"/>
+                                    <field name="amount" sum="Total"/>
                                     <field name="serie_facture"/>
                                     <field name="bl"/>
                                     <field name="type"/>

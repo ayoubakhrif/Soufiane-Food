@@ -39,6 +39,7 @@ class Finance2Cheque(models.Model):
         for rec in self:
             rec.is_admin = self.env.user.has_group('finance_2.group_finance2_admin')
 
+    admin_state = fields.Selection(related='state', readonly=False, tracking=False)
     state = fields.Selection([
         ('brouillon', 'Brouillon'),
         ('reserve', 'Réserve'),

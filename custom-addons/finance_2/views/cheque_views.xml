@@ -98,6 +98,7 @@
                 <field name="ste_id"/>
                 <field name="benif_id"/>
                 <field name="amount_total"/>
+                <field name="total_repartitions" sum="Total"/>
                 <field name="journal"/>
                 <field name="date_emission"/>
                 <field name="date_echeance"/>

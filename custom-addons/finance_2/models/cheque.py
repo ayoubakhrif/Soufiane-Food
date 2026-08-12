@@ -302,20 +302,6 @@ Exemple:
             )
 
 
-class Finance2Repartition(models.Model):
-    _name = 'finance2.repartition'
-    _description = 'Répartition de Chèque'
-
-    cheque_id = fields.Many2one('finance2.cheque', string='Chèque', required=True, ondelete='cascade')
-    amount = fields.Float(string='Montant', required=True)
-    serie_facture = fields.Char(string='Série de facture')
-    bl = fields.Char(string='BL')
-    journal = fields.Char(string='Journal')
-    type = fields.Selection([
-        ('surestarie', 'Surestarie'),
-        ('magasinage', 'Magasinage'),
-        ('change', 'Change')
-    ], string='Type')
 
     def force_brouillon(self):
         for rec in self:
@@ -332,3 +318,18 @@ class Finance2Repartition(models.Model):
     def force_cloture(self):
         for rec in self:
             rec.state = 'cloture'
+
+class Finance2Repartition(models.Model):
+    _name = 'finance2.repartition'
+    _description = 'Répartition de Chèque'
+
+    cheque_id = fields.Many2one('finance2.cheque', string='Chèque', required=True, ondelete='cascade')
+    amount = fields.Float(string='Montant', required=True)
+    serie_facture = fields.Char(string='Série de facture')
+    bl = fields.Char(string='BL')
+    journal = fields.Char(string='Journal')
+    type = fields.Selection([
+        ('surestarie', 'Surestarie'),
+        ('magasinage', 'Magasinage'),
+        ('change', 'Change')
+    ], string='Type')

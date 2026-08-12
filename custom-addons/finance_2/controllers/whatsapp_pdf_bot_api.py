@@ -164,10 +164,10 @@ class WhatsAppFinancePdfController(http.Controller):
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le chèque se trouve TOUJOURS sur la dernière page du document. Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche du chèque (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
-   (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", les frais de "magasinage" et de "surestarie" apparaissent souvent sur la MÊME facture. Vous DEVEZ OBLIGATOIREMENT suivre ces règles de calcul :
-   - Le montant du "magasinage" est la SOMME EXACTE de tous les montants qui se trouvent sous le titre "(L) Terminal full storage at destination". ATTENTION: Lisez UNIQUEMENT les montants de la colonne "Montant Total".
-   - Le montant de la "surestarie" est la SOMME EXACTE de tous les montants qui se trouvent sous le titre "(C) Detention & Demurrage Import Charge". ATTENTION: Lisez UNIQUEMENT les montants de la colonne "Montant Total". CELA INCLUT AUSSI la "Taxe Regionale" (qui se trouve sous "Charges Diverses").
-   Extrayez ces deux totaux calculés comme DEUX éléments séparés dans votre tableau JSON, l'un avec le type "magasinage" et l'autre avec le type "surestarie").
+   (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", NE FAITES PAS LA SOMME. Vous DEVEZ OBLIGATOIREMENT extraire CHAQUE montant séparément :
+   - Pour chaque montant sous "(L) Terminal full storage at destination", créez un élément JSON séparé avec le type "magasinage".
+   - Pour chaque montant sous "(C) Detention & Demurrage Import Charge" (ainsi que la "Taxe Regionale"), créez un élément JSON séparé avec le type "surestarie".
+   ATTENTION: Lisez UNIQUEMENT les montants de la colonne "Montant Total". Vous devez retourner autant d'éléments dans le JSON qu'il y a de lignes de montants dans le tableau.)
 2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.

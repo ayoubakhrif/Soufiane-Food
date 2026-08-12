@@ -35,6 +35,9 @@
                             <field name="benif_id"/>
                             <field name="personne_id"/>
                             <field name="amount_total"/>
+                            <field name="total_magasinage"/>
+                            <field name="total_surestarie"/>
+                            <field name="total_change"/>
                             <field name="type"/>
                         </group>
                         <group>

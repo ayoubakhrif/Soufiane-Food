@@ -257,11 +257,28 @@ Exemple de réponse attendue:
                 payload = {
                     "model": "claude-sonnet-5",
                     "max_tokens": 8192,
+                    "system": "Tu es un extracteur de données. Tu dois absolument retourner un tableau JSON et RIEN d'autre. Ne fais aucune réflexion, aucun commentaire. Limite ta réponse au JSON pur pour éviter de dépasser le nombre de tokens.",
                     "messages": messages
                 }
-                resp = requests.post(url, headers=headers, json=payload, timeout=120)
-                if resp.status_code != 200:
-                    return {"error": f"Erreur API Claude: {resp.text}"}
+                
+                max_retries = 3
+                import time
+                for attempt in range(max_retries):
+                    resp = requests.post(url, headers=headers, json=payload, timeout=120)
+                    if resp.status_code == 200:
+                        break
+                    
+                    try:
+                        err_data = resp.json()
+                        err_type = err_data.get("error", {}).get("type")
+                        if err_type == "overloaded_error" and attempt < max_retries - 1:
+                            time.sleep(2 * (attempt + 1))
+                            continue
+                    except:
+                        pass
+                        
+                    if attempt == max_retries - 1:
+                        return {"error": f"Erreur API Claude: {resp.text}"}
                     
                 resp_json = resp.json()
                 try:

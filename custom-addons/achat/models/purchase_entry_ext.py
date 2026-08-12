@@ -382,9 +382,31 @@ OU si tout est correct :
                     continue
 
                 result = json.loads(raw_content)
-                is_faux_val = result.get("is_faux", False)
-                reason = result.get("reason", "")
                 mismatches = result.get("mismatches", [])
+
+                # Post-traitement Python pour forcer la tolérance de 1.0 (car l'IA se trompe souvent en math)
+                import re
+                filtered_mismatches = []
+                for m in mismatches:
+                    field = m.get('field', '').lower()
+                    if 'total' in field or 'cfr' in field or 'montant' in field:
+                        odoo_val_str = str(m.get('odoo_value', '')).replace(',', '').replace(' ', '')
+                        pdf_val_str = str(m.get('pdf_value', '')).replace(',', '').replace(' ', '')
+                        odoo_num_match = re.search(r'\d+(?:\.\d+)?', odoo_val_str)
+                        pdf_num_match = re.search(r'\d+(?:\.\d+)?', pdf_val_str)
+                        if odoo_num_match and pdf_num_match:
+                            try:
+                                odoo_num = float(odoo_num_match.group(0))
+                                pdf_num = float(pdf_num_match.group(0))
+                                if abs(odoo_num - pdf_num) <= 1.0:
+                                    continue  # On ignore cette erreur, elle est dans la tolérance
+                            except ValueError:
+                                pass
+                    filtered_mismatches.append(m)
+
+                mismatches = filtered_mismatches
+                is_faux_val = bool(mismatches)
+                reason = result.get("reason", "") if is_faux_val else ""
 
                 rec.sudo().write({
                     'is_faux': is_faux_val,

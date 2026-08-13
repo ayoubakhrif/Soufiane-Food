@@ -125,7 +125,7 @@ class WhatsAppFinancePdfController(http.Controller):
 
                 # Map AI type to Odoo selection
                 type_val = False
-                if inv_type in ['surestarie', 'magasinage', 'change']:
+                if inv_type in ['surestarie', 'magasinage', 'change', 'inspection']:
                     type_val = inv_type
                 elif inv_type == 'thc':
                     type_val = 'change' # THC is basically change/port fees for them? Or maybe they didn't specify. I will let 'change' be used for THC if needed, but actually the user said: "change (THC)". So THC -> change.
@@ -183,6 +183,7 @@ Règles strictes pour le "type" de frais :
 - Si la facture indique (Surestarie, Free det, detention, demurage fee, demurage...) -> choisissez "surestarie".
 - Si la facture indique (THC, Droit de port, Frais d'agence, Frais de port, agency fee, frais de manutention...) -> choisissez "thc".
 - PRIORITÉ: Si le mot "MAGASINAGE" apparait, c'est obligatoirement "magasinage".
+- NOTE SPÉCIALE HAPAG-LLOYD : Si le bénéficiaire est Hapag-Lloyd (ou Hapag) et que la facture contient une ligne "INSPECTION FEE", vous devez prendre le MONTANT TOTAL de la facture (ex: TOTAL H.T. ou Total Général) et retourner UN SEUL élément JSON avec ce montant total et le type "inspection".
 
 - Voici la liste des bénéficiaires de type IMPORTATION : [IMPORT_LIST]. Si le bénéficiaire correspond à l'un de ces noms (ou s'il s'agit d'un acteur maritime/portuaire/douanier), vous NE DEVEZ JAMAIS choisir "divers". Vous devez OBLIGATOIREMENT choisir l'un de ces types : "magasinage", "surestarie", "thc", "inspection", "change", ou "fret".
 - Voici la liste des bénéficiaires de type DIVERS : [DIVERS_LIST]. Si le bénéficiaire correspond à l'un de ces noms, vous DEVEZ OBLIGATOIREMENT choisir "divers".[FEEDBACK]

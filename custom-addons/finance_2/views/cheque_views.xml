@@ -38,6 +38,7 @@
                             <field name="total_magasinage"/>
                             <field name="total_surestarie"/>
                             <field name="total_change"/>
+                            <field name="total_inspection"/>
                             <field name="type"/>
                         </group>
                         <group>

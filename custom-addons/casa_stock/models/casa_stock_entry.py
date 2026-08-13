@@ -195,6 +195,11 @@ class CasaStockEntry(models.Model):
             if rec.state != 'confirmed':
                 continue
             
+            if not rec.provider_id:
+                raise UserError(_("Vous devez d'abord renseigner le fournisseur avant de valider l'entrée."))
+            if not rec.calibre:
+                raise UserError(_("Vous devez d'abord renseigner le calibre avant de valider l'entrée."))
+            
             # Create Move
             move = self.env['casa.stock.move'].create({
                 'product_id': rec.product_id.id,

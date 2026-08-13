@@ -384,6 +384,9 @@ class LogisticsEntry(models.Model):
             rec.assurance_amount = assurance_cheques + assurance_deductions + assurance_transfers + assurance_sutra
 
     def action_move_to_draft(self):
+        for rec in self:
+            if not rec.container_count or rec.container_count <= 0:
+                raise ValidationError(_("Vous ne pouvez pas mettre ce dossier en statut 'Draft' car il n'y a aucun conteneur (veuillez ajouter des conteneurs d'abord)."))
         self.write({'purchase_state': 'draft'})
 
     def action_set_in_progress(self):

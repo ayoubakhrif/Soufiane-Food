@@ -103,12 +103,28 @@ class WhatsAppFinancePdfController(http.Controller):
         if base_cheque.repartition_ids:
             return {'status': 'error', 'message': f"❌ *Erreur:* Ce chèque ({chq_number}) a déjà des répartitions sur Gestia."}
 
-        # Save the document PDF on the cheque
+        # Save the document PDF and the extracted cheque details
+        update_vals = {}
         if pdf_base64:
-            base_cheque.sudo().write({
+            update_vals.update({
                 'doc_pdf': pdf_base64,
                 'doc_filename': file_name
             })
+            
+        chq_amount = ai_result.get('chq_amount')
+        chq_date = ai_result.get('chq_date')
+        
+        if chq_amount:
+            try:
+                update_vals['amount_total'] = float(chq_amount)
+            except ValueError:
+                pass
+                
+        if chq_date and len(str(chq_date)) >= 10:
+            update_vals['date_echeance'] = str(chq_date)[:10]
+
+        if update_vals:
+            base_cheque.sudo().write(update_vals)
 
         messages = []
         try:
@@ -166,7 +182,10 @@ class WhatsAppFinancePdfController(http.Controller):
         prompt_text = """Vous êtes un assistant comptable spécialisé dans l'importation et la finance. Vous recevez un document (PDF) qui contient généralement un chèque et une ou plusieurs factures.
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
-1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le chèque se trouve TOUJOURS sur la dernière page du document. Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche du chèque (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
+1. Trouvez les informations du chèque (qui se trouve TOUJOURS sur la dernière page du document) :
+   - Le numéro de chèque: EXACTEMENT 7 chiffres, TOUJOURS en haut à gauche. Ne le confondez pas avec le compte ou le montant.
+   - Le montant du chèque: C'est le montant total écrit sur le chèque (en haut à droite et en toutes lettres).
+   - La date d'échéance du chèque: C'est la date écrite sur le chèque (souvent en bas à droite). Formatez-la OBLIGATOIREMENT en 'YYYY-MM-DD' (ex: 2026-08-15). S'il n'y a pas de date, laissez vide.
    (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", NE FAITES PAS LA SOMME. Vous DEVEZ OBLIGATOIREMENT extraire CHAQUE montant séparément :
    - Pour chaque montant sous "(L) Terminal full storage at destination", créez un élément JSON séparé avec le type "magasinage".
    - Pour chaque montant sous "(C) Detention & Demurrage Import Charge" (ainsi que la "Taxe Regionale"), créez un élément JSON séparé avec le type "surestarie".
@@ -193,6 +212,8 @@ Règles de formatage :
 - Le JSON doit suivre cette structure exacte :
 {
   "chq_number": "1234567",
+  "chq_amount": 10500.50,
+  "chq_date": "2026-08-15",
   "factures": [
     {
       "montant": 10500.50,

@@ -7,6 +7,10 @@ class Finance2Cheque(models.Model):
     _description = 'Chèque Physique (Finance 2)'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    _sql_constraints = [
+        ('unique_cheque_ste', 'unique(name, ste_id)', 'Erreur : Ce numéro de chèque existe déjà pour cette société !')
+    ]
+
     name = fields.Char(string='N° Chèque', required=False, tracking=True)
     ste_id = fields.Many2one('finance2.ste', string='Société', required=False, tracking=True)
     benif_id = fields.Many2one('finance2.benif', string='Bénéficiaire', tracking=True)
@@ -28,7 +32,7 @@ class Finance2Cheque(models.Model):
     
     type = fields.Selection([('cheque', 'Chèque'), ('effet', 'Effet')], string='Type', default='cheque', tracking=True)
     chq_certifie = fields.Boolean(string='Chq certifié', tracking=True)
-    journal = fields.Char(string='Journal', required=True, tracking=True)
+    journal = fields.Char(string='Journal', tracking=True)
     personne_id = fields.Many2one('finance2.personne', string='Personnes', tracking=True)
     serie_facture = fields.Char(string='Série de facture', tracking=True)
     
@@ -276,6 +280,23 @@ Exemple:
 
     def action_confirmer(self):
         for rec in self:
+            missing_fields = []
+            if not rec.journal:
+                missing_fields.append("Journal")
+            if not rec.name:
+                missing_fields.append("N° Chèque")
+            if not rec.amount_total:
+                missing_fields.append("Montant Total")
+            if not rec.date_emission:
+                missing_fields.append("Date d'émission")
+            if not rec.date_echeance:
+                missing_fields.append("Date d'échéance")
+            if not rec.ste_id:
+                missing_fields.append("Société")
+                
+            if missing_fields:
+                raise UserError("Vous ne pouvez pas confirmer ce chèque car les informations suivantes sont manquantes : " + ", ".join(missing_fields))
+                
             rec.state = 'reserve'
             
     def action_remettre_finance(self):

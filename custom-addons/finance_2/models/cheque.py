@@ -285,12 +285,8 @@ Exemple:
                 missing_fields.append("Journal")
             if not rec.name:
                 missing_fields.append("N° Chèque")
-            if not rec.amount_total:
-                missing_fields.append("Montant Total")
             if not rec.date_emission:
                 missing_fields.append("Date d'émission")
-            if not rec.date_echeance:
-                missing_fields.append("Date d'échéance")
             if not rec.ste_id:
                 missing_fields.append("Société")
                 
@@ -314,6 +310,15 @@ Exemple:
             
     def action_cloturer(self):
         for rec in self:
+            missing_fields = []
+            if not rec.amount_total:
+                missing_fields.append("Montant Total")
+            if not rec.date_echeance:
+                missing_fields.append("Date d'échéance")
+                
+            if missing_fields:
+                raise UserError("Vous ne pouvez pas clôturer ce chèque car les informations suivantes sont manquantes : " + ", ".join(missing_fields))
+                
             rec.state = 'cloture'
             
     def action_annuler(self):

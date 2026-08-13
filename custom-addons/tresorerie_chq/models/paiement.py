@@ -208,11 +208,17 @@ Exemple de réponse attendue:
                 clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
                 
                 try:
-                    return json.loads(clean_content)
+                    data = json.loads(clean_content)
+                    if isinstance(data, list):
+                        return {"items": data}
+                    return data
                 except Exception as e:
                     last_brace_idx = clean_content.rfind('}')
                     if last_brace_idx != -1:
-                        return json.loads(clean_content[:last_brace_idx+1] + ']}')
+                        data = json.loads(clean_content[:last_brace_idx+1] + ']}')
+                        if isinstance(data, list):
+                            return {"items": data}
+                        return data
                     return {"error": f"JSON Gemini Invalide: {str(e)}"}
             except Exception as e:
                 return {"error": f"Exception Gemini: {str(e)}"}
@@ -294,11 +300,17 @@ Exemple de réponse attendue:
                 clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
                 clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
                 try:
-                    return json.loads(clean_content)
+                    data = json.loads(clean_content)
+                    if isinstance(data, list):
+                        return {"items": data}
+                    return data
                 except Exception as e:
                     last_brace_idx = clean_content.rfind('}')
                     if last_brace_idx != -1:
-                        return json.loads(clean_content[:last_brace_idx+1] + ']}')
+                        data = json.loads(clean_content[:last_brace_idx+1] + ']}')
+                        if isinstance(data, list):
+                            return {"items": data}
+                        return data
                     return {"error": f"JSON Claude Invalide: {str(e)}"}
             except Exception as e:
                 return {"error": f"Exception Claude: {str(e)}"}

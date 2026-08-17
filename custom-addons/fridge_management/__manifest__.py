@@ -9,6 +9,7 @@
         'security/fridge_security.xml',
         'security/ir.model.access.csv',
         'views/fridge_menus.xml',
+        'views/fridge_client_views.xml',
         'views/fridge_equipment_views.xml',
         'views/fridge_deposit_views.xml',
         'views/fridge_ledger_views.xml',

@@ -5,7 +5,7 @@ class FridgeDeposit(models.Model):
     _description = 'Dossier de Dépôt Client'
 
     name = fields.Char(string="Référence", required=True, copy=False, readonly=True, default=lambda self: 'Nouveau')
-    partner_id = fields.Many2one('res.partner', string="Client", required=True)
+    client_id = fields.Many2one('fridge.client', string="Client (Locataire)", required=True)
     description = fields.Char(string="Marchandise / Description", required=True)
     requested_tonnes = fields.Float(string="Tonnage Prévu (Tonnes)", required=True)
     requested_temp = fields.Char(string="Température Souhaitée")

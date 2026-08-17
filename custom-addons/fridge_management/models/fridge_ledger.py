@@ -9,7 +9,7 @@ class FridgeLedger(models.Model):
     name = fields.Char(string="Description de l'opération")
     date = fields.Datetime(string="Date de l'opération", default=fields.Datetime.now, required=True)
     deposit_id = fields.Many2one('fridge.deposit', string="Dossier Client", required=True, ondelete='cascade')
-    partner_id = fields.Many2one(related='deposit_id.partner_id', string="Client", store=True)
+    client_id = fields.Many2one(related='deposit_id.client_id', string="Client", store=True)
     
     fridge_id = fields.Many2one('fridge.equipment', string="Frigo Concerné", required=True)
     

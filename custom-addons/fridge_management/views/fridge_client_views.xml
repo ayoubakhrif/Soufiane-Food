@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fridge_client_tree" model="ir.ui.view">
+        <field name="name">fridge.client.tree</field>
+        <field name="model">fridge.client</field>
+        <field name="arch" type="xml">
+            <tree string="Clients">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_fridge_client_form" model="ir.ui.view">
+        <field name="name">fridge.client.form</field>
+        <field name="model">fridge.client</field>
+        <field name="arch" type="xml">
+            <form string="Client">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nom de la société..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Dossiers de Dépôt">
+                            <field name="deposit_ids" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fridge_client" model="ir.actions.act_window">
+        <field name="name">Clients (Locataires)</field>
+        <field name="res_model">fridge.client</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

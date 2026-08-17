@@ -5,3 +5,5 @@ access_fridge_deposit_user,fridge.deposit.user,model_fridge_deposit,group_fridge
 access_fridge_deposit_manager,fridge.deposit.manager,model_fridge_deposit,group_fridge_manager,1,1,1,1
 access_fridge_ledger_user,fridge.ledger.user,model_fridge_ledger,group_fridge_user,1,1,1,0
 access_fridge_ledger_manager,fridge.ledger.manager,model_fridge_ledger,group_fridge_manager,1,1,1,1
+access_fridge_client_user,fridge.client.user,model_fridge_client,group_fridge_user,1,1,1,0
+access_fridge_client_manager,fridge.client.manager,model_fridge_client,group_fridge_manager,1,1,1,1

@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Dossiers Client">
                 <field name="name"/>
-                <field name="partner_id"/>
+                <field name="client_id"/>
                 <field name="description"/>
                 <field name="requested_tonnes"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'active'" decoration-muted="state == 'done'"/>
@@ -30,7 +30,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="client_id" readonly="state != 'draft'"/>
                             <field name="description" readonly="state != 'draft'"/>
                         </group>
                         <group>

@@ -4,6 +4,8 @@
     <menuitem id="menu_fridge_root" name="Gestion Frigos" sequence="50"/>
 
     <!-- Sub menus -->
+    <menuitem id="menu_fridge_client" name="Clients (Locataires)" parent="menu_fridge_root" sequence="5"/>
+    
     <menuitem id="menu_fridge_deposit" name="Dossiers de Dépôt" parent="menu_fridge_root" sequence="10"/>
     <menuitem id="menu_fridge_equipment" name="Equipements (Frigos)" parent="menu_fridge_root" sequence="20"/>
     <menuitem id="menu_fridge_ledger" name="Audit Ledger (Mouvements)" parent="menu_fridge_root" sequence="30"/>

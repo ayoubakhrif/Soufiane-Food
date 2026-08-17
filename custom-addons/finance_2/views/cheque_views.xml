@@ -21,7 +21,7 @@
                     <button name="force_actif" string="Forcer Actif" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'actif'"/>
                     <button name="force_cloture" string="Forcer Clôturé" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'cloture'"/>
 
-                    <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,annule"/>
+                    <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,encaisse,annule"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -44,6 +44,8 @@
                         <group>
                             <field name="date_emission"/>
                             <field name="date_echeance"/>
+                            <field name="date_encaissement" attrs="{'invisible': [('state', 'in', ['brouillon', 'reserve', 'actif'])]}"/>
+                            <field name="montant_encaisse" attrs="{'invisible': [('state', 'in', ['brouillon', 'reserve', 'actif'])]}"/>
                             <field name="date_encaissement"/>
                             <field name="chq_certifie"/>
                             <field name="journal"/>
@@ -106,6 +108,35 @@
                 <field name="state" widget="badge" decoration-muted="state == 'brouillon'" decoration-warning="state == 'reserve'" decoration-info="state == 'actif'" decoration-success="state == 'cloture'" decoration-danger="state == 'annule'"/>
             </tree>
         </field>
+    </record>
+
+
+    <!-- Vue Liste : Encaissement -->
+    <record id="view_finance2_encaissement_tree" model="ir.ui.view">
+        <field name="name">finance2.encaissement.tree</field>
+        <field name="model">finance2.cheque</field>
+        <field name="arch" type="xml">
+            <tree string="Encaissement" editable="bottom" create="false" decoration-success="state == 'encaisse'" decoration-warning="state == 'cloture'">
+                <field name="name" readonly="1"/>
+                <field name="ste_id" readonly="1"/>
+                <field name="benif_id" readonly="1"/>
+                <field name="amount_total" readonly="1" sum="Total Chèques"/>
+                <field name="date_encaissement" attrs="{'readonly': [('state', '=', 'encaisse')]}"/>
+                <field name="montant_encaisse" attrs="{'readonly': [('state', '=', 'encaisse')]}" sum="Total Encaissé"/>
+                <field name="state" readonly="1" widget="badge" decoration-success="state == 'encaisse'" decoration-warning="state == 'cloture'"/>
+                <button name="action_encaisser" type="object" icon="fa-check" string="Encaisser" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'cloture')]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action Encaissement -->
+    <record id="action_finance2_encaissement" model="ir.actions.act_window">
+        <field name="name">Encaissements</field>
+        <field name="res_model">finance2.cheque</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', 'in', ['cloture', 'encaisse'])]</field>
+        <field name="context">{'search_default_cloture': 1}</field>
+        <field name="view_id" ref="view_finance2_encaissement_tree"/>
     </record>
 
     <!-- Action -->

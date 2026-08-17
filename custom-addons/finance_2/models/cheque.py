@@ -64,9 +64,14 @@ class Finance2Cheque(models.Model):
         ('reserve', 'Réserve'),
         ('actif', 'Actif'),
         ('cloture', 'Clôturé'),
+        ('encaisse', 'Encaissé'),
         ('annule', 'Annulé'),
     ], string='État', default='brouillon', tracking=True, required=True)
     
+    # Encaissement
+    date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)
+    montant_encaisse = fields.Float(string="Montant encaissé", tracking=True)
+
     # Suivi Logistique
     remis_a_id = fields.Many2one('finance2.personne', string='Remis à', tracking=True)
     date_remise = fields.Date(string='Date de remise (Actif)', tracking=True)
@@ -322,6 +327,29 @@ Exemple:
                 raise UserError("Vous ne pouvez pas clôturer ce chèque car les informations suivantes sont manquantes : " + ", ".join(missing_fields))
                 
             rec.state = 'cloture'
+
+    def action_encaisser(self):
+        for rec in self:
+            if rec.state != 'cloture':
+                raise UserError("Seuls les chèques clôturés peuvent être encaissés.")
+            if not rec.date_encaissement:
+                raise UserError("Veuillez renseigner la date d'encaissement.")
+            if not rec.montant_encaisse:
+                raise UserError("Veuillez renseigner le montant encaissé.")
+                
+            rec.state = 'encaisse'
+            
+            if rec.montant_encaisse != rec.amount_total:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'Attention',
+                        'message': 'Le montant encaissé est différent du montant total du chèque.',
+                        'type': 'warning',
+                        'sticky': False,
+                    }
+                }
             
     def action_annuler(self):
         for rec in self:

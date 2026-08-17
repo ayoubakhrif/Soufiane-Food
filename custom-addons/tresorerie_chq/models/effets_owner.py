@@ -33,9 +33,12 @@ class EffetsOwner(models.Model):
 
     cheque_count = fields.Integer(string="Nombre de chèques", compute='_compute_counts', store=True)
     effet_count = fields.Integer(string="Nombre d'effets", compute='_compute_counts', store=True)
+    unpaid_count = fields.Integer(string="Impayés", compute='_compute_counts', store=True)
 
-    @api.depends('cheque_line_ids', 'effet_line_ids')
+    @api.depends('cheque_line_ids.state', 'effet_line_ids.state')
     def _compute_counts(self):
         for rec in self:
             rec.cheque_count = len(rec.cheque_line_ids)
             rec.effet_count = len(rec.effet_line_ids)
+            rec.unpaid_count = len(rec.cheque_line_ids.filtered(lambda x: x.state == 'impaye')) + \
+                               len(rec.effet_line_ids.filtered(lambda x: x.state == 'impaye'))

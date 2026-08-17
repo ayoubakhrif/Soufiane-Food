@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class TresorerieChqClientAlias(models.Model):
     _name = 'tresorerie_chq.client.alias'
@@ -35,4 +35,13 @@ class TresorerieChqClient(models.Model):
     def get_all_effets(self):
         self.ensure_one()
         return self.env['tresorerie_chq.effet'].search([('client_id', '=', self.id)], order='check_date asc, id desc')
+
+    unpaid_count = fields.Integer(string="Impayés", compute='_compute_unpaid_count', store=True)
+
+    @api.depends('cheque_ids.state', 'effet_ids.state')
+    def _compute_unpaid_count(self):
+        for rec in self:
+            c = len(rec.cheque_ids.filtered(lambda x: x.state == 'impaye'))
+            e = len(rec.effet_ids.filtered(lambda x: x.state == 'impaye'))
+            rec.unpaid_count = c + e
 

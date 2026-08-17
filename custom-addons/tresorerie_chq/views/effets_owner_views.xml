@@ -12,6 +12,7 @@
                 <field name="name"/>
                 <field name="cheque_count" string="Chèques"/>
                 <field name="effet_count" string="Effets"/>
+                <field name="unpaid_count" string="Impayés" decoration-danger="unpaid_count > 0"/>
                 <field name="cin" optional="show"/>
                 <field name="phone"/>
             </tree>

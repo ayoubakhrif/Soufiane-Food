@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Clients">
                 <field name="name"/>
+                <field name="unpaid_count" string="Impayés" decoration-danger="unpaid_count > 0"/>
                 <field name="cin" optional="show"/>
                 <field name="phone"/>
                 <field name="email"/>

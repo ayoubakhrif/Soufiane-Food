@@ -6,6 +6,7 @@
     'description': 'Module sur-mesure pour la location d\'espace frigo et le suivi des entrées/sorties (Audit Ledger).',
     'depends': ['base'],
     'data': [
+        'security/fridge_security.xml',
         'security/ir.model.access.csv',
         'views/fridge_menus.xml',
         'views/fridge_equipment_views.xml',

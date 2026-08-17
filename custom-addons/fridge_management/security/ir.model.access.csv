@@ -1,4 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_fridge_equipment,fridge.equipment,model_fridge_equipment,base.group_user,1,1,1,1
-access_fridge_deposit,fridge.deposit,model_fridge_deposit,base.group_user,1,1,1,1
-access_fridge_ledger,fridge.ledger,model_fridge_ledger,base.group_user,1,1,1,1
+access_fridge_equipment_user,fridge.equipment.user,model_fridge_equipment,group_fridge_user,1,0,0,0
+access_fridge_equipment_manager,fridge.equipment.manager,model_fridge_equipment,group_fridge_manager,1,1,1,1
+access_fridge_deposit_user,fridge.deposit.user,model_fridge_deposit,group_fridge_user,1,1,1,0
+access_fridge_deposit_manager,fridge.deposit.manager,model_fridge_deposit,group_fridge_manager,1,1,1,1
+access_fridge_ledger_user,fridge.ledger.user,model_fridge_ledger,group_fridge_user,1,1,1,0
+access_fridge_ledger_manager,fridge.ledger.manager,model_fridge_ledger,group_fridge_manager,1,1,1,1

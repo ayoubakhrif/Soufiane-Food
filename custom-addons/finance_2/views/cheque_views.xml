@@ -44,8 +44,8 @@
                         <group>
                             <field name="date_emission"/>
                             <field name="date_echeance"/>
-                            <field name="date_encaissement" attrs="{'invisible': [('state', 'in', ['brouillon', 'reserve', 'actif'])]}"/>
-                            <field name="montant_encaisse" attrs="{'invisible': [('state', 'in', ['brouillon', 'reserve', 'actif'])]}"/>
+                            <field name="date_encaissement" invisible="state in ('brouillon', 'reserve', 'actif')"/>
+                            <field name="montant_encaisse" invisible="state in ('brouillon', 'reserve', 'actif')"/>
                             <field name="date_encaissement"/>
                             <field name="chq_certifie"/>
                             <field name="journal"/>
@@ -121,10 +121,10 @@
                 <field name="ste_id" readonly="1"/>
                 <field name="benif_id" readonly="1"/>
                 <field name="amount_total" readonly="1" sum="Total Chèques"/>
-                <field name="date_encaissement" attrs="{'readonly': [('state', '=', 'encaisse')]}"/>
-                <field name="montant_encaisse" attrs="{'readonly': [('state', '=', 'encaisse')]}" sum="Total Encaissé"/>
+                <field name="date_encaissement" readonly="state == 'encaisse'"/>
+                <field name="montant_encaisse" readonly="state == 'encaisse'" sum="Total Encaissé"/>
                 <field name="state" readonly="1" widget="badge" decoration-success="state == 'encaisse'" decoration-warning="state == 'cloture'"/>
-                <button name="action_encaisser" type="object" icon="fa-check" string="Encaisser" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'cloture')]}"/>
+                <button name="action_encaisser" type="object" icon="fa-check" string="Encaisser" class="oe_highlight" invisible="state != 'cloture'"/>
             </tree>
         </field>
     </record>

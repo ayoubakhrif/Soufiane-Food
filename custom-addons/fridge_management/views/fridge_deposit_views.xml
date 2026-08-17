@@ -20,8 +20,8 @@
         <field name="arch" type="xml">
             <form string="Dossier Client">
                 <header>
-                    <button name="action_confirm" type="object" string="Confirmer" attrs="{'invisible': [('state', '!=', 'draft')]}" class="oe_highlight"/>
-                    <button name="action_done" type="object" string="Clôturer" attrs="{'invisible': [('state', '!=', 'active')]}" class="oe_highlight"/>
+                    <button name="action_confirm" type="object" string="Confirmer" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_done" type="object" string="Clôturer" invisible="state != 'active'" class="oe_highlight"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,active,done"/>
                 </header>
                 <sheet>
@@ -30,17 +30,17 @@
                     </div>
                     <group>
                         <group>
-                            <field name="partner_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="description" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="description" readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="requested_tonnes" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="requested_temp" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="requested_tonnes" readonly="state != 'draft'"/>
+                            <field name="requested_temp" readonly="state != 'draft'"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Mouvements (Ledger)">
-                            <field name="ledger_ids" attrs="{'readonly': [('state', '=', 'done')]}">
+                            <field name="ledger_ids" readonly="state == 'done'">
                                 <tree editable="bottom">
                                     <field name="date"/>
                                     <field name="operation_type"/>

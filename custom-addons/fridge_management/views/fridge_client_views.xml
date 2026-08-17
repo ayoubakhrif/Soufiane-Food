@@ -42,4 +42,6 @@
         <field name="res_model">fridge.client</field>
         <field name="view_mode">tree,form</field>
     </record>
+
+    <menuitem id="menu_fridge_client_action" action="action_fridge_client" parent="menu_fridge_client" sequence="10"/>
 </odoo>

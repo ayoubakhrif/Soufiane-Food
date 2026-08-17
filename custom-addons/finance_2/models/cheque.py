@@ -283,8 +283,8 @@ Exemple:
     def action_confirmer(self):
         for rec in self:
             missing_fields = []
-            if not rec.journal:
-                missing_fields.append("Journal")
+            if not rec.journal or rec.journal.strip() == '0':
+                missing_fields.append("Journal (doit être différent de 0)")
             if not rec.name:
                 missing_fields.append("N° Chèque")
             if not rec.date_emission:

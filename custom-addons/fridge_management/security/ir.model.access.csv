@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fridge_equipment,fridge.equipment,model_fridge_equipment,base.group_user,1,1,1,1
+access_fridge_deposit,fridge.deposit,model_fridge_deposit,base.group_user,1,1,1,1
+access_fridge_ledger,fridge.ledger,model_fridge_ledger,base.group_user,1,1,1,1

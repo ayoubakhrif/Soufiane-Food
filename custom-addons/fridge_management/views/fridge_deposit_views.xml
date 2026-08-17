@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fridge_deposit_tree" model="ir.ui.view">
+        <field name="name">fridge.deposit.tree</field>
+        <field name="model">fridge.deposit</field>
+        <field name="arch" type="xml">
+            <tree string="Dossiers Client">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="description"/>
+                <field name="requested_tonnes"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'active'" decoration-muted="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_fridge_deposit_form" model="ir.ui.view">
+        <field name="name">fridge.deposit.form</field>
+        <field name="model">fridge.deposit</field>
+        <field name="arch" type="xml">
+            <form string="Dossier Client">
+                <header>
+                    <button name="action_confirm" type="object" string="Confirmer" attrs="{'invisible': [('state', '!=', 'draft')]}" class="oe_highlight"/>
+                    <button name="action_done" type="object" string="Clôturer" attrs="{'invisible': [('state', '!=', 'active')]}" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="description" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="requested_tonnes" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="requested_temp" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mouvements (Ledger)">
+                            <field name="ledger_ids" attrs="{'readonly': [('state', '=', 'done')]}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="operation_type"/>
+                                    <field name="fridge_id"/>
+                                    <field name="tonnes"/>
+                                    <field name="user_id" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fridge_deposit" model="ir.actions.act_window">
+        <field name="name">Dossiers de Dépôt</field>
+        <field name="res_model">fridge.deposit</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_fridge_deposit_action" action="action_fridge_deposit" parent="menu_fridge_deposit" sequence="10"/>
+</odoo>

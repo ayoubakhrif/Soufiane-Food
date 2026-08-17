@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fridge_ledger_tree" model="ir.ui.view">
+        <field name="name">fridge.ledger.tree</field>
+        <field name="model">fridge.ledger</field>
+        <field name="arch" type="xml">
+            <tree string="Audit Ledger" create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="deposit_id"/>
+                <field name="partner_id"/>
+                <field name="operation_type"/>
+                <field name="fridge_id"/>
+                <field name="tonnes" sum="Total"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_fridge_ledger_search" model="ir.ui.view">
+        <field name="name">fridge.ledger.search</field>
+        <field name="model">fridge.ledger</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="deposit_id"/>
+                <field name="partner_id"/>
+                <field name="fridge_id"/>
+                <filter string="Entrées" name="type_in" domain="[('operation_type', '=', 'in')]"/>
+                <filter string="Sorties" name="type_out" domain="[('operation_type', '=', 'out')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Client" name="group_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="Frigo" name="group_fridge" context="{'group_by':'fridge_id'}"/>
+                    <filter string="Type de Mouvement" name="group_type" context="{'group_by':'operation_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_fridge_ledger" model="ir.actions.act_window">
+        <field name="name">Audit Ledger</field>
+        <field name="res_model">fridge.ledger</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="search_view_id" ref="view_fridge_ledger_search"/>
+        <field name="context">{'search_default_group_partner': 1, 'search_default_group_fridge': 1}</field>
+    </record>
+
+    <menuitem id="menu_fridge_ledger_action" action="action_fridge_ledger" parent="menu_fridge_ledger" sequence="10"/>
+</odoo>

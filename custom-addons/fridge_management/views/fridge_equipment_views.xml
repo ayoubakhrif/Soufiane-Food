@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fridge_equipment_tree" model="ir.ui.view">
+        <field name="name">fridge.equipment.tree</field>
+        <field name="model">fridge.equipment</field>
+        <field name="arch" type="xml">
+            <tree string="Frigos">
+                <field name="name"/>
+                <field name="target_temperature"/>
+                <field name="capacity_tonnes" sum="Total Capacity"/>
+                <field name="current_load_tonnes" sum="Total Load"/>
+                <field name="available_capacity_tonnes" sum="Total Available"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_fridge_equipment_form" model="ir.ui.view">
+        <field name="name">fridge.equipment.form</field>
+        <field name="model">fridge.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Frigo">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nom du frigo..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="capacity_tonnes"/>
+                            <field name="target_temperature"/>
+                        </group>
+                        <group>
+                            <field name="current_load_tonnes" readonly="1"/>
+                            <field name="available_capacity_tonnes" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mouvements (Ledger)">
+                            <field name="ledger_ids" readonly="1">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="deposit_id"/>
+                                    <field name="operation_type"/>
+                                    <field name="tonnes"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fridge_equipment" model="ir.actions.act_window">
+        <field name="name">Frigos</field>
+        <field name="res_model">fridge.equipment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_fridge_equipment_action" action="action_fridge_equipment" parent="menu_fridge_equipment" sequence="10"/>
+</odoo>

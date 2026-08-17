@@ -1,0 +1,18 @@
+{
+    'name': 'Gestion des Frigos',
+    'version': '1.0',
+    'category': 'Operations/Frigos',
+    'summary': 'Gérer le stockage frigorifique pour les clients',
+    'description': 'Module sur-mesure pour la location d\'espace frigo et le suivi des entrées/sorties (Audit Ledger).',
+    'depends': ['base'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/fridge_menus.xml',
+        'views/fridge_equipment_views.xml',
+        'views/fridge_deposit_views.xml',
+        'views/fridge_ledger_views.xml',
+    ],
+    'installable': True,
+    'application': True,
+    'license': 'LGPL-3',
+}

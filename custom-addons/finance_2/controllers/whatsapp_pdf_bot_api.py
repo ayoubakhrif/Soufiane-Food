@@ -194,7 +194,7 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.
    - Le numéro de la facture (UNIQUEMENT le numéro exact, sans le préfixe F/ ou Facture. Cherchez les numéros isolés en haut comme TI-...). S'il n'y en a pas, mettez une chaine vide "". (Note importante: pour le bénéficiaire CMA, la facture commence souvent par MAMI).
-   - Le BL (Bill of Lading, Connaissement maritime, ex: YMJAM450339005). Cherchez "BL", "B/L", ou une longue référence alphanumérique liée au navire/conteneur. S'il n'y en a pas, mettez une chaine vide "".
+   - Le BL (Bill of Lading). Cherchez EXACTEMENT les mentions "BL", "B/L", "B/L No" ou "Connaissement". NE PRENEZ JAMAIS la référence de "Voyage" ou de "Booking". S'il n'y a pas de mention claire de BL ou de Connaissement, mettez une chaine vide "".
    - Le "type" de frais. 
 
 Règles strictes pour le "type" de frais :

@@ -57,7 +57,6 @@
                     </group>
                     
                     <group string="Logistique" invisible="state == 'brouillon'">
-                        <field name="remis_a_id" required="state == 'actif'"/>
                         <field name="date_remise" readonly="1"/>
                     </group>
                     

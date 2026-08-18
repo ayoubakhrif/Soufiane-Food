@@ -73,7 +73,6 @@ class Finance2Cheque(models.Model):
     montant_encaisse = fields.Float(string="Montant encaissé", tracking=True)
 
     # Suivi Logistique
-    remis_a_id = fields.Many2one('finance2.personne', string='Remis à', tracking=True)
     date_remise = fields.Date(string='Date de remise (Actif)', tracking=True)
     
     # Répartitions

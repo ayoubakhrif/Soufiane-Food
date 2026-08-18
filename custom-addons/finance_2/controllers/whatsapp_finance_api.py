@@ -1095,8 +1095,7 @@ class WhatsAppFinanceController(http.Controller):
             f"• *État actuel* : {etat}\n"
         )
         
-        if cheque.remis_a_id:
-            msg += f"• *Logistique* : Remis à {cheque.remis_a_id.name}\n"
+
 
         if cheque.repartition_ids:
             msg += "\n📋 *Répartitions* :\n"

@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Déclarations de décaissement">
                 <field name="invoice_number"/>
+                <field name="is_acompte"/>
                 <field name="fournisseur_id"/>
                 <field name="invoice_date"/>
                 <field name="payment_date"/>
@@ -25,6 +26,7 @@
                     <group>
                         <group string="Informations Générales">
                             <field name="invoice_number"/>
+                            <field name="is_acompte"/>
                             <field name="designation"/>
                             <field name="tva_code"/>
                         </group>

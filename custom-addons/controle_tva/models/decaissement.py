@@ -31,23 +31,57 @@ class TvaDecaissement(models.Model):
     tva_code = fields.Char(string='Code TVA')
     prorata = fields.Float(string='Prorata (%)')
 
+    is_acompte = fields.Boolean(string='Est un acompte', default=False)
+
     @api.depends('amount_ht', 'tva_rate')
     def _compute_amounts(self):
         for record in self:
             record.amount_tva = record.amount_ht * (record.tva_rate / 100.0)
             record.amount_ttc = record.amount_ht + record.amount_tva
 
-    @api.constrains('invoice_number', 'fournisseur_id')
+    @api.constrains('invoice_number', 'fournisseur_id', 'is_acompte')
     def _check_unique_invoice(self):
         for record in self:
-            if record.invoice_number and record.fournisseur_id:
+            if record.invoice_number and record.fournisseur_id and not record.is_acompte:
                 domain = [
                     ('invoice_number', '=', record.invoice_number),
                     ('fournisseur_id', '=', record.fournisseur_id.id),
+                    ('is_acompte', '=', False),
                     ('id', '!=', record.id)
                 ]
                 if self.search_count(domain) > 0:
-                    raise ValidationError("Une facture avec ce numéro et ce même fournisseur existe déjà.")
+                    raise ValidationError("Une facture principale avec ce numéro et ce même fournisseur existe déjà.")
+
+    @api.onchange('invoice_number', 'fournisseur_id', 'is_acompte')
+    def _onchange_invoice_acompte(self):
+        if self.invoice_number and self.fournisseur_id and self.is_acompte:
+            domain = [
+                ('invoice_number', '=', self.invoice_number),
+                ('fournisseur_id', '=', self.fournisseur_id.id)
+            ]
+            if self._origin.id:
+                domain.append(('id', '!=', self._origin.id))
+                
+            existing_records = self.search(domain)
+            
+            if existing_records:
+                parent_invoices = existing_records.filtered(lambda r: not r.is_acompte)
+                acomptes = existing_records.filtered(lambda r: r.is_acompte)
+                
+                msg = "Attention, vous créez un acompte pour une facture (ou acompte) existante.\n\n"
+                if parent_invoices:
+                    msg += f"- Facture mère trouvée : {parent_invoices[0].amount_ttc} TTC (Enregistrée le {parent_invoices[0].create_date.strftime('%Y-%m-%d') if parent_invoices[0].create_date else 'N/A'})\n"
+                if acomptes:
+                    msg += "- Acomptes précédents trouvés :\n"
+                    for ac in acomptes:
+                        msg += f"  * Montant : {ac.amount_ttc} TTC\n"
+                        
+                return {
+                    'warning': {
+                        'title': 'Acompte détecté',
+                        'message': msg
+                    }
+                }
 
     @api.constrains('invoice_date', 'payment_date')
     def _check_payment_date(self):

@@ -11,6 +11,7 @@
     'author': 'Antigravity',
     'depends': ['base'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/fournisseur_views.xml',
         'views/decaissement_views.xml',

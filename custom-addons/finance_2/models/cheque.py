@@ -170,9 +170,6 @@ Exemple:
             # 2. Call generateContent
             gemini_model = self.env['ir.config_parameter'].sudo().get_param('finance.gemini_model', 'gemini-pro-latest')
             gemini_model = gemini_model.replace('models/', '')
-            # Forcer gemini-pro-latest si la valeur est l'ancienne qui crashait
-            if gemini_model in ['gemini-1.5-flash-latest', 'gemini-flash-latest', 'gemini-1.5-flash']:
-                gemini_model = 'gemini-pro-latest'
 
             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
 

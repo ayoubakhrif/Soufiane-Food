@@ -79,7 +79,7 @@
                         icon="fa-archive"
                         class="btn-secondary"
                         title="Remettre en stock"
-                        invisible="state == 'stock' or not is_manager"/>
+                        invisible="state == 'stock'"/>
             </tree>
         </field>
     </record>
@@ -120,7 +120,7 @@
                     <button name="action_stock" 
                             string="Remettre en stock" 
                             type="object" 
-                            invisible="state == 'stock' or not is_manager"/>
+                            invisible="state == 'stock'"/>
 
                     <field name="state" widget="statusbar" statusbar_visible="stock,remis,banque,encaisse,impaye"/>
                 </header>

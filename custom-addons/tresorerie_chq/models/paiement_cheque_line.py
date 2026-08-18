@@ -160,10 +160,8 @@ class TresorerieChqCheque(models.Model):
     # Workflow Actions
     # ------------------------------------------------------------------
     def action_stock(self):
-        """Reset to stock (admin only)."""
+        """Reset to stock (allowed for users)."""
         for rec in self:
-            if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
-                raise ValidationError("❌ Seul un administrateur peut remettre en stock librement.")
             rec.state = 'stock'
 
     def action_remis(self):
@@ -348,10 +346,8 @@ class TresorerieChqEffet(models.Model):
     # Workflow Actions
     # ------------------------------------------------------------------
     def action_stock(self):
-        """Reset to stock (admin only)."""
+        """Reset to stock (allowed for users)."""
         for rec in self:
-            if not self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager'):
-                raise ValidationError("❌ Seul un administrateur peut remettre en stock librement.")
             rec.state = 'stock'
 
     def action_remis(self):

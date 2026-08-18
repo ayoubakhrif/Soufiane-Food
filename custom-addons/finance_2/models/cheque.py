@@ -222,8 +222,17 @@ Exemple:
             try:
                 result = json.loads(clean_content)
             except Exception as e:
-                rec.message_post(body=f"<div style='color:red;'>Erreur de lecture JSON: {str(e)} - Contenu: {clean_content[:200]}</div>")
-                continue
+                import re
+                match = re.search(r'\{.*\}', clean_content, re.DOTALL)
+                if match:
+                    try:
+                        result = json.loads(match.group(0))
+                    except Exception:
+                        rec.message_post(body=f"<div style='color:red;'>Erreur de lecture JSON: {str(e)} - Contenu: {clean_content[:200]}</div>")
+                        continue
+                else:
+                    rec.message_post(body=f"<div style='color:red;'>Erreur de lecture JSON: {str(e)} - Contenu: {clean_content[:200]}</div>")
+                    continue
 
 
             ste_code = result.get('ste', '')

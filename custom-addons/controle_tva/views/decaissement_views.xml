@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tva_decaissement_tree" model="ir.ui.view">
+        <field name="name">tva.decaissement.tree</field>
+        <field name="model">tva.decaissement</field>
+        <field name="arch" type="xml">
+            <tree string="Déclarations de décaissement">
+                <field name="invoice_number"/>
+                <field name="fournisseur_id"/>
+                <field name="invoice_date"/>
+                <field name="payment_date"/>
+                <field name="amount_ht" sum="Total HT"/>
+                <field name="amount_tva" sum="Total TVA"/>
+                <field name="amount_ttc" sum="Total TTC"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tva_decaissement_form" model="ir.ui.view">
+        <field name="name">tva.decaissement.form</field>
+        <field name="model">tva.decaissement</field>
+        <field name="arch" type="xml">
+            <form string="Déclaration de décaissement">
+                <sheet>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="invoice_number"/>
+                            <field name="designation"/>
+                            <field name="tva_code"/>
+                        </group>
+                        <group string="Fournisseur">
+                            <field name="fournisseur_id"/>
+                            <field name="fournisseur_if"/>
+                            <field name="fournisseur_ice"/>
+                        </group>
+                        <group string="Montants">
+                            <field name="amount_ht"/>
+                            <field name="tva_rate"/>
+                            <field name="prorata"/>
+                            <field name="amount_tva"/>
+                            <field name="amount_ttc"/>
+                        </group>
+                        <group string="Paiement">
+                            <field name="payment_method"/>
+                            <field name="invoice_date"/>
+                            <field name="payment_date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tva_decaissement" model="ir.actions.act_window">
+        <field name="name">Déclarations de décaissement</field>
+        <field name="res_model">tva.decaissement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

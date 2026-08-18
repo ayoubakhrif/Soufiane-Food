@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_controle_tva_root" name="Contrôle TVA" sequence="50"/>
+    
+    <menuitem id="menu_tva_decaissement" name="Décaissements" parent="menu_controle_tva_root" action="action_tva_decaissement" sequence="10"/>
+    <menuitem id="menu_tva_fournisseur" name="Fournisseurs" parent="menu_controle_tva_root" action="action_tva_fournisseur" sequence="20"/>
+</odoo>

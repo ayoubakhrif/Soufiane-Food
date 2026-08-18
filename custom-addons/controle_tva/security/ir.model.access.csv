@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tva_fournisseur,tva.fournisseur,model_tva_fournisseur,,1,1,1,1
+access_tva_decaissement,tva.decaissement,model_tva_decaissement,,1,1,1,1

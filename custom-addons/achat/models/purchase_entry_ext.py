@@ -307,16 +307,16 @@ Voici les informations saisies dans le système pour CETTE facture. Vérifiez UN
 {fields_str}
 
 RÈGLES DE COMPARAISON STRICTES :
-1. TEXTE (contract, invoice, lot, origin) : Comparez sans tenir compte de la casse et en ignorant les espaces, tirets (-), points (.), slashes (/).
+1. TEXTE (contract, origin) : Comparez sans tenir compte de la casse et en ignorant les espaces, tirets (-), points (.), slashes (/).
    - ⚠️ RÈGLE DE CORRESPONDANCE LOGIQUE : Considérez que c'est une CORRESPONDANCE si le numéro Odoo est la partie principale du numéro PDF.
    - Ignorez les ZÉROS INUTILES au début et les préfixes/suffixes.
    - Exemple : Odoo="152" match avec PDF="A26/202600152" (car 152 est le coeur du numéro).
-   - Exemple : Odoo="358" match avec PDF="358/2026".
-   - 🚫 RÈGLE ABSOLUE : Si les valeurs Odoo et PDF sont identiques (ex: 35853 et 35853), c'est une correspondance PARFAITE. Ne les ajoutez JAMAIS dans 'mismatches'.
-2. POIDS : Le poids en Odoo est en TONNES. Valeurs équivalentes : 44 tonnes = 44 MT = 44 T = 44,000 KG = 44.000 KG.
-3. MONTANT TOTAL (CFR) : Tolérance de 1.0 (pour les erreurs d'arrondis). Si la différence entre le montant Odoo et le montant PDF est inférieure ou égale à 1.0, considérez-les comme IDENTIQUES. Exemples de correspondances : "80300" = "80,300" = "80.300" = "US$80,300.00". Si Odoo="80300" et PDF="80300.90", c'est correct.
-4. BÉNÉFICE DU DOUTE : Soyez très tolérant. Ne mettez is_faux=true que si les chiffres sont totalement différents et sans aucun lien logique.
-5. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
+   - 🚫 RÈGLE ABSOLUE : Si les valeurs Odoo et PDF sont identiques, c'est une correspondance PARFAITE.
+2. NUMÉRO DE FACTURE (INVOICE) & NUMÉRO DE LOT : La correspondance doit être STRICTE ET EXACTE, mais en ignorant la casse (majuscules/minuscules). Si le PDF affiche "A26/202600152", la valeur Odoo doit être EXACTEMENT identique (aux espaces et tirets près), par exemple "a26/202600152" est accepté. L'IA ne doit pas accepter de raccourcis comme "152". De même pour les Lots.
+3. POIDS : Le poids en Odoo est en TONNES. Valeurs équivalentes : 44 tonnes = 44 MT = 44 T = 44,000 KG = 44.000 KG.
+4. MONTANT TOTAL (CFR) : Tolérance de 1.0 (pour les erreurs d'arrondis). Si la différence entre le montant Odoo et le montant PDF est inférieure ou égale à 1.0, considérez-les comme IDENTIQUES. Exemples de correspondances : "80300" = "80,300" = "80.300" = "US$80,300.00". Si Odoo="80300" et PDF="80300.90", c'est correct.
+5. BÉNÉFICE DU DOUTE : Soyez très tolérant (sauf pour la facture et le lot). Ne mettez is_faux=true que si les chiffres sont totalement différents et sans aucun lien logique.
+6. CHAMPS ABSENTS DU PDF : Si un champ n'apparaît pas clairement dans le document, ignorez-le.
 
 Répondez UNIQUEMENT avec du JSON valide, sans explication, sans markdown :
 {{

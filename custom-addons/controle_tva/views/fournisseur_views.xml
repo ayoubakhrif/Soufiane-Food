@@ -8,6 +8,7 @@
                 <field name="name"/>
                 <field name="if_number"/>
                 <field name="ice_number"/>
+                <field name="convention"/>
             </tree>
         </field>
     </record>
@@ -22,6 +23,7 @@
                         <field name="name"/>
                         <field name="if_number"/>
                         <field name="ice_number"/>
+                        <field name="convention"/>
                     </group>
                 </sheet>
             </form>

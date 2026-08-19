@@ -7,3 +7,8 @@ class TvaFournisseur(models.Model):
     name = fields.Char(string='Nom ou raison sociale', required=True)
     if_number = fields.Char(string='IF de fournisseur')
     ice_number = fields.Char(string='ICE de fournisseur')
+    convention = fields.Selection([
+        ('90', '90J'),
+        ('120', '120J'),
+        ('none', 'Pas de convention')
+    ], string='Convention', default='120')

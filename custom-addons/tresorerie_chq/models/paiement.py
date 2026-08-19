@@ -232,86 +232,97 @@ Exemple de réponse attendue:
                 base64_images = []
                 for page_num in range(len(doc)):
                     page = doc.load_page(page_num)
-                    # Augmentation de la résolution de l'image (Zoom x4) pour éviter les hallucinations
+                    # Zoom x4 pour la qualité, mais encodage JPEG pour réduire le poids
                     pix = page.get_pixmap(matrix=fitz.Matrix(4, 4))
-                    img_bytes = pix.tobytes("png")
+                    img_bytes = pix.tobytes("jpeg")
                     base64_images.append(base64.b64encode(img_bytes).decode('utf-8'))
-                    
-                content_array = [{"type": "text", "text": prompt_text}]
-                for img in base64_images:
-                    content_array.append({
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "image/png",
-                            "data": img
-                        }
-                    })
-                    
-                messages = [
-                    {
-                        "role": "user",
-                        "content": content_array
-                    }
-                ]
-                url = "https://api.anthropic.com/v1/messages"
-                headers = {
-                    "x-api-key": claude_key,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json"
-                }
-                payload = {
-                    "model": "claude-sonnet-5",
-                    "max_tokens": 8192,
-                    "system": "Tu es un extracteur de données. Tu dois absolument retourner un tableau JSON et RIEN d'autre. Ne fais aucune réflexion, aucun commentaire. Limite ta réponse au JSON pur pour éviter de dépasser le nombre de tokens.",
-                    "messages": messages
-                }
                 
-                max_retries = 3
-                import time
-                for attempt in range(max_retries):
-                    resp = requests.post(url, headers=headers, json=payload, timeout=120)
-                    if resp.status_code == 200:
-                        break
+                chunk_size = 10
+                all_items = []
+                for i in range(0, len(base64_images), chunk_size):
+                    chunk = base64_images[i:i+chunk_size]
                     
-                    try:
-                        err_data = resp.json()
-                        err_type = err_data.get("error", {}).get("type")
-                        if err_type == "overloaded_error" and attempt < max_retries - 1:
-                            time.sleep(2 * (attempt + 1))
-                            continue
-                    except:
-                        pass
+                    content_array = [{"type": "text", "text": prompt_text}]
+                    for img in chunk:
+                        content_array.append({
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": img
+                            }
+                        })
                         
-                    if attempt == max_retries - 1:
-                        return {"error": f"Erreur API Claude: {resp.text}"}
+                    messages = [{"role": "user", "content": content_array}]
+                    url = "https://api.anthropic.com/v1/messages"
+                    headers = {
+                        "x-api-key": claude_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json"
+                    }
+                    payload = {
+                        "model": "claude-sonnet-5",
+                        "max_tokens": 8192,
+                        "system": "Tu es un extracteur de données. Tu dois absolument retourner un tableau JSON et RIEN d'autre. Ne fais aucune réflexion, aucun commentaire. Limite ta réponse au JSON pur pour éviter de dépasser le nombre de tokens.",
+                        "messages": messages
+                    }
                     
-                resp_json = resp.json()
-                try:
-                    raw_content = ""
-                    for item in resp_json.get("content", []):
-                        if item.get("type") == "text":
-                            raw_content = item.get("text", "")
+                    max_retries = 3
+                    import time
+                    chunk_resp = None
+                    for attempt in range(max_retries):
+                        resp = requests.post(url, headers=headers, json=payload, timeout=120)
+                        if resp.status_code == 200:
+                            chunk_resp = resp
                             break
-                    if not raw_content:
-                        raise KeyError("Aucun bloc de texte trouvé")
-                except (KeyError, IndexError):
-                    return {"error": f"Format de réponse Claude inattendu: {json.dumps(resp_json)}"}
-                clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
-                clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
-                try:
-                    data = json.loads(clean_content)
-                    if isinstance(data, list):
-                        return {"items": data}
-                    return data
-                except Exception as e:
-                    last_brace_idx = clean_content.rfind('}')
-                    if last_brace_idx != -1:
-                        data = json.loads(clean_content[:last_brace_idx+1] + ']}')
+                        
+                        try:
+                            err_data = resp.json()
+                            err_type = err_data.get("error", {}).get("type")
+                            if err_type == "overloaded_error" and attempt < max_retries - 1:
+                                time.sleep(2 * (attempt + 1))
+                                continue
+                        except:
+                            pass
+                            
+                        if attempt == max_retries - 1:
+                            return {"error": f"Erreur API Claude (Batch {i}): {resp.text}"}
+                            
+                    resp_json = chunk_resp.json()
+                    try:
+                        raw_content = ""
+                        for item in resp_json.get("content", []):
+                            if item.get("type") == "text":
+                                raw_content = item.get("text", "")
+                                break
+                        if not raw_content:
+                            raise KeyError("Aucun bloc de texte trouvé")
+                    except (KeyError, IndexError):
+                        return {"error": f"Format de réponse Claude inattendu (Batch {i}): {json.dumps(resp_json)}"}
+                        
+                    clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
+                    clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
+                    try:
+                        data = json.loads(clean_content)
                         if isinstance(data, list):
-                            return {"items": data}
-                        return data
-                    return {"error": f"JSON Claude Invalide: {str(e)}"}
+                            all_items.extend(data)
+                        elif isinstance(data, dict) and "items" in data:
+                            all_items.extend(data["items"])
+                    except Exception as e:
+                        last_brace_idx = clean_content.rfind('}')
+                        if last_brace_idx != -1:
+                            try:
+                                data = json.loads(clean_content[:last_brace_idx+1] + ']}')
+                                if isinstance(data, list):
+                                    all_items.extend(data)
+                                elif isinstance(data, dict) and "items" in data:
+                                    all_items.extend(data["items"])
+                            except:
+                                return {"error": f"JSON Claude Invalide (Batch {i}): {str(e)}"}
+                        else:
+                            return {"error": f"JSON Claude Invalide (Batch {i}): {str(e)}"}
+                            
+                return {"items": all_items}
             except Exception as e:
                 return {"error": f"Exception Claude: {str(e)}"}
 

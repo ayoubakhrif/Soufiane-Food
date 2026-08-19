@@ -42,10 +42,12 @@
                             <field name="amount_tva"/>
                             <field name="amount_ttc"/>
                         </group>
-                        <group string="Paiement">
+                        <group string="Paiement et TVA">
                             <field name="payment_method"/>
                             <field name="invoice_date"/>
                             <field name="payment_date"/>
+                            <field name="mois_tva"/>
+                            <field name="annee_tva"/>
                         </group>
                     </group>
                 </sheet>

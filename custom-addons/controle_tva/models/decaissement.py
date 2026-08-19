@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
+import calendar
 
 class TvaDecaissement(models.Model):
     _name = 'tva.decaissement'
@@ -27,6 +29,18 @@ class TvaDecaissement(models.Model):
     
     invoice_date = fields.Date(string='Date facture')
     payment_date = fields.Date(string='Date paiement')
+    
+    mois_tva = fields.Selection([
+        ('01', 'Janvier'), ('02', 'Février'), ('03', 'Mars'), ('04', 'Avril'),
+        ('05', 'Mai'), ('06', 'Juin'), ('07', 'Juillet'), ('08', 'Août'),
+        ('09', 'Septembre'), ('10', 'Octobre'), ('11', 'Novembre'), ('12', 'Décembre')
+    ], string='Mois TVA')
+    
+    def _get_years(self):
+        current_year = fields.Date.today().year
+        return [(str(y), str(y)) for y in range(current_year - 5, current_year + 5)]
+
+    annee_tva = fields.Selection(selection='_get_years', string='Année TVA', default=lambda self: str(fields.Date.today().year))
     
     tva_code = fields.Char(string='Code TVA')
     prorata = fields.Float(string='Prorata (%)')
@@ -83,10 +97,37 @@ class TvaDecaissement(models.Model):
                     }
                 }
 
-    @api.constrains('invoice_date', 'payment_date')
+    @api.constrains('invoice_date', 'payment_date', 'fournisseur_id')
     def _check_payment_date(self):
         for record in self:
-            if record.invoice_date and record.payment_date:
+            if record.invoice_date and record.payment_date and record.fournisseur_id:
+                convention = record.fournisseur_id.convention
+                
+                if convention == '120':
+                    limit = 120
+                elif convention == '90':
+                    limit = 90
+                else:
+                    # 'none' ou non défini -> 60 jours
+                    limit = 60
+                    
                 diff = (record.payment_date - record.invoice_date).days
-                if diff >= 120:
-                    raise ValidationError("La différence entre la date de paiement et la date de facture ne peut pas être supérieure ou égale à 120 jours.")
+                if diff >= limit:
+                    raise ValidationError(f"La facture doit être payée avant {limit} jours (Convention applicable). L'écart actuel est de {diff} jours.")
+
+    @api.constrains('mois_tva', 'annee_tva', 'payment_date', 'invoice_date')
+    def _check_tva_dates(self):
+        for record in self:
+            if record.mois_tva and record.annee_tva:
+                tva_start = fields.Date.from_string(f"{record.annee_tva}-{record.mois_tva}-01")
+                last_day = calendar.monthrange(tva_start.year, tva_start.month)[1]
+                tva_end = tva_start.replace(day=last_day)
+
+                if record.payment_date:
+                    max_tva_date = record.payment_date + relativedelta(years=1)
+                    if tva_start > max_tva_date:
+                        raise ValidationError("Le Mois TVA ne peut pas être postérieur de plus d'un an à la date de paiement.")
+
+                if record.invoice_date:
+                    if record.invoice_date > tva_end:
+                        raise ValidationError("La Date Facture doit être dans le Mois TVA ou avant celui-ci.")

@@ -16,10 +16,13 @@ class DouaneDocument(models.Model):
         ('dum', 'DUM'),
         ('estimation', 'Estimation'),
         ('facture_companies', 'Factures des companies'),
+        ('sutra', 'SUTRA'),
+        ('chair', 'Chair'),
     ], string='Type de document', required=True)
     
     file = fields.Binary(string='Fichier', required=True, attachment=True)
     file_name = fields.Char(string='Nom du fichier')
+    date_facture = fields.Date(string='Date de facture')
     note = fields.Char(string='Note')
 
     @api.constrains('file')

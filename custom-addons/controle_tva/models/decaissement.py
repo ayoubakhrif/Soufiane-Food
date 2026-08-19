@@ -7,7 +7,7 @@ class TvaDecaissement(models.Model):
     _rec_name = 'invoice_number'
 
     invoice_number = fields.Char(string='N° facture', required=True)
-    designation = fields.Char(string='Désignation')
+
     amount_ht = fields.Float(string='Montant HT')
     tva_rate = fields.Float(string='Taux de TVA (%)')
     amount_tva = fields.Float(string='Montant de la TVA', compute='_compute_amounts', store=True)

@@ -27,7 +27,7 @@
                         <group string="Informations Générales">
                             <field name="invoice_number"/>
                             <field name="is_acompte"/>
-                            <field name="designation"/>
+
                             <field name="tva_code"/>
                         </group>
                         <group string="Fournisseur">

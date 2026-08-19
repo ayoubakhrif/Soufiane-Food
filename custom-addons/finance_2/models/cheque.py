@@ -310,13 +310,10 @@ Exemple:
     def action_remettre_finance(self):
         for rec in self:
             rec.state = 'brouillon'
-            rec.remis_a_id = False
             rec.date_remise = False
             
     def action_mettre_actif(self):
         for rec in self:
-            if not rec.remis_a_id:
-                raise UserError("Vous devez renseigner le champ 'Remis à' avant de passer le chèque à l'état Actif.")
             rec.state = 'actif'
             rec.date_remise = fields.Date.today()
             

@@ -65,7 +65,7 @@
                             <field name="douane_document_ids">
                                 <tree editable="bottom">
                                     <field name="type"/>
-                                    <field name="date_facture" invisible="type not in ('onssa', 'sutra', 'facture_companies', 'analyse', 'chair')"/>
+                                    <field name="date_facture" invisible="type not in ('onssa', 'sutra', 'facture_companies', 'analyse', 'chair')" required="type in ('onssa', 'sutra', 'facture_companies', 'analyse', 'chair')"/>
                                     <field name="file_name" column_invisible="1"/>
                                     <field name="file" filename="file_name"/>
                                     <field name="note"/>

@@ -4,4 +4,5 @@
     
     <menuitem id="menu_tva_decaissement" name="Décaissements" parent="menu_controle_tva_root" action="action_tva_decaissement" sequence="10"/>
     <menuitem id="menu_tva_fournisseur" name="Fournisseurs" parent="menu_controle_tva_root" action="action_tva_fournisseur" sequence="20"/>
+    <menuitem id="menu_tva_designation" name="Désignations" parent="menu_controle_tva_root" action="action_tva_designation" sequence="30" groups="controle_tva.group_tva_manager"/>
 </odoo>

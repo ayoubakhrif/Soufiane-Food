@@ -19,6 +19,14 @@ class TvaDecaissement(models.Model):
     fournisseur_if = fields.Char(related='fournisseur_id.if_number', string='IF de fournisseur', readonly=True)
     fournisseur_ice = fields.Char(related='fournisseur_id.ice_number', string='ICE de fournisseur', readonly=True)
     
+    type_tva = fields.Selection([
+        ('achats_non_immob', 'Achats non immobilisés'),
+        ('immob', 'Immobilisations'),
+        ('autres_achats_non_immob', 'Autres achats non immobilisés')
+    ], string='Type TVA')
+    
+    designation_id = fields.Many2one('tva.designation', string='Désignation', domain="[('type_designation', '=', type_tva)]")
+    
     payment_method = fields.Selection([
         ('virement', 'Virement'),
         ('prelevement', 'Prélevement'),
@@ -65,6 +73,13 @@ class TvaDecaissement(models.Model):
                 ]
                 if self.search_count(domain) > 0:
                     raise ValidationError("Une facture principale avec ce numéro et ce même fournisseur existe déjà.")
+
+    @api.onchange('designation_id')
+    def _onchange_designation_id(self):
+        if self.designation_id:
+            self.tva_rate = self.designation_id.tva_rate
+            if self.designation_id.tva_code:
+                self.tva_code = self.designation_id.tva_code
 
     @api.onchange('invoice_number', 'fournisseur_id', 'is_acompte')
     def _onchange_invoice_acompte(self):

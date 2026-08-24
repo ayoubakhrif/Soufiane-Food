@@ -13,6 +13,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'views/designation_views.xml',
         'views/fournisseur_views.xml',
         'views/decaissement_views.xml',
         'views/menus_views.xml',

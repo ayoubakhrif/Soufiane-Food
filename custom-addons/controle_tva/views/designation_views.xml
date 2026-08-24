@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tva_designation_tree" model="ir.ui.view">
+        <field name="name">tva.designation.tree</field>
+        <field name="model">tva.designation</field>
+        <field name="arch" type="xml">
+            <tree string="Désignations">
+                <field name="name"/>
+                <field name="type_designation"/>
+                <field name="tva_rate"/>
+                <field name="tva_code"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tva_designation_form" model="ir.ui.view">
+        <field name="name">tva.designation.form</field>
+        <field name="model">tva.designation</field>
+        <field name="arch" type="xml">
+            <form string="Désignation">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="type_designation"/>
+                        <field name="tva_rate"/>
+                        <field name="tva_code"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tva_designation" model="ir.actions.act_window">
+        <field name="name">Désignations</field>
+        <field name="res_model">tva.designation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

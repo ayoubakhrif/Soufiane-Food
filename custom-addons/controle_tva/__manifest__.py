@@ -16,6 +16,7 @@
         'views/designation_views.xml',
         'views/fournisseur_views.xml',
         'views/decaissement_views.xml',
+        'views/encaissement_views.xml',
         'views/menus_views.xml',
     ],
     'installable': True,

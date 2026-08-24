@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tva_encaissement_tree" model="ir.ui.view">
+        <field name="name">tva.encaissement.tree</field>
+        <field name="model">tva.encaissement</field>
+        <field name="arch" type="xml">
+            <tree string="Déclarations d'encaissement">
+                <field name="invoice_number"/>
+                <field name="is_acompte"/>
+                <field name="invoice_date"/>
+                <field name="payment_date"/>
+                <field name="amount_ht" sum="Total HT"/>
+                <field name="amount_tva" sum="Total TVA"/>
+                <field name="amount_ttc" sum="Total TTC"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tva_encaissement_form" model="ir.ui.view">
+        <field name="name">tva.encaissement.form</field>
+        <field name="model">tva.encaissement</field>
+        <field name="arch" type="xml">
+            <form string="Déclaration d'encaissement">
+                <sheet>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="invoice_number"/>
+                            <field name="is_acompte"/>
+                            <field name="tva_code"/>
+                        </group>
+                        <group string="Montants">
+                            <field name="amount_ht"/>
+                            <field name="tva_rate"/>
+                            <field name="amount_tva"/>
+                            <field name="amount_ttc"/>
+                        </group>
+                        <group string="Paiement et TVA">
+                            <field name="payment_method"/>
+                            <field name="invoice_date"/>
+                            <field name="payment_date"/>
+                            <field name="mois_tva"/>
+                            <field name="annee_tva"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tva_encaissement" model="ir.actions.act_window">
+        <field name="name">Déclarations d'encaissement</field>
+        <field name="res_model">tva.encaissement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

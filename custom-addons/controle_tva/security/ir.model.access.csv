@@ -1,7 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_tva_fournisseur_user,tva.fournisseur.user,model_tva_fournisseur,controle_tva.group_tva_user,1,1,1,0
 access_tva_decaissement_user,tva.decaissement.user,model_tva_decaissement,controle_tva.group_tva_user,1,1,1,0
+access_tva_encaissement_user,tva.encaissement.user,model_tva_encaissement,controle_tva.group_tva_user,1,1,1,0
 access_tva_designation_user,tva.designation.user,model_tva_designation,controle_tva.group_tva_user,1,0,0,0
 access_tva_fournisseur_manager,tva.fournisseur.manager,model_tva_fournisseur,controle_tva.group_tva_manager,1,1,1,1
 access_tva_decaissement_manager,tva.decaissement.manager,model_tva_decaissement,controle_tva.group_tva_manager,1,1,1,1
+access_tva_encaissement_manager,tva.encaissement.manager,model_tva_encaissement,controle_tva.group_tva_manager,1,1,1,1
 access_tva_designation_manager,tva.designation.manager,model_tva_designation,controle_tva.group_tva_manager,1,1,1,1

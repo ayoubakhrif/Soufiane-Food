@@ -115,6 +115,7 @@
                 <field name="article_id"/>
                 <field name="lot"/>
                 <field name="invoice_number"/>
+                <field name="container_ids" string="Conteneur" filter_domain="[('container_ids.name', 'ilike', self)]"/>
                 <filter string="En cours" name="status_in_progress" domain="[('status', '=', 'in_progress')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Fournisseur" name="group_supplier" domain="[]" context="{'group_by': 'supplier_id'}"/>

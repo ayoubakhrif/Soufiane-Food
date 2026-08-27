@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tva_declaration_tree" model="ir.ui.view">
+        <field name="name">tva.declaration.tree</field>
+        <field name="model">tva.declaration</field>
+        <field name="arch" type="xml">
+            <tree string="Déclarations de TVA">
+                <field name="name"/>
+                <field name="mois_tva"/>
+                <field name="annee_tva"/>
+                <field name="tva_encaissee" sum="Total TVA Encaissée"/>
+                <field name="tva_decaissee" sum="Total TVA Décaissée"/>
+                <field name="credit_tva_passe" sum="Total Crédit Passé"/>
+                <field name="tva_a_payer" sum="Total TVA à Payer"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tva_declaration_form" model="ir.ui.view">
+        <field name="name">tva.declaration.form</field>
+        <field name="model">tva.declaration</field>
+        <field name="arch" type="xml">
+            <form string="Déclaration de TVA">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Période">
+                            <field name="mois_tva"/>
+                            <field name="annee_tva"/>
+                        </group>
+                        <group string="Calcul de la TVA">
+                            <field name="tva_encaissee" readonly="1"/>
+                            <field name="tva_decaissee" readonly="1"/>
+                            <field name="credit_tva_passe"/>
+                            <field name="tva_a_payer" readonly="1" style="font-weight: bold; font-size: 1.2em;"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tva_declaration" model="ir.actions.act_window">
+        <field name="name">Déclarations mensuelles</field>
+        <field name="res_model">tva.declaration</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

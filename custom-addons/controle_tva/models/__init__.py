@@ -2,3 +2,4 @@ from . import fournisseur
 from . import designation
 from . import decaissement
 from . import encaissement
+from . import declaration

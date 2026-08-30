@@ -237,7 +237,7 @@ Exemple de réponse attendue:
                     img_bytes = pix.tobytes("jpeg")
                     base64_images.append(base64.b64encode(img_bytes).decode('utf-8'))
                 
-                chunk_size = 10
+                chunk_size = 3
                 all_items = []
                 for i in range(0, len(base64_images), chunk_size):
                     chunk = base64_images[i:i+chunk_size]

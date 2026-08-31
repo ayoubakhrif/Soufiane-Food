@@ -100,7 +100,7 @@
                                 <t t-foreach="doc.line_ids" t-as="line">
                                     <tr>
                                         <td><span t-field="line.name"/></td>
-                                        <td><span t-field="line.qte"/></td>
+                                        <td><span t-esc="int(line.qte)"/></td>
                                         <td><span t-field="line.pu"/></td>
                                         <td><span t-field="line.montant_ttc" t-options='{"widget": "float", "precision": 2}'/></td>
                                         <td></td>

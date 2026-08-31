@@ -130,7 +130,7 @@ class WhatsAppBonController(http.Controller):
 
                 bon_lines_real.append((0, 0, {
                     'article_id': article.id,
-                    'qte': art['qte'],
+                    'qte': int(round(art['qte'])),
                     'pu': pu,
                 }))
                 
@@ -144,7 +144,7 @@ class WhatsAppBonController(http.Controller):
                 ratio = poids_fictif / real_total_weight
                 
                 for art in article_lines:
-                    new_qte = art['qte'] * ratio
+                    new_qte = int(round(art['qte'] * ratio))
                     bon_lines_fictif.append((0, 0, {
                         'article_id': art['article_id'],
                         'qte': new_qte,

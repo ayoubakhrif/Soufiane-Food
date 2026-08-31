@@ -1,7 +1,7 @@
-{
+ï»¿{
     'name': 'Generate Bons',
     'version': '1.0',
-    'summary': 'Générer des factures proforma (bons) personnalisées',
+    'summary': 'Generer des factures proforma (bons) personnalisees',
     'author': 'Antigravity',
     'depends': ['base', 'company_data', 'custom_employee'],
     'data': [

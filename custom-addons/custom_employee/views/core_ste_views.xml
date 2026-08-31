@@ -58,6 +58,7 @@
                             <field name="ice"/>
                             <field name="rc"/>
                             <field name="if_field"/>
+                            <field name="cachet" widget="image" class="oe_avatar"/>
                         </group>
                     </group>
                 </sheet>

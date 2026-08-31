@@ -14,5 +14,6 @@ class CoreSte(models.Model):
     if_field = fields.Char(string='I.F', tracking=True)
     address = fields.Text(string='Address')
     is_zone_franche = fields.Boolean(string='Zone Franche', default=False, tracking=True)
+    cachet = fields.Image(string='Cachet', max_width=1024, max_height=1024)
     
     # image_1920 is inherited from image.mixin

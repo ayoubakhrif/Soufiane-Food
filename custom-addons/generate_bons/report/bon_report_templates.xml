@@ -30,6 +30,25 @@
                                 border: none;
                                 padding: 5px;
                             }
+                            .net-a-payer-header {
+                                background-color: #d9d9d9;
+                                padding: 5px 10px;
+                                font-weight: bold;
+                                text-align: right;
+                            }
+                            .net-a-payer-value {
+                                background-color: #d9d9d9;
+                                padding: 5px 10px;
+                                font-weight: bold;
+                                text-align: right;
+                                margin-top: 5px;
+                            }
+                            .footer-address {
+                                border-top: 1px solid black;
+                                text-align: center;
+                                font-size: 11px;
+                                padding-top: 5px;
+                            }
                         </style>
 
                         <div class="row">
@@ -59,7 +78,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><span t-field="doc.date" t-options='{"widget": "date", "format": "d/M/yyyy"}'/></td>
+                                            <td><span t-field="doc.date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/></td>
                                             <td><span t-field="doc.name"/></td>
                                             <td><span t-field="doc.reference"/></td>
                                         </tr>
@@ -91,19 +110,25 @@
                             </tbody>
                         </table>
                         
-                        <div class="row mt-4">
-                            <div class="col-8"></div>
+                        <div class="row" style="margin-top: 100px;">
+                            <div class="col-6 text-center">
+                                <img t-if="doc.company_id.cachet" t-att-src="image_data_uri(doc.company_id.cachet)" style="max-height: 120px; transform: rotate(-3deg);" alt="Cachet"/>
+                            </div>
+                            <div class="col-2"></div>
                             <div class="col-4">
-                                <table style="width:100%;">
-                                    <tr>
-                                        <td style="padding-top: 30px; text-align: right; padding-right: 20px;">
-                                            <span t-field="doc.total_ttc" t-options='{"widget": "float", "precision": 2}'/>
-                                        </td>
-                                    </tr>
-                                </table>
+                                <div class="net-a-payer-header">NET A PAYER</div>
+                                <div class="net-a-payer-value">
+                                    <span t-field="doc.total_ttc" t-options='{"widget": "float", "precision": 2}'/>
+                                </div>
                             </div>
                         </div>
-                        
+                    </div>
+                    
+                    <!-- Footer at the bottom of the page -->
+                    <div class="footer o_standard_footer">
+                        <div class="footer-address">
+                            <span t-field="doc.company_id.name"/> <span t-if="doc.company_id.address" t-field="doc.company_id.address"/>
+                        </div>
                     </div>
                 </t>
             </t>

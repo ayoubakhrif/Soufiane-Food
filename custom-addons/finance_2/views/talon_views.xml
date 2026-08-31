@@ -84,4 +84,5 @@
         <field name="res_model">finance2.talon</field>
         <field name="view_mode">tree,form</field>
     </record>
+    <menuitem id="menu_finance2_talons" name="Talons" parent="menu_finance2_root" action="action_finance2_talon" sequence="15"/>
 </odoo>

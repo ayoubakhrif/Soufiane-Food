@@ -40,26 +40,36 @@ class WhatsAppBonController(http.Controller):
                     date_str = line.split(':', 1)[1].strip()
                 elif line_upper.startswith('ARTICLES:'):
                     parsing_articles = True
-                elif parsing_articles and line.startswith('-'):
+                elif parsing_articles and line.startswith(('-', '*', '•', '·')):
                     import re
                     line_content = line[1:].strip()
-                    # Recherche d'un nombre (quantité) suivi d'un espace, puis du nom de l'article
-                    match = re.match(r'^([\d\.,]+)\s+(.+)$', line_content)
-                    if match:
-                        qte_str = match.group(1).replace(',', '.')
-                        qte = float(qte_str)
-                        art_name = match.group(2).strip()
-                        
-                        article_lines.append({
-                            'name': art_name,
-                            'qte': qte,
-                            'pu': None
-                        })
+                    
+                    if '|' in line_content:
+                        parts = [p.strip() for p in line_content.split('|')]
+                        if len(parts) >= 2:
+                            art_name = parts[0]
+                            qte = float(parts[1].replace(',', '.'))
+                            article_lines.append({
+                                'name': art_name,
+                                'qte': qte,
+                                'pu': None
+                            })
+                    else:
+                        match = re.match(r'^([\d\.,]+)\s+(.+)$', line_content)
+                        if match:
+                            qte_str = match.group(1).replace(',', '.')
+                            qte = float(qte_str)
+                            art_name = match.group(2).strip()
+                            article_lines.append({
+                                'name': art_name,
+                                'qte': qte,
+                                'pu': None
+                            })
 
             if not company_code:
                 return {'status': 'error', 'message': "❌ Erreur: Code société manquant (ex: SOCIETE: SN)."}
             if not article_lines:
-                return {'status': 'error', 'message': "❌ Erreur: Aucun article trouvé. Utilisez le format: - Qté NomArticle"}
+                return {'status': 'error', 'message': "❌ Erreur: Aucun article trouvé. Utilisez le format: '- 100 Article' ou '- Article | 100'"}
 
             # Find company
             company = request.env['core.ste'].sudo().search([('code', '=ilike', company_code)], limit=1)
@@ -73,7 +83,6 @@ class WhatsAppBonController(http.Controller):
             if date_str:
                 try:
                     from datetime import datetime
-                    # Handle multiple formats
                     for fmt in ('%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d'):
                         try:
                             date_val = datetime.strptime(date_str, fmt).date()
@@ -86,7 +95,6 @@ class WhatsAppBonController(http.Controller):
             # Prepare order lines
             bon_lines = []
             for art in article_lines:
-                # Find article by name or by alias
                 domain = [
                     '|', 
                     ('name', '=ilike', art['name']), 

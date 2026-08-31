@@ -28,11 +28,11 @@
                         .driver-title { font-size: 18px; font-weight: bold; text-transform: uppercase; }
                         .driver-stats { font-size: 14px; font-weight: bold; }
                         
-                        .day-header { background-color: #E2ECF7; color: #1A4D80; padding: 5px 10px; font-size: 14px; font-weight: bold; margin-top: 15px; border-bottom: 1px solid #B0CBE3; }
+                        .day-header { background: none; color: #1A4D80; padding: 8px 5px 4px 5px; font-size: 14px; font-weight: bold; margin-top: 15px; border-bottom: 2px solid #E2ECF7; margin-bottom: 5px; }
                         
                         /* Base Table Styles */
-                        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                        .data-table th { padding: 6px; text-align: center; font-size: 11px; font-weight: bold; color: white; background-color: #1A4D80; text-transform: uppercase; border: 1px solid #1A4D80; }
+                        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                        .data-table th { padding: 6px; text-align: center; font-size: 11px; font-weight: bold; color: #1A4D80; background-color: #E2ECF7; text-transform: uppercase; border: 1px solid #B0CBE3; }
                         .data-table td { padding: 5px; text-align: center; font-size: 11px; color: #333; border: 1px solid #E2ECF7; }
                         .data-table tr:nth-child(even) { background-color: #F9FAFB; }
                         .amount-cell { font-weight: bold; color: #1A4D80; text-align: right; white-space: nowrap; }

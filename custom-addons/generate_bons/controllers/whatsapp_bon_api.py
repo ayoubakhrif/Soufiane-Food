@@ -1,5 +1,6 @@
 import base64
 import logging
+import re
 from odoo import http, SUPERUSER_ID, fields
 from odoo.http import request
 
@@ -13,7 +14,6 @@ class WhatsAppBonController(http.Controller):
         request.session.db = db_name
         request.update_env(user=SUPERUSER_ID)
 
-        # 1. Vérification du groupe WhatsApp
         group_id = kwargs.get('group_id', '')
         TARGET_GROUP_ID = '120363430689222541@g.us'
         
@@ -28,6 +28,7 @@ class WhatsAppBonController(http.Controller):
             lines = [line.strip() for line in message_text.split('\n') if line.strip()]
             company_code = None
             date_str = None
+            poids_fictif = None
             article_lines = []
             
             parsing_articles = False
@@ -38,33 +39,44 @@ class WhatsAppBonController(http.Controller):
                     company_code = line.split(':', 1)[1].strip()
                 elif line_upper.startswith('DATE:'):
                     date_str = line.split(':', 1)[1].strip()
+                elif line_upper.startswith('POIDS FICTIF:'):
+                    try:
+                        poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace(',', '.').strip()
+                        poids_fictif = float(poids_fictif_str)
+                    except ValueError:
+                        pass
                 elif line_upper.startswith('ARTICLES:'):
                     parsing_articles = True
                 elif parsing_articles and line.startswith(('-', '*', '•', '·')):
-                    import re
                     line_content = line[1:].strip()
+                    art_name = ""
+                    qte = 0.0
                     
                     if '|' in line_content:
                         parts = [p.strip() for p in line_content.split('|')]
                         if len(parts) >= 2:
                             art_name = parts[0]
                             qte = float(parts[1].replace(',', '.'))
-                            article_lines.append({
-                                'name': art_name,
-                                'qte': qte,
-                                'pu': None
-                            })
                     else:
                         match = re.match(r'^([\d\.,]+)\s+(.+)$', line_content)
                         if match:
-                            qte_str = match.group(1).replace(',', '.')
-                            qte = float(qte_str)
+                            qte = float(match.group(1).replace(',', '.'))
                             art_name = match.group(2).strip()
-                            article_lines.append({
-                                'name': art_name,
-                                'qte': qte,
-                                'pu': None
-                            })
+                    
+                    if art_name:
+                        # Extract weight from string like "Amandes MK BUTTE PADRE 25kg"
+                        weight = None
+                        w_match = re.search(r'(?i)(.*?)\s+(\d+(?:\.\d+)?)\s*kg$', art_name)
+                        if w_match:
+                            art_name = w_match.group(1).strip()
+                            weight = float(w_match.group(2))
+                            
+                        article_lines.append({
+                            'name': art_name,
+                            'qte': qte,
+                            'weight': weight,
+                            'pu': None
+                        })
 
             if not company_code:
                 return {'status': 'error', 'message': "❌ Erreur: Code société manquant (ex: SOCIETE: SN)."}
@@ -78,7 +90,6 @@ class WhatsAppBonController(http.Controller):
             if not company:
                 return {'status': 'error', 'message': f"❌ Erreur: Société '{company_code}' introuvable."}
 
-            # Parse date if provided, otherwise today
             date_val = fields.Date.context_today(company)
             if date_str:
                 try:
@@ -92,8 +103,11 @@ class WhatsAppBonController(http.Controller):
                 except Exception:
                     pass
 
-            # Prepare order lines
-            bon_lines = []
+            bon_lines_real = []
+            bon_lines_fictif = []
+            
+            real_total_weight = 0.0
+
             for art in article_lines:
                 domain = [
                     '|', 
@@ -103,33 +117,79 @@ class WhatsAppBonController(http.Controller):
                 article = request.env['bon.article'].sudo().search(domain, limit=1)
                 
                 if not article:
-                    return {'status': 'error', 'message': f"❌ Erreur: Article '{art['name']}' introuvable dans les alias ni dans la base des articles Bons."}
+                    return {'status': 'error', 'message': f"❌ Erreur: Article '{art['name']}' introuvable."}
                 
-                pu = art['pu'] if art['pu'] is not None else article.pu
+                pu = article.pu
+                
+                # Determine weight
+                line_weight = art['weight']
+                if line_weight is None:
+                    line_weight = article.get_default_weight()
+                
+                real_total_weight += (art['qte'] * line_weight)
 
-                bon_lines.append((0, 0, {
+                bon_lines_real.append((0, 0, {
                     'article_id': article.id,
                     'qte': art['qte'],
                     'pu': pu,
                 }))
+                
+                # Keep original data for fictif calculation later
+                art['article_id'] = article.id
+                art['pu'] = pu
 
-            # Create Bon
-            bon = request.env['bon.generation'].sudo().create({
+            # Ratio for fictif
+            ratio = 1.0
+            if poids_fictif and real_total_weight > 0:
+                ratio = poids_fictif / real_total_weight
+                
+                for art in article_lines:
+                    new_qte = art['qte'] * ratio
+                    bon_lines_fictif.append((0, 0, {
+                        'article_id': art['article_id'],
+                        'qte': new_qte,
+                        'pu': art['pu'],
+                    }))
+
+            # Create Bon Réel
+            bon_reel = request.env['bon.generation'].sudo().create({
                 'company_id': company.id,
                 'date': date_val,
-                'line_ids': bon_lines
+                'line_ids': bon_lines_real
             })
 
-            # Generate PDF
             report_action = request.env['ir.actions.report'].sudo()
-            pdf_content, _ = report_action._render_qweb_pdf('generate_bons.action_report_bon_generation', res_ids=bon.ids)
-            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            pdf_content_reel, _ = report_action._render_qweb_pdf('generate_bons.action_report_bon_generation', res_ids=bon_reel.ids)
+            b64_reel = base64.b64encode(pdf_content_reel).decode('utf-8')
+            
+            response_files = [{
+                'pdf_base64': b64_reel,
+                'file_name': f"Facture_Proforma_{bon_reel.name}.pdf",
+                'mimetype': 'application/pdf'
+            }]
+            
+            msg = f"✅ Bon Proforma *{bon_reel.name}* (Réel) généré avec succès !"
+            
+            if poids_fictif and bon_lines_fictif:
+                bon_fictif = request.env['bon.generation'].sudo().create({
+                    'company_id': company.id,
+                    'date': date_val,
+                    'line_ids': bon_lines_fictif
+                })
+                pdf_content_fictif, _ = report_action._render_qweb_pdf('generate_bons.action_report_bon_generation', res_ids=bon_fictif.ids)
+                b64_fictif = base64.b64encode(pdf_content_fictif).decode('utf-8')
+                
+                response_files.append({
+                    'pdf_base64': b64_fictif,
+                    'file_name': f"Facture_Proforma_{bon_fictif.name}_Fictif.pdf",
+                    'mimetype': 'application/pdf'
+                })
+                msg += f"\n✅ Bon Proforma *{bon_fictif.name}* (Fictif - {poids_fictif}kg) généré !"
 
             return {
                 'status': 'success',
-                'message': f"✅ Bon Proforma *{bon.name}* généré avec succès pour {company.name} !",
-                'pdf_base64': pdf_base64,
-                'file_name': f"Facture_Proforma_{bon.name}.pdf"
+                'message': msg,
+                'files': response_files
             }
 
         except Exception as e:

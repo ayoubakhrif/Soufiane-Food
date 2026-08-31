@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_bon_article,bon.article,model_bon_article,group_generate_bons_user,1,1,1,1
+access_bon_article_weight,bon.article.weight,model_bon_article_weight,group_generate_bons_user,1,1,1,1
 access_bon_generation,bon.generation,model_bon_generation,group_generate_bons_user,1,1,1,1
 access_bon_generation_line,bon.generation.line,model_bon_generation_line,group_generate_bons_user,1,1,1,1

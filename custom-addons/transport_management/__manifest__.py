@@ -22,6 +22,7 @@
         'views/gazoil_refill_view.xml',
         'views/gazoil_sale_view.xml',
         'views/gazoil_stock_view.xml',
+        'report/transport_trip_recap_report.xml',
         'views/transport_destination_views.xml',
         'views/transport_trip_advanced_views.xml',
     ],

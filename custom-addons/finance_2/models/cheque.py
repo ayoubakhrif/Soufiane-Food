@@ -153,7 +153,7 @@ Exemple:
                 "Content-Type": "application/pdf"
             }
             try:
-                upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes_decoded, timeout=120)
+                upload_resp = requests.post(upload_url, headers=upload_headers, data=pdf_bytes_decoded, timeout=240)
                 if upload_resp.status_code != 200:
                     rec.message_post(body=f"<div style='color:red;'>Erreur Gemini Upload: {upload_resp.text[:500]}</div>")
                     continue
@@ -192,7 +192,7 @@ Exemple:
             }
 
             try:
-                resp = requests.post(gemini_url, headers=headers, json=payload, timeout=120)
+                resp = requests.post(gemini_url, headers=headers, json=payload, timeout=240)
                 if resp.status_code != 200:
                     rec.message_post(body=f"<div style='color:red;'>Erreur API Gemini ({resp.status_code}): {resp.text[:500]}</div>")
                     continue

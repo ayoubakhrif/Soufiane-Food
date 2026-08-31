@@ -5,6 +5,7 @@
     'author': 'Antigravity',
     'depends': ['base', 'company_data', 'custom_employee'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/bon_article_views.xml',
         'views/bon_generation_views.xml',

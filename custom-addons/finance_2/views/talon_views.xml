@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_finance2_talon_form" model="ir.ui.view">
+        <field name="name">finance2.talon.form</field>
+        <field name="model">finance2.talon</field>
+        <field name="arch" type="xml">
+            <form string="Talon">
+                <header>
+                    <field name="etat" widget="statusbar" statusbar_visible="coffre,actif,cloture" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Référence du Talon..."/>
+                        </h1>
+                    </div>
+                    
+                    <div class="alert alert-danger text-center" role="alert" invisible="not missing_chqs_text">
+                        <strong>Attention !</strong> Les chèques suivants sont manquants / sautés : <field name="missing_chqs_text" readonly="1"/>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="ste_id"/>
+                            <field name="date_reception"/>
+                        </group>
+                        <group>
+                            <field name="first_cheque_number"/>
+                            <field name="num_chq"/>
+                            <field name="last_cheque_number"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Indicateurs">
+                        <group>
+                            <field name="used_chqs"/>
+                            <field name="unused_chqs"/>
+                        </group>
+                        <group>
+                            <field name="last_used_chq"/>
+                            <field name="usage_percentage" widget="progressbar"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Chèques liés">
+                            <field name="cheque_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date_emission"/>
+                                    <field name="amount_total" sum="Total"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_finance2_talon_tree" model="ir.ui.view">
+        <field name="name">finance2.talon.tree</field>
+        <field name="model">finance2.talon</field>
+        <field name="arch" type="xml">
+            <tree string="Talons">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="first_cheque_number"/>
+                <field name="last_cheque_number"/>
+                <field name="usage_percentage" widget="progressbar"/>
+                <field name="etat" widget="badge" decoration-info="etat == 'coffre'" decoration-success="etat == 'actif'" decoration-muted="etat == 'cloture'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_finance2_talon" model="ir.actions.act_window">
+        <field name="name">Talons</field>
+        <field name="res_model">finance2.talon</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

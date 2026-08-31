@@ -33,6 +33,7 @@
                         <group>
                             <field name="ste_id"/>
                             <field name="benif_id"/>
+                            <field name="talon_id"/>
                             <field name="personne_id"/>
                             <field name="amount_total"/>
                             <field name="total_magasinage"/>
@@ -99,6 +100,7 @@
                 <field name="name"/>
                 <field name="ste_id"/>
                 <field name="benif_id"/>
+                            <field name="talon_id"/>
                 <field name="amount_total"/>
                 <field name="total_repartitions" sum="Total"/>
                 <field name="journal"/>
@@ -119,6 +121,7 @@
                 <field name="name" readonly="1"/>
                 <field name="ste_id" readonly="1"/>
                 <field name="benif_id" readonly="1"/>
+                <field name="talon_id" readonly="1"/>
                 <field name="amount_total" readonly="1" sum="Total Chèques"/>
                 <field name="date_encaissement" readonly="state == 'encaisse'"/>
                 <field name="montant_encaisse" readonly="state == 'encaisse'" sum="Total Encaissé"/>
@@ -149,6 +152,7 @@
     <menuitem id="menu_finance2_root" name="Finance V2" sequence="10" groups="finance_2.group_finance2_user"/>
     
     <menuitem id="menu_finance2_cheques" name="Chèques" parent="menu_finance2_root" action="action_finance2_cheque" sequence="10"/>
+        <menuitem id="menu_finance2_talons" name="Talons" parent="menu_finance2_root" action="action_finance2_talon" sequence="15"/>
     <menuitem id="menu_finance2_encaissement" name="Encaissement" parent="menu_finance2_root" action="action_finance2_encaissement" sequence="20"/>
     
     <menuitem id="menu_finance2_config" name="Configuration" parent="menu_finance2_root" sequence="90" groups="finance_2.group_finance2_manager"/>

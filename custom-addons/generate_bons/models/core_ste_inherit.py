@@ -1,4 +1,4 @@
-﻿from odoo import models, api
+from odoo import models, api
 
 class CoreSte(models.Model):
     _inherit = 'core.ste'

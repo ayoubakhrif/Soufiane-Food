@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Generate Bons',
     'version': '1.0',
     'summary': 'Generer des factures proforma (bons) personnalisees',

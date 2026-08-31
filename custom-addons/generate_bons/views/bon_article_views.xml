@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_bon_article_tree" model="ir.ui.view">
         <field name="name">bon.article.tree</field>

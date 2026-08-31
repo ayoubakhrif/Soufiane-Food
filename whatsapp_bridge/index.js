@@ -36,6 +36,8 @@ const SURESTARIE_REPORT_GROUP_ID = "120363410175900080@g.us";
 const TRESORERIE_CHQ_GROUP_ID = "120363427689661439@g.us";
 const TRESORERIE_REPORT_GROUP_ID = "120363429851164875@g.us";
 const NUMBER_TO_WORDS_GROUP_ID = "120363409052445823@g.us";
+const GENERATE_BONS_GROUP_ID = "120363430689222541@g.us";
+const GENERATE_BONS_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/generate_bon?db=soufianefoods";
 
 const ARTICLE_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/stock?db=soufianefoods";
 const CLIENT_ODOO_URL = "https://gestia-soufianefoods.cloud/api/whatsapp/client?db=soufianefoods";
@@ -205,6 +207,8 @@ async function connectToWhatsApp() {
             } else if (from === TRESORERIE_REPORT_GROUP_ID) {
                 targetOdooUrl = TRESORERIE_REPORT_ODOO_URL;
                 isClientRequest = false;
+            } else if (from === GENERATE_BONS_GROUP_ID) {
+                apiUrl = GENERATE_BONS_ODOO_URL;
             } else if (from === NUMBER_TO_WORDS_GROUP_ID) {
                 targetOdooUrl = null;
                 isClientRequest = false;

@@ -9,7 +9,6 @@ class BonGeneration(models.Model):
     company_id = fields.Many2one('core.ste', string='Société', required=True)
     name = fields.Char(string='Numéro', required=True, copy=False, readonly=True, default='/')
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
-    reference = fields.Char(string='Référence')
     
     line_ids = fields.One2many('bon.generation.line', 'bon_id', string='Lignes')
     

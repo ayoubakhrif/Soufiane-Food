@@ -8,7 +8,6 @@
                 <field name="name"/>
                 <field name="date"/>
                 <field name="company_id" context="{'display_code_only': True}"/>
-                <field name="reference"/>
                 <field name="total_ttc"/>
             </tree>
         </field>
@@ -29,9 +28,6 @@
                         <group>
                             <field name="company_id" context="{'display_code_only': True}" options="{'no_create': True}"/>
                             <field name="date"/>
-                        </group>
-                        <group>
-                            <field name="reference"/>
                         </group>
                     </group>
                     <notebook>

@@ -13,6 +13,7 @@
                             .table-custom th, .table-custom td {
                                 border: 1px solid black;
                                 padding: 5px;
+                                text-align: center;
                             }
                             .table-lines {
                                 width: 100%;
@@ -52,10 +53,10 @@
                         </style>
 
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-5">
                                 <img t-if="doc.company_id.image_1920" t-att-src="image_data_uri(doc.company_id.image_1920)" style="max-height: 120px;" alt="Logo"/>
                             </div>
-                            <div class="col-6 text-right" style="padding-left: 50px;">
+                            <div class="col-7 text-right">
                                 <h3 style="font-weight: bold; margin-bottom: 20px; text-align: center;">FACTURE PROFORMA</h3>
                                 <div style="border: 1px solid black; padding: 10px; text-align: left; height: 100px;">
                                     <strong>TIME FRUIT</strong>
@@ -71,16 +72,14 @@
                                 <table class="table-custom">
                                     <thead>
                                         <tr>
-                                            <th>Date</th>
-                                            <th>Numéro</th>
-                                            <th>Référence</th>
+                                            <th style="width: 50%;">Date</th>
+                                            <th style="width: 50%;">Numéro</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td><span t-field="doc.date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/></td>
                                             <td><span t-field="doc.name"/></td>
-                                            <td><span t-field="doc.reference"/></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -124,7 +123,6 @@
                         </div>
                     </div>
                     
-                    <!-- Footer at the bottom of the page -->
                     <div class="footer o_standard_footer">
                         <div class="footer-address">
                             <span t-field="doc.company_id.name"/> <span t-if="doc.company_id.address" t-field="doc.company_id.address"/>

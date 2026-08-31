@@ -175,6 +175,7 @@ class WhatsAppBonController(http.Controller):
                 bon_fictif = request.env['bon.generation'].sudo().create({
                     'company_id': company.id,
                     'date': date_val,
+                    'name': bon_reel.name,
                     'line_ids': bon_lines_fictif
                 })
                 pdf_content_fictif, _ = report_action._render_qweb_pdf('generate_bons.action_report_bon_generation', res_ids=bon_fictif.ids)

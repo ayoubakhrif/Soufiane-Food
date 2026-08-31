@@ -165,7 +165,8 @@ class WhatsAppBonController(http.Controller):
             response_files = [{
                 'pdf_base64': b64_reel,
                 'file_name': f"Facture_Proforma_{bon_reel.name}.pdf",
-                'mimetype': 'application/pdf'
+                'mimetype': 'application/pdf',
+                'caption': f"✅ Bon Proforma *{bon_reel.name}* généré avec succès !"
             }]
             
             msg = f"✅ Bon Proforma *{bon_reel.name}* (Réel) généré avec succès !"
@@ -182,7 +183,8 @@ class WhatsAppBonController(http.Controller):
                 response_files.append({
                     'pdf_base64': b64_fictif,
                     'file_name': f"Facture_Proforma_{bon_fictif.name}_Fictif.pdf",
-                    'mimetype': 'application/pdf'
+                    'mimetype': 'application/pdf',
+                    'caption': f"✅ Bon Proforma *{bon_fictif.name}* (Fictif - {poids_fictif}kg) généré !"
                 })
                 msg += f"\n✅ Bon Proforma *{bon_fictif.name}* (Fictif - {poids_fictif}kg) généré !"
 

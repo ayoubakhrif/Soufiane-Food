@@ -467,7 +467,7 @@ async function connectToWhatsApp() {
                                 }
                                 
                                 if (mimeType === 'application/pdf' || file.file_name.endsWith('.pdf')) {
-                                    pdfFiles.push({ base64: base64Data, name: file.file_name });
+                                    pdfFiles.push({ base64: base64Data, name: file.file_name, caption: file.caption });
                                 } else {
                                     nonPdfFiles.push({ base64: base64Data, mimeType, name: file.file_name, caption: file.caption });
                                 }

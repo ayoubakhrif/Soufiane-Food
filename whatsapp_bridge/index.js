@@ -208,7 +208,8 @@ async function connectToWhatsApp() {
                 targetOdooUrl = TRESORERIE_REPORT_ODOO_URL;
                 isClientRequest = false;
             } else if (from === GENERATE_BONS_GROUP_ID) {
-                apiUrl = GENERATE_BONS_ODOO_URL;
+                targetOdooUrl = GENERATE_BONS_ODOO_URL;
+                isClientRequest = false;
             } else if (from === NUMBER_TO_WORDS_GROUP_ID) {
                 targetOdooUrl = null;
                 isClientRequest = false;

@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_bon_generation_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <style>
+                            .table-custom {
+                                width: 100%;
+                                border-collapse: collapse;
+                            }
+                            .table-custom th, .table-custom td {
+                                border: 1px solid black;
+                                padding: 5px;
+                            }
+                            .table-lines {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                            }
+                            .table-lines th {
+                                background-color: #d9d9d9;
+                                border: none;
+                                padding: 5px;
+                                text-align: left;
+                                font-weight: bold;
+                            }
+                            .table-lines td {
+                                border: none;
+                                padding: 5px;
+                            }
+                        </style>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <img t-if="doc.company_id.image_1920" t-att-src="image_data_uri(doc.company_id.image_1920)" style="max-height: 120px;" alt="Logo"/>
+                            </div>
+                            <div class="col-6 text-right" style="padding-left: 50px;">
+                                <h3 style="font-weight: bold; margin-bottom: 20px; text-align: center;">FACTURE PROFORMA</h3>
+                                <div style="border: 1px solid black; padding: 10px; text-align: left; height: 100px;">
+                                    <strong>TIME FRUIT</strong>
+                                </div>
+                                <div style="border: 1px solid black; border-top: none; padding: 5px; text-align: left;">
+                                    <strong>ICE:</strong> 0025484880
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-5">
+                            <div class="col-8">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Numéro</th>
+                                            <th>Référence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span t-field="doc.date" t-options='{"widget": "date", "format": "d/M/yyyy"}'/></td>
+                                            <td><span t-field="doc.name"/></td>
+                                            <td><span t-field="doc.reference"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <table class="table-lines mt-4">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Désignation</th>
+                                    <th>Qte</th>
+                                    <th>Px U, T</th>
+                                    <th>Montant TTC</th>
+                                    <th>*</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr>
+                                        <td><span t-field="line.name"/></td>
+                                        <td><span t-field="line.qte"/></td>
+                                        <td><span t-field="line.pu"/></td>
+                                        <td><span t-field="line.montant_ttc" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        
+                        <div class="row mt-4">
+                            <div class="col-8"></div>
+                            <div class="col-4">
+                                <table style="width:100%;">
+                                    <tr>
+                                        <td style="padding-top: 30px; text-align: right; padding-right: 20px;">
+                                            <span t-field="doc.total_ttc" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

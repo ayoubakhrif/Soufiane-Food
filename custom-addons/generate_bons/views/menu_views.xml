@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_bon_generation_root" name="Générateur de Bons" sequence="10"/>
+
+    <menuitem id="menu_bon_generation_bons" name="Bons Proforma" parent="menu_bon_generation_root" action="action_bon_generation" sequence="10"/>
+    <menuitem id="menu_bon_generation_config" name="Configuration" parent="menu_bon_generation_root" sequence="20"/>
+    <menuitem id="menu_bon_article" name="Articles (Bons)" parent="menu_bon_generation_config" action="action_bon_article" sequence="10"/>
+</odoo>

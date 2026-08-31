@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bon_article_tree" model="ir.ui.view">
+        <field name="name">bon.article.tree</field>
+        <field name="model">bon.article</field>
+        <field name="arch" type="xml">
+            <tree string="Articles (Bons)">
+                <field name="company_article_id"/>
+                <field name="name"/>
+                <field name="pu"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bon_article_form" model="ir.ui.view">
+        <field name="name">bon.article.form</field>
+        <field name="model">bon.article</field>
+        <field name="arch" type="xml">
+            <form string="Article (Bons)">
+                <sheet>
+                    <group>
+                        <field name="company_article_id"/>
+                        <field name="name"/>
+                        <field name="pu"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bon_article" model="ir.actions.act_window">
+        <field name="name">Articles (Bons)</field>
+        <field name="res_model">bon.article</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

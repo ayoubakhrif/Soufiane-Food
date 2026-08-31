@@ -189,7 +189,8 @@ class WhatsAppBonController(http.Controller):
             return {
                 'status': 'success',
                 'message': msg,
-                'files': response_files
+                'files': response_files,
+                'merge_pdfs': False
             }
 
         except Exception as e:

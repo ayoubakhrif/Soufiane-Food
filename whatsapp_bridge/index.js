@@ -475,13 +475,15 @@ async function connectToWhatsApp() {
 
                             // 1. Merge and send PDFs if any
                             if (pdfFiles.length > 0) {
-                                if (pdfFiles.length === 1) {
-                                    await sock.sendMessage(from, {
-                                        document: Buffer.from(pdfFiles[0].base64, 'base64'),
-                                        mimetype: 'application/pdf',
-                                        fileName: pdfFiles[0].name,
-                                        caption: `Document pour *${identifier}*.`
-                                    }, { quoted: msg });
+                                if (pdfFiles.length === 1 || result.merge_pdfs === false) {
+                                    for (const pdfFile of pdfFiles) {
+                                        await sock.sendMessage(from, {
+                                            document: Buffer.from(pdfFile.base64, 'base64'),
+                                            mimetype: 'application/pdf',
+                                            fileName: pdfFile.name,
+                                            caption: pdfFile.caption || `Document pour *${identifier}*.`
+                                        }, { quoted: msg });
+                                    }
                                 } else {
                                     // Merge multiple PDFs, handle individual failures
                                     const mergedPdf = await PDFDocument.create();

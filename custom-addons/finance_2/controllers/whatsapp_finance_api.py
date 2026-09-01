@@ -730,6 +730,8 @@ class WhatsAppFinanceController(http.Controller):
                                 html_content += f"<td rowspan='{row_span}'>{global_state}</td>"
                                 
                             html_content += "</tr>"
+                            
+                    continue
 
                 elif doc['type_doc'] == 'CHQ':
                     phys = doc['obj']

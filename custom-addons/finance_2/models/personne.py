@@ -6,6 +6,7 @@ class Finance2Personne(models.Model):
 
     name = fields.Char(string='Nom complet', required=True)
     active = fields.Boolean(default=True)
+    cheque_ids = fields.One2many('finance2.cheque', 'benif_id', string='Chèques')
 
 class Finance2Ste(models.Model):
     _name = 'finance2.ste'
@@ -14,6 +15,7 @@ class Finance2Ste(models.Model):
     name = fields.Char(string='Nom de la société', required=True)
     raison_social = fields.Char(string='Raison Sociale')
     active = fields.Boolean(default=True)
+    cheque_ids = fields.One2many('finance2.cheque', 'benif_id', string='Chèques')
 
 class Finance2Benif(models.Model):
     _name = 'finance2.benif'
@@ -21,3 +23,4 @@ class Finance2Benif(models.Model):
 
     name = fields.Char(string='Nom du bénéficiaire', required=True)
     active = fields.Boolean(default=True)
+    cheque_ids = fields.One2many('finance2.cheque', 'benif_id', string='Chèques')

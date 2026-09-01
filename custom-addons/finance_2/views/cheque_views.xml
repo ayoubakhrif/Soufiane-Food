@@ -135,17 +135,57 @@
     <record id="action_finance2_encaissement" model="ir.actions.act_window">
         <field name="name">Encaissements</field>
         <field name="res_model">finance2.cheque</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot</field>
         <field name="domain">[('state', 'in', ['cloture', 'encaisse'])]</field>
         <field name="context">{'search_default_cloture': 1}</field>
         <field name="view_id" ref="view_finance2_encaissement_tree"/>
     </record>
 
     <!-- Action -->
+    
+    <!-- Calendrier -->
+    <record id="view_finance2_cheque_calendar" model="ir.ui.view">
+        <field name="name">finance2.cheque.calendar</field>
+        <field name="model">finance2.cheque</field>
+        <field name="arch" type="xml">
+            <calendar string="Chèques" date_start="date_emission" date_stop="date_echeance" color="state">
+                <field name="name"/>
+                <field name="ste_id"/>
+                <field name="benif_id"/>
+                <field name="amount_total"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Graphique -->
+    <record id="view_finance2_cheque_graph" model="ir.ui.view">
+        <field name="name">finance2.cheque.graph</field>
+        <field name="model">finance2.cheque</field>
+        <field name="arch" type="xml">
+            <graph string="Analyse des Chèques" type="bar">
+                <field name="date_emission" type="row"/>
+                <field name="amount_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Tableau Croisé (Pivot) -->
+    <record id="view_finance2_cheque_pivot" model="ir.ui.view">
+        <field name="name">finance2.cheque.pivot</field>
+        <field name="model">finance2.cheque</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Chèques">
+                <field name="date_emission" type="row" interval="month"/>
+                <field name="ste_id" type="col"/>
+                <field name="amount_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_finance2_cheque" model="ir.actions.act_window">
         <field name="name">Chèques Physiques</field>
         <field name="res_model">finance2.cheque</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot</field>
     </record>
 
     <!-- Menus Principaux -->

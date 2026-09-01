@@ -34,21 +34,33 @@ class WhatsAppBonController(http.Controller):
             parsing_articles = False
             
             for line in lines:
-                line_upper = line.upper()
-                if line_upper.startswith('SOCIETE:') or line_upper.startswith('SOCIÉTÉ:'):
-                    company_code = line.split(':', 1)[1].strip()
-                elif line_upper.startswith('DATE:'):
-                    date_str = line.split(':', 1)[1].strip()
-                elif line_upper.startswith('POIDS FICTIF:'):
-                    try:
-                        poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace('t', '').replace('tonnes', '').replace(',', '.').strip()
-                        poids_fictif = float(poids_fictif_str)
-                    except ValueError:
-                        pass
-                elif line_upper.startswith('ARTICLES:'):
+                line_upper = line.upper().strip()
+                
+                if line_upper.startswith('SOCIETE') or line_upper.startswith('SOCIÉTÉ') or line_upper.startswith('SOCI'):
+                    if ':' in line_upper:
+                        company_code = line.split(':', 1)[1].strip()
+                    elif ' ' in line_upper:
+                        company_code = line.split(' ', 1)[1].strip()
+                elif line_upper.startswith('DATE'):
+                    if ':' in line_upper:
+                        date_str = line.split(':', 1)[1].strip()
+                elif line_upper.startswith('POIDS FICTIF'):
+                    if ':' in line_upper:
+                        try:
+                            poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace('t', '').replace('tonnes', '').replace(',', '.').strip()
+                            poids_fictif = float(poids_fictif_str)
+                        except ValueError:
+                            pass
+                elif line_upper.startswith('ARTICLE') or line_upper == 'ARTICLES':
                     parsing_articles = True
-                elif parsing_articles and line.startswith(('-', '*', '•', '·')):
-                    line_content = line[1:].strip()
+                elif parsing_articles:
+                    line_content = line.strip()
+                    if line_content.startswith(('-', '*', '•', '·')):
+                        line_content = line_content[1:].strip()
+                        
+                    if not line_content:
+                        continue
+                        
                     art_name = ""
                     qte = 0.0
                     
@@ -58,19 +70,23 @@ class WhatsAppBonController(http.Controller):
                             art_name = parts[0]
                             qte = float(parts[1].replace(',', '.'))
                     else:
-                        match = re.match(r'^([\d\.,]+)\s+(.+)$', line_content)
+                        import re
+                        match = re.match(r"^([\d.,]+)\s+(.+)$", line_content)
                         if match:
-                            qte = float(match.group(1).replace(',', '.'))
+                            qte_str = match.group(1).replace(',', '.')
+                            qte = float(qte_str)
                             art_name = match.group(2).strip()
+                        else:
+                            art_name = line_content
+                            qte = 1.0
                     
                     if art_name:
-                        # Poids n'est plus extrait de la chaîne (ex: 25kg). La qté est directement le poids/tonnes.
                         article_lines.append({
                             'name': art_name,
                             'qte': qte,
                             'pu': None
                         })
-
+            
             if not company_code:
                 return {'status': 'error', 'message': "❌ Erreur: Code société manquant (ex: SOCIETE: SN)."}
             if not article_lines:

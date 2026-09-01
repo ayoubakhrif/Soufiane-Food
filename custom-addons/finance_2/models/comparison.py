@@ -9,6 +9,23 @@ class Finance2Comparison(models.Model):
     name = fields.Char(string='Nom de l\'audit', required=True, default=lambda self: f"Audit du {fields.Date.context_today(self).strftime('%d/%m/%Y')}")
     date_audit = fields.Datetime(string='Date d\'exécution', default=fields.Datetime.now, readonly=True)
     line_ids = fields.One2many('finance2.comparison.line', 'comparison_id', string='Résultats')
+    line_count = fields.Integer(compute='_compute_line_count', string='Nombre de lignes')
+
+    
+    def _compute_line_count(self):
+        for rec in self:
+            rec.line_count = len(rec.line_ids)
+
+    def action_view_lines(self):
+        self.ensure_one()
+        return {
+            'name': 'Lignes d\'Audit',
+            'type': 'ir.actions.act_window',
+            'res_model': 'finance2.comparison.line',
+            'view_mode': 'tree,form',
+            'domain': [('comparison_id', '=', self.id)],
+            'context': {'search_default_group_status': 1},
+        }
 
     def action_run_comparison(self):
         self.ensure_one()

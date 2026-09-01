@@ -722,7 +722,7 @@ class WhatsAppFinanceController(http.Controller):
                                 html_content += f"<td rowspan='{row_span}'>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
                             
                             html_content += f"<td>{dict(rep._fields['type'].selection).get(rep.type) or ''}</td>"
-                            html_content += f"<td>{dict(rep._fields['encours'].selection).get(rep.encours) or ''}</td>"
+                            html_content += "<td>-</td>"
                             html_content += f"<td>{'{:,.2f}'.format(rep.amount).replace(',', ' ')}</td>"
                             
                             if idx == 0:

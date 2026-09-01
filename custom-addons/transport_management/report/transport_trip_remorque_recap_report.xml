@@ -12,7 +12,7 @@
     </record>
 
     <!-- Template -->
-    <template id="report_trip_recap_template">
+    <template id="report_trip_remorque_recap_template">
         <t t-call="web.html_container">
             <t t-call="web.basic_layout">
                 <div class="page">
@@ -92,7 +92,7 @@
                                             <t t-foreach="day_data['trips']" t-as="trip">
                                                 <tr>
                                                     <td><t t-esc="trip.client_id.name"/></td>
-                                                    <td><t t-esc="dict(trip.fields_get(allfields=['trip_type'])['trip_type']['selection'])[trip.destination] if trip.destination else ''"/></td>
+                                                    <td><t t-esc="dict(trip.fields_get(allfields=['destination'])['destination']['selection'])[trip.destination] if trip.destination else ''"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.going_price).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.returning_price).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.total_price).replace(',', ' ')"/></td>

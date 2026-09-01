@@ -41,7 +41,7 @@ class WhatsAppBonController(http.Controller):
                     date_str = line.split(':', 1)[1].strip()
                 elif line_upper.startswith('POIDS FICTIF:'):
                     try:
-                        poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace(',', '.').strip()
+                        poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace('t', '').replace('tonnes', '').replace(',', '.').strip()
                         poids_fictif = float(poids_fictif_str)
                     except ValueError:
                         pass
@@ -64,26 +64,18 @@ class WhatsAppBonController(http.Controller):
                             art_name = match.group(2).strip()
                     
                     if art_name:
-                        # Extract weight from string like "Amandes MK BUTTE PADRE 25kg"
-                        weight = None
-                        w_match = re.search(r'(?i)(.*?)\s+(\d+(?:\.\d+)?)\s*kg$', art_name)
-                        if w_match:
-                            art_name = w_match.group(1).strip()
-                            weight = float(w_match.group(2))
-                            
+                        # Poids n'est plus extrait de la chaîne (ex: 25kg). La qté est directement le poids/tonnes.
                         article_lines.append({
                             'name': art_name,
                             'qte': qte,
-                            'weight': weight,
                             'pu': None
                         })
 
             if not company_code:
                 return {'status': 'error', 'message': "❌ Erreur: Code société manquant (ex: SOCIETE: SN)."}
             if not article_lines:
-                return {'status': 'error', 'message': "❌ Erreur: Aucun article trouvé. Utilisez le format: '- 100 Article' ou '- Article | 100'"}
+                return {'status': 'error', 'message': "❌ Erreur: Aucun article trouvé. Utilisez le format: '- 2.5 Article'"}
 
-            # Find company
             company = request.env['core.ste'].sudo().search([('code', '=ilike', company_code)], limit=1)
             if not company:
                 company = request.env['core.ste'].sudo().search([('name', '=ilike', company_code)], limit=1)
@@ -121,37 +113,31 @@ class WhatsAppBonController(http.Controller):
                 
                 pu = article.pu
                 
-                # Determine weight
-                line_weight = art['weight']
-                if line_weight is None:
-                    line_weight = article.get_default_weight()
-                
-                real_total_weight += (art['qte'] * line_weight)
+                # La quantité saisie EST le poids total de la ligne (ex: tonnes)
+                real_total_weight += art['qte']
 
                 bon_lines_real.append((0, 0, {
                     'article_id': article.id,
-                    'qte': int(round(art['qte'])),
+                    'qte': art['qte'],
                     'pu': pu,
                 }))
                 
-                # Keep original data for fictif calculation later
                 art['article_id'] = article.id
                 art['pu'] = pu
 
-            # Ratio for fictif
             ratio = 1.0
             if poids_fictif and real_total_weight > 0:
                 ratio = poids_fictif / real_total_weight
                 
                 for art in article_lines:
-                    new_qte = int(round(art['qte'] * ratio))
+                    # Plus d'arrondi à l'entier pour conserver les décimales des tonnes
+                    new_qte = art['qte'] * ratio
                     bon_lines_fictif.append((0, 0, {
                         'article_id': art['article_id'],
                         'qte': new_qte,
                         'pu': art['pu'],
                     }))
 
-            # Create Bon Réel
             bon_reel = request.env['bon.generation'].sudo().create({
                 'company_id': company.id,
                 'date': date_val,
@@ -166,7 +152,7 @@ class WhatsAppBonController(http.Controller):
                 'pdf_base64': b64_reel,
                 'file_name': f"Facture_Proforma_{bon_reel.name}.pdf",
                 'mimetype': 'application/pdf',
-                'caption': f"✅ Bon Proforma *{bon_reel.name}* généré avec succès !"
+                'caption': f"✅ Bon Proforma *{bon_reel.name}* (Réel) généré avec succès !"
             }]
             
             msg = f"✅ Bon Proforma *{bon_reel.name}* (Réel) généré avec succès !"
@@ -185,9 +171,9 @@ class WhatsAppBonController(http.Controller):
                     'pdf_base64': b64_fictif,
                     'file_name': f"Facture_Proforma_{bon_fictif.name}_Fictif.pdf",
                     'mimetype': 'application/pdf',
-                    'caption': f"✅ Bon Proforma *{bon_fictif.name}* (Fictif - {poids_fictif}kg) généré !"
+                    'caption': f"✅ Bon Proforma *{bon_fictif.name}* (Fictif - {poids_fictif} T) généré !"
                 })
-                msg += f"\n✅ Bon Proforma *{bon_fictif.name}* (Fictif - {poids_fictif}kg) généré !"
+                msg += f"\n✅ Bon Proforma *{bon_fictif.name}* (Fictif) généré !"
 
             return {
                 'status': 'success',

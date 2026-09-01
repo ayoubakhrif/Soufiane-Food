@@ -687,49 +687,49 @@ class WhatsAppFinanceController(http.Controller):
                     global_state = global_state_dict.get(c_v2.state) or c_v2.state
                     
                     if not reps:
-                        html_table += "<tr>"
-                        html_table += f"<td>{doc_name}</td>"
-                        html_table += f"<td>{'Oui' if c_v2.chq_vide_pdf else 'Non'}</td>"
-                        html_table += f"<td>{c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else ''}</td>"
-                        html_table += f"<td>{ste_name}</td>"
-                        html_table += f"<td>{c_v2.journal or ''}</td>"
-                        html_table += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
-                        html_table += f"<td>{c_v2.serie_facture or ''}</td>"
-                        html_table += "<td>-</td>"
-                        html_table += f"<td>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
-                        html_table += f"<td>{dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque'}</td>"
-                        html_table += "<td>-</td>"
-                        html_table += f"<td>{phys_amount}</td>"
-                        html_table += f"<td>{phys_amount}</td>"
-                        html_table += f"<td>{global_state}</td>"
-                        html_table += "</tr>"
+                        html_content += "<tr>"
+                        html_content += f"<td>{doc_name}</td>"
+                        html_content += f"<td>{'Oui' if c_v2.chq_vide_pdf else 'Non'}</td>"
+                        html_content += f"<td>{c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else ''}</td>"
+                        html_content += f"<td>{ste_name}</td>"
+                        html_content += f"<td>{c_v2.journal or ''}</td>"
+                        html_content += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
+                        html_content += f"<td>{c_v2.serie_facture or ''}</td>"
+                        html_content += "<td>-</td>"
+                        html_content += f"<td>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
+                        html_content += f"<td>{dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque'}</td>"
+                        html_content += "<td>-</td>"
+                        html_content += f"<td>{phys_amount}</td>"
+                        html_content += f"<td>{phys_amount}</td>"
+                        html_content += f"<td>{global_state}</td>"
+                        html_content += "</tr>"
                     else:
                         for idx, rep in enumerate(reps):
-                            html_table += "<tr>"
+                            html_content += "<tr>"
                             if idx == 0:
                                 row_span = len(reps)
-                                html_table += f"<td rowspan='{row_span}'>{doc_name}</td>"
-                                html_table += f"<td rowspan='{row_span}'>{'Oui' if c_v2.chq_vide_pdf else 'Non'}</td>"
-                                html_table += f"<td rowspan='{row_span}'>{c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else ''}</td>"
-                                html_table += f"<td rowspan='{row_span}'>{ste_name}</td>"
+                                html_content += f"<td rowspan='{row_span}'>{doc_name}</td>"
+                                html_content += f"<td rowspan='{row_span}'>{'Oui' if c_v2.chq_vide_pdf else 'Non'}</td>"
+                                html_content += f"<td rowspan='{row_span}'>{c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else ''}</td>"
+                                html_content += f"<td rowspan='{row_span}'>{ste_name}</td>"
                             
-                            html_table += f"<td>{c_v2.journal or ''}</td>"
-                            html_table += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
-                            html_table += f"<td>{rep.serie_facture or ''}</td>"
-                            html_table += f"<td>{rep.bl or ''}</td>"
-                            
-                            if idx == 0:
-                                html_table += f"<td rowspan='{row_span}'>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
-                            
-                            html_table += f"<td>{dict(rep._fields['type'].selection).get(rep.type) or ''}</td>"
-                            html_table += f"<td>{dict(rep._fields['encours'].selection).get(rep.encours) or ''}</td>"
-                            html_table += f"<td>{'{:,.2f}'.format(rep.amount).replace(',', ' ')}</td>"
+                            html_content += f"<td>{c_v2.journal or ''}</td>"
+                            html_content += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
+                            html_content += f"<td>{rep.serie_facture or ''}</td>"
+                            html_content += f"<td>{rep.bl or ''}</td>"
                             
                             if idx == 0:
-                                html_table += f"<td rowspan='{row_span}'>{phys_amount}</td>"
-                                html_table += f"<td rowspan='{row_span}'>{global_state}</td>"
+                                html_content += f"<td rowspan='{row_span}'>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
+                            
+                            html_content += f"<td>{dict(rep._fields['type'].selection).get(rep.type) or ''}</td>"
+                            html_content += f"<td>{dict(rep._fields['encours'].selection).get(rep.encours) or ''}</td>"
+                            html_content += f"<td>{'{:,.2f}'.format(rep.amount).replace(',', ' ')}</td>"
+                            
+                            if idx == 0:
+                                html_content += f"<td rowspan='{row_span}'>{phys_amount}</td>"
+                                html_content += f"<td rowspan='{row_span}'>{global_state}</td>"
                                 
-                            html_table += "</tr>"
+                            html_content += "</tr>"
 
                 elif doc['type_doc'] == 'CHQ':
                     phys = doc['obj']

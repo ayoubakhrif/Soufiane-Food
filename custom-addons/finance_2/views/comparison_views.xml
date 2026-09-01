@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue Recherche pour les Lignes -->
+    <record id="view_finance2_comparison_line_search" model="ir.ui.view">
+        <field name="name">finance2.comparison.line.search</field>
+        <field name="model">finance2.comparison.line</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Lignes Audit">
+                <field name="cheque_number"/>
+                <field name="ste_name"/>
+                <filter string="Anomalies (Manquants ou Différents)" name="anomalies" domain="[('status', 'in', ['only_v1', 'diff'])]"/>
+                <filter string="Manquant dans V2" name="only_v1" domain="[('status', '=', 'only_v1')]"/>
+                <filter string="Différence détectée" name="diff" domain="[('status', '=', 'diff')]"/>
+                <filter string="Nouveau dans V2" name="only_v2" domain="[('status', '=', 'only_v2')]"/>
+                <filter string="Identiques" name="ok" domain="[('status', '=', 'ok')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="group_status" context="{'group_by':'status'}"/>
+                    <filter string="Société" name="group_ste" context="{'group_by':'ste_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vue Formulaire pour l'Audit (Run) -->
+    <record id="view_finance2_comparison_form" model="ir.ui.view">
+        <field name="name">finance2.comparison.form</field>
+        <field name="model">finance2.comparison</field>
+        <field name="arch" type="xml">
+            <form string="Audit Comparatif">
+                <header>
+                    <button name="action_run_comparison" string="Lancer / Rafraîchir l'Audit" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom de l'audit"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="date_audit"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Résultats de la Comparaison">
+                            <field name="line_ids">
+                                <tree decoration-danger="status == 'only_v1'" decoration-warning="status == 'diff'" decoration-info="status == 'only_v2'" decoration-success="status == 'ok'">
+                                    <field name="cheque_number"/>
+                                    <field name="ste_name"/>
+                                    <field name="status" widget="badge" decoration-danger="status == 'only_v1'" decoration-warning="status == 'diff'" decoration-info="status == 'only_v2'" decoration-success="status == 'ok'"/>
+                                    <field name="v1_amount"/>
+                                    <field name="v2_amount"/>
+                                    <field name="diff_details"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue Liste pour les Audits -->
+    <record id="view_finance2_comparison_tree" model="ir.ui.view">
+        <field name="name">finance2.comparison.tree</field>
+        <field name="model">finance2.comparison</field>
+        <field name="arch" type="xml">
+            <tree string="Audits Comparatifs">
+                <field name="name"/>
+                <field name="date_audit"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_finance2_comparison" model="ir.actions.act_window">
+        <field name="name">Audits Comparatifs (Ancien vs V2)</field>
+        <field name="res_model">finance2.comparison</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_finance2_comparison" name="Audit Comparatif" parent="menu_finance2_root" action="action_finance2_comparison" sequence="99"/>
+</odoo>

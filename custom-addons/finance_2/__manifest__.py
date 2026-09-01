@@ -18,6 +18,7 @@
         'views/personne_views.xml',
         'views/cheque_views.xml',
         'views/talon_views.xml',
+        'views/comparison_views.xml',
     ],
     'installable': True,
     'application': True,

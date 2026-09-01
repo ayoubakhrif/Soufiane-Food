@@ -15,3 +15,5 @@ access_finance2_benif_user,finance2.benif.user,model_finance2_benif,group_financ
 access_finance2_benif_manager,finance2.benif.manager,model_finance2_benif,group_finance2_manager,1,1,1,1
 access_finance2_talon_user,finance2.talon_user,model_finance2_talon,finance_2.group_finance2_user,1,1,1,0
 access_finance2_talon_manager,finance2.talon_manager,model_finance2_talon,finance_2.group_finance2_manager,1,1,1,1
+access_finance2_comparison,finance2.comparison,model_finance2_comparison,finance_2.group_finance2_user,1,1,1,1
+access_finance2_comparison_line,finance2.comparison.line,model_finance2_comparison_line,finance_2.group_finance2_user,1,1,1,1

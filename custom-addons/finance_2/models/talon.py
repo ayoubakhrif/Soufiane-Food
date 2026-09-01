@@ -17,7 +17,7 @@ class Finance2Talon(models.Model):
         ('coffre', 'En Coffre'),
         ('actif', 'Actif'),
         ('cloture', 'Clôturé'),
-    ], string='État', default='coffre', tracking=True)
+    ], string='État', default='coffre', compute='_compute_etat', store=True, readonly=False, tracking=True)
 
     cheque_ids = fields.One2many('finance2.cheque', 'talon_id', string='Chèques liés')
     
@@ -65,8 +65,8 @@ class Finance2Talon(models.Model):
                 rec.last_used_chq = False
                 rec.missing_chqs_text = False
 
-    @api.constrains('cheque_ids')
-    def _auto_update_etat(self):
+    @api.depends('used_chqs', 'num_chq')
+    def _compute_etat(self):
         for rec in self:
             if rec.used_chqs == 0:
                 rec.etat = 'coffre'

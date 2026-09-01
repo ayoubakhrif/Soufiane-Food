@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Report Action -->
+    <record id="action_report_trip_remorque_recap" model="ir.actions.report">
+        <field name="name">Récapitulatif des Voyages Remorque</field>
+        <field name="model">transport.trip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">transport_management.report_trip_remorque_recap_template</field>
+        <field name="report_file">transport_management.report_trip_remorque_recap_template</field>
+        <field name="binding_model_id" ref="model_transport_trip_remorque"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Template -->
+    <template id="report_trip_recap_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <style>
+                        .report-header { margin-bottom: 25px; }
+                        .header-row { display: flex; align-items: stretch; margin-bottom: 15px; }
+                        .date-box { background-color: #E6F4EA; border: 1px solid #137333; padding: 12px; font-size: 18px; font-weight: bold; width: 25%; text-align: center; color: #137333; border-radius: 4px; margin-right: 15px; }
+                        .title-box { background-color: #137333; border: 1px solid #137333; padding: 12px; font-size: 22px; font-weight: bold; color: white; flex-grow: 1; text-align: center; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+                        
+                        /* Driver block */
+                        .driver-section { margin-top: 30px; border: 2px solid #137333; border-radius: 4px; overflow: hidden; page-break-inside: avoid; }
+                        .driver-header { background-color: #137333; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+                        .driver-title { font-size: 18px; font-weight: bold; text-transform: uppercase; }
+                        .driver-stats { font-size: 14px; font-weight: bold; }
+                        
+                        .day-header { background: none; color: #137333; padding: 8px 5px 4px 5px; font-size: 14px; font-weight: bold; margin-top: 15px; border-bottom: 2px solid #E6F4EA; margin-bottom: 5px; }
+                        
+                        /* Base Table Styles */
+                        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                        .data-table th { padding: 6px; text-align: center; font-size: 11px; font-weight: bold; color: #137333; background-color: #E6F4EA; text-transform: uppercase; border: 1px solid #A8DAB5; }
+                        .data-table td { padding: 5px; text-align: center; font-size: 11px; color: #333; border: 1px solid #E6F4EA; }
+                        .data-table tr:nth-child(even) { background-color: #F9FAFB; }
+                        .amount-cell { font-weight: bold; color: #137333; text-align: right; white-space: nowrap; }
+                        
+                        /* Summary Stats Table */
+                        .summary-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; border-radius: 4px; overflow: hidden; page-break-inside: avoid; }
+                        .summary-table th { background-color: #E6F4EA; border: 1px solid #A8DAB5; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: #137333; text-transform: uppercase; }
+                        .summary-table td { border: 1px solid #A8DAB5; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; }
+                        .state-global { background-color: #F1F3F4; color: #3C4043; }
+                        
+                        .footer { margin-top: 35px; font-style: italic; font-size: 10px; border-top: 1px solid #E6F4EA; padding-top: 10px; color: #666; display: flex; justify-content: space-between; }
+                    </style>
+
+                    <!-- Header -->
+                    <div class="report-header">
+                        <div class="header-row">
+                            <div class="date-box">
+                                <t t-esc="report_date"/>
+                            </div>
+                            <div class="title-box">
+                                Récapitulatif des Voyages Remorque Sélectionnés
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Drivers Sections -->
+                    <t t-foreach="drivers_list" t-as="d_data">
+                        <div class="driver-section">
+                            <div class="driver-header">
+                                <div class="driver-title"><t t-esc="d_data['driver'].name if d_data['driver'] else 'Sans Chauffeur'"/></div>
+                                <div class="driver-stats">
+                                    <t t-esc="d_data['count']"/> Voyage(s) | 
+                                    Charges: <t t-esc="'{:,.2f}'.format(d_data['charges']).replace(',', ' ')"/> DH | 
+                                    Bénéfice: <t t-esc="'{:,.2f}'.format(d_data['profit']).replace(',', ' ')"/> DH
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 5px;">
+                                <t t-foreach="d_data['days_list']" t-as="day_data">
+                                    <div class="day-header">
+                                        Date : <t t-if="day_data['date']"><t t-esc="day_data['date'].strftime('%d/%m/%Y')"/></t><t t-else="">Non définie</t> 
+                                        - <t t-esc="day_data['count']"/> voyage(s) (Bénéfice: <t t-esc="'{:,.2f}'.format(day_data['profit']).replace(',', ' ')"/>)
+                                    </div>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 15%;">Client</th>
+                                                <th style="width: 15%;">Type</th>
+                                                <th style="width: 15%;">Allée</th>
+                                                <th style="width: 15%;">Retour</th>
+                                                <th style="width: 15%;">Total Prix</th>
+                                                <th style="width: 15%;">Charges</th>
+                                                <th style="width: 10%;">Bénéfice</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="day_data['trips']" t-as="trip">
+                                                <tr>
+                                                    <td><t t-esc="trip.client_id.name"/></td>
+                                                    <td><t t-esc="dict(trip.fields_get(allfields=['trip_type'])['trip_type']['selection'])[trip.destination] if trip.destination else ''"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.going_price).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.returning_price).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.total_price).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(trip.total_amount).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell" style="color: #137333;"><t t-esc="'{:,.2f}'.format(trip.profit).replace(',', ' ')"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                    
+                    <!-- Global Recap by Day -->
+                    <div style="page-break-inside: avoid; margin-top: 40px;">
+                        <div class="title-box" style="font-size: 16px; padding: 8px;">Récapitulatif par Jour (Tous les chauffeurs)</div>
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Date</th>
+                                    <th style="width: 25%;">Nbr. Voyages Remorque</th>
+                                    <th style="width: 25%;">Charges Totales</th>
+                                    <th style="width: 25%;">Bénéfice Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="global_days_list" t-as="g_day">
+                                    <tr>
+                                        <td><t t-if="g_day['date']"><t t-esc="g_day['date'].strftime('%d/%m/%Y')"/></t></td>
+                                        <td><t t-esc="g_day['count']"/></td>
+                                        <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(g_day['charges']).replace(',', ' ')"/> DH</td>
+                                        <td class="amount-cell" style="color: #137333;"><t t-esc="'{:,.2f}'.format(g_day['profit']).replace(',', ' ')"/> DH</td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Global Recap Total -->
+                    <div style="page-break-inside: avoid; margin-top: 30px;">
+                        <div class="title-box" style="font-size: 16px; padding: 8px;">Récapitulatif Global</div>
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%;">Total Voyages Remorque</th>
+                                    <th style="width: 20%;">Total Allées</th>
+                                    <th style="width: 20%;">Total Retours</th>
+                                    <th style="width: 20%;">Total Charges</th>
+                                    <th style="width: 20%;">Bénéfice Global</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="state-global" style="font-size: 15px;">
+                                    <td><t t-esc="global_count"/></td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_going).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_returning).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(global_charges).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell" style="color: #137333; font-size: 16px;"><t t-esc="'{:,.2f}'.format(global_profit).replace(',', ' ')"/> DH</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="footer">
+                        <span>Généré par Gestia ERP - Transport</span>
+                        <span>Rapport Récapitulatif</span>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

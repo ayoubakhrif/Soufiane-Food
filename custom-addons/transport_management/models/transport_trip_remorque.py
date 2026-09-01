@@ -7,7 +7,7 @@ class TransportTripRemorque(models.Model):
     _name = 'transport.trip.remorque'
     _description = 'Transport Trip Remorque'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'create_date desc'
+    _order = 'date desc, id desc'
 
     date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
     driver_remorque_id = fields.Many2one(

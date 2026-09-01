@@ -259,7 +259,23 @@ class WhatsAppLogisticsPaymentController(http.Controller):
                     response += m_fin_line.replace(',', ' ')
             response += "\n"
 
-        # F. Réclamations (Charges à récupérer)
+        # F. Charges Douane
+        if entry:
+            transit = getattr(entry, 'transit_fees', 0.0) or 0.0
+            douane = getattr(entry, 'customs_duty', 0.0) or 0.0
+            temsa = getattr(entry, 'temsa', 0.0) or 0.0
+            
+            if transit > 0 or douane > 0 or temsa > 0:
+                response += f"🛂 *Charges Douane* :\n"
+                if transit > 0:
+                    response += f"  • Frais de transit : *{transit:,.2f} DH*\n".replace(',', ' ')
+                if douane > 0:
+                    response += f"  • Droit de douane : *{douane:,.2f} DH*\n".replace(',', ' ')
+                if temsa > 0:
+                    response += f"  • TEMSA : *{temsa:,.2f} DH*\n".replace(',', ' ')
+                response += "\n"
+
+        # G. Réclamations (Charges à récupérer)
         if entry_ids:
             claims_models = [
                 ('claims.quantity', 'Quantité'),

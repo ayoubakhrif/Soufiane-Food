@@ -1,6 +1,7 @@
 import base64
 import logging
 import re
+import difflib
 from odoo import http, SUPERUSER_ID, fields
 from odoo.http import request
 
@@ -34,33 +35,21 @@ class WhatsAppBonController(http.Controller):
             parsing_articles = False
             
             for line in lines:
-                line_upper = line.upper().strip()
-                
-                if line_upper.startswith('SOCIETE') or line_upper.startswith('SOCIÉTÉ') or line_upper.startswith('SOCI'):
-                    if ':' in line_upper:
-                        company_code = line.split(':', 1)[1].strip()
-                    elif ' ' in line_upper:
-                        company_code = line.split(' ', 1)[1].strip()
-                elif line_upper.startswith('DATE'):
-                    if ':' in line_upper:
-                        date_str = line.split(':', 1)[1].strip()
-                elif line_upper.startswith('POIDS FICTIF'):
-                    if ':' in line_upper:
-                        try:
-                            poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace('t', '').replace('tonnes', '').replace(',', '.').strip()
-                            poids_fictif = float(poids_fictif_str)
-                        except ValueError:
-                            pass
-                elif line_upper.startswith('ARTICLE') or line_upper == 'ARTICLES':
+                line_upper = line.upper()
+                if line_upper.startswith('SOCIETE:') or line_upper.startswith('SOCIÉTÉ:'):
+                    company_code = line.split(':', 1)[1].strip()
+                elif line_upper.startswith('DATE:'):
+                    date_str = line.split(':', 1)[1].strip()
+                elif line_upper.startswith('POIDS FICTIF:'):
+                    try:
+                        poids_fictif_str = line.split(':', 1)[1].strip().lower().replace('kg', '').replace('t', '').replace('tonnes', '').replace(',', '.').strip()
+                        poids_fictif = float(poids_fictif_str)
+                    except ValueError:
+                        pass
+                elif line_upper.startswith('ARTICLES:'):
                     parsing_articles = True
-                elif parsing_articles:
-                    line_content = line.strip()
-                    if line_content.startswith(('-', '*', '•', '·')):
-                        line_content = line_content[1:].strip()
-                        
-                    if not line_content:
-                        continue
-                        
+                elif parsing_articles and line.startswith(('-', '*', '•', '·')):
+                    line_content = line[1:].strip()
                     art_name = ""
                     qte = 0.0
                     
@@ -70,15 +59,10 @@ class WhatsAppBonController(http.Controller):
                             art_name = parts[0]
                             qte = float(parts[1].replace(',', '.'))
                     else:
-                        import re
-                        match = re.match(r"^([\d.,]+)\s+(.+)$", line_content)
+                        match = re.match(r'^([\d\.,]+)\s+(.+)$', line_content)
                         if match:
-                            qte_str = match.group(1).replace(',', '.')
-                            qte = float(qte_str)
+                            qte = float(match.group(1).replace(',', '.'))
                             art_name = match.group(2).strip()
-                        else:
-                            art_name = line_content
-                            qte = 1.0
                     
                     if art_name:
                         article_lines.append({
@@ -86,7 +70,7 @@ class WhatsAppBonController(http.Controller):
                             'qte': qte,
                             'pu': None
                         })
-            
+
             if not company_code:
                 return {'status': 'error', 'message': "❌ Erreur: Code société manquant (ex: SOCIETE: SN)."}
             if not article_lines:
@@ -113,10 +97,21 @@ class WhatsAppBonController(http.Controller):
 
             bon_lines_real = []
             bon_lines_fictif = []
-            
             real_total_weight = 0.0
 
+            # Pre-load articles for fuzzy matching if needed
+            all_articles = request.env['bon.article'].sudo().search([])
+            search_dict = {}
+            for a in all_articles:
+                if a.name:
+                    search_dict[a.name.lower()] = a
+                if a.company_article_id and a.company_article_id.alias_ids:
+                    for alias in a.company_article_id.alias_ids:
+                        if alias.name:
+                            search_dict[alias.name.lower()] = a
+
             for art in article_lines:
+                # 1. Exact or ILIKE match
                 domain = [
                     '|', 
                     ('name', '=ilike', art['name']), 
@@ -124,12 +119,17 @@ class WhatsAppBonController(http.Controller):
                 ]
                 article = request.env['bon.article'].sudo().search(domain, limit=1)
                 
+                # 2. Fuzzy match fallback
                 if not article:
-                    return {'status': 'error', 'message': f"❌ Erreur: Article '{art['name']}' introuvable."}
+                    closest = difflib.get_close_matches(art['name'].lower(), search_dict.keys(), n=1, cutoff=0.55)
+                    if closest:
+                        article = search_dict[closest[0]]
+                        _logger.info(f"Fuzzy match for '{art['name']}' -> found '{closest[0]}' (Article: {article.name})")
+
+                if not article:
+                    return {'status': 'error', 'message': f"❌ Erreur: Article '{art['name']}' introuvable et aucun article proche trouvé."}
                 
                 pu = article.pu
-                
-                # La quantité saisie EST le poids total de la ligne (ex: tonnes)
                 real_total_weight += art['qte']
 
                 bon_lines_real.append((0, 0, {
@@ -144,9 +144,7 @@ class WhatsAppBonController(http.Controller):
             ratio = 1.0
             if poids_fictif and real_total_weight > 0:
                 ratio = poids_fictif / real_total_weight
-                
                 for art in article_lines:
-                    # Plus d'arrondi à l'entier pour conserver les décimales des tonnes
                     new_qte = art['qte'] * ratio
                     bon_lines_fictif.append((0, 0, {
                         'article_id': art['article_id'],

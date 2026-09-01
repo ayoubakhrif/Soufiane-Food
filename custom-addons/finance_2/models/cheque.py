@@ -40,6 +40,7 @@ class Finance2Cheque(models.Model):
     
     date_emission = fields.Date(string="Date d'émission", tracking=True)
     date_echeance = fields.Date(string="Date d'échéance", tracking=True)
+    week = fields.Char(string="Semaine", compute="_compute_week", store=True)
     date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)
     
     commentaire = fields.Text(string="Commentaire")
@@ -53,6 +54,19 @@ class Finance2Cheque(models.Model):
     
     # Workflow Status
     is_admin = fields.Boolean(compute='_compute_is_admin')
+
+    
+    @api.depends('date_emission')
+    def _compute_week(self):
+        for rec in self:
+            if rec.date_emission:
+                import datetime
+                # Use standard isocalendar to match week number
+                isocal = rec.date_emission.isocalendar()
+                week_num = isocal[1]
+                rec.week = f"W{week_num:02d}"
+            else:
+                rec.week = False
 
     def _compute_is_admin(self):
         for rec in self:

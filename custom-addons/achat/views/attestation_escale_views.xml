@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue Liste dédiée pour les Attestations d'Escale (ONICL) -->
+    <record id="view_attestation_escale_tree" model="ir.ui.view">
+        <field name="name">logistique.entry.attestation.tree</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <tree string="Attestations d'Escale" default_order="eta desc, create_date desc">
+                <field name="bl_number"/>
+                <field name="achat_article_id" string="Article"/>
+                <field name="shipping_id"/>
+                <field name="eta"/>
+                <field name="attestation_state" widget="badge" 
+                       decoration-danger="attestation_state == 'not_requested'" 
+                       decoration-warning="attestation_state == 'requested'" 
+                       decoration-success="attestation_state == 'received'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action pour ouvrir cette vue liste filtrée -->
+    <record id="action_attestation_escale" model="ir.actions.act_window">
+        <field name="name">Attestations d'Escale</field>
+        <field name="res_model">logistique.entry</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('achat_article_id.is_onicl', '=', True)]</field>
+        <field name="view_id" ref="view_attestation_escale_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Gérer les attestations d'escale pour les articles ONICL.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item rattaché à Logistique -->
+    <!-- Le menu parent_id utilise le menu de base de logistique -->
+    <menuitem id="menu_attestation_escale"
+              name="Attestations d'Escale"
+              parent="logistique.menu_logistique_root"
+              action="action_attestation_escale"
+              sequence="30"/>
+</odoo>

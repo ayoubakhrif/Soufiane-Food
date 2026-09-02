@@ -109,7 +109,7 @@
         <field name="name">transport.trip.remorque.tree</field>
         <field name="model">transport.trip.remorque</field>
         <field name="arch" type="xml">
-            <tree string="Transport Trips Remorque" decoration-success="is_paid" decoration-info="is_checked">
+            <tree string="Transport Trips Remorque" decoration-success="is_paid" decoration-info="is_checked" default_order="date desc, id desc">
                 <field name="is_checked" widget="boolean_toggle"/>
                 <field name="date"/>
                 <field name="driver_remorque_id"/>
@@ -151,7 +151,7 @@
                     <filter string="Driver" name="group_driver" domain="[]" context="{'group_by': 'driver_remorque_id'}"/>
                     <filter string="Client" name="group_client" domain="[]" context="{'group_by': 'client_id'}"/>
                     <filter string="Destination" name="group_dest" domain="[]" context="{'group_by': 'destination'}"/>
-                    <filter string="Date de Voyage" name="group_date" domain="[]" context="{'group_by': 'date:day'}"/>
+                    <filter string="Date de Voyage" name="group_date" domain="[]" context="{'group_by': 'date:day desc'}"/>
                     <filter string="Date de Création (Jour)" name="group_create_date" context="{'group_by': 'create_date:day'}"/>
                 </group>
             </search>

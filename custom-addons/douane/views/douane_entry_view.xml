@@ -22,7 +22,7 @@
                         <group>
                             <field name="bl_number" readonly="1"/>
                             <field name="supplier_id" readonly="1" options="{'no_open': True}"/>
-                            <field name="article_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="achat_article_id" readonly="1" options="{'no_open': True}"/>
                             <field name="lot" readonly="1"/>
                         </group>
                         <group>
@@ -112,14 +112,14 @@
                 <field name="dossier_id"/>
                 <field name="dum"/>
                 <field name="supplier_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="lot"/>
                 <field name="invoice_number"/>
                 <field name="container_ids" string="Conteneur" filter_domain="[('container_ids.name', 'ilike', self)]"/>
                 <filter string="En cours" name="status_in_progress" domain="[('status', '=', 'in_progress')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Fournisseur" name="group_supplier" domain="[]" context="{'group_by': 'supplier_id'}"/>
-                    <filter string="Article" name="group_article" domain="[]" context="{'group_by': 'article_id'}"/>
+                    <filter string="Article" name="group_article" domain="[]" context="{'group_by': 'achat_article_id'}"/>
                     <filter string="Résultat Analyse" name="group_analysis" domain="[]" context="{'group_by': 'analysis_result'}"/>
                 </group>
             </search>

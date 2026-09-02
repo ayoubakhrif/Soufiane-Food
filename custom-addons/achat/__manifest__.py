@@ -29,6 +29,7 @@
         'views/ai_template_views.xml',
         'report/daily_price_report_template.xml',
         'data/cron_daily_price_report.xml',
+        'views/attestation_escale_views.xml',
         'views/menu.xml',
 
     ],

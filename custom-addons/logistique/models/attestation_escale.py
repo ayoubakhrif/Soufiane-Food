@@ -16,6 +16,9 @@ class LogisticsEntryAttestation(models.Model):
     attestation_file = fields.Binary(string="Fichier Attestation", attachment=True)
     attestation_file_name = fields.Char(string="Nom du fichier")
 
+    voyage = fields.Char(string="Voyage", tracking=True)
+    navire = fields.Char(string="Navire", tracking=True)
+
     def action_request_attestation(self):
         for rec in self:
             rec.attestation_state = 'requested'

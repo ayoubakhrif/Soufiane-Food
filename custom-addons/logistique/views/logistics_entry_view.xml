@@ -56,7 +56,7 @@
                 <sheet>
                     <group>
                         <group string="Statut Opérationnel">
-                             <field name="port_status" readonly="1" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
+                             <field name="port_status"/>
                              <field name="exit_date" readonly="1"/>
                         </group>
                     </group>

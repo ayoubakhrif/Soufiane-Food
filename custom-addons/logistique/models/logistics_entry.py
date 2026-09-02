@@ -300,7 +300,11 @@ class LogisticsEntry(models.Model):
                 entry._terminal49_update_eta()
     
     port_status = fields.Selection([
-        ('on_port', 'On Port'),
+        ('on_port', 'En attente'),
+        ('release', 'Release'),
+        ('tanger_med', 'Tanger Med'),
+        ('emirate', 'Emirate'),
+        ('refinancement', 'Refinancement'),
         ('exited', 'Changé'),
     ], string='Port Status', default='on_port', tracking=True)
 

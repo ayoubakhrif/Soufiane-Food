@@ -45,11 +45,12 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
 
-            <!-- Add Sortie Port Button -->
+            <!-- Add Sortie Port Button & Statusbar -->
             <xpath expr="//header" position="inside">
                 <button name="action_exit_port" string="Décharge" type="object" class="oe_highlight" 
                         invisible="port_status == 'exited'"
                         groups="achat.group_purchase_user"/>
+                <field name="port_status" widget="statusbar" options="{'clickable': '1'}" statusbar_visible="on_port,release,tanger_med,emirate,refinancement,exited"/>
             </xpath>
             
             <!-- Add Operational Status Field (Optional, for visibility) -->
@@ -62,7 +63,6 @@
             
              <xpath expr="//group" position="before">
                 <group string="Statut Opérationnel">
-                        <field name="port_status" readonly="1" widget="badge" decoration-success="port_status == 'exited'" decoration-info="port_status == 'on_port'"/>
                         <field name="exit_date" readonly="1"/>
                         <field name="exit_comment" placeholder="Commentaire spécifique à la sortie..."/>
                 </group>
@@ -100,7 +100,7 @@
         <field name="name">Dossiers à Sortir</field>
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('port_status', '=', 'on_port')]</field>
+        <field name="domain">[('port_status', 'in', ['on_port', 'release', 'tanger_med', 'emirate', 'refinancement'])]</field>
         <field name="context">{'create': False, 'search_default_eta_semaine': 1, 'search_default_group_by_supplier': 1}</field>
         <field name="search_view_id" ref="view_achat_dossiers_to_exit_search"/>
         <field name="view_ids" eval="[(5, 0, 0),

@@ -48,6 +48,8 @@
                             <field name="achat_article_id" readonly="1"/>
                         </group>
                         <group>
+                            <field name="voyage"/>
+                            <field name="navire"/>
                             <field name="eta" readonly="1"/>
                             <field name="attestation_request_date"/>
                             <field name="attestation_receive_date"/>

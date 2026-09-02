@@ -568,7 +568,8 @@ OU si tout est correct :
 
         row = 2
         
-        exporters = self.mapped('supplier_id')
+        normal_recs = self.filtered(lambda r: r.port_status == 'on_port')
+        exporters = normal_recs.mapped('supplier_id')
         
         for exporter in exporters:
             # Ligne jaune du Fournisseur
@@ -576,7 +577,7 @@ OU si tout est correct :
             sheet.merge_range(row, 0, row, 14, export_name, supplier_title_style)
             row += 1
 
-            recs = self.filtered(lambda r: r.supplier_id == exporter)
+            recs = normal_recs.filtered(lambda r: r.supplier_id == exporter)
             exporter_start_row = row + 1
             
             for rec in recs:
@@ -641,7 +642,8 @@ OU si tout est correct :
         grand_weight = 0.0
         grand_amount = 0.0
 
-        for exporter in exporters:
+        all_exporters = self.mapped('supplier_id')
+        for exporter in all_exporters:
             recs = self.filtered(lambda r: r.supplier_id == exporter)
             supp_name = str(exporter.name).upper() if exporter else "SANS FOURNISSEUR"
             supp_fcl = sum(len(r.container_names.split(',')) if r.container_names else 1 for r in recs)
@@ -662,6 +664,71 @@ OU si tout est correct :
         sheet.write(row, 4, grand_fcl, footer_label_style)
         sheet.write(row, 5, grand_weight, footer_val_style)
         sheet.write(row, 6, grand_amount, footer_val_style)
+
+        # --- DOSSIERS EN STATUTS SPÉCIAUX ---
+        special_states = {
+            'release': 'RELEASE',
+            'tanger_med': 'TANGER MED',
+            'emirate': 'EMIRATE',
+            'refinancement': 'REFINANCEMENT'
+        }
+        
+        special_recs = self.filtered(lambda r: r.port_status in special_states.keys())
+        if special_recs:
+            row += 4
+            sheet.merge_range(row, 0, row, 14, "DOSSIERS EN COURS DE DÉCHARGEMENT (STATUTS SPÉCIAUX)", date_title_style)
+            row += 2
+            sheet.write_row(row, 0, headers, header_style)
+            row += 1
+            
+            for state_code, state_name in special_states.items():
+                state_recs = special_recs.filtered(lambda r: r.port_status == state_code)
+                if not state_recs:
+                    continue
+                    
+                sheet.merge_range(row, 0, row, 14, f"STATUT : {state_name}", supplier_title_style)
+                row += 1
+                
+                state_start_row = row + 1
+                for rec in state_recs:
+                    sheet.write(row, 0, rec.ste_id.name or "", cell_style)
+                    sheet.write(row, 1, rec.supplier_id.name or "", cell_style)
+                    
+                    fcl_count = len(rec.container_names.split(',')) if rec.container_names else 1
+                    sheet.write(row, 2, fcl_count, cell_style)
+                    
+                    sheet.write(row, 3, rec.invoice_number or rec.contract_num or "", cell_style)
+                    sheet.write(row, 4, rec.achat_article_id.name or "", cell_style)
+                    sheet.write(row, 5, rec.details or "", left_align_style)
+                    sheet.write(row, 6, float(rec.weight or 0.0), num_style)
+                    sheet.write(row, 7, float(rec.price_unit or 0.0), num_style)
+                    sheet.write(row, 8, float(rec.amount_total or 0.0), pink_num_style)
+                    
+                    sheet.write(row, 9, rec.incoterm.upper() if rec.incoterm else "", cell_style)
+                    sheet.write(row, 10, rec.free_time or "", cell_style)
+                    sheet.write(row, 11, "", cell_style)
+                    sheet.write(row, 12, rec.container_names or "", cell_style)
+                    
+                    if rec.eta:
+                        sheet.write_datetime(row, 13, datetime.combine(rec.eta, time.min), date_style)
+                    else:
+                        sheet.write(row, 13, "", cell_style)
+                    
+                    obs = rec.exit_comment or ""
+                    if "dhl" in obs.lower() or "paye" in obs.lower():
+                        sheet.write(row, 14, obs.upper(), green_obs_style)
+                    elif "en cours" in obs.lower():
+                        sheet.write(row, 14, obs.upper(), yellow_obs_style)
+                    else:
+                        sheet.write(row, 14, obs.upper(), cell_style)
+                    
+                    row += 1
+
+                for c in range(0, 15): 
+                    sheet.write(row, c, "", footer_label_style)
+                sheet.write(row, 7, "TOTAL", footer_label_style)
+                sheet.write_formula(row, 8, f'=SUM(I{state_start_row}:I{row})', footer_val_style)
+                row += 1
 
         workbook.close()
         output.seek(0)

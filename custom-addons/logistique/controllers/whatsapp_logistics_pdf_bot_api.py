@@ -195,6 +195,13 @@ Règles strictes pour le "type" de frais :
 - PRIORITÉ: Si le mot "MAGASINAGE" apparait, c'est obligatoirement "magasinage".
 - Si aucun de ces types ne correspond, mettez "autres".
 
+   (NOTE SPÉCIALE CMA ET HMM : 
+   - Pour les bénéficiaires "CMA" et "HMM", la "Taxe Regionale" (même sous "Charges Diverses") DOIT TOUJOURS être comptée comme "magasinage".
+   - RÈGLE DE CALCUL DE LA TVA EXCLUSIVE À CMA : Pour "CMA" UNIQUEMENT, les montants en haut sont souvent affichés en HT, et la TVA se trouve tout en bas. Vous DEVEZ suivre ces règles pour extraire les montants TTC :
+      * Le montant TTC du "magasinage" = SOMME des montants HT sous "(L) Terminal full storage at destination" + le montant de la TVA en bas (commençant par "L TVA") + la "Taxe Regionale".
+      * Le montant TTC de la "surestarie" = SOMME des montants HT sous "(C) Detention & Demurrage Import Charge" + le montant de la TVA en bas (commençant par "C TVA").
+   - Pour les autres bénéficiaires (y compris HMM), les montants affichés sont généralement déjà en TTC.
+   Extrayez ces deux totaux calculés en TTC comme DEUX factures séparées dans votre liste "factures", l'une pour "magasinage" et l'autre pour "surestarie").
 Règles de formatage :
 - Retournez UNIQUEMENT un objet JSON valide, sans formatage markdown, sans explications.
 - Le JSON doit suivre cette structure exacte :

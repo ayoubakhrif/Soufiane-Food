@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_finance_root" name="Finance" sequence="10"/>
+    <menuitem id="menu_finance_root" name="Finance V1" sequence="10"/>
 
     <menuitem id="menu_finance_cheque_physical"
               name="Chèques Physiques (Global)"

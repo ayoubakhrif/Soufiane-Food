@@ -7,7 +7,7 @@
 
     <menuitem 
         id="finance_root_menu"
-        name="Finance"
+        name="Finance V1"
         sequence="1"
         web_icon="finance,static/description/icon.svg"
         action="finance_app_action"

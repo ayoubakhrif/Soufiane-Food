@@ -96,6 +96,7 @@
                             <field name="incoterm" readonly="1"/>
                             <field name="fret" invisible="incoterm != 'fob'" required="incoterm == 'fob'"/>
                             <field name="free_time" readonly="1"/>
+                            <field name="reste_free_time" decoration-danger="reste_free_time &lt; 0" readonly="1"/>
                             <field name="doc_status" readonly="1"/>
                         </group>
                     </group>

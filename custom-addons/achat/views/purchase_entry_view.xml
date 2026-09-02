@@ -159,6 +159,7 @@
                             <div class="o_row" invisible="incoterm == 'emirate'">
                                 <field name="free_time_negotiated" readonly="1" force_save="1" class="oe_inline"/> / 
                                 <field name="free_time" required="incoterm in ['fob', 'cfr']" class="oe_inline"/>
+                                <span> (Reste: <field name="reste_free_time" decoration-danger="reste_free_time &lt; 0" class="oe_inline"/>)</span>
                             </div>
 
                             <field name="dhl_number"/>

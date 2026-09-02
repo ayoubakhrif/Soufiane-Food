@@ -88,6 +88,18 @@ class LogisticsEntry(models.Model):
         ('exw', 'EXW'),
     ], string='Incoterm')
     free_time = fields.Integer(string='Free Time')
+    reste_free_time = fields.Integer(string='Reste', compute='_compute_reste_free_time')
+
+    @api.depends('eta', 'free_time')
+    def _compute_reste_free_time(self):
+        today = fields.Date.today()
+        from datetime import timedelta
+        for rec in self:
+            if rec.eta and rec.free_time:
+                deadline = rec.eta + timedelta(days=rec.free_time)
+                rec.reste_free_time = (deadline - today).days
+            else:
+                rec.reste_free_time = 0
     shipping_id = fields.Many2one('logistique.shipping', string='Company', tracking=True)
     eta = fields.Date(string='ETA', tracking=True)
 

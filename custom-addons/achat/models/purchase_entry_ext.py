@@ -515,6 +515,10 @@ OU si tout est correct :
         pink_num_style = workbook.add_format({
             'border': 1, 'num_format': '#,##0.00', 'align': 'center', 'font_size': 9, 'bg_color': '#FCE4D6'
         })
+        
+        red_num_style = workbook.add_format({
+            'border': 1, 'align': 'center', 'font_size': 9, 'bg_color': '#FFC7CE', 'font_color': '#9C0006', 'bold': True
+        })
 
         footer_label_style = workbook.add_format({
             'bold': True, 'border': 1, 'align': 'center', 'valign': 'vcenter', 'font_size': 10
@@ -562,7 +566,7 @@ OU si tout est correct :
 
         headers = [
             "Ste", "Supplier", "N°CTN", "INVOICE", "PRODUCT", "DETAILS",
-            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "", "CONTAINERS", "ETA", "OBSERVATIONS"
+            "WEIGHT", "U.P", "TOTAL", "INCOTERM", "FRANCHISE", "RESTE", "CONTAINERS", "ETA", "OBSERVATIONS"
         ]
         sheet.write_row(1, 0, headers, header_style)
 
@@ -598,8 +602,14 @@ OU si tout est correct :
                 sheet.write(row, 9, rec.incoterm.upper() if rec.incoterm else "", cell_style)
                 # K: Franchise
                 sheet.write(row, 10, rec.free_time or "", cell_style)
-                # L: Rest (Empty in the image, or shifted)
-                sheet.write(row, 11, "", cell_style)
+                # L: Rest
+                if rec.eta and rec.free_time:
+                    if rec.reste_free_time < 0:
+                        sheet.write(row, 11, rec.reste_free_time, red_num_style)
+                    else:
+                        sheet.write(row, 11, rec.reste_free_time, cell_style)
+                else:
+                    sheet.write(row, 11, "", cell_style)
                 # M: Container
                 sheet.write(row, 12, rec.container_names or "", cell_style)
                 
@@ -706,7 +716,15 @@ OU si tout est correct :
                     
                     sheet.write(row, 9, rec.incoterm.upper() if rec.incoterm else "", cell_style)
                     sheet.write(row, 10, rec.free_time or "", cell_style)
-                    sheet.write(row, 11, "", cell_style)
+                    
+                    if rec.eta and rec.free_time:
+                        if rec.reste_free_time < 0:
+                            sheet.write(row, 11, rec.reste_free_time, red_num_style)
+                        else:
+                            sheet.write(row, 11, rec.reste_free_time, cell_style)
+                    else:
+                        sheet.write(row, 11, "", cell_style)
+                        
                     sheet.write(row, 12, rec.container_names or "", cell_style)
                     
                     if rec.eta:

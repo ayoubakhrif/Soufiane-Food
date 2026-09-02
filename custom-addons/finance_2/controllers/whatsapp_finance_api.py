@@ -718,7 +718,7 @@ class WhatsAppFinanceController(http.Controller):
                         html_content += f"<td>{ste_name}</td>"
                         html_content += f"<td>{c_v2.journal or ''}</td>"
                         html_content += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
-                        html_content += f"<td>{c_v2.serie_facture or ''}</td>"
+                        html_content += "<td>-</td>"
                         html_content += "<td>-</td>"
                         html_content += f"<td>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
                         html_content += f"<td>{dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque'}</td>"

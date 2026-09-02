@@ -36,7 +36,6 @@ class Finance2Cheque(models.Model):
     chq_certifie = fields.Boolean(string='Chq certifié', tracking=True)
     journal = fields.Char(string='Journal', tracking=True)
     personne_id = fields.Many2one('finance2.personne', string='Personnes', tracking=True)
-    serie_facture = fields.Char(string='Série de facture', tracking=True)
     
     date_emission = fields.Date(string="Date d'émission", tracking=True)
     date_echeance = fields.Date(string="Date d'échéance", tracking=True)

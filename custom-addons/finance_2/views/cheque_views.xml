@@ -50,7 +50,6 @@
                             <field name="date_encaissement"/>
                             <field name="chq_certifie"/>
                             <field name="journal"/>
-                            <field name="serie_facture"/>
                         </group>
                     </group>
                     <group>

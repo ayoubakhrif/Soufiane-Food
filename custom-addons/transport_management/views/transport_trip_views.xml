@@ -146,7 +146,7 @@
                     <filter string="Driver" name="group_driver" domain="[]" context="{'group_by': 'driver_id'}"/>
                     <filter string="Client" name="group_client" domain="[]" context="{'group_by': 'client_id'}"/>
                     <filter string="Trip Type" name="group_type" domain="[]" context="{'group_by': 'trip_type'}"/>
-                    <filter string="Date de Voyage" name="group_date" domain="[]" context="{'group_by': 'date:day desc'}"/>
+                    <filter string="Date de Voyage" name="group_date" domain="[]" context="{'group_by': 'date:day'}"/>
                     <filter string="Date de Création (Jour)" name="group_create_date" context="{'group_by': 'create_date:day'}"/>
                 </group>
             </search>

@@ -187,35 +187,6 @@
                                     <field name="beneficiary_id"/>
                                 </tree>
                             </field>
-                        </page>
-                        <page string="Attestation d'Escale" name="attestation">
-                            <group>
-                                <group>
-                                    <field name="attestation_state" widget="badge" 
-                                           decoration-danger="attestation_state == 'not_requested'" 
-                                           decoration-warning="attestation_state == 'requested'" 
-                                           decoration-success="attestation_state == 'received'"/>
-                                    <field name="attestation_request_date"/>
-                                    <field name="attestation_receive_date"/>
-                                </group>
-                                <group>
-                                    <field name="attestation_file_name" invisible="1"/>
-                                    <field name="attestation_file" filename="attestation_file_name" widget="binary"/>
-                                </group>
-                            </group>
-                            <group>
-                                <div>
-                                    <button name="action_request_attestation" type="object" 
-                                            string="Marquer comme Demandée" 
-                                            class="oe_highlight" 
-                                            invisible="attestation_state != 'not_requested'"/>
-                                    <button name="action_receive_attestation" type="object" 
-                                            string="Marquer comme Reçue" 
-                                            class="oe_highlight" 
-                                            invisible="attestation_state != 'requested'"/>
-                                </div>
-                            </group>
-                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter" groups="logistique.group_logistique_manager">

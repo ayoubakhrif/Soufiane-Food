@@ -18,18 +18,75 @@
         </field>
     </record>
 
-    <!-- Action pour ouvrir cette vue liste filtrée -->
+    <!-- Vue Formulaire dédiée pour les Attestations d'Escale -->
+    <record id="view_attestation_escale_form" model="ir.ui.view">
+        <field name="name">logistique.entry.attestation.form</field>
+        <field name="model">logistique.entry</field>
+        <field name="arch" type="xml">
+            <form string="Attestation d'Escale">
+                <header>
+                    <button name="action_request_attestation" type="object" 
+                            string="Marquer comme Demandée" 
+                            class="oe_highlight" 
+                            invisible="attestation_state != 'not_requested'"/>
+                    <button name="action_receive_attestation" type="object" 
+                            string="Marquer comme Reçue" 
+                            class="oe_highlight" 
+                            invisible="attestation_state != 'requested'"/>
+                    <field name="attestation_state" widget="statusbar" statusbar_visible="not_requested,requested,received"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="bl_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ste_id" readonly="1"/>
+                            <field name="shipping_id" readonly="1"/>
+                            <field name="achat_article_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="eta" readonly="1"/>
+                            <field name="attestation_request_date"/>
+                            <field name="attestation_receive_date"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="attestation_file_name" invisible="1"/>
+                        <field name="attestation_file" filename="attestation_file_name" widget="binary"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour ouvrir cette vue liste et formulaire filtrée -->
     <record id="action_attestation_escale" model="ir.actions.act_window">
         <field name="name">Attestations d'Escale</field>
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('achat_article_id.is_onicl', '=', True)]</field>
-        <field name="view_id" ref="view_attestation_escale_tree"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Gérer les attestations d'escale pour les articles ONICL.
             </p>
         </field>
+    </record>
+
+    <record id="action_attestation_escale_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_attestation_escale_tree"/>
+        <field name="act_window_id" ref="action_attestation_escale"/>
+    </record>
+
+    <record id="action_attestation_escale_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_attestation_escale_form"/>
+        <field name="act_window_id" ref="action_attestation_escale"/>
     </record>
 
     <!-- Menu Item rattaché à Logistique -->

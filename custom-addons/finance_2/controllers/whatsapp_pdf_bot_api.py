@@ -186,10 +186,13 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
    - Le numéro de chèque: EXACTEMENT 7 chiffres, TOUJOURS en haut à gauche. Ne le confondez pas avec le compte ou le montant.
    - Le montant du chèque: C'est le montant total écrit sur le chèque (en haut à droite et en toutes lettres).
    - La date d'échéance du chèque: C'est la date écrite sur le chèque (souvent en bas à droite). Formatez-la OBLIGATOIREMENT en 'YYYY-MM-DD' (ex: 2026-08-15). S'il n'y a pas de date, laissez vide.
-   (NOTE SPÉCIALE CMA : Pour le bénéficiaire "CMA", NE FAITES PAS LA SOMME. Vous DEVEZ OBLIGATOIREMENT extraire CHAQUE montant séparément :
-   - Pour chaque montant sous "(L) Terminal full storage at destination", créez un élément JSON séparé avec le type "magasinage".
-   - Pour chaque montant sous "(C) Detention & Demurrage Import Charge" (ainsi que la "Taxe Regionale"), créez un élément JSON séparé avec le type "surestarie".
-   ATTENTION: Lisez UNIQUEMENT les montants de la colonne "Montant Total". Vous devez retourner autant d'éléments dans le JSON qu'il y a de lignes de montants dans le tableau.)
+   (NOTE SPÉCIALE CMA ET HMM : 
+   - Pour les bénéficiaires "CMA" et "HMM", la "Taxe Regionale" (même sous "Charges Diverses") DOIT TOUJOURS être comptée comme "magasinage".
+   - RÈGLE DE CALCUL DE LA TVA EXCLUSIVE À CMA : Pour "CMA" UNIQUEMENT, les montants en haut sont souvent affichés en HT, et la TVA se trouve tout en bas. Vous DEVEZ suivre ces règles pour extraire les montants TTC :
+      * Le montant TTC du "magasinage" = SOMME des montants HT sous "(L) Terminal full storage at destination" + le montant de la TVA en bas (commençant par "L TVA") + la "Taxe Regionale".
+      * Le montant TTC de la "surestarie" = SOMME des montants HT sous "(C) Detention & Demurrage Import Charge" + le montant de la TVA en bas (commençant par "C TVA").
+   - Pour les autres bénéficiaires (y compris HMM), les montants affichés sont généralement déjà en TTC.
+   Extrayez ces deux totaux calculés en TTC comme DEUX éléments séparés dans votre tableau JSON, l'un pour "magasinage" et l'autre pour "surestarie").
 2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.

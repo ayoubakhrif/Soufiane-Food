@@ -228,10 +228,13 @@ class WhatsAppFinancePdfController(http.Controller):
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le chèque se trouve TOUJOURS sur la dernière page du document. Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche du chèque (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
-   (NOTE SPÉCIALE CMA ET HMM : Pour les bénéficiaires "CMA" et "HMM", les frais de "magasinage" et de "surestarie" apparaissent souvent sur la MÊME facture. De plus, les montants en haut sont souvent affichés en HT, et la TVA se trouve tout en bas de la facture. Vous DEVEZ OBLIGATOIREMENT suivre ces règles de calcul pour extraire les montants TTC :
-   - Le montant TTC du "magasinage" est la SOMME EXACTE de tous les montants HT qui se trouvent sous le titre "(L) Terminal full storage at destination" + le montant de la TVA associée en bas (qui commence par "L TVA"). De plus, INCLUEZ AUSSI la "Taxe Regionale" dans le magasinage (même si elle se trouve sous "Charges Diverses").
-   - Le montant TTC de la "surestarie" est la SOMME EXACTE de tous les montants HT qui se trouvent sous le titre "(C) Detention & Demurrage Import Charge" + le montant de la TVA associée en bas (qui commence par "C TVA").
-   Extrayez ces deux totaux calculés en TTC comme DEUX éléments séparés dans votre tableau JSON, l'un avec le type "magasinage" et l'autre avec le type "surestarie").
+   (NOTE SPÉCIALE CMA ET HMM : 
+   - Pour les bénéficiaires "CMA" et "HMM", la "Taxe Regionale" (même sous "Charges Diverses") DOIT TOUJOURS être comptée comme "magasinage".
+   - RÈGLE DE CALCUL DE LA TVA EXCLUSIVE À CMA : Pour "CMA" UNIQUEMENT, les montants en haut sont souvent affichés en HT, et la TVA se trouve tout en bas. Vous DEVEZ suivre ces règles pour extraire les montants TTC :
+      * Le montant TTC du "magasinage" = SOMME des montants HT sous "(L) Terminal full storage at destination" + le montant de la TVA en bas (commençant par "L TVA") + la "Taxe Regionale".
+      * Le montant TTC de la "surestarie" = SOMME des montants HT sous "(C) Detention & Demurrage Import Charge" + le montant de la TVA en bas (commençant par "C TVA").
+   - Pour les autres bénéficiaires (y compris HMM), les montants affichés sont généralement déjà en TTC.
+   Extrayez ces deux totaux calculés en TTC comme DEUX éléments séparés dans votre tableau JSON, l'un pour "magasinage" et l'autre pour "surestarie").
 2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.

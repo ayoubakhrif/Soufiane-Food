@@ -13,7 +13,7 @@
                     <button name="action_remettre_finance" string="Remettre à Finance" type="object" invisible="state != 'reserve'"/>
                     
                     <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'" groups="finance_2.group_finance2_manager"/>
-                    <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('actif', 'reserve')" groups="finance_2.group_finance2_manager"/>
+                    <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('brouillon', 'actif', 'reserve')"/>
                     
                     <!-- Boutons Admin -->
                     <button name="force_brouillon" string="Forcer Brouillon" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'brouillon'"/>

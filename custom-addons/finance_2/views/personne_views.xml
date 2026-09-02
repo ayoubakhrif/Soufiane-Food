@@ -81,6 +81,10 @@
                                     <field name="date_emission"/>
                                     <field name="amount_total" sum="Total"/>
                                     <field name="state" widget="badge"/>
+                                    <button name="action_open_chq_vide" string="Voir Chèque" type="object" icon="fa-file-pdf-o" invisible="not chq_vide_pdf"/>
+                                    <button name="action_open_doc_pdf" string="Voir Doc" type="object" icon="fa-file-text-o" invisible="not doc_pdf"/>
+                                    <field name="chq_vide_pdf" column_invisible="1"/>
+                                    <field name="doc_pdf" column_invisible="1"/>
                                 </tree>
                             </field>
                         </page>

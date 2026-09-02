@@ -372,6 +372,26 @@ Exemple:
         for rec in self:
             rec.state = 'annule'
 
+    def action_open_chq_vide(self):
+        self.ensure_one()
+        if not self.chq_vide_pdf:
+            return
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/finance2.cheque/{self.id}/chq_vide_pdf',
+            'target': 'new',
+        }
+
+    def action_open_doc_pdf(self):
+        self.ensure_one()
+        if not self.doc_pdf:
+            return
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/finance2.cheque/{self.id}/doc_pdf',
+            'target': 'new',
+        }
+
     @api.model
     def _cron_check_actif_5_days(self):
         """Cron job that checks for cheques in 'actif' state for more than 5 days and sends a reminder."""

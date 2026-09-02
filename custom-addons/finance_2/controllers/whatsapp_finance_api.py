@@ -580,13 +580,21 @@ class WhatsAppFinanceController(http.Controller):
 
             # Calculate missing journals
             missing_journals = []
-            if datacheques:
-                journals = [int(dq.journal) for dq in datacheques if dq.journal and int(dq.journal) > 0]
-                if journals:
-                    max_j = max(journals)
-                    expected_set = set(range(1, max_j + 1))
-                    actual_set = set(journals)
-                    missing_journals = sorted(list(expected_set - actual_set))
+            journals = [int(dq.journal) for dq in datacheques if dq.journal and int(dq.journal) > 0]
+            # Add V2 cheques to journals
+            for c_v2 in cheques_v2:
+                if c_v2.repartition_ids:
+                    for rep in c_v2.repartition_ids:
+                        if rep.journal and rep.journal.isdigit():
+                            journals.append(int(rep.journal))
+                elif c_v2.journal and c_v2.journal.isdigit():
+                    journals.append(int(c_v2.journal))
+                    
+            if journals:
+                max_j = max(journals)
+                expected_set = set(range(1, max_j + 1))
+                actual_set = set(journals)
+                missing_journals = sorted(list(expected_set - actual_set))
 
             documents = []
             total_amount = 0.0
@@ -685,6 +693,22 @@ class WhatsAppFinanceController(http.Controller):
                     
                     global_state_dict = dict(c_v2._fields['state'].selection)
                     global_state = global_state_dict.get(c_v2.state) or c_v2.state
+                    
+                    if not c_v2.chq_vide_pdf:
+                        if reps:
+                            for rep in reps:
+                                if rep.journal:
+                                    chq_vide_missing_journals.add(str(rep.journal))
+                        elif c_v2.journal:
+                            chq_vide_missing_journals.add(str(c_v2.journal))
+                            
+                    if not c_v2.doc_pdf:
+                        if reps:
+                            for rep in reps:
+                                if rep.journal:
+                                    doc_missing_journals.add(str(rep.journal))
+                        elif c_v2.journal:
+                            doc_missing_journals.add(str(c_v2.journal))
                     
                     if not reps:
                         html_content += "<tr>"

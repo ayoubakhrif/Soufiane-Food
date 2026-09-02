@@ -15,7 +15,7 @@ class Finance2Cheque(models.Model):
     ste_id = fields.Many2one('finance2.ste', string='Société', required=False, tracking=True)
     benif_id = fields.Many2one('finance2.benif', string='Bénéficiaire', tracking=True)
     
-    amount_total = fields.Float(string='Montant Total', tracking=True)
+    amount_total = fields.Float(string='Montant des factures', tracking=True)
 
     total_surestarie = fields.Float(string='Total Surestarie', compute='_compute_totals')
     total_magasinage = fields.Float(string='Total Magasinage', compute='_compute_totals')

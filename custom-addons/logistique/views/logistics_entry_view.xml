@@ -187,6 +187,7 @@
                                     <field name="beneficiary_id"/>
                                 </tree>
                             </field>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter" groups="logistique.group_logistique_manager">

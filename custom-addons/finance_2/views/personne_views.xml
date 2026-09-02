@@ -77,9 +77,12 @@
                         <page string="Récapitulatif des Chèques (V2)">
                             <field name="cheque_ids">
                                 <tree>
-                                    <field name="name"/>
+                                    <field name="name" string="Chèque"/>
                                     <field name="date_emission"/>
-                                    <field name="amount_total" sum="Total"/>
+                                    <field name="date_echeance"/>
+                                    <field name="date_encaissement"/>
+                                    <field name="amount_total" string="Crédit" sum="Total Crédit"/>
+                                    <field name="montant_encaisse" string="Encaissement" sum="Total Encaissé"/>
                                     <field name="state" widget="badge"/>
                                     <button name="action_open_chq_vide" string="Voir Chèque" type="object" icon="fa-file-pdf-o" invisible="not chq_vide_pdf"/>
                                     <button name="action_open_doc_pdf" string="Voir Doc" type="object" icon="fa-file-text-o" invisible="not doc_pdf"/>

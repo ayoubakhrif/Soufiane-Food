@@ -94,17 +94,31 @@ class WhatsAppFinancePdfController(http.Controller):
         chq_ste_ai = ai_result.get('chq_ste', '')
         
         domain = [('name', '=', chq_number)]
-        if chq_ste_ai:
-            domain.append(('ste_id.raison_social', 'ilike', chq_ste_ai))
-            
         base_cheques = request.env['finance2.cheque'].sudo().search(domain)
+        
         base_cheque = False
         if base_cheques:
-            actifs = base_cheques.filtered(lambda c: c.state == 'actif')
-            if actifs:
-                base_cheque = actifs[0]
-            else:
+            # S'il y a un seul chèque, on le prend directement sans se casser la tête
+            if len(base_cheques) == 1:
                 base_cheque = base_cheques[0]
+            else:
+                # S'il y a plusieurs chèques, on essaie de filtrer par la société trouvée par l'IA
+                filtered_cheques = base_cheques
+                if chq_ste_ai:
+                    # On vérifie dans la raison sociale ou dans le nom (l'abréviation)
+                    matched = base_cheques.filtered(lambda c: 
+                        (c.ste_id.raison_social and chq_ste_ai.lower() in c.ste_id.raison_social.lower()) or 
+                        (c.ste_id.name and chq_ste_ai.lower() in c.ste_id.name.lower())
+                    )
+                    if matched:
+                        filtered_cheques = matched
+                        
+                # Parmi les chèques filtrés (ou tous s'il n'y a pas de match de société), on priorise 'actif'
+                actifs = filtered_cheques.filtered(lambda c: c.state == 'actif')
+                if actifs:
+                    base_cheque = actifs[0]
+                else:
+                    base_cheque = filtered_cheques[0]
 
         if not base_cheque:
             return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas dans Odoo. Vous devez d'abord créer le chèque vide."}

@@ -91,8 +91,20 @@ class WhatsAppFinancePdfController(http.Controller):
             return {'status': 'error', 'message': "❌ *Erreur:* L'IA n'a pas trouvé de factures valides dans le PDF."}
 
         # 5. Find the Cheque in finance_2
+        chq_ste_ai = ai_result.get('chq_ste', '')
+        
         domain = [('name', '=', chq_number)]
-        base_cheque = request.env['finance2.cheque'].sudo().search(domain, limit=1)
+        if chq_ste_ai:
+            domain.append(('ste_id.raison_social', 'ilike', chq_ste_ai))
+            
+        base_cheques = request.env['finance2.cheque'].sudo().search(domain)
+        base_cheque = False
+        if base_cheques:
+            actifs = base_cheques.filtered(lambda c: c.state == 'actif')
+            if actifs:
+                base_cheque = actifs[0]
+            else:
+                base_cheque = base_cheques[0]
 
         if not base_cheque:
             return {'status': 'error', 'message': f"❌ *Erreur:* Le chèque {chq_number} n'existe pas dans Odoo. Vous devez d'abord créer le chèque vide."}
@@ -184,7 +196,7 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
 
 1. Trouvez les informations du chèque (qui se trouve TOUJOURS sur la dernière page du document) :
    - Le numéro de chèque: EXACTEMENT 7 chiffres, TOUJOURS en haut à gauche. Ne le confondez pas avec le compte ou le montant.
-   - La société du chèque: Cherchez la raison sociale inscrite sur le chèque, et comparez avec la liste suivante : [STES_LIST]. Extrayez l'abréviation correspondante (la valeur avant les parenthèses).
+   - La société du chèque: Cherchez et extrayez la raison sociale exacte inscrite sur le chèque (ex: SOUFIANE NEGOCE, GENERALE...).
    - Le montant du chèque: C'est le montant total écrit sur le chèque (en haut à droite et en toutes lettres).
    - La date d'échéance du chèque: C'est la date écrite sur le chèque (souvent en bas à droite). Formatez-la OBLIGATOIREMENT en 'YYYY-MM-DD' (ex: 2026-08-15). S'il n'y a pas de date, laissez vide.
    (NOTE SPÉCIALE CMA ET HMM : 
@@ -216,6 +228,7 @@ Règles de formatage :
 - Le JSON doit suivre cette structure exacte :
 {
   "chq_number": "1234567",
+  "chq_ste": "SOUFIANE NEGOCE",
   "chq_amount": 10500.50,
   "chq_date": "2026-08-15",
   "factures": [

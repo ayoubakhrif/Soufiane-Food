@@ -606,6 +606,7 @@ class LogisticsEntry(models.Model):
         ('port', 'Dans le port'),
         ('analyse', 'Analyse'),
         ('visite', 'Visite'),
+        ('en_cours_chargement', 'En cours de chargement'),
         ('sortie_plein', 'Sortie plein'),
         ('rentree_vide', 'Rentrée vide'),
         ('arrive_depot', 'Arrivé au dépôt'),
@@ -644,7 +645,7 @@ class LogisticsEntry(models.Model):
 
     @api.onchange('date_sortie_port')
     def _onchange_date_sortie_port(self):
-        if self.date_sortie_port and self.tanger_med_state in ('port', 'analyse', 'visite'):
+        if self.date_sortie_port and self.tanger_med_state in ('port', 'analyse', 'visite', 'en_cours_chargement'):
             self.tanger_med_state = 'sortie_plein'
 
     @api.onchange('date_arrive_stock')
@@ -662,6 +663,12 @@ class LogisticsEntry(models.Model):
         for rec in self:
             rec.write({
                 'tanger_med_state': 'visite'
+            })
+
+    def action_tanger_med_en_cours_chargement(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'en_cours_chargement'
             })
 
     def action_tanger_med_sortie_plein(self):

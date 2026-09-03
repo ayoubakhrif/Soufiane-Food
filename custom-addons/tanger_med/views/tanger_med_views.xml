@@ -10,7 +10,7 @@
         <field name="arch" type="xml">
             <tree string="Tanger Med" create="false" delete="false" default_order="bad_date desc">
                 <field name="bl_number"/>
-                <field name="tanger_med_state" widget="badge" decoration-info="tanger_med_state == 'port'" decoration-warning="tanger_med_state in ('analyse', 'visite', 'sortie_plein', 'rentree_vide')" decoration-success="tanger_med_state == 'arrive_depot'"/>
+                <field name="tanger_med_state" widget="badge" decoration-info="tanger_med_state == 'port'" decoration-warning="tanger_med_state in ('analyse', 'visite', 'en_cours_chargement', 'sortie_plein', 'rentree_vide')" decoration-success="tanger_med_state == 'arrive_depot'"/>
                 <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
@@ -43,11 +43,12 @@
                 <header>
                     <button name="action_tanger_med_analyse" string="Analyse" type="object" class="oe_highlight" invisible="tanger_med_state not in ('port', 'visite')"/>
                     <button name="action_tanger_med_visite" string="Visite" type="object" class="oe_highlight" invisible="tanger_med_state not in ('port', 'analyse')"/>
-                    <button name="action_tanger_med_sortie_plein" string="Sortie Plein" type="object" class="oe_highlight" invisible="tanger_med_state not in ('port', 'analyse', 'visite')"/>
+                    <button name="action_tanger_med_en_cours_chargement" string="En cours de chargement" type="object" class="oe_highlight" invisible="tanger_med_state not in ('port', 'analyse', 'visite')"/>
+                    <button name="action_tanger_med_sortie_plein" string="Sortie Plein" type="object" class="oe_highlight" invisible="tanger_med_state not in ('port', 'analyse', 'visite', 'en_cours_chargement')"/>
                     <button name="action_tanger_med_rentree_vide" string="Rentrée Vide" type="object" class="oe_highlight" invisible="tanger_med_state != 'sortie_plein'"/>
                     <button name="action_tanger_med_arrive_depot" string="Arrivé au Dépôt" type="object" class="oe_highlight" invisible="tanger_med_state != 'rentree_vide'"/>
                     <button name="action_tanger_med_reset" string="Remettre Au Port" type="object" invisible="tanger_med_state == 'port'" groups="tanger_med.group_tanger_med_manager"/>
-                    <field name="tanger_med_state" widget="statusbar" statusbar_visible="port,analyse,visite,sortie_plein,rentree_vide,arrive_depot"/>
+                    <field name="tanger_med_state" widget="statusbar" statusbar_visible="port,analyse,visite,en_cours_chargement,sortie_plein,rentree_vide,arrive_depot"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

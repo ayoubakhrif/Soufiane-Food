@@ -184,6 +184,7 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
 
 1. Trouvez les informations du chèque (qui se trouve TOUJOURS sur la dernière page du document) :
    - Le numéro de chèque: EXACTEMENT 7 chiffres, TOUJOURS en haut à gauche. Ne le confondez pas avec le compte ou le montant.
+   - La société du chèque: Cherchez la raison sociale inscrite sur le chèque, et comparez avec la liste suivante : [STES_LIST]. Extrayez l'abréviation correspondante (la valeur avant les parenthèses).
    - Le montant du chèque: C'est le montant total écrit sur le chèque (en haut à droite et en toutes lettres).
    - La date d'échéance du chèque: C'est la date écrite sur le chèque (souvent en bas à droite). Formatez-la OBLIGATOIREMENT en 'YYYY-MM-DD' (ex: 2026-08-15). S'il n'y a pas de date, laissez vide.
    (NOTE SPÉCIALE CMA ET HMM : 
@@ -229,9 +230,13 @@ Règles de formatage :
 }
 """
         
+        stes = request.env['finance2.ste'].sudo().search([])
+        stes_names = ", ".join([f"{s.name} ({s.raison_social or ''})" for s in stes])
+        
         prompt_text = prompt_text.replace("[IMPORT_LIST]", import_list_str)
         prompt_text = prompt_text.replace("[DIVERS_LIST]", divers_list_str)
         prompt_text = prompt_text.replace("[FEEDBACK]", feedback_instruction)
+        prompt_text = prompt_text.replace("[STES_LIST]", stes_names)
         
         import base64
         try:

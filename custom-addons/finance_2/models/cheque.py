@@ -142,7 +142,7 @@ class Finance2Cheque(models.Model):
 
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque vide.
 Votre but est d'extraire les informations suivantes.
-1. "chq": Le numéro du chèque (EXACTEMENT 7 chiffres, TOUJOURS situé en haut à gauche. Ne cherchez pas en dessous ou ailleurs).
+1. "chq": Le numéro du chèque (EXACTEMENT 7 chiffres. Attention: ne prenez SURTOUT PAS une partie du numéro de compte / RIB (longue série de chiffres type 21217 048... souvent à droite). Le numéro du chèque est généralement situé à côté de mentions comme "Chèque Sie BGON", "Série", ou au-dessus de "Payez contre ce chèque").
 2. "ste": La société émettrice. Cherchez la raison sociale inscrite sur le chèque, et comparez avec la liste suivante : {stes_names}. Extrayez l'abréviation correspondante (la valeur avant les parenthèses).
 3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
 4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.

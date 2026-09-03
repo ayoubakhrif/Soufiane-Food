@@ -209,7 +209,7 @@ class WhatsAppFinancePdfController(http.Controller):
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez les informations du chèque (qui se trouve TOUJOURS sur la dernière page du document) :
-   - Le numéro de chèque: EXACTEMENT 7 chiffres, TOUJOURS situé en haut à gauche. Ne cherchez jamais en bas ou au milieu, et ne le confondez pas avec le compte ou le montant.
+   - Le numéro de chèque: EXACTEMENT 7 chiffres. Attention: ne prenez SURTOUT PAS une partie du numéro de compte / RIB (qui est une longue série de chiffres type 21217 048... souvent à droite). Le numéro du chèque est généralement situé à côté de mentions comme "Chèque Sie BGON", "Série", ou au-dessus de "Payez contre ce chèque".
    - La société du chèque: Cherchez et extrayez la raison sociale exacte inscrite sur le chèque (ex: SOUFIANE NEGOCE, GENERALE...).
    - Le montant du chèque: C'est le montant total écrit sur le chèque (en haut à droite et en toutes lettres).
    - La date d'échéance du chèque: C'est la date écrite sur le chèque (souvent en bas à droite). Formatez-la OBLIGATOIREMENT en 'YYYY-MM-DD' (ex: 2026-08-15). S'il n'y a pas de date, laissez vide.

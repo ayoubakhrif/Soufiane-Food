@@ -604,6 +604,7 @@ class LogisticsEntry(models.Model):
 
     tanger_med_state = fields.Selection([
         ('port', 'Dans le port'),
+        ('attente_ml', 'Attente main levée'),
         ('analyse', 'Analyse'),
         ('visite', 'Visite'),
         ('en_cours_chargement', 'En cours de chargement'),
@@ -645,13 +646,19 @@ class LogisticsEntry(models.Model):
 
     @api.onchange('date_sortie_port')
     def _onchange_date_sortie_port(self):
-        if self.date_sortie_port and self.tanger_med_state in ('port', 'analyse', 'visite', 'en_cours_chargement'):
+        if self.date_sortie_port and self.tanger_med_state in ('port', 'attente_ml', 'analyse', 'visite', 'en_cours_chargement'):
             self.tanger_med_state = 'sortie_plein'
 
     @api.onchange('date_arrive_stock')
     def _onchange_date_arrive_stock(self):
         if self.date_arrive_stock:
             self.tanger_med_state = 'arrive_depot'
+
+    def action_tanger_med_attente_ml(self):
+        for rec in self:
+            rec.write({
+                'tanger_med_state': 'attente_ml'
+            })
 
     def action_tanger_med_analyse(self):
         for rec in self:

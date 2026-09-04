@@ -113,3 +113,14 @@ class TangerMedEntry(models.Model):
         if 'exit_date' in vals and vals.get('exit_date'):
             vals['sur_mag_user'] = self.env.user.id
         return super().write(vals)
+
+    def action_tanger_med_attente_ml(self):
+        res = super(TangerMedEntry, self).action_tanger_med_attente_ml()
+        for rec in self:
+            existing = self.env['sutra.dossier'].search([('logistics_id', '=', rec.id)])
+            if not existing:
+                self.env['sutra.dossier'].create({
+                    'logistics_id': rec.id,
+                })
+        return res
+

@@ -19,3 +19,7 @@ access_logistique_entry_document_tanger_admin,access.logistique.entry.document.t
 access_logistique_entry_document_tanger_admin,access.logistique.entry.document.tanger.admin,achat.model_logistique_entry_document,group_tanger_med_manager,1,1,1,1
 access_logistique_dossier_sutra_tanger_user,access.logistique.dossier.sutra.tanger.user,logistique.model_logistique_dossier_sutra,group_tanger_med_user,1,1,1,0
 access_logistique_dossier_sutra_tanger_manager,access.logistique.dossier.sutra.tanger.manager,logistique.model_logistique_dossier_sutra,group_tanger_med_manager,1,1,1,1
+access_sutra_dossier_user,access.sutra.dossier.user,model_sutra_dossier,group_tanger_med_user,1,1,1,0
+access_sutra_dossier_manager,access.sutra.dossier.manager,model_sutra_dossier,group_tanger_med_manager,1,1,1,1
+access_sutra_facture_user,access.sutra.facture.user,model_sutra_facture,group_tanger_med_user,1,1,1,0
+access_sutra_facture_manager,access.sutra.facture.manager,model_sutra_facture,group_tanger_med_manager,1,1,1,1

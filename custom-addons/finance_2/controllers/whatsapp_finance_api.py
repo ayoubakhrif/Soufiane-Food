@@ -566,14 +566,20 @@ class WhatsAppFinanceController(http.Controller):
             }
 
         # 5.5 Handle Week Search
-        week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", msg_clean)
+        week_match = re.match(r"^(encaisse\s+)?(?:w|s|semaine|week)\s*0*(\d{1,2})$", msg_clean)
         if week_match:
-            week_num = int(week_match.group(1))
+            only_encaisse = bool(week_match.group(1))
+            week_num = int(week_match.group(2))
             week_str = f"W{week_num:02d}"
             
             datacheques = request.env['datacheque'].sudo().search([('week', '=', week_str)], order='journal asc')
             effets = request.env['finance.effet'].sudo().search([('week', '=', week_str)])
             cheques_v2 = request.env['finance2.cheque'].sudo().search([('week', '=', week_str)], order='journal asc')
+            
+            if only_encaisse:
+                datacheques = datacheques.filtered(lambda dq: dq.date_encaissement or (dq.physical_cheque_id and dq.physical_cheque_id.encours == 'encaisse'))
+                effets = effets.filtered(lambda e: e.date_encaissement or e.state == 'encaisse')
+                cheques_v2 = cheques_v2.filtered(lambda c: c.date_encaissement)
             
             if not datacheques and not effets and not cheques_v2:
                 return {'status': 'not_found', 'message': f"Aucun document trouvé pour la semaine {week_str}."}
@@ -598,12 +604,27 @@ class WhatsAppFinanceController(http.Controller):
 
             documents = []
             total_amount = 0.0
+            seen_cheques = set()
             
+            for c_v2 in cheques_v2:
+                c_key = (str(c_v2.name).strip(), c_v2.ste_id.id if c_v2.ste_id else False)
+                seen_cheques.add(c_key)
+                documents.append({
+                    'type_doc': 'CHQ_V2',
+                    'obj': c_v2,
+                    'items': c_v2.repartition_ids,
+                    'min_journal': int(c_v2.journal) if c_v2.journal and c_v2.journal.isdigit() else float('inf')
+                })
+                total_amount += c_v2.amount_total
+
             # Group datacheques by physical cheque
             grouped_dqs = {}
             for dq in datacheques:
                 phys = dq.physical_cheque_id
                 if not phys:
+                    continue
+                c_key = (str(phys.name).strip(), phys.ste_id.id if phys.ste_id else False)
+                if c_key in seen_cheques:
                     continue
                 if phys not in grouped_dqs:
                     grouped_dqs[phys] = []
@@ -631,15 +652,6 @@ class WhatsAppFinanceController(http.Controller):
                 })
                 total_amount += e.montant
                 
-            for c_v2 in cheques_v2:
-                documents.append({
-                    'type_doc': 'CHQ_V2',
-                    'obj': c_v2,
-                    'items': c_v2.repartition_ids,
-                    'min_journal': int(c_v2.journal) if c_v2.journal and c_v2.journal.isdigit() else float('inf')
-                })
-                total_amount += c_v2.amount_total
-                
             # Sort documents by journal
             documents.sort(key=lambda d: d['min_journal'])
 
@@ -659,7 +671,7 @@ class WhatsAppFinanceController(http.Controller):
                     </style>
                 </head>
                 <body>
-                    <h2>Documents de la Semaine {week_str}</h2>
+                    <h2>Documents{encaisse_label.lower()} de la Semaine {week_str}</h2>
                     <table>
                         <tr style="background-color: #ecf0f1;">
                             <th>Document</th>

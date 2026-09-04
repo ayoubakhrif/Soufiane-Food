@@ -21,6 +21,7 @@ class Finance2Cheque(models.Model):
     total_magasinage = fields.Float(string='Total Magasinage', compute='_compute_totals')
     total_change = fields.Float(string='Total Change', compute='_compute_totals')
     total_inspection = fields.Float(string='Total Inspection', compute='_compute_totals')
+    total_surplus = fields.Float(string='Total Surplus', compute='_compute_totals')
     total_repartitions = fields.Float(string='Total Répartitions', compute='_compute_totals')
 
     @api.depends('repartition_ids.amount', 'repartition_ids.type')
@@ -30,6 +31,7 @@ class Finance2Cheque(models.Model):
             rec.total_magasinage = sum(r.amount for r in rec.repartition_ids if r.type == 'magasinage')
             rec.total_change = sum(r.amount for r in rec.repartition_ids if r.type == 'change')
             rec.total_inspection = sum(r.amount for r in rec.repartition_ids if r.type == 'inspection')
+            rec.total_surplus = sum(r.amount for r in rec.repartition_ids if r.type == 'surplus')
             rec.total_repartitions = sum(r.amount for r in rec.repartition_ids)
     
     type = fields.Selection([('cheque', 'Chèque'), ('effet', 'Effet')], string='Type', default='cheque', tracking=True)
@@ -438,7 +440,8 @@ class Finance2Repartition(models.Model):
         ('surestarie', 'Surestarie'),
         ('magasinage', 'Magasinage'),
         ('change', 'Change'),
-        ('inspection', 'Inspection')
+        ('inspection', 'Inspection'),
+        ('surplus', 'Surplus')
     ], string='Type')
 
     @api.model_create_multi

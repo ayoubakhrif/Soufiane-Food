@@ -40,6 +40,7 @@
                             <field name="total_surestarie"/>
                             <field name="total_change"/>
                             <field name="total_inspection"/>
+                            <field name="total_surplus"/>
                             <field name="type"/>
                         </group>
                         <group>

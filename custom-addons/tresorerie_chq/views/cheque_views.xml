@@ -152,6 +152,11 @@
                         </group>
                     </group>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -178,6 +183,7 @@
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Date de réception" name="group_reception" context="{'group_by': 'reception_date:day'}"/>
                     <filter string="Date d'échéance" name="group_date" context="{'group_by': 'check_date:day'}"/>
+                    <filter string="Date d'envoi au banque" name="group_bank_send_date" context="{'group_by': 'bank_send_date:day'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by': 'core_ste_id'}"/>
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                 </group>

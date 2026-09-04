@@ -195,20 +195,20 @@ class LogisticsEntry(models.Model):
             else:
                 rec.display_name = rec.bl_number or "Nouveau"
 
-    @api.constrains('bl_number', 'contract_id')
-    def _check_bl_contract_unique(self):
-        """Prevent duplicate BL numbers for the same contract"""
+    @api.constrains('bl_number', 'achat_article_id')
+    def _check_bl_article_unique(self):
+        """Prevent duplicate BL numbers for the same article"""
         for rec in self:
-            if rec.bl_number and rec.contract_id:
+            if rec.bl_number and rec.achat_article_id:
                 duplicate = self.search([
                     ('id', '!=', rec.id),
                     ('bl_number', '=', rec.bl_number),
-                    ('contract_id', '=', rec.contract_id.id)
+                    ('achat_article_id', '=', rec.achat_article_id.id)
                 ], limit=1)
                 if duplicate:
                     raise ValidationError(
-                        f"The BL '{rec.bl_number}' exists already for this contract '{rec.contract_id.name}'.\n"
-                        f"The same BL number cannot be used twice for the same contract."
+                        f"Le BL '{rec.bl_number}' existe déjà pour l'article '{rec.achat_article_id.name}'.\n"
+                        f"Le doublon est sur '{duplicate.display_name}'."
                     )
 
     @api.constrains('price_unit')

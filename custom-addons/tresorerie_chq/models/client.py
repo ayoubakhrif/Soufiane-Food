@@ -9,6 +9,7 @@ class TresorerieChqClientAlias(models.Model):
 
 class TresorerieChqClient(models.Model):
     _name = 'tresorerie_chq.client'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Client (Trésorerie Chèques & Effets)'
 
     name = fields.Char(string='Nom', required=True)

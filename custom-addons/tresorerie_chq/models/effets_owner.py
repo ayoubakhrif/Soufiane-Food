@@ -7,7 +7,8 @@ class EffetsOwner(models.Model):
     or effet when the payment is not in the client's own name.
     """
     _name = 'tresorerie_chq.effets.owner'
-    _description = 'Porteur de Chèque / Effet'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _description = 'Porteur de Chèques / Effets'
     _order = 'name'
 
     name = fields.Char(string='Nom du porteur', required=True)

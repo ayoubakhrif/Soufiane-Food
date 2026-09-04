@@ -5,7 +5,7 @@
     'description': 'Module spécifique pour gérer les paiements internes indépendamment des partenaires standards.',
     'category': 'Accounting/Localizations',
     'author': 'Gestia',
-    'depends': ['base', 'custom_employee'],
+    'depends': ['base', 'custom_employee', 'mail'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

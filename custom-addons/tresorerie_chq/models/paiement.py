@@ -3,6 +3,7 @@ from odoo import models, fields, api
 
 class TresoreriePaiement(models.Model):
     _name = 'tresorerie_chq.paiement'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Paiement (TrÃ©sorerie ChÃ¨ques & Effets)'
     _order = 'create_date desc'
 

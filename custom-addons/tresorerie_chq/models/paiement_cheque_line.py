@@ -7,6 +7,7 @@ class TresorerieChqCheque(models.Model):
     Represents a physical cheque received within a paiement and its lifecycle workflow.
     """
     _name = 'tresorerie_chq.cheque'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Suivi de Chèque'
     _order = 'check_date asc, core_ste_id asc, client_id asc, id desc'
 
@@ -208,6 +209,7 @@ class TresorerieChqEffet(models.Model):
     Represents a physical commercial paper (effet) received within a paiement and its lifecycle workflow.
     """
     _name = 'tresorerie_chq.effet'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Suivi d\'Effet'
     _order = 'check_date asc, core_ste_id asc, client_id asc, id desc'
 

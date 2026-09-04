@@ -5,7 +5,7 @@ class LogistiqueContainer(models.Model):
     _description = 'Conteneur'
 
     _sql_constraints = [
-        ('unique_container_per_dossier', 'unique(dossier_id, name)', 'Container number must be unique per dossier!')
+        ('unique_container_per_entry', 'unique(entry_id, name)', 'Container number must be unique per entry!')
     ]
 
     name = fields.Char(string='Numéro Conteneur', required=True)

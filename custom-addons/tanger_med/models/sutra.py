@@ -15,7 +15,7 @@ class SutraDossier(models.Model):
             if not vals.get('name') and vals.get('logistics_id'):
                 log_entry = self.env['logistique.entry'].browse(vals['logistics_id'])
                 if log_entry.exists():
-                    vals['name'] = f'SUTRA - {log_entry.name}'
+                    vals['name'] = f'SUTRA - {log_entry.display_name}'
         return super(SutraDossier, self).create(vals_list)
 
 
@@ -34,4 +34,5 @@ class SutraFacture(models.Model):
     ], string='Statut Paiement', default='non_paye', tracking=True)
     pdf_file = fields.Binary(string='Facture (PDF)', attachment=True)
     pdf_filename = fields.Char(string='Nom du fichier PDF')
-
+
+

@@ -13,4 +13,5 @@ class SuiviClient(models.Model):
         ('merakech', 'Merakech'),
         ('fes', 'Fes'),
         ('houssima', 'Houssima'),
+        ('sidi_bennour', 'Sidi Bennour'),
     ], string='Ville')

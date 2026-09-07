@@ -15,6 +15,7 @@ class SuiviOperation(models.Model):
         ('merakech', 'Merakech'),
         ('fes', 'Fes'),
         ('houssima', 'Houssima'),
+        ('sidi_bennour', 'Sidi Bennour'),
     ], string='Ville', required=True)
     chauffeur_id = fields.Many2one('suivi.chauffeur', string='Chauffeur', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)

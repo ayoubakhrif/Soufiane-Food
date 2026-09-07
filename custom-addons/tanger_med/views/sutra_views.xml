@@ -26,7 +26,7 @@
                                         <field name="name"/>
                                         <field name="date"/>
                                         <field name="amount" sum="Total"/>
-                                        <field name="state" widget="badge" decoration-success="state == 'paye'" decoration-danger="state == 'non_paye'"/>
+                                        <field name="state" widget="badge" decoration-success="state == 'paye'" decoration-warning="state == 'encours'" decoration-danger="state == 'non_paye'"/>
                                         <field name="pdf_filename" invisible="1"/>
                                         <field name="pdf_file" filename="pdf_filename" widget="binary"/>
                                     </tree>
@@ -103,6 +103,31 @@
         
         <menuitem id="menu_sutra_dossiers" name="Dossiers SUTRA" parent="menu_sutra_main" action="action_sutra_dossier" sequence="10"/>
         <menuitem id="menu_sutra_config" name="Configuration par Societe" parent="menu_sutra_main" action="action_sutra_config_ste" sequence="20"/>
+
+            <!-- Factures SUTRA Global Tree View -->
+        <record id="view_sutra_facture_tree_global" model="ir.ui.view">
+            <field name="name">sutra.facture.tree.global</field>
+            <field name="model">sutra.facture</field>
+            <field name="arch" type="xml">
+                <tree string="Factures a payer" create="0">
+                    <field name="sutra_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="amount" sum="Total"/>
+                    <field name="state" widget="badge" decoration-success="state == 'paye'" decoration-warning="state == 'encours'" decoration-danger="state == 'non_paye'"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_sutra_facture_global" model="ir.actions.act_window">
+            <field name="name">Factures a payer</field>
+            <field name="res_model">sutra.facture</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'non_paye')]</field>
+            <field name="context">{}</field>
+        </record>
+
+        <menuitem id="menu_sutra_facture_global" name="Factures a payer" parent="menu_sutra_main" action="action_sutra_facture_global" sequence="15"/>
 
     </data>
 </odoo>

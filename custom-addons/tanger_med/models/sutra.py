@@ -46,7 +46,10 @@ class SutraFacture(models.Model):
     amount = fields.Float(string='Montant TTC', tracking=True)
     state = fields.Selection([
         ('non_paye', 'Non Paye'),
+        ('encours', 'En Cours'),
         ('paye', 'Paye')
     ], string='Statut Paiement', default='non_paye', tracking=True)
+    
+    cheque_id = fields.Many2one('finance2.cheque', string='Cheque de Paiement', tracking=True)
     pdf_file = fields.Binary(string='Facture (PDF)', attachment=True)
     pdf_filename = fields.Char(string='Nom du fichier PDF')

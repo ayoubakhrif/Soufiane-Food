@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_finance2_cheque_sutra_inherit" model="ir.ui.view">
+            <field name="name">finance2.cheque.sutra.inherit</field>
+            <field name="model">finance2.cheque</field>
+            <field name="inherit_id" ref="finance_2.view_finance2_cheque_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Factures SUTRA">
+                        <field name="sutra_facture_ids" readonly="1">
+                            <tree>
+                                <field name="sutra_id"/>
+                                <field name="name"/>
+                                <field name="date"/>
+                                <field name="amount" sum="Total"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

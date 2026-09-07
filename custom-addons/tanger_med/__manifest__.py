@@ -19,6 +19,8 @@
         'views/tanger_med_destination_views.xml',
         'views/sutra_views.xml',
         'wizard/sutra_import_wizard_views.xml',
+        'views/finance2_cheque_inherit_views.xml',
+        'wizard/sutra_facture_pay_wizard_views.xml',
         'views/menus.xml',
     ],
     'installable': True,

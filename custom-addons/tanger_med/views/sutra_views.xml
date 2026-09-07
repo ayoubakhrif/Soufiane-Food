@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
         <!-- Form View for Sutra Dossier -->
@@ -16,6 +16,7 @@
                         <group>
                             <group>
                                 <field name="logistics_id"/>
+                                <field name="amount"/>
                             </group>
                         </group>
                         <notebook>
@@ -50,18 +51,58 @@
                 <tree string="Dossiers SUTRA">
                     <field name="name"/>
                     <field name="logistics_id"/>
+                    <field name="amount" sum="Total SUTRA"/>
                 </tree>
             </field>
         </record>
 
-        <!-- Action -->
+        <!-- Action Dossiers -->
         <record id="action_sutra_dossier" model="ir.actions.act_window">
             <field name="name">Dossiers SUTRA</field>
             <field name="res_model">sutra.dossier</field>
             <field name="view_mode">tree,form</field>
         </record>
 
-        <!-- Main Menu under Finance V2 -->
-        <menuitem id="menu_sutra_dossiers" name="SUTRA" parent="finance_2.menu_finance2_root" action="action_sutra_dossier" sequence="50"/>
+        <!-- Form View for Sutra Config -->
+        <record id="view_sutra_config_ste_form" model="ir.ui.view">
+            <field name="name">sutra.config.ste.form</field>
+            <field name="model">sutra.config.ste</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="ste_id"/>
+                            <field name="amount"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View for Sutra Config -->
+        <record id="view_sutra_config_ste_tree" model="ir.ui.view">
+            <field name="name">sutra.config.ste.tree</field>
+            <field name="model">sutra.config.ste</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom">
+                    <field name="ste_id"/>
+                    <field name="amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Config -->
+        <record id="action_sutra_config_ste" model="ir.actions.act_window">
+            <field name="name">Configuration Montant SUTRA</field>
+            <field name="res_model">sutra.config.ste</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Menus -->
+        <menuitem id="menu_sutra_main" name="SUTRA" parent="finance_2.menu_finance2_root" sequence="50"/>
+        
+        <menuitem id="menu_sutra_dossiers" name="Dossiers SUTRA" parent="menu_sutra_main" action="action_sutra_dossier" sequence="10"/>
+        <menuitem id="menu_sutra_config" name="Configuration par Societe" parent="menu_sutra_main" action="action_sutra_config_ste" sequence="20"/>
+
     </data>
 </odoo>

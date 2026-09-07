@@ -18,6 +18,7 @@
         'views/tanger_med_views.xml',
         'views/tanger_med_destination_views.xml',
         'views/sutra_views.xml',
+        'wizard/sutra_import_wizard_views.xml',
         'views/menus.xml',
     ],
     'installable': True,

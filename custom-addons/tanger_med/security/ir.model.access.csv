@@ -29,3 +29,5 @@ access_sutra_facture_finance_user,access.sutra.facture.finance.user,model_sutra_
 access_sutra_facture_finance_manager,access.sutra.facture.finance.manager,model_sutra_facture,finance_2.group_finance2_manager,1,1,1,1
 access_sutra_config_ste_user,access.sutra.config.ste.user,model_sutra_config_ste,finance_2.group_finance2_user,1,0,0,0
 access_sutra_config_ste_manager,access.sutra.config.ste.manager,model_sutra_config_ste,finance_2.group_finance2_manager,1,1,1,1
+access_sutra_import_wizard_user,access.sutra.import.wizard.user,model_sutra_import_wizard,finance_2.group_finance2_user,1,1,1,1
+access_sutra_import_wizard_manager,access.sutra.import.wizard.manager,model_sutra_import_wizard,finance_2.group_finance2_manager,1,1,1,1

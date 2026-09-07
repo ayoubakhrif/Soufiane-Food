@@ -1,29 +1,28 @@
-import os
-import re
+﻿import os
 
-base_path = r'c:\odoo-repos\Soufiane-Food\custom-addons\finance_2'
-cheque_xml = os.path.join(base_path, 'views', 'cheque_views.xml')
-talon_xml = os.path.join(base_path, 'views', 'talon_views.xml')
+manifest_path = 'custom-addons/tanger_med/__manifest__.py'
+with open(manifest_path, 'r', encoding='utf-8') as f:
+    content = f.read()
 
-with open(cheque_xml, 'r', encoding='utf-8') as f:
-    content_chq = f.read()
+content = content.replace("'depends': ['base', 'logistique'],", "'depends': ['base', 'logistique', 'finance_2'],")
 
-menu_pattern = r'    <menuitem id="menu_finance2_talons".*?/>\n'
-match = re.search(menu_pattern, content_chq)
+with open(manifest_path, 'w', encoding='utf-8') as f:
+    f.write(content)
+print("Updated __manifest__.py")
 
-if match:
-    menu_str = match.group(0)
-    content_chq = content_chq.replace(menu_str, '')
-    
-    with open(cheque_xml, 'w', encoding='utf-8') as f:
-        f.write(content_chq)
-        
-    with open(talon_xml, 'r', encoding='utf-8') as f:
-        content_tln = f.read()
-    
-    content_tln = content_tln.replace('</odoo>', menu_str + '</odoo>')
-    with open(talon_xml, 'w', encoding='utf-8') as f:
-        f.write(content_tln)
-    print('Menu moved successfully.')
-else:
-    print('Menu not found in cheque_views.xml.')
+xml_path = 'custom-addons/tanger_med/views/sutra_views.xml'
+with open(xml_path, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+old_menu = """        <!-- Main Menu -->
+        <menuitem id="menu_sutra_root" name="SUTRA" sequence="60" web_icon="tanger_med,static/description/icon.png"/>
+        <menuitem id="menu_sutra_dossiers" name="Dossiers SUTRA" parent="menu_sutra_root" action="action_sutra_dossier" sequence="10"/>"""
+
+new_menu = """        <!-- Main Menu under Finance V2 -->
+        <menuitem id="menu_sutra_dossiers" name="SUTRA" parent="finance_2.menu_finance2_root" action="action_sutra_dossier" sequence="50"/>"""
+
+content = content.replace(old_menu, new_menu)
+
+with open(xml_path, 'w', encoding='utf-8') as f:
+    f.write(content)
+print("Updated sutra_views.xml")

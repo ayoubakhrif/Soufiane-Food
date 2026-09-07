@@ -1,0 +1,113 @@
+﻿xml_content = """<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form View for Sutra Dossier -->
+        <record id="view_sutra_dossier_form" model="ir.ui.view">
+            <field name="name">sutra.dossier.form</field>
+            <field name="model">sutra.dossier</field>
+            <field name="arch" type="xml">
+                <form string="Dossier SUTRA">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Nom du dossier..."/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="logistics_id"/>
+                                <field name="amount"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Factures">
+                                <field name="facture_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="date"/>
+                                        <field name="amount" sum="Total"/>
+                                        <field name="state" widget="badge" decoration-success="state == 'paye'" decoration-danger="state == 'non_paye'"/>
+                                        <field name="pdf_filename" invisible="1"/>
+                                        <field name="pdf_file" filename="pdf_filename" widget="binary"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View for Sutra Dossier -->
+        <record id="view_sutra_dossier_tree" model="ir.ui.view">
+            <field name="name">sutra.dossier.tree</field>
+            <field name="model">sutra.dossier</field>
+            <field name="arch" type="xml">
+                <tree string="Dossiers SUTRA">
+                    <field name="name"/>
+                    <field name="logistics_id"/>
+                    <field name="amount" sum="Total SUTRA"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Dossiers -->
+        <record id="action_sutra_dossier" model="ir.actions.act_window">
+            <field name="name">Dossiers SUTRA</field>
+            <field name="res_model">sutra.dossier</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Form View for Sutra Config -->
+        <record id="view_sutra_config_ste_form" model="ir.ui.view">
+            <field name="name">sutra.config.ste.form</field>
+            <field name="model">sutra.config.ste</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="ste_id"/>
+                            <field name="amount"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View for Sutra Config -->
+        <record id="view_sutra_config_ste_tree" model="ir.ui.view">
+            <field name="name">sutra.config.ste.tree</field>
+            <field name="model">sutra.config.ste</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom">
+                    <field name="ste_id"/>
+                    <field name="amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Config -->
+        <record id="action_sutra_config_ste" model="ir.actions.act_window">
+            <field name="name">Configuration Montant SUTRA</field>
+            <field name="res_model">sutra.config.ste</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Menus -->
+        <menuitem id="menu_sutra_main" name="SUTRA" parent="finance_2.menu_finance2_root" sequence="50"/>
+        
+        <menuitem id="menu_sutra_dossiers" name="Dossiers SUTRA" parent="menu_sutra_main" action="action_sutra_dossier" sequence="10"/>
+        <menuitem id="menu_sutra_config" name="Configuration par Societe" parent="menu_sutra_main" action="action_sutra_config_ste" sequence="20"/>
+
+    </data>
+</odoo>
+"""
+
+with open('custom-addons/tanger_med/views/sutra_views.xml', 'w', encoding='utf-8') as f:
+    f.write(xml_content)
+print("Updated sutra_views.xml")

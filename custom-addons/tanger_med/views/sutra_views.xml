@@ -61,8 +61,7 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <!-- Main Menu -->
-        <menuitem id="menu_sutra_root" name="SUTRA" sequence="60" web_icon="tanger_med,static/description/icon.png"/>
-        <menuitem id="menu_sutra_dossiers" name="Dossiers SUTRA" parent="menu_sutra_root" action="action_sutra_dossier" sequence="10"/>
+        <!-- Main Menu under Finance V2 -->
+        <menuitem id="menu_sutra_dossiers" name="SUTRA" parent="finance_2.menu_finance2_root" action="action_sutra_dossier" sequence="50"/>
     </data>
 </odoo>

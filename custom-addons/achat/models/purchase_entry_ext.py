@@ -166,11 +166,12 @@ class LogisticsEntry(models.Model):
         days_to_thursday = (3 - today.weekday()) % 7
         next_thursday = today + timedelta(days=days_to_thursday)
         for rec in self:
-            rec.eta_this_week = (
-                rec.port_status == 'on_port'
-                and bool(rec.eta)
-                and rec.eta <= next_thursday
-            )
+            if rec.port_status in ('release', 'tanger_med', 'emirate', 'refinancement'):
+                rec.eta_this_week = True
+            elif rec.port_status == 'on_port':
+                rec.eta_this_week = bool(rec.eta) and rec.eta <= next_thursday
+            else:
+                rec.eta_this_week = False
 
     calendar_label = fields.Char(string='Label Calendrier', compute='_compute_calendar_label')
 
@@ -683,7 +684,11 @@ OU si tout est correct :
             'refinancement': 'REFINANCEMENT'
         }
         
-        special_recs = self.filtered(lambda r: r.port_status in special_states.keys())
+        # Récupérer tous les dossiers spéciaux sélectionnés ET ceux en base non encore sortis
+        db_special = self.env['logistique.entry'].search([
+            ('port_status', 'in', list(special_states.keys()))
+        ], order='port_status asc, eta asc')
+        special_recs = (self.filtered(lambda r: r.port_status in special_states.keys()) | db_special)
         if special_recs:
             row += 4
             sheet.merge_range(row, 0, row, 14, "DOSSIERS EN COURS DE DÉCHARGEMENT (STATUTS SPÉCIAUX)", date_title_style)

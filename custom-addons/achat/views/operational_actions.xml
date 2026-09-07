@@ -9,6 +9,10 @@
             <tree string="Dossiers à Sortir" create="false" delete="false">
                 <field name="dossier_id" invisible="1"/>
                 <field name="ste_id"/>
+                <field name="port_status" widget="badge" 
+                       decoration-success="port_status == 'exited'" 
+                       decoration-info="port_status == 'on_port'" 
+                       decoration-warning="port_status in ('release', 'tanger_med', 'emirate', 'refinancement')"/>
                 <field name="supplier_id"/>
                 <field name="invoice_number"/>
                 <field name="achat_article_id"/>
@@ -18,6 +22,7 @@
                 <field name="amount_total" sum="Total Montant" widget="monetary"/>
                 <field name="incoterm"/>
                 <field name="free_time" string="Franchise"/>
+                <field name="reste_free_time" string="Reste" decoration-danger="reste_free_time &lt; 0"/>
                 <field name="container_names" string="Conteneurs"/>
                 <field name="eta"/>
                 <field name="exit_comment" string="Commentaire Sortie"/>
@@ -86,8 +91,15 @@
                 <filter name="eta_semaine"
                         string="ETA cette semaine (≤ jeudi)"
                         domain="[('eta_this_week', '=', True)]"/>
+                <separator/>
+                <filter name="status_on_port" string="En attente" domain="[('port_status', '=', 'on_port')]"/>
+                <filter name="status_release" string="Release" domain="[('port_status', '=', 'release')]"/>
+                <filter name="status_tanger_med" string="Tanger Med" domain="[('port_status', '=', 'tanger_med')]"/>
+                <filter name="status_emirate" string="Emirate" domain="[('port_status', '=', 'emirate')]"/>
+                <filter name="status_refinancement" string="Refinancement" domain="[('port_status', '=', 'refinancement')]"/>
 
                 <group expand="0" string="Group By">
+                    <filter string="Statut Port" name="group_by_port_status" context="{'group_by': 'port_status'}"/>
                     <filter string="Fournisseur" name="group_by_supplier" context="{'group_by': 'supplier_id'}"/>
                     <filter string="Société"     name="group_by_ste"      context="{'group_by': 'ste_id'}"/>
                 </group>

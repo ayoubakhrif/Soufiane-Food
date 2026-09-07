@@ -228,13 +228,35 @@ class WhatsAppFinancePdfController(http.Controller):
 Votre but est d'analyser le document et d'extraire les informations nécessaires pour l'ERP Odoo.
 
 1. Trouvez le numéro de chèque. ATTENTION RÈGLE ABSOLUE : Le chèque se trouve TOUJOURS sur la dernière page du document. Le numéro de chèque est EXACTEMENT composé de 7 chiffres et se trouve TOUJOURS en haut à gauche du chèque (souvent après la mention 'Chèque N°' ou 'N.'). Il ne fait jamais plus de 7 chiffres. Ne le confondez SURTOUT PAS avec les numéros de compte très longs en bas, ni avec le montant du chèque qui se trouve TOUJOURS en haut à droite. S'il y a plusieurs factures ou plusieurs types de frais dans le même document, traitez-les séparément.
-   (NOTE SPÉCIALE CMA ET HMM : 
-   - Pour les bénéficiaires "CMA" et "HMM", la "Taxe Regionale" (même sous "Charges Diverses") DOIT TOUJOURS être comptée comme "magasinage".
-   - RÈGLE DE CALCUL DE LA TVA EXCLUSIVE À CMA : Pour "CMA" UNIQUEMENT, les montants en haut sont souvent affichés en HT, et la TVA se trouve tout en bas. Vous DEVEZ suivre ces règles pour extraire les montants TTC :
-      * Le montant TTC du "magasinage" = SOMME des montants HT sous "(L) Terminal full storage at destination" + le montant de la TVA en bas (commençant par "L TVA") + la "Taxe Regionale".
-      * Le montant TTC de la "surestarie" = SOMME des montants HT sous "(C) Detention & Demurrage Import Charge" + le montant de la TVA en bas (commençant par "C TVA").
-   - Pour les autres bénéficiaires (y compris HMM), les montants affichés sont généralement déjà en TTC.
-   Extrayez ces deux totaux calculés en TTC comme DEUX éléments séparés dans votre tableau JSON, l'un pour "magasinage" et l'autre pour "surestarie").
+   (NOTE SPÉCIALE TRÈS IMPORTANTE POUR FACTURES CMA CGM ET HMM) :
+   Sur les factures CMA CGM (qui comportent souvent plusieurs conteneurs et s'étendent sur plusieurs pages) :
+   1. COLONNE À LIRE POUR CHAQUE CONTENEUR :
+      - Lisez UNIQUEMENT la dernière colonne intitulée "Montant Total" (en dirhams / MAD).
+      - NE CONFONDEZ JAMAIS avec les colonnes "Nombre de jours facturables", "Jours", "Free Days" (ex: '2', '21', '1', etc.) ou "Taux" qui ne sont PAS des montants !
+      - Parcourez TOUTES LES PAGES pour comptabiliser TOUS LES CONTENEURS :
+        * Sous "(L) Terminal full storage at destination", additionnez le "Montant Total" de CHAQUE conteneur sur toutes les pages (ex: 5 conteneurs à 120 MAD = 600 MAD).
+        * Sous "(C) Detention & Demurrage Import Charge", additionnez le "Montant Total" de CHAQUE conteneur sur toutes les pages (ex: 5 conteneurs à 460 MAD = 2300 MAD).
+   
+   2. TAXE RÉGIONALE :
+      - Le montant sous "Charges Diverses" -> "(L) Taxe Regionale" (ex: 24.00 MAD) DOIT TOUJOURS ÊTRE AJOUTÉ au montant de "magasinage".
+      (Note : La colonne "Base taxabl" de la Taxe Régionale indique d'ailleurs exactement le total HT du stockage !).
+
+   3. GESTION DE LA TVA (CAS SANS TVA vs CAS AVEC TVA) :
+      - CAS SANS TVA (Mention Taxe 'ME' / Régime suspensif / Exonéré) :
+        Il n'y a PAS de tableau de TVA en bas. Les montants des conteneurs sont déjà définitifs.
+        Total Magasinage = (Somme stockage L) + (Taxe Régionale L).
+        Total Surestarie = (Somme surestarie C).
+      - CAS AVEC TVA (Tableau de TVA au bas de la facture) :
+        Ajoutez la TVA commençant par "L TVA" au magasinage.
+        Ajoutez la TVA commençant par "C TVA" à la surestarie.
+
+   4. CONTRÔLE DE COHÉRENCE OBLIGATOIRE :
+      - La facture indique TOUJOURS son montant total global au bas de la dernière page (ex: "Montant Total: 2 924.00 MAD" ou "Total T.T.C").
+      - Vérifiez IMPÉRATIVEMENT que :
+        Total Magasinage + Total Surestarie == Montant Total de la facture !
+      - Si votre total calculé ne correspond pas au "Montant Total" de la facture, votre calcul est FAUX : vous avez manqué des conteneurs ou confondu avec le nombre de jours. Corrigez-le avant de renvoyer le JSON.
+   
+   Extrayez ces deux montants exacts dans la liste "factures", l'un avec le type "magasinage" et l'autre avec le type "surestarie".
 2. Pour chaque facture (ou ligne de frais séparée), extrayez :
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur.

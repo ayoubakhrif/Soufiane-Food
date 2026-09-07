@@ -655,6 +655,7 @@ class WhatsAppFinanceController(http.Controller):
             # Sort documents by journal
             documents.sort(key=lambda d: d['min_journal'])
 
+            encaisse_label = " ENCAISSÉS" if only_encaisse else ""
             html_content = f"""
             <html>
                 <head>
@@ -885,16 +886,16 @@ class WhatsAppFinanceController(http.Controller):
 
                 return {
                     'status': 'success',
-                    'product_name': f"Chèques Semaine {week_str}",
-                    'response': f"Voici le rapport des chèques pour la semaine *{week_str}*." + 
+                    'product_name': f"Chèques{encaisse_label.title()} Semaine {week_str}",
+                    'response': f"Voici le rapport des chèques{encaisse_label.lower()} pour la semaine *{week_str}*." + 
                                 (f"\n\n⚠️ *Journaux manquants ({len(missing_journals)} chqs) :* {', '.join(map(str, missing_journals))}" if missing_journals else "") +
                                 (f"\n\n❌ *Chq vide absent ({len(chq_vide_missing_journals)} chqs) :* Les journaux des chqs sans pdf de chq vide: {', '.join(sorted(chq_vide_missing_journals))}" if chq_vide_missing_journals else "") +
                                 (f"\n\n❌ *Documentation absente ({len(doc_missing_journals)} chqs) :* Journaux des chqs sans pdf de documentation: {', '.join(sorted(doc_missing_journals))}" if doc_missing_journals else ""),
                     'files': [
                         {
                             'pdf_base64': pdf_base64,
-                            'file_name': f"Cheques_{week_str}.pdf",
-                            'caption': f"Chèques de la semaine {week_str} 📄"
+                            'file_name': f"Cheques_{week_str}{'_encaisses' if only_encaisse else ''}.pdf",
+                            'caption': f"Chèques{encaisse_label.lower()} de la semaine {week_str} 📅"
                         }
                     ]
                 }

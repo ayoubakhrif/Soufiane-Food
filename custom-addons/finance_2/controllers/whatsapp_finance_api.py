@@ -586,7 +586,7 @@ class WhatsAppFinanceController(http.Controller):
 
             # Calculate missing journals
             missing_journals = []
-            journals = [int(dq.journal) for dq in datacheques if dq.journal and int(dq.journal) > 0]
+            journals = [int(dq.journal) for dq in datacheques if dq.journal and str(dq.journal).isdigit() and int(dq.journal) > 0]
             # Add V2 cheques to journals
             for c_v2 in cheques_v2:
                 if c_v2.repartition_ids:
@@ -632,7 +632,7 @@ class WhatsAppFinanceController(http.Controller):
                 total_amount += dq.amount
                 
             def get_min_journal(dqs_list):
-                journals = [dq.journal for dq in dqs_list if dq.journal]
+                journals = [int(dq.journal) for dq in dqs_list if dq.journal and str(dq.journal).isdigit()]
                 return min(journals) if journals else float('inf')
                 
             for phys, dqs in grouped_dqs.items():

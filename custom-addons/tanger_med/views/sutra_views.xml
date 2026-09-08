@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
         <!-- Form View for Sutra Dossier -->
@@ -104,7 +104,42 @@
         <menuitem id="menu_sutra_dossiers" name="Dossiers SUTRA" parent="menu_sutra_main" action="action_sutra_dossier" sequence="10"/>
         <menuitem id="menu_sutra_config" name="Configuration par Societe" parent="menu_sutra_main" action="action_sutra_config_ste" sequence="20"/>
 
-            <!-- Factures SUTRA Global Tree View -->
+                    <!-- Form view for Sutra Facture -->
+        <record id="view_sutra_facture_form" model="ir.ui.view">
+            <field name="name">sutra.facture.form</field>
+            <field name="model">sutra.facture</field>
+            <field name="arch" type="xml">
+                <form string="Facture SUTRA">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="non_paye,encours,paye"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Numero de Facture"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="sutra_id"/>
+                                <field name="date"/>
+                            </group>
+                            <group>
+                                <field name="amount"/>
+                                <field name="cheque_id" readonly="1" invisible="not cheque_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Factures SUTRA Global Tree View -->
         <record id="view_sutra_facture_tree_global" model="ir.ui.view">
             <field name="name">sutra.facture.tree.global</field>
             <field name="model">sutra.facture</field>
@@ -131,3 +166,4 @@
 
     </data>
 </odoo>
+

@@ -332,3 +332,18 @@ class CasaStockEntry(models.Model):
             # DUM : doit commencer par un chiffre
             if rec.dum and not re.match(r'^\d', rec.dum):
                 raise ValidationError("DUM erroné.")
+
+    @api.constrains('product_id', 'lot', 'dum')
+    def _check_unique_lot_dum(self):
+        for rec in self:
+            if rec.product_id and rec.lot and rec.dum:
+                domain = [
+                    ('product_id', '=', rec.product_id.id),
+                    ('lot', '=', rec.lot),
+                    ('dum', '=', rec.dum),
+                    ('id', '!=', rec.id),
+                    ('state', '!=', 'cancelled')
+                ]
+                existing = self.env['casa.stock.entry'].search(domain, limit=1)
+                if existing:
+                    raise ValidationError(_("Une entrée existe déjà pour ce produit avec le même lot et le même DUM (Réf: %s).") % existing.name)

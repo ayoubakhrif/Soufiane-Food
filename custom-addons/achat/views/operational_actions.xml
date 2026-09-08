@@ -86,6 +86,7 @@
                 <field name="supplier_id"/>
                 <field name="ste_id"/>
                 <field name="achat_article_id"/>
+                <field name="container_ids" string="Conteneur" filter_domain="['|', ('container_ids.name', 'ilike', self), ('container_names', 'ilike', self)]"/>
 
                 <!-- Filter: ETA <= next Thursday, evaluated server-side via computed field -->
                 <filter name="eta_semaine"

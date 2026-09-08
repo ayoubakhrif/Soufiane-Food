@@ -250,6 +250,7 @@
                 <field name="achat_article_id"/>
                 <field name="invoice_number"/>
                 <field name="lot"/>
+                <field name="container_ids" string="Conteneur" filter_domain="['|', ('container_ids.name', 'ilike', self), ('container_names', 'ilike', self)]"/>
                 
                 <separator/>
                 <filter string="Draft" name="draft" domain="[('purchase_state', '=', 'draft')]"/>

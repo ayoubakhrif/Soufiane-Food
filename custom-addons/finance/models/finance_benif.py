@@ -50,7 +50,7 @@ class Cal3iyaClient(models.Model):
             domain.append(('date_encaissement', '=', False))
         return self.env['finance2.cheque'].search(domain)
 
-        def _compute_chq_totals(self):
+    def _compute_chq_totals(self):
         for rec in self:
             c_credit = sum(rec.physical_chq_ids.mapped('credit'))
             e_credit = sum(rec.effet_ids.mapped('montant'))
@@ -137,7 +137,7 @@ class Cal3iyaClient(models.Model):
             chqs = chqs.filtered(lambda c: not c.date_encaissement)
             effets = effets.filtered(lambda e: not e.date_encaissement)
             
-                total_chqs = len(chqs) + len(effets)
+        total_chqs = len(chqs) + len(effets)
         encaisse_chqs = len(chqs.filtered(lambda c: c.date_encaissement)) + len(effets.filtered(lambda e: e.date_encaissement))
         
         f2_chqs = self.get_finance2_cheques(encours_only)

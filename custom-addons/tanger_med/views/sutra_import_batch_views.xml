@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form view for Sutra Import Batch -->
+        <record id="view_sutra_import_batch_form" model="ir.ui.view">
+            <field name="name">sutra.import.batch.form</field>
+            <field name="model">sutra.import.batch</field>
+            <field name="arch" type="xml">
+                <form string="Lot d'importation">
+                    <header>
+                        <button name="action_verify" string="Verifier les DUM" type="object" class="btn-secondary" states="draft"/>
+                        <button name="action_process" string="Generer les Factures" type="object" class="btn-primary" states="draft"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" attrs="{'readonly': [('state', '=', 'done')]}"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="total_lines"/>
+                                <field name="valid_lines"/>
+                                <field name="error_lines"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Lignes (Copier-Coller Excel)">
+                                <field name="line_ids" attrs="{'readonly': [('state', '=', 'done')]}">
+                                    <tree editable="bottom" decoration-success="status == 'ready'" decoration-danger="status == 'error'" decoration-muted="status == 'done'">
+                                        <field name="dum"/>
+                                        <field name="facture_name"/>
+                                        <field name="date"/>
+                                        <field name="amount"/>
+                                        <field name="status"/>
+                                        <field name="error_msg"/>
+                                        <field name="logistics_id" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree view for Sutra Import Batch -->
+        <record id="view_sutra_import_batch_tree" model="ir.ui.view">
+            <field name="name">sutra.import.batch.tree</field>
+            <field name="model">sutra.import.batch</field>
+            <field name="arch" type="xml">
+                <tree string="Lots d'importation">
+                    <field name="name"/>
+                    <field name="create_date"/>
+                    <field name="total_lines"/>
+                    <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action window -->
+        <record id="action_sutra_import_batch" model="ir.actions.act_window">
+            <field name="name">Lots d'importation SUTRA</field>
+            <field name="res_model">sutra.import.batch</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Menu item -->
+        <menuitem id="menu_sutra_import_batch" name="Import (Sas/Tableau)" parent="tanger_med.menu_sutra_main" action="action_sutra_import_batch" sequence="20"/>
+
+    </data>
+</odoo>

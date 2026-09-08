@@ -7,10 +7,12 @@
             <field name="binding_model_id" ref="logistique.model_logistique_entry"/>
             <field name="state">code</field>
             <field name="code">
+valid_states = ['attente_ml', 'analyse', 'visite', 'en_cours_chargement', 'sortie_plein', 'rentree_vide', 'arrive_depot']
 for record in records:
-    existing = env['sutra.dossier'].search([('logistics_id', '=', record.id)])
-    if not existing:
-        env['sutra.dossier'].create({'logistics_id': record.id})
+    if record.tanger_med_state in valid_states:
+        existing = env['sutra.dossier'].search([('logistics_id', '=', record.id)])
+        if not existing:
+            env['sutra.dossier'].create({'logistics_id': record.id})
             </field>
         </record>
     

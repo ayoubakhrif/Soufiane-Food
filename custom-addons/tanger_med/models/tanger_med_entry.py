@@ -124,3 +124,12 @@ class TangerMedEntry(models.Model):
                 })
         return res
 
+
+
+    def action_generate_missing_sutra_records(self):
+        valid_states = ['attente_ml', 'analyse', 'visite', 'en_cours_chargement', 'sortie_plein', 'rentree_vide', 'arrive_depot']
+        for record in self:
+            if record.tanger_med_state in valid_states:
+                existing = self.env['sutra.dossier'].search([('logistics_id', '=', record.id)])
+                if not existing:
+                    self.env['sutra.dossier'].create({'logistics_id': record.id})

@@ -1,18 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="action_generate_missing_sutra" model="ir.actions.server">
+        <record id="action_generate_missing_sutra_v2" model="ir.actions.server">
             <field name="name">Générer Dossiers SUTRA manquants</field>
             <field name="model_id" ref="logistique.model_logistique_entry"/>
             <field name="binding_model_id" ref="logistique.model_logistique_entry"/>
             <field name="state">code</field>
             <field name="code">
-valid_states = ['attente_ml', 'analyse', 'visite', 'en_cours_chargement', 'sortie_plein', 'rentree_vide', 'arrive_depot']
-for record in records:
-    if record.tanger_med_state in valid_states:
-        existing = env['sutra.dossier'].search([('logistics_id', '=', record.id)])
-        if not existing:
-            env['sutra.dossier'].create({'logistics_id': record.id})
+if records:
+    records.action_generate_missing_sutra_records()
             </field>
         </record>
     

@@ -111,7 +111,7 @@
             <field name="arch" type="xml">
                 <form string="Facture SUTRA">
                     <header>
-                        <field name="state" widget="statusbar" statusbar_visible="non_paye,encours,paye"/>
+                        <field name="state" widget="statusbar" statusbar_visible="non_paye,encours,paye" options="{'clickable': '1'}"/>
                     </header>
                     <sheet>
                         <div class="oe_title">

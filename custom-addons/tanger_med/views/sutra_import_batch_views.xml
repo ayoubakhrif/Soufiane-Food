@@ -8,8 +8,8 @@
             <field name="arch" type="xml">
                 <form string="Lot d'importation">
                     <header>
-                        <button name="action_verify" string="Verifier les DUM" type="object" class="btn-secondary" invisible="state != 'draft'"/>
-                        <button name="action_process" string="Generer les Factures" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                        <button name="action_verify" string="Verifier les DUM" type="object" class="btn-secondary"/>
+                        <button name="action_process" string="Generer les Factures" type="object" class="btn-primary"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>

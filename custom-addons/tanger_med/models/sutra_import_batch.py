@@ -33,12 +33,10 @@ class SutraImportBatch(models.Model):
         self.ensure_one()
         self.action_verify()
         
-        ready_lines = self.line_ids.filtered(lambda l: l.status == 'ready')
-        if not ready_lines:
-            raise UserError("Il n'y a aucune ligne valide a traiter.")
+        lines_to_process = self.line_ids.filtered(lambda l: l.status in ['ready', 'done', 'error'] and l.logistics_id)
 
         factures_creees = 0
-        for line in ready_lines:
+        for line in lines_to_process:
             # Create or get Sutra Dossier
             sutra_dossier = self.env['sutra.dossier'].search([('logistics_id', '=', line.logistics_id.id)], limit=1)
             if not sutra_dossier:
@@ -52,8 +50,8 @@ class SutraImportBatch(models.Model):
                 ('name', '=', line.facture_name)
             ])
             if existing_facture:
-                line.status = 'error'
-                line.error_msg = 'Facture existante dans ce dossier.'
+                line.status = 'done'
+                line.error_msg = 'Deja importé'
                 continue
             
             # Create Invoice
@@ -69,15 +67,17 @@ class SutraImportBatch(models.Model):
             line.error_msg = ''
             factures_creees += 1
 
-        if self.valid_lines == 0 and self.error_lines == 0:
+        if not self.line_ids.filtered(lambda l: l.status in ['draft', 'error']):
             self.state = 'done'
+        else:
+            self.state = 'draft'
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Traitement termine',
-                'message': f"{factures_creees} factures creees avec succes.",
+                'message': f"{factures_creees} nouvelles factures creees.",
                 'type': 'success',
                 'sticky': False,
             }

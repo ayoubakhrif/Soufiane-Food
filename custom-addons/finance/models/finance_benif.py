@@ -39,15 +39,29 @@ class Cal3iyaClient(models.Model):
     solde = fields.Float(string="Solde à ce jour", compute="_compute_chq_totals")
 
     @api.depends('physical_chq_ids.credit', 'physical_chq_ids.debit', 'effet_ids.montant', 'effet_ids.date_encaissement')
-    def _compute_chq_totals(self):
+    
+    def get_finance2_cheques(self, encours_only=False):
+        self.ensure_one()
+        f2_benifs = self.env['finance2.benif'].search([('name', '=', self.name)])
+        if not f2_benifs:
+            return self.env['finance2.cheque']
+        domain = [('benif_id', 'in', f2_benifs.ids)]
+        if encours_only:
+            domain.append(('date_encaissement', '=', False))
+        return self.env['finance2.cheque'].search(domain)
+
+        def _compute_chq_totals(self):
         for rec in self:
             c_credit = sum(rec.physical_chq_ids.mapped('credit'))
             e_credit = sum(rec.effet_ids.mapped('montant'))
-            rec.total_credit = c_credit + e_credit
+            f2_chqs = rec.get_finance2_cheques()
+            f2_credit = sum(f2_chqs.mapped('amount_total'))
+            rec.total_credit = c_credit + e_credit + f2_credit
             
             c_debit = sum(rec.physical_chq_ids.mapped('debit'))
             e_debit = sum(e.montant for e in rec.effet_ids if e.date_encaissement)
-            rec.total_debit = c_debit + e_debit
+            f2_debit = sum(c.amount_total for c in f2_chqs if c.date_encaissement)
+            rec.total_debit = c_debit + e_debit + f2_debit
             
             rec.solde = rec.total_credit - rec.total_debit
 
@@ -123,8 +137,12 @@ class Cal3iyaClient(models.Model):
             chqs = chqs.filtered(lambda c: not c.date_encaissement)
             effets = effets.filtered(lambda e: not e.date_encaissement)
             
-        total_chqs = len(chqs) + len(effets)
+                total_chqs = len(chqs) + len(effets)
         encaisse_chqs = len(chqs.filtered(lambda c: c.date_encaissement)) + len(effets.filtered(lambda e: e.date_encaissement))
+        
+        f2_chqs = self.get_finance2_cheques(encours_only)
+        total_chqs += len(f2_chqs)
+        encaisse_chqs += len(f2_chqs.filtered(lambda c: c.date_encaissement))
         non_encaisse_chqs = total_chqs - encaisse_chqs
         return {
             'total': total_chqs,
@@ -435,4 +453,4 @@ class Cal3iyaClient(models.Model):
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'self',
-        }
+        }

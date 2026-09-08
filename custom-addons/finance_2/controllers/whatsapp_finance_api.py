@@ -1079,7 +1079,7 @@ class WhatsAppFinanceController(http.Controller):
             # We need to re-fetch benif with context for stats
             benif_with_ctx = benif.with_context(encours_only=wants_encours)
 
-            has_chqs = bool(benif_with_ctx.physical_chq_ids)
+            has_chqs = bool(benif_with_ctx.physical_chq_ids) or bool(benif_with_ctx.get_finance2_cheques())
             has_effets = bool(benif_with_ctx.effet_ids)
             if has_chqs and has_effets:
                 doc_title = "Chèques et Effets"
@@ -1101,7 +1101,7 @@ class WhatsAppFinanceController(http.Controller):
             summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
             
             if wants_encours:
-                summary_msg += f"💰 Reste à décaisser: *{'{:,.2f}'.format(sum(c.amount_total for c in benif.physical_chq_ids if not c.date_encaissement) + sum(e.montant for e in benif.effet_ids if not e.date_encaissement)).replace(',', ' ')} DH*"
+                summary_msg += f"💰 Reste à décaisser: *{'{:,.2f}'.format(sum(c.amount_total for c in benif.physical_chq_ids if not c.date_encaissement) + sum(e.montant for e in benif.effet_ids if not e.date_encaissement) + sum(f.amount_total for f in benif.get_finance2_cheques(True))).replace(',', ' ')} DH*"
             else:
                 summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
 

@@ -14,7 +14,7 @@
                 <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="container_count" optional="show"/>
                 <field name="container_names" string="Conteneurs" optional="show"/>
                 <field name="exit_date"/>
@@ -62,7 +62,7 @@
                             <field name="dossier_id" readonly="1"/>
                             <field name="ste_id" readonly="1"/>
                             <field name="supplier_id" readonly="1"/>
-                            <field name="article_id" readonly="1"/>
+                            <field name="achat_article_id" readonly="1"/>
                             <field name="shipping_id" readonly="1"/>
                             <field name="free_time" readonly="1"/>
                             <field name="destination_id" />
@@ -136,14 +136,14 @@
                 <field name="week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
-                <field name="article_id"/>
+                <field name="achat_article_id"/>
                 <field name="container_names" string="Conteneur"/>
                 <group string="Regrouper par">
                     <filter name="group_tanger_med_state" string="Statut Tanger Med" context="{'group_by': 'tanger_med_state'}"/>
                     <filter name="group_week" string="Semaine" context="{'group_by': 'week'}"/>
                     <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
                     <filter name="group_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
-                    <filter name="group_article" string="Article" context="{'group_by': 'article_id'}"/>
+                    <filter name="group_article" string="Article" context="{'group_by': 'achat_article_id'}"/>
                 </group>
             </search>
         </field>

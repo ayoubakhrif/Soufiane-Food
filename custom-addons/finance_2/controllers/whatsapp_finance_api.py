@@ -656,234 +656,168 @@ class WhatsAppFinanceController(http.Controller):
             documents.sort(key=lambda d: d['min_journal'])
 
             encaisse_label = " ENCAISSÉS" if only_encaisse else ""
-            html_content = f"""
-            <html>
-                <head>
-                    <meta charset="utf-8"/>
-                    <style>
-                        body {{ font-family: sans-serif; font-size: 14px; color: #333; }}
-                        h2 {{ text-align: center; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }}
-                        table {{ border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 13px; }}
-                        th, td {{ border: 1px solid #bdc3c7; padding: 8px 10px; text-align: left; vertical-align: middle; }}
-                        th {{ background-color: #ecf0f1; font-weight: bold; color: #2c3e50; }}
-                        .total {{ text-align: right; margin-top: 20px; font-size: 18px; color: #2c3e50; font-weight: bold; }}
-                        .chq-info {{ font-weight: bold; color: #2980b9; }}
-                        .effet-info {{ font-weight: bold; color: #8e44ad; }}
-                    </style>
-                </head>
-                <body>
-                    <h2>Documents{encaisse_label.lower()} de la Semaine {week_str}</h2>
-                    <table>
-                        <tr style="background-color: #ecf0f1;">
-                            <th>Document</th>
-                            <th>Chq Vide</th>
-                            <th>Date d'émission</th>
-                            <th>Société</th>
-                            <th>N° Journal</th>
-                            <th>Bénéficiaire</th>
-                            <th>Série de Facture</th>
-                            <th>BL</th>
-                            <th>Doc PDF</th>
-                            <th>Type</th>
-                            <th>Statut</th>
-                            <th>Montant (DH)</th>
-                            <th>Montant Global (DH)</th>
-                            <th>État Global</th>
-                        </tr>
-            """
             
-            chq_vide_missing_journals = set()
-            doc_missing_journals = set()
-            
-            for doc in documents:
-                if doc['type_doc'] == 'CHQ_V2':
-                    c_v2 = doc['obj']
-                    reps = doc['items']
+            try:
+                import io
+                import xlsxwriter
+                
+                output = io.BytesIO()
+                workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+                sheet = workbook.add_worksheet(f"Semaine {week_str}")
+                
+                bold = workbook.add_format({'bold': True, 'bg_color': '#ecf0f1', 'border': 1})
+                cell_format = workbook.add_format({'border': 1, 'valign': 'vcenter'})
+                cell_center = workbook.add_format({'border': 1, 'valign': 'vcenter', 'align': 'center'})
+                
+                headers = ["Document", "Chq Vide", "Date d'Émission", "Société", "N° Journal", "Bénéficiaire", "Série de Facture", "BL", "Doc PDF", "Type", "Statut", "Montant Ligne", "Montant Total (DH)", "État"]
+                for col, h in enumerate(headers):
+                    sheet.write(0, col, h, bold)
                     
-                    doc_name = c_v2.name or "N/A"
-                    ste_name = c_v2.ste_id.name if c_v2.ste_id else "N/A"
-                    phys_amount = '{:,.2f}'.format(c_v2.amount_total).replace(',', ' ')
-                    
-                    global_state_dict = dict(c_v2._fields['state'].selection)
-                    global_state = global_state_dict.get(c_v2.state) or c_v2.state
-                    
-                    if not c_v2.chq_vide_pdf:
-                        if reps:
-                            for rep in reps:
-                                if rep.journal:
-                                    chq_vide_missing_journals.add(str(rep.journal))
-                        elif c_v2.journal:
-                            chq_vide_missing_journals.add(str(c_v2.journal))
-                            
-                    if not c_v2.doc_pdf:
-                        if reps:
-                            for rep in reps:
-                                if rep.journal:
-                                    doc_missing_journals.add(str(rep.journal))
-                        elif c_v2.journal:
-                            doc_missing_journals.add(str(c_v2.journal))
-                    
-                    if not reps:
-                        html_content += "<tr>"
-                        html_content += f"<td>{doc_name}</td>"
-                        html_content += f"<td>{'Oui' if c_v2.chq_vide_pdf else 'Non'}</td>"
-                        html_content += f"<td>{c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else ''}</td>"
-                        html_content += f"<td>{ste_name}</td>"
-                        html_content += f"<td>{c_v2.journal or ''}</td>"
-                        html_content += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
-                        html_content += "<td>-</td>"
-                        html_content += "<td>-</td>"
-                        html_content += f"<td>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
-                        html_content += f"<td>{dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque'}</td>"
-                        html_content += "<td>-</td>"
-                        html_content += f"<td>{phys_amount}</td>"
-                        html_content += f"<td>{phys_amount}</td>"
-                        html_content += f"<td>{global_state}</td>"
-                        html_content += "</tr>"
-                    else:
-                        for idx, rep in enumerate(reps):
-                            html_content += "<tr>"
-                            if idx == 0:
-                                row_span = len(reps)
-                                html_content += f"<td rowspan='{row_span}'>{doc_name}</td>"
-                                html_content += f"<td rowspan='{row_span}'>{'Oui' if c_v2.chq_vide_pdf else 'Non'}</td>"
-                                html_content += f"<td rowspan='{row_span}'>{c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else ''}</td>"
-                                html_content += f"<td rowspan='{row_span}'>{ste_name}</td>"
-                            
-                            html_content += f"<td>{c_v2.journal or ''}</td>"
-                            html_content += f"<td>{c_v2.benif_id.name if c_v2.benif_id else ''}</td>"
-                            html_content += f"<td>{rep.serie_facture or ''}</td>"
-                            html_content += f"<td>{rep.bl or ''}</td>"
-                            
-                            if idx == 0:
-                                html_content += f"<td rowspan='{row_span}'>{'Oui' if c_v2.doc_pdf else 'Non'}</td>"
-                            
-                            html_content += f"<td>{dict(rep._fields['type'].selection).get(rep.type) or ''}</td>"
-                            html_content += "<td>-</td>"
-                            html_content += f"<td>{'{:,.2f}'.format(rep.amount).replace(',', ' ')}</td>"
-                            
-                            if idx == 0:
-                                html_content += f"<td rowspan='{row_span}'>{phys_amount}</td>"
-                                html_content += f"<td rowspan='{row_span}'>{global_state}</td>"
+                row_idx = 1
+                
+                for doc in documents:
+                    if doc['type_doc'] == 'CHQ_V2':
+                        c_v2 = doc['obj']
+                        reps = doc['items']
+                        doc_name = c_v2.name or "N/A"
+                        ste_name = c_v2.ste_id.name if c_v2.ste_id else "N/A"
+                        phys_amount = c_v2.amount_total
+                        
+                        global_state_dict = dict(c_v2._fields['state'].selection)
+                        global_state = global_state_dict.get(c_v2.state) or c_v2.state
+                        
+                        if not c_v2.chq_vide_pdf:
+                            if reps:
+                                for rep in reps:
+                                    if rep.journal:
+                                        chq_vide_missing_journals.add(str(rep.journal))
+                            elif c_v2.journal:
+                                chq_vide_missing_journals.add(str(c_v2.journal))
                                 
-                            html_content += "</tr>"
-                            
-                    continue
-
-                elif doc['type_doc'] == 'CHQ':
-                    phys = doc['obj']
-                    dqs = doc['items']
-                    
-                    doc_name = phys.name or "N/A"
-                    ste_name = phys.ste_id.name if phys.ste_id else "N/A"
-                    phys_amount = '{:,.2f}'.format(phys.amount_total).replace(',', ' ')
-                    date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
-                    
-                    is_encaisse = phys.encours == 'encaisse' or any(d.date_encaissement for d in phys.datacheque_ids)
-                    etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
-                    doc_display = f"<div class='chq-info'>CHQ {doc_name}</div>"
-                    chq_pdf_icon = "<span style='color:green; font-weight:bold; font-size:18px;'>&#10003;</span>" if phys.chq_vide_pdf else "<span style='color:red; font-weight:bold; font-size:18px;'>&#10007;</span>"
-                    
-                    if not phys.chq_vide_pdf:
-                        for dq in dqs:
-                            if dq.journal:
-                                chq_vide_missing_journals.add(str(dq.journal))
-                    
-                    grouped_rows = []
-                    for dq in dqs:
-                        journal_val = str(dq.journal) if dq.journal else "N/A"
-                        benif_name = dq.benif_id.name if dq.benif_id else "N/A"
-                        serie_val = str(dq.serie) if dq.serie else "N/A"
-                        bl_val = str(dq.bl) if dq.bl else "N/A"
-                        t_selection = dict(dq._fields['type'].selection or {})
-                        t_label = t_selection.get(dq.type) or dq.type or "N/A"
-                        s_selection = dict(dq._fields['state'].selection or {})
-                        s_label = s_selection.get(dq.state) or dq.state or "N/A"
-                        dq_amount = '{:,.2f}'.format(dq.amount).replace(',', ' ')
-                        doc_pdf_icon = "<span style='color:green; font-weight:bold; font-size:18px;'>&#10003;</span>" if phys.doc_pdf else "<span style='color:red; font-weight:bold; font-size:18px;'>&#10007;</span>"
+                        if not c_v2.doc_pdf:
+                            if reps:
+                                for rep in reps:
+                                    if rep.journal:
+                                        doc_missing_journals.add(str(rep.journal))
+                            elif c_v2.journal:
+                                doc_missing_journals.add(str(c_v2.journal))
                         
-                        if not phys.doc_pdf and dq.journal:
-                            doc_missing_journals.add(str(dq.journal))
-                        
-                        if grouped_rows and grouped_rows[-1]['journal'] == journal_val and grouped_rows[-1]['benif'] == benif_name:
-                            grouped_rows[-1]['items'].append({'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'bl': bl_val, 'doc_pdf_icon': doc_pdf_icon})
+                        if not reps:
+                            sheet.write(row_idx, 0, doc_name, cell_format)
+                            sheet.write(row_idx, 1, 'Oui' if c_v2.chq_vide_pdf else 'Non', cell_center)
+                            sheet.write(row_idx, 2, c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else '', cell_format)
+                            sheet.write(row_idx, 3, ste_name, cell_format)
+                            sheet.write(row_idx, 4, c_v2.journal or '', cell_format)
+                            sheet.write(row_idx, 5, c_v2.benif_id.name if c_v2.benif_id else '', cell_format)
+                            sheet.write(row_idx, 6, '-', cell_center)
+                            sheet.write(row_idx, 7, '-', cell_center)
+                            sheet.write(row_idx, 8, 'Oui' if c_v2.doc_pdf else 'Non', cell_center)
+                            sheet.write(row_idx, 9, dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque', cell_format)
+                            sheet.write(row_idx, 10, '-', cell_center)
+                            sheet.write(row_idx, 11, phys_amount, cell_format)
+                            sheet.write(row_idx, 12, phys_amount, cell_format)
+                            sheet.write(row_idx, 13, global_state, cell_format)
+                            row_idx += 1
                         else:
+                            for idx, rep in enumerate(reps):
+                                sheet.write(row_idx, 0, doc_name, cell_format)
+                                sheet.write(row_idx, 1, 'Oui' if c_v2.chq_vide_pdf else 'Non', cell_center)
+                                sheet.write(row_idx, 2, c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else '', cell_format)
+                                sheet.write(row_idx, 3, ste_name, cell_format)
+                                sheet.write(row_idx, 4, rep.journal or '', cell_format)
+                                sheet.write(row_idx, 5, rep.benif_id.name if rep.benif_id else '', cell_format)
+                                sheet.write(row_idx, 6, rep.serie_facture or '', cell_format)
+                                sheet.write(row_idx, 7, rep.bl or '', cell_format)
+                                sheet.write(row_idx, 8, 'Oui' if c_v2.doc_pdf else 'Non', cell_center)
+                                sheet.write(row_idx, 9, dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque', cell_format)
+                                sheet.write(row_idx, 10, dict(rep._fields['state'].selection).get(rep.state) or rep.state, cell_format)
+                                sheet.write(row_idx, 11, rep.amount, cell_format)
+                                sheet.write(row_idx, 12, phys_amount if idx == 0 else '', cell_format)
+                                sheet.write(row_idx, 13, global_state if idx == 0 else '', cell_format)
+                                row_idx += 1
+                    elif doc['type_doc'] == 'CHQ':
+                        phys = doc['obj']
+                        dqs = doc['items']
+                        
+                        doc_name = phys.name or "N/A"
+                        ste_name = phys.ste_id.name if phys.ste_id else "N/A"
+                        phys_amount = phys.amount_total
+                        date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
+                        
+                        is_encaisse = phys.state == 'encaisse' or phys.encours == 'encaisse'
+                        etat_label = "Encaissé" if is_encaisse else "En cours"
+                        doc_display = f"CHQ {doc_name}"
+                        chq_pdf_icon = "Oui" if phys.chq_vide_pdf else "Non"
+                        
+                        if not phys.chq_vide_pdf:
+                            for dq in dqs:
+                                if dq.journal: chq_vide_missing_journals.add(str(dq.journal))
+                                
+                        grouped_rows = []
+                        for dq in dqs:
+                            journal_val = dq.journal or "N/A"
+                            benif_name = dq.benif_id.name if dq.benif_id else "N/A"
+                            dq_amount = dq.amount
+                            serie_val = dq.serie_facture or "N/A"
+                            bl_val = dq.bl or "N/A"
+                            doc_pdf_icon = "Oui" if dq.doc_pdf else "Non"
+                            
+                            if not dq.doc_pdf and dq.journal:
+                                doc_missing_journals.add(str(dq.journal))
+                                
+                            t_dict = dict(dq._fields['type'].selection)
+                            t_label = t_dict.get(dq.type) or str(dq.type)
+                            s_dict = dict(dq._fields['state'].selection)
+                            s_label = s_dict.get(dq.state) or str(dq.state)
+                            
                             grouped_rows.append({
                                 'journal': journal_val,
                                 'benif': benif_name,
                                 'items': [{'type': t_label, 'state': s_label, 'amount': dq_amount, 'serie': serie_val, 'bl': bl_val, 'doc_pdf_icon': doc_pdf_icon}]
                             })
                             
-                else: # EFFET
-                    e = doc['obj']
-                    doc_name = e.serie or "N/A"
-                    ste_name = e.ste_id.name if e.ste_id else "N/A"
-                    phys_amount = '{:,.2f}'.format(e.montant).replace(',', ' ')
-                    date_em = e.date_emission.strftime('%d/%m/%Y') if e.date_emission else "N/A"
-                    
-                    is_encaisse = e.state == 'encaisse'
-                    etat_label = "<span style='color:green; font-weight:bold;'>Encaissé</span>" if is_encaisse else "<span style='color:#e67e22; font-weight:bold;'>En cours</span>"
-                    doc_display = f"<div class='effet-info'>EFFET {doc_name}</div>"
-                    chq_pdf_icon = "-"
-                    
-                    benif_name = e.benif_id.name if e.benif_id else "N/A"
-                    
-                    grouped_rows = [{
-                        'journal': 'N/A',
-                        'benif': benif_name,
-                        'items': [{'type': 'Effet', 'state': e.state or "N/A", 'amount': phys_amount, 'serie': 'N/A', 'bl': 'N/A', 'doc_pdf_icon': '-'}]
-                    }]
+                        for g_idx, group in enumerate(grouped_rows):
+                            for i_idx, item in enumerate(group['items']):
+                                sheet.write(row_idx, 0, doc_display, cell_format)
+                                sheet.write(row_idx, 1, chq_pdf_icon, cell_center)
+                                sheet.write(row_idx, 2, date_em, cell_format)
+                                sheet.write(row_idx, 3, ste_name, cell_format)
+                                sheet.write(row_idx, 4, group['journal'], cell_format)
+                                sheet.write(row_idx, 5, group['benif'], cell_format)
+                                sheet.write(row_idx, 6, item['serie'], cell_format)
+                                sheet.write(row_idx, 7, item['bl'], cell_format)
+                                sheet.write(row_idx, 8, item['doc_pdf_icon'], cell_center)
+                                sheet.write(row_idx, 9, item['type'], cell_format)
+                                sheet.write(row_idx, 10, item['state'], cell_format)
+                                sheet.write(row_idx, 11, item['amount'], cell_format)
+                                sheet.write(row_idx, 12, phys_amount if g_idx == 0 and i_idx == 0 else '', cell_format)
+                                sheet.write(row_idx, 13, etat_label if g_idx == 0 and i_idx == 0 else '', cell_format)
+                                row_idx += 1
+                    else: # EFFET
+                        e = doc['obj']
+                        sheet.write(row_idx, 0, f"EFFET {e.serie or 'N/A'}", cell_format)
+                        sheet.write(row_idx, 1, "-", cell_center)
+                        sheet.write(row_idx, 2, e.date_emission.strftime('%d/%m/%Y') if e.date_emission else "N/A", cell_format)
+                        sheet.write(row_idx, 3, e.ste_id.name if e.ste_id else "N/A", cell_format)
+                        sheet.write(row_idx, 4, "N/A", cell_format)
+                        sheet.write(row_idx, 5, e.benif_id.name if e.benif_id else "N/A", cell_format)
+                        sheet.write(row_idx, 6, "N/A", cell_format)
+                        sheet.write(row_idx, 7, "N/A", cell_format)
+                        sheet.write(row_idx, 8, "-", cell_center)
+                        sheet.write(row_idx, 9, "Effet", cell_format)
+                        sheet.write(row_idx, 10, e.state or "N/A", cell_format)
+                        sheet.write(row_idx, 11, e.montant, cell_format)
+                        sheet.write(row_idx, 12, e.montant, cell_format)
+                        sheet.write(row_idx, 13, "Encaissé" if e.state == 'encaisse' else "En cours", cell_format)
+                        row_idx += 1
                 
-                phys_rowspan = sum(len(group['items']) for group in grouped_rows)
+                sheet.write(row_idx, 11, "Total:", bold)
+                sheet.write(row_idx, 12, total_amount, bold)
                 
-                first_group = True
-                for group in grouped_rows:
-                    group_rowspan = len(group['items'])
-                    first_item = True
-                    for item in group['items']:
-                        html_content += "<tr>"
-                        if first_group and first_item:
-                            html_content += f"""
-                                <td rowspan="{phys_rowspan}">{doc_display}</td>
-                                <td rowspan="{phys_rowspan}" style="text-align:center;">{chq_pdf_icon}</td>
-                                <td rowspan="{phys_rowspan}">{date_em}</td>
-                                <td rowspan="{phys_rowspan}">{ste_name}</td>
-                            """
-                        if first_item:
-                            html_content += f"""
-                                <td rowspan="{group_rowspan}">{group['journal']}</td>
-                                <td rowspan="{group_rowspan}">{group['benif']}</td>
-                            """
-                        html_content += f"""
-                                <td>{item['serie']}</td>
-                                <td>{item['bl']}</td>
-                                <td style="text-align:center;">{item['doc_pdf_icon']}</td>
-                                <td>{item['type']}</td>
-                                <td>{item['state']}</td>
-                                <td>{item['amount']}</td>
-                        """
-                        if first_group and first_item:
-                            html_content += f"""
-                                <td rowspan="{phys_rowspan}"><strong>{phys_amount}</strong></td>
-                                <td rowspan="{phys_rowspan}">{etat_label}</td>
-                            """
-                        html_content += "</tr>"
-                        first_item = False
-                    first_group = False
-
-            total_str = '{:,.2f}'.format(total_amount).replace(',', ' ')
-            html_content += f"""
-                    </table>
-                    <div class="total">Total de la semaine: {total_str} DH</div>
-                </body>
-            </html>
-            """
-
-            report_action = request.env['ir.actions.report'].sudo()
-            try:
-                pdf_content = report_action._run_wkhtmltopdf([html_content])
-                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
-
+                workbook.close()
+                output.seek(0)
+                xlsx_base64 = base64.b64encode(output.read()).decode('utf-8')
+    
                 return {
                     'status': 'success',
                     'product_name': f"Chèques{encaisse_label.title()} Semaine {week_str}",
@@ -893,8 +827,8 @@ class WhatsAppFinanceController(http.Controller):
                                 (f"\n\n❌ *Documentation absente ({len(doc_missing_journals)} chqs) :* Journaux des chqs sans pdf de documentation: {', '.join(sorted(doc_missing_journals))}" if doc_missing_journals else ""),
                     'files': [
                         {
-                            'pdf_base64': pdf_base64,
-                            'file_name': f"Cheques_{week_str}{'_encaisses' if only_encaisse else ''}.pdf",
+                            'pdf_base64': xlsx_base64,
+                            'file_name': f"Cheques_{week_str}{'_encaisses' if only_encaisse else ''}.xlsx",
                             'caption': f"Chèques{encaisse_label.lower()} de la semaine {week_str} 📅"
                         }
                     ]
@@ -1008,361 +942,4 @@ class WhatsAppFinanceController(http.Controller):
             talon = exact_talon[0]
             report_action = request.env['ir.actions.report'].sudo()
             pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_talon_summary', res_ids=talon.ids)
-            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
-
-            stats = talon.get_talon_stats()
-            summary_msg = f"Voici les détails du talon *{talon.name_shown}* ({talon.ste_id.name}).\n\n"
-            summary_msg += f"📊 *Statistiques* :\n"
-            summary_msg += f"• Total: {stats['total']}\n"
-            summary_msg += f"• Utilisés: {stats['used']}\n"
-            summary_msg += f"• Restants: {stats['remaining']}\n"
-            summary_msg += f"• État: *{stats['etat']}*"
-            if talon.last_used_chq:
-                summary_msg += f"\n• Dernier chèque sorti: *{talon.last_used_chq}*"
-
-            from odoo import fields
-            return {
-                'status': 'success',
-                'product_name': talon.name_shown,
-                'message': summary_msg,
-                'pdf_base64': pdf_base64,
-                'file_name': f"Talon_{talon.name_shown.replace(' ', '_')}_{fields.Date.today()}.pdf"
-            }
-
-        exact_benif = request.env['finance.benif'].sudo().search([('name', '=ilike', message_text)], limit=1)
-        
-        if exact_benif:
-            benifs = exact_benif
-            extracted_name = exact_benif.name
-        else:
-            # 5. Call OpenAI to extract beneficiary name
-            openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
-            if not openai_key:
-                return {'status': 'error', 'message': 'OpenAI API key not configured'}
-
-            # Fetch all beneficiary names
-            all_benifs = request.env['finance.benif'].sudo().search([])
-            benif_names_list = [b.name for b in all_benifs if b.name]
             
-            extracted_name = self._extract_benif_name(message_text, openai_key, benif_names_list)
-            
-            if not extracted_name or extracted_name.upper() == 'IGNORE':
-                _logger.info(f"Ignoring off-topic message in Finance: {group_id}")
-                return {'status': 'ignored'}
-                
-            extracted_name = extracted_name.strip(' "\'')
-
-            if not extracted_name or extracted_name.lower() == 'none':
-                return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le bénéficiaire dans votre message."}
-
-            # Handle partial match via search
-            benifs = request.env['finance.benif'].sudo().search([('name', 'ilike', extracted_name)])
-
-        if not benifs:
-            return {'status': 'not_found', 'message': f"Aucun bénéficiaire trouvé pour : '{extracted_name}'."}
-
-        # Check for absolute exact match among multiple results
-        if len(benifs) > 1:
-            absolute_match = benifs.filtered(lambda b: b.name.lower() == extracted_name.lower())
-            if absolute_match:
-                benifs = absolute_match[0]
-
-        if len(benifs) == 1:
-            # UNIQUE BENEFICIARY -> GENERATE PDF
-            benif = benifs[0]
-            wants_encours = message_text.lower().strip().startswith("encours") or message_text.lower().strip().startswith("en cours")
-            
-            report_action = request.env['ir.actions.report'].sudo()
-            pdf_content, _ = report_action.with_context(encours_only=wants_encours)._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
-            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
-
-            # We need to re-fetch benif with context for stats
-            benif_with_ctx = benif.with_context(encours_only=wants_encours)
-
-            has_chqs = bool(benif_with_ctx.physical_chq_ids) or bool(benif_with_ctx.get_finance2_cheques())
-            has_effets = bool(benif_with_ctx.effet_ids)
-            if has_chqs and has_effets:
-                doc_title = "Chèques et Effets"
-                doc_short = "docs"
-            elif has_effets:
-                doc_title = "Effets"
-                doc_short = "effets"
-            else:
-                doc_title = "Chèques"
-                doc_short = "chqs"
-
-            stats = benif_with_ctx.get_cheque_stats()
-            
-            report_type_str = " (Encours seulement)" if wants_encours else ""
-            summary_msg = f"Voici le rapport financier{report_type_str} pour *{benif.name}*.\n\n"
-            summary_msg += f"📊 *Analyse des {doc_title}* :\n"
-            summary_msg += f"• Total: {stats['total']}\n"
-            summary_msg += f"• Encaissés: {stats['encaisse']}\n"
-            summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
-            
-            if wants_encours:
-                summary_msg += f"💰 Reste à décaisser: *{'{:,.2f}'.format(sum(c.amount_total for c in benif.physical_chq_ids if not c.date_encaissement) + sum(e.montant for e in benif.effet_ids if not e.date_encaissement) + sum(f.amount_total for f in benif.get_finance2_cheques(True))).replace(',', ' ')} DH*"
-            else:
-                summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
-
-            # Append company-wise breakdown if available
-            breakdown_data = benif_with_ctx.get_financial_breakdown()
-            if breakdown_data:
-                summary_msg += "\n\n🏢 *Chiffres par Société* :\n"
-                for b_item in breakdown_data:
-                    summary_msg += (
-                        f"• *{b_item['ste']}* :\n"
-                        f"   ↳ Total: {b_item['count_total']} {doc_short} ({'{:,.2f}'.format(b_item['total']).replace(',', ' ')} DH)\n"
-                        f"   ↳ Encaissés: {b_item['count_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['encaisse']).replace(',', ' ')} DH)\n"
-                        f"   ↳ Restants: {b_item['count_non_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['non_encaisse']).replace(',', ' ')} DH)\n"
-                    )
-
-            from odoo import fields
-            return {
-                'status': 'success',
-                'product_name': benif.name,
-                'message': summary_msg,
-                'pdf_base64': pdf_base64,
-                'file_name': f"Rapport_Finance_{benif.name.replace(' ', '_')}_{fields.Date.today()}.pdf"
-            }
-            
-        else:
-            # MULTIPLE BENEFICIARIES FOUND
-            choices = [b.name for b in benifs]
-            choices_text = "Plusieurs bénéficiaires correspondent. Veuillez préciser :\n"
-            for i, name in enumerate(choices, 1):
-                choices_text += f"{i}- {name}\n"
-                
-            return {
-                'status': 'multiple_choices',
-                'message': choices_text,
-                'choices': choices
-            }
-
-    def _extract_benif_name(self, text, api_key, names_list):
-        """Use OpenAI to extract the beneficiary name."""
-        url = "https://api.openai.com/v1/chat/completions"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
-        }
-        
-        db_names = ", ".join(names_list) if names_list else "Aucun bénéficiaire disponible"
-        
-        prompt = (
-            "Tu es un assistant comptable. Ta tâche est d'identifier le nom du bénéficiaire (fournisseur) mentionné dans un message WhatsApp.\n"
-            "Voici la liste des bénéficiaires de la base de données :\n"
-            f"[{db_names}]\n\n"
-            "Message WhatsApp : " + text + "\n\n"
-            "Règles :\n"
-            "1. Identifie le nom le plus proche dans la liste.\n"
-            "2. Retourne uniquement le nom du bénéficiaire.\n"
-            "3. IMPORTANT : Si le message ne contient QUE des emojis (ex: '🚀🚀') ou ne contient QUE des caractères aléatoires sans sens (ex: 'qsdqsd', '...', '???'), réponds UNIQUEMENT 'IGNORE'.\n"
-            "4. Pour tout autre message (salutations, fautes de frappe, phrases complètes), tente d'identifier le bénéficiaire ou réponds 'None' si aucun ne correspond.\n"
-            "Retourne UNIQUEMENT le résultat (ou IGNORE)."
-        )
-        data = {
-            "model": "gpt-4o-mini",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0
-        }
-        try:
-            response = requests.post(url, headers=headers, json=data, timeout=10)
-            result = response.json()
-            return result['choices'][0]['message']['content'].strip()
-        except Exception as e:
-            _logger.error(f"OpenAI Finance Extraction Error: {str(e)}")
-            return None
-
-    
-    def _format_finance2_cheque_details(self, cheque):
-        import pytz
-        from datetime import datetime
-
-        doc_name = cheque.name or "Inconnu"
-        ste_name = cheque.ste_id.name if cheque.ste_id else "Non spécifié"
-        benif_name = cheque.benif_id.name if cheque.benif_id else "Non spécifié"
-        amount = '{:,.2f}'.format(cheque.amount_total).replace(',', ' ')
-        
-        date_em = cheque.date_emission.strftime('%d/%m/%Y') if cheque.date_emission else "Non spécifiée"
-        date_ech = cheque.date_echeance.strftime('%d/%m/%Y') if cheque.date_echeance else "Non spécifiée"
-        
-        etat = dict(cheque._fields['state'].selection).get(cheque.state) or cheque.state
-        
-        msg = (
-            f"📄 *Détails du Chèque (Finance V2)*\n\n"
-            f"• *Numéro* : {doc_name}\n"
-            f"• *Société* : {ste_name}\n"
-            f"• *Bénéficiaire* : {benif_name}\n"
-            f"• *Montant* : {amount} DH\n"
-            f"• *Date d'émission* : {date_em}\n"
-            f"• *Date d'échéance* : {date_ech}\n"
-            f"• *État actuel* : {etat}\n"
-        )
-        
-
-
-        if cheque.repartition_ids:
-            msg += "\n📋 *Répartitions* :\n"
-            for rep in cheque.repartition_ids:
-                rep_amt = '{:,.2f}'.format(rep.amount).replace(',', ' ')
-                msg += f"  - {rep_amt} DH (Fact: {rep.serie_facture or 'N/A'})\n"
-
-        # Direct PDF attachments if available
-        cheque_full = cheque.sudo().with_context(bin_size=False).browse(cheque.id)
-        files = []
-        
-        # 1. Variables to track if we found them in V2
-        has_vide = False
-        has_doc = False
-
-        if cheque_full.chq_vide_pdf:
-            has_vide = True
-            files.append({
-                'pdf_base64': cheque_full.chq_vide_pdf.decode('utf-8') if isinstance(cheque_full.chq_vide_pdf, bytes) else cheque_full.chq_vide_pdf,
-                'file_name': cheque_full.chq_vide_filename or f"Cheque_Vide_{cheque_full.name}.pdf",
-                'caption': f"Chèque vide #{cheque_full.name} (V2)"
-            })
-        if cheque_full.doc_pdf:
-            has_doc = True
-            files.append({
-                'pdf_base64': cheque_full.doc_pdf.decode('utf-8') if isinstance(cheque_full.doc_pdf, bytes) else cheque_full.doc_pdf,
-                'file_name': cheque_full.doc_filename or f"Documentation_{cheque_full.name}.pdf",
-                'caption': f"Documentation #{cheque_full.name} (V2)"
-            })
-
-        # 2. Fallback to Old Finance for PDFs if missing
-        if not has_vide or not has_doc:
-            from odoo.http import request
-            old_phys = request.env['finance.cheque.physical'].sudo().with_context(bin_size=False).search([('name', '=', cheque.name)], limit=1)
-            if old_phys:
-                if not has_vide and old_phys.chq_vide_pdf:
-                    files.append({
-                        'pdf_base64': old_phys.chq_vide_pdf.decode('utf-8') if isinstance(old_phys.chq_vide_pdf, bytes) else old_phys.chq_vide_pdf,
-                        'file_name': old_phys.chq_vide_filename or f"Cheque_Vide_{old_phys.name}.pdf",
-                        'caption': f"Chèque vide #{old_phys.name} (Ancien)"
-                    })
-                if not has_doc and old_phys.doc_pdf:
-                    files.append({
-                        'pdf_base64': old_phys.doc_pdf.decode('utf-8') if isinstance(old_phys.doc_pdf, bytes) else old_phys.doc_pdf,
-                        'file_name': old_phys.doc_filename or f"Documentation_{old_phys.name}.pdf",
-                        'caption': f"Documentation #{old_phys.name} (Ancien)"
-                    })
-                if hasattr(old_phys, 'cheque_copy_pdf') and old_phys.cheque_copy_pdf:
-                    files.append({
-                        'pdf_base64': old_phys.cheque_copy_pdf.decode('utf-8') if isinstance(old_phys.cheque_copy_pdf, bytes) else old_phys.cheque_copy_pdf,
-                        'file_name': getattr(old_phys, 'cheque_copy_filename', False) or f"Cheque_{old_phys.name}.pdf",
-                        'caption': f"Chèque #{old_phys.name} (Ancien)"
-                    })
-                    
-        return {
-            'status': 'success',
-            'response': msg,
-            'files': files,
-            'product_name': f"Chèque #{cheque.name}"
-        }
-
-    def _format_physical_cheque_details(self, physical):
-        # Force re-read to ensure we have latest computed status
-        physical = physical.sudo().with_context(bin_size=True).browse(physical.id)
-        
-        # Determine global status
-        is_encaissé = physical.encours == 'encaisse' or any(d.date_encaissement for d in physical.datacheque_ids)
-        status_label = "Encaissé" if is_encaissé else "En cours"
-        
-        msg = f"📄 *Détails du Chèque Physique #{physical.name}*\n\n"
-        msg += f"🏢 *Société:* {physical.ste_id.name}\n"
-        msg += f"💰 *Montant Total:* {'{:,.2f}'.format(physical.amount_total).replace(',', ' ')} DH\n"
-        msg += f"📅 *Émission:* {physical.date_emission.strftime('%d/%m/%Y') if physical.date_emission else 'N/A'}\n"
-        msg += f"⏳ *Échéance:* {physical.date_echeance.strftime('%d/%m/%Y') if physical.date_echeance else 'N/A'}\n"
-        if physical.week:
-            msg += f"📆 *Semaine:* {physical.week}\n"
-        
-        # Use first available cashing date
-        cashing_date = physical.date_encaissement or next((d.date_encaissement for d in physical.datacheque_ids if d.date_encaissement), None)
-        if cashing_date:
-            msg += f"✅ *Encaissé le:* {cashing_date.strftime('%d/%m/%Y')}\n"
-
-        msg += f"📊 *État Global:* *{status_label}*\n\n"
-        
-        if physical.datacheque_ids:
-            msg += "🧾 *Répartitions (Paiements) :*\n"
-            for d in physical.datacheque_ids:
-                # Labels robust fetching
-                f_selection = dict(d._fields['facture'].selection or {})
-                f_label = f_selection.get(d.facture) or d.facture or "N/A"
-                
-                t_selection = dict(d._fields['type'].selection or {})
-                t_label = t_selection.get(d.type) or d.type or "N/A"
-                
-                d_status = "✅" if (d.encours == 'encaisse' or d.date_encaissement) else "⏳"
-                
-                msg += f"• {d.benif_id.name or 'Inconnu'}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}\n"
-                
-                # Retrieve and append Google Drive links of this datacheque split
-                links = []
-                if d.chq_pdf_url:
-                    links.append(f"CHQ: {d.chq_pdf_url}")
-                if d.doc_pdf_url:
-                    links.append(f"DOC: {d.doc_pdf_url}")
-                if d.dem_pdf_url:
-                    links.append(f"DEM: {d.dem_pdf_url}")
-                
-                if links:
-                    msg += f"  ↳ 🔗 { ' | '.join(links) }\n"
-            
-        # Direct PDF attachments if available
-        physical_full = physical.sudo().with_context(bin_size=False).browse(physical.id)
-        files = []
-        if physical_full.chq_vide_pdf:
-            files.append({
-                'pdf_base64': physical_full.chq_vide_pdf.decode('utf-8') if isinstance(physical_full.chq_vide_pdf, bytes) else physical_full.chq_vide_pdf,
-                'file_name': physical_full.chq_vide_filename or f"Cheque_Vide_{physical_full.name}.pdf",
-                'caption': f"Chèque vide #{physical_full.name}"
-            })
-        if physical_full.doc_pdf:
-            files.append({
-                'pdf_base64': physical_full.doc_pdf.decode('utf-8') if isinstance(physical_full.doc_pdf, bytes) else physical_full.doc_pdf,
-                'file_name': physical_full.doc_filename or f"Documentation_{physical_full.name}.pdf",
-                'caption': f"Documentation #{physical_full.name}"
-            })
-        if physical_full.cheque_copy_pdf:
-            files.append({
-                'pdf_base64': physical_full.cheque_copy_pdf.decode('utf-8') if isinstance(physical_full.cheque_copy_pdf, bytes) else physical_full.cheque_copy_pdf,
-                'file_name': physical_full.cheque_copy_filename or f"Cheque_{physical_full.name}.pdf",
-                'caption': f"Chèque #{physical_full.name}"
-            })
-
-        return {
-            'status': 'success',
-            'response': msg,
-            'files': files,
-            'product_name': f"Chèque #{physical.name}"
-        }
-
-    def _format_effet_details(self, effet):
-        if effet.is_annule:
-            status_label = "Annulé"
-        elif effet.date_encaissement:
-            status_label = "Encaissé"
-        else:
-            status_label = "Non encaissé"
-            
-        msg = f"📄 *Détails de l'Effet #{effet.serie}*\n\n"
-        msg += f"🏢 *Société:* {effet.ste_id.name if effet.ste_id else 'Inconnu'}\n"
-        msg += f"👤 *Bénéficiaire:* {effet.benif_id.name if effet.benif_id else 'Inconnu'}\n"
-        msg += f"💰 *Montant:* {'{:,.2f}'.format(effet.montant).replace(',', ' ')} DH\n"
-        msg += f"📅 *Émission:* {effet.date_emission.strftime('%d/%m/%Y') if effet.date_emission else 'N/A'}\n"
-        msg += f"⏳ *Échéance:* {effet.date_echeance.strftime('%d/%m/%Y') if effet.date_echeance else 'N/A'}\n"
-        
-        if effet.date_encaissement:
-            msg += f"✅ *Encaissé le:* {effet.date_encaissement.strftime('%d/%m/%Y')}\n"
-
-        msg += f"📊 *État Global:* *{status_label}*\n"
-        
-        return {
-            'status': 'success',
-            'response': msg,
-            'files': [],
-            'product_name': f"Effet #{effet.serie}"
-        }

@@ -117,9 +117,9 @@ class TangerMedEntry(models.Model):
     def action_tanger_med_attente_ml(self):
         res = super(TangerMedEntry, self).action_tanger_med_attente_ml()
         for rec in self:
-            existing = self.env['sutra.dossier'].search([('logistics_id', '=', rec.id)])
+            existing = self.env['sutra.dossier'].sudo().search([('logistics_id', '=', rec.id)])
             if not existing:
-                self.env['sutra.dossier'].create({
+                self.env['sutra.dossier'].sudo().create({
                     'logistics_id': rec.id,
                 })
         return res
@@ -130,6 +130,6 @@ class TangerMedEntry(models.Model):
         valid_states = ['attente_ml', 'analyse', 'visite', 'en_cours_chargement', 'sortie_plein', 'rentree_vide', 'arrive_depot']
         for record in self:
             if record.tanger_med_state in valid_states:
-                existing = self.env['sutra.dossier'].search([('logistics_id', '=', record.id)])
+                existing = self.env['sutra.dossier'].sudo().search([('logistics_id', '=', record.id)])
                 if not existing:
-                    self.env['sutra.dossier'].create({'logistics_id': record.id})
+                    self.env['sutra.dossier'].sudo().create({'logistics_id': record.id})

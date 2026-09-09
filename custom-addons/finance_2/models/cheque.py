@@ -347,7 +347,7 @@ Exemple:
                 
             rec.state = 'cloture'
 
-def action_encaisser(self):
+    def action_encaisser(self):
         for rec in self:
             if rec.state != 'cloture':
                 raise UserError("Seuls les chèques clôturés peuvent être encaissés.")

@@ -658,7 +658,6 @@ class WhatsAppFinanceController(http.Controller):
             encaisse_label = " ENCAISSÉS" if only_encaisse else ""
             
             try:
-
                 import io
                 import xlsxwriter
                 
@@ -747,12 +746,12 @@ class WhatsAppFinanceController(http.Controller):
                         phys_amount = phys.amount_total
                         date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
                         
-                        is_encaisse = phys.encours == 'encaisse'
+                        is_encaisse = getattr(phys, 'encours', '') == 'encaisse'
                         etat_label = "Encaissé" if is_encaisse else "En cours"
                         doc_display = f"CHQ {doc_name}"
-                        chq_pdf_icon = "Oui" if phys.chq_vide_pdf else "Non"
+                        chq_pdf_icon = "Oui" if getattr(phys, 'chq_vide_pdf', False) else "Non"
                         
-                        if not phys.chq_vide_pdf:
+                        if not getattr(phys, 'chq_vide_pdf', False):
                             for dq in dqs:
                                 if getattr(dq, 'journal', False): chq_vide_missing_journals.add(str(dq.journal))
                                 
@@ -808,10 +807,10 @@ class WhatsAppFinanceController(http.Controller):
                         sheet.write(row_idx, 7, "N/A", cell_format)
                         sheet.write(row_idx, 8, "-", cell_center)
                         sheet.write(row_idx, 9, "Effet", cell_format)
-                        sheet.write(row_idx, 10, e.state or "N/A", cell_format)
+                        sheet.write(row_idx, 10, getattr(e, 'state', "N/A"), cell_format)
                         sheet.write(row_idx, 11, e.montant, cell_format)
                         sheet.write(row_idx, 12, e.montant, cell_format)
-                        sheet.write(row_idx, 13, "Encaissé" if e.state == 'encaisse' else "En cours", cell_format)
+                        sheet.write(row_idx, 13, "Encaissé" if getattr(e, 'state', '') == 'encaisse' else "En cours", cell_format)
                         row_idx += 1
                 
                 sheet.write(row_idx, 11, "Total:", bold)
@@ -945,4 +944,361 @@ class WhatsAppFinanceController(http.Controller):
             talon = exact_talon[0]
             report_action = request.env['ir.actions.report'].sudo()
             pdf_content, _ = report_action._render_qweb_pdf('finance.action_report_finance_talon_summary', res_ids=talon.ids)
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+            stats = talon.get_talon_stats()
+            summary_msg = f"Voici les détails du talon *{talon.name_shown}* ({talon.ste_id.name}).\n\n"
+            summary_msg += f"📊 *Statistiques* :\n"
+            summary_msg += f"• Total: {stats['total']}\n"
+            summary_msg += f"• Utilisés: {stats['used']}\n"
+            summary_msg += f"• Restants: {stats['remaining']}\n"
+            summary_msg += f"• État: *{stats['etat']}*"
+            if talon.last_used_chq:
+                summary_msg += f"\n• Dernier chèque sorti: *{talon.last_used_chq}*"
+
+            from odoo import fields
+            return {
+                'status': 'success',
+                'product_name': talon.name_shown,
+                'message': summary_msg,
+                'pdf_base64': pdf_base64,
+                'file_name': f"Talon_{talon.name_shown.replace(' ', '_')}_{fields.Date.today()}.pdf"
+            }
+
+        exact_benif = request.env['finance.benif'].sudo().search([('name', '=ilike', message_text)], limit=1)
+        
+        if exact_benif:
+            benifs = exact_benif
+            extracted_name = exact_benif.name
+        else:
+            # 5. Call OpenAI to extract beneficiary name
+            openai_key = request.env['ir.config_parameter'].sudo().get_param('whatsapp_stock.openai_key')
+            if not openai_key:
+                return {'status': 'error', 'message': 'OpenAI API key not configured'}
+
+            # Fetch all beneficiary names
+            all_benifs = request.env['finance.benif'].sudo().search([])
+            benif_names_list = [b.name for b in all_benifs if b.name]
             
+            extracted_name = self._extract_benif_name(message_text, openai_key, benif_names_list)
+            
+            if not extracted_name or extracted_name.upper() == 'IGNORE':
+                _logger.info(f"Ignoring off-topic message in Finance: {group_id}")
+                return {'status': 'ignored'}
+                
+            extracted_name = extracted_name.strip(' "\'')
+
+            if not extracted_name or extracted_name.lower() == 'none':
+                return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le bénéficiaire dans votre message."}
+
+            # Handle partial match via search
+            benifs = request.env['finance.benif'].sudo().search([('name', 'ilike', extracted_name)])
+
+        if not benifs:
+            return {'status': 'not_found', 'message': f"Aucun bénéficiaire trouvé pour : '{extracted_name}'."}
+
+        # Check for absolute exact match among multiple results
+        if len(benifs) > 1:
+            absolute_match = benifs.filtered(lambda b: b.name.lower() == extracted_name.lower())
+            if absolute_match:
+                benifs = absolute_match[0]
+
+        if len(benifs) == 1:
+            # UNIQUE BENEFICIARY -> GENERATE PDF
+            benif = benifs[0]
+            wants_encours = message_text.lower().strip().startswith("encours") or message_text.lower().strip().startswith("en cours")
+            
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action.with_context(encours_only=wants_encours)._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=benif.ids)
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+            # We need to re-fetch benif with context for stats
+            benif_with_ctx = benif.with_context(encours_only=wants_encours)
+
+            has_chqs = bool(benif_with_ctx.physical_chq_ids) or bool(benif_with_ctx.get_finance2_cheques())
+            has_effets = bool(benif_with_ctx.effet_ids)
+            if has_chqs and has_effets:
+                doc_title = "Chèques et Effets"
+                doc_short = "docs"
+            elif has_effets:
+                doc_title = "Effets"
+                doc_short = "effets"
+            else:
+                doc_title = "Chèques"
+                doc_short = "chqs"
+
+            stats = benif_with_ctx.get_cheque_stats()
+            
+            report_type_str = " (Encours seulement)" if wants_encours else ""
+            summary_msg = f"Voici le rapport financier{report_type_str} pour *{benif.name}*.\n\n"
+            summary_msg += f"📊 *Analyse des {doc_title}* :\n"
+            summary_msg += f"• Total: {stats['total']}\n"
+            summary_msg += f"• Encaissés: {stats['encaisse']}\n"
+            summary_msg += f"• Restants: {stats['non_encaisse']}\n\n"
+            
+            if wants_encours:
+                summary_msg += f"💰 Reste à décaisser: *{'{:,.2f}'.format(sum(c.amount_total for c in benif.physical_chq_ids if not c.date_encaissement) + sum(e.montant for e in benif.effet_ids if not e.date_encaissement) + sum(f.amount_total for f in benif.get_finance2_cheques(True))).replace(',', ' ')} DH*"
+            else:
+                summary_msg += f"💰 Solde: *{'{:,.2f}'.format(benif.solde).replace(',', ' ')} DH*"
+
+            # Append company-wise breakdown if available
+            breakdown_data = benif_with_ctx.get_financial_breakdown()
+            if breakdown_data:
+                summary_msg += "\n\n🏢 *Chiffres par Société* :\n"
+                for b_item in breakdown_data:
+                    summary_msg += (
+                        f"• *{b_item['ste']}* :\n"
+                        f"   ↳ Total: {b_item['count_total']} {doc_short} ({'{:,.2f}'.format(b_item['total']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Encaissés: {b_item['count_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['encaisse']).replace(',', ' ')} DH)\n"
+                        f"   ↳ Restants: {b_item['count_non_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['non_encaisse']).replace(',', ' ')} DH)\n"
+                    )
+
+            from odoo import fields
+            return {
+                'status': 'success',
+                'product_name': benif.name,
+                'message': summary_msg,
+                'pdf_base64': pdf_base64,
+                'file_name': f"Rapport_Finance_{benif.name.replace(' ', '_')}_{fields.Date.today()}.pdf"
+            }
+            
+        else:
+            # MULTIPLE BENEFICIARIES FOUND
+            choices = [b.name for b in benifs]
+            choices_text = "Plusieurs bénéficiaires correspondent. Veuillez préciser :\n"
+            for i, name in enumerate(choices, 1):
+                choices_text += f"{i}- {name}\n"
+                
+            return {
+                'status': 'multiple_choices',
+                'message': choices_text,
+                'choices': choices
+            }
+
+    def _extract_benif_name(self, text, api_key, names_list):
+        """Use OpenAI to extract the beneficiary name."""
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        db_names = ", ".join(names_list) if names_list else "Aucun bénéficiaire disponible"
+        
+        prompt = (
+            "Tu es un assistant comptable. Ta tâche est d'identifier le nom du bénéficiaire (fournisseur) mentionné dans un message WhatsApp.\n"
+            "Voici la liste des bénéficiaires de la base de données :\n"
+            f"[{db_names}]\n\n"
+            "Message WhatsApp : " + text + "\n\n"
+            "Règles :\n"
+            "1. Identifie le nom le plus proche dans la liste.\n"
+            "2. Retourne uniquement le nom du bénéficiaire.\n"
+            "3. IMPORTANT : Si le message ne contient QUE des emojis (ex: '🚀🚀') ou ne contient QUE des caractères aléatoires sans sens (ex: 'qsdqsd', '...', '???'), réponds UNIQUEMENT 'IGNORE'.\n"
+            "4. Pour tout autre message (salutations, fautes de frappe, phrases complètes), tente d'identifier le bénéficiaire ou réponds 'None' si aucun ne correspond.\n"
+            "Retourne UNIQUEMENT le résultat (ou IGNORE)."
+        )
+        data = {
+            "model": "gpt-4o-mini",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0
+        }
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=10)
+            result = response.json()
+            return result['choices'][0]['message']['content'].strip()
+        except Exception as e:
+            _logger.error(f"OpenAI Finance Extraction Error: {str(e)}")
+            return None
+
+    
+    def _format_finance2_cheque_details(self, cheque):
+        import pytz
+        from datetime import datetime
+
+        doc_name = cheque.name or "Inconnu"
+        ste_name = cheque.ste_id.name if cheque.ste_id else "Non spécifié"
+        benif_name = cheque.benif_id.name if cheque.benif_id else "Non spécifié"
+        amount = '{:,.2f}'.format(cheque.amount_total).replace(',', ' ')
+        
+        date_em = cheque.date_emission.strftime('%d/%m/%Y') if cheque.date_emission else "Non spécifiée"
+        date_ech = cheque.date_echeance.strftime('%d/%m/%Y') if cheque.date_echeance else "Non spécifiée"
+        
+        etat = dict(cheque._fields['state'].selection).get(cheque.state) or cheque.state
+        
+        msg = (
+            f"📄 *Détails du Chèque (Finance V2)*\n\n"
+            f"• *Numéro* : {doc_name}\n"
+            f"• *Société* : {ste_name}\n"
+            f"• *Bénéficiaire* : {benif_name}\n"
+            f"• *Montant* : {amount} DH\n"
+            f"• *Date d'émission* : {date_em}\n"
+            f"• *Date d'échéance* : {date_ech}\n"
+            f"• *État actuel* : {etat}\n"
+        )
+        
+
+
+        if cheque.repartition_ids:
+            msg += "\n📋 *Répartitions* :\n"
+            for rep in cheque.repartition_ids:
+                rep_amt = '{:,.2f}'.format(rep.amount).replace(',', ' ')
+                msg += f"  - {rep_amt} DH (Fact: {rep.serie_facture or 'N/A'})\n"
+
+        # Direct PDF attachments if available
+        cheque_full = cheque.sudo().with_context(bin_size=False).browse(cheque.id)
+        files = []
+        
+        # 1. Variables to track if we found them in V2
+        has_vide = False
+        has_doc = False
+
+        if cheque_full.chq_vide_pdf:
+            has_vide = True
+            files.append({
+                'pdf_base64': cheque_full.chq_vide_pdf.decode('utf-8') if isinstance(cheque_full.chq_vide_pdf, bytes) else cheque_full.chq_vide_pdf,
+                'file_name': cheque_full.chq_vide_filename or f"Cheque_Vide_{cheque_full.name}.pdf",
+                'caption': f"Chèque vide #{cheque_full.name} (V2)"
+            })
+        if cheque_full.doc_pdf:
+            has_doc = True
+            files.append({
+                'pdf_base64': cheque_full.doc_pdf.decode('utf-8') if isinstance(cheque_full.doc_pdf, bytes) else cheque_full.doc_pdf,
+                'file_name': cheque_full.doc_filename or f"Documentation_{cheque_full.name}.pdf",
+                'caption': f"Documentation #{cheque_full.name} (V2)"
+            })
+
+        # 2. Fallback to Old Finance for PDFs if missing
+        if not has_vide or not has_doc:
+            from odoo.http import request
+            old_phys = request.env['finance.cheque.physical'].sudo().with_context(bin_size=False).search([('name', '=', cheque.name)], limit=1)
+            if old_phys:
+                if not has_vide and old_phys.chq_vide_pdf:
+                    files.append({
+                        'pdf_base64': old_phys.chq_vide_pdf.decode('utf-8') if isinstance(old_phys.chq_vide_pdf, bytes) else old_phys.chq_vide_pdf,
+                        'file_name': old_phys.chq_vide_filename or f"Cheque_Vide_{old_phys.name}.pdf",
+                        'caption': f"Chèque vide #{old_phys.name} (Ancien)"
+                    })
+                if not has_doc and old_phys.doc_pdf:
+                    files.append({
+                        'pdf_base64': old_phys.doc_pdf.decode('utf-8') if isinstance(old_phys.doc_pdf, bytes) else old_phys.doc_pdf,
+                        'file_name': old_phys.doc_filename or f"Documentation_{old_phys.name}.pdf",
+                        'caption': f"Documentation #{old_phys.name} (Ancien)"
+                    })
+                if hasattr(old_phys, 'cheque_copy_pdf') and old_phys.cheque_copy_pdf:
+                    files.append({
+                        'pdf_base64': old_phys.cheque_copy_pdf.decode('utf-8') if isinstance(old_phys.cheque_copy_pdf, bytes) else old_phys.cheque_copy_pdf,
+                        'file_name': getattr(old_phys, 'cheque_copy_filename', False) or f"Cheque_{old_phys.name}.pdf",
+                        'caption': f"Chèque #{old_phys.name} (Ancien)"
+                    })
+                    
+        return {
+            'status': 'success',
+            'response': msg,
+            'files': files,
+            'product_name': f"Chèque #{cheque.name}"
+        }
+
+    def _format_physical_cheque_details(self, physical):
+        # Force re-read to ensure we have latest computed status
+        physical = physical.sudo().with_context(bin_size=True).browse(physical.id)
+        
+        # Determine global status
+        is_encaissé = physical.encours == 'encaisse' or any(d.date_encaissement for d in physical.datacheque_ids)
+        status_label = "Encaissé" if is_encaissé else "En cours"
+        
+        msg = f"📄 *Détails du Chèque Physique #{physical.name}*\n\n"
+        msg += f"🏢 *Société:* {physical.ste_id.name}\n"
+        msg += f"💰 *Montant Total:* {'{:,.2f}'.format(physical.amount_total).replace(',', ' ')} DH\n"
+        msg += f"📅 *Émission:* {physical.date_emission.strftime('%d/%m/%Y') if physical.date_emission else 'N/A'}\n"
+        msg += f"⏳ *Échéance:* {physical.date_echeance.strftime('%d/%m/%Y') if physical.date_echeance else 'N/A'}\n"
+        if physical.week:
+            msg += f"📆 *Semaine:* {physical.week}\n"
+        
+        # Use first available cashing date
+        cashing_date = physical.date_encaissement or next((d.date_encaissement for d in physical.datacheque_ids if d.date_encaissement), None)
+        if cashing_date:
+            msg += f"✅ *Encaissé le:* {cashing_date.strftime('%d/%m/%Y')}\n"
+
+        msg += f"📊 *État Global:* *{status_label}*\n\n"
+        
+        if physical.datacheque_ids:
+            msg += "🧾 *Répartitions (Paiements) :*\n"
+            for d in physical.datacheque_ids:
+                # Labels robust fetching
+                f_selection = dict(d._fields['facture'].selection or {})
+                f_label = f_selection.get(d.facture) or d.facture or "N/A"
+                
+                t_selection = dict(d._fields['type'].selection or {})
+                t_label = t_selection.get(d.type) or d.type or "N/A"
+                
+                d_status = "✅" if (d.encours == 'encaisse' or d.date_encaissement) else "⏳"
+                
+                msg += f"• {d.benif_id.name or 'Inconnu'}: *{'{:,.2f}'.format(d.amount).replace(',', ' ')} DH* ({f_label}, {t_label}) {d_status}\n"
+                
+                # Retrieve and append Google Drive links of this datacheque split
+                links = []
+                if d.chq_pdf_url:
+                    links.append(f"CHQ: {d.chq_pdf_url}")
+                if d.doc_pdf_url:
+                    links.append(f"DOC: {d.doc_pdf_url}")
+                if d.dem_pdf_url:
+                    links.append(f"DEM: {d.dem_pdf_url}")
+                
+                if links:
+                    msg += f"  ↳ 🔗 { ' | '.join(links) }\n"
+            
+        # Direct PDF attachments if available
+        physical_full = physical.sudo().with_context(bin_size=False).browse(physical.id)
+        files = []
+        if physical_full.chq_vide_pdf:
+            files.append({
+                'pdf_base64': physical_full.chq_vide_pdf.decode('utf-8') if isinstance(physical_full.chq_vide_pdf, bytes) else physical_full.chq_vide_pdf,
+                'file_name': physical_full.chq_vide_filename or f"Cheque_Vide_{physical_full.name}.pdf",
+                'caption': f"Chèque vide #{physical_full.name}"
+            })
+        if physical_full.doc_pdf:
+            files.append({
+                'pdf_base64': physical_full.doc_pdf.decode('utf-8') if isinstance(physical_full.doc_pdf, bytes) else physical_full.doc_pdf,
+                'file_name': physical_full.doc_filename or f"Documentation_{physical_full.name}.pdf",
+                'caption': f"Documentation #{physical_full.name}"
+            })
+        if physical_full.cheque_copy_pdf:
+            files.append({
+                'pdf_base64': physical_full.cheque_copy_pdf.decode('utf-8') if isinstance(physical_full.cheque_copy_pdf, bytes) else physical_full.cheque_copy_pdf,
+                'file_name': physical_full.cheque_copy_filename or f"Cheque_{physical_full.name}.pdf",
+                'caption': f"Chèque #{physical_full.name}"
+            })
+
+        return {
+            'status': 'success',
+            'response': msg,
+            'files': files,
+            'product_name': f"Chèque #{physical.name}"
+        }
+
+    def _format_effet_details(self, effet):
+        if effet.is_annule:
+            status_label = "Annulé"
+        elif effet.date_encaissement:
+            status_label = "Encaissé"
+        else:
+            status_label = "Non encaissé"
+            
+        msg = f"📄 *Détails de l'Effet #{effet.serie}*\n\n"
+        msg += f"🏢 *Société:* {effet.ste_id.name if effet.ste_id else 'Inconnu'}\n"
+        msg += f"👤 *Bénéficiaire:* {effet.benif_id.name if effet.benif_id else 'Inconnu'}\n"
+        msg += f"💰 *Montant:* {'{:,.2f}'.format(effet.montant).replace(',', ' ')} DH\n"
+        msg += f"📅 *Émission:* {effet.date_emission.strftime('%d/%m/%Y') if effet.date_emission else 'N/A'}\n"
+        msg += f"⏳ *Échéance:* {effet.date_echeance.strftime('%d/%m/%Y') if effet.date_echeance else 'N/A'}\n"
+        
+        if effet.date_encaissement:
+            msg += f"✅ *Encaissé le:* {effet.date_encaissement.strftime('%d/%m/%Y')}\n"
+
+        msg += f"📊 *État Global:* *{status_label}*\n"
+        
+        return {
+            'status': 'success',
+            'response': msg,
+            'files': [],
+            'product_name': f"Effet #{effet.serie}"
+        }

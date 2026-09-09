@@ -747,7 +747,7 @@ class WhatsAppFinanceController(http.Controller):
                         phys_amount = phys.amount_total
                         date_em = phys.date_emission.strftime('%d/%m/%Y') if phys.date_emission else "N/A"
                         
-                        is_encaisse = phys.state == 'encaisse' or phys.encours == 'encaisse'
+                        is_encaisse = phys.encours == 'encaisse'
                         etat_label = "Encaissé" if is_encaisse else "En cours"
                         doc_display = f"CHQ {doc_name}"
                         chq_pdf_icon = "Oui" if phys.chq_vide_pdf else "Non"

@@ -657,7 +657,8 @@ class WhatsAppFinanceController(http.Controller):
 
             encaisse_label = " ENCAISSÉS" if only_encaisse else ""
             
-            try:
+            try:
+
                 import io
                 import xlsxwriter
                 
@@ -725,12 +726,12 @@ class WhatsAppFinanceController(http.Controller):
                                 sheet.write(row_idx, 2, c_v2.date_emission.strftime('%d/%m/%Y') if c_v2.date_emission else '', cell_format)
                                 sheet.write(row_idx, 3, ste_name, cell_format)
                                 sheet.write(row_idx, 4, rep.journal or '', cell_format)
-                                sheet.write(row_idx, 5, rep.benif_id.name if rep.benif_id else '', cell_format)
+                                sheet.write(row_idx, 5, c_v2.benif_id.name if c_v2.benif_id else '', cell_format)
                                 sheet.write(row_idx, 6, rep.serie_facture or '', cell_format)
                                 sheet.write(row_idx, 7, rep.bl or '', cell_format)
                                 sheet.write(row_idx, 8, 'Oui' if c_v2.doc_pdf else 'Non', cell_center)
                                 sheet.write(row_idx, 9, dict(c_v2._fields['type'].selection).get(c_v2.type) or 'Chèque', cell_format)
-                                sheet.write(row_idx, 10, dict(rep._fields['state'].selection).get(rep.state) or rep.state, cell_format)
+                                sheet.write(row_idx, 10, '-', cell_format)
                                 sheet.write(row_idx, 11, rep.amount, cell_format)
                                 sheet.write(row_idx, 12, phys_amount if idx == 0 else '', cell_format)
                                 sheet.write(row_idx, 13, global_state if idx == 0 else '', cell_format)

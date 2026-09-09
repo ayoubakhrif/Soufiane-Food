@@ -347,7 +347,7 @@ Exemple:
                 
             rec.state = 'cloture'
 
-    def action_encaisser(self):
+def action_encaisser(self):
         for rec in self:
             if rec.state != 'cloture':
                 raise UserError("Seuls les chèques clôturés peuvent être encaissés.")
@@ -357,6 +357,13 @@ Exemple:
                 raise UserError("Veuillez renseigner le montant encaissé.")
                 
             rec.state = 'encaisse'
+
+    def action_annuler_encaissement(self):
+        for rec in self:
+            if rec.state == 'encaisse':
+                rec.state = 'cloture'
+                rec.date_encaissement = False
+                rec.montant_encaisse = 0.0
             
             if rec.montant_encaisse != rec.amount_total:
                 return {

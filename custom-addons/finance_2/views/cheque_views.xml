@@ -127,6 +127,7 @@
                 <field name="montant_encaisse" readonly="state == 'encaisse'" sum="Total Encaissé"/>
                 <field name="state" readonly="1" widget="badge" decoration-success="state == 'encaisse'" decoration-warning="state == 'cloture'"/>
                 <button name="action_encaisser" type="object" icon="fa-check" string="Encaisser" class="oe_highlight" invisible="state != 'cloture'"/>
+                <button name="action_annuler_encaissement" type="object" icon="fa-undo" string="Annuler Encaissement" class="btn-danger" invisible="state != 'encaisse'"/>
             </tree>
         </field>
     </record>
@@ -137,7 +138,7 @@
         <field name="res_model">finance2.cheque</field>
         <field name="view_mode">tree,form,calendar,graph,pivot</field>
         <field name="domain">[('state', 'in', ['cloture', 'encaisse'])]</field>
-        <field name="context">{'search_default_cloture': 1}</field>
+        <field name="context">{'search_default_cloture': 1, 'group_by': ['date_encaissement:day']}</field>
         <field name="view_id" ref="view_finance2_encaissement_tree"/>
     </record>
 

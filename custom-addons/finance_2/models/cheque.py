@@ -86,6 +86,15 @@ class Finance2Cheque(models.Model):
     # Encaissement
     date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)
     montant_encaisse = fields.Float(string="Montant encaissé", tracking=True)
+    difference = fields.Float(string="Différence", compute="_compute_difference", store=True)
+
+    @api.depends('amount_total', 'montant_encaisse')
+    def _compute_difference(self):
+        for rec in self:
+            if rec.state == 'encaisse' or rec.montant_encaisse:
+                rec.difference = rec.amount_total - rec.montant_encaisse
+            else:
+                rec.difference = 0.0
 
     # Suivi Logistique
     date_remise = fields.Date(string='Date de remise (Actif)', tracking=True)
@@ -364,18 +373,6 @@ Exemple:
                 rec.state = 'cloture'
                 rec.date_encaissement = False
                 rec.montant_encaisse = 0.0
-            
-            if rec.montant_encaisse != rec.amount_total:
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': 'Attention',
-                        'message': 'Le montant encaissé est différent du montant total du chèque.',
-                        'type': 'warning',
-                        'sticky': False,
-                    }
-                }
             
     def action_annuler(self):
         for rec in self:

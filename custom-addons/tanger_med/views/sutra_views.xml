@@ -16,7 +16,7 @@
                         <group>
                             <group>
                                 <field name="logistics_id"/>
-                                <field name="amount"/>
+                                <field name="amount_single"/><field name="amount_multiple"/>
                             </group>
                         </group>
                         <notebook>
@@ -73,7 +73,7 @@
                         <group>
                             <group string="Configuration">
                                 <field name="ste_id"/>
-                                <field name="amount"/>
+                                <field name="amount_single"/><field name="amount_multiple"/>
                             </group>
                             <group string="Resume Financier SUTRA" style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 5px solid #17a2b8;">
                                 <field name="amount_unbilled" widget="monetary"/>
@@ -95,7 +95,7 @@
             <field name="arch" type="xml">
                 <tree>
                     <field name="ste_id"/>
-                    <field name="amount"/>
+                    <field name="amount_single"/><field name="amount_multiple"/>
                     <field name="amount_unbilled" sum="Total Non Facture"/>
                     <field name="amount_unpaid" sum="Total A Payer"/>
                     <field name="amount_total_debt" sum="Total Dette SUTRA" decoration-bf="1" decoration-danger="1"/>
@@ -137,7 +137,7 @@
                                 <field name="date"/>
                             </group>
                             <group>
-                                <field name="amount"/>
+                                <field name="amount_single"/><field name="amount_multiple"/>
                                 <field name="cheque_id" readonly="1" invisible="not cheque_id"/>
                             </group>
                         </group>

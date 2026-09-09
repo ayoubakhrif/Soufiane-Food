@@ -5,7 +5,8 @@ class SutraConfigSte(models.Model):
     _description = 'Configuration SUTRA par Societe'
 
     ste_id = fields.Many2one('logistique.ste', string='Societe', required=True)
-    amount = fields.Float(string='Montant par defaut', required=True)
+    amount_single = fields.Float(string='Montant (1 Conteneur)', required=True)
+    amount_multiple = fields.Float(string='Montant (Plusieurs)', required=True)
 
     amount_unbilled = fields.Float(string='Dettes Engagees (Non facturees)', compute='_compute_sutra_debts')
     amount_unpaid = fields.Float(string='Dettes Reelles (A Payer)', compute='_compute_sutra_debts')
@@ -57,7 +58,10 @@ class SutraDossier(models.Model):
                     if not vals.get('amount') and log_entry.ste_id:
                         config = self.env['sutra.config.ste'].search([('ste_id', '=', log_entry.ste_id.id)], limit=1)
                         if config:
-                            vals['amount'] = config.amount
+                            if log_entry.container_count and log_entry.container_count > 1:
+                                vals['amount'] = config.amount_multiple
+                            else:
+                                vals['amount'] = config.amount_single
         return super(SutraDossier, self).create(vals_list)
 
 class SutraFacture(models.Model):

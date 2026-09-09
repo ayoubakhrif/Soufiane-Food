@@ -81,10 +81,9 @@
                     </group>
                     <group string="Workflow Tanger Med">
                         <group string="Contrôles Port">
-                            <field name="is_analyse"/>
-                            <field name="date_analyse" invisible="not is_analyse"/>
-                            <field name="is_visite"/>
-                            <field name="date_visite" invisible="not is_visite"/>
+                            <field name="passed_control_type"/>
+                            <field name="date_analyse" invisible="passed_control_type not in ('analyse', 'both')"/>
+                            <field name="date_visite" invisible="passed_control_type not in ('visite', 'both')"/>
                         </group>
                         <group string="Étapes Logistiques">
                             <field name="date_sortie_port"/>

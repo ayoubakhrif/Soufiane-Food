@@ -613,36 +613,29 @@ class LogisticsEntry(models.Model):
         ('arrive_depot', 'Arrivé au dépôt'),
     ], string='Statut Tanger Med', default='port', tracking=True)
 
-    is_analyse = fields.Boolean(string='Analyse', default=False, tracking=True)
     date_analyse = fields.Date(string="Date d'Analyse", tracking=True)
-
-    is_visite = fields.Boolean(string='Visite', default=False, tracking=True)
     date_visite = fields.Date(string="Date de Visite", tracking=True)
+
+    passed_control_type = fields.Selection([
+        ('none', 'Aucun'),
+        ('analyse', 'Analyse'),
+        ('visite', 'Visite'),
+        ('both', 'Analyse & Visite')
+    ], string='Contrôle Passé', default='none', tracking=True)
 
     date_sortie_port = fields.Date(string="Date de Sortie de Port", tracking=True)
     date_arrive_stock = fields.Date(string="Date d'Arrivée au Stock", tracking=True)
 
-    @api.onchange('is_analyse')
-    def _onchange_is_analyse(self):
-        if self.is_analyse and not self.date_analyse:
+    @api.onchange('passed_control_type')
+    def _onchange_passed_control_type(self):
+        if self.passed_control_type in ('analyse', 'both') and not self.date_analyse:
             self.date_analyse = fields.Date.context_today(self)
-        elif not self.is_analyse:
-            self.date_analyse = False
-
-    @api.onchange('is_visite')
-    def _onchange_is_visite(self):
-        if self.is_visite and not self.date_visite:
+        if self.passed_control_type in ('visite', 'both') and not self.date_visite:
             self.date_visite = fields.Date.context_today(self)
-        elif not self.is_visite:
+        if self.passed_control_type in ('none', 'visite'):
+            self.date_analyse = False
+        if self.passed_control_type in ('none', 'analyse'):
             self.date_visite = False
-
-    @api.onchange('date_analyse')
-    def _onchange_date_analyse(self):
-        self.is_analyse = bool(self.date_analyse)
-
-    @api.onchange('date_visite')
-    def _onchange_date_visite(self):
-        self.is_visite = bool(self.date_visite)
 
     @api.onchange('date_sortie_port')
     def _onchange_date_sortie_port(self):
@@ -662,14 +655,24 @@ class LogisticsEntry(models.Model):
 
     def action_tanger_med_analyse(self):
         for rec in self:
+            new_control = 'analyse'
+            if rec.passed_control_type == 'visite' or rec.passed_control_type == 'both':
+                new_control = 'both'
             rec.write({
-                'tanger_med_state': 'analyse'
+                'tanger_med_state': 'analyse',
+                'passed_control_type': new_control,
+                'date_analyse': fields.Date.context_today(rec)
             })
 
     def action_tanger_med_visite(self):
         for rec in self:
+            new_control = 'visite'
+            if rec.passed_control_type == 'analyse' or rec.passed_control_type == 'both':
+                new_control = 'both'
             rec.write({
-                'tanger_med_state': 'visite'
+                'tanger_med_state': 'visite',
+                'passed_control_type': new_control,
+                'date_visite': fields.Date.context_today(rec)
             })
 
     def action_tanger_med_en_cours_chargement(self):

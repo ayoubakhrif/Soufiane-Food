@@ -674,6 +674,8 @@ class WhatsAppFinanceController(http.Controller):
                 for col, h in enumerate(headers):
                     sheet.write(0, col, h, bold)
                     
+                chq_vide_missing_journals = set()
+                doc_missing_journals = set()
                 row_idx = 1
                 
                 for doc in documents:

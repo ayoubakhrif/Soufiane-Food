@@ -127,7 +127,7 @@
                 <field name="montant_encaisse" readonly="state == 'encaisse'" sum="Total Encaissé"/>
                 <field name="state" readonly="1" widget="badge" decoration-success="state == 'encaisse'" decoration-warning="state == 'cloture'"/>
                 <button name="action_encaisser" type="object" icon="fa-check" string="Encaisser" class="oe_highlight" invisible="state != 'cloture'"/>
-                <button name="action_annuler_encaissement" type="object" icon="fa-undo" string="Annuler Encaissement" class="btn-danger" invisible="state != 'encaisse'"/>
+                
             </tree>
         </field>
     </record>
@@ -199,5 +199,19 @@
     <menuitem id="menu_finance2_ste" name="Sociétés" parent="menu_finance2_config" action="action_finance2_ste" sequence="10"/>
     <menuitem id="menu_finance2_benif" name="Bénéficiaires" parent="menu_finance2_config" action="action_finance2_benif" sequence="20"/>
     <menuitem id="menu_finance2_personne" name="Personnes (Logistique)" parent="menu_finance2_config" action="action_finance2_personne" sequence="30"/>
+
+
+    <!-- Server Action to Cancel Encaissement in Bulk -->
+    <record id="action_finance2_annuler_encaissement_bulk" model="ir.actions.server">
+        <field name="name">Annuler Encaissement</field>
+        <field name="model_id" ref="finance_2.model_finance2_cheque"/>
+        <field name="binding_model_id" ref="finance_2.model_finance2_cheque"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                records.action_annuler_encaissement()
+        </field>
+    </record>
 
 </odoo>

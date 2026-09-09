@@ -25,5 +25,20 @@ if records:
         </field>
     </record>
 
+
+    <!-- Server Action to Refresh DUM on old SUTRA Dossiers -->
+    <record id="action_refresh_sutra_dossier_dum" model="ir.actions.server">
+        <field name="name">Rafraichir les DUM</field>
+        <field name="model_id" ref="model_sutra_dossier"/>
+        <field name="binding_model_id" ref="model_sutra_dossier"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                for rec in records:
+                    rec._compute_dum()
+        </field>
+    </record>
+
 </data>
 </odoo>

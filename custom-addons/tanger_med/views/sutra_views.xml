@@ -79,7 +79,7 @@
                                 <field name="amount_unbilled" widget="monetary"/>
                                 <field name="amount_unpaid" widget="monetary"/>
                                 <div class="oe_inline" style="border-top: 2px solid #ccc; width: 100%; margin-top: 10px; padding-top: 10px; font-weight: bold; font-size: 1.2em;">
-                                    <field name="amount_total_debt" widget="monetary" style="color: #dc3545;"/>
+                                    <field name="amount_total_debt" widget="monetary" class="text-danger"/>
                                 </div>
                             </group>
                         </group>
@@ -98,7 +98,7 @@
                     <field name="amount"/>
                     <field name="amount_unbilled" sum="Total Non Facture"/>
                     <field name="amount_unpaid" sum="Total A Payer"/>
-                    <field name="amount_total_debt" sum="Total Dette SUTRA" style="font-weight: bold;"/>
+                    <field name="amount_total_debt" sum="Total Dette SUTRA" decoration-bf="1" decoration-danger="1"/>
                 </tree>
             </field>
         </record>

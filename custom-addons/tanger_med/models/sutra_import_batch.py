@@ -119,12 +119,12 @@ class SutraImportLine(models.Model):
                 
             clean_dum = rec.dum.lstrip('0')
             domain = [
-                '|', '|', '|',
+                '|',
                 ('tanger_med_dum', '=', rec.dum),
-                ('dum', '=', rec.dum),
-                ('tanger_med_dum', '=', clean_dum),
-                ('dum', '=', clean_dum)
+                ('tanger_med_dum', '=', clean_dum)
             ]
+            if 'dum' in self.env['logistique.entry']._fields:
+                domain = ['|', '|', '|', ('tanger_med_dum', '=', rec.dum), ('dum', '=', rec.dum), ('tanger_med_dum', '=', clean_dum), ('dum', '=', clean_dum)]
             entry = self.env['logistique.entry'].search(domain, limit=1)
             if entry:
                 rec.logistics_id = entry.id

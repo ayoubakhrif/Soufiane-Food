@@ -53,10 +53,11 @@ class SutraDossier(models.Model):
         ('paye', 'Paye')
     ], string='Etat de Paiement', compute='_compute_payment_state', store=True)
 
-    @api.depends('logistics_id', 'logistics_id.dum', 'logistics_id.tanger_med_dum')
+    @api.depends('logistics_id', 'logistics_id.tanger_med_dum')
     def _compute_dum(self):
         for rec in self:
-            rec.dum = rec.logistics_id.tanger_med_dum or rec.logistics_id.dum or ''
+            douane_dum = getattr(rec.logistics_id, 'dum', False)
+            rec.dum = rec.logistics_id.tanger_med_dum or douane_dum or ''
 
     @api.depends('facture_ids', 'facture_ids.state')
     def _compute_payment_state(self):

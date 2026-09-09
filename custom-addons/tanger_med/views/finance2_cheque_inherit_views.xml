@@ -6,8 +6,11 @@
             <field name="model">finance2.cheque</field>
             <field name="inherit_id" ref="finance_2.view_finance2_cheque_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <field name="is_sutra_benif" invisible="1"/>
+                </xpath>
                 <xpath expr="//notebook" position="inside">
-                    <page string="Factures SUTRA">
+                    <page string="Factures SUTRA" invisible="not is_sutra_benif">
                         <field name="sutra_facture_ids" readonly="1">
                             <tree>
                                 <field name="sutra_id"/>

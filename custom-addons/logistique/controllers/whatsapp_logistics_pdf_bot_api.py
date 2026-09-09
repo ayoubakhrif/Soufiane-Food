@@ -150,12 +150,40 @@ class WhatsAppLogisticsPdfController(http.Controller):
                 except Exception as e:
                     pass  # Ignorer l'affichage de l'erreur sur WhatsApp selon la demande
 
+        # 7. Add PDF to documents as Facture Compagnie
+        doc_msg = ""
+        if pdf_base64 and 'logistique.entry.document' in request.env:
+            try:
+                DocModel = request.env['logistique.entry.document'].sudo()
+                doc_filename = file_name if file_name and file_name != 'document.pdf' else f"Facture_Compagnie_{dossier.name}_{chq_number or ''}.pdf"
+                
+                existing_doc = DocModel.search([
+                    ('entry_id', '=', entry.id),
+                    ('document_type', '=', 'company_invoice'),
+                    ('file_name', '=', doc_filename)
+                ], limit=1)
+                
+                if not existing_doc:
+                    DocModel.create({
+                        'entry_id': entry.id,
+                        'document_type': 'company_invoice',
+                        'file': pdf_base64,
+                        'file_name': doc_filename
+                    })
+                    doc_msg = "📎 *Document* : Ajouté aux Factures companies"
+                else:
+                    doc_msg = "📎 *Document* : Factures companies (déjà présent)"
+            except Exception as e:
+                _logger.error(f"Erreur enregistrement document facture compagnie pour {dossier.name}: {str(e)}")
+
         final_response = "✅ *Données saisies avec succès dans Gestia :*\n━━━━━━━━━━━━━━━━━━\n"
         final_response += f"{dossier_msg}\n"
         if bad_msg:
             final_response += f"{bad_msg}\n"
         if chq_msg:
             final_response += f"{chq_msg}\n"
+        if doc_msg:
+            final_response += f"{doc_msg}\n"
         
         if factures_msgs:
             final_response += "\n📊 *Factures réparties :*\n"

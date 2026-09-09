@@ -748,7 +748,7 @@ class WhatsAppFinanceController(http.Controller):
                         
                         is_encaisse = getattr(phys, 'encours', '') == 'encaisse'
                         etat_label = "Encaissé" if is_encaisse else "En cours"
-                        doc_display = f"CHQ {doc_name}"
+                        doc_display = str(doc_name)
                         chq_pdf_icon = "Oui" if getattr(phys, 'chq_vide_pdf', False) else "Non"
                         
                         if not getattr(phys, 'chq_vide_pdf', False):

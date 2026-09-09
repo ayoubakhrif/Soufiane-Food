@@ -93,9 +93,12 @@
             <field name="name">sutra.config.ste.tree</field>
             <field name="model">sutra.config.ste</field>
             <field name="arch" type="xml">
-                <tree editable="bottom">
+                <tree>
                     <field name="ste_id"/>
                     <field name="amount"/>
+                    <field name="amount_unbilled" sum="Total Non Facture"/>
+                    <field name="amount_unpaid" sum="Total A Payer"/>
+                    <field name="amount_total_debt" sum="Total Dette SUTRA" style="font-weight: bold;"/>
                 </tree>
             </field>
         </record>

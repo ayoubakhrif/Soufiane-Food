@@ -586,7 +586,7 @@ class WhatsAppFinanceController(http.Controller):
 
             # Calculate missing journals
             missing_journals = []
-            journals = [int(dq.journal) for dq in datacheques if dq.journal and str(dq.journal).isdigit() and int(dq.journal) > 0]
+            journals = [int(dq.journal) for dq in datacheques if getattr(dq, 'journal', False) and str(dq.journal).isdigit() and int(dq.journal) > 0]
             # Add V2 cheques to journals
             for c_v2 in cheques_v2:
                 if c_v2.repartition_ids:
@@ -629,10 +629,10 @@ class WhatsAppFinanceController(http.Controller):
                 if phys not in grouped_dqs:
                     grouped_dqs[phys] = []
                 grouped_dqs[phys].append(dq)
-                total_amount += dq.amount
+                total_amount += getattr(dq, 'amount', 0.0)
                 
             def get_min_journal(dqs_list):
-                journals = [int(dq.journal) for dq in dqs_list if dq.journal and str(dq.journal).isdigit()]
+                journals = [int(dq.journal) for dq in dqs_list if getattr(dq, 'journal', False) and str(dq.journal).isdigit()]
                 return min(journals) if journals else float('inf')
                 
             for phys, dqs in grouped_dqs.items():
@@ -754,24 +754,24 @@ class WhatsAppFinanceController(http.Controller):
                         
                         if not phys.chq_vide_pdf:
                             for dq in dqs:
-                                if dq.journal: chq_vide_missing_journals.add(str(dq.journal))
+                                if getattr(dq, 'journal', False): chq_vide_missing_journals.add(str(dq.journal))
                                 
                         grouped_rows = []
                         for dq in dqs:
-                            journal_val = dq.journal or "N/A"
-                            benif_name = dq.benif_id.name if dq.benif_id else "N/A"
-                            dq_amount = dq.amount
-                            serie_val = dq.serie_facture or "N/A"
-                            bl_val = dq.bl or "N/A"
-                            doc_pdf_icon = "Oui" if dq.doc_pdf else "Non"
+                            journal_val = getattr(dq, 'journal', False) or "N/A"
+                            benif_name = dq.benif_id.name if getattr(dq, 'benif_id', False) else "N/A"
+                            dq_amount = getattr(dq, 'amount', 0.0)
+                            serie_val = getattr(dq, 'serie_facture', getattr(dq, 'serie', "N/A")) or "N/A"
+                            bl_val = getattr(dq, 'bl', "N/A") or "N/A"
+                            doc_pdf_icon = "Oui" if getattr(dq, 'doc_pdf', False) else "Non"
                             
-                            if not dq.doc_pdf and dq.journal:
+                            if not getattr(dq, 'doc_pdf', False) and getattr(dq, 'journal', False):
                                 doc_missing_journals.add(str(dq.journal))
                                 
-                            t_dict = dict(dq._fields['type'].selection)
-                            t_label = t_dict.get(dq.type) or str(dq.type)
-                            s_dict = dict(dq._fields['state'].selection)
-                            s_label = s_dict.get(dq.state) or str(dq.state)
+                            t_dict = dict(dq._fields['type'].selection) if 'type' in dq._fields else {}
+                            t_label = t_dict.get(getattr(dq, 'type', '')) or str(getattr(dq, 'type', ''))
+                            s_dict = dict(dq._fields['state'].selection) if 'state' in dq._fields else {}
+                            s_label = s_dict.get(getattr(dq, 'state', '')) or str(getattr(dq, 'state', ''))
                             
                             grouped_rows.append({
                                 'journal': journal_val,

@@ -7,6 +7,7 @@ class SutraConfigSte(models.Model):
     ste_id = fields.Many2one('logistique.ste', string='Societe', required=True)
     amount_single = fields.Float(string='Montant (1 Conteneur)', required=True)
     amount_multiple = fields.Float(string='Montant (Plusieurs)', required=True)
+    amount_temsa = fields.Float(string='Montant TEMSA')
 
     amount_unbilled = fields.Float(string='Dettes Engagees (Non facturees)', compute='_compute_sutra_debts')
     amount_unpaid = fields.Float(string='Dettes Reelles (A Payer)', compute='_compute_sutra_debts')
@@ -44,7 +45,18 @@ class SutraDossier(models.Model):
 
     name = fields.Char(string='Nom', required=True, tracking=True)
     logistics_id = fields.Many2one('logistique.entry', string='Dossier Logistique', tracking=True)
-    amount = fields.Float(string='Montant SUTRA', tracking=True)
+    amount = fields.Float(string='Montant SUTRA', compute='_compute_sutra_amount', store=True, readonly=False, tracking=True)
+
+    @api.depends('logistics_id.container_count', 'logistics_id.passed_control_type', 'logistics_id.ste_id')
+    def _compute_sutra_amount(self):
+        for rec in self:
+            if rec.logistics_id and rec.logistics_id.ste_id:
+                config = self.env['sutra.config.ste'].search([('ste_id', '=', rec.logistics_id.ste_id.id)], limit=1)
+                if config:
+                    amt = config.amount_multiple if getattr(rec.logistics_id, 'container_count', 0) > 1 else config.amount_single
+                    if getattr(rec.logistics_id, 'passed_control_type', 'none') in ('visite', 'analyse', 'both'):
+                        amt += config.amount_temsa
+                    rec.amount = amt
     facture_ids = fields.One2many('sutra.facture', 'sutra_id', string='Factures')
 
     dum = fields.Char(string='DUM', compute='_compute_dum', store=True)
@@ -77,13 +89,7 @@ class SutraDossier(models.Model):
                 if log_entry.exists():
                     if not vals.get('name'):
                         vals['name'] = f'SUTRA - {log_entry.display_name}'
-                    if not vals.get('amount') and log_entry.ste_id:
-                        config = self.env['sutra.config.ste'].search([('ste_id', '=', log_entry.ste_id.id)], limit=1)
-                        if config:
-                            if log_entry.container_count and log_entry.container_count > 1:
-                                vals['amount'] = config.amount_multiple
-                            else:
-                                vals['amount'] = config.amount_single
+                    # Amount is now handled by the compute method _compute_sutra_amount
         return super(SutraDossier, self).create(vals_list)
 
 class SutraFacture(models.Model):

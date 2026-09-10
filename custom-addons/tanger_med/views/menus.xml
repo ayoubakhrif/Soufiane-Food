@@ -6,7 +6,7 @@
         <field name="name">Tanger Med</field>
         <field name="res_model">logistique.entry</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('port_status', '=', 'exited')]</field>
+        <field name="domain">[('eta', '!=', False), ('eta', '&lt;=', context_today().strftime('%Y-%m-%d'))]</field>
         <field name="context">{'search_default_group_week': 1}</field>
         <field name="search_view_id" ref="view_tanger_med_entry_search"/>
         <field name="view_ids" eval="[(5, 0, 0),

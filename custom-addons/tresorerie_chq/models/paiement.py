@@ -149,11 +149,21 @@ Retournez UNIQUEMENT un objet JSON valide, sans markdown, structuré de cette fa
 1. "total_attendu": (Entier) Le nombre TOTAL exact de chèques/effets que vous avez trouvés et que vous allez extraire. Comptez-les bien tous.
 2. "items": La liste de ces chèques.
 Pour chaque élément de la liste, extrayez :
-1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres ou moin pour un chèque).
-2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50). ATTENTION : Lisez attentivement le montant écrit en lettres (qui se trouve souvent au milieu du document, en arabe ou en français) et croisez-le avec le montant en chiffres (en haut à droite) pour garantir l'exactitude absolue du montant extrait.
+1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres ou moins).
+2. "montant": Le montant numérique (ex: 5000.0).
+   ⚠️ RÈGLE ABSOLUE POUR LE MONTANT ET LES CENTIMES :
+   - Sur les chèques et effets (lettres de change) marocains, le montant en chiffres comporte très fréquemment deux zéros de centimes à la fin (ex: 5000,00 ou 5000.00). NE CONFONDEZ JAMAIS 5000,00 avec 500000 !
+   - Vous DEVEZ IMPÉRATIVEMENT lire et croiser avec le MONTANT EN LETTRES (en arabe ou en français, ex: 'خمسة آلاف درهم' = 5000 DH et NON PAS 500000 DH qui s'écrirait 'خمسمائة ألف درهم'). Le montant en lettres fait foi et permet d'éviter l'erreur d'ajouter deux zéros de centimes.
 3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
-4. "banque": Le nom de la banque (à lire souvent dans le logo en HAUT à GAUCHE ou au CENTRE du chèque). Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
-5. "porteur": Le nom du titulaire du compte / porteur. C'est le nom imprimé situé en BAS au CENTRE, généralement juste en dessous du "Compte n°". NE CHOISISSEZ PAS le nom de l'agence (qui se trouve à gauche sous "Payable à"). ATTENTION : Retirez ABSOLUMENT toutes les civilités et titres du texte extrait (comme MR, M., MONSIEUR, MME, MADAME, MLLE) pour ne garder strictement que le nom et le prénom.
+4. "banque": Le nom de la banque (à lire souvent dans le logo en HAUT à GAUCHE ou au CENTRE du document). Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
+5. "porteur": Le nom officiel du porteur / tiré / titulaire du compte.
+   ⚠️ RÈGLES STRICTES POUR LE PORTEUR (TIRÉ) :
+   - Pour un EFFET (Lettre de change) : Le porteur est le nom officiel IMPRIMÉ/DACTYLOGRAPHIÉ à la machine situé dans la case "Nom ou dénomination Le tiré / المسحوب عليه" (ex: "BOUZHAIF ABDESSLAM").
+   - Pour un CHÈQUE : C'est le nom officiel imprimé du titulaire du compte en bas.
+   - 🚫 INTERDICTION FORMELLE D'EXTRAIRE LES ANNOTATIONS MANUSCRITES :
+     Il arrive souvent que le nom du client soit écrit à la main au stylo à bille (bleu ou noir) dans une marge ou zone libre (ex: "Soufiane Abdellkbir tetouan").
+     N'EXTRAYEZ JAMAIS ces annotations manuscrites au stylo comme nom de porteur ! Le porteur n'est JAMAIS écrit au stylo dans la marge, il est TOUJOURS imprimé dans les cases officielles du chèque ou de l'effet.
+   - Retirez ABSOLUMENT toutes les civilités et titres (comme MR, M., MONSIEUR, MME, MADAME, MLLE) pour ne garder strictement que le nom et prénom.
 
 Exemple de réponse attendue:
 {{
@@ -264,7 +274,7 @@ Exemple de réponse attendue:
                     payload = {
                         "model": "claude-sonnet-5",
                         "max_tokens": 8192,
-                        "system": "Tu es un extracteur de données. Tu dois absolument retourner un tableau JSON et RIEN d'autre. Ne fais aucune réflexion, aucun commentaire. Limite ta réponse au JSON pur pour éviter de dépasser le nombre de tokens.",
+                        "system": "Tu es un extracteur de données financières pour chèques et effets marocains. Retourne UNIQUEMENT un JSON pur sans réflexion. RÈGLE 1 : Le porteur est TOUJOURS le nom officiel imprimé en machine (case 'Le tiré / المسحوب عليه'). N'extrais JAMAIS les annotations ou noms de clients écrits à la main au stylo dans la marge ou sur le document. RÈGLE 2 : Pour le montant, croise impérativement avec le montant en lettres en arabe/français pour ne pas confondre les centimes ,00 avec des zéros supplémentaires (ex: 5000,00 avec 'خمسة آلاف درهم' = 5000, et non 500000).",
                         "messages": messages
                     }
                     

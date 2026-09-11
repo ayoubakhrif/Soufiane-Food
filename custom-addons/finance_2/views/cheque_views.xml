@@ -14,6 +14,7 @@
                     
                     <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'" groups="finance_2.group_finance2_manager"/>
                     <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('brouillon', 'actif', 'reserve')"/>
+                    <button name="action_reporter_cheque" string="Reporter le chèque" type="object" invisible="not week or not journal" confirm="Voulez-vous reporter ce chèque ? Cela effacera la date d'émission et le journal actuels."/>
                     
                     <!-- Boutons Admin -->
                     <button name="force_brouillon" string="Forcer Brouillon" type="object" groups="finance_2.group_finance2_admin" invisible="state == 'brouillon'"/>
@@ -52,6 +53,7 @@
                             <field name="date_encaissement"/>
                             <field name="chq_certifie"/>
                             <field name="journal"/>
+                            <field name="history_journals" invisible="not history_journals"/>
                         </group>
                     </group>
                     <group>

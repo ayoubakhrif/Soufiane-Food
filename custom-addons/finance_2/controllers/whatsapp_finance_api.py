@@ -601,6 +601,24 @@ class WhatsAppFinanceController(http.Controller):
                 expected_set = set(range(1, max_j + 1))
                 actual_set = set(journals)
                 missing_journals = sorted(list(expected_set - actual_set))
+                
+                # Check for justified missing journals in V2 cheques history
+                if missing_journals:
+                    import re
+                    actual_missing = []
+                    for j in missing_journals:
+                        is_justified = False
+                        domain = [('history_journals', '!=', False)]
+                        cheques_with_history = request.env['finance2.cheque'].sudo().search(domain)
+                        for chq in cheques_with_history:
+                            # Look for pattern: WXX - JX
+                            pattern = rf"{week_str}.*?J?{j}"
+                            if re.search(pattern, chq.history_journals, re.IGNORECASE):
+                                is_justified = True
+                                break
+                        if not is_justified:
+                            actual_missing.append(j)
+                    missing_journals = actual_missing
 
             documents = []
             total_amount = 0.0

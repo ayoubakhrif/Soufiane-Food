@@ -42,6 +42,20 @@ class Finance2Cheque(models.Model):
     date_emission = fields.Date(string="Date d'émission", tracking=True)
     date_echeance = fields.Date(string="Date d'échéance", tracking=True)
     week = fields.Char(string="Semaine", compute="_compute_week", store=True)
+    history_journals = fields.Text(string='Historique des reports', readonly=True, tracking=True)
+    
+    def action_reporter_cheque(self):
+        for rec in self:
+            if rec.week and rec.journal:
+                entry = f"{rec.week} - J{rec.journal}"
+                if rec.history_journals:
+                    rec.history_journals += f" | {entry}"
+                else:
+                    rec.history_journals = entry
+            rec.date_emission = False
+            rec.journal = False
+            rec.date_encaissement = False
+            rec.talon_id = False
     date_encaissement = fields.Date(string="Date d'encaissement", tracking=True)
     
     commentaire = fields.Text(string="Commentaire")

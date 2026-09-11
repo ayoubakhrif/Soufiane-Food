@@ -62,6 +62,7 @@ class SutraDossier(models.Model):
 
     dum = fields.Char(string='DUM', compute='_compute_dum', store=True)
     payment_state = fields.Selection([
+        ('sans_facture', 'Pas de facture'),
         ('non_paye', 'Non Paye'),
         ('paye', 'Paye')
     ], string='Etat de Paiement', compute='_compute_payment_state', store=True)
@@ -71,12 +72,21 @@ class SutraDossier(models.Model):
         for rec in self:
             douane_dum = getattr(rec.logistics_id, 'dum', False)
             rec.dum = rec.logistics_id.tanger_med_dum or douane_dum or ''
+            
+            # Auto-link orphans
+            if rec.dum:
+                clean_dum = str(rec.dum).strip().upper()
+                orphans = self.env['sutra.facture'].search([('sutra_id', '=', False), ('dum_provisoire', '!=', False)])
+                for orphan in orphans:
+                    if orphan.dum_provisoire and orphan.dum_provisoire.strip().upper() == clean_dum:
+                        orphan.sutra_id = rec.id
+                        orphan.dum_provisoire = False
 
     @api.depends('facture_ids', 'facture_ids.state')
     def _compute_payment_state(self):
         for rec in self:
             if not rec.facture_ids:
-                rec.payment_state = 'non_paye'
+                rec.payment_state = 'sans_facture'
             elif all(f.state == 'paye' for f in rec.facture_ids):
                 rec.payment_state = 'paye'
             else:
@@ -98,7 +108,8 @@ class SutraFacture(models.Model):
     _description = 'Facture SUTRA'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    sutra_id = fields.Many2one('sutra.dossier', string='Dossier SUTRA', ondelete='cascade', required=True)
+    sutra_id = fields.Many2one('sutra.dossier', string='Dossier SUTRA', ondelete='cascade', required=False)
+    dum_provisoire = fields.Char(string='DUM Provisoire (Orpheline)')
     name = fields.Char(string='Numero de Facture', required=True, tracking=True)
     date = fields.Date(string='Date', tracking=True)
     amount = fields.Float(string='Montant TTC', tracking=True)

@@ -22,11 +22,11 @@ class SutraImportBatch(models.Model):
     def _compute_stats(self):
         for rec in self:
             rec.total_lines = len(rec.line_ids)
-            rec.valid_lines = len(rec.line_ids.filtered(lambda l: l.status == 'ready'))
+            rec.valid_lines = len(rec.line_ids.filtered(lambda l: l.status in ['ready', 'orphan']))
             rec.error_lines = len(rec.line_ids.filtered(lambda l: l.status == 'error'))
 
     def action_verify(self):
-        for line in self.line_ids.filtered(lambda l: l.status in ['draft', 'error']):
+        for line in self.line_ids.filtered(lambda l: l.status in ['draft', 'error', 'orphan']):
             line._check_dum()
 
     def action_process(self):
@@ -67,7 +67,7 @@ class SutraImportBatch(models.Model):
             line.error_msg = ''
             factures_creees += 1
 
-        if not self.line_ids.filtered(lambda l: l.status in ['draft', 'error']):
+        if not self.line_ids.filtered(lambda l: l.status in ['draft', 'error', 'orphan']):
             self.state = 'done'
         else:
             self.state = 'draft'
@@ -98,6 +98,7 @@ class SutraImportLine(models.Model):
         ('draft', 'Brouillon'),
         ('ready', 'Pret'),
         ('error', 'Erreur'),
+        ('orphan', 'Orpheline'),
         ('done', 'Importe')
     ], string='Statut', default='draft', readonly=True)
     error_msg = fields.Char(string='Message', readonly=True)

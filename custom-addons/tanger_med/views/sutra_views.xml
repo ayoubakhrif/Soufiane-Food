@@ -20,7 +20,7 @@
                             </group>
                             <group>
                                 <field name="amount"/>
-                                <field name="payment_state" widget="badge" decoration-success="payment_state == 'paye'" decoration-danger="payment_state == 'non_paye'"/>
+                                <field name="payment_state" widget="badge" decoration-success="payment_state == 'paye'" decoration-warning="payment_state == 'non_paye'" decoration-danger="payment_state == 'sans_facture'"/>
                             </group>
                         </group>
                         <notebook>
@@ -48,7 +48,22 @@
         </record>
 
         <!-- Tree View for Sutra Dossier -->
-        <record id="view_sutra_dossier_tree" model="ir.ui.view">
+        
+        <record id="view_sutra_dossier_search" model="ir.ui.view">
+            <field name="name">sutra.dossier.search</field>
+            <field name="model">sutra.dossier</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="dum"/>
+                    <filter string="Sans Facture" name="sans_facture" domain="[('payment_state', '=', 'sans_facture')]"/>
+                    <filter string="Non Payé" name="non_paye" domain="[('payment_state', '=', 'non_paye')]"/>
+                    <filter string="Payé" name="paye" domain="[('payment_state', '=', 'paye')]"/>
+                </search>
+            </field>
+        </record>
+
+<record id="view_sutra_dossier_tree" model="ir.ui.view">
             <field name="name">sutra.dossier.tree</field>
             <field name="model">sutra.dossier</field>
             <field name="arch" type="xml">
@@ -57,7 +72,7 @@
                     <field name="dum"/>
                     <field name="logistics_id"/>
                     <field name="amount" sum="Total SUTRA"/>
-                    <field name="payment_state" widget="badge" decoration-success="payment_state == 'paye'" decoration-danger="payment_state == 'non_paye'"/>
+                    <field name="payment_state" widget="badge" decoration-success="payment_state == 'paye'" decoration-warning="payment_state == 'non_paye'" decoration-danger="payment_state == 'sans_facture'"/>
                 </tree>
             </field>
         </record>
@@ -139,7 +154,8 @@
                         </div>
                         <group>
                             <group>
-                                <field name="sutra_id"/>
+                                <field name="sutra_id" required="0"/>
+                                <field name="dum_provisoire" invisible="sutra_id != False" string="DUM Provisoire (Orpheline)"/>
                                 <field name="date"/>
                             </group>
                             <group>
@@ -163,7 +179,8 @@
             <field name="model">sutra.facture</field>
             <field name="arch" type="xml">
                 <tree string="Factures a payer" create="0">
-                    <field name="sutra_id"/>
+                    <field name="sutra_id" required="0"/>
+                                <field name="dum_provisoire" invisible="sutra_id != False" string="DUM Provisoire (Orpheline)"/>
                     <field name="name"/>
                     <field name="date"/>
                     <field name="amount" sum="Total"/>
@@ -181,6 +198,17 @@
         </record>
 
         <menuitem id="menu_sutra_facture_global" name="Factures a payer" parent="menu_sutra_main" action="action_sutra_facture_global" sequence="15"/>
+
+    
+        <record id="action_sutra_facture_orphelines" model="ir.actions.act_window">
+            <field name="name">Factures Orphelines</field>
+            <field name="res_model">sutra.facture</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('sutra_id', '=', False)]</field>
+            <field name="context">{}</field>
+        </record>
+        
+        <menuitem id="menu_sutra_facture_orphelines" name="Factures Orphelines" parent="menu_sutra_main" action="action_sutra_facture_orphelines" sequence="16"/>
 
     </data>
 </odoo>

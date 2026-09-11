@@ -114,6 +114,22 @@
 
 
 
+    
+    <record id="action_finance2_assign_talon" model="ir.actions.server">
+        <field name="name">Associer au Talon</field>
+        <field name="model_id" ref="model_finance2_cheque"/>
+        <field name="binding_model_id" ref="model_finance2_cheque"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+for record in records:
+    if record.name and record.ste_id:
+        talon = record._find_matching_talon(record.name, record.ste_id.id)
+        if talon:
+            record.write({'talon_id': talon.id})
+        </field>
+    </record>
+
     <!-- Vue Recherche : Chèques -->
     <record id="view_finance2_cheque_search" model="ir.ui.view">
         <field name="name">finance2.cheque.search</field>
@@ -131,6 +147,8 @@
                 <filter string="Clôturés" name="cloture" domain="[('state', '=', 'cloture')]"/>
                 <filter string="Encaissés" name="encaisse" domain="[('state', '=', 'encaisse')]"/>
                 <group expand="0" string="Regrouper par">
+                    <filter string="Semaine d'encaissement" name="group_semaine_encaissement" context="{'group_by':'date_encaissement:week'}"/>
+                    <filter string="Semaine d'émission" name="group_semaine_emission" context="{'group_by':'date_emission:week'}"/>
                     <filter string="Date d'encaissement" name="group_date_encaissement" context="{'group_by':'date_encaissement:day'}"/>
                     <filter string="Statut" name="group_state" context="{'group_by':'state'}"/>
                     <filter string="Société" name="group_ste" context="{'group_by':'ste_id'}"/>

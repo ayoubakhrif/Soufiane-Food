@@ -141,7 +141,8 @@ for record in records:
         <field name="model">finance2.cheque</field>
         <field name="arch" type="xml">
             <search string="Chèques">
-                <field name="name"/>
+                    <field name="name"/>
+                    <field name="week" string="Semaine (ex: W36)"/>
                 <field name="ste_id"/>
                 <field name="benif_id"/>
                 <field name="journal"/>

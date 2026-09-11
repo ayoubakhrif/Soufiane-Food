@@ -90,6 +90,11 @@
                                     <field name="doc_filename" column_invisible="1"/>
                                 </tree>
                             </field>
+                            <group class="oe_subtotal_footer" name="benif_total">
+                                <field name="total_credit"/>
+                                <field name="total_encaisse"/>
+                                <field name="solde" class="oe_subtotal_footer_separator"/>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>

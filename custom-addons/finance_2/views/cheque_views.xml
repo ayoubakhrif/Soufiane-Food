@@ -25,6 +25,7 @@
                     <field name="state" widget="statusbar" statusbar_visible="brouillon,reserve,actif,cloture,encaisse,annule"/>
                 </header>
                 <sheet>
+                    <field name="week" invisible="1"/>
                     <div class="oe_title">
                         <h1>
                             <field name="name" placeholder="N° Chèque"/>

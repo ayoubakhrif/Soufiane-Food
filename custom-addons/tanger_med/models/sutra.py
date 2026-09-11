@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError, exceptions
+from odoo.exceptions import ValidationError, UserError
 
 class SutraConfigSte(models.Model):
     _name = 'sutra.config.ste'

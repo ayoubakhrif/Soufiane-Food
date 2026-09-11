@@ -10,7 +10,7 @@
                     <button name="action_confirmer" string="Confirmer" type="object" class="oe_highlight" invisible="state != 'brouillon'"/>
                     
                     <button name="action_mettre_actif" string="Mettre en Actif" type="object" class="oe_highlight" invisible="state != 'reserve'"/>
-                    <button name="action_remettre_finance" string="Remettre à Finance" type="object" invisible="state != 'reserve'"/>
+                    <button name="action_remettre_finance" string="Remettre en Brouillon" type="object" groups="finance_2.group_finance2_manager" invisible="state not in ('reserve', 'actif')" confirm="Voulez-vous vraiment remettre ce chèque en brouillon ?"/>
                     
                     <button name="action_cloturer" string="Valider et Clôturer" type="object" class="oe_highlight" invisible="state != 'actif'" groups="finance_2.group_finance2_manager"/>
                     <button name="action_annuler" string="Annuler" type="object" invisible="state not in ('brouillon', 'actif', 'reserve')"/>

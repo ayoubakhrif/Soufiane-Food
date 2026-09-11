@@ -88,6 +88,10 @@
                 <field name="prov_number"/>
                 <field name="def_number"/>
                 <field name="cheque_ids" string="Numéro Chèque" filter_domain="[('cheque_ids.cheque_serie', 'ilike', self)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Par semaine" name="group_by_create_week" context="{'group_by': 'create_date:week'}"/>
+                    <filter string="Par semaine (ETA)" name="group_by_eta_week" context="{'group_by': 'eta:week'}"/>
+                </group>
             </search>
         </field>
     </record>

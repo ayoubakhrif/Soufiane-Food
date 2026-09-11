@@ -221,6 +221,12 @@
                     <filter name="group_supplier"
                             string="Supplier"
                             context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_by_create_week"
+                            string="Par semaine"
+                            context="{'group_by': 'create_date:week'}"/>
+                    <filter name="group_by_eta_week"
+                            string="Par semaine (ETA)"
+                            context="{'group_by': 'eta:week'}"/>
                 </group>
 
             </search>

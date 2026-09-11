@@ -261,6 +261,8 @@
                     <filter string="Société" name="group_by_ste" context="{'group_by': 'ste_id'}"/>
                     <filter string="Status" name="group_by_state" context="{'group_by': 'purchase_state'}"/>
                     <filter string="Article" name="group_by_article" context="{'group_by': 'achat_article_id'}"/>
+                    <filter string="Par semaine" name="group_by_create_week" context="{'group_by': 'create_date:week'}"/>
+                    <filter string="Par semaine (ETA)" name="group_by_eta_week" context="{'group_by': 'eta:week'}"/>
                 </group>
             </search>
         </field>

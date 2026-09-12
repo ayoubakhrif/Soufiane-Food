@@ -168,20 +168,32 @@ class CasaStockTransfer(models.Model):
             if rec.state != 'done':
                 raise UserError(_("Seuls les transferts effectués peuvent être annulés."))
 
+            product_id = rec.product_id.id or (rec.move_out_id.product_id.id if rec.move_out_id else False) or (rec.source_stock_id.product_id.id if rec.source_stock_id else False)
+            if not product_id:
+                raise UserError(_("Impossible d'annuler : le produit lié au transfert est introuvable."))
+
+            lot = rec.lot or (rec.move_out_id.lot if rec.move_out_id else False) or (rec.source_stock_id.lot if rec.source_stock_id else False)
+            dum = rec.dum or (rec.move_out_id.dum if rec.move_out_id else False) or (rec.source_stock_id.dum if rec.source_stock_id else False)
+            calibre = rec.calibre or (rec.move_out_id.calibre if rec.move_out_id else False)
+            weight = rec.weight or (rec.move_out_id.weight if rec.move_out_id else 0.0)
+            price_purchase = rec.price_purchase or (rec.move_out_id.price_purchase if rec.move_out_id else 0.0)
+            source_ville = rec.source_ville or (rec.move_out_id.ville if rec.move_out_id else False)
+            source_ste_id = rec.source_ste_id.id if rec.source_ste_id else (rec.move_out_id.ste_id.id if rec.move_out_id and rec.move_out_id.ste_id else False)
+
             now = fields.Datetime.now()
             ref = rec.name
 
             # Reversal: re-add to source
             move_cancel_out = self.env['casa_hanane.stock.move'].create({
-                'product_id': rec.product_id.id,
-                'lot': rec.lot,
-                'dum': rec.dum,
-                'ville': rec.source_ville,
-                'ste_id': rec.source_ste_id.id,
+                'product_id': product_id,
+                'lot': lot,
+                'dum': dum,
+                'ville': source_ville,
+                'ste_id': source_ste_id,
                 'qty': rec.qty,
-                'weight': rec.weight,
-                'calibre': rec.calibre,
-                'price_purchase': rec.price_purchase,
+                'weight': weight,
+                'calibre': calibre,
+                'price_purchase': price_purchase,
                 'move_type': 'cancel_exit',
                 'state': 'done',
                 'date': now,
@@ -192,12 +204,15 @@ class CasaStockTransfer(models.Model):
 
             # Reversal: remove from destination
             move_cancel_in = self.env['casa_hanane.stock.move'].create({
+                'product_id': product_id,
+                'lot': lot,
+                'dum': dum,
                 'ville': rec.dest_ville,
                 'ste_id': rec.dest_ste_id.id if rec.dest_ste_id else False,
                 'qty': -rec.qty,
-                'weight': rec.weight,
-                'calibre': rec.calibre,
-                'price_purchase': rec.price_purchase,
+                'weight': weight,
+                'calibre': calibre,
+                'price_purchase': price_purchase,
                 'move_type': 'cancel_entry',
                 'state': 'done',
                 'date': now,

@@ -129,7 +129,7 @@
         <field name="code">
 for record in records:
     if record.name and record.ste_id:
-        talon = record._find_matching_talon(record.name, record.ste_id.id)
+        talon = record.find_matching_talon(record.name, record.ste_id.id)
         if talon:
             record.write({'talon_id': talon.id})
         </field>

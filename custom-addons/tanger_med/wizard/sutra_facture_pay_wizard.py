@@ -62,7 +62,7 @@ class SutraFacturePayWizard(models.TransientModel):
             'cheque_id': new_cheque.id,
             'amount': self.amount_total,
             'type': 'surestarie', # Using surestarie as default, or magasinage
-            'dossier_name': 'Paiement SUTRA Groupé'
+            'serie_facture': 'SUTRA Groupé'
         })
 
         # Link factures and change state

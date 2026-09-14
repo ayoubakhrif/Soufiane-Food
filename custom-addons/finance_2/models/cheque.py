@@ -466,7 +466,7 @@ class Finance2Repartition(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if not vals.get('talon_id') and vals.get('name') and vals.get('ste_id'):
-                talon = self._find_matching_talon(vals['name'], vals['ste_id'])
+                talon = self.find_matching_talon(vals['name'], vals['ste_id'])
                 if talon:
                     vals['talon_id'] = talon.id
         return super().create(vals_list)
@@ -476,12 +476,12 @@ class Finance2Repartition(models.Model):
         if 'name' in vals or 'ste_id' in vals:
             for rec in self:
                 if not rec.talon_id and rec.name and rec.ste_id:
-                    talon = self._find_matching_talon(rec.name, rec.ste_id.id)
+                    talon = self.find_matching_talon(rec.name, rec.ste_id.id)
                     if talon:
                         rec.talon_id = talon.id
         return res
 
-    def _find_matching_talon(self, chq_number, ste_id):
+    def find_matching_talon(self, chq_number, ste_id):
         if not chq_number or not chq_number.isdigit():
             return False
         num = int(chq_number)

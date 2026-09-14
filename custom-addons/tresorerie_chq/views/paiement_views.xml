@@ -11,6 +11,7 @@
                 <field name="client_id"/>
                 <field name="payment_type"/>
                 <field name="amount" sum="Total"/>
+                <field name="validation_mode" widget="badge" decoration-success="validation_mode == 'ai'" decoration-info="validation_mode == 'manual'" optional="show"/>
             </tree>
         </field>
     </record>
@@ -33,6 +34,9 @@
                             <field name="date" readonly="state == 'validated'"/>
                             <field name="reception_date" readonly="state == 'validated'"/>
                             <field name="payment_type" widget="radio" readonly="state == 'validated'"/>
+                            <field name="validation_mode" widget="badge" decoration-success="validation_mode == 'ai'" decoration-info="validation_mode == 'manual'" invisible="state == 'draft'"/>
+                            <field name="validated_by_user_id" invisible="validation_mode != 'manual'"/>
+                            <field name="validation_date" invisible="state == 'draft'"/>
                             <field name="scan_document_name" invisible="1"/>
                             <field name="scan_document" string="Scan du document" filename="scan_document_name" widget="binary"/>
                             <button name="action_parse_pdf_via_ai" type="object" string="Analyser le document (IA)" class="btn-primary" icon="fa-robot" invisible="not scan_document" help="Extrait automatiquement les chèques ou effets à partir du PDF scanné."/>
@@ -163,7 +167,17 @@
                         domain="[('payment_type', '=', 'cheque')]"/>
                 <filter string="Effets" name="type_effet"
                         domain="[('payment_type', '=', 'effet')]"/>
+                <separator/>
+                <filter string="Validé par IA 🤖" name="filter_val_ai"
+                        domain="[('validation_mode', '=', 'ai')]"/>
+                <filter string="Validé par Utilisateur 👤" name="filter_val_manual"
+                        domain="[('validation_mode', '=', 'manual')]"/>
+                <filter string="En Brouillon" name="filter_state_draft"
+                        domain="[('state', '=', 'draft')]"/>
                 <group expand="0" string="Group By">
+                    <filter string="Validé par"
+                            name="group_validation_mode"
+                            context="{'group_by': 'validation_mode'}"/>
                     <filter string="Client"
                             name="group_client"
                             context="{'group_by': 'client_id'}"/>

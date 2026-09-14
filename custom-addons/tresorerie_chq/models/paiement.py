@@ -29,6 +29,24 @@ class TresoreriePaiement(models.Model):
         ('validated', 'Validé')
     ], string='Statut', default='draft', required=True, tracking=True)
 
+    validation_mode = fields.Selection([
+        ('ai', '🤖 IA (Direct)'),
+        ('manual', '👤 Utilisateur'),
+    ], string="Validé par", tracking=True, copy=False)
+
+    validated_by_user_id = fields.Many2one(
+        'res.users',
+        string="Validé par (Utilisateur)",
+        readonly=True,
+        copy=False,
+    )
+
+    validation_date = fields.Datetime(
+        string="Date de validation",
+        readonly=True,
+        copy=False,
+    )
+
     date = fields.Date(
         string='Date du paiement',
         default=fields.Date.context_today,
@@ -111,7 +129,12 @@ class TresoreriePaiement(models.Model):
     # ------------------------------------------------------------------
     def action_validate(self):
         for rec in self:
-            rec.state = 'validated'
+            rec.write({
+                'state': 'validated',
+                'validation_mode': 'manual',
+                'validation_date': fields.Datetime.now(),
+                'validated_by_user_id': self.env.user.id,
+            })
 
     def action_draft(self):
         # Allow admin (e.g., Tresorerie Manager) to revert to draft
@@ -119,7 +142,12 @@ class TresoreriePaiement(models.Model):
             from odoo.exceptions import AccessError
             raise AccessError("Seul un responsable peut remettre le paiement en brouillon.")
         for rec in self:
-            rec.state = 'draft'
+            rec.write({
+                'state': 'draft',
+                'validation_mode': False,
+                'validation_date': False,
+                'validated_by_user_id': False,
+            })
 
     def action_parse_pdf_via_ai(self):
         self.ensure_one()
@@ -448,7 +476,19 @@ Exemple de réponse attendue:
                 self.write({'effet_line_ids': lines_to_create})
                 
         if is_consensus:
-            self.write({'state': 'validated'})
+            self.write({
+                'state': 'validated',
+                'validation_mode': 'ai',
+                'validation_date': fields.Datetime.now(),
+                'validated_by_user_id': False,
+            })
+        else:
+            self.write({
+                'state': 'draft',
+                'validation_mode': False,
+                'validation_date': False,
+                'validated_by_user_id': False,
+            })
 
         return {
             'total_expected': result_gemini.get('total_attendu', 0),

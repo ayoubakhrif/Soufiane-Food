@@ -37,6 +37,10 @@
                        decoration-success="state == 'encaisse'"
                        decoration-danger="state == 'impaye'"/>
                 
+                <field name="validation_mode" widget="badge" optional="show"
+                       decoration-success="validation_mode == 'ai'"
+                       decoration-info="validation_mode == 'manual'"/>
+                
                 <!-- Hidden helper to pass role context to visibility expressions -->
                 <field name="is_manager" column_invisible="True"/>
 
@@ -149,6 +153,9 @@
                             <field name="soufiane_owner_id" string="Client soufiane" invisible="client_id != 1 and client_id != 'Soufiane'"/>
                             <field name="core_ste_id" options="{'no_create': True}"/>
                             <field name="reception_date"/>
+                            <field name="validation_mode" widget="badge"
+                                   decoration-success="validation_mode == 'ai'"
+                                   decoration-info="validation_mode == 'manual'"/>
                         </group>
                     </group>
                 </sheet>
@@ -179,7 +186,11 @@
                 <filter string="Envoyé à la banque" name="state_banque" domain="[('state', '=', 'banque')]"/>
                 <filter string="Encaissé" name="state_encaisse" domain="[('state', '=', 'encaisse')]"/>
                 <filter string="Impayé" name="state_impaye" domain="[('state', '=', 'impaye')]"/>
+                <separator/>
+                <filter string="Validé par IA 🤖" name="filter_val_ai" domain="[('validation_mode', '=', 'ai')]"/>
+                <filter string="Validé par Utilisateur 👤" name="filter_val_manual" domain="[('validation_mode', '=', 'manual')]"/>
                 <group expand="0" string="Group By">
+                    <filter string="Validé par" name="group_validation_mode" context="{'group_by': 'validation_mode'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Date de réception" name="group_reception" context="{'group_by': 'reception_date:day'}"/>
                     <filter string="Date d'échéance" name="group_date" context="{'group_by': 'check_date:day'}"/>

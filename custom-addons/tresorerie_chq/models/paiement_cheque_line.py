@@ -74,6 +74,12 @@ class TresorerieChqCheque(models.Model):
 
     ai_raw_prediction = fields.Text(string="Prédiction IA brute", readonly=True)
     is_ai_extracted = fields.Boolean(string="Extrait par IA", readonly=True)
+    validation_mode = fields.Selection(
+        related='paiement_id.validation_mode',
+        string="Validé par",
+        store=True,
+        readonly=True,
+    )
 
     core_ste_id = fields.Many2one('core.ste', string='Société')
     reception_date = fields.Date(string='Date de réception', related='paiement_id.reception_date', store=True, readonly=True)
@@ -271,6 +277,12 @@ class TresorerieChqEffet(models.Model):
 
     ai_raw_prediction = fields.Text(string="Prédiction IA brute", readonly=True)
     is_ai_extracted = fields.Boolean(string="Extrait par IA", readonly=True)
+    validation_mode = fields.Selection(
+        related='paiement_id.validation_mode',
+        string="Validé par",
+        store=True,
+        readonly=True,
+    )
 
     core_ste_id = fields.Many2one('core.ste', string='Société')
     reception_date = fields.Date(string='Date de réception', related='paiement_id.reception_date', store=True, readonly=True)

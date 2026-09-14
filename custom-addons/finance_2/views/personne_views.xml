@@ -78,6 +78,7 @@
                             <field name="cheque_ids">
                                 <tree>
                                     <field name="name" string="Chèque"/>
+                                    <field name="ste_id" string="Société"/>
                                     <field name="date_emission"/>
                                     <field name="date_echeance"/>
                                     <field name="date_encaissement"/>

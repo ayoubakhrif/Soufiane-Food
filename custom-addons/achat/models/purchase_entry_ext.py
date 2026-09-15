@@ -156,11 +156,11 @@ class LogisticsEntry(models.Model):
     eta_this_week = fields.Boolean(
         string='ETA cette semaine',
         compute='_compute_eta_this_week',
-        store=True,
-        help='True if ETA <= next Thursday (inclusive) and port_status is on_port',
+        search='_search_eta_this_week',
+        store=False,
+        help='True if ETA <= next Thursday (inclusive) and port_status is on_port, or any active special status',
     )
 
-    @api.depends('eta', 'port_status')
     def _compute_eta_this_week(self):
         today = date.today()
         days_to_thursday = (3 - today.weekday()) % 7
@@ -172,6 +172,25 @@ class LogisticsEntry(models.Model):
                 rec.eta_this_week = bool(rec.eta) and rec.eta <= next_thursday
             else:
                 rec.eta_this_week = False
+
+    def _search_eta_this_week(self, operator, value):
+        if operator not in ('=', '!='):
+            return []
+        today = date.today()
+        days_to_thursday = (3 - today.weekday()) % 7
+        next_thursday = today + timedelta(days=days_to_thursday)
+
+        # Condition positive : statuts spéciaux OU (on_port et ETA <= next_thursday)
+        domain_match = [
+            '|',
+            ('port_status', 'in', ['release', 'tanger_med', 'emirate', 'refinancement']),
+            '&', ('port_status', '=', 'on_port'), ('eta', '!=', False), ('eta', '<=', next_thursday)
+        ]
+
+        if (operator == '=' and value) or (operator == '!=' and not value):
+            return domain_match
+        else:
+            return ['!', '&'] + domain_match
 
     calendar_label = fields.Char(string='Label Calendrier', compute='_compute_calendar_label')
 

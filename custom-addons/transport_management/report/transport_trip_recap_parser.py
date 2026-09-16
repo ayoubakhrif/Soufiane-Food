@@ -8,7 +8,7 @@ class TripRecapReport(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        trips = self.env['transport.trip'].browse(docids).sorted(key=lambda t: (t.driver_id.name or '', t.date or ''))
+        trips = self.env['transport.trip'].browse(docids).sorted(key=lambda t: (t.driver_id.name or '', str(t.date) if t.date else ''), reverse=True)
         
         drivers_dict = {}
         global_count = len(trips)
@@ -17,7 +17,12 @@ class TripRecapReport(models.AbstractModel):
         global_going = 0.0
         global_returning = 0.0
         
-        global_by_day = defaultdict(lambda: {'count': 0, 'profit': 0.0, 'charges': 0.0})
+        global_fuel = 0.0
+        global_driver = 0.0
+        global_adblue = 0.0
+        global_mixed = 0.0
+        
+        global_by_day = defaultdict(lambda: {'count': 0, 'profit': 0.0, 'charges': 0.0, 'fuel': 0.0, 'driver': 0.0, 'adblue': 0.0, 'mixed': 0.0})
         
         for trip in trips:
             driver = trip.driver_id
@@ -27,12 +32,20 @@ class TripRecapReport(models.AbstractModel):
                     'count': 0,
                     'profit': 0.0,
                     'charges': 0.0,
+                    'fuel': 0.0,
+                    'driver_charge': 0.0,
+                    'adblue': 0.0,
+                    'mixed': 0.0,
                     'by_day': defaultdict(list)
                 }
                 
             drivers_dict[driver]['count'] += 1
             drivers_dict[driver]['profit'] += trip.profit
             drivers_dict[driver]['charges'] += trip.total_amount
+            drivers_dict[driver]['fuel'] += trip.charge_fuel
+            drivers_dict[driver]['driver_charge'] += trip.charge_driver
+            drivers_dict[driver]['adblue'] += trip.charge_adblue
+            drivers_dict[driver]['mixed'] += trip.charge_mixed
             drivers_dict[driver]['by_day'][trip.date].append(trip)
             
             global_profit += trip.profit
@@ -40,11 +53,19 @@ class TripRecapReport(models.AbstractModel):
             global_going += trip.going_price
             global_returning += trip.returning_price
             
+            global_fuel += trip.charge_fuel
+            global_driver += trip.charge_driver
+            global_adblue += trip.charge_adblue
+            global_mixed += trip.charge_mixed
+            
             global_by_day[trip.date]['count'] += 1
             global_by_day[trip.date]['profit'] += trip.profit
             global_by_day[trip.date]['charges'] += trip.total_amount
+            global_by_day[trip.date]['fuel'] += trip.charge_fuel
+            global_by_day[trip.date]['driver'] += trip.charge_driver
+            global_by_day[trip.date]['adblue'] += trip.charge_adblue
+            global_by_day[trip.date]['mixed'] += trip.charge_mixed
             
-        # Format the dicts into sorted lists for qweb
         drivers_list = []
         for driver, d_data in drivers_dict.items():
             days_list = []
@@ -54,7 +75,11 @@ class TripRecapReport(models.AbstractModel):
                     'trips': day_trips,
                     'count': len(day_trips),
                     'profit': sum(t.profit for t in day_trips),
-                    'charges': sum(t.total_amount for t in day_trips)
+                    'charges': sum(t.total_amount for t in day_trips),
+                    'fuel': sum(t.charge_fuel for t in day_trips),
+                    'driver': sum(t.charge_driver for t in day_trips),
+                    'adblue': sum(t.charge_adblue for t in day_trips),
+                    'mixed': sum(t.charge_mixed for t in day_trips),
                 })
             d_data['days_list'] = days_list
             drivers_list.append(d_data)
@@ -67,7 +92,11 @@ class TripRecapReport(models.AbstractModel):
                 'date': date,
                 'count': g_data['count'],
                 'profit': g_data['profit'],
-                'charges': g_data['charges']
+                'charges': g_data['charges'],
+                'fuel': g_data['fuel'],
+                'driver': g_data['driver'],
+                'adblue': g_data['adblue'],
+                'mixed': g_data['mixed'],
             })
             
         report_date = datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -82,6 +111,10 @@ class TripRecapReport(models.AbstractModel):
             'global_charges': global_charges,
             'global_going': global_going,
             'global_returning': global_returning,
+            'global_fuel': global_fuel,
+            'global_driver': global_driver,
+            'global_adblue': global_adblue,
+            'global_mixed': global_mixed,
             'global_days_list': global_days_list,
             'report_date': report_date
         }
@@ -101,7 +134,12 @@ class TripRemorqueRecapReport(models.AbstractModel):
         global_going = 0.0
         global_returning = 0.0
         
-        global_by_day = defaultdict(lambda: {'count': 0, 'profit': 0.0, 'charges': 0.0})
+        global_fuel = 0.0
+        global_driver = 0.0
+        global_adblue = 0.0
+        global_mixed = 0.0
+        
+        global_by_day = defaultdict(lambda: {'count': 0, 'profit': 0.0, 'charges': 0.0, 'fuel': 0.0, 'driver': 0.0, 'adblue': 0.0, 'mixed': 0.0})
         
         for trip in trips:
             driver = trip.driver_remorque_id
@@ -111,12 +149,20 @@ class TripRemorqueRecapReport(models.AbstractModel):
                     'count': 0,
                     'profit': 0.0,
                     'charges': 0.0,
+                    'fuel': 0.0,
+                    'driver_charge': 0.0,
+                    'adblue': 0.0,
+                    'mixed': 0.0,
                     'by_day': defaultdict(list)
                 }
                 
             drivers_dict[driver]['count'] += 1
             drivers_dict[driver]['profit'] += trip.profit
             drivers_dict[driver]['charges'] += trip.total_amount
+            drivers_dict[driver]['fuel'] += trip.charge_fuel
+            drivers_dict[driver]['driver_charge'] += trip.charge_driver
+            drivers_dict[driver]['adblue'] += trip.charge_adblue
+            drivers_dict[driver]['mixed'] += trip.charge_mixed
             drivers_dict[driver]['by_day'][trip.date].append(trip)
             
             global_profit += trip.profit
@@ -124,9 +170,18 @@ class TripRemorqueRecapReport(models.AbstractModel):
             global_going += trip.going_price
             global_returning += trip.returning_price
             
+            global_fuel += trip.charge_fuel
+            global_driver += trip.charge_driver
+            global_adblue += trip.charge_adblue
+            global_mixed += trip.charge_mixed
+            
             global_by_day[trip.date]['count'] += 1
             global_by_day[trip.date]['profit'] += trip.profit
             global_by_day[trip.date]['charges'] += trip.total_amount
+            global_by_day[trip.date]['fuel'] += trip.charge_fuel
+            global_by_day[trip.date]['driver'] += trip.charge_driver
+            global_by_day[trip.date]['adblue'] += trip.charge_adblue
+            global_by_day[trip.date]['mixed'] += trip.charge_mixed
             
         drivers_list = []
         for driver, d_data in drivers_dict.items():
@@ -137,7 +192,11 @@ class TripRemorqueRecapReport(models.AbstractModel):
                     'trips': day_trips,
                     'count': len(day_trips),
                     'profit': sum(t.profit for t in day_trips),
-                    'charges': sum(t.total_amount for t in day_trips)
+                    'charges': sum(t.total_amount for t in day_trips),
+                    'fuel': sum(t.charge_fuel for t in day_trips),
+                    'driver': sum(t.charge_driver for t in day_trips),
+                    'adblue': sum(t.charge_adblue for t in day_trips),
+                    'mixed': sum(t.charge_mixed for t in day_trips),
                 })
             d_data['days_list'] = days_list
             drivers_list.append(d_data)
@@ -150,7 +209,11 @@ class TripRemorqueRecapReport(models.AbstractModel):
                 'date': date,
                 'count': g_data['count'],
                 'profit': g_data['profit'],
-                'charges': g_data['charges']
+                'charges': g_data['charges'],
+                'fuel': g_data['fuel'],
+                'driver': g_data['driver'],
+                'adblue': g_data['adblue'],
+                'mixed': g_data['mixed'],
             })
             
         report_date = datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -165,6 +228,10 @@ class TripRemorqueRecapReport(models.AbstractModel):
             'global_charges': global_charges,
             'global_going': global_going,
             'global_returning': global_returning,
+            'global_fuel': global_fuel,
+            'global_driver': global_driver,
+            'global_adblue': global_adblue,
+            'global_mixed': global_mixed,
             'global_days_list': global_days_list,
             'report_date': report_date
         }

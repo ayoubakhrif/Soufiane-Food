@@ -79,23 +79,29 @@
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 15%;">Client</th>
-                                                <th style="width: 15%;">Type</th>
-                                                <th style="width: 15%;">Allée</th>
-                                                <th style="width: 15%;">Retour</th>
-                                                <th style="width: 15%;">Total Prix</th>
-                                                <th style="width: 15%;">Charges</th>
-                                                <th style="width: 10%;">Bénéfice</th>
+                                                <th style="width: 14%;">Client</th>
+                                                <th style="width: 10%;">Allée</th>
+                                                <th style="width: 10%;">Retour</th>
+                                                <th style="width: 11%;">Total Prix</th>
+                                                <th style="width: 9%;">Gazoil</th>
+                                                <th style="width: 9%;">Dép.</th>
+                                                <th style="width: 9%;">AdBlue</th>
+                                                <th style="width: 9%;">Mixe</th>
+                                                <th style="width: 10%;">Charges</th>
+                                                <th style="width: 9%;">Bénéfice</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <t t-foreach="day_data['trips']" t-as="trip">
                                                 <tr>
                                                     <td><t t-esc="trip.client_id.name"/></td>
-                                                    <td><t t-esc="dict(trip.fields_get(allfields=['destination'])['destination']['selection'])[trip.destination] if trip.destination else ''"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.going_price).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.returning_price).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.total_price).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_fuel).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_driver).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_adblue).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_mixed).replace(',', ' ')"/></td>
                                                     <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(trip.total_amount).replace(',', ' ')"/></td>
                                                     <td class="amount-cell" style="color: #137333;"><t t-esc="'{:,.2f}'.format(trip.profit).replace(',', ' ')"/></td>
                                                 </tr>
@@ -113,10 +119,14 @@
                         <table class="summary-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 25%;">Date</th>
-                                    <th style="width: 25%;">Nbr. Voyages Remorque</th>
-                                    <th style="width: 25%;">Charges Totales</th>
-                                    <th style="width: 25%;">Bénéfice Total</th>
+                                    <th style="width: 16%;">Date</th>
+                                    <th style="width: 12%;">Nbr. Voyages Remorque</th>
+                                    <th style="width: 10%;">Gazoil</th>
+                                    <th style="width: 10%;">Dép.</th>
+                                    <th style="width: 10%;">AdBlue</th>
+                                    <th style="width: 10%;">Mixe</th>
+                                    <th style="width: 16%;">Tot. Charges</th>
+                                    <th style="width: 16%;">Bénéfice Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -124,6 +134,10 @@
                                     <tr>
                                         <td><t t-if="g_day['date']"><t t-esc="g_day['date'].strftime('%d/%m/%Y')"/></t></td>
                                         <td><t t-esc="g_day['count']"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(g_day['fuel']).replace(',', ' ')"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(g_day['driver']).replace(',', ' ')"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(g_day['adblue']).replace(',', ' ')"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(g_day['mixed']).replace(',', ' ')"/></td>
                                         <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(g_day['charges']).replace(',', ' ')"/> DH</td>
                                         <td class="amount-cell" style="color: #137333;"><t t-esc="'{:,.2f}'.format(g_day['profit']).replace(',', ' ')"/> DH</td>
                                     </tr>
@@ -138,11 +152,15 @@
                         <table class="summary-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 20%;">Total Voyages Remorque</th>
-                                    <th style="width: 20%;">Total Allées</th>
-                                    <th style="width: 20%;">Total Retours</th>
-                                    <th style="width: 20%;">Total Charges</th>
-                                    <th style="width: 20%;">Bénéfice Global</th>
+                                    <th style="width: 12%;">Total Voyages Remorque</th>
+                                    <th style="width: 12%;">Tot. Allées</th>
+                                    <th style="width: 12%;">Tot. Retours</th>
+                                    <th style="width: 10%;">Tot. Gazoil</th>
+                                    <th style="width: 10%;">Tot. Dép.</th>
+                                    <th style="width: 10%;">Tot. AdBlue</th>
+                                    <th style="width: 10%;">Tot. Mixe</th>
+                                    <th style="width: 12%;">Tot. Charges</th>
+                                    <th style="width: 12%;">Bénéf. Global</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -150,6 +168,10 @@
                                     <td><t t-esc="global_count"/></td>
                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_going).replace(',', ' ')"/> DH</td>
                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_returning).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_fuel).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_driver).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_adblue).replace(',', ' ')"/> DH</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(global_mixed).replace(',', ' ')"/> DH</td>
                                     <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(global_charges).replace(',', ' ')"/> DH</td>
                                     <td class="amount-cell" style="color: #137333; font-size: 16px;"><t t-esc="'{:,.2f}'.format(global_profit).replace(',', ' ')"/> DH</td>
                                 </tr>

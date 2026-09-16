@@ -128,10 +128,14 @@
         <field name="state">code</field>
         <field name="code">
 for record in records:
-    if record.name and record.ste_id:
-        talon = record.find_matching_talon(record.name, record.ste_id.id)
-        if talon:
-            record.write({'talon_id': talon.id})
+    if record.name and record.ste_id and record.name.isdigit():
+        num = int(record.name)
+        talons = env['finance2.talon'].search([('ste_id', '=', record.ste_id.id)])
+        for t in talons:
+            if t.first_cheque_number and t.last_cheque_number and t.first_cheque_number.isdigit() and t.last_cheque_number.isdigit():
+                if int(t.first_cheque_number) &lt;= num &lt;= int(t.last_cheque_number):
+                    record.write({'talon_id': t.id})
+                    break
         </field>
     </record>
 

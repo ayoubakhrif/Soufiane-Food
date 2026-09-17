@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_finance2_divers_summary" model="ir.actions.report">
+        <field name="name">Rapport Divers</field>
+        <field name="model">finance2.benif</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance_2.report_finance2_divers_summary_template</field>
+        <field name="report_file">finance_2.report_finance2_divers_summary_template</field>
+        <field name="print_report_name">'Rapport_Divers'</field>
+        <field name="binding_model_id" ref="model_finance2_benif"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_finance2_divers_summary_template">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <style>
+                        .report-header { margin-bottom: 20px; }
+                        .header-row { display: flex; align-items: stretch; margin-bottom: 10px; }
+                        .date-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; width: 20%; text-align: center; }
+                        .title-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 24px; font-weight: bold; color: black; flex-grow: 1; text-align: center; letter-spacing: 5px; }
+                        
+                        .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+                        .data-table th { background-color: #FCE9DA; border: 1px solid black; padding: 8px; text-align: center; font-size: 13px; font-weight: bold; }
+                        .data-table td { border: 1px solid black; padding: 8px; text-align: center; font-size: 13px; }
+                        
+                        /* Colors like before */
+                        .ste-cell { background-color: #6DA9DC; font-weight: bold; }
+                        .amount-cell { background-color: #FF9900; font-weight: bold; }
+                        .total-cell { background-color: #00FFFF; font-weight: bold; }
+                        .gray-cell { background-color: #f2f2f2; }
+                    </style>
+
+                    <div class="report-header">
+                        <div class="header-row">
+                            <div class="date-box">
+                                <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%y')"/>
+                            </div>
+                            <div class="title-box">
+                                D I V E R S
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Bénéficiaire</th>
+                                <th>Ste</th>
+                                <th>Nb. T</th>
+                                <th>MT</th>
+                                <th>Nb. E</th>
+                                <th>MT</th>
+                                <th>Nb. NE</th>
+                                <th>MT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="benif">
+                                <t t-set="breakdown" t-value="benif.get_divers_breakdown()"/>
+                                <t t-if="breakdown">
+                                    <t t-foreach="range(len(breakdown))" t-as="idx">
+                                        <t t-set="line" t-value="breakdown[idx]"/>
+                                        <tr>
+                                            <t t-if="idx == 0">
+                                                <td t-att-rowspan="len(breakdown)" style="text-align: left; font-weight: bold; font-size: 16px;"><t t-esc="benif.name"/></td>
+                                            </t>
+                                            <td class="ste-cell" style="text-align: left;"><t t-esc="line['ste']"/></td>
+                                            <td class="gray-cell"><t t-esc="line['nb_t']"/></td>
+                                            <td class="amount-cell"><t t-esc="'{:,.2f}'.format(line['mt_t']).replace(',', ' ')"/>,-</td>
+                                            <td class="gray-cell"><t t-esc="line['nb_e']"/></td>
+                                            <td class="amount-cell"><t t-esc="'{:,.2f}'.format(line['mt_e']).replace(',', ' ')"/>,-</td>
+                                            <td class="gray-cell"><t t-esc="line['nb_ne']"/></td>
+                                            <td class="total-cell"><t t-esc="'{:,.2f}'.format(line['mt_ne']).replace(',', ' ')"/>,-</td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <tr>
+                                        <td style="text-align: left; font-weight: bold; font-size: 16px;"><t t-esc="benif.name"/></td>
+                                        <td class="ste-cell">-</td>
+                                        <td class="gray-cell">0</td>
+                                        <td class="amount-cell">0.00,-</td>
+                                        <td class="gray-cell">0</td>
+                                        <td class="amount-cell">0.00,-</td>
+                                        <td class="gray-cell">0</td>
+                                        <td class="total-cell">0.00,-</td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

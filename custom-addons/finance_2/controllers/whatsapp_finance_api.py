@@ -253,10 +253,23 @@ class WhatsAppFinanceController(http.Controller):
         state_label_fr = "Tous"
         
         if msg_clean == "divers":
-            # Search in V2 directly
             divers_v2 = request.env['finance2.benif'].sudo().search([('is_divers', '=', True)])
             if not divers_v2:
                 return {'status': 'not_found', 'message': "Aucun bénéficiaire de type Divers trouvé dans Finance V2."}
+            
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action._render_qweb_pdf('finance_2.action_report_finance2_divers_summary', res_ids=divers_v2.ids)
+            
+            import base64
+            from odoo import fields
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            
+            return {
+                'status': 'success',
+                'response': "Voici le tableau récapitulatif DIVERS (Finance V2).",
+                'file_name': f"DIVERS_{fields.Date.today()}.pdf",
+                'pdf_base64': pdf_base64
+            }
             
             # Map to V1 to leverage the global report that aggregates V1 + V2 cheques
             v1_ids = []

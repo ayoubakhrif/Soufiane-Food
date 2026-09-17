@@ -124,9 +124,8 @@
                             </div>
                         </group>
                     </group>
-                    <group string="Détail du calcul (Tranches les plus chères)">
-                        <field name="calculation_details" readonly="1" nolabel="1"/>
-                    </group>
+                    <separator string="Détail du calcul (Tranches les plus chères)"/>
+                    <field name="calculation_details" widget="html" readonly="1" nolabel="1"/>
                     <group string="Dates Clés" col="2">
                         <group>
                             <field name="claim_date"/>

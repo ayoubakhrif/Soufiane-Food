@@ -40,6 +40,7 @@
                             <field name="driver_id"/>
                             <field name="client_id"/>
                             <field name="ste_id"/>
+                            <field name="dum_id" options="{'no_create': True}"/>
                             <field name="vehicle_id"/>
                             <label for="going_price"/>
                             <div class="o_row">

@@ -54,3 +54,21 @@ class LogisticsEntry(models.Model):
     def _compute_customs_total(self):
         for rec in self:
             rec.customs_total = rec.vat + rec.customs_duty
+
+    def name_get(self):
+        result = []
+        for record in self:
+            if record.dum:
+                name = f"[{record.dum}] {record.bl_number or 'Sans BL'}"
+            else:
+                name = record.bl_number or f"Dossier Logistique #{record.id}"
+            result.append((record.id, name))
+        return result
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        args = args or []
+        domain = []
+        if name:
+            domain = ['|', ('dum', operator, name), ('bl_number', operator, name)]
+        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)

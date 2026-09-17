@@ -29,7 +29,18 @@ class TransportTripRemorque(models.Model):
     def _onchange_driver_remorque_id(self):
         if self.driver_remorque_id and self.driver_remorque_id.vehicle_id:
             self.vehicle_id = self.driver_remorque_id.vehicle_id
+
+    dum_id = fields.Many2one('logistique.entry', string='DUM', domain="[('dum', '!=', False)]")
     
+    @api.onchange('dum_id')
+    def _onchange_dum_id(self):
+        if self.dum_id and self.dum_id.ste_id:
+            ste_name = self.dum_id.ste_id.name
+            transport_ste = self.env['transport.ste'].search([('name', '=', ste_name)], limit=1)
+            if not transport_ste:
+                transport_ste = self.env['transport.ste'].create({'name': ste_name})
+            self.ste_id = transport_ste
+
     destination = fields.Selection([
         ('tanger', 'Tanger'),
         ('fenideq', 'Fenideq'),

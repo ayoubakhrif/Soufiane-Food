@@ -66,10 +66,11 @@ class ClaimsDHLDelay(models.Model):
         store=True,
         help="Montant calculé automatiquement sur la tranche la plus chère."
     )
-    calculation_details = fields.Text(
+    calculation_details = fields.Html(
         string='Détail du calcul',
         compute='_compute_amount_due_calculated',
-        store=True
+        store=True,
+        sanitize=False
     )
 
     # ==========================
@@ -292,25 +293,51 @@ class ClaimsDHLDelay(models.Model):
             sel_list = sel(rec) if callable(sel) else sel
             type_label = dict(sel_list).get(rec.container_type, rec.container_type) or ''
 
-            # Génération du récapitulatif textuel
-            lines = [
-                f"Retard DHL fournisseur : {delay} jour(s) | Conteneurs : {cnt} ({type_label} {rec.container_size}')",
-                f"Compagnie : {rec.shipping_id.name} | Franchise surestarie : {free_days} jour(s)",
-                "",
-                f"--- SURESTARIE (Total séjour : {days_surestarie}j) ---",
-                f"Tranche(s) imputée(s) : {sur_details[0] if len(sur_details) == 1 else ''}"
-            ]
-            if len(sur_details) > 1:
-                lines.extend(sur_details)
-            lines.append(f"Sous-total Surestarie : {total_sur_ht:.2f} MAD")
-            lines.append("")
-            lines.append(f"--- MAGASINAGE (Total séjour port : {days_magasinage}j) ---")
-            lines.extend(mag_details)
-            lines.append(f"Sous-total Magasinage : {total_mag_ht:.2f} MAD")
-            lines.append("")
-            lines.append(f"TOTAL CALCULÉ (Tranches les plus chères) : {total_calculated:.2f} MAD")
+            # Génération du récapitulatif HTML propre et structuré
+            sur_html_items = "".join([f"<li style='margin-bottom: 4px;'>{item}</li>" for item in sur_details])
+            mag_html_items = "".join([f"<li style='margin-bottom: 4px;'>{item}</li>" for item in mag_details])
 
-            rec.calculation_details = "\n".join(lines)
+            rec.calculation_details = f"""
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; font-size: 13px; color: #1e293b; line-height: 1.5;">
+                <div style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #cbd5e1;">
+                    <div style="font-weight: bold; font-size: 14px; color: #0f172a; margin-bottom: 4px;">
+                        Retard DHL : <span style="color: #dc2626;">{delay} jour(s)</span> | Conteneurs : <strong>{cnt}</strong> ({type_label} {rec.container_size}')
+                    </div>
+                    <div style="color: #64748b;">
+                        Compagnie : <strong>{rec.shipping_id.name}</strong> | Franchise négociée : <strong>{free_days} jour(s)</strong>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <div style="font-weight: 600; color: #334155; margin-bottom: 4px;">
+                        📦 SURESTARIE <span style="font-weight: normal; color: #64748b;">(Séjour total : {days_surestarie}j)</span>
+                    </div>
+                    <ul style="margin: 0 0 6px 0; padding-left: 20px; color: #475569;">
+                        {sur_html_items}
+                    </ul>
+                    <div style="font-weight: 600; color: #0f172a;">
+                        Sous-total Surestarie : <span style="color: #2563eb;">{total_sur_ht:,.2f} MAD</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px; padding-top: 8px; border-top: 1px dashed #cbd5e1;">
+                    <div style="font-weight: 600; color: #334155; margin-bottom: 4px;">
+                        🏢 MAGASINAGE <span style="font-weight: normal; color: #64748b;">(Séjour port : {days_magasinage}j)</span>
+                    </div>
+                    <ul style="margin: 0 0 6px 0; padding-left: 20px; color: #475569;">
+                        {mag_html_items}
+                    </ul>
+                    <div style="font-weight: 600; color: #0f172a;">
+                        Sous-total Magasinage : <span style="color: #2563eb;">{total_mag_ht:,.2f} MAD</span>
+                    </div>
+                </div>
+
+                <div style="padding-top: 10px; border-top: 2px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: bold; font-size: 14px; text-transform: uppercase;">Total Calculé (Tranches les plus chères) :</span>
+                    <span style="font-weight: bold; font-size: 16px; color: #16a34a; background: #dcfce7; padding: 2px 10px; border-radius: 6px;">{total_calculated:,.2f} MAD</span>
+                </div>
+            </div>
+            """
 
     @api.onchange('amount_due_calculated')
     def _onchange_amount_due_calculated(self):

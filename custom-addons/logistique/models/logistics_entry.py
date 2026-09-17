@@ -44,6 +44,15 @@ class LogisticsEntry(models.Model):
                 rec.container_ids.mapped('name')
             )
 
+    container_type = fields.Selection([
+        ('generals', 'Dry'),
+        ('reefers', 'Reefers'),
+    ], string='Container Type', default='generals', tracking=True)
+    
+    container_size = fields.Selection([
+        ('20', "20'"),
+        ('40', "40'"),
+    ], string='Container Size', default='40', tracking=True)
     
     # Week and status
     week = fields.Char(

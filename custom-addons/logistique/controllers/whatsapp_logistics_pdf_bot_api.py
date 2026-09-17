@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import re
 import requests
 from odoo import http, SUPERUSER_ID, fields
 from odoo.http import request
@@ -9,6 +10,15 @@ from datetime import datetime
 _logger = logging.getLogger(__name__)
 
 class WhatsAppLogisticsPdfController(http.Controller):
+
+    def _normalize_ste_name(self, name):
+        if not name:
+            return ""
+        s = name.upper()
+        for word in ['SARL', 'AU', 'STE', 'SOCIETE', 'S.A.R.L', 'S.A.', 'SA', 'LTD', 'COMPANY', 'ETS']:
+            s = re.sub(r'\b' + word + r'\b', '', s)
+        s = re.sub(r'[^A-Z0-9]', '', s)
+        return s.strip()
 
     @http.route('/api/whatsapp/logistique/pdf', type='json', auth='none', methods=['POST'], csrf=False)
     def whatsapp_logistics_pdf_processor(self, **kwargs):
@@ -82,6 +92,44 @@ class WhatsAppLogisticsPdfController(http.Controller):
         
         if not entry:
             return {'status': 'not_found', 'message': f"❌ Aucune entrée logistique trouvée pour le dossier BL: {dossier.name}."}
+
+        # 5.1 Check Company Mismatch between Cheque and Invoice
+        ste_cheque = str(ai_result.get('ste_cheque', '')).strip()
+        ste_facture = str(ai_result.get('ste_facture', '')).strip()
+        ste_mismatch_ai = bool(ai_result.get('ste_mismatch', False))
+
+        norm_chq = self._normalize_ste_name(ste_cheque)
+        norm_fac = self._normalize_ste_name(ste_facture)
+
+        is_mismatch = False
+        if ste_mismatch_ai:
+            is_mismatch = True
+        elif norm_chq and norm_fac and norm_chq != norm_fac and (norm_chq not in norm_fac and norm_fac not in norm_chq):
+            is_mismatch = True
+        elif not is_mismatch and dossier.ste_id and norm_chq:
+            norm_dossier = self._normalize_ste_name(dossier.ste_id.name)
+            if norm_dossier and norm_chq != norm_dossier and (norm_chq not in norm_dossier and norm_dossier not in norm_chq):
+                is_mismatch = True
+                ste_facture = ste_facture or dossier.ste_id.name
+
+        if is_mismatch:
+            _logger.warning(f"Company mismatch detected for PDF {file_name}: Cheque='{ste_cheque}', Invoice='{ste_facture}'")
+            danger_emojis = "⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️"
+            warning_msg = (
+                f"{danger_emojis}\n"
+                f"🚨 *ATTENTION : LA SOCIÉTÉ N'EST PAS LA MÊME !* 🚨\n"
+                f"{danger_emojis}\n\n"
+                f"🔹 *Dossier (BL)* : {dossier.name}\n"
+                f"🧾 *Chèque N°* : {chq_number or 'N/A'}\n\n"
+                f"❌ *La société n'est pas la même sur les factures et le chèque :*\n"
+                f"  • 🧾 *Société sur le chèque* : *{ste_cheque or 'Non identifiée'}*\n"
+                f"  • 📄 *Société sur la facture* : *{ste_facture or 'Non identifiée'}*\n\n"
+                f"⛔ *Opération bloquée : Aucune donnée n'a été saisie dans Gestia.*"
+            )
+            return {
+                'status': 'success',
+                'response': warning_msg
+            }
 
         messages = []
         
@@ -195,10 +243,14 @@ class WhatsAppLogisticsPdfController(http.Controller):
         }
 
     def _extract_data_from_pdf(self, pdf_b64, file_name, api_key):
-        """Use OpenAI to extract cheque, invoices and BAD data from PDF."""
+        """Use OpenAI to extract cheque, invoices, company matching and BAD data from PDF."""
         # Get shipping lists to guide the AI for beneficiaries
         shippings = request.env['logistique.shipping'].sudo().search([]).mapped('name')
         shipping_list_str = ", ".join(shippings) if shippings else "Aucun"
+
+        # Get list of known companies in Gestia
+        stes = request.env['logistique.ste'].sudo().search([]).mapped('name')
+        ste_list_str = ", ".join(stes) if stes else "Aucun"
 
         prompt_text = f"""Vous êtes un assistant logistique. Vous recevez un document (PDF) qui contient généralement un chèque, une ou plusieurs factures, et parfois un Bon à Délivrer (BAD).
 Le nom du fichier est : {file_name}
@@ -213,6 +265,13 @@ Votre but est d'analyser le document et d'extraire les informations nécessaires
    - Le montant TTC (numérique).
    - Le bénéficiaire ou fournisseur. Voici la liste des compagnies maritimes connues : [SHIPPING_LIST]. Essayez de mapper le bénéficiaire à l'un de ces noms.
    - Le "type" de frais.
+
+6. VÉRIFICATION DE LA SOCIÉTÉ (TRÈS IMPORTANT) :
+   - Trouvez le nom de la société émettrice sur le chèque (le titulaire du compte qui paie, généralement imprimé en haut ou au milieu du chèque, ou dans le tampon/cachet, ex: SOUFIANE NEGOCE, GENERALE TRADING...). Voici la liste des sociétés connues : [STE_LIST]. Mettez ce nom dans "ste_cheque".
+   - Trouvez le nom de la société cliente sur les factures (le destinataire / client de la facture sous 'Client', 'Facturé à', ou 'Doit', ex: SOUFIANE NEGOCE, GENERALE...). Mettez ce nom dans "ste_facture".
+   - Comparez scrupuleusement ces deux sociétés :
+     * Si la société sur le chèque et la société sur la facture sont la MÊME entité (en ignorant les mentions mineures comme SARL, STE, AU), mettez "ste_mismatch": false.
+     * Si la société sur le chèque et la société sur la facture sont DIFFÉRENTES (par exemple chèque au nom de "GENERALE..." mais facture au nom de "SOUFIANE NEGOCE"), mettez "ste_mismatch": true.
 
 Règles strictes pour le "type" de frais :
 - Si la facture indique (Magasinage, Magasinage Eurogate, Terminal storage, taxe regional) -> VOUS DEVEZ ABSOLUMENT choisir "magasinage".
@@ -260,6 +319,9 @@ Règles de formatage :
   "bl_number": "YMJAM450339005",
   "bl_number_filename": "CFA0903943",
   "bad_date": "2023-10-15",
+  "ste_cheque": "SOUFIANE NEGOCE",
+  "ste_facture": "SOUFIANE NEGOCE",
+  "ste_mismatch": false,
   "factures": [
     {{
       "montant": 10500.50,
@@ -272,6 +334,7 @@ Règles de formatage :
 """
         
         prompt_text = prompt_text.replace("[SHIPPING_LIST]", shipping_list_str)
+        prompt_text = prompt_text.replace("[STE_LIST]", ste_list_str)
         
         payload = {
             "model": "gpt-4o",

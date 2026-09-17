@@ -45,10 +45,16 @@ class ClaimsDHLDelay(models.Model):
     lot = fields.Char(related='bl_id.lot', string='LOT', readonly=True, store=True)
     invoice_number = fields.Char(related='bl_id.invoice_number', string='Invoice Number', readonly=True, store=True)
 
-    # Paramètres Conteneurs & Dates (liés au BL)
+    # Paramètres Conteneurs & Dates (liés au BL mais modifiables)
     shipping_id = fields.Many2one(related='bl_id.shipping_id', string='Compagnie Maritime', readonly=True, store=True)
-    container_type = fields.Selection(related='bl_id.container_type', string='Container Type', readonly=True, store=True)
-    container_size = fields.Selection(related='bl_id.container_size', string='Container Size', readonly=True, store=True)
+    container_type = fields.Selection([
+        ('generals', 'Dry'),
+        ('reefers', 'Reefers'),
+    ], string='Container Type', readonly=False, store=True)
+    container_size = fields.Selection([
+        ('20', "20'"),
+        ('40', "40'"),
+    ], string='Container Size', readonly=False, store=True)
     free_surestarie_days = fields.Integer(related='bl_id.free_time', string='Franchise Surestarie', readonly=True, store=True)
     date_sortie_port = fields.Date(related='bl_id.exit_date', string='Date Sortie Plein (Exit)', readonly=True, store=True)
     date_rentree_vide = fields.Date(related='bl_id.entry_date', string='Date Rentrée Vide (Entry)', readonly=True, store=True)
@@ -351,6 +357,10 @@ class ClaimsDHLDelay(models.Model):
             if rec.bl_id:
                 rec.eta_planned = rec.bl_id.eta
                 rec.eta_dhl = rec.bl_id.eta_dhl
+                if rec.bl_id.container_type:
+                    rec.container_type = rec.bl_id.container_type
+                if rec.bl_id.container_size:
+                    rec.container_size = rec.bl_id.container_size
                 if rec.amount_due_calculated:
                     rec.amount_due = rec.amount_due_calculated
 
@@ -370,8 +380,12 @@ class ClaimsDHLDelay(models.Model):
                 vals['eta_planned'] = bl.eta
             if bl.eta_dhl:
                 vals['eta_dhl'] = bl.eta_dhl
+            if bl.container_type:
+                vals['container_type'] = bl.container_type
+            if bl.container_size:
+                vals['container_size'] = bl.container_size
             
-            # Si les champs related en base ont besoin d'être rafraîchis
+            # Mise à jour des valeurs
             rec.write(vals)
             
             # Forcer le recalcul du montant dû calculé et de l'amount_due

@@ -105,7 +105,12 @@
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_fuel).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_driver).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_adblue).replace(',', ' ')"/></td>
-                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_mixed).replace(',', ' ')"/></td>
+                                                    <td class="amount-cell">
+                                                        <t t-esc="'{:,.2f}'.format(trip.charge_mixed).replace(',', ' ')"/>
+                                                        <t t-if="trip.note">
+                                                            <br/><span style="font-size: 8px; color: #666; font-weight: normal; white-space: normal; display: block; line-height: 1.1; margin-top: 2px;"><t t-esc="trip.note"/></span>
+                                                        </t>
+                                                    </td>
                                                     <td class="amount-cell" style="color: #C5221F;"><t t-esc="'{:,.2f}'.format(trip.total_amount).replace(',', ' ')"/></td>
                                                     <td class="amount-cell" style="color: #137333;"><t t-esc="'{:,.2f}'.format(trip.profit).replace(',', ' ')"/></td>
                                                 </tr>

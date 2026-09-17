@@ -79,17 +79,16 @@
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 14%;">Client</th>
-                                                <th style="width: 9%;">Matricule</th>
-                                                <th style="width: 8%;">Allée</th>
-                                                <th style="width: 8%;">Retour</th>
-                                                <th style="width: 9%;">Total Prix</th>
+                                                <th style="width: 9%;">Date</th>
+                                                <th style="width: 15%;">Client</th>
+                                                <th style="width: 10%;">Matricule</th>
+                                                <th style="width: 10%;">Allée</th>
                                                 <th style="width: 9%;">Gazoil</th>
                                                 <th style="width: 9%;">Dép.</th>
                                                 <th style="width: 9%;">AdBlue</th>
                                                 <th style="width: 9%;">Mixe</th>
-                                                <th style="width: 9%;">Charges</th>
-                                                <th style="width: 9%;">Bénéfice</th>
+                                                <th style="width: 10%;">Charges</th>
+                                                <th style="width: 10%;">Bénéfice</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -99,8 +98,6 @@
                                                     <td><t t-esc="trip.client_id.name"/></td>
                                                     <td><t t-esc="trip.vehicle_id.matricule if trip.vehicle_id else ''"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.going_price).replace(',', ' ')"/></td>
-                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.returning_price).replace(',', ' ')"/></td>
-                                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.total_price).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_fuel).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_driver).replace(',', ' ')"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.charge_adblue).replace(',', ' ')"/></td>

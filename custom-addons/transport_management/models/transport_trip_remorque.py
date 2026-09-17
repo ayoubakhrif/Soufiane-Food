@@ -25,6 +25,11 @@ class TransportTripRemorque(models.Model):
     driver = fields.Char(string='Chauffeur (Legacy)')
     client = fields.Char(string='Client (Legacy)')
     
+    @api.onchange('driver_remorque_id')
+    def _onchange_driver_remorque_id(self):
+        if self.driver_remorque_id and self.driver_remorque_id.vehicle_id:
+            self.vehicle_id = self.driver_remorque_id.vehicle_id
+    
     destination = fields.Selection([
         ('tanger', 'Tanger'),
         ('fenideq', 'Fenideq'),

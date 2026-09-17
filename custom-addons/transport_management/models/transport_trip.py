@@ -19,6 +19,11 @@ class TransportTrip(models.Model):
     driver = fields.Char(string='Chauffeur (Legacy)')
     client = fields.Char(string='Client (Legacy)')
     
+    @api.onchange('driver_id')
+    def _onchange_driver_id(self):
+        if self.driver_id and self.driver_id.vehicle_id:
+            self.vehicle_id = self.driver_id.vehicle_id
+    
     trip_type = fields.Selection([
         ('tanger_med', 'Tanger Med'),
         ('soufiane', 'Soufiane'),

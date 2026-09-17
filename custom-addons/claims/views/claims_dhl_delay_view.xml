@@ -90,9 +90,39 @@
                             <field name="eta_planned" readonly="state != 'initial'"/>
                             <field name="eta_dhl" readonly="state != 'initial'"/>
                             <field name="dhl_delay" decoration-danger="dhl_delay &gt; 0"/>
-                            <field name="amount_due" readonly="state in ('resolved', 'closed')"/>
                             <field name="can_see_evidence" invisible="1"/>
                             <field name="evidence_link" widget="url" invisible="not can_see_evidence"/> 
+                        </group>
+                    </group>
+                    <group string="Paramètres Conteneurs &amp; Barème Logistique">
+                        <group>
+                            <field name="shipping_id"/>
+                            <field name="container_type"/>
+                            <field name="container_size"/>
+                            <field name="container_count"/>
+                        </group>
+                        <group>
+                            <field name="free_surestarie_days"/>
+                            <field name="date_sortie_port"/>
+                            <field name="date_rentree_vide"/>
+                        </group>
+                    </group>
+                    <group string="Facturation &amp; Calcul Automatique">
+                        <group>
+                            <field name="amount_due_calculated" readonly="1" widget="monetary"/>
+                            <label for="amount_due" string="Montant Réclamation (Amount Due)"/>
+                            <div class="o_row">
+                                <field name="amount_due" readonly="state in ('resolved', 'closed')" class="oe_inline"/>
+                                <button name="action_apply_calculated_amount" 
+                                        string="Appliquer Montant Calculé" 
+                                        type="object" 
+                                        class="btn-link" 
+                                        icon="fa-refresh"
+                                        invisible="state in ('resolved', 'closed') or amount_due == amount_due_calculated"/>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="calculation_details" widget="text" readonly="1" nolabel="1"/>
                         </group>
                     </group>
                     <group string="Dates Clés" col="2">

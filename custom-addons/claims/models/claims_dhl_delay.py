@@ -45,6 +45,33 @@ class ClaimsDHLDelay(models.Model):
     lot = fields.Char(related='bl_id.lot', string='LOT', readonly=True, store=True)
     invoice_number = fields.Char(related='bl_id.invoice_number', string='Invoice Number', readonly=True, store=True)
 
+    # Paramètres Conteneurs & Dates (liés au BL)
+    shipping_id = fields.Many2one(related='bl_id.shipping_id', string='Compagnie Maritime', readonly=True, store=True)
+    container_type = fields.Selection(related='bl_id.container_type', string='Container Type', readonly=True, store=True)
+    container_size = fields.Selection(related='bl_id.container_size', string='Container Size', readonly=True, store=True)
+    free_surestarie_days = fields.Integer(related='bl_id.free_time', string='Franchise Surestarie', readonly=True, store=True)
+    date_sortie_port = fields.Date(related='bl_id.exit_date', string='Date Sortie Plein (Exit)', readonly=True, store=True)
+    date_rentree_vide = fields.Date(related='bl_id.entry_date', string='Date Rentrée Vide (Entry)', readonly=True, store=True)
+
+    container_count = fields.Integer(
+        string='Nombre de Conteneurs',
+        compute='_compute_container_count',
+        store=True,
+        readonly=True
+    )
+
+    amount_due_calculated = fields.Float(
+        string='Montant Calculé',
+        compute='_compute_amount_due_calculated',
+        store=True,
+        help="Montant calculé automatiquement sur la tranche la plus chère."
+    )
+    calculation_details = fields.Text(
+        string='Détail du calcul',
+        compute='_compute_amount_due_calculated',
+        store=True
+    )
+
     # ==========================
     # 2. User-entered Fields
     # ==========================
@@ -120,6 +147,14 @@ class ClaimsDHLDelay(models.Model):
     # 5. Logic
     # ==========================
 
+    @api.depends('bl_id', 'bl_id.container_ids')
+    def _compute_container_count(self):
+        for rec in self:
+            if rec.bl_id and rec.bl_id.container_ids:
+                rec.container_count = len(rec.bl_id.container_ids)
+            else:
+                rec.container_count = 1
+
     @api.depends('eta_planned', 'eta_dhl')
     def _compute_dhl_delay(self):
         for rec in self:
@@ -128,6 +163,167 @@ class ClaimsDHLDelay(models.Model):
                 rec.dhl_delay = delta.days + 1
             else:
                 rec.dhl_delay = 0
+
+    @api.depends(
+        'dhl_delay', 'eta_planned', 'date_sortie_port', 'date_rentree_vide',
+        'shipping_id', 'container_type', 'container_size', 'free_surestarie_days',
+        'container_count'
+    )
+    def _compute_amount_due_calculated(self):
+        for rec in self:
+            rec.amount_due_calculated = 0.0
+            rec.calculation_details = ""
+
+            if not rec.dhl_delay or rec.dhl_delay <= 0:
+                rec.calculation_details = "Aucun retard DHL détecté (Retard DHL <= 0 jours)."
+                continue
+
+            if not rec.shipping_id or not rec.container_type or not rec.container_size:
+                rec.calculation_details = "Informations conteneur ou compagnie maritime incomplètes sur le BL."
+                continue
+
+            config = self.env['logistique.surest_mag.config'].search([
+                ('shipping_id', '=', rec.shipping_id.id),
+                ('container_type', '=', rec.container_type),
+                ('container_size', '=', rec.container_size),
+            ], limit=1)
+
+            if not config:
+                type_label = dict(rec._fields['container_type'].selection).get(rec.container_type, rec.container_type)
+                rec.calculation_details = (
+                    f"Aucun barème trouvé pour la compagnie {rec.shipping_id.name}, "
+                    f"type {type_label}, taille {rec.container_size}'."
+                )
+                continue
+
+            # Construction des tranches/phases tarifaires
+            phases = config.phase_ids.sorted(key=lambda p: p.sequence)
+            if not phases:
+                rec.calculation_details = f"Aucune tranche tarifaire configurée pour {config.name_get()[0][1]}."
+                continue
+
+            # Jours totaux de Magasinage et Surestarie
+            days_magasinage = 0
+            if rec.eta_planned and rec.date_sortie_port and rec.date_sortie_port >= rec.eta_planned:
+                days_magasinage = (rec.date_sortie_port - rec.eta_planned).days + 1
+
+            days_surestarie = 0
+            if rec.eta_planned and rec.date_rentree_vide and rec.date_rentree_vide >= rec.eta_planned:
+                days_surestarie = (rec.date_rentree_vide - rec.eta_planned).days + 1
+
+            # Retard fournisseur à imputer
+            delay = rec.dhl_delay
+            free_days = rec.free_surestarie_days or 0
+            cnt = rec.container_count or 1
+
+            # Découpage des tranches : construire la liste des plages [start_day, end_day, sur_rate, mag_rate, phase_name]
+            tariff_ranges = []
+            curr_day = 1
+            for phase in phases:
+                p_start = curr_day
+                p_end = 999999 if phase.is_beyond else (p_start + phase.days - 1)
+                p_name = f"Beyond (Taux: {phase.surestarie_rate} / {phase.magasinage_rate})" if phase.is_beyond else f"Phase {phase.sequence} ({phase.days}j, Taux: {phase.surestarie_rate} / {phase.magasinage_rate})"
+                tariff_ranges.append({
+                    'start': p_start,
+                    'end': p_end,
+                    'surestarie_rate': phase.surestarie_rate,
+                    'magasinage_rate': phase.magasinage_rate,
+                    'name': p_name
+                })
+                if phase.is_beyond:
+                    break
+                curr_day += phase.days
+
+            # 1. Calcul Surestarie sur les delay derniers jours facturés
+            # Les jours facturés de surestarie vont de (free_days + 1) à days_surestarie
+            sur_start_billed = free_days + 1
+            sur_end_billed = days_surestarie
+            total_sur_ht = 0.0
+            sur_details = []
+
+            if sur_end_billed >= sur_start_billed:
+                # Les delay derniers jours facturés :
+                imputed_sur_start = max(sur_start_billed, sur_end_billed - delay + 1)
+                imputed_sur_end = sur_end_billed
+                imputed_sur_days = imputed_sur_end - imputed_sur_start + 1
+
+                for tr in tariff_ranges:
+                    overlap_start = max(tr['start'], imputed_sur_start)
+                    overlap_end = min(tr['end'], imputed_sur_end)
+                    if overlap_end >= overlap_start:
+                        nb_days = overlap_end - overlap_start + 1
+                        sub = nb_days * tr['surestarie_rate'] * cnt
+                        total_sur_ht += sub
+                        sur_details.append(
+                            f"• {nb_days}j (jours {overlap_start} à {overlap_end}) à {tr['surestarie_rate']} MAD/j = {sub:.2f} MAD"
+                        )
+            else:
+                sur_details.append("• 0 jour facturé (délai inclus dans la franchise de surestarie ou date rentrée vide non saisie).")
+
+            # 2. Calcul Magasinage sur les delay derniers jours de magasinage
+            total_mag_ht = 0.0
+            mag_details = []
+
+            if days_magasinage > 0:
+                imputed_mag_start = max(1, days_magasinage - delay + 1)
+                imputed_mag_end = days_magasinage
+                imputed_mag_days = imputed_mag_end - imputed_mag_start + 1
+
+                for tr in tariff_ranges:
+                    overlap_start = max(tr['start'], imputed_mag_start)
+                    overlap_end = min(tr['end'], imputed_mag_end)
+                    if overlap_end >= overlap_start:
+                        nb_days = overlap_end - overlap_start + 1
+                        sub = nb_days * tr['magasinage_rate'] * cnt
+                        total_mag_ht += sub
+                        mag_details.append(
+                            f"• {nb_days}j (jours {overlap_start} à {overlap_end}) à {tr['magasinage_rate']} MAD/j = {sub:.2f} MAD"
+                        )
+            else:
+                mag_details.append("• Date de sortie non renseignée ou <= ETA.")
+
+            total_calculated = total_sur_ht + total_mag_ht
+            rec.amount_due_calculated = total_calculated
+
+            # Génération du récapitulatif textuel
+            lines = [
+                f"Retard DHL fournisseur : {delay} jour(s) | Conteneurs : {cnt} ({dict(rec._fields['container_type'].selection).get(rec.container_type, '')} {rec.container_size}')",
+                f"Compagnie : {rec.shipping_id.name} | Franchise surestarie : {free_days} jour(s)",
+                "",
+                f"--- SURESTARIE (Total séjour : {days_surestarie}j) ---",
+                f"Tranche(s) imputée(s) : {sur_details[0] if len(sur_details) == 1 else ''}"
+            ]
+            if len(sur_details) > 1:
+                lines.extend(sur_details)
+            lines.append(f"Sous-total Surestarie : {total_sur_ht:.2f} MAD")
+            lines.append("")
+            lines.append(f"--- MAGASINAGE (Total séjour port : {days_magasinage}j) ---")
+            lines.extend(mag_details)
+            lines.append(f"Sous-total Magasinage : {total_mag_ht:.2f} MAD")
+            lines.append("")
+            lines.append(f"TOTAL CALCULÉ (Tranches les plus chères) : {total_calculated:.2f} MAD")
+
+            rec.calculation_details = "\n".join(lines)
+
+    @api.onchange('amount_due_calculated')
+    def _onchange_amount_due_calculated(self):
+        for rec in self:
+            if rec.amount_due_calculated and (not rec.amount_due or rec.amount_due == 0.0):
+                rec.amount_due = rec.amount_due_calculated
+
+    @api.onchange('bl_id')
+    def _onchange_bl_id(self):
+        for rec in self:
+            if rec.bl_id:
+                rec.eta_planned = rec.bl_id.eta
+                rec.eta_dhl = rec.bl_id.eta_dhl
+                if rec.amount_due_calculated:
+                    rec.amount_due = rec.amount_due_calculated
+
+    def action_apply_calculated_amount(self):
+        """Action manuelle permettant de réinitialiser le montant dû avec le montant calculé."""
+        for rec in self:
+            rec.amount_due = rec.amount_due_calculated
 
     # ==========================
     # 6. Workflow Actions

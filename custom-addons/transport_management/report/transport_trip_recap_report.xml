@@ -79,17 +79,18 @@
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 14%;">Client</th>
-                                                <th style="width: 9%;">Matricule</th>
+                                                <th style="width: 9%;">Date</th>
+                                                <th style="width: 12%;">Client</th>
+                                                <th style="width: 8%;">Matricule</th>
                                                 <th style="width: 8%;">Allée</th>
                                                 <th style="width: 8%;">Retour</th>
-                                                <th style="width: 9%;">Total Prix</th>
-                                                <th style="width: 9%;">Gazoil</th>
-                                                <th style="width: 9%;">Dép.</th>
-                                                <th style="width: 9%;">AdBlue</th>
-                                                <th style="width: 9%;">Mixe</th>
+                                                <th style="width: 8%;">Total Prix</th>
+                                                <th style="width: 7%;">Gazoil</th>
+                                                <th style="width: 7%;">Dép.</th>
+                                                <th style="width: 7%;">AdBlue</th>
+                                                <th style="width: 7%;">Mixe</th>
                                                 <th style="width: 9%;">Charges</th>
-                                                <th style="width: 9%;">Bénéfice</th>
+                                                <th style="width: 10%;">Bénéfice</th>
                                             </tr>
                                         </thead>
                                         <tbody>

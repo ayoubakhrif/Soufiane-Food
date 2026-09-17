@@ -36,6 +36,8 @@
             <form string="DHL Delay Claim">
                 <header>
                     <button name="action_print_report" string="Generate Claim PDF" type="object" class="oe_highlight" groups="claims.group_claims_user"/>
+                    <button name="action_sync_logistics_data" string="Actualiser depuis BL" type="object" icon="fa-refresh"
+                            help="Synchroniser les dates et paramètres depuis le BL logistique et recalculer le montant"/>
                     <button name="action_receive" string="Reçu" type="object"
                             invisible="state != 'initial'"/>
                     <button name="action_send_supplier" string="Envoyé au Fournisseur" type="object"
@@ -175,6 +177,18 @@
                 <field name="comment_responsible" optional="hide"/>
                 <field name="state" widget="badge" decoration-info="state in ('initial', 'received')" decoration-warning="state == 'waiting'" decoration-success="state == 'resolved'" decoration-danger="state == 'refused'" optional="show"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- ACTION SERVEUR DANS LE MENU ACTIONS (LISTE ET FORMULAIRE) -->
+    <record id="action_server_sync_claims_dhl_delay" model="ir.actions.server">
+        <field name="name">Actualiser depuis Logistique</field>
+        <field name="model_id" ref="claims.model_claims_dhl_delay"/>
+        <field name="binding_model_id" ref="claims.model_claims_dhl_delay"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">
+            records.action_sync_logistics_data()
         </field>
     </record>
 

@@ -325,6 +325,28 @@ class ClaimsDHLDelay(models.Model):
         for rec in self:
             rec.amount_due = rec.amount_due_calculated
 
+    def action_sync_logistics_data(self):
+        """Synchronise manuellement les données depuis le BL (logistique.entry) et recalcule le montant dû."""
+        for rec in self:
+            if not rec.bl_id:
+                continue
+            bl = rec.bl_id
+            vals = {}
+            if bl.eta:
+                vals['eta_planned'] = bl.eta
+            if bl.eta_dhl:
+                vals['eta_dhl'] = bl.eta_dhl
+            
+            # Si les champs related en base ont besoin d'être rafraîchis
+            rec.write(vals)
+            
+            # Forcer le recalcul du montant dû calculé et de l'amount_due
+            rec._compute_container_count()
+            rec._compute_dhl_delay()
+            rec._compute_amount_due_calculated()
+            if rec.amount_due_calculated:
+                rec.amount_due = rec.amount_due_calculated
+
     # ==========================
     # 6. Workflow Actions
     # ==========================

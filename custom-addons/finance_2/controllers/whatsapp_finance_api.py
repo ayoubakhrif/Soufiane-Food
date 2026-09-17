@@ -252,6 +252,24 @@ class WhatsAppFinanceController(http.Controller):
         talon_state_filter = None
         state_label_fr = "Tous"
         
+        if msg_clean == "divers":
+            divers_benifs = request.env['finance.benif'].sudo().search([('is_divers', '=', True)])
+            if not divers_benifs:
+                return {'status': 'not_found', 'message': "Aucun bénéficiaire de type Divers trouvé."}
+            
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action.with_context(encours_only=False)._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=divers_benifs.ids)
+            import base64
+            from odoo import fields
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            
+            return {
+                'status': 'success',
+                'response': "Voici la fiche récapitulative de tous les bénéficiaires Divers.",
+                'file_name': f"Rapport_Divers_{fields.Date.today()}.pdf",
+                'pdf_base64': pdf_base64
+            }
+
         if msg_clean in ["talon", "talons"]:
             is_global_talon = True
         elif msg_clean in ["talon coffre", "talons coffre", "talon en coffre", "talons en coffre"]:

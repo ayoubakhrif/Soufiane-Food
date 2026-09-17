@@ -21,6 +21,7 @@ class Finance2Benif(models.Model):
     _name = 'finance2.benif'
     _description = 'Bénéficiaire'
 
+    is_divers = fields.Boolean(string='Divers', default=False)
     name = fields.Char(string='Nom du bénéficiaire', required=True)
     active = fields.Boolean(default=True)
     cheque_ids = fields.One2many('finance2.cheque', 'benif_id', string='Chèques')

@@ -11,6 +11,7 @@ class Cal3iyaClient(models.Model):
     _name = 'finance.benif'
     _description = 'Bénificiaires'
 
+    is_divers = fields.Boolean(string='Divers', default=False)
     name = fields.Char(string='Bénificiaire', required=True)
     days = fields.Integer(string='Jours de plus')
     type = fields.Selection([

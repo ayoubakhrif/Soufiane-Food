@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_transport_vehicle_tree" model="ir.ui.view">
+        <field name="name">transport.vehicle.tree</field>
+        <field name="model">transport.vehicle</field>
+        <field name="arch" type="xml">
+            <tree string="Véhicules" editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_transport_vehicle" model="ir.actions.act_window">
+        <field name="name">Véhicules</field>
+        <field name="res_model">transport.vehicle</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+    <menuitem id="menu_transport_vehicle"
+            name="Véhicules"
+            parent="menu_transport_data"
+            action="action_transport_vehicle"
+            sequence="40"/>
+</odoo>

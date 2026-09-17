@@ -1,4 +1,6 @@
-from odoo import models, api, _
+import os
+
+content = """from odoo import models, api, _
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -258,3 +260,6 @@ class TripRemorqueRecapReport(models.AbstractModel):
             'global_days_list': global_weeks_list,
             'report_date': report_date
         }
+"""
+with open('c:/odoo-repos/Soufiane-Food/custom-addons/transport_management/report/transport_trip_recap_parser.py', 'w', encoding='utf-8') as f:
+    f.write(content)

@@ -12,6 +12,8 @@ class TransportTrip(models.Model):
     date = fields.Date(string='Date de voyage', required=True, default=fields.Date.context_today)
     driver_id = fields.Many2one('transport.driver', string='Chauffeur', required=True, tracking=True)
     client_id = fields.Many2one('transport.client', string='Client', required=True, tracking=True)
+    ste_id = fields.Many2one('transport.ste', string='Société', tracking=True)
+    vehicle_id = fields.Many2one('transport.vehicle', string='Matricule', tracking=True)
     
     # Deprecated fields (kept for data safety, but hidden in views)
     driver = fields.Char(string='Chauffeur (Legacy)')

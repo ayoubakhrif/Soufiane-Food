@@ -18,6 +18,8 @@ class TransportTripRemorque(models.Model):
         domain=[('remorque', '=', True)]
     )
     client_id = fields.Many2one('transport.client', string='Client', required=True, tracking=True)
+    ste_id = fields.Many2one('transport.ste', string='Société', tracking=True)
+    vehicle_id = fields.Many2one('transport.vehicle', string='Matricule', tracking=True)
 
     # Deprecated fields (kept for data safety, but hidden in views)
     driver = fields.Char(string='Chauffeur (Legacy)')

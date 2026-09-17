@@ -39,6 +39,8 @@
                         <group>
                             <field name="driver_remorque_id"/>
                             <field name="client_id"/>
+                            <field name="ste_id"/>
+                            <field name="vehicle_id"/>
                             <label for="going_price"/>
                             <div class="o_row">
                                 <field name="going_price"/>
@@ -114,6 +116,8 @@
                 <field name="date"/>
                 <field name="driver_remorque_id"/>
                 <field name="client_id"/>
+                <field name="ste_id"/>
+                <field name="vehicle_id"/>
                 <field name="destination"/>
                 <field name="going_price"/>
                 <field name="returning_price"/>
@@ -138,6 +142,8 @@
             <search string="Search Transport Trips Remorque">
                 <field name="driver_remorque_id"/>
                 <field name="client_id"/>
+                <field name="ste_id"/>
+                <field name="vehicle_id"/>
                 <field name="destination"/>
                 <field name="date"/>
                 

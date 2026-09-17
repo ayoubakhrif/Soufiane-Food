@@ -25,6 +25,8 @@
         'report/transport_trip_recap_report.xml',
         'report/transport_trip_remorque_recap_report.xml',
         'views/transport_destination_views.xml',
+        'views/transport_ste_views.xml',
+        'views/transport_vehicle_views.xml',
         'views/transport_trip_advanced_views.xml',
     ],
     'installable': True,

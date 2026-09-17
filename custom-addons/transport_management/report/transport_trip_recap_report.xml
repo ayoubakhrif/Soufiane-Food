@@ -95,6 +95,7 @@
                                         <tbody>
                                             <t t-foreach="day_data['trips']" t-as="trip">
                                                 <tr>
+                                                    <td><t t-esc="trip.date.strftime('%d/%m') if trip.date else ''"/></td>
                                                     <td><t t-esc="trip.client_id.name"/></td>
                                                     <td><t t-esc="trip.vehicle_id.matricule if trip.vehicle_id else ''"/></td>
                                                     <td class="amount-cell"><t t-esc="'{:,.2f}'.format(trip.going_price).replace(',', ' ')"/></td>

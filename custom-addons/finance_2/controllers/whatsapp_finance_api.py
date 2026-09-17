@@ -257,40 +257,102 @@ class WhatsAppFinanceController(http.Controller):
             if not divers_v2:
                 return {'status': 'not_found', 'message': "Aucun bénéficiaire de type Divers trouvé dans Finance V2."}
             
+            # 1. Render QWeb PDF report
             report_action = request.env['ir.actions.report'].sudo()
             pdf_content, _ = report_action._render_qweb_pdf('finance_2.action_report_finance2_divers_summary', res_ids=divers_v2.ids)
             
             import base64
+            import io
+            import xlsxwriter
             from odoo import fields
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
             
-            return {
-                'status': 'success',
-                'response': "Voici le tableau récapitulatif DIVERS (Finance V2).",
-                'file_name': f"DIVERS_{fields.Date.today()}.pdf",
-                'pdf_base64': pdf_base64
-            }
+            # 2. Render Excel spreadsheet
+            output = io.BytesIO()
+            workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+            sheet = workbook.add_worksheet('DIVERS')
             
-            # Map to V1 to leverage the global report that aggregates V1 + V2 cheques
-            v1_ids = []
-            for b in divers_v2:
-                v1_b = request.env['finance.benif'].sudo().search([('name', '=', b.name)], limit=1)
-                if not v1_b:
-                    v1_b = request.env['finance.benif'].sudo().create({'name': b.name, 'is_divers': True})
-                v1_ids.append(v1_b.id)
+            # Formats with same colors as before
+            fmt_header = workbook.add_format({'bold': True, 'bg_color': '#FCE9DA', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+            fmt_title = workbook.add_format({'bold': True, 'bg_color': '#FCE9DA', 'border': 1, 'align': 'center', 'valign': 'vcenter', 'font_size': 14})
+            fmt_ste = workbook.add_format({'bold': True, 'bg_color': '#6DA9DC', 'border': 1, 'valign': 'vcenter'})
+            fmt_amount = workbook.add_format({'bold': True, 'bg_color': '#FF9900', 'border': 1, 'align': 'right', 'valign': 'vcenter', 'num_format': '#,##0.00'})
+            fmt_total = workbook.add_format({'bold': True, 'bg_color': '#00FFFF', 'border': 1, 'align': 'right', 'valign': 'vcenter', 'num_format': '#,##0.00'})
+            fmt_gray = workbook.add_format({'bg_color': '#F2F2F2', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+            fmt_benif = workbook.add_format({'bold': True, 'border': 1, 'valign': 'vcenter'})
+            
+            # Title block
+            today_str = fields.Date.today().strftime('%d/%m/%Y')
+            sheet.merge_range('A1:B1', today_str, fmt_title)
+            sheet.merge_range('C1:H1', 'D I V E R S', fmt_title)
+            
+            # Headers
+            headers = ["Bénéficiaire", "Ste", "Nb. T", "MT Total", "Nb. E", "MT Encaissé", "Nb. NE", "MT Non Encaissé"]
+            for col_idx, h in enumerate(headers):
+                sheet.write(2, col_idx, h, fmt_header)
                 
-            report_action = request.env['ir.actions.report'].sudo()
-            pdf_content, _ = report_action.with_context(encours_only=False)._render_qweb_pdf('finance.action_report_finance_benif_summary', res_ids=v1_ids)
+            row_idx = 3
+            for benif in divers_v2:
+                breakdown = benif.get_divers_breakdown()
+                if breakdown:
+                    start_row = row_idx
+                    for line in breakdown:
+                        sheet.write(row_idx, 1, line.get('ste', '-'), fmt_ste)
+                        sheet.write(row_idx, 2, line.get('nb_t', 0), fmt_gray)
+                        sheet.write(row_idx, 3, line.get('mt_t', 0.0), fmt_amount)
+                        sheet.write(row_idx, 4, line.get('nb_e', 0), fmt_gray)
+                        sheet.write(row_idx, 5, line.get('mt_e', 0.0), fmt_amount)
+                        sheet.write(row_idx, 6, line.get('nb_ne', 0), fmt_gray)
+                        sheet.write(row_idx, 7, line.get('mt_ne', 0.0), fmt_total)
+                        row_idx += 1
+                    
+                    if len(breakdown) > 1:
+                        sheet.merge_range(start_row, 0, row_idx - 1, 0, benif.name, fmt_benif)
+                    else:
+                        sheet.write(start_row, 0, benif.name, fmt_benif)
+                else:
+                    sheet.write(row_idx, 0, benif.name, fmt_benif)
+                    sheet.write(row_idx, 1, '-', fmt_ste)
+                    sheet.write(row_idx, 2, 0, fmt_gray)
+                    sheet.write(row_idx, 3, 0.0, fmt_amount)
+                    sheet.write(row_idx, 4, 0, fmt_gray)
+                    sheet.write(row_idx, 5, 0.0, fmt_amount)
+                    sheet.write(row_idx, 6, 0, fmt_gray)
+                    sheet.write(row_idx, 7, 0.0, fmt_total)
+                    row_idx += 1
+                    
+            sheet.set_column('A:A', 25)
+            sheet.set_column('B:B', 20)
+            sheet.set_column('C:C', 10)
+            sheet.set_column('D:D', 16)
+            sheet.set_column('E:E', 10)
+            sheet.set_column('F:F', 16)
+            sheet.set_column('G:G', 10)
+            sheet.set_column('H:H', 18)
             
-            import base64
-            from odoo import fields
-            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            workbook.close()
+            output.seek(0)
+            xlsx_base64 = base64.b64encode(output.read()).decode('utf-8')
+            output.close()
             
+            today_file_str = fields.Date.today().strftime('%d_%m_%Y')
             return {
                 'status': 'success',
-                'response': "Voici la fiche récapitulative de tous les bénéficiaires Divers (Lecture depuis V2).",
-                'file_name': f"Rapport_Divers_{fields.Date.today()}.pdf",
-                'pdf_base64': pdf_base64
+                'response': "Voici le récapitulatif DIVERS (Finance V2) en versions PDF et Excel.",
+                'file_name': f"DIVERS_{today_file_str}.pdf",
+                'pdf_base64': pdf_base64,
+                'files': [
+                    {
+                        'pdf_base64': pdf_base64,
+                        'file_name': f"DIVERS_{today_file_str}.pdf",
+                        'caption': "DIVERS - Version PDF 📄"
+                    },
+                    {
+                        'pdf_base64': xlsx_base64,
+                        'file_name': f"DIVERS_{today_file_str}.xlsx",
+                        'caption': "DIVERS - Version Excel 📊"
+                    }
+                ]
             }
 
         if msg_clean in ["talon", "talons"]:

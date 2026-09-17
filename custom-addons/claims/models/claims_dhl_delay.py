@@ -189,7 +189,9 @@ class ClaimsDHLDelay(models.Model):
             ], limit=1)
 
             if not config:
-                type_label = dict(rec._fields['container_type'].selection).get(rec.container_type, rec.container_type)
+                sel = rec._fields['container_type'].selection
+                sel_list = sel(rec) if callable(sel) else sel
+                type_label = dict(sel_list).get(rec.container_type, rec.container_type)
                 rec.calculation_details = (
                     f"Aucun barème trouvé pour la compagnie {rec.shipping_id.name}, "
                     f"type {type_label}, taille {rec.container_size}'."
@@ -285,9 +287,14 @@ class ClaimsDHLDelay(models.Model):
             total_calculated = total_sur_ht + total_mag_ht
             rec.amount_due_calculated = total_calculated
 
+            # Libellé sécurisé pour container_type
+            sel = rec._fields['container_type'].selection
+            sel_list = sel(rec) if callable(sel) else sel
+            type_label = dict(sel_list).get(rec.container_type, rec.container_type) or ''
+
             # Génération du récapitulatif textuel
             lines = [
-                f"Retard DHL fournisseur : {delay} jour(s) | Conteneurs : {cnt} ({dict(rec._fields['container_type'].selection).get(rec.container_type, '')} {rec.container_size}')",
+                f"Retard DHL fournisseur : {delay} jour(s) | Conteneurs : {cnt} ({type_label} {rec.container_size}')",
                 f"Compagnie : {rec.shipping_id.name} | Franchise surestarie : {free_days} jour(s)",
                 "",
                 f"--- SURESTARIE (Total séjour : {days_surestarie}j) ---",

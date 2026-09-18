@@ -10,7 +10,7 @@
     """,
     'category': 'Operations',
     'author': 'Ayoub Akhrif',
-    'depends': ['base', 'logistique', 'finance_2'],
+    'depends': ['base', 'logistique', 'finance_2', 'achat'],
     'data': [
         'security/security.xml',
         'data/server_actions.xml',

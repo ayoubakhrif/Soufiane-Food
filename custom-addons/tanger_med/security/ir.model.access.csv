@@ -6,6 +6,8 @@ access_logistique_dossier_tanger_manager,access.logistique.dossier.tanger.manage
 access_logistique_ste_tanger_user,access.logistique.ste.tanger.user,logistique.model_logistique_ste,group_tanger_med_user,1,0,0,0
 access_logistique_supplier_tanger_user,access.logistique.supplier.tanger.user,logistique.model_logistique_supplier,group_tanger_med_user,1,0,0,0
 access_logistique_article_tanger_user,access.logistique.article.tanger.user,logistique.model_logistique_article,group_tanger_med_user,1,0,0,0
+access_achat_article_tanger_user,access.achat.article.tanger.user,achat.model_achat_article,group_tanger_med_user,1,0,0,0
+access_achat_article_tanger_manager,access.achat.article.tanger.manager,achat.model_achat_article,group_tanger_med_manager,1,1,0,0
 access_logistique_container_tanger_user,access.logistique.container.tanger.user,logistique.model_logistique_container,group_tanger_med_user,1,0,0,0
 access_logistique_shipping_tanger_user,access.logistique.shipping.tanger.user,logistique.model_logistique_shipping,group_tanger_med_user,1,0,0,0
 access_logistique_consolidator_tanger_user,access.logistique.consolidator.tanger.user,logistique.model_logistique_consolidator,group_tanger_med_user,1,0,0,0

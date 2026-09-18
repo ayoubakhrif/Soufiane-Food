@@ -66,9 +66,9 @@ class LogisticsEntry(models.Model):
         return result
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
         args = args or []
         domain = []
         if name:
             domain = ['|', ('dum', operator, name), ('bl_number', operator, name)]
-        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid, order=order)

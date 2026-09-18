@@ -47,13 +47,13 @@ venv310/
 .env.bak/
 .env.dev/
 .env.prod/
-bin/
-build/
-dist/
-include/
-lib/
-man/
-share/
+/bin/
+/build/
+/dist/
+/include/
+/lib/
+/man/
+/share/
 
 # --- Reports / Generated Files ---
 *.pdf

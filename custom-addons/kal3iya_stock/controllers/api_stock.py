@@ -38,6 +38,16 @@ class Kal3iyaStockApiController(http.Controller):
             pass
         return request.params or {}
 
+    def _sanitize_date(self, date_val):
+        if date_val and date_val != '--':
+            try:
+                date_str = str(date_val).strip()
+                if len(date_str) == 10 and date_str[4] == '-' and date_str[7] == '-':
+                    return date_str
+            except Exception:
+                pass
+        return fields.Date.context_today(request.env.user)
+
     @http.route('/api/kal3iya/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_login(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
@@ -127,7 +137,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'calibre': data.get('calibre') or '',
                 'qty': float(data.get('qty', 0)),
                 'weight': float(data.get('weight', 0)),
-                'date': data.get('date'),
+                'date': self._sanitize_date(data.get('date')),
                 'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
             }
             if data.get('photo_packaging'):
@@ -164,7 +174,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'calibre': data.get('calibre') or '',
                 'weight': float(data.get('weight', 0)),
                 'qty': float(data.get('qty', 0)),
-                'date': data.get('date'),
+                'date': self._sanitize_date(data.get('date')),
                 'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
                 'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
             }
@@ -199,7 +209,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'calibre': data.get('calibre') or '',
                 'weight': float(data.get('weight', 0)),
                 'qty': float(data.get('qty', 0)),
-                'date': data.get('date'),
+                'date': self._sanitize_date(data.get('date')),
                 'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
                 'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
             }

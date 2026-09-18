@@ -61,6 +61,16 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Documents" name="documents">
+                            <field name="logistique_doc_ids" readonly="1">
+                                <tree>
+                                    <field name="document_type"/>
+                                    <field name="file" widget="binary" filename="file_name"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                    <field name="notes" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

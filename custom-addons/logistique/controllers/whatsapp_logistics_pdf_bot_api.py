@@ -155,14 +155,14 @@ class WhatsAppLogisticsPdfController(http.Controller):
         else:
             chq_msg = f"🧾 *Chèque N°* : {chq_number}"
             
-            # Check if any divisions for this cheque already exist in the dossier (optional protection)
+            # Check if any divisions for this cheque already exist in the dossier
             existing_cheques = request.env['logistique.dossier.cheque'].sudo().search([
                 ('dossier_id', '=', dossier.id),
                 ('cheque_serie', '=', chq_number)
             ])
-            
-            if existing_cheques:
-                factures_msgs.append("ℹ️ _(Des lignes existent déjà pour ce chèque dans ce dossier, de nouvelles ont été ajoutées)_")
+
+            nb_added = 0
+            nb_already_exist = 0
 
             for idx, inv_data in enumerate(factures):
                 inv_amount = float(inv_data.get('montant', 0))
@@ -177,7 +177,19 @@ class WhatsAppLogisticsPdfController(http.Controller):
                 if inv_type not in ['thc', 'magasinage', 'fret', 'surestarie', 'assurance', 'autres']:
                     inv_type = 'autres'
 
-                # Prepare values
+                benif_display = benif_record.name if benif_record else inv_benif_name
+
+                # Check if this exact line already exists for this cheque and dossier
+                matching_line = existing_cheques.filtered(
+                    lambda c: c.type == inv_type and abs(c.amount - inv_amount) < 0.01
+                )
+
+                if matching_line:
+                    nb_already_exist += 1
+                    factures_msgs.append(f"  • *{inv_amount:,.2f} DH* ({inv_type.capitalize()}) - {benif_display} _(déjà enregistré)_")
+                    continue
+
+                # Prepare values for new line
                 vals = {
                     'cheque_serie': chq_number,
                     'amount': inv_amount,
@@ -193,36 +205,63 @@ class WhatsAppLogisticsPdfController(http.Controller):
 
                 try:
                     request.env['logistique.dossier.cheque'].sudo().with_context(from_bot=True).create(vals)
-                    benif_display = benif_record.name if benif_record else inv_benif_name
                     factures_msgs.append(f"  • *{inv_amount:,.2f} DH* ({vals['type'].capitalize()}) - {benif_display}")
+                    nb_added += 1
                 except Exception as e:
                     pass  # Ignorer l'affichage de l'erreur sur WhatsApp selon la demande
 
+            if nb_added == 0 and nb_already_exist > 0:
+                factures_msgs.insert(0, "ℹ️ _(Toutes les lignes de ce chèque sont déjà enregistrées dans ce dossier, aucune nouvelle ligne n'a été ajoutée)_")
+            elif nb_already_exist > 0:
+                factures_msgs.insert(0, "ℹ️ _(Certaines lignes existaient déjà et n'ont pas été dupliquées)_")
+
         # 7. Add PDF to documents as Facture Compagnie
         doc_msg = ""
-        if pdf_base64 and 'logistique.entry.document' in request.env:
+        if pdf_base64:
+            doc_filename = file_name if file_name and file_name != 'document.pdf' else f"Facture_Compagnie_{dossier.name}_{chq_number or ''}.pdf"
+
+            # 7a. Save in logistique.doc (displayed directly on Entry and Dossier Documents tab)
             try:
-                DocModel = request.env['logistique.entry.document'].sudo()
-                doc_filename = file_name if file_name and file_name != 'document.pdf' else f"Facture_Compagnie_{dossier.name}_{chq_number or ''}.pdf"
-                
-                existing_doc = DocModel.search([
+                LogDocModel = request.env['logistique.doc'].sudo()
+                existing_log_doc = LogDocModel.search([
                     ('entry_id', '=', entry.id),
                     ('document_type', '=', 'company_invoice'),
                     ('file_name', '=', doc_filename)
                 ], limit=1)
-                
-                if not existing_doc:
-                    DocModel.create({
+
+                if not existing_log_doc:
+                    LogDocModel.create({
                         'entry_id': entry.id,
                         'document_type': 'company_invoice',
                         'file': pdf_base64,
-                        'file_name': doc_filename
+                        'file_name': doc_filename,
+                        'notes': f"Facture compagnie reçue via WhatsApp (Chèque {chq_number or 'N/A'})"
                     })
                     doc_msg = "📎 *Document* : Ajouté aux Factures companies"
                 else:
                     doc_msg = "📎 *Document* : Factures companies (déjà présent)"
             except Exception as e:
-                _logger.error(f"Erreur enregistrement document facture compagnie pour {dossier.name}: {str(e)}")
+                _logger.error(f"Erreur enregistrement logistique.doc facture compagnie pour {dossier.name}: {str(e)}")
+
+            # 7b. Save in logistique.entry.document if model exists (for achat module / doc search backward compatibility)
+            if 'logistique.entry.document' in request.env:
+                try:
+                    DocModel = request.env['logistique.entry.document'].sudo()
+                    existing_doc = DocModel.search([
+                        ('entry_id', '=', entry.id),
+                        ('document_type', '=', 'company_invoice'),
+                        ('file_name', '=', doc_filename)
+                    ], limit=1)
+
+                    if not existing_doc:
+                        DocModel.create({
+                            'entry_id': entry.id,
+                            'document_type': 'company_invoice',
+                            'file': pdf_base64,
+                            'file_name': doc_filename
+                        })
+                except Exception as e:
+                    _logger.error(f"Erreur enregistrement logistique.entry.document pour {dossier.name}: {str(e)}")
 
         final_response = "✅ *Données saisies avec succès dans Gestia :*\n━━━━━━━━━━━━━━━━━━\n"
         final_response += f"{dossier_msg}\n"

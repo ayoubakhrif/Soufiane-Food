@@ -21,7 +21,7 @@ class LogistiqueDoc(models.Model):
 
     drive_link = fields.Char(
         string='Lien Drive',
-        required=True,
+        required=False,
         help="Collez le lien Google Drive du document",
     )
 
@@ -30,6 +30,8 @@ class LogistiqueDoc(models.Model):
         compute='_compute_drive_url',
     )
 
+    file = fields.Binary(string='Fichier (PDF)', attachment=True)
+    file_name = fields.Char(string='Nom du fichier')
     notes = fields.Char(string='Notes')
 
     @api.depends('drive_link')

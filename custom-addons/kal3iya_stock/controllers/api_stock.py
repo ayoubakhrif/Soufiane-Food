@@ -99,7 +99,19 @@ class Kal3iyaStockApiController(http.Controller):
         stock_records = request.env['kal3iya.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
-            image_b64 = rec.image_1920.decode('utf-8') if rec.image_1920 else ''
+            # Chercher d'abord la photo d'emballage prise lors de l'entrée du lot
+            image_b64 = ''
+            entry = request.env['kal3iya.stock.entry'].sudo().search([
+                ('product_id', '=', rec.product_id.id),
+                ('lot', '=', rec.lot),
+                ('photo_packaging', '!=', False)
+            ], limit=1, order='date desc, id desc')
+            
+            if entry and entry.photo_packaging:
+                image_b64 = entry.photo_packaging.decode('utf-8') if isinstance(entry.photo_packaging, bytes) else str(entry.photo_packaging)
+            elif rec.image_1920:
+                image_b64 = rec.image_1920.decode('utf-8') if isinstance(rec.image_1920, bytes) else str(rec.image_1920)
+
             data.append({
                 'id': rec.id,
                 'product_id': rec.product_id.id if rec.product_id else None,

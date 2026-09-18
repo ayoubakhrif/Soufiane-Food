@@ -81,9 +81,12 @@ class _StockTransferScreenState extends State<StockTransferScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Transfert : ',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: Text(
+                          'Transfert : ${item.productName}',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
@@ -93,15 +96,17 @@ class _StockTransferScreenState extends State<StockTransferScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Lot:  • DUM: ',
+                    'Lot: ${item.lot.isNotEmpty ? item.lot : '-'} • DUM: ${item.dum.isNotEmpty ? item.dum : '-'} • Cal: ${item.calibre.isNotEmpty ? item.calibre : '-'}',
                     style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                   ),
+                  const SizedBox(height: 3),
                   Text(
-                    'Garage actuel (Source) : ',
+                    'Garage actuel (Source) : ${item.garage.toUpperCase()}',
                     style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.w600, fontSize: 13),
                   ),
+                  const SizedBox(height: 3),
                   Text(
-                    'Disponible :  colis',
+                    'Disponible : ${item.quantity % 1 == 0 ? item.quantity.toInt() : item.quantity} colis (${item.weight > 0 ? '${item.weight} kg' : ''})',
                     style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const Divider(height: 24),
@@ -150,7 +155,7 @@ class _StockTransferScreenState extends State<StockTransferScreen> {
                               }
                               if (qty > item.quantity) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Quantité supérieure au stock dispo () !')),
+                                  SnackBar(content: Text('Quantité supérieure au stock dispo (${item.quantity} col.) !')),
                                 );
                                 return;
                               }
@@ -193,7 +198,7 @@ class _StockTransferScreenState extends State<StockTransferScreen> {
                                 );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Erreur: '), backgroundColor: Colors.red),
+                                  SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
                                 );
                               } finally {
                                 setModalState(() => isDialogSubmitting = false);
@@ -236,13 +241,31 @@ class _StockTransferScreenState extends State<StockTransferScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _stockList.isEmpty
               ? const Center(child: Text('Aucun produit disponible à transférer.'))
-              : ListView.builder(
-                  itemCount: _stockList.length,
-                  itemBuilder: (ctx, i) {
-                    final item = _stockList[i];
-                    return StockCardItem(
-                      item: item,
-                      onTap: () => _openTransferDialog(item),
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    int crossAxisCount = 2;
+                    if (constraints.maxWidth > 900) {
+                      crossAxisCount = 4;
+                    } else if (constraints.maxWidth > 600) {
+                      crossAxisCount = 3;
+                    }
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.95,
+                      ),
+                      itemCount: _stockList.length,
+                      itemBuilder: (ctx, i) {
+                        final item = _stockList[i];
+                        return StockCardItem(
+                          item: item,
+                          onTap: () => _openTransferDialog(item),
+                        );
+                      },
                     );
                   },
                 ),

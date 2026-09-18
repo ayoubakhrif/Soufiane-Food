@@ -94,9 +94,12 @@ class _StockExitScreenState extends State<StockExitScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Sortie : ',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: Text(
+                          'Sortie : ${item.productName}',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
@@ -106,12 +109,12 @@ class _StockExitScreenState extends State<StockExitScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Lot:  • DUM:  • Garage: ',
+                    'Lot: ${item.lot.isNotEmpty ? item.lot : '-'} • DUM: ${item.dum.isNotEmpty ? item.dum : '-'} • Garage: ${item.garage.toUpperCase()}',
                     style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Disponible en stock :  colis',
+                    'Disponible en stock : ${item.quantity % 1 == 0 ? item.quantity.toInt() : item.quantity} colis (${item.weight > 0 ? '${item.weight} kg' : ''})',
                     style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const Divider(height: 24),
@@ -160,7 +163,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
                               }
                               if (qty > item.quantity) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Quantité supérieure au stock dispo () !')),
+                                  SnackBar(content: Text('Quantité supérieure au stock dispo (${item.quantity} col.) !')),
                                 );
                                 return;
                               }
@@ -196,7 +199,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
                                 );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Erreur: '), backgroundColor: Colors.red),
+                                  SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
                                 );
                               } finally {
                                 setModalState(() => isDialogSubmitting = false);
@@ -302,7 +305,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
 
           const SizedBox(height: 8),
 
-          // Liste des cartes
+          // Grille des cartes carrées
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -320,13 +323,32 @@ class _StockExitScreenState extends State<StockExitScreen> {
                           ],
                         ),
                       )
-                    : ListView.builder(
-                        itemCount: _filteredList.length,
-                        itemBuilder: (ctx, i) {
-                          final item = _filteredList[i];
-                          return StockCardItem(
-                            item: item,
-                            onTap: () => _openExitDialog(item),
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Calcul dynamique des colonnes : 2 sur mobile (<600px), 3 ou 4 sur tablette/desktop
+                          int crossAxisCount = 2;
+                          if (constraints.maxWidth > 900) {
+                            crossAxisCount = 4;
+                          } else if (constraints.maxWidth > 600) {
+                            crossAxisCount = 3;
+                          }
+
+                          return GridView.builder(
+                            padding: const EdgeInsets.all(12),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.95, // Format quasi-carré élégant
+                            ),
+                            itemCount: _filteredList.length,
+                            itemBuilder: (ctx, i) {
+                              final item = _filteredList[i];
+                              return StockCardItem(
+                                item: item,
+                                onTap: () => _openExitDialog(item),
+                              );
+                            },
                           );
                         },
                       ),

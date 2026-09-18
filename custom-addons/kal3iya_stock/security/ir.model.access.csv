@@ -24,4 +24,10 @@ access_kal3iya_stock_stock_entry_viewer,kal3iya.stock.entry,model_kal3iya_stock_
 access_kal3iya_stock_stock_exit_viewer,kal3iya.stock.exit,model_kal3iya_stock_exit,group_viewer,1,0,0,0
 access_kal3iya_stock_stock_stock_viewer,kal3iya.stock.stock,model_kal3iya_stock_stock,group_viewer,1,0,0,0
 access_kal3iya_stock_return_viewer,kal3iya.stock.return,model_kal3iya_stock_return,group_viewer,1,0,0,0
+access_kal3iya_stock_agent_user,kal3iya.stock.agent,model_kal3iya_stock_agent,group_user,1,1,1,1
+access_kal3iya_stock_agent_manager,kal3iya.stock.agent,model_kal3iya_stock_agent,group_manager,1,1,1,1
+access_kal3iya_stock_agent_viewer,kal3iya.stock.agent,model_kal3iya_stock_agent,group_viewer,1,0,0,0
+access_kal3iya_stock_transfer_user,kal3iya.stock.transfer,model_kal3iya_stock_transfer,group_user,1,1,1,0
+access_kal3iya_stock_transfer_manager,kal3iya.stock.transfer,model_kal3iya_stock_transfer,group_manager,1,1,1,0
+access_kal3iya_stock_transfer_viewer,kal3iya.stock.transfer,model_kal3iya_stock_transfer,group_viewer,1,0,0,0
 

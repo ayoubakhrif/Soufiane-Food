@@ -69,10 +69,21 @@
                             <field name="calibre"/>
                             <field name="provider_id" options="{'no_create_edit': True}"/>
                             <field name="driver_id" options="{'no_create_edit': True}"/>
+                            <field name="agent_id" options="{'no_create_edit': True}"/>
                         </group>
                     </group>
 
-                    <separator string="Image"/>
+                    <separator string="Photos de Réception"/>
+                    <group>
+                        <group string="Emballage">
+                            <field name="photo_packaging" widget="image" class="oe_avatar"/>
+                        </group>
+                        <group string="Conteneur">
+                            <field name="photo_container" widget="image" class="oe_avatar"/>
+                        </group>
+                    </group>
+
+                    <separator string="Image Article"/>
                     <group>
                         <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_1920'}"/>
                     </group>

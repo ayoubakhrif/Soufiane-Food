@@ -1,0 +1,216 @@
+﻿import json
+import logging
+from odoo import http
+from odoo.http import request
+
+_logger = logging.getLogger(__name__)
+
+GARAGE_SELECTION = [
+    {'key': 'garage1', 'label': 'Garage 1'},
+    {'key': 'garage2', 'label': 'Garage 2'},
+    {'key': 'garage3', 'label': 'Garage 3'},
+    {'key': 'garage4', 'label': 'Garage 4'},
+    {'key': 'garage5', 'label': 'Garage 5'},
+    {'key': 'garage6', 'label': 'Garage 6'},
+    {'key': 'garage7', 'label': 'Garage 7'},
+    {'key': 'garage8', 'label': 'Garage 8'},
+    {'key': 'terrasse', 'label': 'Terrasse'},
+    {'key': 'fenidek', 'label': 'Fenidek'},
+]
+
+class Kal3iyaStockApiController(http.Controller):
+
+    def _json_response(self, data, status=200):
+        return request.make_response(
+            json.dumps(data, ensure_ascii=False, default=str),
+            headers=[('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*')],
+            status=status
+        )
+
+    def _get_request_data(self):
+        try:
+            if request.httprequest.data:
+                return json.loads(request.httprequest.data.decode('utf-8'))
+        except Exception:
+            pass
+        return request.params or {}
+
+    @http.route('/api/kal3iya/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    def api_login(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        phone = (data.get('phone') or '').strip()
+        password = (data.get('password') or '').strip()
+
+        if not phone or not password:
+            return self._json_response({'status': 'error', 'message': 'Veuillez saisir le numéro de téléphone et le mot de passe.'}, status=400)
+
+        agent = request.env['kal3iya.stock.agent'].sudo().search([('phone', '=', phone), ('active', '=', True)], limit=1)
+        if not agent or agent.password != password:
+            return self._json_response({'status': 'error', 'message': 'Numéro de téléphone ou mot de passe incorrect.'}, status=401)
+
+        return self._json_response({
+            'status': 'success',
+            'agent': {
+                'id': agent.id,
+                'name': agent.name,
+                'phone': agent.phone,
+            }
+        })
+
+    @http.route('/api/kal3iya/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False)
+    def api_bootstrap(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        products = request.env['kal3iya.stock.product'].sudo().search_read(
+            [], ['id', 'name']
+        )
+        clients = request.env['kal3iya.stock.client'].sudo().search_read(
+            [], ['id', 'name']
+        )
+
+        return self._json_response({
+            'status': 'success',
+            'products': products,
+            'clients': clients,
+            'garages': GARAGE_SELECTION,
+        })
+
+    @http.route('/api/kal3iya/stock', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False)
+    def api_stock(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        stock_records = request.env['kal3iya.stock.stock'].sudo().search([('quantity', '>', 0)])
+        data = []
+        for rec in stock_records:
+            # Récupérer l'image en base64 si disponible
+            image_b64 = rec.image_1920.decode('utf-8') if rec.image_1920 else ''
+            data.append({
+                'id': rec.id,
+                'product_id': rec.product_id.id if rec.product_id else None,
+                'product_name': rec.product_id.name if rec.product_id else '',
+                'lot': rec.lot or '',
+                'dum': rec.dum or '',
+                'calibre': rec.calibre or '',
+                'weight': rec.weight or 0.0,
+                'quantity': rec.quantity or 0.0,
+                'garage': rec.garage or '',
+                'frigo': rec.frigo or 'stock_kal3iya',
+                'ste_id': rec.ste_id.id if rec.ste_id else None,
+                'ste_name': rec.ste_id.name if rec.ste_id else '',
+                'image': image_b64,
+            })
+
+        return self._json_response({
+            'status': 'success',
+            'count': len(data),
+            'stock': data,
+        })
+
+    @http.route('/api/kal3iya/entry', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    def api_entry(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            vals = {
+                'product_id': int(data.get('product_id')),
+                'garage': data.get('garage'),
+                'frigo': data.get('frigo') or 'stock_kal3iya',
+                'lot': data.get('lot'),
+                'dum': data.get('dum'),
+                'calibre': data.get('calibre') or '',
+                'qty': float(data.get('qty', 0)),
+                'weight': float(data.get('weight', 0)),
+                'date': data.get('date') or fields.Date.context_today(request.env['kal3iya.stock.entry']),
+                'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
+            }
+            if data.get('photo_packaging'):
+                vals['photo_packaging'] = data.get('photo_packaging')
+            if data.get('photo_container'):
+                vals['photo_container'] = data.get('photo_container')
+
+            entry = request.env['kal3iya.stock.entry'].sudo().create(vals)
+            entry.action_confirm()
+
+            return self._json_response({
+                'status': 'success',
+                'entry_id': entry.id,
+                'name': entry.name,
+                'message': f"Entrée {entry.name} enregistrée avec succès."
+            })
+        except Exception as e:
+            _logger.exception("Erreur API Entry")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+
+    @http.route('/api/kal3iya/exit', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    def api_exit(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            vals = {
+                'product_id': int(data.get('product_id')),
+                'client_id': int(data.get('client_id')) if data.get('client_id') else False,
+                'garage': data.get('garage'),
+                'frigo': data.get('frigo') or 'stock_kal3iya',
+                'lot': data.get('lot') or '',
+                'dum': data.get('dum') or '',
+                'calibre': data.get('calibre') or '',
+                'weight': float(data.get('weight', 0)),
+                'qty': float(data.get('qty', 0)),
+                'date': data.get('date') or fields.Date.context_today(request.env['kal3iya.stock.exit']),
+                'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
+                'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
+            }
+
+            exit_rec = request.env['kal3iya.stock.exit'].sudo().create(vals)
+            exit_rec.action_confirm()
+
+            return self._json_response({
+                'status': 'success',
+                'exit_id': exit_rec.id,
+                'name': exit_rec.name,
+                'message': f"Sortie {exit_rec.name} enregistrée avec succès."
+            })
+        except Exception as e:
+            _logger.exception("Erreur API Exit")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+
+    @http.route('/api/kal3iya/transfer', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    def api_transfer(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            vals = {
+                'product_id': int(data.get('product_id')),
+                'garage_source': data.get('garage_source'),
+                'garage_dest': data.get('garage_dest'),
+                'frigo_source': data.get('frigo_source') or 'stock_kal3iya',
+                'frigo_dest': data.get('frigo_dest') or 'stock_kal3iya',
+                'lot': data.get('lot') or '',
+                'dum': data.get('dum') or '',
+                'calibre': data.get('calibre') or '',
+                'weight': float(data.get('weight', 0)),
+                'qty': float(data.get('qty', 0)),
+                'date': data.get('date') or fields.Date.context_today(request.env['kal3iya.stock.transfer']),
+                'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
+                'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
+            }
+
+            transfer = request.env['kal3iya.stock.transfer'].sudo().create(vals)
+            transfer.action_confirm()
+
+            return self._json_response({
+                'status': 'success',
+                'transfer_id': transfer.id,
+                'name': transfer.name,
+                'message': f"Transfert {transfer.name} enregistré avec succès."
+            })
+        except Exception as e:
+            _logger.exception("Erreur API Transfer")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)

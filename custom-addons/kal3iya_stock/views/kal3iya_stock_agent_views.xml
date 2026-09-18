@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kal3iya_stock_agent_tree" model="ir.ui.view">
+        <field name="name">kal3iya.stock.agent.tree</field>
+        <field name="model">kal3iya.stock.agent</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not active">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="active" widget="boolean_toggle"/>
+                <field name="notes"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kal3iya_stock_agent_form" model="ir.ui.view">
+        <field name="name">kal3iya.stock.agent.form</field>
+        <field name="model">kal3iya.stock.agent</field>
+        <field name="arch" type="xml">
+            <form string="Agent de Stock Kal3iya">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="Ex: Mohammed Alami"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phone" placeholder="Ex: 0612345678"/>
+                            <field name="password" password="True"/>
+                        </group>
+                        <group>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="notes" placeholder="Remarques / affectation..."/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_kal3iya_stock_agent" model="ir.actions.act_window">
+        <field name="name">Agents de Stock</field>
+        <field name="res_model">kal3iya.stock.agent</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

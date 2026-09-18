@@ -42,6 +42,7 @@ class Kal3iyaStockExit(models.Model):
     client_id = fields.Many2one('kal3iya.stock.client', string='Client')
     driver_id = fields.Many2one('kal3iya.stock.driver', string='Chauffeur')
     ste_id = fields.Many2one('kal3iya.stock.ste', string='Société')
+    agent_id = fields.Many2one('kal3iya.stock.agent', string='Agent de Stock')
     
     state = fields.Selection([
         ('draft', 'Brouillon'),

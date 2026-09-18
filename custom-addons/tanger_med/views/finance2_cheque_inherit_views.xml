@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
         <record id="view_finance2_cheque_sutra_inherit" model="ir.ui.view">
@@ -11,13 +11,15 @@
                 </xpath>
                 <xpath expr="//notebook" position="inside">
                     <page string="Factures SUTRA" invisible="not is_sutra_benif">
-                        <field name="sutra_facture_ids" readonly="1">
-                            <tree>
-                                <field name="sutra_id"/>
+                        <field name="sutra_facture_ids">
+                            <tree editable="bottom">
                                 <field name="name"/>
+                                <field name="sutra_id"/>
                                 <field name="date"/>
                                 <field name="amount" sum="Total"/>
-                                <field name="state"/>
+                                <field name="state" widget="badge" decoration-success="state == 'paye'" decoration-warning="state == 'encours'" decoration-danger="state == 'non_paye'"/>
+                                <field name="pdf_filename" invisible="1"/>
+                                <field name="pdf_file" filename="pdf_filename" widget="binary"/>
                             </tree>
                         </field>
                     </page>

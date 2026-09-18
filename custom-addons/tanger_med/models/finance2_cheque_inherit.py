@@ -1,4 +1,4 @@
-﻿from odoo import models, fields, api
+from odoo import models, fields, api
 
 class Finance2Cheque(models.Model):
     _inherit = 'finance2.cheque'
@@ -6,10 +6,15 @@ class Finance2Cheque(models.Model):
     sutra_facture_ids = fields.One2many('sutra.facture', 'cheque_id', string='Factures SUTRA liees')
     is_sutra_benif = fields.Boolean(compute='_compute_is_sutra_benif')
 
-    @api.depends('benif_id', 'benif_id.name')
+    @api.depends('benif_id', 'benif_id.name', 'benif_id.is_sutra')
     def _compute_is_sutra_benif(self):
         for rec in self:
-            rec.is_sutra_benif = bool(rec.benif_id and rec.benif_id.name and 'sutra' in rec.benif_id.name.lower())
+            rec.is_sutra_benif = bool(
+                rec.benif_id and (
+                    rec.benif_id.is_sutra or 
+                    (rec.benif_id.name and 'sutra' in rec.benif_id.name.lower())
+                )
+            )
 
 
     def write(self, vals):

@@ -20,6 +20,8 @@ class AITrainingExportController(http.Controller):
                     
                 pdf_b64 = rec.scan_document.decode('utf-8') if isinstance(rec.scan_document, bytes) else rec.scan_document
                 doc_type = "chèques" if rec.document_type == 'cheque' else "effets"
+                from datetime import datetime
+                current_year = datetime.now().year
                 
                 prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan PDF contenant un ou plusieurs {doc_type}.
 Votre but est d'extraire les informations pour chaque {doc_type[:-1]} trouvé dans le document.
@@ -29,7 +31,7 @@ Retournez UNIQUEMENT un objet JSON valide, sans markdown, contenant une liste no
 Pour chaque élément, extrayez :
 1. "numero": Le numéro du {doc_type[:-1]} (généralement 7 chiffres ou moin pour un chèque).
 2. "montant": Le montant du {doc_type[:-1]} (uniquement des chiffres, ex: 1500.50). ATTENTION : Lisez attentivement le montant écrit en lettres (qui se trouve souvent au milieu du document, en arabe ou en français) et croisez-le avec le montant en chiffres (en haut à droite) pour garantir l'exactitude absolue du montant extrait.
-3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
+3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD. Dans 99.9% des cas, l'année du document est l'année en cours ({current_year}). Donnez TOUJOURS la priorité absolue à l'année {current_year} lors de la lecture manuscrite des dates (ne confondez jamais {current_year} avec 2021 ou 2016).
 4. "banque": Le nom de la banque (à lire souvent dans le logo en HAUT à GAUCHE ou au CENTRE du chèque). Essayez de faire correspondre avec l'une de ces banques : Attijariwafa Bank, Banque Populaire, BMCE, CIH, etc.
 5. "porteur": Le nom du titulaire du compte / porteur. C'est le nom imprimé situé en BAS au CENTRE, généralement juste en dessous du "Compte n°". NE CHOISISSEZ PAS le nom de l'agence (qui se trouve à gauche sous "Payable à"). ATTENTION : Retirez ABSOLUMENT toutes les civilités et titres du texte extrait (comme MR, M., MONSIEUR, MME, MADAME, MLLE) pour ne garder strictement que le nom et le prénom.
 

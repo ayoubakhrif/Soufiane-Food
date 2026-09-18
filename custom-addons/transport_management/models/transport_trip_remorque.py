@@ -30,7 +30,7 @@ class TransportTripRemorque(models.Model):
         if self.driver_remorque_id and self.driver_remorque_id.vehicle_id:
             self.vehicle_id = self.driver_remorque_id.vehicle_id
 
-    dum_id = fields.Many2one('logistique.entry', string='DUM', domain="[('dum', '!=', False)]")
+    dum_id = fields.Many2one('logistique.entry', string='DUM', domain="[('dum', '!=', False), ('dum', '!=', '')]")
     
     @api.onchange('dum_id')
     def _onchange_dum_id(self):

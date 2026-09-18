@@ -165,12 +165,13 @@ class Finance2Cheque(models.Model):
             
             benifs = self.env['finance2.benif'].sudo().search([])
             benifs_names = ", ".join(benifs.mapped('name'))
+            current_year = fields.Date.today().year
 
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque vide.
 Votre but est d'extraire les informations suivantes.
 1. "chq": Le numéro du chèque (EXACTEMENT 7 chiffres. Attention: ne prenez SURTOUT PAS une partie du numéro de compte / RIB (longue série de chiffres type 21217 048... souvent à droite). Le numéro du chèque est généralement situé à côté de mentions comme "Chèque Sie BGON", "Série", ou au-dessus de "Payez contre ce chèque").
 2. "ste": La société émettrice. Cherchez la raison sociale inscrite sur le chèque, et comparez avec la liste suivante : {stes_names}. Extrayez l'abréviation correspondante (la valeur avant les parenthèses).
-3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD.
+3. "date_emission": La date qui se situe sur le cachet en dessous (la première date inscrite), au format YYYY-MM-DD. Dans 99.9% des cas, l'année est l'année en cours ({current_year}). Donnez TOUJOURS la priorité absolue à l'année {current_year} lors de la lecture manuscrite (ne confondez jamais {current_year} avec 2021 ou 2016).
 4. "personne": La personne écrite sur le cachet (sur la deuxième ligne). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
 5. "journal": Le numéro écrit manuellement en haut. Il peut être sous forme "Wxx-Journal" (ex: "W33-12", extrayez uniquement "12") ou bien simplement un chiffre écrit seul (ex: "12"). Extrayez uniquement le numéro du journal.
 6. "beneficiaire": Le bénéficiaire (à l'ordre de). Essayez de faire correspondre avec l'un de ces noms : {benifs_names}.

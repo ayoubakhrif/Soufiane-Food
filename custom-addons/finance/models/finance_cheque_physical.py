@@ -221,6 +221,7 @@ class FinanceChequePhysical(models.Model):
             
             stes = self.env['finance.ste'].sudo().search([])
             stes_names = ", ".join(stes.mapped('name'))
+            current_year = fields.Date.today().year
 
             prompt_text = f"""Vous êtes un assistant financier. Vous recevez un scan d'un chèque.
 Votre but est d'extraire les informations suivantes.
@@ -233,8 +234,9 @@ Votre but est d'extraire les informations suivantes.
    - Maruk = MR
 3. "amount": Le montant du chèque (uniquement des chiffres).
 4. "beneficiaire": Le bénéficiaire (à l'ordre de). Essayez de faire correspondre avec l'un de ces noms : {benifs_names}.
-5. "date_echeance": La date écrite sur le chèque (en haut à droite, ex: 16/05/2026), au format YYYY-MM-DD.
-6. "date_emission": La date écrite sur le tampon ou cachet (souvent à gauche, ex: 18/05/2026), au format YYYY-MM-DD.
+5. "date_echeance": La date écrite sur le chèque (en haut à droite), au format YYYY-MM-DD.
+   ⚠️ RÈGLE ABSOLUE POUR L'ANNÉE : Dans 99.9% des cas, l'année de la date est l'année en cours ({current_year}). Donnez TOUJOURS la priorité absolue à l'année {current_year} lors de la lecture manuscrite (ne confondez jamais {current_year} avec 2021, 2016 ou une autre année si le dernier chiffre est ambigu).
+6. "date_emission": La date écrite sur le tampon ou cachet (souvent à gauche), au format YYYY-MM-DD (donnez également priorité absolue à l'année {current_year}).
 7. "personne": Le nom de la personne (le deuxième nom écrit sur les tampons en bas, après "Remis à"). Essayez de faire correspondre avec l'un de ces noms : {persos_names}.
 8. "journal": Le numéro du journal (le chiffre entouré d'un cercle, souvent écrit au stylo en haut). Cherchez attentivement un chiffre encerclé (ex: 1, 2, 3...). Retournez UNIQUEMENT ce chiffre (ex: 1).
 

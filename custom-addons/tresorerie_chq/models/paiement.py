@@ -164,6 +164,7 @@ class TresoreriePaiement(models.Model):
             
         banks = self.env['tresorerie_chq.bank'].search([])
         bank_names = ", ".join(banks.mapped('name'))
+        current_year = fields.Date.today().year
 
         doc_type = "chèques" if self.payment_type == 'cheque' else "effets"
 
@@ -183,6 +184,9 @@ Pour chaque élément de la liste, extrayez :
    - Sur les chèques et effets (lettres de change) marocains, le montant en chiffres comporte très fréquemment deux zéros de centimes à la fin (ex: 5000,00 ou 5000.00). NE CONFONDEZ JAMAIS 5000,00 avec 500000 !
    - Vous DEVEZ IMPÉRATIVEMENT lire et croiser avec le MONTANT EN LETTRES (en arabe ou en français, ex: 'خمسة آلاف درهم' = 5000 DH et NON PAS 500000 DH qui s'écrirait 'خمسمائة ألف درهم'). Le montant en lettres fait foi et permet d'éviter l'erreur d'ajouter deux zéros de centimes.
 3. "date_echeance": La date d'échéance écrite sur le document, au format YYYY-MM-DD.
+   ⚠️ RÈGLE ABSOLUE POUR L'ANNÉE DE LA DATE :
+   - Dans 99.9% des cas, l'année du document est l'année en cours ({current_year}).
+   - Donnez TOUJOURS la priorité absolue à l'année {current_year} lors de la lecture manuscrite des dates. Si l'écriture manuscrite de l'année est ambiguë (ex: un 6 manuscrit qui ressemble à un 1 ou un 0, pouvant faire penser à 2021, 2016 ou 2020), vous DEVEZ TOUJOURS lire et retenir {current_year} (ne choisissez JAMAIS une ancienne année comme 2021 ou 2016 sauf si c'est explicitement et indubitablement une ancienne année).
 4. "banque": Le nom de la banque (à lire souvent dans le logo en HAUT à GAUCHE ou au CENTRE du document). Essayez de faire correspondre avec l'une de ces banques : {bank_names}.
 5. "porteur": Le nom officiel du porteur / tiré / titulaire du compte.
    ⚠️ RÈGLES STRICTES POUR LE PORTEUR (TIRÉ) :
@@ -302,7 +306,7 @@ Exemple de réponse attendue:
                     payload = {
                         "model": "claude-sonnet-5",
                         "max_tokens": 8192,
-                        "system": "Tu es un extracteur de données financières pour chèques et effets marocains. Retourne UNIQUEMENT un JSON pur sans réflexion. RÈGLE 1 : Le porteur est TOUJOURS le nom officiel imprimé en machine (case 'Le tiré / المسحوب عليه'). N'extrais JAMAIS les annotations ou noms de clients écrits à la main au stylo dans la marge ou sur le document. RÈGLE 2 : Pour le montant, croise impérativement avec le montant en lettres en arabe/français pour ne pas confondre les centimes ,00 avec des zéros supplémentaires (ex: 5000,00 avec 'خمسة آلاف درهم' = 5000, et non 500000).",
+                        "system": f"Tu es un extracteur de données financières pour chèques et effets marocains. Retourne UNIQUEMENT un JSON pur sans réflexion. RÈGLE 1 : Le porteur est TOUJOURS le nom officiel imprimé en machine (case 'Le tiré / المسحوب عليه'). N'extrais JAMAIS les annotations ou noms de clients écrits à la main au stylo dans la marge ou sur le document. RÈGLE 2 : Pour le montant, croise impérativement avec le montant en lettres en arabe/français pour ne pas confondre les centimes ,00 avec des zéros supplémentaires (ex: 5000,00 avec 'خمسة آلاف درهم' = 5000, et non 500000). RÈGLE 3 : Pour les dates, l'année est dans 99.9% des cas l'année en cours ({current_year}). Donne TOUJOURS la priorité absolue à l'année {current_year} lors du déchiffrage manuscrit (ne confonds jamais {current_year} avec 2021, 2016 ou 2020).",
                         "messages": messages
                     }
                     

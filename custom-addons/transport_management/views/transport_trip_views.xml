@@ -41,6 +41,7 @@
                             <field name="client_id"/>
                             <field name="ste_id"/>
                             <field name="dum_id" options="{'no_create': True}" domain="[('dum', '!=', False), ('dum', '!=', '')]"/>
+                            <field name="dum"/>
                             <field name="vehicle_id"/>
                             <label for="going_price"/>
                             <div class="o_row">

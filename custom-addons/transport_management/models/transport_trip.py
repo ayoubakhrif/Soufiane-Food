@@ -24,7 +24,8 @@ class TransportTrip(models.Model):
         if self.driver_id and self.driver_id.vehicle_id:
             self.vehicle_id = self.driver_id.vehicle_id
             
-    dum_id = fields.Many2one('logistique.entry', string='DUM', domain="[('dum', '!=', False), ('dum', '!=', '')]")
+    dum_id = fields.Many2one('logistique.entry', string='Dossier Logistique', domain="[('dum', '!=', False), ('dum', '!=', '')]")
+    dum = fields.Char(string='DUM', related='dum_id.dum', store=True, readonly=False)
     
     @api.onchange('dum_id')
     def _onchange_dum_id(self):

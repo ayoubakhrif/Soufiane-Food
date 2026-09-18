@@ -71,6 +71,7 @@
                     <div class="oe_title">
                         <h1>
                             <field name="is_divers"/>
+                            <field name="is_sutra"/>
                             <field name="name" placeholder="Nom du bénéficiaire"/>
                         </h1>
                     </div>

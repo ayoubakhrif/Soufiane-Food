@@ -1,4 +1,4 @@
-﻿from odoo import models, fields, api, _
+from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class SutraFacturePayWizard(models.TransientModel):
@@ -7,10 +7,12 @@ class SutraFacturePayWizard(models.TransientModel):
 
     ste_id = fields.Many2one('finance2.ste', string='Societe', required=True)
     benif_id = fields.Many2one('finance2.benif', string='Beneficiaire', required=True)
+    benif_is_sutra = fields.Boolean(related='benif_id.is_sutra', string='Bénéficiaire SUTRA', readonly=True)
     amount_total = fields.Float(string='Montant du Cheque', required=True)
     cheque_number = fields.Char(string='Numero du Cheque', required=True)
     date_emission = fields.Date(string="Date d'emission", required=True, default=fields.Date.context_today)
     journal = fields.Char(string='Carnet / Journal')
+    reglement = fields.Char(string='Réglement')
     facture_ids = fields.Many2many('sutra.facture', string='Factures a payer')
 
     @api.model

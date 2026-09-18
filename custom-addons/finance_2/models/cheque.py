@@ -118,6 +118,9 @@ class Finance2Cheque(models.Model):
     # Répartitions
     repartition_ids = fields.One2many('finance2.repartition', 'cheque_id', string='Répartitions')
 
+    # Factures SUTRA liées à ce chèque
+    sutra_facture_ids = fields.One2many('sutra.facture', 'cheque_id', string='Factures SUTRA')
+
 
     @api.model_create_multi
     def create(self, vals_list):

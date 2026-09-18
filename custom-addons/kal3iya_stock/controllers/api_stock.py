@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 from odoo import http, fields
 from odoo.http import request
@@ -23,9 +23,6 @@ class Kal3iyaStockApiController(http.Controller):
     def _json_response(self, data, status=200):
         headers = [
             ('Content-Type', 'application/json'),
-            ('Access-Control-Allow-Origin', '*'),
-            ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'),
-            ('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept'),
         ]
         return request.make_response(
             json.dumps(data, ensure_ascii=False, default=str),

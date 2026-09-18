@@ -17,6 +17,12 @@
               action="action_kal3iya_stock_entry"
               sequence="20"/>
 
+    <menuitem id="menu_kal3iya_stock_return"
+              name="Retours Clients"
+              parent="menu_kal3iya_stock_root"
+              action="action_kal3iya_stock_return"
+              sequence="25"/>
+
     <menuitem id="menu_kal3iya_stock_exit"
               name="Sorties"
               parent="menu_kal3iya_stock_root"

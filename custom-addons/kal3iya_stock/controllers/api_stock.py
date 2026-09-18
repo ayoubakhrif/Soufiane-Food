@@ -214,31 +214,18 @@ class Kal3iyaStockApiController(http.Controller):
             _logger.exception("Erreur API Transfer")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
-    @http.route('/api/kal3iya/reset_data', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
-    def api_reset_data(self, **kwargs):
-        """Endpoint d'administration sécurisé pour réinitialiser toutes les données de test de kal3iya_stock."""
+    @http.route('/api/kal3iya/clean_foreign_keys', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    def api_clean_foreign_keys(self, **kwargs):
+        """Nettoie la table SQL kal3iya_stock_transfer orpheline empêchant la désinstallation ou la réinstallation."""
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
-        data = self._get_request_data()
-        secret = data.get('secret')
-
-        if secret != 'reset-kal3iya-stock-2026':
-            return self._json_response({'status': 'error', 'message': 'Code secret invalide.'}, status=403)
-
         try:
             cr = request.env.cr
-            # Suppression en cascade des tables de mouvements kal3iya_stock
-            cr.execute("DELETE FROM kal3iya_stock_return;")
-            cr.execute("DELETE FROM kal3iya_stock_transfer;")
-            cr.execute("DELETE FROM kal3iya_stock_exit;")
-            cr.execute("DELETE FROM kal3iya_stock_entry;")
-            cr.execute("DELETE FROM kal3iya_stock_move;")
+            cr.execute("DROP TABLE IF EXISTS kal3iya_stock_transfer CASCADE;")
             cr.commit()
-
             return self._json_response({
                 'status': 'success',
-                'message': 'Toutes les anciennes données de kal3iya_stock (Entrées, Sorties, Retours, Transferts, Mouvements) ont été supprimées avec succès. Le stock est désormais vierge et sain.'
+                'message': 'Table kal3iya_stock_transfer nettoyée avec succès.'
             })
         except Exception as e:
-            _logger.exception("Erreur Reset Data")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)

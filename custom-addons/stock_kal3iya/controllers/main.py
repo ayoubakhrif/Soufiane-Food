@@ -195,3 +195,20 @@ class StockKal3iyaController(http.Controller):
 
         # 4. Return Response
         return {'status': 'success', 'response': response_text}
+
+    @http.route('/api/stock_kal3iya/clean_transfer_fkey', type='http', auth='public', methods=['GET', 'POST'], csrf=False)
+    def clean_transfer_fkey(self, **kwargs):
+        try:
+            cr = request.env.cr
+            cr.execute("DROP TABLE IF EXISTS kal3iya_stock_transfer CASCADE;")
+            cr.commit()
+            return request.make_response(
+                json.dumps({'status': 'success', 'message': 'kal3iya_stock_transfer table dropped cleanly'}),
+                headers={'Content-Type': 'application/json'}
+            )
+        except Exception as e:
+            return request.make_response(
+                json.dumps({'status': 'error', 'message': str(e)}),
+                headers={'Content-Type': 'application/json'},
+                status=500
+            )

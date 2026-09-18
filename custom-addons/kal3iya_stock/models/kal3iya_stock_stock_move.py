@@ -63,4 +63,6 @@ class Kal3iyaStockMove(models.Model):
     ste_id = fields.Many2one('kal3iya.stock.ste', string='Société')
 
     def unlink(self):
-        raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
+        if not self.env.user.has_group('kal3iya_stock.group_manager'):
+            raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
+        return super(Kal3iyaStockMove, self).unlink()

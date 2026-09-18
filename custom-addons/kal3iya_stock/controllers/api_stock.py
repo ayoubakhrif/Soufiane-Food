@@ -86,7 +86,6 @@ class Kal3iyaStockApiController(http.Controller):
         stock_records = request.env['kal3iya.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
-            # Récupérer l'image en base64 si disponible
             image_b64 = rec.image_1920.decode('utf-8') if rec.image_1920 else ''
             data.append({
                 'id': rec.id,
@@ -125,7 +124,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'calibre': data.get('calibre') or '',
                 'qty': float(data.get('qty', 0)),
                 'weight': float(data.get('weight', 0)),
-                'date': data.get('date') or fields.Date.context_today(request.env['kal3iya.stock.entry']),
+                'date': data.get('date'),
                 'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
             }
             if data.get('photo_packaging'):
@@ -162,7 +161,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'calibre': data.get('calibre') or '',
                 'weight': float(data.get('weight', 0)),
                 'qty': float(data.get('qty', 0)),
-                'date': data.get('date') or fields.Date.context_today(request.env['kal3iya.stock.exit']),
+                'date': data.get('date'),
                 'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
                 'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
             }
@@ -197,7 +196,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'calibre': data.get('calibre') or '',
                 'weight': float(data.get('weight', 0)),
                 'qty': float(data.get('qty', 0)),
-                'date': data.get('date') or fields.Date.context_today(request.env['kal3iya.stock.transfer']),
+                'date': data.get('date'),
                 'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
                 'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
             }
@@ -213,4 +212,33 @@ class Kal3iyaStockApiController(http.Controller):
             })
         except Exception as e:
             _logger.exception("Erreur API Transfer")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+
+    @http.route('/api/kal3iya/reset_data', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    def api_reset_data(self, **kwargs):
+        """Endpoint d'administration sécurisé pour réinitialiser toutes les données de test de kal3iya_stock."""
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        secret = data.get('secret')
+
+        if secret != 'reset-kal3iya-stock-2026':
+            return self._json_response({'status': 'error', 'message': 'Code secret invalide.'}, status=403)
+
+        try:
+            cr = request.env.cr
+            # Suppression en cascade des tables de mouvements kal3iya_stock
+            cr.execute("DELETE FROM kal3iya_stock_return;")
+            cr.execute("DELETE FROM kal3iya_stock_transfer;")
+            cr.execute("DELETE FROM kal3iya_stock_exit;")
+            cr.execute("DELETE FROM kal3iya_stock_entry;")
+            cr.execute("DELETE FROM kal3iya_stock_move;")
+            cr.commit()
+
+            return self._json_response({
+                'status': 'success',
+                'message': 'Toutes les anciennes données de kal3iya_stock (Entrées, Sorties, Retours, Transferts, Mouvements) ont été supprimées avec succès. Le stock est désormais vierge et sain.'
+            })
+        except Exception as e:
+            _logger.exception("Erreur Reset Data")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)

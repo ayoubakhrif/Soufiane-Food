@@ -1,6 +1,6 @@
 ﻿import json
 import logging
-from odoo import http
+from odoo import http, fields
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -21,9 +21,15 @@ GARAGE_SELECTION = [
 class Kal3iyaStockApiController(http.Controller):
 
     def _json_response(self, data, status=200):
+        headers = [
+            ('Content-Type', 'application/json'),
+            ('Access-Control-Allow-Origin', '*'),
+            ('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'),
+            ('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept'),
+        ]
         return request.make_response(
             json.dumps(data, ensure_ascii=False, default=str),
-            headers=[('Content-Type', 'application/json'), ('Access-Control-Allow-Origin', '*')],
+            headers=headers,
             status=status
         )
 
@@ -35,7 +41,7 @@ class Kal3iyaStockApiController(http.Controller):
             pass
         return request.params or {}
 
-    @http.route('/api/kal3iya/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    @http.route('/api/kal3iya/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_login(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -59,7 +65,7 @@ class Kal3iyaStockApiController(http.Controller):
             }
         })
 
-    @http.route('/api/kal3iya/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False)
+    @http.route('/api/kal3iya/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
     def api_bootstrap(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -78,7 +84,7 @@ class Kal3iyaStockApiController(http.Controller):
             'garages': GARAGE_SELECTION,
         })
 
-    @http.route('/api/kal3iya/stock', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False)
+    @http.route('/api/kal3iya/stock', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
     def api_stock(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -109,7 +115,7 @@ class Kal3iyaStockApiController(http.Controller):
             'stock': data,
         })
 
-    @http.route('/api/kal3iya/entry', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    @http.route('/api/kal3iya/entry', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_entry(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -145,7 +151,7 @@ class Kal3iyaStockApiController(http.Controller):
             _logger.exception("Erreur API Entry")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
-    @http.route('/api/kal3iya/exit', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    @http.route('/api/kal3iya/exit', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_exit(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -179,7 +185,7 @@ class Kal3iyaStockApiController(http.Controller):
             _logger.exception("Erreur API Exit")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
-    @http.route('/api/kal3iya/transfer', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
+    @http.route('/api/kal3iya/transfer', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_transfer(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -212,20 +218,4 @@ class Kal3iyaStockApiController(http.Controller):
             })
         except Exception as e:
             _logger.exception("Erreur API Transfer")
-            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
-
-    @http.route('/api/kal3iya/clean_foreign_keys', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
-    def api_clean_foreign_keys(self, **kwargs):
-        """Nettoie la table SQL kal3iya_stock_transfer orpheline empêchant la désinstallation ou la réinstallation."""
-        if request.httprequest.method == 'OPTIONS':
-            return self._json_response({'status': 'ok'})
-        try:
-            cr = request.env.cr
-            cr.execute("DROP TABLE IF EXISTS kal3iya_stock_transfer CASCADE;")
-            cr.commit()
-            return self._json_response({
-                'status': 'success',
-                'message': 'Table kal3iya_stock_transfer nettoyée avec succès.'
-            })
-        except Exception as e:
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)

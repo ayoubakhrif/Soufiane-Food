@@ -15,6 +15,7 @@
                         <group>
                             <field name="ste_id"/>
                             <field name="benif_id"/>
+                            <field name="benif_is_sutra" invisible="1"/>
                             <field name="journal"/>
                             <field name="reglement" invisible="not benif_is_sutra"/>
                         </group>

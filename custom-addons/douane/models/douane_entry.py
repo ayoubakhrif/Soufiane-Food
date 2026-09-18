@@ -58,10 +58,7 @@ class LogisticsEntry(models.Model):
     def name_get(self):
         result = []
         for record in self:
-            if record.dum:
-                name = f"[{record.dum}] {record.bl_number or 'Sans BL'}"
-            else:
-                name = record.bl_number or f"Dossier Logistique #{record.id}"
+            name = record.dum or record.bl_number or f"Dossier #{record.id}"
             result.append((record.id, name))
         return result
 

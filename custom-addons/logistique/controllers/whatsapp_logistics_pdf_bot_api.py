@@ -143,9 +143,11 @@ class WhatsAppLogisticsPdfController(http.Controller):
             try:
                 # the AI is instructed to return YYYY-MM-DD
                 bad_date_obj = datetime.strptime(bad_date_str, '%Y-%m-%d').date()
-                entry.write({'bad_date': bad_date_obj})
+                with request.env.cr.savepoint():
+                    entry.write({'bad_date': bad_date_obj})
                 bad_msg = f"📅 *Date de BAD* : {bad_date_obj.strftime('%d/%m/%Y')}"
             except Exception as e:
+                _logger.warning(f"Failed to update BAD date: {str(e)}")
                 bad_msg = f"⚠️ *Date de BAD* : Impossible de parser ({bad_date_str})"
 
         if not chq_number:
@@ -204,10 +206,12 @@ class WhatsAppLogisticsPdfController(http.Controller):
                     vals['beneficiary_id'] = benif_record.id
 
                 try:
-                    request.env['logistique.dossier.cheque'].sudo().with_context(from_bot=True).create(vals)
+                    with request.env.cr.savepoint():
+                        request.env['logistique.dossier.cheque'].sudo().with_context(from_bot=True).create(vals)
                     factures_msgs.append(f"  • *{inv_amount:,.2f} DH* ({vals['type'].capitalize()}) - {benif_display}")
                     nb_added += 1
                 except Exception as e:
+                    _logger.warning(f"Erreur création ligne chèque pour {dossier.name}: {str(e)}")
                     pass  # Ignorer l'affichage de l'erreur sur WhatsApp selon la demande
 
             if nb_added == 0 and nb_already_exist > 0:
@@ -222,44 +226,46 @@ class WhatsAppLogisticsPdfController(http.Controller):
 
             # 7a. Save in logistique.doc (displayed directly on Entry and Dossier Documents tab)
             try:
-                LogDocModel = request.env['logistique.doc'].sudo()
-                existing_log_doc = LogDocModel.search([
-                    ('entry_id', '=', entry.id),
-                    ('document_type', '=', 'company_invoice'),
-                    ('file_name', '=', doc_filename)
-                ], limit=1)
+                with request.env.cr.savepoint():
+                    LogDocModel = request.env['logistique.doc'].sudo()
+                    existing_log_doc = LogDocModel.search([
+                        ('entry_id', '=', entry.id),
+                        ('document_type', '=', 'company_invoice'),
+                        ('file_name', '=', doc_filename)
+                    ], limit=1)
 
-                if not existing_log_doc:
-                    LogDocModel.create({
-                        'entry_id': entry.id,
-                        'document_type': 'company_invoice',
-                        'file': pdf_base64,
-                        'file_name': doc_filename,
-                        'notes': f"Facture compagnie reçue via WhatsApp (Chèque {chq_number or 'N/A'})"
-                    })
-                    doc_msg = "📎 *Document* : Ajouté aux Factures companies"
-                else:
-                    doc_msg = "📎 *Document* : Factures companies (déjà présent)"
+                    if not existing_log_doc:
+                        LogDocModel.create({
+                            'entry_id': entry.id,
+                            'document_type': 'company_invoice',
+                            'file': pdf_base64,
+                            'file_name': doc_filename,
+                            'notes': f"Facture compagnie reçue via WhatsApp (Chèque {chq_number or 'N/A'})"
+                        })
+                        doc_msg = "📎 *Document* : Ajouté aux Factures companies"
+                    else:
+                        doc_msg = "📎 *Document* : Factures companies (déjà présent)"
             except Exception as e:
                 _logger.error(f"Erreur enregistrement logistique.doc facture compagnie pour {dossier.name}: {str(e)}")
 
             # 7b. Save in logistique.entry.document if model exists (for achat module / doc search backward compatibility)
             if 'logistique.entry.document' in request.env:
                 try:
-                    DocModel = request.env['logistique.entry.document'].sudo()
-                    existing_doc = DocModel.search([
-                        ('entry_id', '=', entry.id),
-                        ('document_type', '=', 'company_invoice'),
-                        ('file_name', '=', doc_filename)
-                    ], limit=1)
+                    with request.env.cr.savepoint():
+                        DocModel = request.env['logistique.entry.document'].sudo()
+                        existing_doc = DocModel.search([
+                            ('entry_id', '=', entry.id),
+                            ('document_type', '=', 'company_invoice'),
+                            ('file_name', '=', doc_filename)
+                        ], limit=1)
 
-                    if not existing_doc:
-                        DocModel.create({
-                            'entry_id': entry.id,
-                            'document_type': 'company_invoice',
-                            'file': pdf_base64,
-                            'file_name': doc_filename
-                        })
+                        if not existing_doc:
+                            DocModel.create({
+                                'entry_id': entry.id,
+                                'document_type': 'company_invoice',
+                                'file': pdf_base64,
+                                'file_name': doc_filename
+                            })
                 except Exception as e:
                     _logger.error(f"Erreur enregistrement logistique.entry.document pour {dossier.name}: {str(e)}")
 

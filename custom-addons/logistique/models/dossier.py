@@ -55,13 +55,9 @@ class LogistiqueDossier(models.Model):
     )
     logistique_doc_ids = fields.One2many(
         'logistique.doc',
-        compute='_compute_logistique_doc_ids',
+        'dossier_id',
         string='Documents',
     )
-
-    def _compute_logistique_doc_ids(self):
-        for rec in self:
-            rec.logistique_doc_ids = rec.entry_ids.mapped('logistique_doc_ids')
     container_count = fields.Integer(
         string="Nb Conteneurs",
         compute="_compute_counts",

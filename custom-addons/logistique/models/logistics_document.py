@@ -8,9 +8,16 @@ class LogistiqueDoc(models.Model):
 
     entry_id = fields.Many2one(
         'logistique.entry',
-        string='Dossier',
+        string='Dossier / Entrée',
         required=True,
         ondelete='cascade',
+    )
+    dossier_id = fields.Many2one(
+        'logistique.dossier',
+        string='Dossier BL',
+        related='entry_id.dossier_id',
+        store=True,
+        readonly=True,
     )
 
     document_type = fields.Selection([

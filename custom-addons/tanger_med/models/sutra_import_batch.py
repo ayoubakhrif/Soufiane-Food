@@ -1,4 +1,4 @@
-﻿from odoo import models, fields, api, _
+from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class SutraImportBatch(models.Model):
@@ -118,14 +118,23 @@ class SutraImportLine(models.Model):
             if rec.status == 'done':
                 continue
                 
-            clean_dum = rec.dum.lstrip('0')
+            raw_dum = str(rec.dum).strip()
+            clean_dum = raw_dum.lstrip('0') or raw_dum
+            
+            # Case-insensitive domain (=ilike) for exact case-insensitive match
             domain = [
                 '|',
-                ('tanger_med_dum', '=', rec.dum),
-                ('tanger_med_dum', '=', clean_dum)
+                ('tanger_med_dum', '=ilike', raw_dum),
+                ('tanger_med_dum', '=ilike', clean_dum)
             ]
             if 'dum' in self.env['logistique.entry']._fields:
-                domain = ['|', '|', '|', ('tanger_med_dum', '=', rec.dum), ('dum', '=', rec.dum), ('tanger_med_dum', '=', clean_dum), ('dum', '=', clean_dum)]
+                domain = [
+                    '|', '|', '|',
+                    ('tanger_med_dum', '=ilike', raw_dum),
+                    ('dum', '=ilike', raw_dum),
+                    ('tanger_med_dum', '=ilike', clean_dum),
+                    ('dum', '=ilike', clean_dum)
+                ]
             entry = self.env['logistique.entry'].search(domain, limit=1)
             if entry:
                 rec.logistics_id = entry.id

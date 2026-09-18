@@ -342,7 +342,7 @@ class CasaStockEntry(models.Model):
                     ('lot', '=', rec.lot),
                     ('dum', '=', rec.dum),
                     ('id', '!=', rec.id),
-                    ('state', '!=', 'cancelled')
+                    ('state', '!=', 'cancel')
                 ]
                 existing = self.env['casa.stock.entry'].search(domain, limit=1)
                 if existing:

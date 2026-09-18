@@ -251,11 +251,11 @@ for record in records:
     <menuitem id="menu_finance2_root" name="Finance V2" sequence="10" groups="finance_2.group_finance2_user"/>
     
     <menuitem id="menu_finance2_cheques" name="Chèques" parent="menu_finance2_root" action="action_finance2_cheque" sequence="10"/>
-        <menuitem id="menu_finance2_encaissement" name="Encaissement" parent="menu_finance2_root" action="action_finance2_encaissement" sequence="20"/>
+    <menuitem id="menu_finance2_encaissement" name="Encaissement" parent="menu_finance2_root" action="action_finance2_encaissement" sequence="20"/>
+    <menuitem id="menu_finance2_benif" name="Bénéficiaires" parent="menu_finance2_root" action="action_finance2_benif" sequence="25"/>
     
     <menuitem id="menu_finance2_config" name="Configuration" parent="menu_finance2_root" sequence="90" groups="finance_2.group_finance2_manager"/>
     <menuitem id="menu_finance2_ste" name="Sociétés" parent="menu_finance2_config" action="action_finance2_ste" sequence="10"/>
-    <menuitem id="menu_finance2_benif" name="Bénéficiaires" parent="menu_finance2_config" action="action_finance2_benif" sequence="20"/>
     <menuitem id="menu_finance2_personne" name="Personnes (Logistique)" parent="menu_finance2_config" action="action_finance2_personne" sequence="30"/>
 
 

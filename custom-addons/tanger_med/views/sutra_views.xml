@@ -178,7 +178,7 @@
             <field name="name">sutra.facture.tree.global</field>
             <field name="model">sutra.facture</field>
             <field name="arch" type="xml">
-                <tree string="Factures a payer" create="0">
+                <tree string="Factures a payer">
                     <field name="sutra_id" required="0"/>
                                 <field name="dum_provisoire" invisible="sutra_id != False" string="DUM Provisoire (Orpheline)"/>
                     <field name="name"/>

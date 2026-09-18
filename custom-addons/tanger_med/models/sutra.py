@@ -152,11 +152,4 @@ class SutraFacture(models.Model):
                 if self.search_count(domain) > 0:
                     raise exceptions.ValidationError(f"La facture SUTRA '{rec.name}' a déjà été saisie (numéro de facture en double) !")
 
-    @api.constrains('sutra_id')
-    def _check_unique_dossier(self):
-        for rec in self:
-            if rec.sutra_id:
-                domain = [('sutra_id', '=', rec.sutra_id.id), ('id', '!=', rec.id)]
-                if self.search_count(domain) > 0:
-                    raise exceptions.ValidationError(f"Le dossier SUTRA '{rec.sutra_id.dum or rec.sutra_id.name}' a déjà une facture SUTRA liée. Impossible d'en lier une deuxième !")
 

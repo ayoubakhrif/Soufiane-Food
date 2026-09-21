@@ -40,6 +40,9 @@ class Finance2Benif(models.Model):
             rec.total_encaisse = encaisse
             rec.solde = credit - encaisse
 
+    def action_print_report(self):
+        self.ensure_one()
+        return self.env.ref('finance_2.action_report_finance2_divers_summary').report_action(self)
 
     def get_divers_breakdown(self):
         self.ensure_one()

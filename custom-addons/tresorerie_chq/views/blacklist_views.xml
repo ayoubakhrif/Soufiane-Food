@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =================================================================
+         Configuration Paramètres Liste Noire
+    ================================================================= -->
+    <record id="view_tresorerie_chq_blacklist_config_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.config.form</field>
+        <field name="model">tresorerie_chq.blacklist.config</field>
+        <field name="arch" type="xml">
+            <form string="Paramètres de Détection Liste Noire" create="0" delete="0">
+                <header>
+                    <button name="action_recompute_all" 
+                            string="Recalculer pour tous les Clients et Porteurs" 
+                            type="object" 
+                            class="btn-primary" 
+                            icon="fa-refresh" 
+                            confirm="Voulez-vous recalculer immédiatement le statut de liste noire pour l'ensemble des clients et porteurs de la base ?"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Règle de gestion :</strong> Le calcul prend en compte l'historique complet depuis le début. Dès qu'un client ou porteur franchit l'un des seuils (en nombre ou en montant) avec le nombre minimum requis, il est automatiquement basculé sur la Liste Noire (Bloqué).
+                    </div>
+                    <group>
+                        <group string="Seuils Clients">
+                            <field name="client_min_count"/>
+                            <field name="client_pct_count"/>
+                            <field name="client_pct_amount"/>
+                        </group>
+                        <group string="Seuils Porteurs">
+                            <field name="owner_min_count"/>
+                            <field name="owner_pct_count"/>
+                            <field name="owner_pct_amount"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tresorerie_chq_blacklist_config" model="ir.actions.act_window">
+        <field name="name">Configuration Liste Noire</field>
+        <field name="res_model">tresorerie_chq.blacklist.config</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="res_id" eval="ref('tresorerie_chq.default_blacklist_config', False)"/>
+    </record>
+
+    <!-- Window Action function helper to always open the single config record -->
+    <record id="action_open_blacklist_config" model="ir.actions.server">
+        <field name="name">Configuration Liste Noire</field>
+        <field name="model_id" ref="model_tresorerie_chq_blacklist_config"/>
+        <field name="state">code</field>
+        <field name="code">
+config = model.get_config()
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Paramètres Liste Noire',
+    'res_model': 'tresorerie_chq.blacklist.config',
+    'view_mode': 'form',
+    'res_id': config.id,
+    'target': 'current',
+}
+        </field>
+    </record>
+
+    <!-- =================================================================
+         Liste Noire Clients
+    ================================================================= -->
+    <record id="view_tresorerie_chq_blacklist_client_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.client.tree</field>
+        <field name="model">tresorerie_chq.blacklist.client</field>
+        <field name="arch" type="xml">
+            <tree string="Liste Noire Clients" 
+                  create="0" 
+                  delete="0" 
+                  decoration-danger="state == 'blocked'"
+                  decoration-warning="state == 'alert'"
+                  decoration-success="state == 'unblocked'">
+                <field name="client_id"/>
+                <field name="cin" optional="show"/>
+                <field name="phone" optional="show"/>
+                <field name="total_count"/>
+                <field name="unpaid_count"/>
+                <field name="pct_count" widget="percentage" optional="show"/>
+                <field name="total_amount" optional="show"/>
+                <field name="unpaid_amount"/>
+                <field name="pct_amount" widget="percentage"/>
+                <field name="state" widget="badge" 
+                       decoration-danger="state == 'blocked'" 
+                       decoration-warning="state == 'alert'" 
+                       decoration-success="state == 'unblocked'"/>
+                <field name="date_update" optional="show"/>
+                <button name="action_set_alert" 
+                        string="Débloquer avec alerte" 
+                        type="object" 
+                        icon="fa-warning" 
+                        class="btn-warning"
+                        title="Débloquer avec alerte"
+                        invisible="state == 'alert'"/>
+                <button name="action_set_blocked" 
+                        string="Bloquer" 
+                        type="object" 
+                        icon="fa-ban" 
+                        class="btn-danger"
+                        title="Bloquer sur liste noire"
+                        invisible="state == 'blocked'"/>
+                <button name="action_set_unblocked" 
+                        string="Débloquer" 
+                        type="object" 
+                        icon="fa-check-circle" 
+                        class="btn-success"
+                        title="Débloquer complètement"
+                        invisible="state == 'unblocked'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tresorerie_chq_blacklist_client_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.client.form</field>
+        <field name="model">tresorerie_chq.blacklist.client</field>
+        <field name="arch" type="xml">
+            <form string="Entrée Liste Noire Client" create="0" delete="0">
+                <header>
+                    <button name="action_set_alert" 
+                            string="🟡 Débloquer avec alerte" 
+                            type="object" 
+                            class="btn-warning"
+                            invisible="state == 'alert'"/>
+                    <button name="action_set_blocked" 
+                            string="🔴 Rebloquer" 
+                            type="object" 
+                            class="btn-danger"
+                            invisible="state == 'blocked'"/>
+                    <button name="action_set_unblocked" 
+                            string="🟢 Débloquer complètement" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state == 'unblocked'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="blocked,alert,unblocked"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="client_id" options="{'no_open': False, 'no_create': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Coordonnées">
+                            <field name="cin"/>
+                            <field name="phone"/>
+                            <field name="date_blacklist"/>
+                            <field name="date_update"/>
+                        </group>
+                        <group string="Statistiques &amp; Ratios Impayés">
+                            <field name="total_count"/>
+                            <field name="unpaid_count"/>
+                            <field name="pct_count" widget="percentage"/>
+                            <field name="total_amount"/>
+                            <field name="unpaid_amount"/>
+                            <field name="pct_amount" widget="percentage"/>
+                        </group>
+                    </group>
+                    <group string="Observations du Responsable">
+                        <field name="reason" placeholder="Motif ou justification de la décision..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tresorerie_chq_blacklist_client_search" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.client.search</field>
+        <field name="model">tresorerie_chq.blacklist.client</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Liste Noire Clients">
+                <field name="name" string="Client"/>
+                <field name="cin"/>
+                <field name="phone"/>
+                <separator/>
+                <filter string="🔴 Bloqués" name="blocked" domain="[('state', '=', 'blocked')]"/>
+                <filter string="🟡 Débloqués avec alerte" name="alert" domain="[('state', '=', 'alert')]"/>
+                <filter string="🟢 Débloqués" name="unblocked" domain="[('state', '=', 'unblocked')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="group_state" domain="[]" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tresorerie_chq_blacklist_client" model="ir.actions.act_window">
+        <field name="name">Liste Noire Clients</field>
+        <field name="res_model">tresorerie_chq.blacklist.client</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_blocked': 1}</field>
+    </record>
+
+
+    <!-- =================================================================
+         Liste Noire Porteurs
+    ================================================================= -->
+    <record id="view_tresorerie_chq_blacklist_owner_tree" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.owner.tree</field>
+        <field name="model">tresorerie_chq.blacklist.owner</field>
+        <field name="arch" type="xml">
+            <tree string="Liste Noire Porteurs" 
+                  create="0" 
+                  delete="0" 
+                  decoration-danger="state == 'blocked'"
+                  decoration-warning="state == 'alert'"
+                  decoration-success="state == 'unblocked'">
+                <field name="owner_id"/>
+                <field name="cin" optional="show"/>
+                <field name="phone" optional="show"/>
+                <field name="total_count"/>
+                <field name="unpaid_count"/>
+                <field name="pct_count" widget="percentage" optional="show"/>
+                <field name="total_amount" optional="show"/>
+                <field name="unpaid_amount"/>
+                <field name="pct_amount" widget="percentage"/>
+                <field name="state" widget="badge" 
+                       decoration-danger="state == 'blocked'" 
+                       decoration-warning="state == 'alert'" 
+                       decoration-success="state == 'unblocked'"/>
+                <field name="date_update" optional="show"/>
+                <button name="action_set_alert" 
+                        string="Débloquer avec alerte" 
+                        type="object" 
+                        icon="fa-warning" 
+                        class="btn-warning"
+                        title="Débloquer avec alerte"
+                        invisible="state == 'alert'"/>
+                <button name="action_set_blocked" 
+                        string="Bloquer" 
+                        type="object" 
+                        icon="fa-ban" 
+                        class="btn-danger"
+                        title="Bloquer sur liste noire"
+                        invisible="state == 'blocked'"/>
+                <button name="action_set_unblocked" 
+                        string="Débloquer" 
+                        type="object" 
+                        icon="fa-check-circle" 
+                        class="btn-success"
+                        title="Débloquer complètement"
+                        invisible="state == 'unblocked'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tresorerie_chq_blacklist_owner_form" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.owner.form</field>
+        <field name="model">tresorerie_chq.blacklist.owner</field>
+        <field name="arch" type="xml">
+            <form string="Entrée Liste Noire Porteur" create="0" delete="0">
+                <header>
+                    <button name="action_set_alert" 
+                            string="🟡 Débloquer avec alerte" 
+                            type="object" 
+                            class="btn-warning"
+                            invisible="state == 'alert'"/>
+                    <button name="action_set_blocked" 
+                            string="🔴 Rebloquer" 
+                            type="object" 
+                            class="btn-danger"
+                            invisible="state == 'blocked'"/>
+                    <button name="action_set_unblocked" 
+                            string="🟢 Débloquer complètement" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state == 'unblocked'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="blocked,alert,unblocked"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="owner_id" options="{'no_open': False, 'no_create': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Coordonnées">
+                            <field name="cin"/>
+                            <field name="phone"/>
+                            <field name="date_blacklist"/>
+                            <field name="date_update"/>
+                        </group>
+                        <group string="Statistiques &amp; Ratios Impayés">
+                            <field name="total_count"/>
+                            <field name="unpaid_count"/>
+                            <field name="pct_count" widget="percentage"/>
+                            <field name="total_amount"/>
+                            <field name="unpaid_amount"/>
+                            <field name="pct_amount" widget="percentage"/>
+                        </group>
+                    </group>
+                    <group string="Observations du Responsable">
+                        <field name="reason" placeholder="Motif ou justification de la décision..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tresorerie_chq_blacklist_owner_search" model="ir.ui.view">
+        <field name="name">tresorerie_chq.blacklist.owner.search</field>
+        <field name="model">tresorerie_chq.blacklist.owner</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Liste Noire Porteurs">
+                <field name="name" string="Porteur"/>
+                <field name="cin"/>
+                <field name="phone"/>
+                <separator/>
+                <filter string="🔴 Bloqués" name="blocked" domain="[('state', '=', 'blocked')]"/>
+                <filter string="🟡 Débloqués avec alerte" name="alert" domain="[('state', '=', 'alert')]"/>
+                <filter string="🟢 Débloqués" name="unblocked" domain="[('state', '=', 'unblocked')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="group_state" domain="[]" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tresorerie_chq_blacklist_owner" model="ir.actions.act_window">
+        <field name="name">Liste Noire Porteurs</field>
+        <field name="res_model">tresorerie_chq.blacklist.owner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_blocked': 1}</field>
+    </record>
+
+    <!-- =================================================================
+         Menus
+    ================================================================= -->
+    <!-- Sous Mouvements -->
+    <menuitem id="menu_tresorerie_chq_blacklist_client" 
+              name="Liste Noire Clients" 
+              parent="menu_tresorerie_chq_paiements" 
+              action="action_tresorerie_chq_blacklist_client" 
+              sequence="50"/>
+
+    <menuitem id="menu_tresorerie_chq_blacklist_owner" 
+              name="Liste Noire Porteurs" 
+              parent="menu_tresorerie_chq_paiements" 
+              action="action_tresorerie_chq_blacklist_owner" 
+              sequence="51"/>
+
+    <!-- Sous Configurations -->
+    <menuitem id="menu_tresorerie_chq_blacklist_config" 
+              name="Paramètres Liste Noire" 
+              parent="menu_tresorerie_chq_donnees" 
+              action="action_open_blacklist_config" 
+              sequence="90"/>
+
+</odoo>

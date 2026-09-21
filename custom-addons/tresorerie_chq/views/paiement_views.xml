@@ -30,7 +30,13 @@
                 <sheet>
                     <group>
                         <group string="Informations générales">
-                            <field name="client_id" readonly="state == 'validated'"/>
+                            <field name="client_id" readonly="state == 'validated'" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="client_blacklist_state" widget="badge" 
+                                   decoration-danger="client_blacklist_state == 'blocked'" 
+                                   decoration-warning="client_blacklist_state == 'alert'" 
+                                   decoration-success="client_blacklist_state == 'unblocked'"
+                                   string="Statut LN Client"
+                                   invisible="not client_id"/>
                             <field name="date" readonly="state == 'validated'"/>
                             <field name="reception_date" readonly="state == 'validated'"/>
                             <field name="payment_type" widget="radio" readonly="state == 'validated'"/>
@@ -63,6 +69,11 @@
                                            optional="show"
                                            options="{'no_quick_create': False, 'no_create_edit': False}"
                                            placeholder="— Client —"/>
+                                    <field name="owner_blacklist_state" widget="badge" optional="show"
+                                           decoration-danger="owner_blacklist_state == 'blocked'" 
+                                           decoration-warning="owner_blacklist_state == 'alert'" 
+                                           decoration-success="owner_blacklist_state == 'unblocked'"
+                                           string="LN Porteur"/>
 
                                     <field name="core_ste_id" options="{'no_create': True}" optional="show"/>
                                     <field name="reception_date" optional="show"/>
@@ -108,6 +119,11 @@
                                            optional="show"
                                            options="{'no_quick_create': False, 'no_create_edit': False}"
                                            placeholder="— Client —"/>
+                                    <field name="owner_blacklist_state" widget="badge" optional="show"
+                                           decoration-danger="owner_blacklist_state == 'blocked'" 
+                                           decoration-warning="owner_blacklist_state == 'alert'" 
+                                           decoration-success="owner_blacklist_state == 'unblocked'"
+                                           string="LN Porteur"/>
 
                                     <field name="core_ste_id" options="{'no_create': True}" optional="show"/>
                                     <field name="reception_date" optional="show"/>

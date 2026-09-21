@@ -81,6 +81,17 @@ class TresorerieChqCheque(models.Model):
         readonly=True,
     )
 
+    client_blacklist_state = fields.Selection(
+        related='client_id.blacklist_state',
+        string="Liste Noire Client",
+        readonly=True,
+    )
+    owner_blacklist_state = fields.Selection(
+        related='owner_id.blacklist_state',
+        string="Liste Noire Porteur",
+        readonly=True,
+    )
+
     core_ste_id = fields.Many2one('core.ste', string='Société')
     reception_date = fields.Date(string='Date de réception', related='paiement_id.reception_date', store=True, readonly=True)
     bank_send_date = fields.Date(string="Date d'envoi au banque")
@@ -166,10 +177,18 @@ class TresorerieChqCheque(models.Model):
     # ------------------------------------------------------------------
     # Workflow Actions
     # ------------------------------------------------------------------
+    def _recompute_blacklist_for_related(self):
+        for rec in self:
+            if rec.client_id:
+                rec.client_id._check_and_update_blacklist()
+            if rec.owner_id:
+                rec.owner_id._check_and_update_blacklist()
+
     def action_stock(self):
         """Reset to stock (allowed for users)."""
         for rec in self:
             rec.state = 'stock'
+            rec._recompute_blacklist_for_related()
 
     def action_remis(self):
         """Deliver to client."""
@@ -178,6 +197,7 @@ class TresorerieChqCheque(models.Model):
                 if rec.state not in ['stock', 'impaye']:
                     raise ValidationError("❌ Le chèque doit être en stock ou impayé pour être remis au client.")
             rec.state = 'remis'
+            rec._recompute_blacklist_for_related()
 
     def action_banque(self):
         """Send to bank."""
@@ -196,6 +216,7 @@ class TresorerieChqCheque(models.Model):
                 if rec.state != 'banque':
                     raise ValidationError("❌ Le chèque doit être envoyé à la banque pour pouvoir être encaissé.")
             rec.state = 'encaisse'
+            rec._recompute_blacklist_for_related()
 
     def action_impaye(self):
         """Mark as unpaid/bounced."""
@@ -208,6 +229,7 @@ class TresorerieChqCheque(models.Model):
                 if rec.state != 'banque':
                     raise ValidationError("❌ Le chèque doit être envoyé à la banque pour pouvoir être marqué impayé.")
             rec.state = 'impaye'
+            rec._recompute_blacklist_for_related()
 
 
 class TresorerieChqEffet(models.Model):
@@ -281,6 +303,17 @@ class TresorerieChqEffet(models.Model):
         related='paiement_id.validation_mode',
         string="Validé par",
         store=True,
+        readonly=True,
+    )
+
+    client_blacklist_state = fields.Selection(
+        related='client_id.blacklist_state',
+        string="Liste Noire Client",
+        readonly=True,
+    )
+    owner_blacklist_state = fields.Selection(
+        related='owner_id.blacklist_state',
+        string="Liste Noire Porteur",
         readonly=True,
     )
 
@@ -359,10 +392,18 @@ class TresorerieChqEffet(models.Model):
     # ------------------------------------------------------------------
     # Workflow Actions
     # ------------------------------------------------------------------
+    def _recompute_blacklist_for_related(self):
+        for rec in self:
+            if rec.client_id:
+                rec.client_id._check_and_update_blacklist()
+            if rec.owner_id:
+                rec.owner_id._check_and_update_blacklist()
+
     def action_stock(self):
         """Reset to stock (allowed for users)."""
         for rec in self:
             rec.state = 'stock'
+            rec._recompute_blacklist_for_related()
 
     def action_remis(self):
         """Deliver to client."""
@@ -371,6 +412,7 @@ class TresorerieChqEffet(models.Model):
                 if rec.state not in ['stock', 'impaye']:
                     raise ValidationError("❌ L'effet doit être en stock ou impayé pour être remis au client.")
             rec.state = 'remis'
+            rec._recompute_blacklist_for_related()
 
     def action_banque(self):
         """Send to bank."""
@@ -389,6 +431,7 @@ class TresorerieChqEffet(models.Model):
                 if rec.state != 'banque':
                     raise ValidationError("❌ L'effet doit être envoyé à la banque pour pouvoir être encaissé.")
             rec.state = 'encaisse'
+            rec._recompute_blacklist_for_related()
 
     def action_impaye(self):
         """Mark as unpaid/bounced."""
@@ -401,3 +444,4 @@ class TresorerieChqEffet(models.Model):
                 if rec.state != 'banque':
                     raise ValidationError("❌ L'effet doit être envoyé à la banque pour pouvoir être marqué impayé.")
             rec.state = 'impaye'
+            rec._recompute_blacklist_for_related()

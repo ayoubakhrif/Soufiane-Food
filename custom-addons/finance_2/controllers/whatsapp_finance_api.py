@@ -674,17 +674,14 @@ class WhatsAppFinanceController(http.Controller):
             only_encaisse = bool(week_match.group(1))
             week_num = int(week_match.group(2))
             week_str = f"W{week_num:02d}"
-            
-            datacheques = request.env['datacheque'].sudo().search([('week', '=', week_str)], order='journal asc')
-            effets = request.env['finance.effet'].sudo().search([('week', '=', week_str)])
+            datacheques = request.env['datacheque'].sudo().search([('id', '=', 0)]) # Empty recordset
+            effets = request.env['finance.effet'].sudo().search([('id', '=', 0)]) # Empty recordset
             cheques_v2 = request.env['finance2.cheque'].sudo().search([('week', '=', week_str)], order='journal asc')
             
             if only_encaisse:
-                datacheques = datacheques.filtered(lambda dq: dq.date_encaissement or (dq.physical_cheque_id and dq.physical_cheque_id.encours == 'encaisse'))
-                effets = effets.filtered(lambda e: e.date_encaissement or e.state == 'encaisse')
                 cheques_v2 = cheques_v2.filtered(lambda c: c.date_encaissement)
             
-            if not datacheques and not effets and not cheques_v2:
+            if not cheques_v2:
                 return {'status': 'not_found', 'message': f"Aucun document trouvé pour la semaine {week_str}."}
 
             # Calculate missing journals

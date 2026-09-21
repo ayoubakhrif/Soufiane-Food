@@ -13,6 +13,11 @@ class TresoreriePaiement(models.Model):
         required=True,
         ondelete='restrict',
     )
+    client_blacklist_state = fields.Selection(
+        related='client_id.blacklist_state',
+        string="Statut LN Client",
+        readonly=True,
+    )
 
     payment_type = fields.Selection([
         ('cheque', 'Chèques'),
@@ -129,6 +134,35 @@ class TresoreriePaiement(models.Model):
     # ------------------------------------------------------------------
     def action_validate(self):
         for rec in self:
+            is_manager = self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager')
+            lines = rec.cheque_line_ids if rec.payment_type == 'cheque' else rec.effet_line_ids
+
+            if rec.client_id.blacklist_state == 'blocked' and not is_manager:
+                from odoo.exceptions import UserError
+                raise UserError(f"❌ Le client '{rec.client_id.name}' est bloqué sur LISTE NOIRE.\nSeul un responsable de la trésorerie peut valider ce paiement.")
+
+            blocked_owners = []
+            alert_owners = []
+            for l in lines:
+                if l.owner_id:
+                    if l.owner_id.blacklist_state == 'blocked':
+                        blocked_owners.append(l.owner_id.name)
+                    elif l.owner_id.blacklist_state == 'alert':
+                        alert_owners.append(l.owner_id.name)
+
+            if blocked_owners and not is_manager:
+                from odoo.exceptions import UserError
+                owners_str = ", ".join(set(blocked_owners))
+                raise UserError(f"❌ Porteur(s) bloqué(s) sur LISTE NOIRE : {owners_str}.\nSeul un responsable de la trésorerie peut valider ce paiement.")
+
+            if rec.client_id.blacklist_state == 'alert' or alert_owners:
+                notes = []
+                if rec.client_id.blacklist_state == 'alert':
+                    notes.append(f"Client '{rec.client_id.name}'")
+                if alert_owners:
+                    notes.append(f"Porteur(s) '{', '.join(set(alert_owners))}'")
+                rec.message_post(body=f"🟡 <b>Avertissement Liste Noire</b> : Ce paiement contient des entités débloquées avec alerte ({', '.join(notes)}).")
+
             rec.write({
                 'state': 'validated',
                 'validation_mode': 'manual',
@@ -479,6 +513,28 @@ Exemple de réponse attendue:
             else:
                 self.write({'effet_line_ids': lines_to_create})
                 
+        # Vérification Liste Noire avant validation automatique par l'IA
+        has_blocked = False
+        blocked_reasons = []
+        if self.client_id and self.client_id.blacklist_state == 'blocked':
+            has_blocked = True
+            blocked_reasons.append(f"Client '{self.client_id.name}' est LISTÉ NOIR (Bloqué)")
+        elif self.client_id and self.client_id.blacklist_state == 'alert':
+            blocked_reasons.append(f"Client '{self.client_id.name}' est en DÉBLOQUÉ AVEC ALERTE")
+
+        created_lines = self.cheque_line_ids if self.payment_type == 'cheque' else self.effet_line_ids
+        for line in created_lines:
+            if line.owner_id and line.owner_id.blacklist_state == 'blocked':
+                has_blocked = True
+                blocked_reasons.append(f"Porteur '{line.owner_id.name}' est LISTÉ NOIR (Bloqué)")
+            elif line.owner_id and line.owner_id.blacklist_state == 'alert':
+                blocked_reasons.append(f"Porteur '{line.owner_id.name}' est en DÉBLOQUÉ AVEC ALERTE")
+
+        if has_blocked or blocked_reasons:
+            is_consensus = False
+            for r in set(blocked_reasons):
+                consensus_errors.append(f"🛑 Contrôle Liste Noire : {r}")
+
         if is_consensus:
             self.write({
                 'state': 'validated',

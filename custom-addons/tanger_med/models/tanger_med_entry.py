@@ -14,6 +14,7 @@ class TangerMedEntry(models.Model):
 
     tanger_med_lot = fields.Char(string='Lot Tanger Med')
     tanger_med_dum = fields.Char(string='DUM Tanger Med')
+    tanger_med_week = fields.Char(string='Semaine Tanger Med')
     destination_id = fields.Many2one('tanger.med.destination', string='Destination')
 
     entry_date = fields.Date(string='Date of entry', tracking=True)

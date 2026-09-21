@@ -15,7 +15,7 @@
                        decoration-info="port_status == 'on_port'" 
                        decoration-warning="port_status in ('release', 'tanger_med', 'emirate', 'refinancement')"/>
                 <field name="tanger_med_state" widget="badge" decoration-info="tanger_med_state in ('port', 'attente_ml')" decoration-warning="tanger_med_state in ('analyse', 'visite', 'en_cours_chargement', 'sortie_plein', 'rentree_vide')" decoration-success="tanger_med_state == 'arrive_depot'"/>
-                <field name="week"/>
+                <field name="tanger_med_week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
@@ -104,7 +104,7 @@
                                     <field name="eta" readonly="1"/>
                                     <field name="tanger_med_lot"/>
                                     <field name="tanger_med_dum"/>
-                                    <field name="week"/>
+                                    <field name="tanger_med_week"/>
                                 </group>
                                 <group string="SUR+MAG">
                                     <field name="calculated_surestarie_ht" readonly="1"/>
@@ -136,14 +136,14 @@
         <field name="arch" type="xml">
             <search string="Recherche Tanger Med">
                 <field name="bl_number"/>
-                <field name="week"/>
+                <field name="tanger_med_week"/>
                 <field name="ste_id"/>
                 <field name="supplier_id"/>
                 <field name="achat_article_id"/>
                 <field name="container_names" string="Conteneur"/>
                 <group string="Regrouper par">
                     <filter name="group_tanger_med_state" string="Statut Tanger Med" context="{'group_by': 'tanger_med_state'}"/>
-                    <filter name="group_week" string="Semaine" context="{'group_by': 'week'}"/>
+                    <filter name="group_week" string="Semaine" context="{'group_by': 'tanger_med_week'}"/>
                     <filter name="group_ste" string="Société" context="{'group_by': 'ste_id'}"/>
                     <filter name="group_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
                     <filter name="group_article" string="Article" context="{'group_by': 'achat_article_id'}"/>

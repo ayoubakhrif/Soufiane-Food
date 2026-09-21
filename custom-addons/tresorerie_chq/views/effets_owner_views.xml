@@ -10,6 +10,11 @@
         <field name="arch" type="xml">
             <tree string="Porteurs de Chèques / Effets">
                 <field name="name"/>
+                <field name="blacklist_state" widget="badge" 
+                       decoration-danger="blacklist_state == 'blocked'" 
+                       decoration-warning="blacklist_state == 'alert'" 
+                       decoration-success="blacklist_state == 'unblocked'"
+                       string="Statut Liste Noire"/>
                 <field name="cheque_count" string="Chèques"/>
                 <field name="effet_count" string="Effets"/>
                 <field name="unpaid_count" string="Impayés" decoration-danger="unpaid_count > 0"/>
@@ -31,6 +36,11 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="blacklist_state" widget="badge" 
+                                   decoration-danger="blacklist_state == 'blocked'" 
+                                   decoration-warning="blacklist_state == 'alert'" 
+                                   decoration-success="blacklist_state == 'unblocked'"
+                                   string="Statut Liste Noire" readonly="1"/>
                             <field name="cin"/>
                             <field name="phone"/>
                         </group>

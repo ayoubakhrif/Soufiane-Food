@@ -7,7 +7,13 @@
         <field name="arch" type="xml">
             <tree string="Clients">
                 <field name="name"/>
+                <field name="blacklist_state" widget="badge" 
+                       decoration-danger="blacklist_state == 'blocked'" 
+                       decoration-warning="blacklist_state == 'alert'" 
+                       decoration-success="blacklist_state == 'unblocked'"
+                       string="Statut Liste Noire"/>
                 <field name="unpaid_count" string="Impayés" decoration-danger="unpaid_count > 0"/>
+                <field name="emetteur" string="De la part de" optional="show"/>
                 <field name="cin" optional="show"/>
                 <field name="phone"/>
                 <field name="email"/>
@@ -29,6 +35,12 @@
                     </div>
                     <group>
                         <group>
+                            <field name="blacklist_state" widget="badge" 
+                                   decoration-danger="blacklist_state == 'blocked'" 
+                                   decoration-warning="blacklist_state == 'alert'" 
+                                   decoration-success="blacklist_state == 'unblocked'"
+                                   string="Statut Liste Noire" readonly="1"/>
+                            <field name="emetteur" widget="radio" options="{'horizontal': true}"/>
                             <field name="cin"/>
                             <field name="phone"/>
                             <field name="email"/>

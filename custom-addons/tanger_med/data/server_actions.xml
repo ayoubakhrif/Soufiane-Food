@@ -36,7 +36,7 @@ if records:
 if records:
     for rec in records:
         if rec.week:
-            rec.tanger_med_week = rec.week
+            rec.write({'tanger_med_week': rec.week})
         </field>
     </record>
 

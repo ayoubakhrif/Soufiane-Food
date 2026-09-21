@@ -68,7 +68,7 @@
         <field name="arch" type="xml">
             <form string="Bénéficiaire">
                 <header>
-                    <button name="action_print_report" string="Imprimer Rapport" type="object" class="oe_highlight" icon="fa-print"/>
+                    <button name="action_export_excel" string="Exporter Excel" type="object" class="oe_highlight" icon="fa-file-excel-o"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

@@ -39,11 +39,13 @@ class Finance2Benif(models.Model):
             rec.total_credit = credit
             rec.total_encaisse = encaisse
             rec.solde = credit - encaisse
-
-    def action_print_report(self):
+    def action_export_excel(self):
         self.ensure_one()
-        return self.env.ref('finance_2.action_report_finance2_divers_summary').report_action(self)
-
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/finance_2/export_benif_excel/{self.id}',
+            'target': 'self',
+        }
     def get_divers_breakdown(self):
         self.ensure_one()
         breakdown = {}

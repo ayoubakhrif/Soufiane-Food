@@ -15,6 +15,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'reports/divers_report.xml',
+        'reports/benif_cheques_report.xml',
         'data/cron.xml',
         'views/personne_views.xml',
         'views/cheque_views.xml',

@@ -39,6 +39,11 @@ class Finance2Benif(models.Model):
             rec.total_credit = credit
             rec.total_encaisse = encaisse
             rec.solde = credit - encaisse
+
+    def action_print_cheques_pdf(self):
+        self.ensure_one()
+        return self.env.ref('finance_2.action_report_finance2_benif_cheques').report_action(self)
+
     def action_export_excel(self):
         self.ensure_one()
         return {

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_finance2_benif_cheques" model="ir.actions.report">
+        <field name="name">Rapport Détaillé Chèques</field>
+        <field name="model">finance2.benif</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">finance_2.report_finance2_benif_cheques_template</field>
+        <field name="report_file">finance_2.report_finance2_benif_cheques_template</field>
+        <field name="print_report_name">'Rapport_Cheques_' + (object.name or '').replace(' ', '_')</field>
+        <field name="binding_model_id" ref="model_finance2_benif"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_finance2_benif_cheques_template">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <style>
+                        .report-header { margin-bottom: 20px; }
+                        .header-row { display: flex; align-items: stretch; margin-bottom: 10px; }
+                        .date-box { background-color: #D3D3D3; border: 1px solid black; padding: 10px; font-size: 16px; font-weight: bold; width: 25%; text-align: center; }
+                        .title-box { background-color: #D3D3D3; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; color: black; flex-grow: 1; text-align: center; letter-spacing: 2px; }
+                        
+                        .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        .data-table th { background-color: #D3D3D3; border: 1px solid black; padding: 6px; text-align: center; font-size: 12px; font-weight: bold; }
+                        .data-table td { border: 1px solid black; padding: 6px; text-align: center; font-size: 12px; }
+                        
+                        .amount-cell { background-color: #f9f9f9; font-weight: bold; text-align: right !important; }
+                        .total-row td { background-color: #F0F0F0; font-weight: bold; font-size: 14px; }
+                        .solde-row td { background-color: #D3D3D3; font-weight: bold; font-size: 15px; }
+                        .chq-name { font-weight: bold; }
+                    </style>
+
+                    <t t-foreach="docs" t-as="benif">
+                        <div class="report-header">
+                            <div class="header-row">
+                                <div class="date-box">
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                                </div>
+                                <div class="title-box">
+                                    RECAPITULATIF DES CHEQUES - <t t-esc="benif.name.upper()"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Chèque</th>
+                                    <th>Société</th>
+                                    <th>Date Émission</th>
+                                    <th>Date Échéance</th>
+                                    <th>Date Encaissement</th>
+                                    <th>Crédit</th>
+                                    <th>Encaissement</th>
+                                    <th>État</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_credit" t-value="0.0"/>
+                                <t t-set="total_encaisse" t-value="0.0"/>
+                                
+                                <t t-foreach="benif.cheque_ids" t-as="chq">
+                                    <t t-set="credit" t-value="chq.amount_total or 0.0"/>
+                                    <t t-set="encaisse" t-value="chq.montant_encaisse or 0.0"/>
+                                    <t t-set="total_credit" t-value="total_credit + credit"/>
+                                    <t t-set="total_encaisse" t-value="total_encaisse + encaisse"/>
+                                    
+                                    <t t-set="state_label" t-value="chq.state"/>
+                                    <t t-if="chq.state == 'brouillon'"><t t-set="state_label" t-value="'Brouillon'"/></t>
+                                    <t t-if="chq.state == 'reserve'"><t t-set="state_label" t-value="'Réserve'"/></t>
+                                    <t t-if="chq.state == 'actif'"><t t-set="state_label" t-value="'Actif'"/></t>
+                                    <t t-if="chq.state == 'cloture'"><t t-set="state_label" t-value="'Clôturé'"/></t>
+                                    <t t-if="chq.state == 'encaisse'"><t t-set="state_label" t-value="'Encaissé'"/></t>
+                                    <t t-if="chq.state == 'annule'"><t t-set="state_label" t-value="'Annulé'"/></t>
+
+                                    <tr>
+                                        <td class="chq-name"><t t-esc="chq.name or '-'"/></td>
+                                        <td><t t-esc="chq.ste_id.name if chq.ste_id else '-'"/></td>
+                                        <td><t t-esc="chq.date_emission.strftime('%d/%m/%Y') if chq.date_emission else '-'"/></td>
+                                        <td><t t-esc="chq.date_echeance.strftime('%d/%m/%Y') if chq.date_echeance else '-'"/></td>
+                                        <td><t t-esc="chq.date_encaissement.strftime('%d/%m/%Y') if chq.date_encaissement else '-'"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(credit).replace(',', ' ')"/></td>
+                                        <td class="amount-cell"><t t-esc="'{:,.2f}'.format(encaisse).replace(',', ' ')"/></td>
+                                        <td><t t-esc="state_label"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <tr class="total-row">
+                                    <td colspan="5" style="text-align: right; padding-right: 15px;">TOTAL:</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(total_credit).replace(',', ' ')"/></td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(total_encaisse).replace(',', ' ')"/></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="solde-row">
+                                    <td colspan="5" style="text-align: right; padding-right: 15px;">SOLDE A CE JOUR:</td>
+                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(total_credit - total_encaisse).replace(',', ' ')"/></td>
+                                    <td class="amount-cell"></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <p style="page-break-after:always;"></p>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

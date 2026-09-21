@@ -18,16 +18,19 @@
                     <style>
                         .report-header { margin-bottom: 20px; }
                         .header-row { display: flex; align-items: stretch; margin-bottom: 10px; }
-                        .date-box { background-color: #D3D3D3; border: 1px solid black; padding: 10px; font-size: 16px; font-weight: bold; width: 25%; text-align: center; }
-                        .title-box { background-color: #D3D3D3; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; color: black; flex-grow: 1; text-align: center; letter-spacing: 2px; }
+                        .date-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 16px; font-weight: bold; width: 25%; text-align: center; }
+                        .title-box { background-color: #FCE9DA; border: 1px solid black; padding: 10px; font-size: 20px; font-weight: bold; color: black; flex-grow: 1; text-align: center; letter-spacing: 2px; }
                         
                         .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                        .data-table th { background-color: #D3D3D3; border: 1px solid black; padding: 6px; text-align: center; font-size: 12px; font-weight: bold; }
+                        .data-table th { background-color: #FCE9DA; border: 1px solid black; padding: 6px; text-align: center; font-size: 12px; font-weight: bold; }
                         .data-table td { border: 1px solid black; padding: 6px; text-align: center; font-size: 12px; }
                         
-                        .amount-cell { background-color: #f9f9f9; font-weight: bold; text-align: right !important; }
-                        .total-row td { background-color: #F0F0F0; font-weight: bold; font-size: 14px; }
-                        .solde-row td { background-color: #D3D3D3; font-weight: bold; font-size: 15px; }
+                        .ste-cell { background-color: #6DA9DC; font-weight: bold; }
+                        .amount-cell { background-color: #FF9900; font-weight: bold; text-align: right !important; }
+                        .total-cell { background-color: #00FFFF; font-weight: bold; text-align: right !important; }
+                        
+                        .total-row td { background-color: #FCE9DA; font-weight: bold; font-size: 14px; }
+                        .solde-row td { background-color: #FCE9DA; font-weight: bold; font-size: 15px; }
                         .chq-name { font-weight: bold; }
                     </style>
 
@@ -76,7 +79,7 @@
 
                                     <tr>
                                         <td class="chq-name"><t t-esc="chq.name or '-'"/></td>
-                                        <td><t t-esc="chq.ste_id.name if chq.ste_id else '-'"/></td>
+                                        <td class="ste-cell"><t t-esc="chq.ste_id.name if chq.ste_id else '-'"/></td>
                                         <td><t t-esc="chq.date_emission.strftime('%d/%m/%Y') if chq.date_emission else '-'"/></td>
                                         <td><t t-esc="chq.date_echeance.strftime('%d/%m/%Y') if chq.date_echeance else '-'"/></td>
                                         <td><t t-esc="chq.date_encaissement.strftime('%d/%m/%Y') if chq.date_encaissement else '-'"/></td>
@@ -88,14 +91,14 @@
                                 
                                 <tr class="total-row">
                                     <td colspan="5" style="text-align: right; padding-right: 15px;">TOTAL:</td>
-                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(total_credit).replace(',', ' ')"/></td>
-                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(total_encaisse).replace(',', ' ')"/></td>
+                                    <td class="total-cell"><t t-esc="'{:,.2f}'.format(total_credit).replace(',', ' ')"/></td>
+                                    <td class="total-cell"><t t-esc="'{:,.2f}'.format(total_encaisse).replace(',', ' ')"/></td>
                                     <td></td>
                                 </tr>
                                 <tr class="solde-row">
                                     <td colspan="5" style="text-align: right; padding-right: 15px;">SOLDE A CE JOUR:</td>
-                                    <td class="amount-cell"><t t-esc="'{:,.2f}'.format(total_credit - total_encaisse).replace(',', ' ')"/></td>
-                                    <td class="amount-cell"></td>
+                                    <td class="total-cell"><t t-esc="'{:,.2f}'.format(total_credit - total_encaisse).replace(',', ' ')"/></td>
+                                    <td class="total-cell"></td>
                                     <td></td>
                                 </tr>
                             </tbody>

@@ -56,6 +56,16 @@ class TresorerieChqClient(models.Model):
 
     unpaid_count = fields.Integer(string="Impayés", compute='_compute_unpaid_count', store=True)
 
+    @api.depends('name', 'emetteur')
+    def _compute_display_name(self):
+        emetteur_dict = dict(self._fields['emetteur'].selection)
+        for rec in self:
+            if rec.emetteur:
+                label = emetteur_dict.get(rec.emetteur, rec.emetteur.capitalize())
+                rec.display_name = f"{label}-{rec.name}"
+            else:
+                rec.display_name = rec.name
+
     blacklist_id = fields.One2many('tresorerie_chq.blacklist.client', 'client_id', string="Fiche Liste Noire")
     blacklist_state = fields.Selection(
         [

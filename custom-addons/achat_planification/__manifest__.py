@@ -9,7 +9,7 @@
         - Saisir les dossiers d'achats avec les numéros de BL, factures, ETA et numéros de conteneurs.
         - Suivre les montants par semaine selon l'ETA des dossiers.
     """,
-    'depends': ['base', 'purchase', 'product', 'achat', 'logistique'],
+    'depends': ['base', 'achat', 'logistique'],
     'data': [
         'security/ir.model.access.csv',
         'views/planification_config_views.xml',

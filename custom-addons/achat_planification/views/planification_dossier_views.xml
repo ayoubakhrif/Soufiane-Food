@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form View -->
+        <record id="view_planification_dossier_form" model="ir.ui.view">
+            <field name="name">achat.planification.dossier.form</field>
+            <field name="model">achat.planification.dossier</field>
+            <field name="arch" type="xml">
+                <form string="Dossier Acheté">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="charge,arrive,decharge,paye"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="bl_number" placeholder="Numéro de BL"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="fournisseur_id"/>
+                                <field name="article_id"/>
+                                <field name="invoice_number"/>
+                            </group>
+                            <group>
+                                <field name="eta_date"/>
+                                <field name="montant_total" widget="monetary"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Conteneurs" name="containers">
+                                <group>
+                                    <field name="container_names" placeholder="Ex: CONT1234567, CONT7654321"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View -->
+        <record id="view_planification_dossier_tree" model="ir.ui.view">
+            <field name="name">achat.planification.dossier.tree</field>
+            <field name="model">achat.planification.dossier</field>
+            <field name="arch" type="xml">
+                <tree string="Dossiers Achetés">
+                    <field name="bl_number"/>
+                    <field name="fournisseur_id"/>
+                    <field name="article_id"/>
+                    <field name="eta_date"/>
+                    <field name="week_number"/>
+                    <field name="container_names"/>
+                    <field name="montant_total" sum="Total"/>
+                    <field name="state" widget="badge" 
+                           decoration-info="state == 'charge'"
+                           decoration-warning="state == 'arrive'"
+                           decoration-success="state == 'paye' or state == 'decharge'"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_planification_dossier_search" model="ir.ui.view">
+            <field name="name">achat.planification.dossier.search</field>
+            <field name="model">achat.planification.dossier</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Dossiers">
+                    <field name="bl_number"/>
+                    <field name="fournisseur_id"/>
+                    <field name="article_id"/>
+                    <field name="invoice_number"/>
+                    <field name="container_names"/>
+                    <filter string="Chargé" name="charge" domain="[('state','=','charge')]"/>
+                    <filter string="Arrivé au port" name="arrive" domain="[('state','=','arrive')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Fournisseur" name="group_fournisseur" context="{'group_by':'fournisseur_id'}"/>
+                        <filter string="Statut" name="group_state" context="{'group_by':'state'}"/>
+                        <filter string="Semaine ETA" name="group_week" context="{'group_by':'week_number'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_planification_dossier" model="ir.actions.act_window">
+            <field name="name">Dossiers Achetés</field>
+            <field name="res_model">achat.planification.dossier</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_group_week': 1}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Créez votre premier dossier de planification d'achat.
+              </p>
+            </field>
+        </record>
+    </data>
+</odoo>

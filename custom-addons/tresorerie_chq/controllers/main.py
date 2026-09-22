@@ -93,14 +93,29 @@ Exemple de réponse attendue:
         import re
         from datetime import datetime
         
-        # Parse file name: LCN-HAMZA BASSIT-06-07-2026 (1).pdf (allow optional spaces and WhatsApp duplicate suffix)
+        # Parse file name:
+        # Option 1: TYPE-EMETTEUR-CLIENT-DD-MM-YYYY.pdf (ex: CHQ-SOUFIANE-AMINE-06-07-2026.pdf)
+        # Standard: TYPE-CLIENT-DD-MM-YYYY.pdf (ex: CHQ-AMINE-06-07-2026.pdf)
         match = re.match(r'^\s*(CHQ|LCN)\s*-\s*(.*?)\s*-\s*(\d{2}-\d{2}-\d{4})(?:\s*\(\d+\))?\s*\.pdf\s*$', file_name, re.IGNORECASE)
         if not match:
-            return {"status": "error", "message": f"❌ Nom de fichier invalide: {file_name}. Le format doit être TYPE-CLIENT-DD-MM-YYYY.pdf"}
+            return {"status": "error", "message": f"❌ Nom de fichier invalide: {file_name}. Le format doit être TYPE-[EMETTEUR-]CLIENT-DD-MM-YYYY.pdf (ex: CHQ-SOUFIANE-AMINE-06-07-2026.pdf)"}
             
         doc_type_str = match.group(1).upper()
-        client_name = match.group(2).strip()
+        raw_client_part = match.group(2).strip()
         date_str = match.group(3)
+
+        # Détection de l'émetteur dans raw_client_part
+        emetteur_map = {'soufiane': 'Soufiane', 'hamza': 'Hamza'}
+        detected_emetteur = None
+        target_client_name = raw_client_part
+
+        # Vérifier si raw_client_part commence par "EMETTEUR-"
+        if '-' in raw_client_part:
+            prefix, remainder = raw_client_part.split('-', 1)
+            prefix_clean = prefix.strip().lower()
+            if prefix_clean in emetteur_map and remainder.strip():
+                detected_emetteur = prefix_clean
+                target_client_name = remainder.strip()
         
         payment_type = 'cheque' if doc_type_str == 'CHQ' else 'effet'
         
@@ -115,12 +130,40 @@ Exemple de réponse attendue:
         if existing_paiement:
             return {"status": "success", "message": f"⚠️ Le PDF '{file_name}' a déjà été enregistré précédemment (entrée #{existing_paiement.id}). Je l'ignore pour éviter de dupliquer les chèques/effets."}
             
-        # Search client
+        # Recherche du client avec gestion de l'émetteur
         Client = request.env['tresorerie_chq.client'].sudo()
-        client_id = self._robust_client_search(client_name, Client)
-                
-        if not client_id:
-            return {"status": "success", "message": f"❌ Le client '{client_name}' n'a pas été trouvé dans la base de données (ni par recherche floue)."}
+
+        if detected_emetteur:
+            # 1. Si un émetteur est spécifié dans le nom du fichier : on cherche ce client avec cet émetteur
+            client_id = self._robust_client_search(target_client_name, Client, emetteur=detected_emetteur)
+            if not client_id:
+                label_emetteur = emetteur_map.get(detected_emetteur, detected_emetteur)
+                return {
+                    "status": "success", 
+                    "message": f"❌ Le client '{target_client_name}' associé à l'émetteur '{label_emetteur}' n'a pas été trouvé dans la base de données."
+                }
+        else:
+            # 2. Si AUCUN émetteur n'est spécifié dans le nom du fichier :
+            # D'abord on cherche le client SANS émetteur (en direct)
+            client_id = self._robust_client_search(target_client_name, Client, emetteur=False)
+            
+            if not client_id:
+                # Vérifier si ce client existe mais AVEC un émetteur dans la base
+                existing_with_emetteur = self._robust_client_search(target_client_name, Client, emetteur=None)
+                if existing_with_emetteur and existing_with_emetteur.emetteur:
+                    label_e = emetteur_map.get(existing_with_emetteur.emetteur, existing_with_emetteur.emetteur.capitalize())
+                    return {
+                        "status": "error",
+                        "message": (
+                            f"❌ Erreur Émetteur : Le fichier ne contient aucun émetteur pour le client '{target_client_name}', "
+                            f"mais ce client est enregistré dans la base uniquement sous l'émetteur '{label_e}'.\n"
+                            f"Veuillez renommer le fichier sous la forme : {doc_type_str}-{label_e.upper()}-{target_client_name}-{date_str}.pdf"
+                        )
+                    }
+                return {
+                    "status": "success", 
+                    "message": f"❌ Le client '{target_client_name}' n'a pas été trouvé dans la base de données (ni par recherche floue)."
+                }
             
         # Create paiement
         Paiement = request.env['tresorerie_chq.paiement'].sudo()
@@ -190,8 +233,44 @@ Exemple de réponse attendue:
         if group_id != TRESORERIE_REPORT_GROUP_ID:
             return {'status': 'ignored', 'message': 'This agent only handles the Tresorerie Report Group.'}
 
-        # 1. Fast match & Fuzzy code search
+        # 0. Vérification si la demande concerne un émetteur (ex: Soufiane, Hamza)
+        text_lower = message_text.lower().strip()
         Client = request.env['tresorerie_chq.client'].sudo()
+        emetteur_key = None
+        emetteur_label = None
+        
+        # Liste des émetteurs possibles
+        emetteur_map = {'soufiane': 'Soufiane', 'hamza': 'Hamza'}
+        for key, label in emetteur_map.items():
+            if text_lower == key or text_lower == f"rapport {key}" or text_lower == f"clients {key}" or text_lower == f"client {key}":
+                emetteur_key = key
+                emetteur_label = label
+                break
+                
+        if emetteur_key:
+            emetteur_clients = Client.search([('emetteur', '=', emetteur_key)], order='name asc')
+            if not emetteur_clients:
+                return {
+                    'status': 'not_found', 
+                    'message': f"Aucun client trouvé pour l'émetteur '{emetteur_label}'."
+                }
+            
+            report_action = request.env['ir.actions.report'].sudo()
+            pdf_content, _ = report_action._render_qweb_pdf(
+                'tresorerie_chq.action_report_tresorerie_chq_emetteur_history', 
+                res_ids=emetteur_clients.ids,
+                data={'emetteur_name': emetteur_label}
+            )
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            
+            return {
+                'status': 'success',
+                'client_name': f"Émetteur {emetteur_label} ({len(emetteur_clients)} clients)",
+                'pdf_base64': pdf_base64,
+                'file_name': f"Rapport_Tresorerie_Emetteur_{emetteur_label}.pdf"
+            }
+
+        # 1. Fast match & Fuzzy code search
         client_id = self._robust_client_search(message_text, Client)
         
         if client_id:
@@ -212,6 +291,26 @@ Exemple de réponse attendue:
             
             if not extracted_name or extracted_name.upper() == 'IGNORE':
                 return {'status': 'ignored'}
+
+            # Vérifier si l'IA a extrait un émetteur
+            if extracted_name.lower() in emetteur_map:
+                e_key = extracted_name.lower()
+                e_label = emetteur_map[e_key]
+                emetteur_clients = Client.search([('emetteur', '=', e_key)], order='name asc')
+                if emetteur_clients:
+                    report_action = request.env['ir.actions.report'].sudo()
+                    pdf_content, _ = report_action._render_qweb_pdf(
+                        'tresorerie_chq.action_report_tresorerie_chq_emetteur_history', 
+                        res_ids=emetteur_clients.ids,
+                        data={'emetteur_name': e_label}
+                    )
+                    pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+                    return {
+                        'status': 'success',
+                        'client_name': f"Émetteur {e_label} ({len(emetteur_clients)} clients)",
+                        'pdf_base64': pdf_base64,
+                        'file_name': f"Rapport_Tresorerie_Emetteur_{e_label}.pdf"
+                    }
 
             if not extracted_name or extracted_name.lower() == 'none':
                 return {'status': 'not_found', 'message': "Désolé, je n'ai pas pu identifier le client dans votre message."}
@@ -251,18 +350,31 @@ Exemple de réponse attendue:
                 'choices': choices
             }
 
-    def _robust_client_search(self, text, ClientModel):
+    def _robust_client_search(self, text, ClientModel, emetteur=None):
         import difflib
         import re
         text_clean = text.lower().strip()
         
+        base_domain = []
+        if emetteur is not None:
+            if emetteur is False:
+                base_domain.append(('emetteur', '=', False))
+            else:
+                base_domain.append(('emetteur', '=', emetteur))
+
         # 1. Exact or ILIKE match
-        client_id = ClientModel.search([('name', 'ilike', text_clean)], limit=1)
+        client_id = ClientModel.search(base_domain + [('name', 'ilike', text_clean)], limit=1)
         if client_id:
             return client_id
             
         AliasModel = request.env['tresorerie_chq.client.alias'].sudo()
-        alias_id = AliasModel.search([('name', 'ilike', text_clean)], limit=1)
+        alias_domain = [('name', 'ilike', text_clean)]
+        if emetteur is not None:
+            if emetteur is False:
+                alias_domain.append(('client_id.emetteur', '=', False))
+            else:
+                alias_domain.append(('client_id.emetteur', '=', emetteur))
+        alias_id = AliasModel.search(alias_domain, limit=1)
         if alias_id:
             return alias_id.client_id
             
@@ -272,7 +384,7 @@ Exemple de réponse attendue:
             
         text_norm = normalize_str(text_clean)
         
-        all_clients = ClientModel.search([])
+        all_clients = ClientModel.search(base_domain)
         client_names_norm = {normalize_str(c.name): c for c in all_clients if c.name}
         
         # Check closest client name
@@ -281,7 +393,7 @@ Exemple de réponse attendue:
             return client_names_norm[closest_names[0]]
             
         # Check closest alias
-        all_aliases = AliasModel.search([])
+        all_aliases = AliasModel.search(alias_domain if emetteur is not None else [])
         alias_names_norm = {normalize_str(a.name): a.client_id for a in all_aliases if a.name and a.client_id}
         
         closest_aliases = difflib.get_close_matches(text_norm, alias_names_norm.keys(), n=1, cutoff=0.7)

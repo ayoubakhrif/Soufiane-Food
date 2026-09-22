@@ -54,6 +54,26 @@ class TresorerieChqClient(models.Model):
         self.ensure_one()
         return self.env['tresorerie_chq.effet'].search([('client_id', '=', self.id)], order='check_date asc, id desc')
 
+    def get_report_summary(self):
+        self.ensure_one()
+        all_chqs = self.get_all_cheques()
+        all_effs = self.get_all_effets()
+        total_chq = sum(all_chqs.mapped('amount'))
+        total_eff = sum(all_effs.mapped('amount'))
+        total_encaisse = sum(all_chqs.filtered(lambda x: x.state == 'encaisse').mapped('amount')) + sum(all_effs.filtered(lambda x: x.state == 'encaisse').mapped('amount'))
+        total_impaye = sum(all_chqs.filtered(lambda x: x.state == 'impaye').mapped('amount')) + sum(all_effs.filtered(lambda x: x.state == 'impaye').mapped('amount'))
+        return {
+            'cheques': all_chqs,
+            'effets': all_effs,
+            'total_chq': total_chq,
+            'total_eff': total_eff,
+            'total_general': total_chq + total_eff,
+            'total_encaisse': total_encaisse,
+            'total_impaye': total_impaye,
+            'count_chq': len(all_chqs),
+            'count_eff': len(all_effs),
+        }
+
     unpaid_count = fields.Integer(string="Impayés", compute='_compute_unpaid_count', store=True)
 
     @api.depends('name', 'emetteur')

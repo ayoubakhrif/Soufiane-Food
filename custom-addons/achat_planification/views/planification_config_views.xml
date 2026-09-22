@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_planification_config_form" model="ir.ui.view">
+            <field name="name">achat.planification.config.form</field>
+            <field name="model">achat.planification.config</field>
+            <field name="arch" type="xml">
+                <form string="Configuration Budget">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="montant_hebdomadaire_max" widget="monetary"/>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_planification_config" model="ir.actions.act_window">
+            <field name="name">Budget Hebdomadaire</field>
+            <field name="res_model">achat.planification.config</field>
+            <field name="view_mode">form</field>
+            <field name="res_id" eval="1"/> <!-- On essaie de forcer le premier ID s'il existe -->
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Définissez le budget hebdomadaire max.
+              </p>
+            </field>
+        </record>
+    </data>
+</odoo>

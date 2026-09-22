@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Top menu item -->
+        <menuitem id="menu_achat_planification_root"
+                  name="Planification Achat"
+                  sequence="20"/>
+
+        <!-- Menu Dossiers -->
+        <menuitem id="menu_achat_planification_dossiers"
+                  name="Dossiers Achetés"
+                  parent="menu_achat_planification_root"
+                  action="action_planification_dossier"
+                  sequence="10"/>
+
+        <!-- Menu Configuration -->
+        <menuitem id="menu_achat_planification_config"
+                  name="Configuration"
+                  parent="menu_achat_planification_root"
+                  sequence="100"/>
+                  
+        <menuitem id="menu_achat_planification_config_budget"
+                  name="Budget Hebdomadaire"
+                  parent="menu_achat_planification_config"
+                  action="action_planification_config"
+                  sequence="10"/>
+    </data>
+</odoo>

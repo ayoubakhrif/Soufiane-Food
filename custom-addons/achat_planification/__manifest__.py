@@ -11,6 +11,7 @@
     """,
     'depends': ['base', 'achat', 'logistique'],
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/planification_config_views.xml',
         'views/planification_dossier_views.xml',

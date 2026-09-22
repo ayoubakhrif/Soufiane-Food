@@ -4,6 +4,7 @@
         <!-- Top menu item -->
         <menuitem id="menu_achat_planification_root"
                   name="Planification Achat"
+                  groups="achat_planification.group_achat_planification_user"
                   sequence="20"/>
 
         <!-- Menu Dossiers -->
@@ -17,6 +18,7 @@
         <menuitem id="menu_achat_planification_config"
                   name="Configuration"
                   parent="menu_achat_planification_root"
+                  groups="achat_planification.group_achat_planification_manager"
                   sequence="100"/>
                   
         <menuitem id="menu_achat_planification_config_budget"

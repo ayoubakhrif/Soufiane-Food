@@ -6,13 +6,13 @@ class PlanificationDossier(models.Model):
     _order = 'eta_date desc, id desc'
 
     bl_number = fields.Char(string='Numéro de BL', required=True)
-    article_id = fields.Many2one('product.product', string='Article')
+    article_id = fields.Many2one('achat.article', string='Article')
     invoice_number = fields.Char(string='Invoice Num')
     montant_total = fields.Monetary(string='Montant', currency_field='currency_id')
     currency_id = fields.Many2one('res.currency', string='Devise', default=lambda self: self.env.company.currency_id)
     eta_date = fields.Date(string='ETA (Date d\'arrivée prévue)')
     container_names = fields.Char(string='Numéros de Conteneurs', help='Séparés par des virgules')
-    fournisseur_id = fields.Many2one('res.partner', string='Fournisseur', domain="[('supplier_rank', '>', 0)]")
+    fournisseur_id = fields.Many2one('logistique.supplier', string='Fournisseur')
     state = fields.Selection([
         ('charge', 'Chargé'),
         ('arrive', 'Arrivé au port'),

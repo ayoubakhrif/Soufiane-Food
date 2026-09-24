@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_kal3iya_stock_stock_kanban" model="ir.ui.view">
         <field name="name">kal3iya.stock.stock.kanban</field>
@@ -31,7 +31,7 @@
                             "
                             >
 
-                            <!-- 🖼️ Image -->
+                            <!-- ðŸ–¼ï¸ Image -->
                             <aside style="width:90px; height:90px; flex-shrink:0;">
                                 <div class="o_kanban_image_fill w-100 h-100">
                                     <field name="image_1920"
@@ -41,7 +41,7 @@
                                 </div>
                             </aside>
 
-                            <!-- 📋 Infos -->
+                            <!-- ðŸ“‹ Infos -->
                             <div class="flex-grow-1">
 
                                 <!-- Produit -->
@@ -61,14 +61,7 @@
                                         <field name="garage"/>
                                     </span>
 
-                                    <span style="
-                                        background:#f0fdf4;
-                                        color:#166534;
-                                        padding:2px 8px;
-                                        border-radius:999px;
-                                        font-size:12px;
-                                        margin-right:6px;">
-                                                                            </span>
+                                    
 
                                     <span style="
                                         background:#f3f4f6;
@@ -83,16 +76,16 @@
                                 <!-- Stock -->
                                 <div style="font-size:13px; color:#374151; line-height:1.6;">
                                     <div>
-                                        📦 <b>Quantité :</b>
+                                        ðŸ“¦ <b>QuantitÃ© :</b>
                                         <span style="color:#059669;">
                                             <field name="quantity"/>
                                         </span>
                                     </div>
                                     <div>
-                                        ⚖️ <b>Poids :</b> <field name="weight"/> (Poids tot: <t t-esc="record.quantity.raw_value * record.weight.raw_value"/> Kg)
+                                        âš–ï¸ <b>Poids :</b> <field name="weight"/> 
                                     </div>
                                     <div>
-                                        📍 <b>Frigo :</b> <field name="frigo"/>
+                                        ðŸ“ <b>Frigo :</b> <field name="frigo"/>
                                     </div>
                                 </div>
 
@@ -101,19 +94,19 @@
                                 <!-- Financier -->
                                 <div style="font-size:13px; color:#374151; line-height:1.6;">
                                     <div>
-                                        💰 <b>Dernier Prix :</b>
+                                        ðŸ’° <b>Dernier Prix :</b>
                                         <span style="color:#1d4ed8;">
                                             <field name="price"/>
                                         </span>
                                     </div>
                                     <div>
-                                        🧾 <b>Mt Achat Tot :</b>
+                                        ðŸ§¾ <b>Mt Achat Tot :</b>
                                         <span style="color:#7c2d12;">
                                             <field name="mt_achat"/>
                                         </span>
                                     </div>
                                     <div>
-                                        🏷️ <b>Lot :</b> <field name="lot"/> | <b>DUM :</b> <field name="dum"/>
+                                        ðŸ·ï¸ <b>Lot :</b> <field name="lot"/> | <b>DUM :</b> <field name="dum"/>
                                     </div>
                                 </div>
                             </div>
@@ -134,7 +127,7 @@
                 <field name="dum"/>
                 <field name="garage"/>
                 <field name="frigo"/>
-                                <field name="quantity" sum="Total Quantité"/>
+                                <field name="quantity" sum="Total QuantitÃ©"/>
                 <field name="weight"/>
                 <field name="price"/>
                 <field name="mt_achat" sum="Total Mt Achat"/>
@@ -157,7 +150,7 @@
                         </h1>
                     </div>
                     <group>
-                        <group string="Détails Stock">
+                        <group string="DÃ©tails Stock">
                             <field name="quantity"/>
                             <field name="weight"/>
                             <field name="calibre"/>
@@ -250,3 +243,4 @@
     </record>
 
 </odoo>
+

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_kal3iya_stock_exit_tree" model="ir.ui.view">
         <field name="name">kal3iya.stock.exit.tree</field>
@@ -35,9 +35,9 @@
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="%(action_kal3iya_stock_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
                             <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_text">RetournÃ©</span>
+                                <span class="o_stat_text">RetournÃƒÂ©</span>
                             
-                        <button name="action_view_returns" type="object" class="oe_stat_button" icon="fa-undo" attrs="{'invisible': [('returned_qty', '=', 0)]}">
+                        <button name="action_view_returns" type="object" class="oe_stat_button" icon="fa-undo" invisible="returned_qty == 0">
                             <div class="o_stat_info">
                                 <field name="returned_qty" class="o_stat_value"/>
                                 <span class="o_stat_text">Retours</span>
@@ -48,7 +48,7 @@
                     </div>
                     <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
                         <i class="fa fa-info-circle me-2"/>
-                        <strong>Attention:</strong> Les opÃ©rations confirmÃ©es ne peuvent pas Ãªtre modifiÃ©es. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et crÃ©ez une nouvelle opÃ©ration.
+                        <strong>Attention:</strong> Les opÃƒÂ©rations confirmÃƒÂ©es ne peuvent pas ÃƒÂªtre modifiÃƒÂ©es. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et crÃƒÂ©ez une nouvelle opÃƒÂ©ration.
                     </div>
                     <div class="oe_title">
                         <h1>
@@ -56,7 +56,7 @@
                         </h1>
                     </div>
                     
-                    <separator string="DÃ©tails Sortie"/>
+                    <separator string="DÃƒÂ©tails Sortie"/>
                     <group>
                         <group string="Selection Stock">
                             <field name="product_id" readonly="1" force_save="1"/>
@@ -65,7 +65,7 @@
                             <field name="garage" readonly="1" force_save="1"/>
                             <field name="frigo" readonly="1" force_save="1"/>
                                                     </group>
-                        <group string="QuantitÃ©s &amp; Prix">
+                        <group string="QuantitÃƒÂ©s &amp; Prix">
                             <field name="qty"/>
                             <field name="weight" readonly="1" force_save="1"/>
                             <field name="tonnage"/>
@@ -74,7 +74,7 @@
                         </group>
                     </group>
 
-                    <separator string="Informations ComplÃ©mentaires"/>
+                    <separator string="Informations ComplÃƒÂ©mentaires"/>
                     <group>
                         <group>
                             <field name="client_id" options="{'no_create_edit': True}"/>
@@ -85,7 +85,7 @@
                         </group>
                     </group>
 
-                    <separator string="Mouvements LiÃ©s"/>
+                    <separator string="Mouvements LiÃƒÂ©s"/>
                     <group>
                         <field name="move_id"/>
                         <field name="cancel_move_id" invisible="not cancel_move_id"/>
@@ -124,7 +124,7 @@
                 <field name="driver_id"/>
                                 <separator/>
                 <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="ConfirmÃ©" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="ConfirmÃƒÂ©" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
@@ -132,7 +132,7 @@
                     <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                                         <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
-                    <filter string="Ã‰tat" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Ãƒâ€°tat" name="group_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
         </field>
@@ -144,6 +144,7 @@
         <field name="view_mode">tree,form,pivot</field>
     </record>
 </odoo>
+
 
 
 

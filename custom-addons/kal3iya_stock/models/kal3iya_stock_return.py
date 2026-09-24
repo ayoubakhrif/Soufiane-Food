@@ -15,7 +15,18 @@ class Kal3iyaStockReturn(models.Model):
     product_id = fields.Many2one('kal3iya.stock.product', related='exit_id.product_id', store=True, string='Produit')
     lot = fields.Char(related='exit_id.lot', store=True, string='Lot')
     dum = fields.Char(related='exit_id.dum', store=True, string='DUM')
-    garage = fields.Selection(related='exit_id.garage', store=True, string='Garage')
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+        ('fenidek', 'Fenidek'),
+    ], string='Garage', required=True)
     frigo = fields.Selection(related='exit_id.frigo', store=True, string='Frigo')
     client_id = fields.Many2one('kal3iya.stock.client', related='exit_id.client_id', store=True, string='Client')
     ste_id = fields.Many2one('kal3iya.stock.ste', related='exit_id.ste_id', store=True, string='Société')

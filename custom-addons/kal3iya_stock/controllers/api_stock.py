@@ -238,3 +238,61 @@ class Kal3iyaStockApiController(http.Controller):
         except Exception as e:
             _logger.exception("Erreur API Transfer")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+    @http.route('/api/kal3iya/exits', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    def api_exits(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        domain = [('state', '=', 'done')]
+        exits = request.env['kal3iya.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=100)
+        data = []
+        for rec in exits:
+            returned_qty = sum(r.qty for r in rec.return_ids if r.state == 'done')
+            if returned_qty < rec.qty: # Only send exits that can still be returned
+                data.append({
+                    'id': rec.id,
+                    'name': rec.name,
+                    'date': str(rec.date),
+                    'product_name': rec.product_id.name if rec.product_id else '',
+                    'lot': rec.lot or '',
+                    'client_name': rec.client_id.name if rec.client_id else '',
+                    'garage': rec.garage or '',
+                    'qty': rec.qty,
+                    'returned_qty': returned_qty,
+                })
+
+        return self._json_response({
+            'status': 'success',
+            'exits': data,
+        })
+
+    @http.route('/api/kal3iya/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_return(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            exit_id = int(data.get('exit_id'))
+            exit_rec = request.env['kal3iya.stock.exit'].sudo().browse(exit_id)
+            if not exit_rec.exists():
+                return self._json_response({'status': 'error', 'message': "Sortie introuvable."}, status=404)
+
+            vals = {
+                'exit_id': exit_id,
+                'garage': data.get('garage'),
+                'qty': float(data.get('qty', 0)),
+                'date': self._sanitize_date(data.get('date')),
+            }
+
+            ret_rec = request.env['kal3iya.stock.return'].sudo().create(vals)
+            ret_rec.action_confirm()
+
+            return self._json_response({
+                'status': 'success',
+                'return_id': ret_rec.id,
+                'name': ret_rec.name,
+                'message': f"Retour {ret_rec.name} enregistré avec succès."
+            })
+        except Exception as e:
+            _logger.exception("Erreur API Return")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)

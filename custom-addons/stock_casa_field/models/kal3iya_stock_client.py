@@ -1,7 +1,6 @@
-from odoo import models, fields
+﻿from odoo import models, fields
 
 class Kal3iyaStockClient(models.Model):
-    return_ids = fields.One2many('kal3iya.stock.return', 'client_id', string='Retours')
     _name = 'kal3iya.stock.client'
     _description = 'Clients Stock Kal3iya'
 
@@ -14,6 +13,7 @@ class Kal3iyaStockClient(models.Model):
     )
     
     return_ids = fields.One2many(
+        'kal3iya.stock.return',
         'client_id',
         string='Retours'
     )
@@ -30,5 +30,3 @@ class Kal3iyaStockClient(models.Model):
                 'default_client_id': self.id,
             }
         }
-
-

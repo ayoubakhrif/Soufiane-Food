@@ -2,6 +2,13 @@ import base64
 import json
 import logging
 import requests
+import io
+import xlsxwriter
+import re
+import traceback
+import pytz
+import calendar
+from odoo import fields
 from odoo import http, SUPERUSER_ID
 from odoo.http import request
 
@@ -223,7 +230,6 @@ class WhatsAppFinanceController(http.Controller):
 
                 summary_msg += f"📂 _Les rapports PDF et Excel détaillés ont été générés et sont joints ci-dessous._"
 
-                from odoo import fields
                 today_str = fields.Date.today().strftime('%d/%m/%Y').replace('/', '_')
                 return {
                     'status': 'success',
@@ -261,10 +267,7 @@ class WhatsAppFinanceController(http.Controller):
             report_action = request.env['ir.actions.report'].sudo()
             pdf_content, _ = report_action._render_qweb_pdf('finance_2.action_report_finance2_divers_summary', res_ids=divers_v2.ids)
             
-            import base64
-            import io
-            import xlsxwriter
-            from odoo import fields
+            
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
             
             # 2. Render Excel spreadsheet
@@ -412,7 +415,6 @@ class WhatsAppFinanceController(http.Controller):
                 summary_msg += f"• ⚠️ *Chèques absents* : {total_missing} chèques\n\n"
                 summary_msg += f"📂 _Les rapports PDF et Excel détaillés ont été générés et sont joints ci-dessous._"
 
-                from odoo import fields
                 today_str = fields.Date.today().strftime('%d/%m/%Y').replace('/', '_')
                 return {
                     'status': 'success',
@@ -471,7 +473,6 @@ class WhatsAppFinanceController(http.Controller):
             return {'status': 'success', 'response': msg}
 
         # 5. Handle Cheque / Effet Number Search
-        import re
         is_direct_search = False
         search_number = None
         
@@ -621,7 +622,6 @@ class WhatsAppFinanceController(http.Controller):
 
         # 5.4.5 Handle Encours Marglory
         if msg_clean.startswith("encours marglory"):
-            import calendar
             param = None
             if len(msg_clean.split()) > 2:
                 param = msg_clean.split()[2]
@@ -704,7 +704,6 @@ class WhatsAppFinanceController(http.Controller):
                 
                 # Check for justified missing journals in V2 cheques history
                 if missing_journals:
-                    import re
                     actual_missing = []
                     for j in missing_journals:
                         is_justified = False
@@ -776,8 +775,6 @@ class WhatsAppFinanceController(http.Controller):
             encaisse_label = " ENCAISSÉS" if only_encaisse else ""
             
             try:
-                import io
-                import xlsxwriter
                 
                 output = io.BytesIO()
                 workbook = xlsxwriter.Workbook(output, {'in_memory': True})
@@ -954,7 +951,6 @@ class WhatsAppFinanceController(http.Controller):
                     ]
                 }
             except Exception as e:
-                import traceback
                 error_trace = traceback.format_exc()
                 _logger.error(f"Error generating week PDF: {error_trace}")
                 return {'status': 'error', 'message': f"Erreur lors de la génération du PDF ({week_str}) : {str(e)}\n\nTrace: {error_trace}"}
@@ -1020,8 +1016,6 @@ class WhatsAppFinanceController(http.Controller):
                 msg += "\n⚠️ _Seuls les 100 premiers résultats sont affichés._"
                 
             # Generate Excel
-            import io
-            import xlsxwriter
             
             output = io.BytesIO()
             workbook = xlsxwriter.Workbook(output, {'in_memory': True})
@@ -1074,7 +1068,6 @@ class WhatsAppFinanceController(http.Controller):
             if talon.last_used_chq:
                 summary_msg += f"\n• Dernier chèque sorti: *{talon.last_used_chq}*"
 
-            from odoo import fields
             return {
                 'status': 'success',
                 'product_name': talon.name_shown,
@@ -1171,7 +1164,6 @@ class WhatsAppFinanceController(http.Controller):
                         f"   ↳ Restants: {b_item['count_non_encaisse']} {doc_short} ({'{:,.2f}'.format(b_item['non_encaisse']).replace(',', ' ')} DH)\n"
                     )
 
-            from odoo import fields
             return {
                 'status': 'success',
                 'product_name': benif.name,
@@ -1230,7 +1222,6 @@ class WhatsAppFinanceController(http.Controller):
 
     
     def _format_finance2_cheque_details(self, cheque):
-        import pytz
         from datetime import datetime
 
         doc_name = cheque.name or "Inconnu"

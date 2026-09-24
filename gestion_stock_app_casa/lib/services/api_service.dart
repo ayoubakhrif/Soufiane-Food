@@ -244,47 +244,4 @@ class ApiService {
     }
     return syncedCount;
   }
-
-  static Future<List<Map<String, dynamic>>> fetchExits() async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/exits');
-    final response = await http.get(uri, headers: _headers);
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 200 && data['status'] == 'success') {
-      return List<Map<String, dynamic>>.from(data['exits']);
-    } else {
-      throw Exception(data['message'] ?? 'Erreur lors de la récupération des sorties');
-    }
-  }
-
-  static Future<Map<String, dynamic>> createReturn(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/return');
-    http.Response response;
-    try {
-      response = await http.post(
-        uri,
-        headers: _headers,
-        body: jsonEncode(payload),
-      );
-    } catch (e) {
-      throw Exception('Erreur réseau. Impossible de contacter le serveur.');
-    }
-
-    try {
-      final data = jsonDecode(response.body);
-      if (response.statusCode == 200 && data['status'] == 'success') {
-        return data;
-      } else {
-        return {
-          'status': 'error',
-          'message': data['message'] ?? 'Erreur (Code: ${response.statusCode})'
-        };
-      }
-    } catch (_) {
-      return {
-        'status': 'error',
-        'message': 'Erreur serveur (${response.statusCode}): ${response.body}'
-      };
-    }
-  }
 }
-

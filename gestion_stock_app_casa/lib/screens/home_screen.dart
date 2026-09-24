@@ -7,7 +7,6 @@ import 'login_screen.dart';
 import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
 import 'stock_transfer_screen.dart';
-import 'exits_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Agent agent;
@@ -293,21 +292,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => StockTransferScreen(agent: widget.agent)),
-                );
-                _checkPendingOperations();
-              },
-            ),
-
-            // 4. Retour Client
-            _buildActionButton(
-              title: 'Retours Clients',
-              subtitle: 'Historique des sorties & déclaration de retours',
-              icon: Icons.assignment_return_rounded,
-              color: Colors.orange.shade800,
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)),
                 );
                 _checkPendingOperations();
               },

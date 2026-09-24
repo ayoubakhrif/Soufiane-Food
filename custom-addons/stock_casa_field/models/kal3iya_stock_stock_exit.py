@@ -1,0 +1,197 @@
+﻿from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+class Kal3iyaStockExit(models.Model):
+    returned_qty = fields.Float(string='Quantité Retournée', compute='_compute_returned_qty', store=True)
+    return_ids = fields.One2many('kal3iya.stock.return', 'exit_id', string='Retours')
+
+    @api.depends('return_ids.qty', 'return_ids.state')
+    def _compute_returned_qty(self):
+        for rec in self:
+            rec.returned_qty = sum(rec.return_ids.filtered(lambda r: r.state == 'done').mapped('qty'))
+
+    def action_view_returns(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Retours Client',
+            'view_mode': 'tree,form',
+            'res_model': 'kal3iya.stock.return',
+            'domain': [('exit_id', '=', self.id)],
+            'context': {'default_exit_id': self.id},
+        }
+
+    _name = 'kal3iya.stock.exit'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _description = 'Sortie Stock Kal3iya'
+    _order = 'date desc, id desc'
+
+    name = fields.Char(string='RÃ©fÃ©rence', readonly=True, default='/')
+    product_id = fields.Many2one('kal3iya.stock.product', string='Produit', required=True)
+    qty = fields.Float(string='QuantitÃ©', required=True)
+    weight = fields.Float(string='Poids unit (Kg)')
+    tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
+    
+
+    
+    date = fields.Date(string='Date', required=True)
+    lot = fields.Char(string='Lot')
+    dum = fields.Char(string='DUM')
+    calibre = fields.Char(string='Calibre')
+    
+    garage = fields.Selection([
+        ('garage1', 'Garage 1'),
+        ('garage2', 'Garage 2'),
+        ('garage3', 'Garage 3'),
+        ('garage4', 'Garage 4'),
+        ('garage5', 'Garage 5'),
+        ('garage6', 'Garage 6'),
+        ('garage7', 'Garage 7'),
+        ('garage8', 'Garage 8'),
+        ('terrasse', 'Terrasse'),
+        ('fenidek', 'Fenidek'),
+    ], string='Garage', required=True)
+    
+    frigo = fields.Selection([
+        ('frigo1', 'Frigo 1'),
+        ('frigo2', 'Frigo 2'),
+        ('stock_kal3iya', 'Stock Kal3iya'),
+    ], string='Frigo')
+    
+    client_id = fields.Many2one('kal3iya.stock.client', string='Client')
+    driver_id = fields.Many2one('kal3iya.stock.driver', string='Chauffeur')
+    
+    state = fields.Selection([
+        ('draft', 'Brouillon'),
+        ('done', 'ConfirmÃ©'),
+        ('cancel', 'AnnulÃ©'),
+    ], string='Ã‰tat', default='draft', required=True)
+
+    move_id = fields.Many2one('kal3iya.stock.move', string='Mouvement Stock', readonly=True)
+    cancel_move_id = fields.Many2one('kal3iya.stock.move', string='Mouvement d\'Annulation', readonly=True)
+
+    @api.depends('return_ids.qty', 'return_ids.state')
+    def _compute_returned_qty(self):
+        for rec in self:
+            rec.returned_qty = sum(rec.return_ids.filtered(lambda r: r.state == 'done').mapped('qty'))
+
+    def action_new_return(self):
+        self.ensure_one()
+        return {
+            'name': 'Nouveau Retour',
+            'type': 'ir.actions.act_window',
+            'res_model': 'kal3iya.stock.return',
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {
+                'default_exit_id': self.id,
+                'default_driver_id': self.driver_id.id,
+            }
+        }
+
+    @api.depends('qty', 'weight')
+    def _compute_tonnage(self):
+        for rec in self:
+            rec.tonnage = rec.qty * rec.weight
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('kal3iya.stock.exit') or '/'
+        return super(Kal3iyaStockExit, self).create(vals)
+
+    def write(self, vals):
+        for rec in self:
+            if rec.state == 'done':
+                forbidden_fields = [
+                    'product_id', 'qty', 'weight',
+                    'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id'
+                ]
+                if any(f in vals for f in forbidden_fields):
+                    raise UserError(_("Les opÃ©rations confirmÃ©es ne peuvent pas Ãªtre modifiÃ©es. Utilisez 'Annuler' et crÃ©ez une nouvelle opÃ©ration."))
+        return super(Kal3iyaStockExit, self).write(vals)
+
+    def action_confirm(self):
+        for rec in self:
+            if rec.state != 'draft':
+                continue
+            
+            # Optimized availability check using read_group
+            domain = [
+                ('product_id', '=', rec.product_id.id),
+                ('lot', '=', rec.lot),
+                ('dum', '=', rec.dum),
+                ('garage', '=', rec.garage),
+                ('frigo', '=', rec.frigo),
+                ('state', '=', 'done')
+            ]
+            res = self.env['kal3iya.stock.move'].read_group(domain, ['qty'], [])
+            total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
+            
+            if rec.qty > total_available:
+                raise UserError(_("Stock insuffisant ! Disponible : %s, DemandÃ© : %s") % (total_available, rec.qty))
+            
+            # Create Move
+            move = self.env['kal3iya.stock.move'].create({
+                'product_id': rec.product_id.id,
+                'lot': rec.lot,
+                'dum': rec.dum,
+                'garage': rec.garage,
+                'frigo': rec.frigo,
+                'qty': -rec.qty,
+                'move_type': 'exit',
+                'state': 'done',
+                'date': rec.date,
+                'reference': rec.name,
+
+                'weight': rec.weight,
+                'calibre': rec.calibre,
+                'client_id': rec.client_id.id,
+                'driver_id': rec.driver_id.id,
+                'res_model': 'kal3iya.stock.exit',
+                'res_id': rec.id,
+            })
+            rec.write({
+                'state': 'done',
+                'move_id': move.id
+            })
+
+    def action_cancel(self):
+        for rec in self:
+            if rec.state != 'done':
+                raise UserError(_("Vous ne pouvez annuler que des sorties confirmÃ©es."))
+            
+            # Create Reversal Move
+            cancel_move = self.env['kal3iya.stock.move'].create({
+                'product_id': rec.product_id.id,
+                'lot': rec.lot,
+                'dum': rec.dum,
+                'garage': rec.garage,
+                'frigo': rec.frigo,
+                'qty': rec.qty,
+                'move_type': 'cancel_exit',
+                'state': 'done',
+                'date': fields.Datetime.now(),
+                'reference': rec.name,
+
+                'weight': rec.weight,
+                'calibre': rec.calibre,
+                'client_id': rec.client_id.id,
+                'driver_id': rec.driver_id.id,
+                'res_model': 'kal3iya.stock.exit',
+                'res_id': rec.id,
+            })
+            rec.write({
+                'state': 'cancel',
+                'cancel_move_id': cancel_move.id
+            })
+
+    @api.constrains('qty')
+    def _check_qty_positive(self):
+        for rec in self:
+            if rec.qty <= 0:
+                raise UserError(_("La quantitÃ© doit Ãªtre strictement positive."))
+
+
+
+

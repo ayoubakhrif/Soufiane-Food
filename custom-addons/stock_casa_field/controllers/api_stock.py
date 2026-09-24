@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 from odoo import http, fields
 from odoo.http import request
@@ -48,29 +48,6 @@ class Kal3iyaStockApiController(http.Controller):
                 pass
         return fields.Date.context_today(request.env.user)
 
-    @http.route('/api/kal3iya/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
-    def api_login(self, **kwargs):
-        if request.httprequest.method == 'OPTIONS':
-            return self._json_response({'status': 'ok'})
-        data = self._get_request_data()
-        phone = (data.get('phone') or '').strip()
-        password = (data.get('password') or '').strip()
-
-        if not phone or not password:
-            return self._json_response({'status': 'error', 'message': 'Veuillez saisir le numéro de téléphone et le mot de passe.'}, status=400)
-
-        agent = request.env['kal3iya.stock.agent'].sudo().search([('phone', '=', phone), ('active', '=', True)], limit=1)
-        if not agent or agent.password != password:
-            return self._json_response({'status': 'error', 'message': 'Numéro de téléphone ou mot de passe incorrect.'}, status=401)
-
-        return self._json_response({
-            'status': 'success',
-            'agent': {
-                'id': agent.id,
-                'name': agent.name,
-                'phone': agent.phone,
-            }
-        })
 
     @http.route('/api/kal3iya/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
     def api_bootstrap(self, **kwargs):
@@ -99,7 +76,7 @@ class Kal3iyaStockApiController(http.Controller):
         stock_records = request.env['kal3iya.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
-            # Chercher d'abord la photo d'emballage prise lors de l'entrée du lot
+            # Chercher d'abord la photo d'emballage prise lors de l'entrÃ©e du lot
             image_b64 = ''
             entry = request.env['kal3iya.stock.entry'].sudo().search([
                 ('product_id', '=', rec.product_id.id),
@@ -123,8 +100,6 @@ class Kal3iyaStockApiController(http.Controller):
                 'quantity': rec.quantity or 0.0,
                 'garage': rec.garage or '',
                 'frigo': rec.frigo or 'stock_kal3iya',
-                'ste_id': rec.ste_id.id if rec.ste_id else None,
-                'ste_name': rec.ste_id.name if rec.ste_id else '',
                 'image': image_b64,
             })
 
@@ -150,7 +125,6 @@ class Kal3iyaStockApiController(http.Controller):
                 'qty': float(data.get('qty', 0)),
                 'weight': float(data.get('weight', 0)),
                 'date': self._sanitize_date(data.get('date')),
-                'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
             }
             if data.get('photo_packaging'):
                 vals['photo_packaging'] = data.get('photo_packaging')
@@ -164,7 +138,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'status': 'success',
                 'entry_id': entry.id,
                 'name': entry.name,
-                'message': f"Entrée {entry.name} enregistrée avec succès."
+                'message': f"EntrÃ©e {entry.name} enregistrÃ©e avec succÃ¨s."
             })
         except Exception as e:
             _logger.exception("Erreur API Entry")
@@ -187,8 +161,6 @@ class Kal3iyaStockApiController(http.Controller):
                 'weight': float(data.get('weight', 0)),
                 'qty': float(data.get('qty', 0)),
                 'date': self._sanitize_date(data.get('date')),
-                'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
-                'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
             }
 
             exit_rec = request.env['kal3iya.stock.exit'].sudo().create(vals)
@@ -198,103 +170,9 @@ class Kal3iyaStockApiController(http.Controller):
                 'status': 'success',
                 'exit_id': exit_rec.id,
                 'name': exit_rec.name,
-                'message': f"Sortie {exit_rec.name} enregistrée avec succès."
+                'message': f"Sortie {exit_rec.name} enregistrÃ©e avec succÃ¨s."
             })
         except Exception as e:
             _logger.exception("Erreur API Exit")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
-    @http.route('/api/kal3iya/transfer', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
-    def api_transfer(self, **kwargs):
-        if request.httprequest.method == 'OPTIONS':
-            return self._json_response({'status': 'ok'})
-        data = self._get_request_data()
-        try:
-            vals = {
-                'product_id': int(data.get('product_id')),
-                'garage_source': data.get('garage_source'),
-                'garage_dest': data.get('garage_dest'),
-                'frigo_source': data.get('frigo_source') or 'stock_kal3iya',
-                'frigo_dest': data.get('frigo_dest') or 'stock_kal3iya',
-                'lot': data.get('lot') or '',
-                'dum': data.get('dum') or '',
-                'calibre': data.get('calibre') or '',
-                'weight': float(data.get('weight', 0)),
-                'qty': float(data.get('qty', 0)),
-                'date': self._sanitize_date(data.get('date')),
-                'agent_id': int(data.get('agent_id')) if data.get('agent_id') else False,
-                'ste_id': int(data.get('ste_id')) if data.get('ste_id') else False,
-            }
-
-            transfer = request.env['kal3iya.stock.transfer'].sudo().create(vals)
-            transfer.action_confirm()
-
-            return self._json_response({
-                'status': 'success',
-                'transfer_id': transfer.id,
-                'name': transfer.name,
-                'message': f"Transfert {transfer.name} enregistré avec succès."
-            })
-        except Exception as e:
-            _logger.exception("Erreur API Transfer")
-            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
-    @http.route('/api/kal3iya/exits', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
-
-    @http.route('/api/kal3iya/exits', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
-    def api_exits(self, **kwargs):
-        if request.httprequest.method == 'OPTIONS':
-            return self._json_response({'status': 'ok'})
-
-        domain = [('state', '=', 'done')]
-        exits = request.env['kal3iya.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=100)
-        data = []
-        for rec in exits:
-            returned_qty = sum(r.qty for r in rec.return_ids if r.state == 'done')
-            if returned_qty < rec.qty: # Only send exits that can still be returned
-                data.append({
-                    'id': rec.id,
-                    'name': rec.name,
-                    'date': str(rec.date),
-                    'product_name': rec.product_id.name if rec.product_id else '',
-                    'lot': rec.lot or '',
-                    'client_name': rec.client_id.name if rec.client_id else '',
-                    'garage': rec.garage or '',
-                    'qty': rec.qty,
-                    'returned_qty': returned_qty,
-                })
-
-        return self._json_response({
-            'status': 'success',
-            'exits': data,
-        })
-
-    @http.route('/api/kal3iya/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
-    def api_return(self, **kwargs):
-        if request.httprequest.method == 'OPTIONS':
-            return self._json_response({'status': 'ok'})
-        data = self._get_request_data()
-        try:
-            exit_id = int(data.get('exit_id'))
-            exit_rec = request.env['kal3iya.stock.exit'].sudo().browse(exit_id)
-            if not exit_rec.exists():
-                return self._json_response({'status': 'error', 'message': 'Sortie introuvable.'}, status=404)
-
-            vals = {
-                'exit_id': exit_id,
-                'garage': data.get('garage'),
-                'qty': float(data.get('qty', 0)),
-                'date': self._sanitize_date(data.get('date')),
-            }
-
-            ret_rec = request.env['kal3iya.stock.return'].sudo().create(vals)
-            ret_rec.action_confirm()
-
-            return self._json_response({
-                'status': 'success',
-                'return_id': ret_rec.id,
-                'name': ret_rec.name,
-                'message': f'Retour {ret_rec.name} enregistre avec succes.'
-            })
-        except Exception as e:
-            _logger.exception('Erreur API Return')
-            return self._json_response({'status': 'error', 'message': str(e)}, status=500)

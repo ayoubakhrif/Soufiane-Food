@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Return Tree View -->
     <record id="view_kal3iya_stock_return_tree" model="ir.ui.view">

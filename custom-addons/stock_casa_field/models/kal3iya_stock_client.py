@@ -1,4 +1,4 @@
-﻿from odoo import models, fields
+from odoo import models, fields
 
 class Kal3iyaStockClient(models.Model):
     return_ids = fields.One2many('kal3iya.stock.return', 'client_id', string='Retours')

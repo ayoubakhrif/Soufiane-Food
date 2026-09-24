@@ -1,4 +1,4 @@
-﻿from . import kal3iya_stock_product
+from . import kal3iya_stock_product
 from . import kal3iya_stock_client
 from . import kal3iya_stock_driver
 from . import kal3iya_stock_stock_move

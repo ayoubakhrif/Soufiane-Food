@@ -1,5 +1,5 @@
-﻿{
-    'name': 'Kal3iya (Rami)',
+{
+    'name': 'Stock Casa Field',
     'version': '1.0',
     'category': 'Inventory',
     'summary': 'Pilot Stock Management Module based on Movement Ledger (Kal3iya)',
@@ -26,4 +26,5 @@
     'application': True,
     'license': 'LGPL-3',
 }
+
 

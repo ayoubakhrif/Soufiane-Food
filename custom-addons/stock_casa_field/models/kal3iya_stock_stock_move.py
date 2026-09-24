@@ -1,8 +1,9 @@
-from odoo import models, fields, api, _
+﻿from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 
 class Kal3iyaStockMove(models.Model):
+    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     _name = 'kal3iya.stock.move'
     _description = 'Movement Ledger'
     _order = 'date desc, id desc'
@@ -63,4 +64,5 @@ class Kal3iyaStockMove(models.Model):
         if not self.env.user.has_group('kal3iya_stock.group_manager'):
             raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
         return super(Kal3iyaStockMove, self).unlink()
+
 

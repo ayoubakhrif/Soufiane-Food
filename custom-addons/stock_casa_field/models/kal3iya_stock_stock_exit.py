@@ -2,6 +2,7 @@
 from odoo.exceptions import UserError
 
 class Kal3iyaStockExit(models.Model):
+    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     returned_qty = fields.Float(string='Quantité Retournée', compute='_compute_returned_qty', store=True)
     return_ids = fields.One2many('kal3iya.stock.return', 'exit_id', string='Retours')
 
@@ -191,6 +192,7 @@ class Kal3iyaStockExit(models.Model):
         for rec in self:
             if rec.qty <= 0:
                 raise UserError(_("La Quantité doit être strictement positive."))
+
 
 
 

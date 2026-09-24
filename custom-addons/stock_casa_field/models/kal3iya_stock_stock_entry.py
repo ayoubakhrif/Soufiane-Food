@@ -1,7 +1,8 @@
-from odoo import models, fields, api, _
+﻿from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class Kal3iyaStockEntry(models.Model):
+    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     _name = 'kal3iya.stock.entry'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'EntrÃ©e Stock Kal3iya'
@@ -139,4 +140,5 @@ class Kal3iyaStockEntry(models.Model):
         for rec in self:
             if rec.qty <= 0:
                 raise UserError(_("La quantitÃ© doit Ãªtre strictement positive."))
+
 

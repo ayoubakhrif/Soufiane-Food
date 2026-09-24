@@ -1,6 +1,7 @@
 ﻿from odoo import models, fields, api, tools
 
 class Kal3iyaStockStock(models.Model):
+    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     _name = 'kal3iya.stock.stock'
     _description = 'Stock Kal3iya (Aggregation)'
     _auto = False
@@ -85,4 +86,5 @@ class Kal3iyaStockStock(models.Model):
                 'default_calibre': self.calibre,
                 }
         }
+
 

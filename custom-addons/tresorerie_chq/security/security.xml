@@ -14,11 +14,18 @@
             <field name="category_id" ref="module_category_tresorerie_chq"/>
         </record>
 
+        <!-- Groupe Validateur -->
+        <record id="group_tresorerie_chq_validator" model="res.groups">
+            <field name="name">Validateur (Chèques &amp; Effets)</field>
+            <field name="category_id" ref="module_category_tresorerie_chq"/>
+            <field name="implied_ids" eval="[(4, ref('group_tresorerie_chq_user'))]"/>
+        </record>
+
         <!-- Groupe Responsable -->
         <record id="group_tresorerie_chq_manager" model="res.groups">
             <field name="name">Responsable (Chèques &amp; Effets)</field>
             <field name="category_id" ref="module_category_tresorerie_chq"/>
-            <field name="implied_ids" eval="[(4, ref('group_tresorerie_chq_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_tresorerie_chq_validator'))]"/>
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 

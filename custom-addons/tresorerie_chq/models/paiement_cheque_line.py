@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, AccessError
 
 
 class TresorerieChqCheque(models.Model):
@@ -24,6 +24,12 @@ class TresorerieChqCheque(models.Model):
         'tresorerie_chq.client',
         string='Client',
         related='paiement_id.client_id',
+        store=True,
+        readonly=True,
+    )
+    emetteur = fields.Selection(
+        related='client_id.emetteur',
+        string="Émetteur",
         store=True,
         readonly=True,
     )
@@ -128,6 +134,11 @@ class TresorerieChqCheque(models.Model):
         string='Est Responsable',
     )
 
+    is_validator = fields.Boolean(
+        compute='_compute_is_validator',
+        string='Est Validateur',
+    )
+
     # ------------------------------------------------------------------
     # Computes
     # ------------------------------------------------------------------
@@ -136,6 +147,12 @@ class TresorerieChqCheque(models.Model):
         is_manager = self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager')
         for rec in self:
             rec.is_manager = is_manager
+
+    @api.depends_context('uid')
+    def _compute_is_validator(self):
+        is_validator = self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_validator')
+        for rec in self:
+            rec.is_validator = is_validator
 
     @api.depends('owner_id', 'paiement_id.client_id')
     def _compute_owner_display(self):
@@ -220,6 +237,8 @@ class TresorerieChqCheque(models.Model):
 
     def action_impaye(self):
         """Mark as unpaid/bounced."""
+        if not (self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_validator') or self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager')):
+            raise AccessError("❌ Seul un validateur ou un responsable peut marquer un chèque comme impayé.")
         for rec in self:
             if not rec.unpaid_date:
                 raise ValidationError("❌ La 'Date impayé' est obligatoire pour marquer ce chèque comme impayé.")
@@ -254,6 +273,12 @@ class TresorerieChqEffet(models.Model):
         'tresorerie_chq.client',
         string='Client',
         related='paiement_id.client_id',
+        store=True,
+        readonly=True,
+    )
+    emetteur = fields.Selection(
+        related='client_id.emetteur',
+        string="Émetteur",
         store=True,
         readonly=True,
     )
@@ -353,6 +378,11 @@ class TresorerieChqEffet(models.Model):
         string='Est Responsable',
     )
 
+    is_validator = fields.Boolean(
+        compute='_compute_is_validator',
+        string='Est Validateur',
+    )
+
     # ------------------------------------------------------------------
     # Computes
     # ------------------------------------------------------------------
@@ -361,6 +391,12 @@ class TresorerieChqEffet(models.Model):
         is_manager = self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager')
         for rec in self:
             rec.is_manager = is_manager
+
+    @api.depends_context('uid')
+    def _compute_is_validator(self):
+        is_validator = self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_validator')
+        for rec in self:
+            rec.is_validator = is_validator
 
     @api.depends('owner_id', 'paiement_id.client_id')
     def _compute_owner_display(self):
@@ -435,6 +471,8 @@ class TresorerieChqEffet(models.Model):
 
     def action_impaye(self):
         """Mark as unpaid/bounced."""
+        if not (self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_validator') or self.env.user.has_group('tresorerie_chq.group_tresorerie_chq_manager')):
+            raise AccessError("❌ Seul un validateur ou un responsable peut marquer un effet comme impayé.")
         for rec in self:
             if not rec.unpaid_date:
                 raise ValidationError("❌ La 'Date impayé' est obligatoire pour marquer cet effet comme impayé.")

@@ -53,6 +53,7 @@
                 
                 <!-- Hidden helper to pass role context to visibility expressions -->
                 <field name="is_manager" column_invisible="True"/>
+                <field name="is_validator" column_invisible="True"/>
 
                 <!-- Row action buttons with modern icons and context visibility -->
                 <button name="action_remis" 
@@ -85,7 +86,7 @@
                         icon="fa-times-circle"
                         class="btn-danger"
                         title="Impayé"
-                        invisible="state == 'impaye' or (state != 'banque' and not is_manager)"/>
+                        invisible="state == 'impaye' or not is_validator or (state != 'banque' and not is_manager)"/>
 
                 <button name="action_stock" 
                         string="Remettre en stock" 
@@ -129,7 +130,7 @@
                             string="Impayé" 
                             type="object" 
                             class="btn-danger" 
-                            invisible="state == 'impaye' or (state != 'banque' and not is_manager)"/>
+                            invisible="state == 'impaye' or not is_validator or (state != 'banque' and not is_manager)"/>
                     
                     <button name="action_stock" 
                             string="Remettre en stock" 
@@ -154,6 +155,7 @@
                             <field name="bank_send_date"/>
                             <field name="unpaid_date"/>
                             <field name="is_manager" invisible="1"/>
+                            <field name="is_validator" invisible="1"/>
                         </group>
                         <group string="Acteurs">
                             <field name="paiement_id" string="Paiement d'origine" readonly="1"/>
@@ -188,6 +190,7 @@
             <search string="Recherche Chèques">
                 <field name="note"/>
                 <field name="client_id"/>
+                <field name="emetteur"/>
                 <field name="owner_id"/>
                 <field name="owner_cin"/>
                 <separator/>
@@ -200,6 +203,7 @@
                 <filter string="Validé par IA 🤖" name="filter_val_ai" domain="[('validation_mode', '=', 'ai')]"/>
                 <filter string="Validé par Utilisateur 👤" name="filter_val_manual" domain="[('validation_mode', '=', 'manual')]"/>
                 <group expand="0" string="Group By">
+                    <filter string="Émetteur" name="group_emetteur" context="{'group_by': 'emetteur'}"/>
                     <filter string="Validé par" name="group_validation_mode" context="{'group_by': 'validation_mode'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Date de réception" name="group_reception" context="{'group_by': 'reception_date:day'}"/>

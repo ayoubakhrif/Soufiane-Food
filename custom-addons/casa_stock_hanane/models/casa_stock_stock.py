@@ -24,6 +24,7 @@ class CasaStockStock(models.Model):
     ste_id = fields.Many2one('casa_hanane.ste', string='Société', readonly=True)
     
     quantity = fields.Float(string='Quantité', readonly=True)
+    virtual_quantity = fields.Float(string='Quantité Virtuelle', compute='_compute_virtual_quantity')
     weight = fields.Float(string='Poids (Kg)', readonly=True)
     poids = fields.Char(string='Poids', readonly=True)
     calibre = fields.Char(string='Calibre', readonly=True)
@@ -128,7 +129,8 @@ class CasaStockStock(models.Model):
                 name_parts.append(f"{rec.price} MAD")
             
             # Show availability in name
-            qty_str = f"{rec.quantity} ({rec.total_weight:.2f}T)"
+            weight = rec.weight or 0.0
+            qty_str = f"{rec.virtual_quantity} ({(rec.virtual_quantity * weight):.2f}T)"
             name_parts.append(f"Dispo: {qty_str}")
             
             if rec.create_date:
@@ -144,6 +146,25 @@ class CasaStockStock(models.Model):
             domain = ['|', '|', ('product_id.name', operator, name), ('lot', operator, name), ('dum', operator, name)]
         order = kwargs.get('order', self._order)
         return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid, order=order)
+
+    def _compute_virtual_quantity(self):
+        if not self.ids:
+            for rec in self:
+                rec.virtual_quantity = rec.quantity or 0.0
+            return
+            
+        self.env.cr.execute("""
+            SELECT col.stock_id, sum(col.qty) 
+            FROM casa_hanane_stock_order_line col
+            JOIN casa_hanane_stock_order co ON co.id = col.order_id
+            WHERE co.state IN ('draft', 'confirmed') AND col.stock_id IN %s
+            GROUP BY col.stock_id
+        """, [tuple(self.ids)])
+        reserved_dict = {row[0]: row[1] for row in self.env.cr.fetchall()}
+        
+        for rec in self:
+            reserved = reserved_dict.get(rec.id, 0.0)
+            rec.virtual_quantity = (rec.quantity or 0.0) - reserved
 
 
     def init(self):

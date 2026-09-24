@@ -18,6 +18,12 @@ class TresoreriePaiement(models.Model):
         string="Statut LN Client",
         readonly=True,
     )
+    emetteur = fields.Selection(
+        related='client_id.emetteur',
+        string="Émetteur",
+        store=True,
+        readonly=True,
+    )
 
     payment_type = fields.Selection([
         ('cheque', 'Chèques'),

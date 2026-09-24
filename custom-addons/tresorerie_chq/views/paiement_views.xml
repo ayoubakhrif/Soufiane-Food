@@ -176,6 +176,7 @@
         <field name="arch" type="xml">
             <search string="Recherche Entrées">
                 <field name="client_id"/>
+                <field name="emetteur"/>
                 <field name="payment_type"/>
                 <field name="cheque_line_ids" string="N° Chèque" filter_domain="[('cheque_line_ids.note', 'ilike', self)]"/>
                 <field name="effet_line_ids" string="N° Effet" filter_domain="[('effet_line_ids.note', 'ilike', self)]"/>
@@ -191,6 +192,9 @@
                 <filter string="En Brouillon" name="filter_state_draft"
                         domain="[('state', '=', 'draft')]"/>
                 <group expand="0" string="Group By">
+                    <filter string="Émetteur"
+                            name="group_emetteur"
+                            context="{'group_by': 'emetteur'}"/>
                     <filter string="Validé par"
                             name="group_validation_mode"
                             context="{'group_by': 'validation_mode'}"/>

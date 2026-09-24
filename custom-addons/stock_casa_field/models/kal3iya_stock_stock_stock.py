@@ -1,4 +1,4 @@
-from odoo import models, fields, api, tools
+﻿from odoo import models, fields, api, tools
 
 class Kal3iyaStockStock(models.Model):
     _name = 'kal3iya.stock.stock'
@@ -85,3 +85,4 @@ class Kal3iyaStockStock(models.Model):
                 'default_calibre': self.calibre,
                 }
         }
+

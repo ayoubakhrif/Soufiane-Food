@@ -1,4 +1,4 @@
-from odoo import models, fields, api, _
+﻿from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class Kal3iyaStockExit(models.Model):
@@ -26,9 +26,9 @@ class Kal3iyaStockExit(models.Model):
     _description = 'Sortie Stock Kal3iya'
     _order = 'date desc, id desc'
 
-    name = fields.Char(string='RÃ©fÃ©rence', readonly=True, default='/')
+    name = fields.Char(string='Référence', readonly=True, default='/')
     product_id = fields.Many2one('kal3iya.stock.product', string='Produit', required=True)
-    qty = fields.Float(string='QuantitÃ©', required=True)
+    qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids unit (Kg)')
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
@@ -63,9 +63,9 @@ class Kal3iyaStockExit(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('done', 'ConfirmÃ©'),
-        ('cancel', 'AnnulÃ©'),
-    ], string='Ã‰tat', default='draft', required=True)
+        ('done', 'Confirmé'),
+        ('cancel', 'Annulé'),
+    ], string='État', default='draft', required=True)
 
     move_id = fields.Many2one('kal3iya.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('kal3iya.stock.move', string='Mouvement d\'Annulation', readonly=True)
@@ -108,7 +108,7 @@ class Kal3iyaStockExit(models.Model):
                     'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Les opÃ©rations confirmÃ©es ne peuvent pas Ãªtre modifiÃ©es. Utilisez 'Annuler' et crÃ©ez une nouvelle opÃ©ration."))
+                    raise UserError(_("Les opérations Confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opÃ©ration."))
         return super(Kal3iyaStockExit, self).write(vals)
 
     def action_confirm(self):
@@ -129,7 +129,7 @@ class Kal3iyaStockExit(models.Model):
             total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
             
             if rec.qty > total_available:
-                raise UserError(_("Stock insuffisant ! Disponible : %s, DemandÃ© : %s") % (total_available, rec.qty))
+                raise UserError(_("Stock insuffisant ! Disponible : %s, Demandé : %s") % (total_available, rec.qty))
             
             # Create Move
             move = self.env['kal3iya.stock.move'].create({
@@ -159,7 +159,7 @@ class Kal3iyaStockExit(models.Model):
     def action_cancel(self):
         for rec in self:
             if rec.state != 'done':
-                raise UserError(_("Vous ne pouvez annuler que des sorties confirmÃ©es."))
+                raise UserError(_("Vous ne pouvez annuler que des sorties Confirmées."))
             
             # Create Reversal Move
             cancel_move = self.env['kal3iya.stock.move'].create({
@@ -190,7 +190,8 @@ class Kal3iyaStockExit(models.Model):
     def _check_qty_positive(self):
         for rec in self:
             if rec.qty <= 0:
-                raise UserError(_("La quantitÃ© doit Ãªtre strictement positive."))
+                raise UserError(_("La Quantité doit être strictement positive."))
+
 
 
 

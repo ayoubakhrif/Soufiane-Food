@@ -44,6 +44,7 @@ class Kal3iyaStockStock(models.Model):
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
                     min(m.id) as id,
+                    0 as ste_id,
                     m.product_id,
                     m.lot,
                     m.dum,
@@ -86,5 +87,6 @@ class Kal3iyaStockStock(models.Model):
                 'default_calibre': self.calibre,
                 }
         }
+
 
 

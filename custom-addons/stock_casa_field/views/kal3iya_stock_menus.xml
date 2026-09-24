@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem id="menu_kal3iya_stock_root"
-              name="Stock Kal3iya"
+              name="Gestion Stock Terrain"
               web_icon="kal3iya_stock,static/description/icon.png"
               sequence="2"/>
 
@@ -12,7 +12,7 @@
               sequence="10"/>
 
     <menuitem id="menu_kal3iya_stock_entry"
-              name="EntrÃ©es"
+              name="Entrées"
               parent="menu_kal3iya_stock_root"
               action="action_kal3iya_stock_entry"
               sequence="20"/>
@@ -41,9 +41,9 @@
               groups="kal3iya_stock.group_manager"
               sequence="10"/>
 
-    <!-- Restructuring Master Data under "DonnÃ©es" -->
+    <!-- Restructuring Master Data under "Données" -->
     <menuitem id="menu_kal3iya_stock_data"
-              name="DonnÃ©es"
+              name="Données"
               parent="menu_kal3iya_stock_root"
               sequence="50"/>
 
@@ -66,5 +66,7 @@
               sequence="40"/>
 
     </odoo>
+
+
 
 

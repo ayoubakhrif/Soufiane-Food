@@ -84,7 +84,7 @@ class _StockEntryScreenState extends State<StockEntryScreen> {
     final payload = {
       'product_id': _selectedProductId,
       'garage': _selectedGarage,
-      'frigo': 'stock_kal3iya',
+      'frigo': 'stock_casa_field',
       'lot': _lotController.text.trim(),
       'dum': _dumController.text.trim(),
       'calibre': _calibreController.text.trim(),

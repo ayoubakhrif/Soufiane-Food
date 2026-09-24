@@ -16,7 +16,7 @@ class ApiService {
   };
 
   static Future<Agent> login(String phone, String password) async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/login');
+    final uri = Uri.parse('$baseUrl/api/stock_casa_field/login');
     final response = await http.post(
       uri,
       headers: _headers,
@@ -38,7 +38,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> fetchBootstrap() async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/bootstrap');
+    final uri = Uri.parse('$baseUrl/api/stock_casa_field/bootstrap');
     final response = await http.get(uri, headers: _headers);
 
     final data = jsonDecode(response.body);
@@ -64,7 +64,7 @@ class ApiService {
   }
 
   static Future<List<StockCard>> fetchStock() async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/stock');
+    final uri = Uri.parse('$baseUrl/api/stock_casa_field/stock');
     final response = await http.get(uri, headers: _headers);
 
     final data = jsonDecode(response.body);
@@ -78,7 +78,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createEntry(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/entry');
+    final uri = Uri.parse('$baseUrl/api/stock_casa_field/entry');
     http.Response response;
     try {
       response = await http.post(
@@ -120,7 +120,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createExit(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/exit');
+    final uri = Uri.parse('$baseUrl/api/stock_casa_field/exit');
     http.Response response;
     try {
       response = await http.post(
@@ -162,7 +162,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createTransfer(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/kal3iya/transfer');
+    final uri = Uri.parse('$baseUrl/api/stock_casa_field/transfer');
     http.Response response;
     try {
       response = await http.post(
@@ -216,11 +216,11 @@ class ApiService {
 
         String path;
         if (op.type == 'entry') {
-          path = '/api/kal3iya/entry';
+          path = '/api/stock_casa_field/entry';
         } else if (op.type == 'exit') {
-          path = '/api/kal3iya/exit';
+          path = '/api/stock_casa_field/exit';
         } else if (op.type == 'transfer') {
-          path = '/api/kal3iya/transfer';
+          path = '/api/stock_casa_field/transfer';
         } else {
           continue;
         }

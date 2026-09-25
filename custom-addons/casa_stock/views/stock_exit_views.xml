@@ -15,6 +15,7 @@
                 <field name="poids"/>
                 <field name="client_id"/>
                 <field name="driver_id"/>
+                <field name="price_purchase"/>
                 <field name="price_sale"/>
                 <field name="mt_vente"/>
                 <field name="mt_achat"/>

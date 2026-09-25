@@ -11,9 +11,11 @@
                 <field name="exit_id"/>
                 <field name="product_id"/>
                 <field name="client_id"/>
+                <field name="ville" optional="show"/>
                 <field name="qty"/>
                 <field name="weight"/>
                 <field name="tonnage"/>
+                <field name="price_return"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>

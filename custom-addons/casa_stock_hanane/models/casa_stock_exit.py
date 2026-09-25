@@ -342,6 +342,18 @@ class CasaStockExit(models.Model):
         for rec in self:
             if rec.state not in ('confirmed', 'done', 'cancel'):
                 raise UserError(_("Seules les opérations confirmées, validées ou annulées peuvent être remises en brouillon."))
+
+            # Block if this exit has active returns
+            returns = self.env['casa_hanane.stock.return'].search([
+                ('exit_id', '=', rec.id),
+                ('state', '!=', 'cancel')
+            ])
+            if returns:
+                raise UserError(_(
+                    "Impossible de remettre la sortie en brouillon : "
+                    "cette sortie a des retours clients (%s). "
+                    "L'action est interdite tant que ces retours existent."
+                ) % ", ".join(returns.mapped('name')))
                 
             if rec.state in ('confirmed', 'done'):
                 # Create Reversal Move

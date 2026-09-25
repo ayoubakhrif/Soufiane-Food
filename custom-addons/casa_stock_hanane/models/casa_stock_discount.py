@@ -152,10 +152,6 @@ class CasaStockDiscount(models.Model):
             total_order_amount = sum(rec.line_ids.mapped('initial_amount'))
 
             for line in rec.line_ids:
-                if line.discount_amount < 0:
-                    raise UserError(_(
-                        "La réduction ne peut pas être négative pour le produit %s."
-                    ) % line.product_id.display_name)
                 if line.discount_amount > line.initial_amount:
                     raise UserError(_(
                         "La réduction (%s) dépasse le montant initial (%s) pour le produit %s."

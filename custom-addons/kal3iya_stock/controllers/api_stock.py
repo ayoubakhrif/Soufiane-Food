@@ -332,7 +332,7 @@ class Kal3iyaStockApiController(http.Controller):
             _logger.exception("Erreur API Bulk Exit")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
-    @http.route('/api/kal3iya/driver_exits', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    @http.route('/api/kal3iya/driver_exits', type='http', auth='public', methods=['GET', 'POST', 'OPTIONS'], csrf=False, cors='*')
     def api_driver_exits(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})

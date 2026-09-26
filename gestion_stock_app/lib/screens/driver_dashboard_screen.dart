@@ -29,8 +29,10 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       
       final Map<String, List<Map<String, dynamic>>> grouped = {};
       for (var ex in exits) {
-        if (ex['state'] == 'delivered') continue; // Optionally hide delivered, or keep them marked
-        final clientName = ex['client_name'] as String;
+        if (ex['state'] == 'delivered') continue;
+        final clientName = (ex['client_name'] as String?)?.isNotEmpty == true
+            ? ex['client_name'] as String
+            : 'Client non défini';
         if (!grouped.containsKey(clientName)) {
           grouped[clientName] = [];
         }

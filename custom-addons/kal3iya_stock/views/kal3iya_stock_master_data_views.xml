@@ -29,7 +29,6 @@
             <tree>
                 <field name="name"/>
                 <field name="employee_id"/>
-                <field name="phone"/>
             </tree>
         </field>
     </record>

@@ -22,6 +22,7 @@
         'views/kal3iya_stock_stock_views.xml',
         'views/kal3iya_stock_agent_views.xml',
         'views/kal3iya_stock_master_data_views.xml',
+        'views/kal3iya_stock_driver_views.xml',
         'views/kal3iya_stock_menus.xml',
     ],
     'installable': True,

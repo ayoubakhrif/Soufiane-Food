@@ -43,8 +43,6 @@
                         <group>
                             <field name="name"/>
                             <field name="employee_id"/>
-                            <field name="phone"/>
-                            <field name="password" password="True"/>
                         </group>
                     </group>
                 </sheet>

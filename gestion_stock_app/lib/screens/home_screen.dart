@@ -8,6 +8,7 @@ import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
 import 'stock_transfer_screen.dart';
 import 'exits_history_screen.dart';
+import 'bulk_order_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Agent agent;
@@ -308,6 +309,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)),
+                );
+                _checkPendingOperations();
+              },
+            ),
+            // 5. Commande Groupée
+            _buildActionButton(
+              title: 'Commande Groupée (Tournée)',
+              subtitle: 'Assigner plusieurs clients à un chauffeur',
+              icon: Icons.map_rounded,
+              color: Colors.purple.shade700,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BulkOrderScreen(agent: widget.agent)),
                 );
                 _checkPendingOperations();
               },

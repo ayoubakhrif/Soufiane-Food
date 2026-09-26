@@ -1,12 +1,14 @@
-﻿class Agent {
+class Agent {
   final int id;
   final String name;
   final String phone;
+  final String role; // 'agent' or 'driver'
 
   Agent({
     required this.id,
     required this.name,
     required this.phone,
+    this.role = 'agent',
   });
 
   factory Agent.fromJson(Map<String, dynamic> json) {
@@ -14,6 +16,7 @@
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
+      role: json['role'] as String? ?? 'agent',
     );
   }
 
@@ -21,5 +24,6 @@
     'id': id,
     'name': name,
     'phone': phone,
+    'role': role,
   };
 }

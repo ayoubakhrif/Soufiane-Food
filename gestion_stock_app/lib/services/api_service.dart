@@ -24,7 +24,7 @@ class ApiService {
     );
 
     if (response.body.isEmpty) {
-      throw Exception('Réponse vide du serveur ()');
+      throw Exception('RÃ©ponse vide du serveur ()');
     }
 
     final data = jsonDecode(response.body);
@@ -52,14 +52,18 @@ class ApiService {
       final garages = (data['garages'] as List)
           .map((g) => GarageItem.fromJson(g))
           .toList();
+      final drivers = data['drivers'] != null ? (data['drivers'] as List)
+          .map((d) => DriverItem.fromJson(d))
+          .toList() : <DriverItem>[];
 
       return {
         'products': products,
         'clients': clients,
         'garages': garages,
+        'drivers': drivers,
       };
     } else {
-      throw Exception(data['message'] ?? 'Impossible de charger les données');
+      throw Exception(data['message'] ?? 'Impossible de charger les donnÃ©es');
     }
   }
 
@@ -73,7 +77,7 @@ class ApiService {
           .map((item) => StockCard.fromJson(item))
           .toList();
     } else {
-      throw Exception(data['message'] ?? 'Erreur lors de la récupération du stock');
+      throw Exception(data['message'] ?? 'Erreur lors de la rÃ©cupÃ©ration du stock');
     }
   }
 
@@ -97,7 +101,7 @@ class ApiService {
       );
       return {
         'status': 'offline',
-        'message': 'Pas de connexion réseau. Enregistré localement pour synchronisation !'
+        'message': 'Pas de connexion rÃ©seau. EnregistrÃ© localement pour synchronisation !'
       };
     }
 
@@ -108,7 +112,7 @@ class ApiService {
       } else {
         return {
           'status': 'error',
-          'message': data['message'] ?? 'Erreur lors de l\'enregistrement de l\'entrée (Code: ${response.statusCode})'
+          'message': data['message'] ?? 'Erreur lors de l\'enregistrement de l\'entrÃ©e (Code: ${response.statusCode})'
         };
       }
     } catch (_) {
@@ -139,7 +143,7 @@ class ApiService {
       );
       return {
         'status': 'offline',
-        'message': 'Pas de connexion réseau. Enregistré localement pour synchronisation !'
+        'message': 'Pas de connexion rÃ©seau. EnregistrÃ© localement pour synchronisation !'
       };
     }
 
@@ -181,7 +185,7 @@ class ApiService {
       );
       return {
         'status': 'offline',
-        'message': 'Pas de connexion réseau. Enregistré localement pour synchronisation !'
+        'message': 'Pas de connexion rÃ©seau. EnregistrÃ© localement pour synchronisation !'
       };
     }
 
@@ -245,14 +249,39 @@ class ApiService {
     return syncedCount;
   }
 
+
+  static Future<Map<String, dynamic>> createBulkExit(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('/api/kal3iya/bulk_exit');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode(payload));
+    return jsonDecode(response.body);
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchDriverExits(int driverId) async {
+    final uri = Uri.parse('/api/kal3iya/driver_exits');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode({'driver_id': driverId}));
+    final data = jsonDecode(response.body);
+    if (data['status'] == 'success') {
+      return List<Map<String, dynamic>>.from(data['exits']);
+    } else {
+      throw Exception(data['message'] ?? 'Erreur');
+    }
+  }
+
+  static Future<Map<String, dynamic>> markDelivered(List<int> exitIds) async {
+    final uri = Uri.parse('/api/kal3iya/mark_delivered');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode({'exit_ids': exitIds}));
+    return jsonDecode(response.body);
+  }
+
   static Future<List<Map<String, dynamic>>> fetchExits() async {
+
     final uri = Uri.parse('$baseUrl/api/kal3iya/exits');
     final response = await http.get(uri, headers: _headers);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200 && data['status'] == 'success') {
       return List<Map<String, dynamic>>.from(data['exits']);
     } else {
-      throw Exception(data['message'] ?? 'Erreur lors de la récupération des sorties');
+      throw Exception(data['message'] ?? 'Erreur lors de la rÃ©cupÃ©ration des sorties');
     }
   }
 
@@ -266,7 +295,7 @@ class ApiService {
         body: jsonEncode(payload),
       );
     } catch (e) {
-      throw Exception('Erreur réseau. Impossible de contacter le serveur.');
+      throw Exception('Erreur rÃ©seau. Impossible de contacter le serveur.');
     }
 
     try {
@@ -287,4 +316,5 @@ class ApiService {
     }
   }
 }
+
 

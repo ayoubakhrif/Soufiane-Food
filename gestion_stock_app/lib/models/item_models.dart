@@ -39,3 +39,16 @@ class GarageItem {
     );
   }
 }
+class DriverItem {
+  final int id;
+  final String name;
+
+  DriverItem({required this.id, required this.name});
+
+  factory DriverItem.fromJson(Map<String, dynamic> json) {
+    return DriverItem(
+      id: json['id'] as int,
+      name: json['name'] as String? ?? '',
+    );
+  }
+}

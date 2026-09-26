@@ -43,7 +43,7 @@ class Kal3iyaStockExit(models.Model):
     driver_id = fields.Many2one('kal3iya.stock.driver', string='Chauffeur')
     ste_id = fields.Many2one('kal3iya.stock.ste', string='Société')
     agent_id = fields.Many2one('kal3iya.stock.agent', string='Agent de Stock')
-    order_reference = fields.Char(string=\'Ref. Commande Groupee\')
+    order_reference = fields.Char(string='Ref. Commande Groupee')
     
     state = fields.Selection([
         ('draft', 'Brouillon'),

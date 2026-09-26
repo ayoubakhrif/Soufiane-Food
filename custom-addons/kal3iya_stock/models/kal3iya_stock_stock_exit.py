@@ -43,10 +43,12 @@ class Kal3iyaStockExit(models.Model):
     driver_id = fields.Many2one('kal3iya.stock.driver', string='Chauffeur')
     ste_id = fields.Many2one('kal3iya.stock.ste', string='Société')
     agent_id = fields.Many2one('kal3iya.stock.agent', string='Agent de Stock')
+    order_reference = fields.Char(string=\'Ref. Commande Groupee\')
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('done', 'Confirmé'),
+        ('done', 'Confirmé (En route)'),
+        ('delivered', 'Livré'),
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
 
@@ -88,7 +90,7 @@ class Kal3iyaStockExit(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state == 'done':
+            if rec.state in ['done', 'delivered']:
                 forbidden_fields = [
                     'product_id', 'qty', 'weight',
                     'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id', 'ste_id'
@@ -179,3 +181,13 @@ class Kal3iyaStockExit(models.Model):
         for rec in self:
             if rec.qty <= 0:
                 raise UserError(_("La quantité doit être strictement positive."))
+
+    def action_deliver(self):
+        for rec in self:
+            if rec.state in ['done', 'delivered']:
+                rec.state = 'delivered'
+
+    def action_deliver(self):
+        for rec in self:
+            if rec.state == 'done':
+                rec.state = 'delivered'

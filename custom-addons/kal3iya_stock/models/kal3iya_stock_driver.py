@@ -11,3 +11,5 @@ class Kal3iyaStockDriver(models.Model):
         domain="[('job_position_id.name', 'ilike', 'Chauffeur')]",
         help="Linked HR Employee. Filtered by job position 'Chauffeur'."
     )
+    phone = fields.Char(string='Telephone')
+    password = fields.Char(string='Mot de passe')

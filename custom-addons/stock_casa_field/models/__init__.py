@@ -1,10 +1,10 @@
-from . import kal3iya_stock_product
-from . import kal3iya_stock_client
-from . import kal3iya_stock_driver
-from . import kal3iya_stock_stock_move
-from . import kal3iya_stock_stock_entry
-from . import kal3iya_stock_stock_exit
-from . import kal3iya_stock_stock_stock
+from . import casa_stock_product
+from . import casa_stock_client
+from . import casa_stock_driver
+from . import casa_stock_stock_move
+from . import casa_stock_stock_entry
+from . import casa_stock_stock_exit
+from . import casa_stock_stock_stock
 
-from . import kal3iya_stock_return
+from . import casa_stock_return
 

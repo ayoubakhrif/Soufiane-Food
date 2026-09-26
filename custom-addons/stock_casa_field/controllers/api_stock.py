@@ -18,7 +18,7 @@ GARAGE_SELECTION = [
     {'key': 'fenidek', 'label': 'Fenidek'},
 ]
 
-class Kal3iyaStockApiController(http.Controller):
+class CasaStockApiController(http.Controller):
 
     def _json_response(self, data, status=200):
         headers = [
@@ -49,18 +49,18 @@ class Kal3iyaStockApiController(http.Controller):
         return fields.Date.context_today(request.env.user)
 
 
-    @http.route('/api/kal3iya/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    @http.route('/api/casa/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
     def api_bootstrap(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
 
-        products = request.env['kal3iya.stock.product'].sudo().search_read(
+        products = request.env['casa.stock.product'].sudo().search_read(
             [], ['id', 'name']
         )
-        clients = request.env['kal3iya.stock.client'].sudo().search_read(
+        clients = request.env['casa.stock.client'].sudo().search_read(
             [], ['id', 'name']
         )
-        drivers = request.env['kal3iya.stock.driver'].sudo().search_read(
+        drivers = request.env['casa.stock.driver'].sudo().search_read(
             [], ['id', 'name']
         )
 
@@ -72,17 +72,17 @@ class Kal3iyaStockApiController(http.Controller):
             'garages': GARAGE_SELECTION,
         })
 
-    @http.route('/api/kal3iya/stock', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    @http.route('/api/casa/stock', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
     def api_stock(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
 
-        stock_records = request.env['kal3iya.stock.stock'].sudo().search([('quantity', '>', 0)])
+        stock_records = request.env['casa.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
             # Chercher d'abord la photo d'emballage prise lors de l'entrÃ©e du lot
             image_b64 = ''
-            entry = request.env['kal3iya.stock.entry'].sudo().search([
+            entry = request.env['casa.stock.entry'].sudo().search([
                 ('product_id', '=', rec.product_id.id),
                 ('lot', '=', rec.lot),
                 ('photo_packaging', '!=', False)
@@ -103,7 +103,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'weight': rec.weight or 0.0,
                 'quantity': rec.quantity or 0.0,
                 'garage': rec.garage or '',
-                'frigo': rec.frigo or 'stock_kal3iya',
+                'frigo': rec.frigo or 'stock_casa',
                 'image': image_b64,
             })
 
@@ -113,7 +113,7 @@ class Kal3iyaStockApiController(http.Controller):
             'stock': data,
         })
 
-    @http.route('/api/kal3iya/entry', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    @http.route('/api/casa/entry', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_entry(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -122,7 +122,7 @@ class Kal3iyaStockApiController(http.Controller):
             vals = {
                 'product_id': int(data.get('product_id')),
                 'garage': data.get('garage'),
-                'frigo': data.get('frigo') or 'stock_kal3iya',
+                'frigo': data.get('frigo') or 'stock_casa',
                 'lot': data.get('lot'),
                 'dum': data.get('dum'),
                 'calibre': data.get('calibre') or '',
@@ -135,7 +135,7 @@ class Kal3iyaStockApiController(http.Controller):
             if data.get('photo_container'):
                 vals['photo_container'] = data.get('photo_container')
 
-            entry = request.env['kal3iya.stock.entry'].sudo().create(vals)
+            entry = request.env['casa.stock.entry'].sudo().create(vals)
             entry.action_confirm()
 
             return self._json_response({
@@ -148,7 +148,7 @@ class Kal3iyaStockApiController(http.Controller):
             _logger.exception("Erreur API Entry")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
-    @http.route('/api/kal3iya/exit', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    @http.route('/api/casa/exit', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_exit(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -158,7 +158,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'product_id': int(data.get('product_id')),
                 'client_id': int(data.get('client_id')) if data.get('client_id') else False,
                 'garage': data.get('garage'),
-                'frigo': data.get('frigo') or 'stock_kal3iya',
+                'frigo': data.get('frigo') or 'stock_casa',
                 'lot': data.get('lot') or '',
                 'dum': data.get('dum') or '',
                 'calibre': data.get('calibre') or '',
@@ -167,7 +167,7 @@ class Kal3iyaStockApiController(http.Controller):
                 'date': self._sanitize_date(data.get('date')),
             }
 
-            exit_rec = request.env['kal3iya.stock.exit'].sudo().create(vals)
+            exit_rec = request.env['casa.stock.exit'].sudo().create(vals)
             exit_rec.action_confirm()
 
             return self._json_response({

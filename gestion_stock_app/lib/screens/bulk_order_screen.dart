@@ -47,7 +47,7 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement: ')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement: $e')));
       }
     }
   }
@@ -106,7 +106,7 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'Erreur inconnue')));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -147,10 +147,10 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
                 children: [
                   Text(stock.productName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text('Lot: ', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-                  Text('DUM: ', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                  Text('Lot: ${stock.lot}', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                  Text('DUM: ${stock.dum}', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                   const SizedBox(height: 4),
-                  Text('Dispo: ', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                  Text('Dispo: ${stock.quantity}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),

@@ -1,4 +1,4 @@
-﻿class StockCard {
+class StockCard {
   final int id;
   final int? productId;
   final String productName;

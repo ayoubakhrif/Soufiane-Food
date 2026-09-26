@@ -317,6 +317,7 @@ class Kal3iyaStockApiController(http.Controller):
                     'garage': line.get('garage'),
                     'frigo': line.get('frigo') or 'stock_kal3iya',
                     'lot': line.get('lot') or '',
+                    'dum': line.get('dum') or '',
                     'qty': float(line.get('qty', 0)),
                     'date': self._sanitize_date(line.get('date')),
                     'driver_id': driver_id,

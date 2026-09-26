@@ -31,14 +31,14 @@
         <menuitem id="menu_casa_field_stock_audit"
               name="Audit Ledger"
               parent="menu_casa_field_stock_root"
-              groups="casa_field_stock.group_manager"
+              groups="stock_casa_field.group_manager"
               sequence="100"/>
 
     <menuitem id="menu_casa_field_stock_move"
               name="Mouvements"
               parent="menu_casa_field_stock_audit"
               action="action_casa_field_stock_move"
-              groups="casa_field_stock.group_manager"
+              groups="stock_casa_field.group_manager"
               sequence="10"/>
 
     <!-- Restructuring Master Data under "Données" -->

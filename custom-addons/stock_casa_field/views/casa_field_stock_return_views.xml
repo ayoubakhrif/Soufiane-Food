@@ -25,8 +25,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_confirm" type="object" string="Confirmer" invisible="state != 'draft'" class="oe_highlight" groups="casa_field_stock.group_manager"/>
-                    <button name="action_cancel" type="object" string="Annuler" invisible="state != 'done'" groups="casa_field_stock.group_manager"/>
+                    <button name="action_confirm" type="object" string="Confirmer" invisible="state != 'draft'" class="oe_highlight" groups="stock_casa_field.group_manager"/>
+                    <button name="action_cancel" type="object" string="Annuler" invisible="state != 'done'" groups="stock_casa_field.group_manager"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>

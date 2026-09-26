@@ -54,6 +54,9 @@ class StockKal3iyaStock(models.Model):
             record.display_name = " - ".join(parts) if parts else "N/A"
 
     def init(self):
+        import odoo
+        if not odoo.tools.table_exists(self.env.cr, "stock_kal3iya_move"):
+            self.env["stock.kal3iya.move"]._auto_init()
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW stock_kal3iya_stock AS (

@@ -39,6 +39,9 @@ class Kal3iyaStockStock(models.Model):
     create_date = fields.Datetime(string='Creation Date', readonly=True)
 
     def init(self):
+        import odoo
+        if not odoo.tools.table_exists(self.env.cr, "kal3iya_stock_move"):
+            self.env["kal3iya.stock.move"]._auto_init()
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (

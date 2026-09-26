@@ -24,7 +24,6 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
   ClientItem? _selectedClient;
   GarageItem? _selectedGarage;
 
-  // Map to hold quantities chosen by the user: StockCard -> Quantity
   final Map<StockCard, double> _selectedQuantities = {};
 
   @override
@@ -48,7 +47,7 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement: \')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur de chargement: ')));
       }
     }
   }
@@ -69,7 +68,7 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
     }
 
     final date = DateTime.now().toIso8601String().split('T')[0];
-    final orderRef = 'CMD-\-\';
+    final orderRef = 'CMD--';
 
     final parsedLines = [];
     _selectedQuantities.forEach((stock, qty) {
@@ -107,7 +106,7 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'Erreur inconnue')));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: \')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: ')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -123,7 +122,6 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Image
             Container(
               width: 80,
               height: 80,
@@ -143,21 +141,19 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
                   : const Icon(Icons.inventory, size: 40, color: Colors.grey),
             ),
             const SizedBox(width: 12),
-            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(stock.productName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text('Lot: \', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-                  Text('DUM: \', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                  Text('Lot: ', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                  Text('DUM: ', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                   const SizedBox(height: 4),
-                  Text('Dispo: \', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                  Text('Dispo: ', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
-            // Quantity Input
             SizedBox(
               width: 80,
               child: TextFormField(
@@ -212,7 +208,6 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
                         onChanged: (val) {
                           setState(() {
                             _selectedGarage = val;
-                            // Clear quantities when garage changes to prevent mistakes
                             _selectedQuantities.clear();
                           });
                         },

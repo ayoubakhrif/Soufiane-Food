@@ -1,5 +1,5 @@
 import odoo
-﻿from odoo import models, fields, api, tools
+from odoo import models, fields, api, tools
 
 class CasaStockStock(models.Model):
     ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')

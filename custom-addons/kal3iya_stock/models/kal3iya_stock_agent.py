@@ -1,4 +1,4 @@
-﻿from odoo import models, fields, api
+from odoo import models, fields, api
 
 class Kal3iyaStockAgent(models.Model):
     _name = 'kal3iya.stock.agent'

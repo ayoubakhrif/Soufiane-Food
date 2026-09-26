@@ -1,4 +1,4 @@
-﻿from odoo import models, fields
+from odoo import models, fields
 
 class CasaStockClient(models.Model):
     _name = 'casa_field.stock.client'

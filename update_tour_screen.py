@@ -1,4 +1,6 @@
-import 'dart:convert';
+﻿import codecs
+
+code = r'''import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/agent.dart';
 import '../models/item_models.dart';
@@ -712,3 +714,9 @@ class _BulkOrderScreenState extends State<BulkOrderScreen> {
     );
   }
 }
+'''
+
+with codecs.open('gestion_stock_app/lib/screens/bulk_order_screen.dart', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print("Tour multi-client screen written successfully")

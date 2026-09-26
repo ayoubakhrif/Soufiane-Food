@@ -60,11 +60,15 @@ class Kal3iyaStockApiController(http.Controller):
         clients = request.env['kal3iya.stock.client'].sudo().search_read(
             [], ['id', 'name']
         )
+        drivers = request.env['kal3iya.stock.driver'].sudo().search_read(
+            [], ['id', 'name']
+        )
 
         return self._json_response({
             'status': 'success',
             'products': products,
             'clients': clients,
+            'drivers': drivers,
             'garages': GARAGE_SELECTION,
         })
 

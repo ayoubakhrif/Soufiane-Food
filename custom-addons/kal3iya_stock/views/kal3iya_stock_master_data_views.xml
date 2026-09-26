@@ -26,9 +26,10 @@
         <field name="name">kal3iya.stock.driver.tree</field>
         <field name="model">kal3iya.stock.driver</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <tree>
                 <field name="name"/>
                 <field name="employee_id"/>
+                <field name="phone"/>
             </tree>
         </field>
     </record>
@@ -43,6 +44,8 @@
                         <group>
                             <field name="name"/>
                             <field name="employee_id"/>
+                            <field name="phone"/>
+                            <field name="password" password="True"/>
                         </group>
                     </group>
                 </sheet>

@@ -4,11 +4,11 @@ from odoo.exceptions import UserError
 
 class CasaStockMove(models.Model):
     ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
-    _name = 'casa.stock.move'
+    _name = 'casa_field.stock.move'
     _description = 'Movement Ledger'
     _order = 'date desc, id desc'
 
-    product_id = fields.Many2one('casa.stock.product', string='Produit', required=True, ondelete='restrict')
+    product_id = fields.Many2one('casa_field.stock.product', string='Produit', required=True, ondelete='restrict')
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
     garage = fields.Selection([
@@ -57,11 +57,11 @@ class CasaStockMove(models.Model):
     weight = fields.Float(string='Poids (Kg)')
     calibre = fields.Char(string='Calibre')
     
-    client_id = fields.Many2one('casa.stock.client', string='Client')
-    driver_id = fields.Many2one('casa.stock.driver', string='Chauffeur')
+    client_id = fields.Many2one('casa_field.stock.client', string='Client')
+    driver_id = fields.Many2one('casa_field.stock.driver', string='Chauffeur')
 
     def unlink(self):
-        if not self.env.user.has_group('casa_stock.group_manager'):
+        if not self.env.user.has_group('casa_field_stock.group_manager'):
             raise UserError(_("Stock movements cannot be deleted. Use reversal moves instead."))
         return super(CasaStockMove, self).unlink()
 

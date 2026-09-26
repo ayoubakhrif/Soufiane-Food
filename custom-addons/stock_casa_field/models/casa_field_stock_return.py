@@ -2,16 +2,16 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class CasaStockReturn(models.Model):
-    _name = 'casa.stock.return'
+    _name = 'casa_field.stock.return'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Retour Client Casa'
     _order = 'date desc, id desc'
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    exit_id = fields.Many2one('casa.stock.exit', string='Sortie Originale', required=True)
-    product_id = fields.Many2one('casa.stock.product', related='exit_id.product_id', store=True, string='Produit')
-    client_id = fields.Many2one('casa.stock.client', related='exit_id.client_id', store=True, string='Client')
-    driver_id = fields.Many2one('casa.stock.driver', related='exit_id.driver_id', store=True, string='Chauffeur')
+    exit_id = fields.Many2one('casa_field.stock.exit', string='Sortie Originale', required=True)
+    product_id = fields.Many2one('casa_field.stock.product', related='exit_id.product_id', store=True, string='Produit')
+    client_id = fields.Many2one('casa_field.stock.client', related='exit_id.client_id', store=True, string='Client')
+    driver_id = fields.Many2one('casa_field.stock.driver', related='exit_id.driver_id', store=True, string='Chauffeur')
     garage = fields.Selection(related='exit_id.garage', store=True, string='Garage')
     frigo = fields.Selection(related='exit_id.frigo', store=True, string='Frigo')
     lot = fields.Char(related='exit_id.lot', store=True, string='Lot')
@@ -27,13 +27,13 @@ class CasaStockReturn(models.Model):
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
 
-    move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
-    cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
+    move_id = fields.Many2one('casa_field.stock.move', string='Mouvement Stock', readonly=True)
+    cancel_move_id = fields.Many2one('casa_field.stock.move', string='Mouvement d\'Annulation', readonly=True)
 
     @api.model
     def create(self, vals):
         if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.return') or '/'
+            vals['name'] = self.env['ir.sequence'].next_by_code('casa_field.stock.return') or '/'
         return super(CasaStockReturn, self).create(vals)
 
     def write(self, vals):
@@ -52,7 +52,7 @@ class CasaStockReturn(models.Model):
                 raise UserError(_("La quantité retournée ne peut pas dépasser la quantité restante de la sortie."))
             
             # Create Move
-            move = self.env['casa.stock.move'].create({
+            move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
@@ -66,7 +66,7 @@ class CasaStockReturn(models.Model):
                 'state': 'done',
                 'date': rec.date,
                 'reference': rec.name,
-                'res_model': 'casa.stock.return',
+                'res_model': 'casa_field.stock.return',
                 'res_id': rec.id,
             })
             rec.write({
@@ -80,7 +80,7 @@ class CasaStockReturn(models.Model):
                 raise UserError(_("Vous ne pouvez annuler que des retours confirmés."))
             
             # Create Reversal Move
-            cancel_move = self.env['casa.stock.move'].create({
+            cancel_move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
@@ -94,7 +94,7 @@ class CasaStockReturn(models.Model):
                 'state': 'done',
                 'date': fields.Datetime.now(),
                 'reference': rec.name,
-                'res_model': 'casa.stock.return',
+                'res_model': 'casa_field.stock.return',
                 'res_id': rec.id,
             })
             rec.write({

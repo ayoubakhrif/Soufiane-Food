@@ -2,9 +2,9 @@
 <odoo>
         
 
-    <record id="view_casa_stock_stock_tree" model="ir.ui.view">
-        <field name="name">casa.stock.stock.tree</field>
-        <field name="model">casa.stock.stock</field>
+    <record id="view_casa_field_stock_stock_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.stock.tree</field>
+        <field name="model">casa_field.stock.stock</field>
         <field name="arch" type="xml">
             <tree create="false" delete="false">
                 <field name="product_id"/>
@@ -20,9 +20,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_stock_form" model="ir.ui.view">
-        <field name="name">casa.stock.stock.form</field>
-        <field name="model">casa.stock.stock</field>
+    <record id="view_casa_field_stock_stock_form" model="ir.ui.view">
+        <field name="name">casa_field.stock.stock.form</field>
+        <field name="model">casa_field.stock.stock</field>
         <field name="arch" type="xml">
             <form string="Ligne de Stock" create="false" edit="false">
                 <header>
@@ -54,9 +54,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_stock_graph" model="ir.ui.view">
-        <field name="name">casa.stock.stock.graph</field>
-        <field name="model">casa.stock.stock</field>
+    <record id="view_casa_field_stock_stock_graph" model="ir.ui.view">
+        <field name="name">casa_field.stock.stock.graph</field>
+        <field name="model">casa_field.stock.stock</field>
         <field name="arch" type="xml">
             <graph string="Stock Analysis" type="bar">
                 <field name="product_id" type="row"/>
@@ -66,9 +66,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_stock_pivot" model="ir.ui.view">
-        <field name="name">casa.stock.stock.pivot</field>
-        <field name="model">casa.stock.stock</field>
+    <record id="view_casa_field_stock_stock_pivot" model="ir.ui.view">
+        <field name="name">casa_field.stock.stock.pivot</field>
+        <field name="model">casa_field.stock.stock</field>
         <field name="arch" type="xml">
             <pivot string="Stock Analysis">
                 <field name="garage" type="row"/>
@@ -79,9 +79,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_stock_search" model="ir.ui.view">
-        <field name="name">casa.stock.stock.search</field>
-        <field name="model">casa.stock.stock</field>
+    <record id="view_casa_field_stock_stock_search" model="ir.ui.view">
+        <field name="name">casa_field.stock.stock.search</field>
+        <field name="model">casa_field.stock.stock</field>
         <field name="arch" type="xml">
             <search string="Recherche Stock">
                 <field name="product_id"/>
@@ -103,9 +103,9 @@
         </field>
     </record>
 
-    <record id="action_casa_stock_stock" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_stock" model="ir.actions.act_window">
         <field name="name">Stock Casa</field>
-        <field name="res_model">casa.stock.stock</field>
+        <field name="res_model">casa_field.stock.stock</field>
         <field name="view_mode">tree,form,graph,pivot</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -117,8 +117,8 @@
     <!-- Adding "New Exit" to the Action menu of the Stock view -->
     <record id="action_new_exit_binding" model="ir.actions.server">
         <field name="name">Nouvelle Sortie</field>
-        <field name="model_id" ref="model_casa_stock_stock"/>
-        <field name="binding_model_id" ref="model_casa_stock_stock"/>
+        <field name="model_id" ref="model_casa_field_stock_stock"/>
+        <field name="binding_model_id" ref="model_casa_field_stock_stock"/>
         <field name="binding_view_types">kanban,list</field>
         <field name="state">code</field>
         <field name="code">

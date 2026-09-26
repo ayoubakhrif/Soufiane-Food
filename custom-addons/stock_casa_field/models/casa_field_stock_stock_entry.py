@@ -3,13 +3,13 @@ from odoo.exceptions import UserError
 
 class CasaStockEntry(models.Model):
     ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
-    _name = 'casa.stock.entry'
+    _name = 'casa_field.stock.entry'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'EntrÃ©e Stock Casa'
     _order = 'date desc, id desc'
 
     name = fields.Char(string='RÃ©fÃ©rence', readonly=True, default='/')
-    product_id = fields.Many2one('casa.stock.product', string='Produit', required=True)
+    product_id = fields.Many2one('casa_field.stock.product', string='Produit', required=True)
     company_article_id = fields.Many2one('company.article', string='Article SociÃ©tÃ©', related='product_id.company_article_id', store=True)
     qty = fields.Float(string='QuantitÃ©', required=True)
     weight = fields.Float(string='Poids (Kg)')
@@ -41,7 +41,7 @@ class CasaStockEntry(models.Model):
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo', default='stock_casa')
     
-    driver_id = fields.Many2one('casa.stock.driver', string='Chauffeur')
+    driver_id = fields.Many2one('casa_field.stock.driver', string='Chauffeur')
     image_1920 = fields.Image(related='product_id.company_article_image', readonly=False)
     photo_packaging = fields.Binary(string='Photo Emballage', attachment=True)
     photo_container = fields.Binary(string='Photo Conteneur', attachment=True)
@@ -52,8 +52,8 @@ class CasaStockEntry(models.Model):
         ('cancel', 'AnnulÃ©'),
     ], string='Ã‰tat', default='draft', required=True)
 
-    move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
-    cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
+    move_id = fields.Many2one('casa_field.stock.move', string='Mouvement Stock', readonly=True)
+    cancel_move_id = fields.Many2one('casa_field.stock.move', string='Mouvement d\'Annulation', readonly=True)
 
     @api.depends('qty', 'weight')
     def _compute_tonnage(self):
@@ -63,7 +63,7 @@ class CasaStockEntry(models.Model):
     @api.model
     def create(self, vals):
         if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.entry') or '/'
+            vals['name'] = self.env['ir.sequence'].next_by_code('casa_field.stock.entry') or '/'
         return super(CasaStockEntry, self).create(vals)
 
     def write(self, vals):
@@ -83,7 +83,7 @@ class CasaStockEntry(models.Model):
                 continue
             
             # Create Move
-            move = self.env['casa.stock.move'].create({
+            move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
@@ -98,7 +98,7 @@ class CasaStockEntry(models.Model):
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'driver_id': rec.driver_id.id,
-                'res_model': 'casa.stock.entry',
+                'res_model': 'casa_field.stock.entry',
                 'res_id': rec.id,
             })
             rec.write({
@@ -112,7 +112,7 @@ class CasaStockEntry(models.Model):
                 raise UserError(_("Vous ne pouvez annuler que des entrÃ©es confirmÃ©es."))
             
             # Create Reversal Move
-            cancel_move = self.env['casa.stock.move'].create({
+            cancel_move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
@@ -127,7 +127,7 @@ class CasaStockEntry(models.Model):
                 'weight': rec.weight,
                 'calibre': rec.calibre,
                 'driver_id': rec.driver_id.id,
-                'res_model': 'casa.stock.entry',
+                'res_model': 'casa_field.stock.entry',
                 'res_id': rec.id,
             })
             rec.write({

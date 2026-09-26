@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <record id="seq_casa_stock_entry" model="ir.sequence">
+        <record id="seq_casa_field_stock_entry" model="ir.sequence">
             <field name="name">EntrÃ©e Stock Casa</field>
-            <field name="code">casa.stock.entry</field>
+            <field name="code">casa_field.stock.entry</field>
             <field name="prefix">KE/%(year)s/</field>
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>
 
-        <record id="seq_casa_stock_exit" model="ir.sequence">
+        <record id="seq_casa_field_stock_exit" model="ir.sequence">
             <field name="name">Sortie Stock Casa</field>
-            <field name="code">casa.stock.exit</field>
+            <field name="code">casa_field.stock.exit</field>
             <field name="prefix">KS/%(year)s/</field>
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>
-        <record id="seq_casa_stock_return" model="ir.sequence">
+        <record id="seq_casa_field_stock_return" model="ir.sequence">
             <field name="name">Retour Stock Casa</field>
-            <field name="code">casa.stock.return</field>
+            <field name="code">casa_field.stock.return</field>
             <field name="prefix">KR/%(year)s/</field>
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>

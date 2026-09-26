@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Return Tree View -->
-    <record id="view_casa_stock_return_tree" model="ir.ui.view">
-        <field name="name">casa.stock.return.tree</field>
-        <field name="model">casa.stock.return</field>
+    <record id="view_casa_field_stock_return_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.return.tree</field>
+        <field name="model">casa_field.stock.return</field>
         <field name="arch" type="xml">
             <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-muted="state == 'cancel'">
                 <field name="name"/>
@@ -19,14 +19,14 @@
     </record>
 
     <!-- Return Form View -->
-    <record id="view_casa_stock_return_form" model="ir.ui.view">
-        <field name="name">casa.stock.return.form</field>
-        <field name="model">casa.stock.return</field>
+    <record id="view_casa_field_stock_return_form" model="ir.ui.view">
+        <field name="name">casa_field.stock.return.form</field>
+        <field name="model">casa_field.stock.return</field>
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_confirm" type="object" string="Confirmer" invisible="state != 'draft'" class="oe_highlight" groups="casa_stock.group_manager"/>
-                    <button name="action_cancel" type="object" string="Annuler" invisible="state != 'done'" groups="casa_stock.group_manager"/>
+                    <button name="action_confirm" type="object" string="Confirmer" invisible="state != 'draft'" class="oe_highlight" groups="casa_field_stock.group_manager"/>
+                    <button name="action_cancel" type="object" string="Annuler" invisible="state != 'done'" groups="casa_field_stock.group_manager"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -65,9 +65,9 @@
     </record>
 
     <!-- Return Action -->
-    <record id="action_casa_stock_return" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_return" model="ir.actions.act_window">
         <field name="name">Retours Clients</field>
-        <field name="res_model">casa.stock.return</field>
+        <field name="res_model">casa_field.stock.return</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

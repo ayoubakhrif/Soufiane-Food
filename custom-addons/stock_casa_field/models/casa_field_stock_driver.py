@@ -1,7 +1,7 @@
 from odoo import models, fields
 
 class CasaStockDriver(models.Model):
-    _name = 'casa.stock.driver'
+    _name = 'casa_field.stock.driver'
     _description = 'Chauffeurs Stock Casa'
 
     name = fields.Char(string='Nom', required=True)

@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_casa_stock_exit_tree" model="ir.ui.view">
-        <field name="name">casa.stock.exit.tree</field>
-        <field name="model">casa.stock.exit</field>
+    <record id="view_casa_field_stock_exit_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.exit.tree</field>
+        <field name="model">casa_field.stock.exit</field>
         <field name="arch" type="xml">
             <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
@@ -20,9 +20,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_exit_form" model="ir.ui.view">
-        <field name="name">casa.stock.exit.form</field>
-        <field name="model">casa.stock.exit</field>
+    <record id="view_casa_field_stock_exit_form" model="ir.ui.view">
+        <field name="name">casa_field.stock.exit.form</field>
+        <field name="model">casa_field.stock.exit</field>
         <field name="arch" type="xml">
             <form string="Sortie Stock Casa">
                 <header>
@@ -33,7 +33,7 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="%(action_casa_stock_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
+                        <button class="oe_stat_button" name="%(action_casa_field_stock_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_text">RetournÃƒÂ©</span>
                             
@@ -91,7 +91,7 @@
                         <field name="cancel_move_id" invisible="not cancel_move_id"/>
                     </group>
                 </sheet>
-                <div class="oe_chatter" groups="casa_stock.group_manager">
+                <div class="oe_chatter" groups="casa_field_stock.group_manager">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
@@ -100,9 +100,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_exit_pivot" model="ir.ui.view">
-        <field name="name">casa.stock.exit.pivot</field>
-        <field name="model">casa.stock.exit</field>
+    <record id="view_casa_field_stock_exit_pivot" model="ir.ui.view">
+        <field name="name">casa_field.stock.exit.pivot</field>
+        <field name="model">casa_field.stock.exit</field>
         <field name="arch" type="xml">
             <pivot string="Analyse Sorties Casa Stock">
                 <field name="date" interval="month" type="row"/>
@@ -113,9 +113,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_exit_search" model="ir.ui.view">
-        <field name="name">casa.stock.exit.search</field>
-        <field name="model">casa.stock.exit</field>
+    <record id="view_casa_field_stock_exit_search" model="ir.ui.view">
+        <field name="name">casa_field.stock.exit.search</field>
+        <field name="model">casa_field.stock.exit</field>
         <field name="arch" type="xml">
             <search string="Recherche Sorties">
                 <field name="name"/>
@@ -138,9 +138,9 @@
         </field>
     </record>
 
-    <record id="action_casa_stock_exit" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_exit" model="ir.actions.act_window">
         <field name="name">Sorties Stock Casa</field>
-        <field name="res_model">casa.stock.exit</field>
+        <field name="res_model">casa_field.stock.exit</field>
         <field name="view_mode">tree,form,pivot</field>
     </record>
 </odoo>

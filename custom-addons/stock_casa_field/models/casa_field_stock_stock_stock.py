@@ -2,13 +2,13 @@
 
 class CasaStockStock(models.Model):
     ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
-    _name = 'casa.stock.stock'
+    _name = 'casa_field.stock.stock'
     _description = 'Stock Casa (Aggregation)'
     _auto = False
     _log_access = False
     _order = 'product_id'
 
-    product_id = fields.Many2one('casa.stock.product', string='Produit', readonly=True)
+    product_id = fields.Many2one('casa_field.stock.product', string='Produit', readonly=True)
     lot = fields.Char(string='Lot', readonly=True)
     dum = fields.Char(string='DUM', readonly=True)
     garage = fields.Selection([
@@ -59,7 +59,7 @@ class CasaStockStock(models.Model):
                     max(m.date) as write_date,
                     min(m.date) as create_date
                 FROM
-                    casa_stock_move m
+                    casa_field_stock_move m
                 WHERE
                     m.state = 'done'
                 GROUP BY
@@ -74,7 +74,7 @@ class CasaStockStock(models.Model):
         return {
             'name': 'Nouvelle Sortie',
             'type': 'ir.actions.act_window',
-            'res_model': 'casa.stock.exit',
+            'res_model': 'casa_field.stock.exit',
             'view_mode': 'form',
             'target': 'current',
             'context': {

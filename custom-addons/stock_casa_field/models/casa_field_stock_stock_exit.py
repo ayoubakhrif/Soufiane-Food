@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 class CasaStockExit(models.Model):
     ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     returned_qty = fields.Float(string='Quantité Retournée', compute='_compute_returned_qty', store=True)
-    return_ids = fields.One2many('casa.stock.return', 'exit_id', string='Retours')
+    return_ids = fields.One2many('casa_field.stock.return', 'exit_id', string='Retours')
 
     @api.depends('return_ids.qty', 'return_ids.state')
     def _compute_returned_qty(self):
@@ -17,18 +17,18 @@ class CasaStockExit(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Retours Client',
             'view_mode': 'tree,form',
-            'res_model': 'casa.stock.return',
+            'res_model': 'casa_field.stock.return',
             'domain': [('exit_id', '=', self.id)],
             'context': {'default_exit_id': self.id},
         }
 
-    _name = 'casa.stock.exit'
+    _name = 'casa_field.stock.exit'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Sortie Stock Casa'
     _order = 'date desc, id desc'
 
     name = fields.Char(string='Référence', readonly=True, default='/')
-    product_id = fields.Many2one('casa.stock.product', string='Produit', required=True)
+    product_id = fields.Many2one('casa_field.stock.product', string='Produit', required=True)
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids unit (Kg)')
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
@@ -59,8 +59,8 @@ class CasaStockExit(models.Model):
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo')
     
-    client_id = fields.Many2one('casa.stock.client', string='Client')
-    driver_id = fields.Many2one('casa.stock.driver', string='Chauffeur')
+    client_id = fields.Many2one('casa_field.stock.client', string='Client')
+    driver_id = fields.Many2one('casa_field.stock.driver', string='Chauffeur')
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
@@ -68,8 +68,8 @@ class CasaStockExit(models.Model):
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
 
-    move_id = fields.Many2one('casa.stock.move', string='Mouvement Stock', readonly=True)
-    cancel_move_id = fields.Many2one('casa.stock.move', string='Mouvement d\'Annulation', readonly=True)
+    move_id = fields.Many2one('casa_field.stock.move', string='Mouvement Stock', readonly=True)
+    cancel_move_id = fields.Many2one('casa_field.stock.move', string='Mouvement d\'Annulation', readonly=True)
 
     @api.depends('return_ids.qty', 'return_ids.state')
     def _compute_returned_qty(self):
@@ -81,7 +81,7 @@ class CasaStockExit(models.Model):
         return {
             'name': 'Nouveau Retour',
             'type': 'ir.actions.act_window',
-            'res_model': 'casa.stock.return',
+            'res_model': 'casa_field.stock.return',
             'view_mode': 'form',
             'target': 'current',
             'context': {
@@ -98,7 +98,7 @@ class CasaStockExit(models.Model):
     @api.model
     def create(self, vals):
         if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code('casa.stock.exit') or '/'
+            vals['name'] = self.env['ir.sequence'].next_by_code('casa_field.stock.exit') or '/'
         return super(CasaStockExit, self).create(vals)
 
     def write(self, vals):
@@ -126,14 +126,14 @@ class CasaStockExit(models.Model):
                 ('frigo', '=', rec.frigo),
                 ('state', '=', 'done')
             ]
-            res = self.env['casa.stock.move'].read_group(domain, ['qty'], [])
+            res = self.env['casa_field.stock.move'].read_group(domain, ['qty'], [])
             total_available = res[0]['qty'] if res and res[0]['qty'] else 0.0
             
             if rec.qty > total_available:
                 raise UserError(_("Stock insuffisant ! Disponible : %s, Demandé : %s") % (total_available, rec.qty))
             
             # Create Move
-            move = self.env['casa.stock.move'].create({
+            move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
@@ -149,7 +149,7 @@ class CasaStockExit(models.Model):
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
-                'res_model': 'casa.stock.exit',
+                'res_model': 'casa_field.stock.exit',
                 'res_id': rec.id,
             })
             rec.write({
@@ -163,7 +163,7 @@ class CasaStockExit(models.Model):
                 raise UserError(_("Vous ne pouvez annuler que des sorties Confirmées."))
             
             # Create Reversal Move
-            cancel_move = self.env['casa.stock.move'].create({
+            cancel_move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
@@ -179,7 +179,7 @@ class CasaStockExit(models.Model):
                 'calibre': rec.calibre,
                 'client_id': rec.client_id.id,
                 'driver_id': rec.driver_id.id,
-                'res_model': 'casa.stock.exit',
+                'res_model': 'casa_field.stock.exit',
                 'res_id': rec.id,
             })
             rec.write({

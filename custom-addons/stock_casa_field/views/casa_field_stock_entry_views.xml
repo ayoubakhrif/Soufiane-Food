@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_casa_stock_entry_tree" model="ir.ui.view">
-        <field name="name">casa.stock.entry.tree</field>
-        <field name="model">casa.stock.entry</field>
+    <record id="view_casa_field_stock_entry_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.entry.tree</field>
+        <field name="model">casa_field.stock.entry</field>
         <field name="arch" type="xml">
             <tree decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
@@ -20,9 +20,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_entry_form" model="ir.ui.view">
-        <field name="name">casa.stock.entry.form</field>
-        <field name="model">casa.stock.entry</field>
+    <record id="view_casa_field_stock_entry_form" model="ir.ui.view">
+        <field name="name">casa_field.stock.entry.form</field>
+        <field name="model">casa_field.stock.entry</field>
         <field name="arch" type="xml">
             <form string="EntrÃ©e Stock Casa">
                 <header>
@@ -84,7 +84,7 @@
                         <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_1920'}"/>
                     </group>
                 </sheet>
-                <div class="oe_chatter" groups="casa_stock.group_manager">
+                <div class="oe_chatter" groups="casa_field_stock.group_manager">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
@@ -93,9 +93,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_entry_search" model="ir.ui.view">
-        <field name="name">casa.stock.entry.search</field>
-        <field name="model">casa.stock.entry</field>
+    <record id="view_casa_field_stock_entry_search" model="ir.ui.view">
+        <field name="name">casa_field.stock.entry.search</field>
+        <field name="model">casa_field.stock.entry</field>
         <field name="arch" type="xml">
             <search string="Recherche EntrÃ©es">
                 <field name="name"/>
@@ -117,9 +117,9 @@
         </field>
     </record>
 
-    <record id="action_casa_stock_entry" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_entry" model="ir.actions.act_window">
         <field name="name">EntrÃ©es Stock Casa</field>
-        <field name="res_model">casa.stock.entry</field>
+        <field name="res_model">casa_field.stock.entry</field>
         <field name="view_mode">tree,form</field>
     </record>
 </odoo>

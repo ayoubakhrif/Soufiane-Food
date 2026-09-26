@@ -1,7 +1,7 @@
 from odoo import models, fields
 
 class CasaStockProduct(models.Model):
-    _name = 'casa.stock.product'
+    _name = 'casa_field.stock.product'
     _description = 'Produits Stock Casa'
 
     company_article_id = fields.Many2one(

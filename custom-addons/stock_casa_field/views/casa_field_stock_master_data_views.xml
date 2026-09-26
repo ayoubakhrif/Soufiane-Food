@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Product Action -->
-    <record id="action_casa_stock_product" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_product" model="ir.actions.act_window">
         <field name="name">Produits</field>
-        <field name="res_model">casa.stock.product</field>
+        <field name="res_model">casa_field.stock.product</field>
         <field name="view_mode">tree,form</field>
     </record>
 
     <!-- Client Action -->
-    <record id="action_casa_stock_client" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_client" model="ir.actions.act_window">
         <field name="name">Clients</field>
-        <field name="res_model">casa.stock.client</field>
+        <field name="res_model">casa_field.stock.client</field>
         <field name="view_mode">tree,form</field>
     </record>
 
         <!-- Driver Views -->
-    <record id="view_casa_stock_driver_tree" model="ir.ui.view">
-        <field name="name">casa.stock.driver.tree</field>
-        <field name="model">casa.stock.driver</field>
+    <record id="view_casa_field_stock_driver_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.driver.tree</field>
+        <field name="model">casa_field.stock.driver</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="name"/>
@@ -26,9 +26,9 @@
         </field>
     </record>
 
-    <record id="view_casa_stock_driver_form" model="ir.ui.view">
-        <field name="name">casa.stock.driver.form</field>
-        <field name="model">casa.stock.driver</field>
+    <record id="view_casa_field_stock_driver_form" model="ir.ui.view">
+        <field name="name">casa_field.stock.driver.form</field>
+        <field name="model">casa_field.stock.driver</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -44,9 +44,9 @@
     </record>
 
     <!-- Driver Action -->
-    <record id="action_casa_stock_driver" model="ir.actions.act_window">
+    <record id="action_casa_field_stock_driver" model="ir.actions.act_window">
         <field name="name">Chauffeurs</field>
-        <field name="res_model">casa.stock.driver</field>
+        <field name="res_model">casa_field.stock.driver</field>
         <field name="view_mode">tree,form</field>
     </record>
 

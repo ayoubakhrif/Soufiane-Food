@@ -54,13 +54,13 @@ class CasaStockApiController(http.Controller):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
 
-        products = request.env['casa.stock.product'].sudo().search_read(
+        products = request.env['casa_field.stock.product'].sudo().search_read(
             [], ['id', 'name']
         )
-        clients = request.env['casa.stock.client'].sudo().search_read(
+        clients = request.env['casa_field.stock.client'].sudo().search_read(
             [], ['id', 'name']
         )
-        drivers = request.env['casa.stock.driver'].sudo().search_read(
+        drivers = request.env['casa_field.stock.driver'].sudo().search_read(
             [], ['id', 'name']
         )
 
@@ -77,12 +77,12 @@ class CasaStockApiController(http.Controller):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
 
-        stock_records = request.env['casa.stock.stock'].sudo().search([('quantity', '>', 0)])
+        stock_records = request.env['casa_field.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
             # Chercher d'abord la photo d'emballage prise lors de l'entrÃ©e du lot
             image_b64 = ''
-            entry = request.env['casa.stock.entry'].sudo().search([
+            entry = request.env['casa_field.stock.entry'].sudo().search([
                 ('product_id', '=', rec.product_id.id),
                 ('lot', '=', rec.lot),
                 ('photo_packaging', '!=', False)
@@ -135,7 +135,7 @@ class CasaStockApiController(http.Controller):
             if data.get('photo_container'):
                 vals['photo_container'] = data.get('photo_container')
 
-            entry = request.env['casa.stock.entry'].sudo().create(vals)
+            entry = request.env['casa_field.stock.entry'].sudo().create(vals)
             entry.action_confirm()
 
             return self._json_response({
@@ -167,7 +167,7 @@ class CasaStockApiController(http.Controller):
                 'date': self._sanitize_date(data.get('date')),
             }
 
-            exit_rec = request.env['casa.stock.exit'].sudo().create(vals)
+            exit_rec = request.env['casa_field.stock.exit'].sudo().create(vals)
             exit_rec.action_confirm()
 
             return self._json_response({

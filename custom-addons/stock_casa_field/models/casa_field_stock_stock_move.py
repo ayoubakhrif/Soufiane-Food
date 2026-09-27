@@ -3,7 +3,6 @@ from odoo.exceptions import UserError
 
 
 class CasaStockMove(models.Model):
-    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     _name = 'casa_field.stock.move'
     _description = 'Movement Ledger'
     _order = 'date desc, id desc'
@@ -11,18 +10,6 @@ class CasaStockMove(models.Model):
     product_id = fields.Many2one('casa_field.stock.product', string='Produit', required=True, ondelete='restrict')
     lot = fields.Char(string='Lot')
     dum = fields.Char(string='DUM')
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-        ('fenidek', 'Fenidek'),
-    ], string='Garage', required=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),

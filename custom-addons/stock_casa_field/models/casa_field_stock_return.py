@@ -12,7 +12,6 @@ class CasaStockReturn(models.Model):
     product_id = fields.Many2one('casa_field.stock.product', related='exit_id.product_id', store=True, string='Produit')
     client_id = fields.Many2one('casa_field.stock.client', related='exit_id.client_id', store=True, string='Client')
     driver_id = fields.Many2one('casa_field.stock.driver', related='exit_id.driver_id', store=True, string='Chauffeur')
-    garage = fields.Selection(related='exit_id.garage', store=True, string='Garage')
     frigo = fields.Selection(related='exit_id.frigo', store=True, string='Frigo')
     lot = fields.Char(related='exit_id.lot', store=True, string='Lot')
     dum = fields.Char(related='exit_id.dum', store=True, string='DUM')
@@ -58,7 +57,6 @@ class CasaStockReturn(models.Model):
                 'driver_id': rec.driver_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': rec.qty,
                 'weight': rec.weight,
@@ -86,7 +84,6 @@ class CasaStockReturn(models.Model):
                 'driver_id': rec.driver_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'weight': -rec.weight,

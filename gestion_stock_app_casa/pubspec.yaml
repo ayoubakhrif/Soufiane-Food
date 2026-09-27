@@ -1,5 +1,5 @@
-name: gestion_stock_app
-description: Application de gestion de stock.
+name: gestion_stock_app_casa
+description: Application de gestion de stock (Casa).
 publish_to: "none"
 
 version: 1.0.0+1

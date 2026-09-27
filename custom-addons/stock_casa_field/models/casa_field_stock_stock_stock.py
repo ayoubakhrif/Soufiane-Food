@@ -2,7 +2,6 @@ import odoo
 from odoo import models, fields, api, tools
 
 class CasaStockStock(models.Model):
-    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     _name = 'casa_field.stock.stock'
     _description = 'Stock Casa (Aggregation)'
     _auto = False
@@ -12,18 +11,6 @@ class CasaStockStock(models.Model):
     product_id = fields.Many2one('casa_field.stock.product', string='Produit', readonly=True)
     lot = fields.Char(string='Lot', readonly=True)
     dum = fields.Char(string='DUM', readonly=True)
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-        ('fenidek', 'Fenidek'),
-    ], string='Garage', required=True)
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
         ('frigo2', 'Frigo 2'),
@@ -48,16 +35,13 @@ class CasaStockStock(models.Model):
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
                     min(m.id) as id,
-                    0 as ste_id,
                     m.product_id,
                     m.lot,
                     m.dum,
-                    m.garage,
                     m.frigo,
-                    
+                    m.weight,
+                    m.calibre,
                     sum(m.qty) as quantity,
-                    max(m.weight) as weight,
-                    max(m.calibre) as calibre,
                     max(m.price_purchase) as price,
                     sum(m.qty * m.price_purchase) as mt_achat,
                     max(m.date) as write_date,
@@ -67,7 +51,7 @@ class CasaStockStock(models.Model):
                 WHERE
                     m.state = 'done'
                 GROUP BY
-                    m.product_id, m.lot, m.dum, m.garage, m.frigo
+                    m.product_id, m.lot, m.dum, m.frigo, m.weight, m.calibre
                 HAVING
                     sum(m.qty) != 0
             )
@@ -85,7 +69,6 @@ class CasaStockStock(models.Model):
                 'default_product_id': self.product_id.id,
                 'default_lot': self.lot,
                 'default_dum': self.dum,
-                'default_garage': self.garage,
                 'default_frigo': self.frigo,
                 'default_weight': self.weight,
                 'default_calibre': self.calibre,

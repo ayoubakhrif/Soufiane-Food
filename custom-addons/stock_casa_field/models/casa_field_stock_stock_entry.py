@@ -2,7 +2,6 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class CasaStockEntry(models.Model):
-    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     _name = 'casa_field.stock.entry'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'EntrÃ©e Stock Casa'
@@ -22,18 +21,6 @@ class CasaStockEntry(models.Model):
     dum = fields.Char(string='DUM', required=True)
     calibre = fields.Char(string='Calibre')
     
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-        ('fenidek', 'Fenidek'),
-    ], string='Garage', required=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
@@ -71,7 +58,7 @@ class CasaStockEntry(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight', 'price_purchase',
-                    'date', 'lot', 'dum', 'garage', 'frigo', 'driver_id'
+                    'date', 'lot', 'dum', 'frigo', 'driver_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opÃ©rations confirmÃ©es ne peuvent pas Ãªtre modifiÃ©es. Utilisez 'Annuler' et crÃ©ez une nouvelle opÃ©ration."))
@@ -87,7 +74,6 @@ class CasaStockEntry(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'entry',
@@ -116,7 +102,6 @@ class CasaStockEntry(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'cancel_entry',

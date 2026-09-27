@@ -10,8 +10,7 @@
                 <field name="product_id"/>
                                 <field name="lot"/>
                 <field name="dum"/>
-                <field name="garage"/>
-                <field name="frigo"/>
+                                <field name="frigo"/>
                 <field name="qty" sum="Total Quantité"/>
                 <field name="move_type"/>
                 <field name="user_id"/>

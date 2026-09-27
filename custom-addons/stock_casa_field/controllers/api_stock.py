@@ -102,7 +102,6 @@ class CasaStockApiController(http.Controller):
                 'calibre': rec.calibre or '',
                 'weight': rec.weight or 0.0,
                 'quantity': rec.quantity or 0.0,
-                'garage': rec.garage or '',
                 'frigo': rec.frigo or 'stock_casa',
                 'image': image_b64,
             })
@@ -121,7 +120,6 @@ class CasaStockApiController(http.Controller):
         try:
             vals = {
                 'product_id': int(data.get('product_id')),
-                'garage': data.get('garage'),
                 'frigo': data.get('frigo') or 'stock_casa',
                 'lot': data.get('lot'),
                 'dum': data.get('dum'),
@@ -157,7 +155,6 @@ class CasaStockApiController(http.Controller):
             vals = {
                 'product_id': int(data.get('product_id')),
                 'client_id': int(data.get('client_id')) if data.get('client_id') else False,
-                'garage': data.get('garage'),
                 'frigo': data.get('frigo') or 'stock_casa',
                 'lot': data.get('lot') or '',
                 'dum': data.get('dum') or '',

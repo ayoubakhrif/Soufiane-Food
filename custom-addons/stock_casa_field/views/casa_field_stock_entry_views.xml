@@ -13,8 +13,7 @@
                 <field name="weight"/>
                 <field name="tonnage"/>
                 <field name="price_purchase"/>
-                <field name="garage"/>
-                <field name="frigo"/>
+                                <field name="frigo"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>
@@ -58,8 +57,7 @@
                     <separator string="Logistique &amp; TraÃ§abilitÃ©"/>
                     <group>
                         <group>
-                            <field name="garage"/>
-                            <field name="frigo"/>
+                                                        <field name="frigo"/>
                                                         <field name="lot"/>
                             <field name="dum"/>
                         </group>

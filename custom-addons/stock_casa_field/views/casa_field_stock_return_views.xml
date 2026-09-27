@@ -50,8 +50,7 @@
                             <field name="dum"/>
                         </group>
                         <group>
-                            <field name="garage"/>
-                            <field name="frigo"/>
+                                                        <field name="frigo"/>
                         </group>
                     </group>
                 </sheet>

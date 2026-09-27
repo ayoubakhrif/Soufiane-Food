@@ -2,7 +2,6 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class CasaStockExit(models.Model):
-    ste_id = fields.Integer(string='Ancienne Societe (A ignorer)')
     returned_qty = fields.Float(string='Quantité Retournée', compute='_compute_returned_qty', store=True)
     return_ids = fields.One2many('casa_field.stock.return', 'exit_id', string='Retours')
 
@@ -40,18 +39,6 @@ class CasaStockExit(models.Model):
     dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
     
-    garage = fields.Selection([
-        ('garage1', 'Garage 1'),
-        ('garage2', 'Garage 2'),
-        ('garage3', 'Garage 3'),
-        ('garage4', 'Garage 4'),
-        ('garage5', 'Garage 5'),
-        ('garage6', 'Garage 6'),
-        ('garage7', 'Garage 7'),
-        ('garage8', 'Garage 8'),
-        ('terrasse', 'Terrasse'),
-        ('fenidek', 'Fenidek'),
-    ], string='Garage', required=True)
     
     frigo = fields.Selection([
         ('frigo1', 'Frigo 1'),
@@ -106,7 +93,7 @@ class CasaStockExit(models.Model):
             if rec.state == 'done':
                 forbidden_fields = [
                     'product_id', 'qty', 'weight',
-                    'date', 'lot', 'dum', 'garage', 'frigo', 'client_id', 'driver_id'
+                    'date', 'lot', 'dum', 'frigo', 'client_id', 'driver_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
                     raise UserError(_("Les opérations Confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opÃ©ration."))
@@ -122,7 +109,6 @@ class CasaStockExit(models.Model):
                 ('product_id', '=', rec.product_id.id),
                 ('lot', '=', rec.lot),
                 ('dum', '=', rec.dum),
-                ('garage', '=', rec.garage),
                 ('frigo', '=', rec.frigo),
                 ('state', '=', 'done')
             ]
@@ -137,7 +123,6 @@ class CasaStockExit(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': -rec.qty,
                 'move_type': 'exit',
@@ -167,7 +152,6 @@ class CasaStockExit(models.Model):
                 'product_id': rec.product_id.id,
                 'lot': rec.lot,
                 'dum': rec.dum,
-                'garage': rec.garage,
                 'frigo': rec.frigo,
                 'qty': rec.qty,
                 'move_type': 'cancel_exit',

@@ -346,17 +346,33 @@ class Kal3iyaStockApiController(http.Controller):
         
         result = []
         for rec in exits:
+            image_b64 = ''
+            if rec.product_id:
+                entry = request.env['kal3iya.stock.entry'].sudo().search([
+                    ('product_id', '=', rec.product_id.id),
+                    ('lot', '=', rec.lot),
+                    ('photo_packaging', '!=', False)
+                ], limit=1, order='date desc, id desc')
+
+                if entry and entry.photo_packaging:
+                    image_b64 = entry.photo_packaging.decode('utf-8') if isinstance(entry.photo_packaging, bytes) else str(entry.photo_packaging)
+                elif rec.product_id.company_article_image:
+                    img = rec.product_id.company_article_image
+                    image_b64 = img.decode('utf-8') if isinstance(img, bytes) else str(img)
+
             result.append({
                 'id': rec.id,
                 'name': rec.name,
                 'date': str(rec.date),
                 'product_name': rec.product_id.name if rec.product_id else '',
                 'lot': rec.lot or '',
+                'dum': rec.dum or '',
                 'qty': rec.qty,
                 'client_id': rec.client_id.id if rec.client_id else None,
                 'client_name': rec.client_id.name if rec.client_id else '',
                 'state': rec.state,
                 'order_reference': rec.order_reference or '',
+                'image_b64': image_b64,
             })
         return self._json_response({'status': 'success', 'exits': result})
 

@@ -955,6 +955,154 @@ class WhatsAppFinanceController(http.Controller):
                 _logger.error(f"Error generating week PDF: {error_trace}")
                 return {'status': 'error', 'message': f"Erreur lors de la génération du PDF ({week_str}) : {str(e)}\n\nTrace: {error_trace}"}
 
+        # 5.55 Handle Manque Facture Search (Cheques without invoice)
+        keyword_facture_match = re.search(
+            r"(?:manque\s+(?:de\s+|des\s+)?factures?|manque\s+fac\b|sans\s+factures?|pas\s+de\s+factures?|factures?\s+manquantes?|(?:chqs?|ch[eèé]ques?)\s+sans\s+factures?)",
+            msg_clean,
+            re.IGNORECASE
+        )
+        if keyword_facture_match:
+            start, end = keyword_facture_match.span()
+            raw_param = (msg_clean[:start] + " " + msg_clean[end:]).strip()
+
+            domain = [('state', '!=', 'annule')]
+            filter_parts = []
+            week_filter = None
+
+            # 1. Check for week in raw_param or msg_clean
+            week_match = re.search(r"(?:w|s|semaine|week)\s*0*(\d{1,2})\b", raw_param, re.IGNORECASE)
+            if not week_match:
+                week_match = re.search(r"\b0*(\d{1,2})\b", raw_param)
+
+            if week_match:
+                week_num = int(week_match.group(1))
+                week_str = f"W{week_num:02d}"
+                domain.append(('week', '=', week_str))
+                filter_parts.append(f"semaine {week_str}")
+                week_filter = week_str
+                raw_param = raw_param[:week_match.start()] + " " + raw_param[week_match.end():]
+
+            # 2. Clean up remaining parameter for company or beneficiary search
+            stop_words = r"\b(?:donne|donnez|moi|nous|affiche|affichez|liste|listez|montre|montrez|quels?|quelles?|sont|est|il|y|a|t|des|les|la|le|du|de|d|l|pour|en|dans|chq|chqs|cheque|cheques|chèque|chèques|facture|factures|svp|stp|merci|ste|societe|société|qui|ont|n|pas|avec|sans)\b"
+            clean_param = re.sub(stop_words, " ", raw_param, flags=re.IGNORECASE).strip()
+            clean_param = re.sub(r"\s+", " ", clean_param).strip()
+
+            if len(clean_param) >= 2:
+                domain.append('|')
+                domain.append(('ste_id.name', 'ilike', clean_param))
+                domain.append(('benif_id.name', 'ilike', clean_param))
+                filter_parts.append(f"'{clean_param}'")
+
+            filter_desc = " - ".join(filter_parts) if filter_parts else "globale"
+
+            # 3. Query cheques in finance2.cheque
+            cheques = request.env['finance2.cheque'].sudo().search(domain, order='date_emission desc, id desc')
+
+            missing_cheques = []
+            for c in cheques:
+                has_sutra = bool(getattr(c, 'sutra_facture_ids', False))
+                has_repartition_facture = any(
+                    bool(r.serie_facture and str(r.serie_facture).strip() and str(r.serie_facture).strip().lower() not in ['-', 'n/a', 'none', '/', 'non', '0'])
+                    for r in c.repartition_ids
+                )
+                if not has_sutra and not has_repartition_facture:
+                    missing_cheques.append(c)
+
+            if not missing_cheques:
+                return {
+                    'status': 'not_found',
+                    'message': f"✅ Aucun chèque sans facture trouvé ({filter_desc})."
+                }
+
+            # Sort by week descending, then date_emission descending
+            missing_cheques.sort(key=lambda x: (x.week or '', str(x.date_emission or '')), reverse=True)
+
+            total_amount = sum(c.amount_total or 0.0 for c in missing_cheques)
+            msg = f"📄 *Chèques sans facture ({filter_desc})*\n"
+            msg += f"Total trouvé : *{len(missing_cheques)}* chèque(s) | Montant : *{'{:,.2f}'.format(total_amount).replace(',', ' ')} DH*\n\n"
+
+            display_limit = 40
+            for c in missing_cheques[:display_limit]:
+                ste_name = c.ste_id.name if c.ste_id else 'N/A'
+                benif_name = c.benif_id.name if c.benif_id else 'Inconnu'
+                amount_str = '{:,.2f}'.format(c.amount_total or 0.0).replace(',', ' ')
+                week_disp = c.week or 'N/A'
+                chq_num = c.name or 'S/N'
+                state_dict = dict(c._fields['state'].selection) if 'state' in c._fields else {}
+                state_label = state_dict.get(c.state, c.state.capitalize() if c.state else '')
+
+                msg += f"• *{chq_num}* ({ste_name}) 🗓️ *{week_disp}* | {benif_name} | *{amount_str} DH* [{state_label}]\n"
+
+            if len(missing_cheques) > display_limit:
+                msg += f"\n⚠️ _Affichage limité aux {display_limit} premiers chèques. Consultez le fichier Excel joint pour la liste complète._\n"
+
+            # 4. Generate Excel spreadsheet
+            try:
+                output = io.BytesIO()
+                workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+                sheet = workbook.add_worksheet('Sans Facture')
+
+                bold = workbook.add_format({'bold': True, 'bg_color': '#FCE9DA', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
+                cell_format = workbook.add_format({'border': 1, 'valign': 'vcenter'})
+                cell_center = workbook.add_format({'border': 1, 'valign': 'vcenter', 'align': 'center'})
+                money_format = workbook.add_format({'border': 1, 'valign': 'vcenter', 'align': 'right', 'num_format': '#,##0.00'})
+                total_bold = workbook.add_format({'bold': True, 'border': 1, 'valign': 'vcenter', 'align': 'right', 'bg_color': '#FCE9DA'})
+                total_money = workbook.add_format({'bold': True, 'border': 1, 'valign': 'vcenter', 'align': 'right', 'bg_color': '#FCE9DA', 'num_format': '#,##0.00'})
+
+                headers = ["N° Chèque", "Semaine", "Date Émission", "Société", "Bénéficiaire", "Journal", "Montant (DH)", "État"]
+                widths = [15, 12, 15, 20, 25, 10, 18, 15]
+                for col, (h, w) in enumerate(zip(headers, widths)):
+                    sheet.write(0, col, h, bold)
+                    sheet.set_column(col, col, w)
+
+                row_idx = 1
+                for c in missing_cheques:
+                    ste_name = c.ste_id.name if c.ste_id else 'N/A'
+                    benif_name = c.benif_id.name if c.benif_id else 'Inconnu'
+                    date_str = c.date_emission.strftime('%d/%m/%Y') if c.date_emission else ''
+                    state_dict = dict(c._fields['state'].selection) if 'state' in c._fields else {}
+                    state_label = state_dict.get(c.state, c.state.capitalize() if c.state else '')
+
+                    sheet.write(row_idx, 0, c.name or '', cell_center)
+                    sheet.write(row_idx, 1, c.week or '', cell_center)
+                    sheet.write(row_idx, 2, date_str, cell_center)
+                    sheet.write(row_idx, 3, ste_name, cell_format)
+                    sheet.write(row_idx, 4, benif_name, cell_format)
+                    sheet.write(row_idx, 5, c.journal or '', cell_center)
+                    sheet.write(row_idx, 6, c.amount_total or 0.0, money_format)
+                    sheet.write(row_idx, 7, state_label or '', cell_center)
+                    row_idx += 1
+
+                # Totals line
+                sheet.merge_range(row_idx, 0, row_idx, 5, "Total :", total_bold)
+                sheet.write(row_idx, 6, total_amount, total_money)
+                sheet.write(row_idx, 7, "", total_bold)
+
+                workbook.close()
+                output.seek(0)
+                xlsx_base64 = base64.b64encode(output.getvalue()).decode('utf-8')
+
+                file_suffix = f"_{week_filter}" if week_filter else ""
+                return {
+                    'status': 'success',
+                    'product_name': f"Chèques sans facture",
+                    'response': msg,
+                    'files': [
+                        {
+                            'pdf_base64': xlsx_base64,
+                            'file_name': f"Manque_Factures{file_suffix}.xlsx",
+                            'caption': f"Détails des chèques sans facture ({filter_desc})"
+                        }
+                    ]
+                }
+            except Exception as e:
+                _logger.error(f"Error generating Manque Factures Excel: {str(e)}")
+                return {
+                    'status': 'success',
+                    'product_name': f"Chèques sans facture",
+                    'response': msg
+                }
+
         # 5.6 Handle Manque Search (Missing PDFs)
         if msg_clean == "manque" or msg_clean.startswith("manque "):
             param = msg_clean[6:].strip()
@@ -962,7 +1110,10 @@ class WhatsAppFinanceController(http.Controller):
             filter_desc = "globale"
 
             if param:
-                week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", param)
+                if param in ['pdf', 'doc', 'chq vide', 'documentation', 'fichiers', 'fichier']:
+                    param = ""
+                else:
+                    week_match = re.match(r"^(?:w|s|semaine|week)\s*0*(\d{1,2})$", param)
                 if week_match:
                     week_num = int(week_match.group(1))
                     week_str = f"W{week_num:02d}"

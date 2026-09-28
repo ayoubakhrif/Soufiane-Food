@@ -955,9 +955,9 @@ class WhatsAppFinanceController(http.Controller):
                 _logger.error(f"Error generating week PDF: {error_trace}")
                 return {'status': 'error', 'message': f"Erreur lors de la génération du PDF ({week_str}) : {str(e)}\n\nTrace: {error_trace}"}
 
-        # 5.55 Handle Manque Facture Search (Cheques without invoice)
+        # 5.55 Handle Manque Facture / Documentation PDF Search (Cheques without doc_pdf)
         keyword_facture_match = re.search(
-            r"(?:manque\s+(?:de\s+|des\s+)?factures?|manque\s+fac\b|sans\s+factures?|pas\s+de\s+factures?|factures?\s+manquantes?|(?:chqs?|ch[eèé]ques?)\s+sans\s+factures?)",
+            r"(?:manque\s+(?:de\s+|des\s+)?(?:factures?|docs?|documentations?|pdf)|manque\s+fac\b|sans\s+(?:factures?|docs?|documentations?|pdf)|pas\s+de\s+(?:factures?|docs?|documentations?|pdf)|(?:factures?|documentations?)\s+manquantes?|(?:chqs?|ch[eèé]ques?)\s+sans\s+(?:factures?|docs?|documentations?|pdf))",
             msg_clean,
             re.IGNORECASE
         )
@@ -983,7 +983,7 @@ class WhatsAppFinanceController(http.Controller):
                 raw_param = raw_param[:week_match.start()] + " " + raw_param[week_match.end():]
 
             # 2. Clean up remaining parameter for company or beneficiary search
-            stop_words = r"\b(?:donne|donnez|moi|nous|affiche|affichez|liste|listez|montre|montrez|quels?|quelles?|sont|est|il|y|a|t|des|les|la|le|du|de|d|l|pour|en|dans|chq|chqs|cheque|cheques|chèque|chèques|facture|factures|svp|stp|merci|ste|societe|société|qui|ont|n|pas|avec|sans)\b"
+            stop_words = r"\b(?:donne|donnez|moi|nous|affiche|affichez|liste|listez|montre|montrez|quels?|quelles?|sont|est|il|y|a|t|des|les|la|le|du|de|d|l|pour|en|dans|chq|chqs|cheque|cheques|chèque|chèques|facture|factures|doc|docs|documentation|documentations|pdf|svp|stp|merci|ste|societe|société|qui|ont|n|pas|avec|sans)\b"
             clean_param = re.sub(stop_words, " ", raw_param, flags=re.IGNORECASE).strip()
             clean_param = re.sub(r"\s+", " ", clean_param).strip()
 
@@ -995,30 +995,22 @@ class WhatsAppFinanceController(http.Controller):
 
             filter_desc = " - ".join(filter_parts) if filter_parts else "globale"
 
-            # 3. Query cheques in finance2.cheque
+            # 3. Query cheques in finance2.cheque with missing doc_pdf
+            domain.append(('doc_pdf', '=', False))
             cheques = request.env['finance2.cheque'].sudo().search(domain, order='date_emission desc, id desc')
-
-            missing_cheques = []
-            for c in cheques:
-                has_sutra = bool(getattr(c, 'sutra_facture_ids', False))
-                has_repartition_facture = any(
-                    bool(r.serie_facture and str(r.serie_facture).strip() and str(r.serie_facture).strip().lower() not in ['-', 'n/a', 'none', '/', 'non', '0'])
-                    for r in c.repartition_ids
-                )
-                if not has_sutra and not has_repartition_facture:
-                    missing_cheques.append(c)
+            missing_cheques = [c for c in cheques.with_context(bin_size=True) if not c.doc_pdf]
 
             if not missing_cheques:
                 return {
                     'status': 'not_found',
-                    'message': f"✅ Aucun chèque sans facture trouvé ({filter_desc})."
+                    'message': f"✅ Aucun chèque sans documentation PDF trouvé ({filter_desc})."
                 }
 
             # Sort by week descending, then date_emission descending
             missing_cheques.sort(key=lambda x: (x.week or '', str(x.date_emission or '')), reverse=True)
 
             total_amount = sum(c.amount_total or 0.0 for c in missing_cheques)
-            msg = f"📄 *Chèques sans facture ({filter_desc})*\n"
+            msg = f"📄 *Chèques sans documentation PDF ({filter_desc})*\n"
             msg += f"Total trouvé : *{len(missing_cheques)}* chèque(s) | Montant : *{'{:,.2f}'.format(total_amount).replace(',', ' ')} DH*\n\n"
 
             display_limit = 40
@@ -1028,10 +1020,11 @@ class WhatsAppFinanceController(http.Controller):
                 amount_str = '{:,.2f}'.format(c.amount_total or 0.0).replace(',', ' ')
                 week_disp = c.week or 'N/A'
                 chq_num = c.name or 'S/N'
+                journal_str = f" (J: {c.journal})" if c.journal else ""
                 state_dict = dict(c._fields['state'].selection) if 'state' in c._fields else {}
                 state_label = state_dict.get(c.state, c.state.capitalize() if c.state else '')
 
-                msg += f"• *{chq_num}* ({ste_name}) 🗓️ *{week_disp}* | {benif_name} | *{amount_str} DH* [{state_label}]\n"
+                msg += f"• *{chq_num}*{journal_str} ({ste_name}) 🗓️ *{week_disp}* | {benif_name} | *{amount_str} DH* [{state_label}]\n"
 
             if len(missing_cheques) > display_limit:
                 msg += f"\n⚠️ _Affichage limité aux {display_limit} premiers chèques. Consultez le fichier Excel joint pour la liste complète._\n"
@@ -1085,21 +1078,21 @@ class WhatsAppFinanceController(http.Controller):
                 file_suffix = f"_{week_filter}" if week_filter else ""
                 return {
                     'status': 'success',
-                    'product_name': f"Chèques sans facture",
+                    'product_name': f"Chèques sans documentation",
                     'response': msg,
                     'files': [
                         {
                             'pdf_base64': xlsx_base64,
-                            'file_name': f"Manque_Factures{file_suffix}.xlsx",
-                            'caption': f"Détails des chèques sans facture ({filter_desc})"
+                            'file_name': f"Manque_Documentation{file_suffix}.xlsx",
+                            'caption': f"Détails des chèques sans documentation ({filter_desc})"
                         }
                     ]
                 }
             except Exception as e:
-                _logger.error(f"Error generating Manque Factures Excel: {str(e)}")
+                _logger.error(f"Error generating Manque Documentation Excel: {str(e)}")
                 return {
                     'status': 'success',
-                    'product_name': f"Chèques sans facture",
+                    'product_name': f"Chèques sans documentation",
                     'response': msg
                 }
 

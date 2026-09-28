@@ -212,16 +212,32 @@ class CasaStockApiController(http.Controller):
             
             created_exits = []
             for line in lines:
+                product_id = int(line.get('product_id'))
+                lot = line.get('lot') or ''
+                dum = line.get('dum') or ''
+                frigo = line.get('frigo') or 'stock_casa'
+                
+                # Fetch original weight and calibre from the entry in stock.move
+                move = request.env['casa_field.stock.move'].sudo().search([
+                    ('product_id', '=', product_id),
+                    ('lot', '=', lot),
+                    ('dum', '=', dum),
+                    ('frigo', '=', frigo),
+                    ('state', '=', 'done')
+                ], limit=1)
+                
                 vals = {
-                    'product_id': int(line.get('product_id')),
+                    'product_id': product_id,
                     'client_id': int(line.get('client_id')) if line.get('client_id') else False,
-                    'frigo': line.get('frigo') or 'stock_casa',
-                    'lot': line.get('lot') or '',
-                    'dum': line.get('dum') or '',
+                    'frigo': frigo,
+                    'lot': lot,
+                    'dum': dum,
                     'qty': float(line.get('qty', 0)),
                     'date': self._sanitize_date(line.get('date')),
                     'driver_id': driver_id,
                     'order_reference': order_ref,
+                    'weight': move.weight if move else 0.0,
+                    'calibre': move.calibre if move else '',
                 }
                 exit_rec = request.env['casa_field.stock.exit'].sudo().create(vals)
                 exit_rec.action_confirm()
@@ -299,6 +315,7 @@ class CasaStockApiController(http.Controller):
             vals = {
                 'exit_id': exit_id,
                 'qty': float(data.get('qty', 0)),
+                'weight': exit_rec.weight,
                 'date': self._sanitize_date(data.get('date')),
             }
 

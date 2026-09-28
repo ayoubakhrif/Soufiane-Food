@@ -76,34 +76,7 @@ class StockCardItem extends StatelessWidget {
                     ),
                   ),
 
-                  // Badge Garage
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.warehouse_rounded, size: 12, color: Colors.amberAccent),
-                          const SizedBox(width: 4),
-                          Text(
-                            item.garage.toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+
 
                   // Badge Quantité Colis
                   Positioned(

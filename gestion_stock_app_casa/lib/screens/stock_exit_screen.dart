@@ -20,8 +20,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
   List<ClientItem> _clients = [];
   bool _isLoading = true;
   String _searchQuery = '';
-  String _selectedGarageFilter = 'ALL';
-
+  
   @override
   void initState() {
     super.initState();
@@ -59,7 +58,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
         final matchesSearch = item.productName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
             item.lot.toLowerCase().contains(_searchQuery.toLowerCase()) ||
             item.dum.toLowerCase().contains(_searchQuery.toLowerCase());
-        final matchesGarage = _selectedGarageFilter == 'ALL' || item.garage == _selectedGarageFilter;
+        final matchesGarage = true;
         return matchesSearch && matchesGarage;
       }).toList();
     });
@@ -109,7 +108,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Lot: ${item.lot.isNotEmpty ? item.lot : '-'} • DUM: ${item.dum.isNotEmpty ? item.dum : '-'} • Garage: ${item.garage.toUpperCase()}',
+                    'Lot: ${item.lot.isNotEmpty ? item.lot : '-'} • DUM: ${item.dum.isNotEmpty ? item.dum : '-'} ',
                     style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
@@ -172,8 +171,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
 
                               final payload = {
                                 'product_id': item.productId,
-                                'garage': item.garage,
-                                'frigo': item.frigo,
+                                                                'frigo': item.frigo,
                                 'lot': item.lot,
                                 'dum': item.dum,
                                 'calibre': item.calibre,
@@ -229,8 +227,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final garagesAvailable = ['ALL', ..._stockList.map((e) => e.garage).toSet().toList()];
-
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sortie de Stock'),
@@ -275,35 +272,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
             ),
           ),
 
-          // Filtre rapide par Garage
-          if (garagesAvailable.length > 2)
-            SizedBox(
-              height: 36,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: garagesAvailable.length,
-                itemBuilder: (ctx, i) {
-                  final g = garagesAvailable[i];
-                  final isSelected = _selectedGarageFilter == g;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(g == 'ALL' ? 'Tous les garages' : g.toUpperCase()),
-                      selected: isSelected,
-                      onSelected: (val) {
-                        setState(() {
-                          _selectedGarageFilter = g;
-                          _applyFilters();
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
 
-          const SizedBox(height: 8),
 
           // Grille des cartes carrées
           Expanded(

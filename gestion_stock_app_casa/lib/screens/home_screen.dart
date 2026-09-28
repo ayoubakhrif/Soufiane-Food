@@ -281,20 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-            // 3. Transfert Garage
-            _buildActionButton(
-              title: 'Transfert entre Garages',
-              subtitle: 'Déplacer de la marchandise d\'un garage à un autre',
-              icon: Icons.sync_alt_rounded,
-              color: Colors.blue.shade800,
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => StockTransferScreen(agent: widget.agent)),
-                );
-                _checkPendingOperations();
-              },
-            ),
+
           ],
         ),
       ),

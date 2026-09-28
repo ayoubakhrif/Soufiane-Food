@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem id="menu_casa_field_stock_root"
               name="Gestion Stock Terrain"
@@ -58,6 +58,12 @@
               parent="menu_casa_field_stock_data"
               action="action_casa_field_stock_client"
               sequence="20"/>
+
+    <menuitem id="menu_casa_field_stock_agent"
+              name="Agents de Stock"
+              parent="menu_casa_field_stock_data"
+              action="action_casa_field_stock_agent"
+              sequence="30"/>
 
         <menuitem id="menu_casa_field_stock_driver"
               name="Chauffeurs"

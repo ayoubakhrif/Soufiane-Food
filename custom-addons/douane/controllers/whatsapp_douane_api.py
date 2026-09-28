@@ -147,11 +147,11 @@ class WhatsAppDouaneController(http.Controller):
         # Search with priority
         entry = None
         if forced_type:
-            entry = self._find_entry_by_norm_ref(norm_target, forced_type)
+            entry = self._find_entry_by_norm_ref(norm_target, forced_type, raw_target=reference)
         else:
             # Priority: DUM -> Lot -> BL
             for t in ['dum', 'lot', 'bl']:
-                entry = self._find_entry_by_norm_ref(norm_target, t)
+                entry = self._find_entry_by_norm_ref(norm_target, t, raw_target=reference)
                 if entry:
                     break
 
@@ -190,7 +190,7 @@ class WhatsAppDouaneController(http.Controller):
             'choices': choices
         }
 
-    def _find_entry_by_norm_ref(self, norm_target, field_type):
+    def _find_entry_by_norm_ref(self, norm_target, field_type, raw_target=None):
         """Finds logistique.entry by normalizing DB fields with flexible wildcards."""
         if not norm_target:
             return None
@@ -199,22 +199,70 @@ class WhatsAppDouaneController(http.Controller):
         if field_type == 'bl':
             field = 'bl_number'
         
-        # Build a flexible search term: %3%3%1%L% for "331L"
-        # This ignores any characters (like spaces) present in the database field
-        import re
-        flexible_search = '%' + '%'.join(list(norm_target)) + '%'
-        domain = [(field, 'ilike', flexible_search)]
+        raw_target = raw_target or norm_target
+        norm_clean = norm_target.lstrip('0')
+        raw_seg_clean = self.strip_leading_zeros_all(raw_target)
+
+        # Build flexible search patterns
+        # 1. Exact flexible search
+        search_patterns = []
+        if norm_target:
+            search_patterns.append('%' + '%'.join(list(norm_target)) + '%')
         
-        candidates = request.env['logistique.entry'].sudo().search(domain)
-        # Final strict validation in Python
+        # 2. Flexible search without leading zeros (matches DB values with or without leading zeros)
+        if norm_clean and norm_clean != norm_target:
+            search_patterns.append('%' + '%'.join(list(norm_clean)) + '%')
+            
+        if raw_seg_clean and raw_seg_clean not in (norm_target, norm_clean):
+            search_patterns.append('%' + '%'.join(list(raw_seg_clean)) + '%')
+
+        has_tanger_med = field == 'dum' and 'tanger_med_dum' in request.env['logistique.entry']._fields
+        search_fields = [field]
+        if has_tanger_med:
+            search_fields.append('tanger_med_dum')
+
+        conditions = []
+        for f in search_fields:
+            for pat in search_patterns:
+                conditions.append((f, 'ilike', pat))
+
+        if len(conditions) == 1:
+            domain = conditions
+        elif len(conditions) > 1:
+            domain = ['|'] * (len(conditions) - 1) + conditions
+        else:
+            return None
+
+        candidates = request.env['logistique.entry'].sudo().search(domain, order='id desc')
+
+        def get_field_vals(ent):
+            vals = []
+            for f in search_fields:
+                v = ent[f]
+                if v:
+                    vals.append(v)
+            return vals
+
+        # PASS 1: Strict exact normalized match
         for entry in candidates:
-            if self.normalize_ref(entry[field]) == norm_target:
-                return entry
-        
-        # Secondary check: see if the target is a substring of the normalized DB field
+            for val in get_field_vals(entry):
+                if self.normalize_ref(val) == norm_target:
+                    return entry
+
+        # PASS 2: Match neglecting leading zeros
         for entry in candidates:
-            if norm_target in self.normalize_ref(entry[field]):
-                return entry
+            for val in get_field_vals(entry):
+                if self.is_zero_prefix_match(norm_target, val) or self.is_zero_prefix_match(raw_target, val):
+                    return entry
+
+        # PASS 3: Secondary check: see if the target is a substring of the normalized DB field
+        for entry in candidates:
+            for val in get_field_vals(entry):
+                norm_val = self.normalize_ref(val)
+                if norm_target in norm_val:
+                    return entry
+                if norm_clean and len(norm_clean) >= 4 and norm_clean in norm_val:
+                    return entry
                 
         return None
 
@@ -229,17 +277,21 @@ class WhatsAppDouaneController(http.Controller):
         for entry in candidates:
             for field in ['dum', 'bl_number', 'lot']:
                 val = entry[field]
-                if val and self.get_char_diff_count(norm_target, val) == 1:
-                    found.append(val)
+                if val:
+                    # Ignore if the only difference is leading zeros (already handled directly)
+                    if self.is_zero_prefix_match(norm_target, val):
+                        continue
+                    if self.get_char_diff_count(norm_target, val) == 1:
+                        found.append(val)
         
         return list(set(found))[:3] # Limit to 3 closest matches
 
     def _send_dum_docs_by_ref(self, reference):
-        """Find entry by exact string match and send docs."""
+        """Find entry by exact or leading-zero match and send docs."""
         norm = self.normalize_ref(reference)
         entry = None
         for t in ['dum', 'lot', 'bl']:
-            entry = self._find_entry_by_norm_ref(norm, t)
+            entry = self._find_entry_by_norm_ref(norm, t, raw_target=reference)
             if entry:
                 break
             
@@ -253,14 +305,20 @@ class WhatsAppDouaneController(http.Controller):
             ('entry_id', '=', entry.id),
             ('type', '=', 'dum')
         ])
+        if not docs and entry.dossier_id:
+            docs = request.env['douane.document'].sudo().search([
+                ('entry_id', 'in', entry.dossier_id.entry_ids.ids),
+                ('type', '=', 'dum')
+            ])
         if not docs:
             return {'status': 'not_found', 'message': f"Dossier {entry.bl_number} trouvé, mais aucun PDF 'DUM' n'est attaché."}
 
         files = []
         for doc in docs:
             if doc.file:
+                b64 = doc.file.decode('utf-8') if isinstance(doc.file, bytes) else doc.file
                 files.append({
-                    'pdf_base64': doc.file.decode('utf-8'),
+                    'pdf_base64': b64,
                     'file_name': doc.file_name or f"DUM_{entry.dum or entry.bl_number}.pdf"
                 })
         

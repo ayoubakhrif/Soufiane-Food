@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'home_screen.dart';
 import 'driver_dashboard_screen.dart';
@@ -68,16 +68,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.warehouse_rounded,
-                          size: 64,
-                          color: Colors.blue,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/logo.jpg',
+                          height: 100,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 24),

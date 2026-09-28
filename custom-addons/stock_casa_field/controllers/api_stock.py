@@ -49,6 +49,28 @@ class CasaStockApiController(http.Controller):
         return fields.Date.context_today(request.env.user)
 
 
+
+    @http.route('/api/casa/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_login(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        phone = (data.get('phone') or '').strip()
+        password = (data.get('password') or '').strip()
+
+        if not phone or not password:
+            return self._json_response({'status': 'error', 'message': 'Veuillez saisir le numéro de téléphone et le mot de passe.'}, status=400)
+
+        agent = request.env['casa_field.stock.agent'].sudo().search([('phone', '=', phone), ('active', '=', True)], limit=1)
+        if agent and agent.password == password:
+            return self._json_response({'status': 'success', 'agent': {'id': agent.id, 'name': agent.name, 'phone': agent.phone, 'role': 'agent'}})
+
+        driver = request.env['casa_field.stock.driver'].sudo().search([('phone', '=', phone)], limit=1)
+        if driver and driver.password == password:
+            return self._json_response({'status': 'success', 'agent': {'id': driver.id, 'name': driver.name, 'phone': driver.phone, 'role': 'driver'}})
+
+        return self._json_response({'status': 'error', 'message': 'Numero de telephone ou mot de passe incorrect.'}, status=401)
+
     @http.route('/api/casa/bootstrap', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
     def api_bootstrap(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':

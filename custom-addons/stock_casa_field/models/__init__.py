@@ -8,3 +8,5 @@ from . import casa_field_stock_stock_stock
 
 from . import casa_field_stock_return
 
+
+from . import casa_field_stock_agent

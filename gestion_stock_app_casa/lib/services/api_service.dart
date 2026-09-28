@@ -16,7 +16,7 @@ class ApiService {
   };
 
   static Future<Agent> login(String phone, String password) async {
-    final uri = Uri.parse('$baseUrl/api/stock_casa_field/login');
+    final uri = Uri.parse('$baseUrl/api/casa/login');
     final response = await http.post(
       uri,
       headers: _headers,
@@ -38,7 +38,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> fetchBootstrap() async {
-    final uri = Uri.parse('$baseUrl/api/stock_casa_field/bootstrap');
+    final uri = Uri.parse('$baseUrl/api/casa/bootstrap');
     final response = await http.get(uri, headers: _headers);
 
     final data = jsonDecode(response.body);
@@ -64,7 +64,7 @@ class ApiService {
   }
 
   static Future<List<StockCard>> fetchStock() async {
-    final uri = Uri.parse('$baseUrl/api/stock_casa_field/stock');
+    final uri = Uri.parse('$baseUrl/api/casa/stock');
     final response = await http.get(uri, headers: _headers);
 
     final data = jsonDecode(response.body);
@@ -78,7 +78,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createEntry(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/stock_casa_field/entry');
+    final uri = Uri.parse('$baseUrl/api/casa/entry');
     http.Response response;
     try {
       response = await http.post(
@@ -120,7 +120,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createExit(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/stock_casa_field/exit');
+    final uri = Uri.parse('$baseUrl/api/casa/exit');
     http.Response response;
     try {
       response = await http.post(
@@ -162,7 +162,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createTransfer(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('$baseUrl/api/stock_casa_field/transfer');
+    final uri = Uri.parse('$baseUrl/api/casa/transfer');
     http.Response response;
     try {
       response = await http.post(
@@ -216,11 +216,11 @@ class ApiService {
 
         String path;
         if (op.type == 'entry') {
-          path = '/api/stock_casa_field/entry';
+          path = '/api/casa/entry';
         } else if (op.type == 'exit') {
-          path = '/api/stock_casa_field/exit';
+          path = '/api/casa/exit';
         } else if (op.type == 'transfer') {
-          path = '/api/stock_casa_field/transfer';
+          path = '/api/casa/transfer';
         } else {
           continue;
         }

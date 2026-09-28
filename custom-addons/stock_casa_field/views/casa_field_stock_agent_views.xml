@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_casa_field_stock_agent_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.agent.tree</field>
+        <field name="model">casa_field.stock.agent</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="password" password="True"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_casa_field_stock_agent" model="ir.actions.act_window">
+        <field name="name">Agents de Stock</field>
+        <field name="res_model">casa_field.stock.agent</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

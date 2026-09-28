@@ -20,6 +20,7 @@
         'views/casa_field_stock_exit_views.xml',
         'views/casa_field_stock_stock_views.xml',
         'views/casa_field_stock_master_data_views.xml',
+        'views/casa_field_stock_agent_views.xml',
         'views/casa_field_stock_menus.xml',
     ],
     'installable': True,

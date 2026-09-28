@@ -1009,9 +1009,43 @@ class WhatsAppFinanceController(http.Controller):
             # Sort by week descending, then date_emission descending
             missing_cheques.sort(key=lambda x: (x.week or '', str(x.date_emission or '')), reverse=True)
 
+            # Query Finance V1 documentation availability (batch optimization)
+            chq_names = [c.name for c in missing_cheques if c.name]
+            v1_phys_map = {}
+            v1_dq_map = {}
+            if chq_names:
+                v1_phys_records = request.env['finance.cheque.physical'].sudo().with_context(bin_size=True).search([('name', 'in', chq_names)])
+                for p in v1_phys_records:
+                    p_ste = p.ste_id.name.lower().strip() if p.ste_id and p.ste_id.name else ""
+                    v1_phys_map[(p.name, p_ste)] = p
+                    if p.name not in v1_phys_map:
+                        v1_phys_map[p.name] = p
+
+                v1_dq_records = request.env['datacheque'].sudo().search([('chq', 'in', chq_names)])
+                for dq in v1_dq_records:
+                    if dq.doc_pdf_url:
+                        v1_dq_map[dq.chq] = dq.doc_pdf_url
+
+            def get_v1_status(c):
+                ste_lower = c.ste_id.name.lower().strip() if c.ste_id and c.ste_id.name else ""
+                p = v1_phys_map.get((c.name, ste_lower)) or v1_phys_map.get(c.name)
+                if p and p.doc_pdf:
+                    return "Oui (PDF)"
+                elif p and getattr(p, 'cheque_copy_pdf', False):
+                    return "Oui (Copie)"
+                elif (c.name in v1_dq_map) or (p and any(dq.doc_pdf_url for dq in p.datacheque_ids)):
+                    return "Oui (Lien)"
+                return "Non"
+
+            v1_status_dict = {c.id: get_v1_status(c) for c in missing_cheques}
+            v1_avail_count = sum(1 for s in v1_status_dict.values() if s.startswith("Oui"))
+
             total_amount = sum(c.amount_total or 0.0 for c in missing_cheques)
             msg = f"📄 *Chèques sans documentation PDF ({filter_desc})*\n"
-            msg += f"Total trouvé : *{len(missing_cheques)}* chèque(s) | Montant : *{'{:,.2f}'.format(total_amount).replace(',', ' ')} DH*\n\n"
+            msg += f"Total trouvé : *{len(missing_cheques)}* chèque(s) | Montant : *{'{:,.2f}'.format(total_amount).replace(',', ' ')} DH*\n"
+            if v1_avail_count > 0:
+                msg += f"💡 *{v1_avail_count}* documentation(s) disponible(s) dans Finance V1 (à copier)\n"
+            msg += "\n"
 
             display_limit = 40
             for c in missing_cheques[:display_limit]:
@@ -1023,8 +1057,10 @@ class WhatsAppFinanceController(http.Controller):
                 journal_str = f" (J: {c.journal})" if c.journal else ""
                 state_dict = dict(c._fields['state'].selection) if 'state' in c._fields else {}
                 state_label = state_dict.get(c.state, c.state.capitalize() if c.state else '')
+                v1_st = v1_status_dict.get(c.id, "Non")
+                v1_badge = f" [📁 V1: {v1_st}]" if v1_st.startswith("Oui") else ""
 
-                msg += f"• *{chq_num}*{journal_str} ({ste_name}) 🗓️ *{week_disp}* | {benif_name} | *{amount_str} DH* [{state_label}]\n"
+                msg += f"• *{chq_num}*{journal_str} ({ste_name}) 🗓️ *{week_disp}* | {benif_name} | *{amount_str} DH* [{state_label}]{v1_badge}\n"
 
             if len(missing_cheques) > display_limit:
                 msg += f"\n⚠️ _Affichage limité aux {display_limit} premiers chèques. Consultez le fichier Excel joint pour la liste complète._\n"
@@ -1033,7 +1069,7 @@ class WhatsAppFinanceController(http.Controller):
             try:
                 output = io.BytesIO()
                 workbook = xlsxwriter.Workbook(output, {'in_memory': True})
-                sheet = workbook.add_worksheet('Sans Facture')
+                sheet = workbook.add_worksheet('Sans Documentation')
 
                 bold = workbook.add_format({'bold': True, 'bg_color': '#FCE9DA', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
                 cell_format = workbook.add_format({'border': 1, 'valign': 'vcenter'})
@@ -1042,8 +1078,12 @@ class WhatsAppFinanceController(http.Controller):
                 total_bold = workbook.add_format({'bold': True, 'border': 1, 'valign': 'vcenter', 'align': 'right', 'bg_color': '#FCE9DA'})
                 total_money = workbook.add_format({'bold': True, 'border': 1, 'valign': 'vcenter', 'align': 'right', 'bg_color': '#FCE9DA', 'num_format': '#,##0.00'})
 
-                headers = ["N° Chèque", "Semaine", "Date Émission", "Société", "Bénéficiaire", "Journal", "Montant (DH)", "État"]
-                widths = [15, 12, 15, 20, 25, 10, 18, 15]
+                # Colors for V1 availability
+                cell_v1_yes = workbook.add_format({'border': 1, 'valign': 'vcenter', 'align': 'center', 'bold': True, 'font_color': '#0e6251', 'bg_color': '#d4efdf'})
+                cell_v1_no = workbook.add_format({'border': 1, 'valign': 'vcenter', 'align': 'center', 'font_color': '#78281f', 'bg_color': '#fadbd8'})
+
+                headers = ["N° Chèque", "Semaine", "Date Émission", "Société", "Bénéficiaire", "Journal", "Montant (DH)", "État", "Dispo Finance V1"]
+                widths = [15, 12, 15, 20, 25, 10, 18, 15, 20]
                 for col, (h, w) in enumerate(zip(headers, widths)):
                     sheet.write(0, col, h, bold)
                     sheet.set_column(col, col, w)
@@ -1055,6 +1095,7 @@ class WhatsAppFinanceController(http.Controller):
                     date_str = c.date_emission.strftime('%d/%m/%Y') if c.date_emission else ''
                     state_dict = dict(c._fields['state'].selection) if 'state' in c._fields else {}
                     state_label = state_dict.get(c.state, c.state.capitalize() if c.state else '')
+                    v1_st = v1_status_dict.get(c.id, "Non")
 
                     sheet.write(row_idx, 0, c.name or '', cell_center)
                     sheet.write(row_idx, 1, c.week or '', cell_center)
@@ -1064,12 +1105,14 @@ class WhatsAppFinanceController(http.Controller):
                     sheet.write(row_idx, 5, c.journal or '', cell_center)
                     sheet.write(row_idx, 6, c.amount_total or 0.0, money_format)
                     sheet.write(row_idx, 7, state_label or '', cell_center)
+                    sheet.write(row_idx, 8, v1_st, cell_v1_yes if v1_st.startswith("Oui") else cell_v1_no)
                     row_idx += 1
 
                 # Totals line
                 sheet.merge_range(row_idx, 0, row_idx, 5, "Total :", total_bold)
                 sheet.write(row_idx, 6, total_amount, total_money)
                 sheet.write(row_idx, 7, "", total_bold)
+                sheet.write(row_idx, 8, f"{v1_avail_count} dispo(s)", total_bold)
 
                 workbook.close()
                 output.seek(0)

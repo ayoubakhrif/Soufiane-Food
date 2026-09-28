@@ -199,3 +199,92 @@ class CasaStockApiController(http.Controller):
             _logger.exception("Erreur API Exit")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
+
+    @http.route('/api/casa/bulk_exit', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_bulk_exit(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            driver_id = int(data.get('driver_id')) if data.get('driver_id') else False
+            order_ref = data.get('order_reference', '')
+            lines = data.get('lines', [])
+            
+            created_exits = []
+            for line in lines:
+                vals = {
+                    'product_id': int(line.get('product_id')),
+                    'client_id': int(line.get('client_id')) if line.get('client_id') else False,
+                    'frigo': line.get('frigo') or 'stock_casa',
+                    'lot': line.get('lot') or '',
+                    'dum': line.get('dum') or '',
+                    'qty': float(line.get('qty', 0)),
+                    'date': self._sanitize_date(line.get('date')),
+                    'driver_id': driver_id,
+                    'order_reference': order_ref,
+                }
+                exit_rec = request.env['casa_field.stock.exit'].sudo().create(vals)
+                exit_rec.action_confirm()
+                created_exits.append(exit_rec.id)
+
+            return self._json_response({'status': 'success', 'message': f'{len(created_exits)} sorties crées avec succès.'})
+        except Exception as e:
+            _logger.exception("Erreur API Bulk Exit")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+
+    @http.route('/api/casa/exits', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    def api_exits(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        domain = [('state', '=', 'done')]
+        exits = request.env['casa_field.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=100)
+        data = []
+        for rec in exits:
+            returned_qty = sum(r.qty for r in rec.return_ids if r.state == 'done')
+            if returned_qty < rec.qty: # Only send exits that can still be returned
+                data.append({
+                    'id': rec.id,
+                    'name': rec.name,
+                    'date': str(rec.date),
+                    'product_name': rec.product_id.name if rec.product_id else '',
+                    'lot': rec.lot or '',
+                    'client_name': rec.client_id.name if rec.client_id else '',
+                    'qty': rec.qty,
+                    'returned_qty': returned_qty,
+                })
+
+        return self._json_response({
+            'status': 'success',
+            'exits': data,
+        })
+
+    @http.route('/api/casa/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_return(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            exit_id = int(data.get('exit_id'))
+            exit_rec = request.env['casa_field.stock.exit'].sudo().browse(exit_id)
+            if not exit_rec.exists():
+                return self._json_response({'status': 'error', 'message': 'Sortie introuvable.'}, status=404)
+
+            vals = {
+                'exit_id': exit_id,
+                'qty': float(data.get('qty', 0)),
+                'date': self._sanitize_date(data.get('date')),
+            }
+
+            ret_rec = request.env['casa_field.stock.return'].sudo().create(vals)
+            ret_rec.action_confirm()
+
+            return self._json_response({
+                'status': 'success',
+                'return_id': ret_rec.id,
+                'name': ret_rec.name,
+                'message': f'Retour {ret_rec.name} enregistré avec succès.'
+            })
+        except Exception as e:
+            _logger.exception('Erreur API Return')
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)

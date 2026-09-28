@@ -52,11 +52,15 @@ class ApiService {
       final garages = (data['garages'] as List)
           .map((g) => GarageItem.fromJson(g))
           .toList();
+      final drivers = data['drivers'] != null ? (data['drivers'] as List)
+          .map((d) => DriverItem.fromJson(d))
+          .toList() : <DriverItem>[];
 
       return {
         'products': products,
         'clients': clients,
         'garages': garages,
+        'drivers': drivers,
       };
     } else {
       throw Exception(data['message'] ?? 'Impossible de charger les données');
@@ -244,4 +248,52 @@ class ApiService {
     }
     return syncedCount;
   }
+  static Future<Map<String, dynamic>> createBulkExit(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/bulk_exit');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode(payload));
+    return jsonDecode(response.body);
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchExits() async {
+    final uri = Uri.parse('$baseUrl/api/casa/exits');
+    final response = await http.get(uri, headers: _headers);
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
+      return List<Map<String, dynamic>>.from(data['exits']);
+    } else {
+      throw Exception(data['message'] ?? 'Erreur lors de la récupération des sorties');
+    }
+  }
+
+  static Future<Map<String, dynamic>> createReturn(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/return');
+    http.Response response;
+    try {
+      response = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode(payload),
+      );
+    } catch (e) {
+      throw Exception('Erreur réseau. Impossible de contacter le serveur.');
+    }
+
+    try {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return data;
+      } else {
+        return {
+          'status': 'error',
+          'message': data['message'] ?? 'Erreur (Code: ${response.statusCode})'
+        };
+      }
+    } catch (_) {
+      return {
+        'status': 'error',
+        'message': 'Erreur serveur (${response.statusCode}): ${response.body}'
+      };
+    }
+  }
+
 }

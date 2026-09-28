@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/agent.dart';
-import '../models/pending_operation.dart';
+
 import '../services/api_service.dart';
 import '../services/local_storage_service.dart';
 import 'login_screen.dart';
 import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
+import 'exits_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Agent agent;
@@ -140,7 +141,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stock Casa'),
+        toolbarHeight: 80,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/logo.jpg', height: 40),
+            const SizedBox(height: 4),
+            const Text('Stock Casa', style: TextStyle(fontSize: 16)),
+          ],
+        ),
         backgroundColor: Colors.blue.shade900,
         foregroundColor: Colors.white,
         actions: [
@@ -282,6 +292,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
 
+
+            // 3. Retours
+            _buildActionButton(
+              title: 'Retours Clients',
+              subtitle: 'Historique des sorties et retours de marchandise',
+              icon: Icons.assignment_return_rounded,
+              color: Colors.orange.shade700,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)),
+                );
+                _checkPendingOperations();
+              },
+            ),
           ],
         ),
       ),

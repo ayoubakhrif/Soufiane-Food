@@ -27,6 +27,7 @@ class CasaStockExit(models.Model):
     _order = 'date desc, id desc'
 
     name = fields.Char(string='Référence', readonly=True, default='/')
+    order_reference = fields.Char(string='Référence Commande')
     product_id = fields.Many2one('casa_field.stock.product', string='Produit', required=True)
     qty = fields.Float(string='Quantité', required=True)
     weight = fields.Float(string='Poids unit (Kg)')

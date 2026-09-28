@@ -1,6 +1,6 @@
 {
-    "name": "gestion_stock_app",
-    "short_name": "gestion_stock_app",
+    "name": "Stock Casa",
+    "short_name": "Stock Casa",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

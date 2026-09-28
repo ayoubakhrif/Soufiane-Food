@@ -7,8 +7,7 @@ class StockCard {
   final String calibre;
   final double weight;
   final double quantity;
-  final String garage;
-  final String frigo;
+    final String frigo;
   final int? steId;
   final String steName;
   final String imageBase64;
@@ -22,7 +21,6 @@ class StockCard {
     required this.calibre,
     required this.weight,
     required this.quantity,
-    required this.garage,
     required this.frigo,
     this.steId,
     required this.steName,
@@ -40,7 +38,7 @@ class StockCard {
       weight: (json['weight'] is num) ? (json['weight'] as num).toDouble() : 0.0,
       quantity: (json['quantity'] is num) ? (json['quantity'] as num).toDouble() : 0.0,
       garage: json['garage'] as String? ?? '',
-      frigo: json['frigo'] as String? ?? 'stock_casa_field',
+      frigo: json['frigo'] as String? ?? 'stock_casa',
       steId: json['ste_id'] as int?,
       steName: json['ste_name'] as String? ?? '',
       imageBase64: json['image'] as String? ?? '',

@@ -17,14 +17,12 @@ class _StockEntryScreenState extends State<StockEntryScreen> {
   final _formKey = GlobalKey<FormState>();
 
   List<ProductItem> _products = [];
-  List<GarageItem> _garages = [];
-  bool _isLoadingBootstrap = true;
+    bool _isLoadingBootstrap = true;
   bool _isSubmitting = false;
 
   // Form controllers
   int? _selectedProductId;
-  String? _selectedGarage;
-  final _lotController = TextEditingController();
+    final _lotController = TextEditingController();
   final _dumController = TextEditingController();
   final _calibreController = TextEditingController();
   final _qtyController = TextEditingController();
@@ -55,11 +53,7 @@ class _StockEntryScreenState extends State<StockEntryScreen> {
       final data = await ApiService.fetchBootstrap();
       setState(() {
         _products = data['products'];
-        _garages = data['garages'];
-        if (_garages.isNotEmpty) {
-          _selectedGarage = _garages.first.key;
-        }
-        _isLoadingBootstrap = false;
+                        _isLoadingBootstrap = false;
       });
     } catch (e) {
       if (!mounted) return;
@@ -83,8 +77,7 @@ class _StockEntryScreenState extends State<StockEntryScreen> {
 
     final payload = {
       'product_id': _selectedProductId,
-      'garage': _selectedGarage,
-      'frigo': 'stock_casa_field',
+            'frigo': 'stock_casa',
       'lot': _lotController.text.trim(),
       'dum': _dumController.text.trim(),
       'calibre': _calibreController.text.trim(),
@@ -154,20 +147,7 @@ class _StockEntryScreenState extends State<StockEntryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Garage
-              DropdownButtonFormField<String>(
-                value: _selectedGarage,
-                decoration: InputDecoration(
-                  labelText: 'Garage de réception',
-                  prefixIcon: const Icon(Icons.warehouse),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                items: _garages.map((g) {
-                  return DropdownMenuItem(value: g.key, child: Text(g.label));
-                }).toList(),
-                onChanged: (val) => setState(() => _selectedGarage = val),
-              ),
-              const SizedBox(height: 14),
+              
 
               // Produit
               DropdownButtonFormField<int>(

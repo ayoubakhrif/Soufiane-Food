@@ -6,7 +6,6 @@ import '../services/local_storage_service.dart';
 import 'login_screen.dart';
 import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
-import 'stock_transfer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Agent agent;
@@ -141,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kal3iya Stock'),
+        title: const Text('Stock Casa'),
         backgroundColor: Colors.blue.shade900,
         foregroundColor: Colors.white,
         actions: [

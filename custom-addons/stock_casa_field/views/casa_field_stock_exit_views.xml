@@ -1,20 +1,20 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_casa_field_stock_exit_tree" model="ir.ui.view">
         <field name="name">casa_field.stock.exit.tree</field>
         <field name="model">casa_field.stock.exit</field>
         <field name="arch" type="xml">
-            <tree create="false" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'">
+            <tree create="false" decoration-info="state == 'draft'" decoration-warning="state == 'done'" decoration-success="state == 'delivered'" decoration-danger="state == 'cancel'">
                 <field name="date"/>
                 <field name="name"/>
                 <field name="product_id"/>
-                                <field name="qty"/>
+                <field name="qty"/>
                 <field name="client_id"/>
 
-                                <field name="frigo"/>
+                <field name="frigo"/>
                 <field name="lot"/>
                 <field name="dum"/>
-                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'done'" decoration-success="state == 'delivered'" decoration-danger="state == 'cancel'"/>
             </tree>
         </field>
     </record>
@@ -26,15 +26,17 @@
             <form string="Sortie Stock Casa">
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object" class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state != 'done'"/>
-                    <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state != 'done'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,done,cancel"/>
+                    <button name="action_deliver" string="Marquer Livré" type="object" class="btn-primary" invisible="state != 'done'"/>
+                    <button name="action_reset_confirmed" string="Remettre en Confirmé" type="object" class="btn-secondary" invisible="state != 'delivered'"/>
+                    <button name="action_new_return" string="Retour Client" type="object" class="btn-secondary" invisible="state not in ('done', 'delivered')"/>
+                    <button name="action_cancel" string="Annuler (Reversal)" type="object" class="btn-danger" invisible="state not in ('done', 'delivered')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done,delivered,cancel"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="%(action_casa_field_stock_return)d" type="action" icon="fa-undo" context="{'default_exit_id': id, 'search_default_exit_id': id}">
                             <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_text">RetournÃƒÂ©</span>
+                                <span class="o_stat_text">Retourné</span>
                             
                         <button name="action_view_returns" type="object" class="oe_stat_button" icon="fa-undo" invisible="returned_qty == 0">
                             <div class="o_stat_info">
@@ -45,9 +47,9 @@
                     </div>
                         </button>
                     </div>
-                    <div class="alert alert-info border-0 mb-4" role="alert" invisible="state != 'done'">
+                    <div class="alert alert-info border-0 mb-4" role="alert" invisible="state not in ('done', 'delivered')">
                         <i class="fa fa-info-circle me-2"/>
-                        <strong>Attention:</strong> Les opÃƒÂ©rations confirmÃƒÂ©es ne peuvent pas ÃƒÂªtre modifiÃƒÂ©es. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> et crÃƒÂ©ez une nouvelle opÃƒÂ©ration.
+                        <strong>Attention:</strong> Les opérations confirmées ou livrées ne peuvent pas être modifiées. Pour corriger une erreur, utilisez le bouton <strong>Annuler (Reversal)</strong> ou <strong>Remettre en Confirmé</strong>.
                     </div>
                     <div class="oe_title">
                         <h1>
@@ -122,15 +124,17 @@
                 <field name="driver_id"/>
                                 <separator/>
                 <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="ConfirmÃƒÂ©" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Confirmé" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Livré" name="delivered" domain="[('state', '=', 'delivered')]"/>
+                <filter string="Annulé" name="cancel" domain="[('state', '=', 'cancel')]"/>
                 <separator/>
                 <filter string="Aujourd'hui" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="this_month" domain="[('date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
                 <group expand="0" string="Grouper par">
                     <filter string="Produit" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
-                                        <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
-                    <filter string="Ãƒâ€°tat" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
         </field>

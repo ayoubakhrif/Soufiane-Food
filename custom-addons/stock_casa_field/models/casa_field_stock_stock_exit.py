@@ -92,13 +92,13 @@ class CasaStockExit(models.Model):
 
     def write(self, vals):
         for rec in self:
-            if rec.state == 'done':
+            if rec.state in ('done', 'delivered'):
                 forbidden_fields = [
                     'product_id', 'qty', 'weight',
                     'date', 'lot', 'dum', 'frigo', 'client_id', 'driver_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Les opérations Confirmées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opÃ©ration."))
+                    raise UserError(_("Les opérations Confirmées ou Livrées ne peuvent pas être modifiées. Utilisez 'Annuler' et créez une nouvelle opération."))
         return super(CasaStockExit, self).write(vals)
 
     def action_confirm(self):
@@ -146,9 +146,12 @@ class CasaStockExit(models.Model):
 
     def action_cancel(self):
         for rec in self:
-            if rec.state != 'done':
-                raise UserError(_("Vous ne pouvez annuler que des sorties Confirmées."))
+            if rec.state not in ('done', 'delivered'):
+                raise UserError(_("Vous ne pouvez annuler que des sorties Confirmées ou Livrées."))
             
+            if rec.return_ids.filtered(lambda r: r.state == 'done'):
+                raise UserError(_("Impossible d'annuler une sortie ayant des retours clients confirmés. Veuillez d'abord annuler les retours associés."))
+
             # Create Reversal Move
             cancel_move = self.env['casa_field.stock.move'].create({
                 'product_id': rec.product_id.id,
@@ -173,19 +176,20 @@ class CasaStockExit(models.Model):
                 'cancel_move_id': cancel_move.id
             })
 
+    def action_deliver(self):
+        for rec in self:
+            if rec.state != 'done':
+                raise UserError(_("Seules les sorties à l'état 'Confirmé' peuvent être marquées comme 'Livré'."))
+            rec.write({'state': 'delivered'})
+
+    def action_reset_confirmed(self):
+        for rec in self:
+            if rec.state != 'delivered':
+                raise UserError(_("Seules les sorties à l'état 'Livré' peuvent être remises en 'Confirmé'."))
+            rec.write({'state': 'done'})
+
     @api.constrains('qty')
     def _check_qty_positive(self):
         for rec in self:
             if rec.qty <= 0:
                 raise UserError(_("La Quantité doit être strictement positive."))
-
-
-
-
-
-
-
-    def action_deliver(self):
-        for rec in self:
-            if rec.state == 'done':
-                rec.state = 'delivered'

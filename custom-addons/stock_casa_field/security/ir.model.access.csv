@@ -2,7 +2,7 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_casa_field_stock_product,casa_field.stock.product,model_casa_field_stock_product,base.group_user,1,1,1,1
 access_casa_field_stock_client,casa_field.stock.client,model_casa_field_stock_client,base.group_user,1,1,1,1
 access_casa_field_stock_driver,casa_field.stock.driver,model_casa_field_stock_driver,base.group_user,1,1,1,1
-access_casa_field_stock_stock_move_user,casa_field.stock.move,model_casa_field_stock_move,group_user,1,1,1,0
+access_casa_field_stock_stock_move_user,casa_field.stock.move,model_casa_field_stock_move,group_user,1,1,1,1
 access_casa_field_stock_stock_move_manager,casa_field.stock.move,model_casa_field_stock_move,group_manager,1,1,1,1
 access_casa_field_stock_stock_entry_user,casa_field.stock.entry,model_casa_field_stock_entry,group_user,1,1,1,0
 access_casa_field_stock_stock_entry_manager,casa_field.stock.entry,model_casa_field_stock_entry,group_manager,1,1,1,1

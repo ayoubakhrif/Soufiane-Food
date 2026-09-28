@@ -17,6 +17,38 @@ class WhatsAppDouaneController(http.Controller):
         import re
         return re.sub(r'[^A-Z0-9]', '', str(val).upper())
 
+    def strip_leading_zeros_all(self, val):
+        """Removes leading zeros from each numeric segment (e.g. '00123/045' -> '123/45' -> '12345')."""
+        if not val:
+            return ""
+        import re
+        val_clean = re.sub(r'(^|[^0-9])0+([0-9]+)', r'\1\2', str(val).strip())
+        norm = self.normalize_ref(val_clean)
+        return norm.lstrip('0')
+
+    def is_zero_prefix_match(self, s1, s2):
+        """
+        Returns True if the only difference between normalized s1 and s2
+        is leading zeros (at start of string or at start of segments).
+        """
+        if not s1 or not s2:
+            return False
+        n1 = self.normalize_ref(s1)
+        n2 = self.normalize_ref(s2)
+        if not n1 or not n2:
+            return False
+        if n1 == n2:
+            return True
+        l1 = n1.lstrip('0')
+        l2 = n2.lstrip('0')
+        if l1 and l1 == l2:
+            return True
+        c1 = self.strip_leading_zeros_all(s1)
+        c2 = self.strip_leading_zeros_all(s2)
+        if c1 and c1 == c2:
+            return True
+        return False
+
     def get_char_diff_count(self, s1, s2):
         """Counts differences between two normalized strings."""
         n1 = self.normalize_ref(s1)

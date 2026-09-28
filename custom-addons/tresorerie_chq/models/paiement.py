@@ -315,16 +315,16 @@ Exemple de réponse attendue:
                 base64_images = []
                 for page_num in range(len(doc)):
                     page = doc.load_page(page_num)
-                    # Zoom x4 pour la qualité, mais encodage JPEG pour réduire le poids
-                    pix = page.get_pixmap(matrix=fitz.Matrix(4, 4))
+                    # Zoom x2.5 offre une excellente netteté tout en divisant la taille mémoire et le temps d'encodage par 3
+                    pix = page.get_pixmap(matrix=fitz.Matrix(2.5, 2.5))
                     img_bytes = pix.tobytes("jpeg")
                     base64_images.append(base64.b64encode(img_bytes).decode('utf-8'))
                 
                 chunk_size = 3
-                all_items = []
-                for i in range(0, len(base64_images), chunk_size):
-                    chunk = base64_images[i:i+chunk_size]
-                    
+                chunks = [base64_images[i:i+chunk_size] for i in range(0, len(base64_images), chunk_size)]
+                
+                def process_claude_chunk(chunk_idx_and_data):
+                    idx, chunk = chunk_idx_and_data
                     content_array = [{"type": "text", "text": prompt_text}]
                     for img in chunk:
                         content_array.append({
@@ -354,7 +354,7 @@ Exemple de réponse attendue:
                     import time
                     chunk_resp = None
                     for attempt in range(max_retries):
-                        resp = requests.post(url, headers=headers, json=payload, timeout=120)
+                        resp = requests.post(url, headers=headers, json=payload, timeout=60)
                         if resp.status_code == 200:
                             chunk_resp = resp
                             break
@@ -369,7 +369,7 @@ Exemple de réponse attendue:
                             pass
                             
                         if attempt == max_retries - 1:
-                            return {"error": f"Erreur API Claude (Batch {i}): {resp.text}"}
+                            return {"error": f"Erreur API Claude (Batch {idx}): {resp.text}"}
                             
                     resp_json = chunk_resp.json()
                     try:
@@ -381,30 +381,41 @@ Exemple de réponse attendue:
                         if not raw_content:
                             raise KeyError("Aucun bloc de texte trouvé")
                     except (KeyError, IndexError):
-                        return {"error": f"Format de réponse Claude inattendu (Batch {i}): {json.dumps(resp_json)}"}
+                        return {"error": f"Format de réponse Claude inattendu (Batch {idx}): {json.dumps(resp_json)}"}
                         
                     clean_content = re.sub(r'^```(json)?', '', raw_content.strip(), flags=re.IGNORECASE)
                     clean_content = re.sub(r'```$', '', clean_content.strip()).strip()
                     try:
                         data = json.loads(clean_content)
                         if isinstance(data, list):
-                            all_items.extend(data)
+                            return {"items": data}
                         elif isinstance(data, dict) and "items" in data:
-                            all_items.extend(data["items"])
+                            return {"items": data["items"]}
+                        return {"items": []}
                     except Exception as e:
                         last_brace_idx = clean_content.rfind('}')
                         if last_brace_idx != -1:
                             try:
                                 data = json.loads(clean_content[:last_brace_idx+1] + ']}')
                                 if isinstance(data, list):
-                                    all_items.extend(data)
+                                    return {"items": data}
                                 elif isinstance(data, dict) and "items" in data:
-                                    all_items.extend(data["items"])
+                                    return {"items": data["items"]}
                             except:
-                                return {"error": f"JSON Claude Invalide (Batch {i}): {str(e)}"}
-                        else:
-                            return {"error": f"JSON Claude Invalide (Batch {i}): {str(e)}"}
-                            
+                                pass
+                        return {"error": f"JSON Claude Invalide (Batch {idx}): {str(e)}"}
+
+                # Traitement de tous les chunks Claude EN PARALLÈLE
+                from concurrent.futures import ThreadPoolExecutor as ClaudePool
+                with ClaudePool(max_workers=min(4, len(chunks) or 1)) as claude_executor:
+                    chunk_results = list(claude_executor.map(process_claude_chunk, enumerate(chunks)))
+                
+                all_items = []
+                for res in chunk_results:
+                    if "error" in res:
+                        return res
+                    all_items.extend(res.get("items", []))
+                    
                 return {"items": all_items}
             except Exception as e:
                 return {"error": f"Exception Claude: {str(e)}"}

@@ -288,3 +288,65 @@ class CasaStockApiController(http.Controller):
         except Exception as e:
             _logger.exception('Erreur API Return')
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+
+    @http.route('/api/casa/driver_exits', type='http', auth='public', methods=['GET', 'POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_driver_exits(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        driver_id = data.get('driver_id')
+        if not driver_id:
+            return self._json_response({'status': 'error', 'message': 'Chauffeur non specifie'}, status=400)
+            
+        domain = [('driver_id', '=', int(driver_id)), ('state', 'in', ['done', 'delivered'])]
+        exits = request.env['casa_field.stock.exit'].sudo().search(domain, order='date desc, id desc')
+        
+        result = []
+        for rec in exits:
+            image_b64 = ''
+            if rec.product_id:
+                entry = request.env['casa_field.stock.entry'].sudo().search([
+                    ('product_id', '=', rec.product_id.id),
+                    ('lot', '=', rec.lot),
+                    ('photo_packaging', '!=', False)
+                ], limit=1, order='date desc, id desc')
+
+                if entry and entry.photo_packaging:
+                    image_b64 = entry.photo_packaging.decode('utf-8') if isinstance(entry.photo_packaging, bytes) else str(entry.photo_packaging)
+                elif rec.product_id.image_1920:
+                    img = rec.product_id.image_1920
+                    image_b64 = img.decode('utf-8') if isinstance(img, bytes) else str(img)
+
+            result.append({
+                'id': rec.id,
+                'name': rec.name,
+                'date': str(rec.date),
+                'product_name': rec.product_id.name if rec.product_id else '',
+                'lot': rec.lot or '',
+                'dum': rec.dum or '',
+                'qty': rec.qty,
+                'client_id': rec.client_id.id if rec.client_id else None,
+                'client_name': rec.client_id.name if rec.client_id else '',
+                'state': rec.state,
+                'order_reference': rec.order_reference or '',
+                'image_b64': image_b64,
+            })
+        return self._json_response({'status': 'success', 'exits': result})
+
+    @http.route('/api/casa/mark_delivered', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_mark_delivered(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            exit_ids = data.get('exit_ids', [])
+            if not exit_ids:
+                return self._json_response({'status': 'error', 'message': 'Aucune sortie specifiee'}, status=400)
+                
+            exits = request.env['casa_field.stock.exit'].sudo().browse(exit_ids)
+            exits.action_deliver()
+            
+            return self._json_response({'status': 'success', 'message': 'Mise a jour reussie'})
+        except Exception as e:
+            _logger.exception("Erreur API Mark Delivered")
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)

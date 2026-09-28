@@ -53,6 +53,7 @@ class CasaStockExit(models.Model):
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('done', 'Confirmé'),
+        ('delivered', 'Livré'),
         ('cancel', 'Annulé'),
     ], string='État', default='draft', required=True)
 
@@ -183,3 +184,8 @@ class CasaStockExit(models.Model):
 
 
 
+
+    def action_deliver(self):
+        for rec in self:
+            if rec.state == 'done':
+                rec.state = 'delivered'

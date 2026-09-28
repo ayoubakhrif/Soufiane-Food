@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'home_screen.dart';
+import 'driver_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomeScreen(agent: agent)),
+        MaterialPageRoute(builder: (_) => agent.role == 'driver' ? DriverDashboardScreen(agent: agent) : HomeScreen(agent: agent)),
       );
     } catch (e) {
       if (!mounted) return;

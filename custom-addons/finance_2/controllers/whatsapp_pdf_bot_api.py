@@ -186,9 +186,12 @@ class WhatsAppFinancePdfController(http.Controller):
                 type_str = f" ({type_val})" if type_val else ""
                 messages.append(f"• {inv_amount} DH{type_str} {bl_str}{fact_str}")
 
+            ste_name = f" ({base_cheque.ste_id.name})" if base_cheque.ste_id else ""
+            doc_msg = "\n\n📄 *Documentation PDF :* Le fichier a bien été attaché au chèque sur Gestia !" if pdf_base64 else ""
+
             return {
                 'status': 'success',
-                'response': f"✅ *PDF traité avec succès (Finance V2) !*\n\n*Chèque N°:* {chq_number}\n\n*Répartitions ajoutées :*\n" + "\n".join(messages)
+                'response': f"✅ *PDF traité avec succès (Finance V2) !*\n\n*Chèque N°:* {chq_number}{ste_name}\n\n*Répartitions ajoutées :*\n" + "\n".join(messages) + doc_msg
             }
         except Exception as e:
             _logger.error(f"Error updating/creating datacheques from PDF: {str(e)}")

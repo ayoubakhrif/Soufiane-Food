@@ -231,12 +231,14 @@ class CasaStockApiController(http.Controller):
             try:
                 driver_name = request.env['casa_field.stock.driver'].sudo().browse(driver_id).name if driver_id else "Inconnu"
                 msg = f"🚚 *Nouvelle Tournée Validée (Casa)*\n"
-                msg += f"Réf: {order_ref}\n"
+                exits_records = request.env['casa_field.stock.exit'].sudo().browse(created_exits)
+                refs = ", ".join(exits_records.mapped('name'))
+                msg += f"Réf: {refs}\n"
                 msg += f"Chauffeur: {driver_name}\n"
                 msg += f"Nombre de sorties: {len(lines)}\n\n"
                 
                 for line in lines:
-                    product = request.env['product.product'].sudo().browse(int(line.get('product_id'))).name
+                    product = request.env['casa_field.stock.product'].sudo().browse(int(line.get('product_id'))).name
                     client_id = line.get('client_id')
                     client = request.env['casa_field.stock.client'].sudo().browse(int(client_id)).name if client_id else "Inconnu"
                     qty = line.get('qty', 0)

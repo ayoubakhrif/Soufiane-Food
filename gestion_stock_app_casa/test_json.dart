@@ -1,0 +1,1 @@
+﻿import 'dart:convert'; class Agent { final int id; Agent(this.id); factory Agent.fromJson(Map<String, dynamic> json) => Agent(json['id']); } void main() { String str = '{"id": 1}'; Agent.fromJson(jsonDecode(str)); print('Success'); }

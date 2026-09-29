@@ -7,6 +7,7 @@ import 'login_screen.dart';
 import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
 import 'exits_history_screen.dart';
+import 'stock_consultation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Agent agent;
@@ -260,6 +261,20 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 14),
+
+            if (widget.agent.role == 'agent')
+              _buildActionButton(
+                title: 'Consultation de Stock',
+                subtitle: 'Rechercher et consulter l\'état du stock en temps réel',
+                icon: Icons.inventory_2_rounded,
+                color: Colors.blue.shade700,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => StockConsultationScreen(agent: widget.agent)),
+                  );
+                },
+              ),
 
             // 1. Entrée Stock
             _buildActionButton(

@@ -10,6 +10,9 @@
                 <field name="date"/>
                 <field name="product_id"/>
                 <field name="qty"/>
+                <field name="weight"/>
+                <field name="tonnage"/>
+                <field name="price_purchase"/>
                 <field name="source_ville"/>
                 <field name="dest_ville"/>
                 <field name="state" widget="badge"
@@ -62,6 +65,7 @@
                             <field name="dum"/>
                             <field name="calibre"/>
                             <field name="weight"/>
+                            <field name="tonnage"/>
                             <field name="price_purchase"/>
                             <field name="source_ste_id"/>
                         </group>

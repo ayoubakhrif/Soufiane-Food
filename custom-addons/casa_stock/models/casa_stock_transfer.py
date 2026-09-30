@@ -19,6 +19,8 @@ class CasaStockTransfer(models.Model):
     dum = fields.Char(string='DUM')
     calibre = fields.Char(string='Calibre')
     weight = fields.Float(string='Poids unit (Kg)')
+    tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
+    poids = fields.Char(string='Poids', compute='_compute_poids')
     price_purchase = fields.Float(string='Prix Achat')
     source_ville = fields.Selection([
         ('tanger', 'Tanger'),
@@ -77,6 +79,16 @@ class CasaStockTransfer(models.Model):
             self.price_purchase = 0.0
             self.source_ste_id = False
             self.available_qty = 0.0
+
+    @api.depends('qty', 'weight')
+    def _compute_tonnage(self):
+        for rec in self:
+            rec.tonnage = (rec.qty or 0.0) * (rec.weight or 0.0)
+
+    @api.depends('weight')
+    def _compute_poids(self):
+        for rec in self:
+            rec.poids = f"{rec.weight or 0.0}Kg" if rec.weight else ""
 
     def action_validate(self):
         for rec in self:

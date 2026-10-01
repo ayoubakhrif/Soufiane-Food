@@ -69,6 +69,7 @@ class Finance2Cheque(models.Model):
     
     # Workflow Status
     is_admin = fields.Boolean(compute='_compute_is_admin')
+    is_manager = fields.Boolean(compute='_compute_is_manager')
 
     
     @api.depends('date_emission')
@@ -86,6 +87,10 @@ class Finance2Cheque(models.Model):
     def _compute_is_admin(self):
         for rec in self:
             rec.is_admin = self.env.user.has_group('finance_2.group_finance2_admin')
+
+    def _compute_is_manager(self):
+        for rec in self:
+            rec.is_manager = self.env.user.has_group('finance_2.group_finance2_manager')
 
     admin_state = fields.Selection(related='state', readonly=False, tracking=False)
     state = fields.Selection([
@@ -353,6 +358,8 @@ Exemple:
         for rec in self:
             rec.state = 'brouillon'
             rec.date_remise = False
+            rec.date_encaissement = False
+            rec.montant_encaisse = 0.0
             
     def action_mettre_actif(self):
         for rec in self:
@@ -392,7 +399,12 @@ Exemple:
             
     def action_annuler(self):
         for rec in self:
+            if rec.state in ('cloture', 'encaisse') and not self.env.user.has_group('finance_2.group_finance2_manager'):
+                raise UserError("Seul un responsable peut annuler un chèque clôturé ou encaissé.")
             rec.state = 'annule'
+            rec.date_remise = False
+            rec.date_encaissement = False
+            rec.montant_encaisse = 0.0
 
     def action_open_chq_vide(self):
         self.ensure_one()
@@ -434,6 +446,9 @@ Exemple:
     def force_brouillon(self):
         for rec in self:
             rec.state = 'brouillon'
+            rec.date_remise = False
+            rec.date_encaissement = False
+            rec.montant_encaisse = 0.0
 
     def force_reserve(self):
         for rec in self:

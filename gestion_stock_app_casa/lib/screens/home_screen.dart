@@ -8,6 +8,8 @@ import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
 import 'exits_history_screen.dart';
 import 'stock_consultation_screen.dart';
+import 'order_creation_screen.dart';
+import 'pending_orders_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Agent agent;
@@ -20,12 +22,25 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _pendingCount = 0;
+  int _pendingOrdersCount = 0;
   bool _isSyncing = false;
 
   @override
   void initState() {
     super.initState();
     _checkPendingOperations();
+    _fetchPendingOrdersCount();
+  }
+
+  Future<void> _fetchPendingOrdersCount() async {
+    if (widget.agent.role == 'agent') {
+      try {
+        final count = await ApiService.fetchPendingOrdersCount();
+        if (mounted) setState(() => _pendingOrdersCount = count);
+      } catch (e) {
+        // Ignore silent failure
+      }
+    }
   }
 
   Future<void> _checkPendingOperations() async {
@@ -33,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _pendingCount = list.length;
     });
+    _fetchPendingOrdersCount();
   }
 
   Future<void> _triggerSync() async {
@@ -262,66 +278,105 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 14),
 
-            if (widget.agent.role == 'agent')
+            if (widget.agent.role == 'commercial') ...[
+              _buildActionButton(
+                title: 'Nouvelle Commande',
+                subtitle: 'Saisir une demande de chargement pour un client',
+                icon: Icons.add_shopping_cart,
+                color: Colors.green.shade700,
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => OrderCreationScreen(agent: widget.agent)));
+                },
+              ),
               _buildActionButton(
                 title: 'Consultation de Stock',
                 subtitle: 'Rechercher et consulter l\'état du stock en temps réel',
                 icon: Icons.inventory_2_rounded,
                 color: Colors.blue.shade700,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => StockConsultationScreen(agent: widget.agent)),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => StockConsultationScreen(agent: widget.agent)));
                 },
               ),
-
-            // 1. Entrée Stock
-            _buildActionButton(
-              title: 'Entrée en Stock',
-              subtitle: 'Réceptionner conteneur, saisir lot, DUM & photos',
-              icon: Icons.add_business_rounded,
-              color: Colors.green.shade700,
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => StockEntryScreen(agent: widget.agent)),
-                );
-                _checkPendingOperations();
-              },
-            ),
-
-            // 2. Sortie Stock
-            _buildActionButton(
-              title: 'Sortie de Stock',
-              subtitle: 'Choisir le produit par carte visuelle & affecter au client',
-              icon: Icons.local_shipping_rounded,
-              color: Colors.red.shade700,
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => StockExitScreen(agent: widget.agent)),
-                );
-                _checkPendingOperations();
-              },
-            ),
-
-
-
-            // 3. Retours
-            _buildActionButton(
-              title: 'Retours Clients',
-              subtitle: 'Historique des sorties et retours de marchandise',
-              icon: Icons.assignment_return_rounded,
-              color: Colors.orange.shade700,
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)),
-                );
-                _checkPendingOperations();
-              },
-            ),
+              _buildActionButton(
+                title: 'Historique des Sorties',
+                subtitle: 'Consulter l\'état des sorties (Validé, Livré)',
+                icon: Icons.history,
+                color: Colors.orange.shade700,
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)));
+                },
+              ),
+            ] else if (widget.agent.role == 'agent') ...[
+              Stack(
+                children: [
+                  _buildActionButton(
+                    title: 'Commandes à Préparer',
+                    subtitle: 'Voir les demandes de chargement des commerciaux',
+                    icon: Icons.assignment,
+                    color: Colors.orange.shade700,
+                    onTap: () async {
+                      await Navigator.push(context, MaterialPageRoute(builder: (_) => PendingOrdersScreen(agent: widget.agent)));
+                      _fetchPendingOrdersCount();
+                    },
+                  ),
+                  if (_pendingOrdersCount > 0)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          _pendingOrdersCount.toString(),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              _buildActionButton(
+                title: 'Consultation de Stock',
+                subtitle: 'Rechercher et consulter l\'état du stock en temps réel',
+                icon: Icons.inventory_2_rounded,
+                color: Colors.blue.shade700,
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => StockConsultationScreen(agent: widget.agent)));
+                },
+              ),
+              _buildActionButton(
+                title: 'Entrée en Stock',
+                subtitle: 'Réceptionner conteneur, saisir lot, DUM & photos',
+                icon: Icons.add_business_rounded,
+                color: Colors.green.shade700,
+                onTap: () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => StockEntryScreen(agent: widget.agent)));
+                  _checkPendingOperations();
+                },
+              ),
+              _buildActionButton(
+                title: 'Sortie de Stock',
+                subtitle: 'Choisir le produit par carte visuelle & affecter au client',
+                icon: Icons.local_shipping_rounded,
+                color: Colors.red.shade700,
+                onTap: () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => StockExitScreen(agent: widget.agent)));
+                  _checkPendingOperations();
+                },
+              ),
+              _buildActionButton(
+                title: 'Retours Clients',
+                subtitle: 'Historique des sorties et retours de marchandise',
+                icon: Icons.assignment_return_rounded,
+                color: Colors.purple.shade700,
+                onTap: () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)));
+                  _checkPendingOperations();
+                },
+              ),
+            ],
           ],
         ),
       ),

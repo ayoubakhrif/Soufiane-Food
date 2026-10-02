@@ -313,4 +313,35 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  static Future<int> fetchPendingOrdersCount() async {
+    final uri = Uri.parse('$baseUrl/api/casa/orders/pending_count');
+    final response = await http.get(uri, headers: _headers);
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
+      return data['count'] as int;
+    }
+    return 0;
+  }
+
+  static Future<List<dynamic>> fetchPendingOrders() async {
+    final uri = Uri.parse('$baseUrl/api/casa/orders');
+    final response = await http.get(uri, headers: _headers);
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
+      return data['orders'] as List;
+    }
+    throw Exception('Erreur de chargement des commandes');
+  }
+
+  static Future<Map<String, dynamic>> createOrder(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/orders');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode(payload));
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> validateOrder(int orderId) async {
+    final uri = Uri.parse('$baseUrl/api/casa/orders/validate');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode({'order_id': orderId}));
+    return jsonDecode(response.body);
+  }
 }

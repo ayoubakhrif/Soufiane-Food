@@ -16,6 +16,16 @@ class ExpenseDaily(models.Model):
     )
     description = fields.Text(string='Description')
     
+    # Reçu / Facture
+    receipt_image = fields.Binary(string='Reçu / Facture', attachment=True)
+    receipt_filename = fields.Char(string='Nom du fichier')
+    has_receipt = fields.Boolean(string='Reçu attaché', compute='_compute_has_receipt', store=True)
+
+    @api.depends('receipt_image')
+    def _compute_has_receipt(self):
+        for rec in self:
+            rec.has_receipt = bool(rec.receipt_image)
+    
     # Computed fields for analysis
     month_period = fields.Char(
         string='Période',

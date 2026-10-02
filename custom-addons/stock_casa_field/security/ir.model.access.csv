@@ -1,4 +1,4 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+﻿id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_casa_field_stock_product,casa_field.stock.product,model_casa_field_stock_product,base.group_user,1,1,1,1
 access_casa_field_stock_client,casa_field.stock.client,model_casa_field_stock_client,base.group_user,1,1,1,1
 access_casa_field_stock_driver,casa_field.stock.driver,model_casa_field_stock_driver,base.group_user,1,1,1,1
@@ -23,3 +23,9 @@ access_casa_field_stock_return_manager,casa_field.stock.return,model_casa_field_
 access_casa_field_stock_return_viewer,casa_field.stock.return,model_casa_field_stock_return,group_viewer,1,0,0,0
 access_casa_field_stock_agent,casa_field.stock.agent,model_casa_field_stock_agent,base.group_user,1,1,1,1
 access_casa_field_stock_agent_viewer,casa_field.stock.agent,model_casa_field_stock_agent,group_viewer,1,0,0,0
+access_casa_field_stock_order,casa_field.stock.order,model_casa_field_stock_order,base.group_user,1,1,1,1
+access_casa_field_stock_order_line,casa_field.stock.order.line,model_casa_field_stock_order_line,base.group_user,1,1,1,1
+access_casa_field_stock_order,casa_field.stock.order,model_casa_field_stock_order,base.group_user,1,1,1,1
+access_casa_field_stock_order_line,casa_field.stock.order.line,model_casa_field_stock_order_line,base.group_user,1,1,1,1
+
+

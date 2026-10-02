@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_casa_field_stock_order_tree" model="ir.ui.view">
+        <field name="name">casa_field.stock.order.tree</field>
+        <field name="model">casa_field.stock.order</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'pending'" decoration-success="state == 'done'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="commercial_id"/>
+                <field name="client_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_casa_field_stock_order_form" model="ir.ui.view">
+        <field name="name">casa_field.stock.order.form</field>
+        <field name="model">casa_field.stock.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="client_id"/>
+                            <field name="commercial_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lignes de Commande">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="weight"/>
+                                    <field name="tonnage"/>
+                                    <field name="note"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_casa_field_stock_order" model="ir.actions.act_window">
+        <field name="name">Commandes à Charger</field>
+        <field name="res_model">casa_field.stock.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+    <menuitem id="menu_casa_field_stock_order" name="Commandes Commerciales" parent="menu_casa_field_stock_root" action="action_casa_field_stock_order" sequence="15"/>
+</odoo>

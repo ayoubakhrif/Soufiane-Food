@@ -2,7 +2,6 @@
     "name": "Stock Casa",
     "short_name": "Stock Casa",
     "start_url": "index.html",
-    "scope": "/stock_casa_field/static/app/",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",

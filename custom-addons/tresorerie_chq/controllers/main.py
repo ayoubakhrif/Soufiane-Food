@@ -104,7 +104,18 @@ Exemple de réponse attendue:
         raw_client_part = match.group(2).strip()
         date_str = match.group(3)
 
-        # Détection de l'émetteur dans raw_client_part
+        # Détection de l'émetteur dans raw_client_part (support des variantes/alias)
+        emetteur_aliases = {
+            'soufiane': 'soufiane',
+            'soufyan': 'soufiane',
+            'soufyane': 'soufiane',
+            'soufian': 'soufiane',
+            'hamza': 'hamza',
+            'hamza wahaby': 'hamza',
+            'hamza wahabi': 'hamza',
+            'wahaby': 'hamza',
+            'wahabi': 'hamza',
+        }
         emetteur_map = {'soufiane': 'Soufiane', 'hamza': 'Hamza'}
         detected_emetteur = None
         target_client_name = raw_client_part
@@ -113,8 +124,8 @@ Exemple de réponse attendue:
         if '-' in raw_client_part:
             prefix, remainder = raw_client_part.split('-', 1)
             prefix_clean = prefix.strip().lower()
-            if prefix_clean in emetteur_map and remainder.strip():
-                detected_emetteur = prefix_clean
+            if prefix_clean in emetteur_aliases and remainder.strip():
+                detected_emetteur = emetteur_aliases[prefix_clean]
                 target_client_name = remainder.strip()
         
         payment_type = 'cheque' if doc_type_str == 'CHQ' else 'effet'
@@ -233,18 +244,30 @@ Exemple de réponse attendue:
         if group_id != TRESORERIE_REPORT_GROUP_ID:
             return {'status': 'ignored', 'message': 'This agent only handles the Tresorerie Report Group.'}
 
-        # 0. Vérification si la demande concerne un émetteur (ex: Soufiane, Hamza)
+        # 0. Vérification si la demande concerne un émetteur (ex: Soufiane, Hamza et leurs variantes)
         text_lower = message_text.lower().strip()
         Client = request.env['tresorerie_chq.client'].sudo()
         emetteur_key = None
         emetteur_label = None
         
-        # Liste des émetteurs possibles
+        # Liste des émetteurs possibles et leurs variantes / alias
+        emetteur_aliases = {
+            'soufiane': 'soufiane',
+            'soufyan': 'soufiane',
+            'soufyane': 'soufiane',
+            'soufian': 'soufiane',
+            'hamza': 'hamza',
+            'hamza wahaby': 'hamza',
+            'hamza wahabi': 'hamza',
+            'wahaby': 'hamza',
+            'wahabi': 'hamza',
+        }
         emetteur_map = {'soufiane': 'Soufiane', 'hamza': 'Hamza'}
-        for key, label in emetteur_map.items():
-            if text_lower == key or text_lower == f"rapport {key}" or text_lower == f"clients {key}" or text_lower == f"client {key}":
-                emetteur_key = key
-                emetteur_label = label
+
+        for alias, e_key in emetteur_aliases.items():
+            if text_lower == alias or text_lower == f"rapport {alias}" or text_lower == f"clients {alias}" or text_lower == f"client {alias}":
+                emetteur_key = e_key
+                emetteur_label = emetteur_map[e_key]
                 break
                 
         if emetteur_key:
@@ -292,9 +315,10 @@ Exemple de réponse attendue:
             if not extracted_name or extracted_name.upper() == 'IGNORE':
                 return {'status': 'ignored'}
 
-            # Vérifier si l'IA a extrait un émetteur
-            if extracted_name.lower() in emetteur_map:
-                e_key = extracted_name.lower()
+            # Vérifier si l'IA a extrait un émetteur ou une variante
+            extracted_lower = extracted_name.lower().strip()
+            if extracted_lower in emetteur_aliases:
+                e_key = emetteur_aliases[extracted_lower]
                 e_label = emetteur_map[e_key]
                 emetteur_clients = Client.search([('emetteur', '=', e_key)], order='name asc')
                 if emetteur_clients:
@@ -413,19 +437,21 @@ Exemple de réponse attendue:
         synonyms = "\n".join(alias_list) if alias_list else "Aucun synonyme défini."
         
         prompt = (
-            "Tu es un assistant administratif. Ta tâche est d'identifier le nom correct du client demandé pour un rapport de trésorerie (chèques/effets).\n"
+            "Tu es un assistant administratif. Ta tâche est d'identifier le nom correct du client ou de l'émetteur demandé pour un rapport de trésorerie (chèques/effets).\n"
+            "Deux émetteurs spéciaux existent : 'Soufiane' (variantes: Soufyan, Soufyane, Soufian) et 'Hamza' (variantes: Hamza Wahaby, Hamza Wahabi, Wahaby).\n"
+            "Si le message fait référence à l'un de ces émetteurs, retourne exactement 'Soufiane' ou 'Hamza'.\n\n"
             "Voici la liste des clients de la base de données :\n"
             f"[{db_names}]\n\n"
             "Voici un dictionnaire d'alias (synonymes) pour t'aider :\n"
             f"{synonyms}\n\n"
             "Message WhatsApp : " + text + "\n\n"
             "Règles strictes :\n"
-            "1. Identifie le nom du client mentionné.\n"
-            "2. Retourne le nom du client tel qu'il apparaît dans la liste (le plus proche possible).\n"
+            "1. Identifie le nom du client ou de l'émetteur mentionné.\n"
+            "2. Retourne le nom tel qu'il apparaît dans la liste (le plus proche possible).\n"
             "3. IMPORTANT : Si la demande est vague (ex: 'taggada'), renvoie UNIQUEMENT le terme commun.\n"
             "4. IMPORTANT : Si le message ne contient QUE des emojis ou des ponctuations (ex: '???', '...'), réponds UNIQUEMENT 'IGNORE'.\n"
-            "5. Pour tout autre message, tente d'identifier le client de la base de données. Si vraiment aucun ne correspond de près ou de loin, réponds 'None'.\n"
-            "Retourne UNIQUEMENT le résultat (le nom du client ou IGNORE)."
+            "5. Pour tout autre message, tente d'identifier le client ou émetteur. Si vraiment aucun ne correspond de près ou de loin, réponds 'None'.\n"
+            "Retourne UNIQUEMENT le résultat (le nom identifié ou IGNORE)."
         )
         data = {
             "model": "gpt-4o-mini",

@@ -94,7 +94,7 @@ class BudgetGauge extends StatelessWidget {
 
           // Montant Restant Mis en Avant
           Text(
-            'Reste à dépenser',
+            'Solde Net (Reste à vivre)',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -111,7 +111,7 @@ class BudgetGauge extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: totals.isExceeded ? const Color(0xFFE53935) : const Color(0xFF1E293B),
+                  color: totals.remainingTotal < 0 ? const Color(0xFFE53935) : const Color(0xFF1E293B),
                   letterSpacing: -0.5,
                 ),
               ),
@@ -142,7 +142,7 @@ class BudgetGauge extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Détail : Charges Fixes, Sorties Quotidiennes, Total & Objectif
+          // Détail Synthèse Financière Odoo
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -157,10 +157,34 @@ class BudgetGauge extends StatelessWidget {
                   children: [
                     Row(
                       children: [
+                        const Icon(Icons.account_balance_wallet_outlined, size: 15, color: Color(0xFF0284C7)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Total Revenus (Budget)',
+                          style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${currencyFormat.format(totals.budgetTotal)} DH',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0284C7),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
                         const Icon(Icons.push_pin_rounded, size: 15, color: Color(0xFF64748B)),
                         const SizedBox(width: 6),
                         Text(
-                          'Charges Fixes Mensuelles',
+                          'Dépenses Fixes Mensuelles',
                           style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -184,7 +208,7 @@ class BudgetGauge extends StatelessWidget {
                         const Icon(Icons.shopping_bag_outlined, size: 15, color: Color(0xFF64748B)),
                         const SizedBox(width: 6),
                         Text(
-                          'Sorties Quotidiennes',
+                          'Dépenses Journalières',
                           style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -206,7 +230,7 @@ class BudgetGauge extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Total Dépensé', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                        Text('Total Dépenses', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
                         Text(
                           '${currencyFormat.format(totals.spentTotal)} DH',
                           style: const TextStyle(
@@ -220,13 +244,13 @@ class BudgetGauge extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Objectif alloué', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                        Text('Solde Net (Reste)', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
                         Text(
-                          '${currencyFormat.format(totals.budgetTotal)} DH',
-                          style: const TextStyle(
+                          '${currencyFormat.format(totals.remainingTotal)} DH',
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
+                            color: totals.remainingTotal < 0 ? const Color(0xFFE53935) : const Color(0xFF10B981),
                           ),
                         ),
                       ],

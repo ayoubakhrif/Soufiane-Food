@@ -137,9 +137,15 @@ class MobileSuiviController(http.Controller):
         date_end = period_info['date_end']
         days_remaining = period_info['days_remaining']
 
-        # 1. Dépenses Mensuelles Fixes (Charges récurrentes)
+        # 1. Utilisation du rapport officiel Odoo (suivi.month.report)
+        ReportModel = request.env['suivi.month.report'].sudo()
+        report = ReportModel.search([('period_id', '=', period.id)], limit=1)
+        if not report:
+            report = ReportModel.create({'period_id': period.id})
+        report.action_compute()
+
+        # 2. Dépenses Mensuelles Fixes (Détail)
         monthly_expenses_records = request.env['suivi.expense.monthly'].sudo().search([], order='category asc')
-        expense_fixed_total = sum(monthly_expenses_records.mapped('amount'))
         monthly_expenses_data = [{
             'id': m.id,
             'name': m.name or m.category or 'Charge fixe',
@@ -148,52 +154,47 @@ class MobileSuiviController(http.Controller):
             'description': m.description or '',
         } for m in monthly_expenses_records]
 
-        # 2. Dépenses Quotidiennes dans la période
-        expenses = request.env['suivi.expense.daily'].sudo().search([
-            ('date', '>=', date_start),
-            ('date', '<=', date_end)
-        ])
-        expense_daily_total = sum(expenses.mapped('amount'))
-
-        # 3. Total Cumulé = Charges Fixes + Sorties Quotidiennes
-        total_spent = expense_fixed_total + expense_daily_total
-
-        # Catégories & Objectifs
-        categories = request.env['suivi.expense.category'].sudo().search([('active', '=', True)], order='name asc')
+        # 3. Catégories & Objectifs depuis les lignes officielles du rapport
         categories_data = []
-        total_budget = 0.0
-
-        for cat in categories:
-            cat_expenses = expenses.filtered(lambda e: e.category_id.id == cat.id)
-            spent = sum(cat_expenses.mapped('amount'))
-            limit = cat.get_monthly_limit_for_period(period) or 0.0
-
-            has_objective = (limit > 0)
-            if has_objective:
-                total_budget += limit
-                remaining = limit - spent
-                pct = (spent / limit * 100) if limit > 0 else 0.0
-            else:
-                remaining = 0.0
-                pct = 0.0
+        for line in report.line_ids:
+            limit = line.limit or 0.0
+            spent = line.spent or 0.0
+            remaining = line.remaining or 0.0
+            has_obj = (limit > 0)
+            pct = (spent / limit * 100) if limit > 0 else 0.0
 
             categories_data.append({
-                'id': cat.id,
-                'name': cat.name,
-                'has_objective': has_objective,
+                'id': line.category_id.id,
+                'name': line.category_id.name,
+                'has_objective': has_obj,
                 'limit': round(limit, 2),
                 'spent': round(spent, 2),
                 'remaining': round(remaining, 2),
                 'percentage': round(pct, 1),
-                'is_exceeded': spent > limit if has_objective else False,
+                'is_exceeded': remaining < 0,
             })
 
-        total_remaining = total_budget - total_spent
-        daily_advised = round(total_remaining / days_remaining, 2) if (total_remaining > 0 and days_remaining > 0) else 0.0
-        global_pct = round((total_spent / total_budget * 100), 1) if total_budget > 0 else 0.0
+        # 4. Totaux financiers officiels (exactement identiques au rapport Odoo)
+        income_total = report.income_total or 0.0
+        income_fixed = report.income_fixed or 0.0
+        income_daily = report.income_daily or 0.0
+        expense_total = report.expense_total or 0.0
+        expense_fixed = report.expense_fixed or 0.0
+        expense_daily = report.expense_daily or 0.0
+        balance = report.balance or 0.0 # Solde net: Revenus - Dépenses
 
-        # Dernières dépenses récentes (5)
-        recent_records = expenses.sorted(key=lambda r: (str(r.date), r.id), reverse=True)[:5]
+        # Budget de référence : Revenus du mois (ou somme des limites si aucun revenu n'est défini)
+        sum_category_limits = sum(c['limit'] for c in categories_data if c['has_objective'])
+        budget_reference = income_total if income_total > 0 else sum_category_limits
+        global_pct = round((expense_total / budget_reference * 100), 1) if budget_reference > 0 else 0.0
+        daily_advised = round(balance / days_remaining, 2) if (balance > 0 and days_remaining > 0) else 0.0
+
+        # 5. Dernières dépenses récentes (5)
+        recent_records = request.env['suivi.expense.daily'].sudo().search([
+            ('date', '>=', date_start),
+            ('date', '<=', date_end)
+        ], limit=5, order='date desc, id desc')
+
         recent_expenses = []
         for exp in recent_records:
             recent_expenses.append({
@@ -218,14 +219,17 @@ class MobileSuiviController(http.Controller):
                     'total_days': period_info['total_days'],
                 },
                 'totals': {
-                    'budget_total': round(total_budget, 2),
-                    'spent_total': round(total_spent, 2),
-                    'expense_fixed_total': round(expense_fixed_total, 2),
-                    'expense_daily_total': round(expense_daily_total, 2),
-                    'remaining_total': round(total_remaining, 2),
+                    'income_total': round(income_total, 2),
+                    'income_fixed': round(income_fixed, 2),
+                    'income_daily': round(income_daily, 2),
+                    'budget_total': round(budget_reference, 2),
+                    'spent_total': round(expense_total, 2),
+                    'expense_fixed_total': round(expense_fixed, 2),
+                    'expense_daily_total': round(expense_daily, 2),
+                    'remaining_total': round(balance, 2),
                     'daily_advised': daily_advised,
                     'percentage': global_pct,
-                    'is_exceeded': total_spent > total_budget if total_budget > 0 else False,
+                    'is_exceeded': balance < 0,
                 },
                 'categories': categories_data,
                 'recent_expenses': recent_expenses,

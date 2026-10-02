@@ -31,6 +31,9 @@ class PeriodInfo {
 }
 
 class TotalsInfo {
+  final double incomeTotal;
+  final double incomeFixed;
+  final double incomeDaily;
   final double budgetTotal;
   final double spentTotal;
   final double expenseFixedTotal;
@@ -41,6 +44,9 @@ class TotalsInfo {
   final bool isExceeded;
 
   TotalsInfo({
+    required this.incomeTotal,
+    required this.incomeFixed,
+    required this.incomeDaily,
     required this.budgetTotal,
     required this.spentTotal,
     required this.expenseFixedTotal,
@@ -53,6 +59,9 @@ class TotalsInfo {
 
   factory TotalsInfo.fromJson(Map<String, dynamic> json) {
     return TotalsInfo(
+      incomeTotal: (json['income_total'] is num) ? (json['income_total'] as num).toDouble() : 0.0,
+      incomeFixed: (json['income_fixed'] is num) ? (json['income_fixed'] as num).toDouble() : 0.0,
+      incomeDaily: (json['income_daily'] is num) ? (json['income_daily'] as num).toDouble() : 0.0,
       budgetTotal: (json['budget_total'] is num) ? (json['budget_total'] as num).toDouble() : 0.0,
       spentTotal: (json['spent_total'] is num) ? (json['spent_total'] as num).toDouble() : 0.0,
       expenseFixedTotal: (json['expense_fixed_total'] is num) ? (json['expense_fixed_total'] as num).toDouble() : 0.0,

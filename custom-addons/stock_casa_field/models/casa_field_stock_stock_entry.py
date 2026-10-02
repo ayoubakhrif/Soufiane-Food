@@ -4,13 +4,13 @@ from odoo.exceptions import UserError
 class CasaStockEntry(models.Model):
     _name = 'casa_field.stock.entry'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = 'EntrÃ©e Stock Casa'
+    _description = 'Entree Stock Casa'
     _order = 'date desc, id desc'
 
-    name = fields.Char(string='RÃ©fÃ©rence', readonly=True, default='/')
+    name = fields.Char(string='Reference', readonly=True, default='/')
     product_id = fields.Many2one('casa_field.stock.product', string='Produit', required=True)
-    company_article_id = fields.Many2one('company.article', string='Article SociÃ©tÃ©', related='product_id.company_article_id', store=True)
-    qty = fields.Float(string='QuantitÃ©', required=True)
+    company_article_id = fields.Many2one('company.article', string='Article Societe', related='product_id.company_article_id', store=True)
+    qty = fields.Float(string='Quantite', required=True)
     weight = fields.Float(string='Poids (Kg)')
     tonnage = fields.Float(string='Tonnage', compute='_compute_tonnage', store=True)
     
@@ -35,9 +35,9 @@ class CasaStockEntry(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
-        ('done', 'ConfirmÃ©'),
-        ('cancel', 'AnnulÃ©'),
-    ], string='Ã‰tat', default='draft', required=True)
+        ('done', 'Confirme'),
+        ('cancel', 'Annule'),
+    ], string='e‰tat', default='draft', required=True)
 
     move_id = fields.Many2one('casa_field.stock.move', string='Mouvement Stock', readonly=True)
     cancel_move_id = fields.Many2one('casa_field.stock.move', string='Mouvement d\'Annulation', readonly=True)
@@ -61,7 +61,7 @@ class CasaStockEntry(models.Model):
                     'date', 'lot', 'dum', 'frigo', 'driver_id'
                 ]
                 if any(f in vals for f in forbidden_fields):
-                    raise UserError(_("Les opÃ©rations confirmÃ©es ne peuvent pas Ãªtre modifiÃ©es. Utilisez 'Annuler' et crÃ©ez une nouvelle opÃ©ration."))
+                    raise UserError(_("Les operations confirmees ne peuvent pas etre modifiees. Utilisez 'Annuler' et creez une nouvelle operation."))
         return super(CasaStockEntry, self).write(vals)
 
     def action_confirm(self):
@@ -95,7 +95,7 @@ class CasaStockEntry(models.Model):
     def action_cancel(self):
         for rec in self:
             if rec.state != 'done':
-                raise UserError(_("Vous ne pouvez annuler que des entrÃ©es confirmÃ©es."))
+                raise UserError(_("Vous ne pouvez annuler que des entrees confirmees."))
             
             # Create Reversal Move
             cancel_move = self.env['casa_field.stock.move'].create({
@@ -124,6 +124,6 @@ class CasaStockEntry(models.Model):
     def _check_qty_positive(self):
         for rec in self:
             if rec.qty <= 0:
-                raise UserError(_("La quantitÃ© doit Ãªtre strictement positive."))
+                raise UserError(_("La quantite doit etre strictement positive."))
 
 

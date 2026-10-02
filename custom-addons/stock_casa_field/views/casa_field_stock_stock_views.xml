@@ -11,7 +11,7 @@
                 <field name="lot"/>
                 <field name="dum"/>
                                 <field name="frigo"/>
-                                <field name="quantity" sum="Total QuantitÃ©"/>
+                                <field name="quantity" sum="Total Quantite"/>
                 <field name="weight"/>
                 <field name="price"/>
                 <field name="mt_achat" sum="Total Mt Achat"/>
@@ -34,7 +34,7 @@
                         </h1>
                     </div>
                     <group>
-                        <group string="DÃ©tails Stock">
+                        <group string="Details Stock">
                             <field name="quantity"/>
                             <field name="weight"/>
                             <field name="calibre"/>

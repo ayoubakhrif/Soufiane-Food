@@ -7,7 +7,7 @@ class CasaStockDriver(models.Model):
     name = fields.Char(string='Nom', required=True)
     employee_id = fields.Many2one(
         'core.employee', 
-        string='EmployÃ©', 
+        string='Employe', 
         domain="[('job_position_id.name', 'ilike', 'Chauffeur')]",
         help="Linked HR Employee. Filtered by job position 'Chauffeur'."
     )

@@ -59,7 +59,7 @@ class CasaStockApiController(http.Controller):
         password = (data.get('password') or '').strip()
 
         if not phone or not password:
-            return self._json_response({'status': 'error', 'message': 'Veuillez saisir le numÃ©ro de tÃ©lÃ©phone et le mot de passe.'}, status=400)
+            return self._json_response({'status': 'error', 'message': 'Veuillez saisir le numero de telephone et le mot de passe.'}, status=400)
 
         agent = request.env['casa_field.stock.agent'].sudo().search([('phone', '=', phone), ('active', '=', True)], limit=1)
         if agent and agent.password == password:
@@ -102,7 +102,7 @@ class CasaStockApiController(http.Controller):
         stock_records = request.env['casa_field.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
-            # Chercher d'abord la photo d'emballage prise lors de l'entrÃƒÂ©e du lot
+            # Chercher d'abord la photo d'emballage prise lors de l'entreƒÂ©e du lot
             image_b64 = ''
             entry = request.env['casa_field.stock.entry'].sudo().search([
                 ('product_id', '=', rec.product_id.id),
@@ -162,7 +162,7 @@ class CasaStockApiController(http.Controller):
                 'status': 'success',
                 'entry_id': entry.id,
                 'name': entry.name,
-                'message': f"EntrÃƒÂ©e {entry.name} enregistrÃƒÂ©e avec succÃƒÂ¨s."
+                'message': f"EntreƒÂ©e {entry.name} enregistreƒÂ©e avec succeƒÂ¨s."
             })
         except Exception as e:
             _logger.exception("Erreur API Entry")
@@ -193,7 +193,7 @@ class CasaStockApiController(http.Controller):
                 'status': 'success',
                 'exit_id': exit_rec.id,
                 'name': exit_rec.name,
-                'message': f"Sortie {exit_rec.name} enregistrÃƒÂ©e avec succÃƒÂ¨s."
+                'message': f"Sortie {exit_rec.name} enregistreƒÂ©e avec succeƒÂ¨s."
             })
         except Exception as e:
             _logger.exception("Erreur API Exit")
@@ -246,10 +246,10 @@ class CasaStockApiController(http.Controller):
 
             try:
                 driver_name = request.env['casa_field.stock.driver'].sudo().browse(driver_id).name if driver_id else "Inconnu"
-                msg = f"ðŸšš *Nouvelle TournÃ©e ValidÃ©e (Casa)*\n"
+                msg = f"ðŸšš *Nouvelle Tournee Validee (Casa)*\n"
                 exits_records = request.env['casa_field.stock.exit'].sudo().browse(created_exits)
                 refs = ", ".join(exits_records.mapped('name'))
-                msg += f"RÃ©f: {refs}\n"
+                msg += f"Ref: {refs}\n"
                 msg += f"Chauffeur: {driver_name}\n"
                 msg += f"Nombre de sorties: {len(lines)}\n\n"
                 
@@ -269,7 +269,7 @@ class CasaStockApiController(http.Controller):
             except Exception as e:
                 _logger.error(f"WhatsApp send error: {str(e)}")
 
-            return self._json_response({'status': 'success', 'message': f'{len(created_exits)} sorties crÃ©es avec succÃ¨s.'})
+            return self._json_response({'status': 'success', 'message': f'{len(created_exits)} sorties crees avec succes.'})
         except Exception as e:
             _logger.exception("Erreur API Bulk Exit")
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
@@ -326,7 +326,7 @@ class CasaStockApiController(http.Controller):
                 'status': 'success',
                 'return_id': ret_rec.id,
                 'name': ret_rec.name,
-                'message': f'Retour {ret_rec.name} enregistrÃ© avec succÃ¨s.'
+                'message': f'Retour {ret_rec.name} enregistre avec succes.'
             })
         except Exception as e:
             _logger.exception('Erreur API Return')

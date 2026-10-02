@@ -57,7 +57,7 @@
                         </h1>
                     </div>
                     
-                    <separator string="DÃƒÂ©tails Sortie"/>
+                    <separator string="DeƒÂ©tails Sortie"/>
                     <group>
                         <group string="Selection Stock">
                             <field name="product_id" readonly="1" force_save="1"/>
@@ -65,7 +65,7 @@
                             <field name="dum" readonly="1" force_save="1"/>
                                                         <field name="frigo" readonly="1" force_save="1"/>
                                                     </group>
-                        <group string="QuantitÃƒÂ©s &amp; Prix">
+                        <group string="QuantiteƒÂ©s &amp; Prix">
                             <field name="qty"/>
                             <field name="weight" readonly="1" force_save="1"/>
                             <field name="tonnage"/>
@@ -74,7 +74,7 @@
                         </group>
                     </group>
 
-                    <separator string="Informations ComplÃƒÂ©mentaires"/>
+                    <separator string="Informations CompleƒÂ©mentaires"/>
                     <group>
                         <group>
                             <field name="client_id" options="{'no_create_edit': True}"/>
@@ -85,7 +85,7 @@
                         </group>
                     </group>
 
-                    <separator string="Mouvements LiÃƒÂ©s"/>
+                    <separator string="Mouvements LieƒÂ©s"/>
                     <group>
                         <field name="move_id"/>
                         <field name="cancel_move_id" invisible="not cancel_move_id"/>

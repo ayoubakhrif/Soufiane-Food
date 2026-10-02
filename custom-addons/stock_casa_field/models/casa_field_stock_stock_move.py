@@ -16,26 +16,26 @@ class CasaStockMove(models.Model):
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo')
     
-    qty = fields.Float(string='QuantitÃ©', required=True)
+    qty = fields.Float(string='Quantite', required=True)
     
     move_type = fields.Selection([
-        ('entry', 'EntrÃ©e'),
+        ('entry', 'Entree'),
         ('exit', 'Sortie'),
-        ('cancel_entry', 'Annulation EntrÃ©e'),
+        ('cancel_entry', 'Annulation Entree'),
         ('cancel_exit', 'Annulation Sortie'),
         ('adjustment', 'Ajustement'),
     ], string='Type de mouvement', required=True)
     
     state = fields.Selection([
         ('done', 'Fait'),
-    ], string='Ã‰tat', default='done', required=True)
+    ], string='e‰tat', default='done', required=True)
     
     date = fields.Datetime(string='Date', default=fields.Datetime.now, required=True)
-    reference = fields.Char(string='RÃ©fÃ©rence')
+    reference = fields.Char(string='Reference')
     user_id = fields.Many2one('res.users', string='Utilisateur', default=lambda self: self.env.user)
 
     # Origin Tracking
-    res_model = fields.Char(string='ModÃ¨le d\'Origine', readonly=True)
+    res_model = fields.Char(string='Modele d\'Origine', readonly=True)
     res_id = fields.Integer(string='ID d\'Origine', readonly=True)
 
     # Optional fields for reporting

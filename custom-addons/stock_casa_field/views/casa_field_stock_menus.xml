@@ -12,7 +12,7 @@
               sequence="10"/>
 
     <menuitem id="menu_casa_field_stock_entry"
-              name="Entrées"
+              name="Entrees"
               parent="menu_casa_field_stock_root"
               action="action_casa_field_stock_entry"
               sequence="20"/>
@@ -22,13 +22,13 @@
               action="action_casa_field_stock_return"
               sequence="25"/>
 
-        <menuitem id="menu_casa_field_stock_exit"
+    <menuitem id="menu_casa_field_stock_exit"
               name="Sorties"
               parent="menu_casa_field_stock_root"
               action="action_casa_field_stock_exit"
               sequence="30"/>
 
-        <menuitem id="menu_casa_field_stock_audit"
+    <menuitem id="menu_casa_field_stock_audit"
               name="Audit Ledger"
               parent="menu_casa_field_stock_root"
               groups="stock_casa_field.group_manager"
@@ -41,13 +41,13 @@
               groups="stock_casa_field.group_manager"
               sequence="10"/>
 
-    <!-- Restructuring Master Data under "Données" -->
+    <!-- Restructuring Master Data under "Donnees" -->
     <menuitem id="menu_casa_field_stock_data"
-              name="Données"
+              name="Donnees"
               parent="menu_casa_field_stock_root"
               sequence="50"/>
 
-        <menuitem id="menu_casa_field_stock_product"
+    <menuitem id="menu_casa_field_stock_product"
               name="Produits"
               parent="menu_casa_field_stock_data"
               action="action_casa_field_stock_product"
@@ -65,14 +65,10 @@
               action="action_casa_field_stock_agent"
               sequence="30"/>
 
-        <menuitem id="menu_casa_field_stock_driver"
+    <menuitem id="menu_casa_field_stock_driver"
               name="Chauffeurs"
               parent="menu_casa_field_stock_data"
               action="action_casa_field_stock_driver"
               sequence="40"/>
 
-    </odoo>
-
-
-
-
+</odoo>

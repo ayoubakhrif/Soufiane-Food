@@ -142,47 +142,99 @@ class BudgetGauge extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Détail : Budget total et Dépensé
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Dépensé',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${currencyFormat.format(totals.spentTotal)} DH',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF334155),
+          // Détail : Charges Fixes, Sorties Quotidiennes, Total & Objectif
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.push_pin_rounded, size: 15, color: Color(0xFF64748B)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Charges Fixes Mensuelles',
+                          style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Objectif alloué',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${currencyFormat.format(totals.budgetTotal)} DH',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF334155),
+                    Text(
+                      '${currencyFormat.format(totals.expenseFixedTotal)} DH',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF334155),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.shopping_bag_outlined, size: 15, color: Color(0xFF64748B)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Sorties Quotidiennes',
+                          style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${currencyFormat.format(totals.expenseDailyTotal)} DH',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF334155),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Total Dépensé', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                        Text(
+                          '${currencyFormat.format(totals.spentTotal)} DH',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('Objectif alloué', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                        Text(
+                          '${currencyFormat.format(totals.budgetTotal)} DH',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
 
           const Divider(height: 28),

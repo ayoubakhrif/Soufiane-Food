@@ -94,23 +94,27 @@ class ApiService {
   }
 
   // =========================================================================
-  // ➕ CREATE EXPENSE
+  // ➕ CREATE EXPENSE (QUOTIDIENNE OU MENSUELLE FIXE)
   // =========================================================================
   static Future<Map<String, dynamic>> createExpense({
     required double amount,
-    required int categoryId,
-    required String date,
+    int? categoryId,
+    String? categoryName,
+    String? date,
     String? description,
     String? receiptBase64,
     String? receiptFilename,
+    bool isMonthly = false,
   }) async {
     final baseUrl = await _getBaseUrl();
     final uri = Uri.parse('$baseUrl/api/suivi/expense/create');
 
     final payload = {
       'amount': amount,
-      'category_id': categoryId,
-      'date': date,
+      'is_monthly': isMonthly,
+      if (categoryId != null) 'category_id': categoryId,
+      if (categoryName != null) 'category_name': categoryName,
+      if (date != null) 'date': date,
       'description': description ?? '',
       if (receiptBase64 != null) 'receipt_image': receiptBase64,
       if (receiptFilename != null) 'receipt_filename': receiptFilename,
@@ -131,6 +135,20 @@ class ApiService {
       return data;
     } else {
       throw Exception(data['message'] ?? 'Erreur lors de l\'enregistrement de la dépense');
+    }
+  }
+
+  // =========================================================================
+  // 🗑️ DELETE MONTHLY EXPENSE
+  // =========================================================================
+  static Future<void> deleteMonthlyExpense(int id) async {
+    final baseUrl = await _getBaseUrl();
+    final uri = Uri.parse('$baseUrl/api/suivi/monthly_expense/delete/$id');
+
+    final response = await http.post(uri, headers: _headers);
+    final data = jsonDecode(response.body);
+    if (response.statusCode != 200 || data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Impossible de supprimer la charge');
     }
   }
 

@@ -33,6 +33,8 @@ class PeriodInfo {
 class TotalsInfo {
   final double budgetTotal;
   final double spentTotal;
+  final double expenseFixedTotal;
+  final double expenseDailyTotal;
   final double remainingTotal;
   final double dailyAdvised;
   final double percentage;
@@ -41,6 +43,8 @@ class TotalsInfo {
   TotalsInfo({
     required this.budgetTotal,
     required this.spentTotal,
+    required this.expenseFixedTotal,
+    required this.expenseDailyTotal,
     required this.remainingTotal,
     required this.dailyAdvised,
     required this.percentage,
@@ -51,10 +55,38 @@ class TotalsInfo {
     return TotalsInfo(
       budgetTotal: (json['budget_total'] is num) ? (json['budget_total'] as num).toDouble() : 0.0,
       spentTotal: (json['spent_total'] is num) ? (json['spent_total'] as num).toDouble() : 0.0,
+      expenseFixedTotal: (json['expense_fixed_total'] is num) ? (json['expense_fixed_total'] as num).toDouble() : 0.0,
+      expenseDailyTotal: (json['expense_daily_total'] is num) ? (json['expense_daily_total'] as num).toDouble() : 0.0,
       remainingTotal: (json['remaining_total'] is num) ? (json['remaining_total'] as num).toDouble() : 0.0,
       dailyAdvised: (json['daily_advised'] is num) ? (json['daily_advised'] as num).toDouble() : 0.0,
       percentage: (json['percentage'] is num) ? (json['percentage'] as num).toDouble() : 0.0,
       isExceeded: json['is_exceeded'] == true,
+    );
+  }
+}
+
+class MonthlyExpenseModel {
+  final int id;
+  final String name;
+  final String category;
+  final double amount;
+  final String description;
+
+  MonthlyExpenseModel({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.amount,
+    required this.description,
+  });
+
+  factory MonthlyExpenseModel.fromJson(Map<String, dynamic> json) {
+    return MonthlyExpenseModel(
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      name: json['name']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      amount: (json['amount'] is num) ? (json['amount'] as num).toDouble() : 0.0,
+      description: json['description']?.toString() ?? '',
     );
   }
 }
@@ -64,12 +96,14 @@ class DashboardData {
   final TotalsInfo totals;
   final List<CategoryModel> categories;
   final List<ExpenseModel> recentExpenses;
+  final List<MonthlyExpenseModel> monthlyExpenses;
 
   DashboardData({
     required this.period,
     required this.totals,
     required this.categories,
     required this.recentExpenses,
+    required this.monthlyExpenses,
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
@@ -81,12 +115,16 @@ class DashboardData {
     final recentList = (json['recent_expenses'] as List<dynamic>? ?? [])
         .map((e) => ExpenseModel.fromJson(e as Map<String, dynamic>))
         .toList();
+    final monthlyList = (json['monthly_expenses'] as List<dynamic>? ?? [])
+        .map((m) => MonthlyExpenseModel.fromJson(m as Map<String, dynamic>))
+        .toList();
 
     return DashboardData(
       period: PeriodInfo.fromJson(periodJson),
       totals: TotalsInfo.fromJson(totalsJson),
       categories: categoriesList,
       recentExpenses: recentList,
+      monthlyExpenses: monthlyList,
     );
   }
 }

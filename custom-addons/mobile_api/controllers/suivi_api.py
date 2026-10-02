@@ -137,12 +137,26 @@ class MobileSuiviController(http.Controller):
         date_end = period_info['date_end']
         days_remaining = period_info['days_remaining']
 
-        # Dépenses dans la période
+        # 1. Dépenses Mensuelles Fixes (Charges récurrentes)
+        monthly_expenses_records = request.env['suivi.expense.monthly'].sudo().search([], order='category asc')
+        expense_fixed_total = sum(monthly_expenses_records.mapped('amount'))
+        monthly_expenses_data = [{
+            'id': m.id,
+            'name': m.name or m.category or 'Charge fixe',
+            'category': m.category or '',
+            'amount': round(m.amount, 2),
+            'description': m.description or '',
+        } for m in monthly_expenses_records]
+
+        # 2. Dépenses Quotidiennes dans la période
         expenses = request.env['suivi.expense.daily'].sudo().search([
             ('date', '>=', date_start),
             ('date', '<=', date_end)
         ])
-        total_spent = sum(expenses.mapped('amount'))
+        expense_daily_total = sum(expenses.mapped('amount'))
+
+        # 3. Total Cumulé = Charges Fixes + Sorties Quotidiennes
+        total_spent = expense_fixed_total + expense_daily_total
 
         # Catégories & Objectifs
         categories = request.env['suivi.expense.category'].sudo().search([('active', '=', True)], order='name asc')
@@ -206,6 +220,8 @@ class MobileSuiviController(http.Controller):
                 'totals': {
                     'budget_total': round(total_budget, 2),
                     'spent_total': round(total_spent, 2),
+                    'expense_fixed_total': round(expense_fixed_total, 2),
+                    'expense_daily_total': round(expense_daily_total, 2),
                     'remaining_total': round(total_remaining, 2),
                     'daily_advised': daily_advised,
                     'percentage': global_pct,
@@ -213,6 +229,7 @@ class MobileSuiviController(http.Controller):
                 },
                 'categories': categories_data,
                 'recent_expenses': recent_expenses,
+                'monthly_expenses': monthly_expenses_data,
             }
         })
 
@@ -249,6 +266,57 @@ class MobileSuiviController(http.Controller):
         receipt_image_b64 = data.get('receipt_image') # Base64 string
         receipt_filename = data.get('receipt_filename') or 'receipt.jpg'
 
+        is_monthly = data.get('is_monthly') == True or data.get('type') == 'monthly'
+
+        if is_monthly:
+            if not amount_raw:
+                return self._json_response({
+                    'status': 'error',
+                    'message': 'Le montant est obligatoire.'
+                }, status=400)
+            
+            try:
+                amount = float(amount_raw)
+                if amount <= 0:
+                    return self._json_response({
+                        'status': 'error',
+                        'message': 'Le montant doit être supérieur à zéro.'
+                    }, status=400)
+            except (ValueError, TypeError):
+                return self._json_response({
+                    'status': 'error',
+                    'message': 'Montant invalide.'
+                }, status=400)
+
+            category_name = data.get('category_name') or ''
+            if not category_name and category_id:
+                cat = request.env['suivi.expense.category'].sudo().browse(int(category_id))
+                if cat.exists():
+                    category_name = cat.name
+            if not category_name:
+                category_name = description or 'Charge mensuelle'
+
+            vals = {
+                'category': category_name,
+                'amount': amount,
+                'description': description.strip(),
+            }
+
+            try:
+                rec = request.env['suivi.expense.monthly'].sudo().create(vals)
+                return self._json_response({
+                    'status': 'success',
+                    'message': 'Charge mensuelle enregistrée avec succès.',
+                    'id': rec.id,
+                })
+            except Exception as e:
+                _logger.exception("Erreur création charge mensuelle: %s", str(e))
+                return self._json_response({
+                    'status': 'error',
+                    'message': f"Erreur lors de l'enregistrement: {str(e)}"
+                }, status=500)
+
+        # Sinon : Dépense Quotidienne
         if not amount_raw or not category_id:
             return self._json_response({
                 'status': 'error',
@@ -357,3 +425,37 @@ class MobileSuiviController(http.Controller):
             return request.make_response(image_data, headers=headers)
         except Exception:
             return request.not_found()
+
+    # =========================================================================
+    # 📌 MONTHLY EXPENSES (CHARGES FIXES)
+    # =========================================================================
+    @http.route('/api/suivi/monthly_expenses', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    def api_get_monthly_expenses(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        records = request.env['suivi.expense.monthly'].sudo().search([], order='category asc')
+        data = [{
+            'id': m.id,
+            'name': m.name or m.category or 'Charge fixe',
+            'category': m.category or '',
+            'amount': round(m.amount, 2),
+            'description': m.description or '',
+        } for m in records]
+
+        return self._json_response({'status': 'success', 'data': data})
+
+    @http.route('/api/suivi/monthly_expense/delete/<int:expense_id>', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_delete_monthly_expense(self, expense_id, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        record = request.env['suivi.expense.monthly'].sudo().browse(expense_id)
+        if not record.exists():
+            return self._json_response({'status': 'error', 'message': 'Charge introuvable.'}, status=404)
+
+        try:
+            record.unlink()
+            return self._json_response({'status': 'success', 'message': 'Charge mensuelle supprimée.'})
+        except Exception as e:
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)

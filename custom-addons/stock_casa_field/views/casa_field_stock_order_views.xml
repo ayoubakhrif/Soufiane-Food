@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_casa_field_stock_order_tree" model="ir.ui.view">
         <field name="name">casa_field.stock.order.tree</field>
@@ -56,7 +56,7 @@
     </record>
 
     <record id="action_casa_field_stock_order" model="ir.actions.act_window">
-        <field name="name">Commandes à Charger</field>
+        <field name="name">Commandes a Charger</field>
         <field name="res_model">casa_field.stock.order</field>
         <field name="view_mode">tree,form</field>
     </record>

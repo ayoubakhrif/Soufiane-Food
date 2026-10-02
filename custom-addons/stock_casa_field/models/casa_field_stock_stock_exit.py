@@ -143,6 +143,38 @@ class CasaStockExit(models.Model):
                 'state': 'done',
                 'move_id': move.id
             })
+            rec._send_whatsapp_notification()
+
+    def _send_whatsapp_notification(self):
+        import requests
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        for rec in self:
+            try:
+                client_name = rec.client_id.name if rec.client_id else 'Inconnu'
+                driver_name = rec.driver_id.name if rec.driver_id else 'Inconnu'
+                product_name = rec.product_id.name if rec.product_id else 'Produit'
+                
+                # Le client a demandé d'envoyer la "commande" + tonnage et mot de remerciement au commercial
+                # Or ici on est sur une sortie. On va faire un mot de remerciement générique à l'Agent / Chauffeur / Client
+                msg = f"🚚 *Nouvelle Sortie de Stock*\n\n"
+                msg += f"👤 Client: *{client_name}*\n"
+                msg += f"🚛 Chauffeur: *{driver_name}*\n\n"
+                msg += f"📦 Produit: {product_name}\n"
+                msg += f"🔢 Quantité: {rec.qty} colis\n"
+                msg += f"⚖️ Poids unitaire: {rec.weight} Kg\n"
+                msg += f"📊 *Tonnage Total: {rec.tonnage} Kg*\n\n"
+                msg += f"👏 Merci pour cette opération !"
+                
+                payload = {
+                    "group_id": "120363049891261462@g.us",
+                    "text": msg
+                }
+                
+                requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
+            except Exception as e:
+                _logger.error(f"Failed to send WhatsApp notification for exit {rec.id}: {str(e)}")
 
     def action_cancel(self):
         for rec in self:

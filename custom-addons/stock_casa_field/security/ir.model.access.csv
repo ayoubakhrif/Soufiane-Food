@@ -1,4 +1,4 @@
-﻿id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_casa_field_stock_product,casa_field.stock.product,model_casa_field_stock_product,base.group_user,1,1,1,1
 access_casa_field_stock_client,casa_field.stock.client,model_casa_field_stock_client,base.group_user,1,1,1,1
 access_casa_field_stock_driver,casa_field.stock.driver,model_casa_field_stock_driver,base.group_user,1,1,1,1
@@ -17,7 +17,6 @@ access_casa_field_stock_stock_move_viewer,casa_field.stock.move,model_casa_field
 access_casa_field_stock_stock_entry_viewer,casa_field.stock.entry,model_casa_field_stock_entry,group_viewer,1,0,0,0
 access_casa_field_stock_stock_exit_viewer,casa_field.stock.exit,model_casa_field_stock_exit,group_viewer,1,0,0,0
 access_casa_field_stock_stock_stock_viewer,casa_field.stock.stock,model_casa_field_stock_stock,group_viewer,1,0,0,0
-
 access_casa_field_stock_return_user,casa_field.stock.return,model_casa_field_stock_return,group_user,1,1,1,0
 access_casa_field_stock_return_manager,casa_field.stock.return,model_casa_field_stock_return,group_manager,1,1,1,1
 access_casa_field_stock_return_viewer,casa_field.stock.return,model_casa_field_stock_return,group_viewer,1,0,0,0

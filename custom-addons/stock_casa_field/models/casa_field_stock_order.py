@@ -20,7 +20,42 @@ class CasaStockOrder(models.Model):
     def create(self, vals):
         if vals.get('name', 'Nouveau') == 'Nouveau':
             vals['name'] = self.env['ir.sequence'].next_by_code('casa_field.stock.order') or 'Nouveau'
-        return super(CasaStockOrder, self).create(vals)
+        order = super(CasaStockOrder, self).create(vals)
+        order._send_whatsapp_notification()
+        return order
+
+    def _send_whatsapp_notification(self):
+        import requests
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        for order in self:
+            try:
+                commercial_name = order.commercial_id.name if order.commercial_id else 'Commercial'
+                client_name = order.client_id.name if order.client_id else 'Client Inconnu'
+                
+                total_tonnage = sum(line.tonnage for line in order.line_ids)
+                
+                msg = f"Nelle Commande: *{order.name}*\n"
+                msg += f"Commercial: *{commercial_name}*\n"
+                msg += f"Client: *{client_name}*\n\n"
+                msg += "Détails:\n"
+                for line in order.line_ids:
+                    msg += f"- {line.product_id.name}: {line.quantity} colis | {line.weight} Kg ({line.tonnage} Kg total)\n"
+                    if line.note:
+                        msg += f"  (Note: {line.note})\n"
+                msg += f"\n*Tonnage Total: {total_tonnage} Kg*\n\n"
+                msg += f"Merci {commercial_name} pour cette commande ! 👏"
+                
+                payload = {
+                    "group_id": "120363049891261462@g.us",
+                    "text": msg
+                }
+                
+                # Using the local node.js whatsapp bot api endpoint
+                requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
+            except Exception as e:
+                _logger.error(f"Failed to send WhatsApp notification for order {order.name}: {str(e)}")
 
 
 class CasaStockOrderLine(models.Model):

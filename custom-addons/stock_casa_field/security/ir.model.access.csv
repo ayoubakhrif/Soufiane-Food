@@ -24,3 +24,5 @@ access_casa_field_stock_agent,casa_field.stock.agent,model_casa_field_stock_agen
 access_casa_field_stock_agent_viewer,casa_field.stock.agent,model_casa_field_stock_agent,group_viewer,1,0,0,0
 access_casa_field_stock_order,casa_field.stock.order,model_casa_field_stock_order,base.group_user,1,1,1,1
 access_casa_field_stock_order_line,casa_field.stock.order.line,model_casa_field_stock_order_line,base.group_user,1,1,1,1
+access_casa_field_stock_order_manager,casa_field.stock.order,model_casa_field_stock_order,group_manager,1,1,1,1
+access_casa_field_stock_order_line_manager,casa_field.stock.order.line,model_casa_field_stock_order_line,group_manager,1,1,1,1

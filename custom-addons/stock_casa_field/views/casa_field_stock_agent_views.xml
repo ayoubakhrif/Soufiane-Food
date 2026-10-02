@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="name"/>
+                <field name="role"/>
                 <field name="phone"/>
                 <field name="password" password="True"/>
                 <field name="active"/>

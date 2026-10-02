@@ -2,7 +2,7 @@
 <odoo>
     <menuitem id="menu_casa_field_stock_root"
               name="Gestion Stock Terrain"
-              web_icon="casa_field_stock,static/description/icon.png"
+              web_icon="stock_casa_field,static/description/icon.png"
               sequence="2"/>
 
     <menuitem id="menu_casa_field_stock_stock"

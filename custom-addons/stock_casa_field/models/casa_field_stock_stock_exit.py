@@ -156,16 +156,13 @@ class CasaStockExit(models.Model):
                 driver_name = rec.driver_id.name if rec.driver_id else 'Inconnu'
                 product_name = rec.product_id.name if rec.product_id else 'Produit'
                 
-                # Le client a demandé d'envoyer la "commande" + tonnage et mot de remerciement au commercial
-                # Or ici on est sur une sortie. On va faire un mot de remerciement générique à l'Agent / Chauffeur / Client
-                msg = f"🚚 *Nouvelle Sortie de Stock*\n\n"
-                msg += f"👤 Client: *{client_name}*\n"
-                msg += f"🚛 Chauffeur: *{driver_name}*\n\n"
-                msg += f"📦 Produit: {product_name}\n"
-                msg += f"🔢 Quantité: {rec.qty} colis\n"
-                msg += f"⚖️ Poids unitaire: {rec.weight} Kg\n"
-                msg += f"📊 *Tonnage Total: {rec.tonnage} Kg*\n\n"
-                msg += f"👏 Merci pour cette opération !"
+                msg = "*Sortie de Stock*\n"
+                msg += f"Client : {client_name}\n"
+                msg += f"Chauffeur : {driver_name}\n"
+                msg += f"Produit : {product_name}\n"
+                msg += f"Quantité : {rec.qty} colis\n"
+                msg += f"Poids unitaire : {rec.weight} Kg\n"
+                msg += f"Tonnage Total : *{rec.tonnage} Kg*"
                 
                 payload = {
                     "group_id": "120363049891261462@g.us",

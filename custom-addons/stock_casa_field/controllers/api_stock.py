@@ -187,7 +187,7 @@ class CasaStockApiController(http.Controller):
             }
 
             exit_rec = request.env['casa_field.stock.exit'].sudo().create(vals)
-            exit_rec.action_confirm()
+            exit_rec.action_register()
 
             return self._json_response({
                 'status': 'success',
@@ -240,7 +240,7 @@ class CasaStockApiController(http.Controller):
                     'calibre': move.calibre if move else '',
                 }
                 exit_rec = request.env['casa_field.stock.exit'].sudo().create(vals)
-                exit_rec.action_confirm()
+                exit_rec.action_register()
                 created_exits.append(exit_rec.id)
 
 
@@ -279,7 +279,7 @@ class CasaStockApiController(http.Controller):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
 
-        domain = [('state', '=', 'done')]
+        domain = [('state', 'in', ['done', 'registered'])]
         exits = request.env['casa_field.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=100)
         data = []
         for rec in exits:
@@ -346,7 +346,7 @@ class CasaStockApiController(http.Controller):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
             
-        domain = [('state', 'in', ['done', 'delivered'])]
+        domain = [('state', 'in', ['done', 'delivered', 'registered'])]
         exits = request.env['casa_field.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=200)
         
         data = []
@@ -403,6 +403,24 @@ class CasaStockApiController(http.Controller):
             return request.make_response(image_data, headers=headers)
         except Exception as e:
             return request.not_found()
+
+
+
+    @http.route('/api/casa/exit/confirm', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_confirm_exit(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+        data = self._get_request_data()
+        try:
+            exit_id = int(data.get('exit_id'))
+            exit_rec = request.env['casa_field.stock.exit'].sudo().browse(exit_id)
+            if not exit_rec.exists():
+                return self._json_response({'status': 'error', 'message': 'Sortie introuvable.'}, status=404)
+                
+            exit_rec.action_confirm()
+            return self._json_response({'status': 'success', 'message': 'Sortie confirmée.'})
+        except Exception as e:
+            return self._json_response({'status': 'error', 'message': str(e)}, status=500)
 
     @http.route('/api/casa/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
 

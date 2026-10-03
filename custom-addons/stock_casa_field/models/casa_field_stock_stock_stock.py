@@ -41,15 +41,16 @@ class CasaStockStock(models.Model):
                     m.frigo,
                     m.weight,
                     m.calibre,
-                    sum(m.qty) as quantity,
+                    sum(CASE WHEN m.state = 'done' THEN m.qty ELSE 0 END) as quantity,
+                    sum(m.qty) as quantity_sellable,
                     max(m.price_purchase) as price,
-                    sum(m.qty * m.price_purchase) as mt_achat,
+                    sum(CASE WHEN m.state = 'done' THEN m.qty ELSE 0 END * m.price_purchase) as mt_achat,
                     max(m.date) as write_date,
                     min(m.date) as create_date
                 FROM
                     casa_field_stock_move m
                 WHERE
-                    m.state = 'done'
+                    m.state IN ('done', 'registered')
                 GROUP BY
                     m.product_id, m.lot, m.dum, m.frigo, m.weight, m.calibre
                 HAVING

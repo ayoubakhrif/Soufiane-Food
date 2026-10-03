@@ -396,10 +396,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
   }
 
   void _submit() async {
-    if (_selectedDriver == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner un chauffeur')));
-      return;
-    }
+    
     if (_tourLines.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Le camion est vide. Veuillez ajouter des sorties.')));
       return;
@@ -606,16 +603,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        DropdownButtonFormField<DriverItem>(
-                        decoration: InputDecoration(
-                          labelText: '1. Chauffeur (Camion)',
-                          prefixIcon: const Icon(Icons.person_pin_circle_outlined),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
-                        items: _drivers.map((d) => DropdownMenuItem(value: d, child: Text(d.name))).toList(),
-                        onChanged: (val) => setState(() => _selectedDriver = val),
-                      ),
+                        
                       const SizedBox(height: 10),
                       
                     ],
@@ -693,7 +681,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
                         const Spacer(),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.check_circle_outline),
-                          label: const Text('Valider la tournée', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                          label: const Text('Enregistrer', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.purple.shade800,
                             foregroundColor: Colors.white,

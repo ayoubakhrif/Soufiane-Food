@@ -414,9 +414,13 @@ class CasaStockApiController(http.Controller):
         data = self._get_request_data()
         try:
             exit_id = int(data.get('exit_id'))
+            driver_id = data.get('driver_id')
             exit_rec = request.env['casa_field.stock.exit'].sudo().browse(exit_id)
             if not exit_rec.exists():
                 return self._json_response({'status': 'error', 'message': 'Sortie introuvable.'}, status=404)
+            
+            if driver_id:
+                exit_rec.write({'driver_id': int(driver_id)})
                 
             exit_rec.action_confirm()
             return self._json_response({'status': 'success', 'message': 'Sortie confirmée.'})

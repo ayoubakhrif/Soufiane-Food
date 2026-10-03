@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/agent.dart';
 import '../services/api_service.dart';
+import '../models/item_models.dart';
 import 'stock_exit_screen.dart';
 import 'package:collection/collection.dart';
 
@@ -15,6 +16,7 @@ class AgentExitsListScreen extends StatefulWidget {
 class _AgentExitsListScreenState extends State<AgentExitsListScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _exits = [];
+  List<DriverItem> _drivers = [];
 
   @override
   void initState() {
@@ -25,10 +27,13 @@ class _AgentExitsListScreenState extends State<AgentExitsListScreen> {
   Future<void> _loadExits() async {
     setState(() => _isLoading = true);
     try {
-      final list = await ApiService.fetchExits(); // Returns done and registered exits
+      final list = await ApiService.fetchExits();
+      final bootstrap = await ApiService.fetchBootstrap();
+      final drvs = bootstrap['drivers'] as List<DriverItem>;
       if (!mounted) return;
       setState(() {
         _exits = list;
+        _drivers = drvs;
         _isLoading = false;
       });
     } catch (e) {
@@ -50,18 +55,59 @@ class _AgentExitsListScreenState extends State<AgentExitsListScreen> {
     return state;
   }
 
-  Future<void> _confirmExit(int exitId) async {
-    try {
-      showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
-      await ApiService.confirmExit(exitId);
-      if (!mounted) return;
-      Navigator.pop(context); // Close loading
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sortie confirmée et déduite du stock.')));
-      _loadExits();
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context); // Close loading
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+Future<void> _confirmExit(int exitId) async {
+    DriverItem? selectedDriver;
+    final bool? result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateSB) {
+            return AlertDialog(
+              title: const Text('Confirmer le départ'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Veuillez sélectionner le chauffeur pour cette sortie :'),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<DriverItem>(
+                    decoration: const InputDecoration(labelText: 'Chauffeur', border: OutlineInputBorder()),
+                    items: _drivers.map((d) => DropdownMenuItem(value: d, child: Text(d.name))).toList(),
+                    onChanged: (val) => setStateSB(() => selectedDriver = val),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedDriver != null) {
+                      Navigator.pop(ctx, true);
+                    } else {
+                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner un chauffeur')));
+                    }
+                  },
+                  child: const Text('Confirmer'),
+                ),
+              ],
+            );
+          }
+        );
+      }
+    );
+
+    if (result == true && selectedDriver != null) {
+      try {
+        showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+        await ApiService.confirmExit(exitId, selectedDriver!.id);
+        if (!mounted) return;
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sortie confirmée avec succès.')));
+        _loadExits();
+      } catch (e) {
+        if (!mounted) return;
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
 

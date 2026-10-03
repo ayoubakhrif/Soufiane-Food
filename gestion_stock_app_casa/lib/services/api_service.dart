@@ -1,24 +1,44 @@
-
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../models/agent.dart';
 import '../models/item_models.dart';
 import '../models/stock_card.dart';
+import '../models/pending_operation.dart';
+import 'local_storage_service.dart';
 
 class ApiService {
   static const String baseUrl = 'https://gestia-soufianefoods.cloud';
-  static const Map<String, String> _headers = {
+
+  static Map<String, String> get _headers => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   };
 
-  static Future<Map<String, dynamic>> login(String phone, String password) async {
-    final uri = Uri.parse('\/api/casa/login');
-    final response = await http.post(uri, headers: _headers, body: jsonEncode({'phone': phone, 'password': password}));
-    return jsonDecode(response.body);
+  static Future<Agent> login(String phone, String password) async {
+    final uri = Uri.parse('$baseUrl/api/casa/login');
+    final response = await http.post(
+      uri,
+      headers: _headers,
+      body: jsonEncode({'phone': phone, 'password': password}),
+    );
+
+    if (response.body.isEmpty) {
+      throw Exception('Réponse vide du serveur ()');
+    }
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
+      final agent = Agent.fromJson(data['agent']);
+      await LocalStorageService.saveAgentSession(agent);
+      return agent;
+    } else {
+      throw Exception(data['message'] ?? 'Erreur lors de la connexion');
+    }
   }
 
   static Future<Map<String, dynamic>> fetchBootstrap() async {
-    final uri = Uri.parse('\/api/casa/bootstrap');
+    final uri = Uri.parse('$baseUrl/api/casa/bootstrap');
     final response = await http.get(uri, headers: _headers);
 
     final data = jsonDecode(response.body);
@@ -29,14 +49,26 @@ class ApiService {
       final clients = (data['clients'] as List)
           .map((c) => ClientItem.fromJson(c))
           .toList();
-      return {'products': products, 'clients': clients};
+      final garages = (data['garages'] as List)
+          .map((g) => GarageItem.fromJson(g))
+          .toList();
+      final drivers = data['drivers'] != null ? (data['drivers'] as List)
+          .map((d) => DriverItem.fromJson(d))
+          .toList() : <DriverItem>[];
+
+      return {
+        'products': products,
+        'clients': clients,
+        'garages': garages,
+        'drivers': drivers,
+      };
     } else {
-      throw Exception(data['message'] ?? 'Erreur lors du chargement des données');
+      throw Exception(data['message'] ?? 'Impossible de charger les données');
     }
   }
 
   static Future<List<StockCard>> fetchStock() async {
-    final uri = Uri.parse('\/api/casa/stock');
+    final uri = Uri.parse('$baseUrl/api/casa/stock');
     final response = await http.get(uri, headers: _headers);
 
     final data = jsonDecode(response.body);
@@ -49,14 +81,181 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> bulkExit(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('\/api/casa/bulk_exit');
+  static Future<Map<String, dynamic>> createEntry(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/entry');
+    http.Response response;
+    try {
+      response = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode(payload),
+      );
+    } catch (e) {
+      await LocalStorageService.savePendingOperation(
+        PendingOperation(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: 'entry',
+          data: payload,
+          createdAt: DateTime.now(),
+        ),
+      );
+      return {
+        'status': 'offline',
+        'message': 'Pas de connexion réseau. Enregistré localement pour synchronisation !'
+      };
+    }
+
+    try {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return data;
+      } else {
+        return {
+          'status': 'error',
+          'message': data['message'] ?? 'Erreur lors de l\'enregistrement de l\'entrée (Code: ${response.statusCode})'
+        };
+      }
+    } catch (_) {
+      return {
+        'status': 'error',
+        'message': 'Erreur serveur (${response.statusCode}): ${response.body}'
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> createExit(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/exit');
+    http.Response response;
+    try {
+      response = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode(payload),
+      );
+    } catch (e) {
+      await LocalStorageService.savePendingOperation(
+        PendingOperation(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: 'exit',
+          data: payload,
+          createdAt: DateTime.now(),
+        ),
+      );
+      return {
+        'status': 'offline',
+        'message': 'Pas de connexion réseau. Enregistré localement pour synchronisation !'
+      };
+    }
+
+    try {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return data;
+      } else {
+        return {
+          'status': 'error',
+          'message': data['message'] ?? 'Erreur lors de l\'enregistrement de la sortie (Code: ${response.statusCode})'
+        };
+      }
+    } catch (_) {
+      return {
+        'status': 'error',
+        'message': 'Erreur serveur (${response.statusCode}): ${response.body}'
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> createTransfer(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/transfer');
+    http.Response response;
+    try {
+      response = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode(payload),
+      );
+    } catch (e) {
+      await LocalStorageService.savePendingOperation(
+        PendingOperation(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: 'transfer',
+          data: payload,
+          createdAt: DateTime.now(),
+        ),
+      );
+      return {
+        'status': 'offline',
+        'message': 'Pas de connexion réseau. Enregistré localement pour synchronisation !'
+      };
+    }
+
+    try {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return data;
+      } else {
+        return {
+          'status': 'error',
+          'message': data['message'] ?? 'Erreur lors du transfert (Code: ${response.statusCode})'
+        };
+      }
+    } catch (_) {
+      return {
+        'status': 'error',
+        'message': 'Erreur serveur (${response.statusCode}): ${response.body}'
+      };
+    }
+  }
+
+  static Future<int> syncPendingOperations() async {
+    final pending = await LocalStorageService.getPendingOperations();
+    int syncedCount = 0;
+
+    for (final op in pending) {
+      try {
+        final Map<String, dynamic> data = Map<String, dynamic>.from(op.data);
+        if (data['date'] == '--' || data['date'] == null || data['date'].toString().isEmpty) {
+          data['date'] = DateTime.now().toIso8601String().split('T')[0];
+        }
+
+        String path;
+        if (op.type == 'entry') {
+          path = '/api/casa/entry';
+        } else if (op.type == 'exit') {
+          path = '/api/casa/exit';
+        } else if (op.type == 'transfer') {
+          path = '/api/casa/transfer';
+        } else {
+          continue;
+        }
+
+        final res = await http.post(
+          Uri.parse('$baseUrl$path'),
+          headers: _headers,
+          body: jsonEncode(data),
+        );
+        if (res.statusCode == 200) {
+          final resData = jsonDecode(res.body);
+          if (resData['status'] == 'success') {
+            await LocalStorageService.removePendingOperation(op.id);
+            syncedCount++;
+          }
+        }
+      } catch (e) {
+        debugPrint('Erreur synchronisation: $e');
+        break;
+      }
+    }
+    return syncedCount;
+  }
+  static Future<Map<String, dynamic>> createBulkExit(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/bulk_exit');
     final response = await http.post(uri, headers: _headers, body: jsonEncode(payload));
     return jsonDecode(response.body);
   }
 
   static Future<List<Map<String, dynamic>>> fetchExits() async {
-    final uri = Uri.parse('\/api/casa/commercial/exits_history');
+    final uri = Uri.parse('$baseUrl/api/casa/exits');
     final response = await http.get(uri, headers: _headers);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200 && data['status'] == 'success') {
@@ -66,25 +265,39 @@ class ApiService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> fetchCommercialOrders(int agentId) async {
-    final uri = Uri.parse('\/api/casa/commercial/orders_history');
-    final response = await http.post(uri, headers: _headers, body: jsonEncode({'commercial_id': agentId}));
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 200 && data['status'] == 'success') {
-      return List<Map<String, dynamic>>.from(data['orders']);
-    } else {
-      throw Exception(data['message'] ?? 'Erreur');
+  static Future<Map<String, dynamic>> createReturn(Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$baseUrl/api/casa/return');
+    http.Response response;
+    try {
+      response = await http.post(
+        uri,
+        headers: _headers,
+        body: jsonEncode(payload),
+      );
+    } catch (e) {
+      throw Exception('Erreur réseau. Impossible de contacter le serveur.');
+    }
+
+    try {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        return data;
+      } else {
+        return {
+          'status': 'error',
+          'message': data['message'] ?? 'Erreur (Code: ${response.statusCode})'
+        };
+      }
+    } catch (_) {
+      return {
+        'status': 'error',
+        'message': 'Erreur serveur (${response.statusCode}): ${response.body}'
+      };
     }
   }
 
-  static Future<Map<String, dynamic>> submitReturn(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('\/api/casa/return');
-    final response = await http.post(uri, headers: _headers, body: jsonEncode(payload));
-    return jsonDecode(response.body);
-  }
-
   static Future<List<Map<String, dynamic>>> fetchDriverExits(int driverId) async {
-    final uri = Uri.parse('\/api/casa/driver_exits');
+    final uri = Uri.parse('$baseUrl/api/casa/driver_exits');
     final response = await http.post(uri, headers: _headers, body: jsonEncode({'driver_id': driverId}));
     final data = jsonDecode(response.body);
     if (data['status'] == 'success') {
@@ -95,13 +308,13 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> markDelivered(List<int> exitIds) async {
-    final uri = Uri.parse('\/api/casa/driver_deliver');
+    final uri = Uri.parse('$baseUrl/api/casa/mark_delivered');
     final response = await http.post(uri, headers: _headers, body: jsonEncode({'exit_ids': exitIds}));
     return jsonDecode(response.body);
   }
 
   static Future<int> fetchPendingOrdersCount() async {
-    final uri = Uri.parse('\/api/casa/orders/pending_count');
+    final uri = Uri.parse('$baseUrl/api/casa/orders/pending_count');
     final response = await http.get(uri, headers: _headers);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200 && data['status'] == 'success') {
@@ -111,7 +324,7 @@ class ApiService {
   }
 
   static Future<List<dynamic>> fetchPendingOrders() async {
-    final uri = Uri.parse('\/api/casa/orders');
+    final uri = Uri.parse('$baseUrl/api/casa/orders');
     final response = await http.get(uri, headers: _headers);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200 && data['status'] == 'success') {
@@ -121,17 +334,14 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> createOrder(Map<String, dynamic> payload) async {
-    final uri = Uri.parse('\/api/casa/orders/create');
+    final uri = Uri.parse('$baseUrl/api/casa/orders');
     final response = await http.post(uri, headers: _headers, body: jsonEncode(payload));
     return jsonDecode(response.body);
   }
 
-  static Future<void> validateOrder(int orderId) async {
-    final uri = Uri.parse('\/api/casa/orders/validate');
+  static Future<Map<String, dynamic>> validateOrder(int orderId) async {
+    final uri = Uri.parse('$baseUrl/api/casa/orders/validate');
     final response = await http.post(uri, headers: _headers, body: jsonEncode({'order_id': orderId}));
-    final data = jsonDecode(response.body);
-    if (data['status'] != 'success') {
-      throw Exception(data['message'] ?? 'Erreur lors de la validation');
-    }
+    return jsonDecode(response.body);
   }
 }

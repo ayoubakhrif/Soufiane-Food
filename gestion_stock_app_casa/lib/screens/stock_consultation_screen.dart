@@ -65,6 +65,10 @@ class _StockConsultationScreenState extends State<StockConsultationScreen> {
   double get _totalQuantity {
     return _filteredStock.fold(0.0, (sum, item) => sum + item.quantity);
   }
+  
+  double get _totalQuantitySellable {
+    return _filteredStock.fold(0.0, (sum, item) => sum + item.quantitySellable);
+  }
 
   double get _totalTonnage {
     return _filteredStock.fold(0.0, (sum, item) => sum + (item.quantity * item.weight));
@@ -161,9 +165,9 @@ class _StockConsultationScreenState extends State<StockConsultationScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total Unités', style: TextStyle(color: Colors.black54, fontSize: 12)),
+                    const Text('Physique / Vendable', style: TextStyle(color: Colors.black54, fontSize: 12)),
                     Text(
-                      _totalQuantity.toStringAsFixed(0),
+                      '${_totalQuantity.toStringAsFixed(0)} / ${_totalQuantitySellable.toStringAsFixed(0)}',
                       style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ],
@@ -278,10 +282,20 @@ class _StockConsultationScreenState extends State<StockConsultationScreen> {
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                const Text('Unités', style: TextStyle(fontSize: 11, color: Colors.black54)),
+                                                const Text('Physique', style: TextStyle(fontSize: 11, color: Colors.black54)),
                                                 Text(
                                                   stock.quantity.toStringAsFixed(0),
-                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text('Vendable', style: TextStyle(fontSize: 11, color: Colors.black54)),
+                                                Text(
+                                                  stock.quantitySellable.toStringAsFixed(0),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.blue),
                                                 ),
                                               ],
                                             ),

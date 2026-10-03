@@ -296,6 +296,7 @@ class CasaStockApiController(http.Controller):
                     'qty': rec.qty,
                     'returned_qty': returned_qty,
                     'state': rec.state,
+                    'driver_name': rec.driver_id.name if rec.driver_id else 'Pas de chauffeur',
                 })
 
         return self._json_response({

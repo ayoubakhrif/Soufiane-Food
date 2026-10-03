@@ -160,6 +160,7 @@ Future<void> _confirmExit(int exitId) async {
                           const SizedBox(height: 8),
                           Text('Produit: ${exit['product_name']} | Qté: ${exit['qty']}'),
                           Text('Date: ${exit['date']}'),
+                          Text('Chauffeur: ${exit['driver_name'] ?? "Pas de chauffeur"}'),
                           
                           if (isRegistered) ...[
                             const SizedBox(height: 12),

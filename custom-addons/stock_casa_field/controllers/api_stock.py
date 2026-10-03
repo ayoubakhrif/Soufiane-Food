@@ -354,8 +354,13 @@ class CasaStockApiController(http.Controller):
         
         for rec in exits:
             image_url = ""
-            if rec.product_id:
-                image_url = f"{base_url}/web/image?model=casa_field.stock.product&id={rec.product_id.id}&field=image_emballage"
+            if rec.lot and rec.product_id:
+                entry = request.env['casa_field.stock.entry'].sudo().search([
+                    ('product_id', '=', rec.product_id.id),
+                    ('lot', '=', rec.lot)
+                ], limit=1)
+                if entry and entry.photo_packaging:
+                    image_url = f"{base_url}/api/casa/image/casa_field.stock.entry/{entry.id}/photo_packaging"
                 
             data.append({
                 'id': rec.id,
@@ -375,6 +380,29 @@ class CasaStockApiController(http.Controller):
             'status': 'success',
             'exits': data
         })
+
+
+
+    @http.route('/api/casa/image/<string:model>/<int:id>/<string:field>', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    def api_image(self, model, id, field, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+            
+        try:
+            record = request.env[model].sudo().browse(id)
+            if not record.exists():
+                return request.not_found()
+                
+            image_base64 = getattr(record, field)
+            if not image_base64:
+                return request.not_found()
+                
+            import base64
+            image_data = base64.b64decode(image_base64)
+            headers = [('Content-Type', 'image/jpeg')]
+            return request.make_response(image_data, headers=headers)
+        except Exception as e:
+            return request.not_found()
 
     @http.route('/api/casa/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
 

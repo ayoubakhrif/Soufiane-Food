@@ -7,6 +7,7 @@ class StockCard {
   final String calibre;
   final double weight;
   final double quantity;
+  final double quantitySellable;
     final String frigo;
   final int? steId;
   final String steName;
@@ -21,6 +22,7 @@ class StockCard {
     required this.calibre,
     required this.weight,
     required this.quantity,
+    required this.quantitySellable,
     required this.frigo,
     this.steId,
     required this.steName,
@@ -37,6 +39,7 @@ class StockCard {
       calibre: json['calibre'] as String? ?? '',
       weight: (json['weight'] is num) ? (json['weight'] as num).toDouble() : 0.0,
       quantity: (json['quantity'] is num) ? (json['quantity'] as num).toDouble() : 0.0,
+      quantitySellable: (json['quantity_sellable'] is num) ? (json['quantity_sellable'] as num).toDouble() : ((json['quantity'] is num) ? (json['quantity'] as num).toDouble() : 0.0),
             frigo: json['frigo'] as String? ?? 'stock_casa',
       steId: json['ste_id'] as int?,
       steName: json['ste_name'] as String? ?? '',

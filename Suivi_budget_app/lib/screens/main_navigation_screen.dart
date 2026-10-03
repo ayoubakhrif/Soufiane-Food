@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user_session.dart';
 import 'dashboard_screen.dart';
 import 'add_expense_screen.dart';
+import 'analytics_screen.dart';
 import 'expense_history_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _currentIndex;
   final GlobalKey<DashboardScreenState> _dashboardKey = GlobalKey<DashboardScreenState>();
+  final GlobalKey<AnalyticsScreenState> _analyticsKey = GlobalKey<AnalyticsScreenState>();
   final GlobalKey<ExpenseHistoryScreenState> _historyKey = GlobalKey<ExpenseHistoryScreenState>();
 
   @override
@@ -31,8 +33,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _onExpenseAdded() {
-    // Rafraîchir les données du dashboard et de l'historique
+    // Rafraîchir les données du dashboard, des analyses et de l'historique
     _dashboardKey.currentState?.refresh();
+    _analyticsKey.currentState?.refresh();
     _historyKey.currentState?.refresh();
 
     // Revenir sur le dashboard
@@ -55,6 +58,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           AddExpenseScreen(
             onExpenseAdded: _onExpenseAdded,
           ),
+          AnalyticsScreen(
+            key: _analyticsKey,
+          ),
           ExpenseHistoryScreen(
             key: _historyKey,
           ),
@@ -76,11 +82,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           onTap: (index) {
             setState(() => _currentIndex = index);
             if (index == 0) _dashboardKey.currentState?.refresh();
-            if (index == 2) _historyKey.currentState?.refresh();
+            if (index == 2) _analyticsKey.currentState?.refresh();
+            if (index == 3) _historyKey.currentState?.refresh();
           },
           selectedItemColor: const Color(0xFF0284C7),
           unselectedItemColor: const Color(0xFF94A3B8),
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+          unselectedLabelStyle: const TextStyle(fontSize: 11),
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           elevation: 0,
@@ -92,6 +100,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.add_circle_rounded, size: 28),
               label: 'Nouvelle Sortie',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.bar_chart_rounded),
+              label: 'Statistiques',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long_rounded),

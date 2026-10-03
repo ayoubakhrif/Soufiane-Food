@@ -463,3 +463,165 @@ class MobileSuiviController(http.Controller):
             return self._json_response({'status': 'success', 'message': 'Charge mensuelle supprimée.'})
         except Exception as e:
             return self._json_response({'status': 'error', 'message': str(e)}, status=500)
+
+    # =========================================================================
+    # 📊 ANALYTICS & CHARTS
+    # =========================================================================
+    @http.route('/api/suivi/analytics', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    def api_analytics(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+
+        period_info = self._get_active_period_info()
+        date_start = period_info['date_start']
+        date_end = period_info['date_end']
+        today = fields.Date.today()
+
+        d_start = fields.Date.from_string(date_start)
+        d_end = fields.Date.from_string(date_end)
+
+        # 1. Fetch daily expenses in period
+        daily_records = request.env['suivi.expense.daily'].sudo().search([
+            ('date', '>=', date_start),
+            ('date', '<=', date_end)
+        ], order='date asc, id desc')
+
+        total_daily = sum(r.amount for r in daily_records)
+
+        # 2. Fetch monthly fixed expenses
+        monthly_records = request.env['suivi.expense.monthly'].sudo().search([])
+        total_fixed = sum(m.amount for m in monthly_records)
+        total_all = total_daily + total_fixed
+
+        # 3. Calculate Days passed & Daily Average
+        days_passed = max(1, (today - d_start).days + 1)
+        if today > d_end:
+            days_passed = max(1, (d_end - d_start).days + 1)
+        daily_avg = round(total_daily / days_passed, 2) if total_daily > 0 else 0.0
+
+        # 4. Group daily expenses by date
+        daily_map = {}
+        curr = d_start
+        last_date_to_plot = min(today, d_end)
+        while curr <= last_date_to_plot:
+            daily_map[curr.strftime('%Y-%m-%d')] = 0.0
+            curr += timedelta(days=1)
+
+        for r in daily_records:
+            d_str = str(r.date)
+            if d_str in daily_map:
+                daily_map[d_str] += r.amount
+            else:
+                daily_map[d_str] = r.amount
+
+        # Find max day
+        max_day = {'date': '', 'day_label': '', 'amount': 0.0}
+        daily_timeline = []
+        for d_str in sorted(daily_map.keys()):
+            amt = round(daily_map[d_str], 2)
+            d_obj = fields.Date.from_string(d_str)
+            label = d_obj.strftime('%d/%m')
+            daily_timeline.append({
+                'date': d_str,
+                'day': d_obj.day,
+                'day_label': label,
+                'amount': amt,
+            })
+            if amt > max_day['amount']:
+                max_day = {
+                    'date': d_str,
+                    'day_label': label,
+                    'amount': amt,
+                }
+
+        # 5. Group by category (Daily expenses)
+        cat_daily_map = {}
+        for r in daily_records:
+            cid = r.category_id.id if r.category_id else 0
+            cname = r.category_id.name if r.category_id else 'Sans catégorie'
+            if cid not in cat_daily_map:
+                cat_daily_map[cid] = {'id': cid, 'name': cname, 'amount': 0.0, 'count': 0}
+            cat_daily_map[cid]['amount'] += r.amount
+            cat_daily_map[cid]['count'] += 1
+
+        by_cat_daily = []
+        for item in sorted(cat_daily_map.values(), key=lambda x: x['amount'], reverse=True):
+            pct = round((item['amount'] / total_daily * 100), 1) if total_daily > 0 else 0.0
+            by_cat_daily.append({
+                'id': item['id'],
+                'name': item['name'],
+                'amount': round(item['amount'], 2),
+                'count': item['count'],
+                'percentage': pct,
+            })
+
+        # Top category
+        top_category = by_cat_daily[0] if by_cat_daily else {'name': 'Aucune', 'amount': 0.0, 'percentage': 0.0}
+
+        # 6. Group by category (All expenses, including fixed)
+        cat_all_map = {}
+        for c in by_cat_daily:
+            cat_all_map[c['name']] = c['amount']
+        for m in monthly_records:
+            name = m.name or m.category or 'Charge fixe'
+            cat_all_map[name] = cat_all_map.get(name, 0.0) + m.amount
+
+        by_cat_all = []
+        for name, amt in sorted(cat_all_map.items(), key=lambda x: x[1], reverse=True):
+            pct = round((amt / total_all * 100), 1) if total_all > 0 else 0.0
+            by_cat_all.append({
+                'name': name,
+                'amount': round(amt, 2),
+                'percentage': pct,
+            })
+
+        # 7. Top 5 highest daily expenses
+        top_expenses_records = request.env['suivi.expense.daily'].sudo().search([
+            ('date', '>=', date_start),
+            ('date', '<=', date_end)
+        ], order='amount desc, id desc', limit=5)
+
+        top_expenses = [{
+            'id': exp.id,
+            'date': exp.date,
+            'amount': round(exp.amount, 2),
+            'category_name': exp.category_id.name if exp.category_id else 'Autre',
+            'description': exp.description or '',
+        } for exp in top_expenses_records]
+
+        # 8. Report balance / advised budget (from suivi.month.report)
+        report = request.env['suivi.month.report'].sudo().search([('period_id', '=', period_info['period'].id)], limit=1)
+        if not report:
+            report = request.env['suivi.month.report'].sudo().create({'period_id': period_info['period'].id})
+        report.action_compute()
+
+        balance = report.balance or 0.0
+        daily_advised = round(balance / period_info['days_remaining'], 2) if (balance > 0 and period_info['days_remaining'] > 0) else 0.0
+
+        return self._json_response({
+            'status': 'success',
+            'data': {
+                'period': {
+                    'name': period_info['period_name'],
+                    'date_start': date_start,
+                    'date_end': date_end,
+                    'days_remaining': period_info['days_remaining'],
+                    'total_days': period_info['total_days'],
+                    'days_passed': days_passed,
+                },
+                'kpis': {
+                    'total_daily': round(total_daily, 2),
+                    'total_fixed': round(total_fixed, 2),
+                    'total_all': round(total_all, 2),
+                    'daily_avg_spent': daily_avg,
+                    'daily_advised': daily_advised,
+                    'remaining_balance': round(balance, 2),
+                    'max_day': max_day,
+                    'top_category': top_category,
+                },
+                'by_category_daily': by_cat_daily,
+                'by_category_all': by_cat_all,
+                'daily_timeline': daily_timeline,
+                'top_expenses': top_expenses,
+            }
+        })

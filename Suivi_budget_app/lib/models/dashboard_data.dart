@@ -28,6 +28,30 @@ class PeriodInfo {
       totalDays: (json['total_days'] is num) ? (json['total_days'] as num).toInt() : 30,
     );
   }
+
+  String get formattedStartDate {
+    try {
+      final parts = dateStart.split('-');
+      if (parts.length == 3) {
+        return '${parts[2]}/${parts[1]}';
+      }
+      return dateStart;
+    } catch (_) {
+      return dateStart;
+    }
+  }
+
+  String get formattedEndDate {
+    try {
+      final parts = dateEnd.split('-');
+      if (parts.length == 3) {
+        return '${parts[2]}/${parts[1]}';
+      }
+      return dateEnd;
+    } catch (_) {
+      return dateEnd;
+    }
+  }
 }
 
 class TotalsInfo {

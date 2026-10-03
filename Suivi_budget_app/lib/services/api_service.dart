@@ -4,6 +4,7 @@ import '../models/user_session.dart';
 import '../models/dashboard_data.dart';
 import '../models/category_model.dart';
 import '../models/expense_model.dart';
+import '../models/analytics_data.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -187,5 +188,26 @@ class ApiService {
   static Future<String> getReceiptImageUrl(int expenseId) async {
     final baseUrl = await _getBaseUrl();
     return '$baseUrl/api/suivi/receipt/$expenseId';
+  }
+
+  // =========================================================================
+  // 📊 ANALYTICS & STATS
+  // =========================================================================
+  static Future<AnalyticsData> fetchAnalytics() async {
+    final baseUrl = await _getBaseUrl();
+    final uri = Uri.parse('$baseUrl/api/suivi/analytics');
+
+    final response = await http.get(uri, headers: _headers);
+
+    if (response.body.isEmpty) {
+      throw Exception('Réponse vide du serveur');
+    }
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
+      return AnalyticsData.fromJson(data['data']);
+    } else {
+      throw Exception(data['message'] ?? 'Impossible de charger les statistiques');
+    }
   }
 }

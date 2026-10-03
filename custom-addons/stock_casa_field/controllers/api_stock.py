@@ -245,30 +245,7 @@ class CasaStockApiController(http.Controller):
                 created_exits.append(exit_rec.id)
 
 
-            try:
-                driver_name = request.env['casa_field.stock.driver'].sudo().browse(driver_id).name if driver_id else "Inconnu"
-                msg = f"ðŸšš *Nouvelle Tournee Validee (Casa)*\n"
-                exits_records = request.env['casa_field.stock.exit'].sudo().browse(created_exits)
-                refs = ", ".join(exits_records.mapped('name'))
-                msg += f"Ref: {refs}\n"
-                msg += f"Chauffeur: {driver_name}\n"
-                msg += f"Nombre de sorties: {len(lines)}\n\n"
-                
-                for line in lines:
-                    product = request.env['casa_field.stock.product'].sudo().browse(int(line.get('product_id'))).name
-                    client_id = line.get('client_id')
-                    client = request.env['casa_field.stock.client'].sudo().browse(int(client_id)).name if client_id else "Inconnu"
-                    qty = line.get('qty', 0)
-                    msg += f"- {product} ({qty} u) -> {client}\n"
-                
-                payload = {
-                    "group_id": "120363049891261462@g.us",
-                    "text": msg
-                }
-                import requests
-                requests.post("http://172.17.0.1:3000/api/send", json=payload, timeout=5)
-            except Exception as e:
-                _logger.error(f"WhatsApp send error: {str(e)}")
+
 
             return self._json_response({'status': 'success', 'message': f'{len(created_exits)} sorties crees avec succes.'})
         except Exception as e:

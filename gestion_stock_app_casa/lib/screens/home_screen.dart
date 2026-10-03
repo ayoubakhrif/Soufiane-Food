@@ -304,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.history,
                 color: Colors.orange.shade700,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => ExitsHistoryScreen()));
                 },
               ),
             ] else if (widget.agent.role == 'agent') ...[
@@ -373,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.assignment_return_rounded,
                 color: Colors.purple.shade700,
                 onTap: () async {
-                  await Navigator.push(context, MaterialPageRoute(builder: (_) => ExitsHistoryScreen(agent: widget.agent)));
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => ExitsHistoryScreen()));
                   _checkPendingOperations();
                 },
               ),
@@ -386,4 +386,5 @@ class _HomeScreenState extends State<HomeScreen> {
 );
   }
 }
+
 

@@ -99,7 +99,7 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
                                 color: Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: item['image_url'] != null && item['image_url'].isNotEmpty
+                              child: item['image_url'] != null && item['image_url'].toString().isNotEmpty
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(item['image_url'], fit: BoxFit.cover,
@@ -170,7 +170,6 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
                       final clientName = parts[0];
                       final dateDay = parts.length > 1 ? parts[1] : '';
                       
-                      // Check overall status (if all delivered -> delivered, else done)
                       bool allDelivered = items.every((i) => i['state'] == 'delivered');
                       String groupState = allDelivered ? 'Livré' : 'Confirmé';
                       Color groupColor = allDelivered ? Colors.green : Colors.orange;

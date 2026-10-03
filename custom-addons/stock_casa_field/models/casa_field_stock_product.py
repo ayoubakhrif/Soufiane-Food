@@ -20,6 +20,12 @@ class CasaStockProduct(models.Model):
         related='company_article_id.image',
         readonly=True
     )
+    
+    image_emballage = fields.Image(
+        string='Image Emballage',
+        max_width=512,
+        max_height=512
+    )
 
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'Le nom interne doit être unique.')

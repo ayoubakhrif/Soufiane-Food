@@ -41,7 +41,7 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
   }
 
   String _getStateText(String state) {
-    if (state == 'done') return 'Réalisé';
+    if (state == 'done') return 'RÃ©alisÃ©';
     return 'En attente';
   }
 
@@ -57,8 +57,8 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Commande \', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              Text('Client : \', style: const TextStyle(fontSize: 16)),
+              Text('Commande ${order['name']}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('Client : ${order['client_name']}', style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 16),
               Expanded(
                 child: ListView.builder(
@@ -68,7 +68,7 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
                     return Card(
                       child: ListTile(
                         title: Text(line['product_name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Qté: \ | Poids: \ Kg | Total: \ Kg\nNote: \'),
+                        subtitle: Text('QtÃ©: ${line['quantity']} | Poids: ${line['weight']} Kg | Total: ${line['tonnage']} Kg\nnote: ${line['note']}'),
                       ),
                     );
                   },
@@ -92,7 +92,7 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : _orders.isEmpty 
-          ? const Center(child: Text('Aucune commande trouvée'))
+          ? const Center(child: Text('Aucune commande trouvÃ©e'))
           : RefreshIndicator(
               onRefresh: _loadOrders,
               child: ListView.builder(
@@ -106,8 +106,8 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
-                      title: Text('\ - \', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      subtitle: Text('Date: \'),
+                      title: Text('${order['name']} - ${order['lclient_name']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      subtitle: Text('Date: ${order['date']}'),
                       trailing: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(

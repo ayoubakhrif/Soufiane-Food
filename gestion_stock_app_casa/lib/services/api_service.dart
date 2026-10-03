@@ -255,13 +255,24 @@ class ApiService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchExits() async {
-    final uri = Uri.parse('$baseUrl/api/casa/exits');
+    final uri = Uri.parse('$baseUrl/api/casa/commercial/exits_history');
     final response = await http.get(uri, headers: _headers);
     final data = jsonDecode(response.body);
     if (response.statusCode == 200 && data['status'] == 'success') {
       return List<Map<String, dynamic>>.from(data['exits']);
     } else {
       throw Exception(data['message'] ?? 'Erreur lors de la récupération des sorties');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchCommercialOrders(int agentId) async {
+    final uri = Uri.parse('$baseUrl/api/casa/commercial/orders_history');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode({'commercial_id': agentId}));
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
+      return List<Map<String, dynamic>>.from(data['orders']);
+    } else {
+      throw Exception(data['message'] ?? 'Erreur');
     }
   }
 

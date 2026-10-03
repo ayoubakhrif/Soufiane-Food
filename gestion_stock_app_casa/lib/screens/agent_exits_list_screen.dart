@@ -55,9 +55,13 @@ class _AgentExitsListScreenState extends State<AgentExitsListScreen> {
     return state;
   }
 
-Future<void> _confirmExit(int exitId) async {
+Future<void> _confirmExit(dynamic exit) async {
     DriverItem? selectedDriver;
-    final bool? result = await showDialog<bool>(
+    final qtyController = TextEditingController(text: exit['qty'].toString());
+    double currentQty = double.tryParse(exit['qty'].toString()) ?? 0.0;
+    double weight = double.tryParse(exit['weight']?.toString() ?? '0.0') ?? 0.0;
+
+    final Map<String, dynamic>? result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
@@ -66,22 +70,38 @@ Future<void> _confirmExit(int exitId) async {
               title: const Text('Confirmer le départ'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Veuillez sélectionner le chauffeur pour cette sortie :'),
-                  const SizedBox(height: 16),
+                  const Text('Chauffeur :'),
+                  const SizedBox(height: 8),
                   DropdownButtonFormField<DriverItem>(
-                    decoration: const InputDecoration(labelText: 'Chauffeur', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     items: _drivers.map((d) => DropdownMenuItem(value: d, child: Text(d.name))).toList(),
                     onChanged: (val) => setStateSB(() => selectedDriver = val),
                   ),
+                  const SizedBox(height: 16),
+                  const Text('Quantité à confirmer (petit à petit) :'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: qtyController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    onChanged: (val) {
+                      setStateSB(() {
+                        currentQty = double.tryParse(val) ?? 0.0;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Tonnage : ${(currentQty * weight).toStringAsFixed(2)} Kg', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+                TextButton(onPressed: () => Navigator.pop(ctx, null), child: const Text('Annuler')),
                 ElevatedButton(
                   onPressed: () {
                     if (selectedDriver != null) {
-                      Navigator.pop(ctx, true);
+                      Navigator.pop(ctx, {'driver_id': selectedDriver!.id, 'qty': currentQty});
                     } else {
                       ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner un chauffeur')));
                     }
@@ -95,10 +115,10 @@ Future<void> _confirmExit(int exitId) async {
       }
     );
 
-    if (result == true && selectedDriver != null) {
+    if (result != null) {
       try {
         showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
-        await ApiService.confirmExit(exitId, selectedDriver!.id);
+        await ApiService.confirmExit(exit['id'], result['driver_id'], qty: result['qty']);
         if (!mounted) return;
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sortie confirmée avec succès.')));
@@ -167,7 +187,7 @@ Future<void> _confirmExit(int exitId) async {
                             Align(
                               alignment: Alignment.centerRight,
                               child: ElevatedButton.icon(
-                                onPressed: () => _confirmExit(exit['id']),
+                                onPressed: () => _confirmExit(exit),
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, foregroundColor: Colors.white),
                                 icon: const Icon(Icons.check_circle_outline, size: 20),
                                 label: const Text('Confirmer (Départ)'),

@@ -265,9 +265,34 @@ class ApiService {
     }
   }
 
-    static Future<void> confirmExit(int exitId, int driverId) async {
+    
+  static Future<Map<String, dynamic>> deliverExit(int exitId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/casa/exit/deliver'),
+      headers: _headers,
+      body: jsonEncode({'exit_id': exitId}),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to deliver exit');
+  }
+
+  static Future<Map<String, dynamic>> bulkConfirmExit(List<int> exitIds, int driverId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/casa/exit/bulk_confirm'),
+      headers: _headers,
+      body: jsonEncode({'exit_ids': exitIds, 'driver_id': driverId}),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to bulk confirm exit');
+  }
+
+  static Future<void> confirmExit(int exitId, int driverId, {double? qty}) async {
     final uri = Uri.parse('$baseUrl/api/casa/exit/confirm');
-    final response = await http.post(uri, headers: _headers, body: jsonEncode({'exit_id': exitId, 'driver_id': driverId}));
+    final response = await http.post(uri, headers: _headers, body: jsonEncode({'exit_id': exitId, 'driver_id': driverId, if (qty != null) 'qty': qty}));
     final data = jsonDecode(response.body);
     if (response.statusCode != 200 || data['status'] != 'success') {
       throw Exception(data['message'] ?? 'Erreur de confirmation');

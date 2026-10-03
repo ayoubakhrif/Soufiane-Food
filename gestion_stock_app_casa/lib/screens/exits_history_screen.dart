@@ -14,6 +14,19 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
   Map<String, List<Map<String, dynamic>>> _groupedExits = {};
 
   @override
+
+  Future<void> _deliverExit(int exitId) async {
+    try {
+      await ApiService.deliverExit(exitId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sortie marquée comme livrée')));
+      _loadExits();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+    }
+  }
+
   void initState() {
     super.initState();
     _loadExits();
@@ -119,6 +132,22 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
                                   Text('Qté: ${item['qty']} | Tonnage: ${item['tonnage']} Kg', style: const TextStyle(color: Colors.black87)),
                                   Text('Chauffeur: ${item['driver_name']}', style: const TextStyle(color: Colors.black54, fontSize: 12)),
                                   const SizedBox(height: 8),
+
+                                    if (item['state'] == 'done')
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ElevatedButton(
+                                          onPressed: () => _deliverExit(item['id']),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                            minimumSize: Size.zero,
+                                          ),
+                                          child: const Text('Marquer Livré', style: TextStyle(fontSize: 12)),
+                                        ),
+                                      ),
+
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(

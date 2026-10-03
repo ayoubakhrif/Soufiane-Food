@@ -31,6 +31,9 @@ class _StockExitScreenState extends State<StockExitScreen> {
   
   List<DriverItem> _drivers = [];
   List<StockCard> _allStock = [];
+  bool _isRegistered = false;
+  List<int> _registeredExitIds = [];
+  DriverItem? _selectedDriver;
 
   
   DateTime? _selectedDate = DateTime.now();
@@ -393,6 +396,26 @@ class _StockExitScreenState extends State<StockExitScreen> {
         );
       },
     );
+  }
+
+  
+  Future<void> _validerTournee() async {
+    if (_selectedDriver == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner un chauffeur')));
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await ApiService.bulkConfirmExit(_registeredExitIds, _selectedDriver!.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tournée validée avec succès !')));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _submit() async {

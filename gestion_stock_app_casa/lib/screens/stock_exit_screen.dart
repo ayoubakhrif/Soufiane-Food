@@ -33,6 +33,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
   List<StockCard> _allStock = [];
 
   DriverItem? _selectedDriver;
+  DateTime? _selectedDate = DateTime.now();
   
   ClientItem? _lastSelectedClient;
 
@@ -404,7 +405,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
       return;
     }
 
-    final date = DateTime.now().toIso8601String().split('T')[0];
+    final date = (_selectedDate ?? DateTime.now()).toIso8601String().split('T')[0];
     final orderRef = 'TOUR-${_selectedDriver!.name.toUpperCase()}-$date-${DateTime.now().millisecondsSinceEpoch}';
 
     final parsedLines = _tourLines.map((line) => {
@@ -582,7 +583,30 @@ class _StockExitScreenState extends State<StockExitScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Column(
                     children: [
-                      DropdownButtonFormField<DriverItem>(
+                        InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate ?? DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() => _selectedDate = picked);
+                            }
+                          },
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Date de sortie',
+                              prefixIcon: const Icon(Icons.calendar_today),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            ),
+                            child: Text(_selectedDate != null ? _selectedDate!.toIso8601String().split('T')[0] : 'Sélectionner une date'),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownButtonFormField<DriverItem>(
                         decoration: InputDecoration(
                           labelText: '1. Chauffeur (Camion)',
                           prefixIcon: const Icon(Icons.person_pin_circle_outlined),

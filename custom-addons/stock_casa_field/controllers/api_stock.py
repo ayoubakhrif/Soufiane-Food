@@ -350,11 +350,11 @@ class CasaStockApiController(http.Controller):
         exits = request.env['casa_field.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=200)
         
         data = []
-        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        base_url = 'https://gestia-soufianefoods.cloud'
         
         for rec in exits:
             image_url = ""
-            if rec.product_id and rec.product_id.image_emballage:
+            if rec.product_id:
                 image_url = f"{base_url}/web/image?model=casa_field.stock.product&id={rec.product_id.id}&field=image_emballage"
                 
             data.append({

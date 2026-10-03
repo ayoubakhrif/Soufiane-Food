@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 from odoo import http, fields
 from odoo.http import request
@@ -300,6 +300,8 @@ class CasaStockApiController(http.Controller):
             'status': 'success',
             'exits': data,
         })
+
+
     @http.route('/api/casa/commercial/orders_history', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_commercial_orders_history(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
@@ -351,9 +353,9 @@ class CasaStockApiController(http.Controller):
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         
         for rec in exits:
-            image_url = ''
+            image_url = ""
             if rec.product_id and rec.product_id.image_emballage:
-                image_url = f'{base_url}/web/image?model=casa_field.stock.product&id={rec.product_id.id}&field=image_emballage'
+                image_url = f"{base_url}/web/image?model=casa_field.stock.product&id={rec.product_id.id}&field=image_emballage"
                 
             data.append({
                 'id': rec.id,
@@ -374,7 +376,8 @@ class CasaStockApiController(http.Controller):
             'exits': data
         })
 
-    @http.route('/api/casa/return'
+    @http.route('/api/casa/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+
     def api_return(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -543,4 +546,3 @@ class CasaStockApiController(http.Controller):
             order.write({'state': 'done'})
             return self._json_response({'status': 'success', 'message': 'Commande préparée'})
         return self._json_response({'status': 'error', 'message': 'Commande introuvable'}, status=404)
-

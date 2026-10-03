@@ -28,6 +28,7 @@ class CasaStockMove(models.Model):
     
     state = fields.Selection([
         ('done', 'Fait'),
+        ('registered', 'Enregistré'),
     ], string='e‰tat', default='done', required=True)
     
     date = fields.Datetime(string='Date', default=fields.Datetime.now, required=True)

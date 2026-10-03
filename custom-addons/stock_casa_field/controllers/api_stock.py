@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 from odoo import http, fields
 from odoo.http import request
@@ -102,7 +102,7 @@ class CasaStockApiController(http.Controller):
         stock_records = request.env['casa_field.stock.stock'].sudo().search([('quantity', '>', 0)])
         data = []
         for rec in stock_records:
-            # Chercher d'abord la photo d'emballage prise lors de l'entreƒÂ©e du lot
+            # Chercher d'abord la photo d'emballage prise lors de l'entre�©e du lot
             image_b64 = ''
             entry = request.env['casa_field.stock.entry'].sudo().search([
                 ('product_id', '=', rec.product_id.id),
@@ -162,7 +162,7 @@ class CasaStockApiController(http.Controller):
                 'status': 'success',
                 'entry_id': entry.id,
                 'name': entry.name,
-                'message': f"EntreƒÂ©e {entry.name} enregistreƒÂ©e avec succeƒÂ¨s."
+                'message': f"Entre�©e {entry.name} enregistre�©e avec succe�¨s."
             })
         except Exception as e:
             _logger.exception("Erreur API Entry")
@@ -193,7 +193,7 @@ class CasaStockApiController(http.Controller):
                 'status': 'success',
                 'exit_id': exit_rec.id,
                 'name': exit_rec.name,
-                'message': f"Sortie {exit_rec.name} enregistreƒÂ©e avec succeƒÂ¨s."
+                'message': f"Sortie {exit_rec.name} enregistre�©e avec succe�¨s."
             })
         except Exception as e:
             _logger.exception("Erreur API Exit")
@@ -246,7 +246,7 @@ class CasaStockApiController(http.Controller):
 
             try:
                 driver_name = request.env['casa_field.stock.driver'].sudo().browse(driver_id).name if driver_id else "Inconnu"
-                msg = f"ðŸšš *Nouvelle Tournee Validee (Casa)*\n"
+                msg = f"🚚 *Nouvelle Tournee Validee (Casa)*\n"
                 exits_records = request.env['casa_field.stock.exit'].sudo().browse(created_exits)
                 refs = ", ".join(exits_records.mapped('name'))
                 msg += f"Ref: {refs}\n"
@@ -300,8 +300,81 @@ class CasaStockApiController(http.Controller):
             'status': 'success',
             'exits': data,
         })
+    @http.route('/api/casa/commercial/orders_history', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    def api_commercial_orders_history(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+            
+        data = self._get_request_data()
+        commercial_id = data.get('commercial_id')
+        
+        domain = []
+        if commercial_id:
+            domain.append(('commercial_id', '=', int(commercial_id)))
+            
+        orders = request.env['casa_field.stock.order'].sudo().search(domain, order='date desc, id desc', limit=100)
+        
+        result = []
+        for o in orders:
+            lines = []
+            for l in o.line_ids:
+                lines.append({
+                    'product_name': l.product_id.name if l.product_id else '',
+                    'quantity': l.quantity,
+                    'weight': l.weight,
+                    'tonnage': l.tonnage,
+                    'note': l.note or ''
+                })
+            result.append({
+                'id': o.id,
+                'name': o.name,
+                'date': str(o.date),
+                'client_name': o.client_id.name if o.client_id else '',
+                'state': o.state,
+                'lines': lines
+            })
+            
+        return self._json_response({
+            'status': 'success',
+            'orders': result
+        })
 
-    @http.route('/api/casa/return', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
+    @http.route('/api/casa/commercial/exits_history', type='http', auth='public', methods=['GET', 'OPTIONS'], csrf=False, cors='*')
+    def api_commercial_exits_history(self, **kwargs):
+        if request.httprequest.method == 'OPTIONS':
+            return self._json_response({'status': 'ok'})
+            
+        domain = [('state', 'in', ['done', 'delivered'])]
+        exits = request.env['casa_field.stock.exit'].sudo().search(domain, order='date desc, id desc', limit=200)
+        
+        data = []
+        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        
+        for rec in exits:
+            image_url = ''
+            if rec.product_id and rec.product_id.image_emballage:
+                image_url = f'{base_url}/web/image?model=casa_field.stock.product&id={rec.product_id.id}&field=image_emballage'
+                
+            data.append({
+                'id': rec.id,
+                'name': rec.name,
+                'date': str(rec.date),
+                'product_name': rec.product_id.name if rec.product_id else '',
+                'image_url': image_url,
+                'client_name': rec.client_id.name if rec.client_id else 'Inconnu',
+                'qty': rec.qty,
+                'weight': rec.weight,
+                'tonnage': rec.tonnage,
+                'state': rec.state,
+                'driver_name': rec.driver_id.name if rec.driver_id else ''
+            })
+            
+        return self._json_response({
+            'status': 'success',
+            'exits': data
+        })
+
+    @http.route('/api/casa/return'
     def api_return(self, **kwargs):
         if request.httprequest.method == 'OPTIONS':
             return self._json_response({'status': 'ok'})
@@ -436,7 +509,7 @@ class CasaStockApiController(http.Controller):
             lines = data.get('lines', [])
             
             if not commercial_id or not client_id or not lines:
-                return self._json_response({'status': 'error', 'message': 'Données invalides'}, status=400)
+                return self._json_response({'status': 'error', 'message': 'Donn�es invalides'}, status=400)
                 
             order_vals = {
                 'commercial_id': commercial_id,
@@ -454,7 +527,7 @@ class CasaStockApiController(http.Controller):
                 }))
                 
             order = request.env['casa_field.stock.order'].sudo().create(order_vals)
-            return self._json_response({'status': 'success', 'message': 'Commande envoyée', 'order_id': order.id})
+            return self._json_response({'status': 'success', 'message': 'Commande envoy�e', 'order_id': order.id})
 
     @http.route('/api/casa/orders/validate', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False, cors='*')
     def api_orders_validate(self, **kwargs):
@@ -468,5 +541,6 @@ class CasaStockApiController(http.Controller):
         order = request.env['casa_field.stock.order'].sudo().browse(int(order_id))
         if order.exists():
             order.write({'state': 'done'})
-            return self._json_response({'status': 'success', 'message': 'Commande préparée'})
+            return self._json_response({'status': 'success', 'message': 'Commande pr�par�e'})
         return self._json_response({'status': 'error', 'message': 'Commande introuvable'}, status=404)
+

@@ -17,7 +17,8 @@ class CasaStockStock(models.Model):
         ('stock_casa', 'Stock Casa'),
     ], string='Frigo', readonly=True)
     
-    quantity = fields.Float(string='Quantité', readonly=True)
+    quantity = fields.Float(string='Quantité (Physique)', readonly=True)
+    quantity_sellable = fields.Float(string='Quantité (Vendable)', readonly=True)
     weight = fields.Float(string='Poids (Kg)', readonly=True)
     calibre = fields.Char(string='Calibre', readonly=True)
     price = fields.Float(string='Dernier Prix (Achat)', readonly=True)

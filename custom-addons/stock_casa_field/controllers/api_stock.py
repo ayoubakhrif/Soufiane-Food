@@ -124,6 +124,7 @@ class CasaStockApiController(http.Controller):
                 'calibre': rec.calibre or '',
                 'weight': rec.weight or 0.0,
                 'quantity': rec.quantity or 0.0,
+                'quantity_sellable': rec.quantity_sellable or 0.0,
                 'frigo': rec.frigo or 'stock_casa',
                 'image': image_b64,
             })

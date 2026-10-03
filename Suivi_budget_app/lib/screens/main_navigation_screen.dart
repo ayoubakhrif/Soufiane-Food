@@ -7,9 +7,12 @@ import 'expense_history_screen.dart';
 class MainNavigationScreen extends StatefulWidget {
   final UserSession session;
 
+  final int initialIndex;
+
   const MainNavigationScreen({
     super.key,
     required this.session,
+    this.initialIndex = 1, // Ouverture par défaut sur "Nouvelle Sortie"
   });
 
   @override
@@ -17,9 +20,15 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   final GlobalKey<DashboardScreenState> _dashboardKey = GlobalKey<DashboardScreenState>();
   final GlobalKey<ExpenseHistoryScreenState> _historyKey = GlobalKey<ExpenseHistoryScreenState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   void _onExpenseAdded() {
     // Rafraîchir les données du dashboard et de l'historique

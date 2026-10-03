@@ -9,6 +9,7 @@ import 'stock_exit_screen.dart';
 import 'exits_history_screen.dart';
 import 'stock_consultation_screen.dart';
 import 'order_creation_screen.dart';
+import 'commercial_orders_list_screen.dart';
 import 'pending_orders_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -285,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.add_shopping_cart,
                 color: Colors.green.shade700,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => OrderCreationScreen(agent: widget.agent)));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => CommercialOrdersListScreen(agent: widget.agent)));
                 },
               ),
               _buildActionButton(
@@ -385,3 +386,4 @@ class _HomeScreenState extends State<HomeScreen> {
 );
   }
 }
+

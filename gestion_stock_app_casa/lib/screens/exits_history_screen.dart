@@ -1,187 +1,206 @@
 import 'package:flutter/material.dart';
-import '../models/agent.dart';
-
 import '../services/api_service.dart';
+import 'package:collection/collection.dart';
 
 class ExitsHistoryScreen extends StatefulWidget {
-  final Agent agent;
-  const ExitsHistoryScreen({super.key, required this.agent});
-
+  const ExitsHistoryScreen({super.key});
   @override
   State<ExitsHistoryScreen> createState() => _ExitsHistoryScreenState();
 }
 
 class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
-  List<Map<String, dynamic>> _exits = [];
-  
   bool _isLoading = true;
+  List<Map<String, dynamic>> _exits = [];
+  Map<String, List<Map<String, dynamic>>> _groupedExits = {};
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadExits();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadExits() async {
     setState(() => _isLoading = true);
     try {
       final exits = await ApiService.fetchExits();
-      
       if (!mounted) return;
       setState(() {
         _exits = exits;
+        
+        // Group by Client Name + Date (day only)
+        _groupedExits = groupBy(_exits, (Map<String, dynamic> e) {
+          final dateDay = e['date'].toString().split(' ')[0];
+          final client = e['client_name']?.toString().isEmpty ?? true ? 'Client Inconnu' : e['client_name'];
+          return '\|\';
+        });
+        
         _isLoading = false;
       });
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
+  
+  Color _getStateColor(String state) {
+    if (state == 'delivered') return Colors.green;
+    if (state == 'done') return Colors.orange;
+    return Colors.grey;
+  }
+  
+  String _getStateText(String state) {
+    if (state == 'delivered') return 'Livré';
+    if (state == 'done') return 'Confirmé';
+    return state;
+  }
 
-  void _showReturnDialog(Map<String, dynamic> exitData) {
-    double qtyToReturn = 0;
-    
-    
-    // Default to today
-    final String todayDate = DateTime.now().toIso8601String().split('T')[0];
+  void _showGroupDetails(String key, List<Map<String, dynamic>> items) {
+    final parts = key.split('|');
+    final clientName = parts[0];
+    final dateDay = parts.length > 1 ? parts[1] : '';
 
-    final double maxReturnable = (exitData['qty'] as num).toDouble() - (exitData['returned_qty'] as num).toDouble();
-
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Retourner: ${exitData['name']}'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Produit: ${exitData['product_name']}'),
-                    Text('Lot: ${exitData['lot']}'),
-                    Text('Client: ${exitData['client_name']}'),
-                    Text('QuantitÃ© livrÃ©e: ${exitData['qty']} (DÃ©jÃ  retournÃ©: ${exitData['returned_qty']})'),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      initialValue: '0',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'QuantitÃ© Ã  retourner',
-                        border: OutlineInputBorder(),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(20),
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Sorties : \', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('Date : \', style: const TextStyle(fontSize: 16, color: Colors.grey)),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: item['image_url'] != null && item['image_url'].isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(item['image_url'], fit: BoxFit.cover,
+                                        errorBuilder: (c, e, s) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                                      ),
+                                    )
+                                  : const Icon(Icons.inventory_2, color: Colors.grey, size: 40),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item['product_name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(height: 4),
+                                  Text('Qté: \ | Tonnage: \ Kg', style: const TextStyle(color: Colors.black87)),
+                                  Text('Chauffeur: \', style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getStateColor(item['state']).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: _getStateColor(item['state'])),
+                                    ),
+                                    child: Text(_getStateText(item['state']), style: TextStyle(color: _getStateColor(item['state']), fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      onChanged: (val) {
-                        qtyToReturn = double.tryParse(val) ?? 0;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                  ],
+                    );
+                  },
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Annuler'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (qtyToReturn <= 0 || qtyToReturn > maxReturnable) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('QuantitÃ© invalide.')),
-                      );
-                      return;
-                    }
-                    
-
-                    Navigator.pop(context); // Close dialog
-                    _processReturn(exitData['id'], qtyToReturn, todayDate);
-                  },
-                  child: const Text('Valider Retour'),
-                ),
-              ],
-            );
-          }
+            ],
+          ),
         );
       },
     );
   }
 
-  Future<void> _processReturn(int exitId, double qty, String date) async {
-    setState(() => _isLoading = true);
-    try {
-      final payload = {
-        'exit_id': exitId,
-        'qty': qty,
-        
-        'date': date,
-        'driver_id': widget.agent.id, // using agent as driver or we leave empty if not needed
-      };
-      
-      final res = await ApiService.createReturn(payload);
-      if (!mounted) return;
-      if (res['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'Retour enregistrÃ© avec succÃ¨s.')),
-        );
-        _loadData(); // reload list
-      } else {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${res['message']}')),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final keys = _groupedExits.keys.toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historique des Sorties'),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.blue.shade900,
+        foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _exits.isEmpty
-              ? const Center(child: Text('Aucune sortie trouvÃ©e.'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: _exits.length,
-                  itemBuilder: (context, index) {
-                    final exitData = _exits[index];
-                    final double qty = (exitData['qty'] as num).toDouble();
-                    final double returnedQty = (exitData['returned_qty'] as num).toDouble();
-                    final double remaining = qty - returnedQty;
+          : _groupedExits.isEmpty
+              ? const Center(child: Text('Aucune sortie trouvée'))
+              : RefreshIndicator(
+                  onRefresh: _loadExits,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: keys.length,
+                    itemBuilder: (context, index) {
+                      final key = keys[index];
+                      final items = _groupedExits[key]!;
+                      final parts = key.split('|');
+                      final clientName = parts[0];
+                      final dateDay = parts.length > 1 ? parts[1] : '';
+                      
+                      // Check overall status (if all delivered -> delivered, else done)
+                      bool allDelivered = items.every((i) => i['state'] == 'delivered');
+                      String groupState = allDelivered ? 'Livré' : 'Confirmé';
+                      Color groupColor = allDelivered ? Colors.green : Colors.orange;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                      child: ListTile(
-                        title: Text('${exitData['name']} - ${exitData['product_name']}'),
-                        subtitle: Text(
-                          'Date: ${exitData['date']}\nClient: ${exitData['client_name']}\nQte: ${exitData['qty']} (RetournÃ©: $returnedQty)',
+                      return Card(
+                        elevation: 3,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.blue.shade100,
+                            child: const Icon(Icons.local_shipping, color: Colors.blue),
+                          ),
+                          title: Text(clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          subtitle: Text('\ • \ produit(s)'),
+                          trailing: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: groupColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: groupColor),
+                            ),
+                            child: Text(groupState, style: TextStyle(color: groupColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ),
+                          onTap: () => _showGroupDetails(key, items),
                         ),
-                        isThreeLine: true,
-                        trailing: remaining > 0
-                            ? IconButton(
-                                icon: const Icon(Icons.assignment_return, color: Colors.teal),
-                                onPressed: () => _showReturnDialog(exitData),
-                                tooltip: 'Faire un retour',
-                              )
-                            : const Icon(Icons.check_circle, color: Colors.grey),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
     );
   }

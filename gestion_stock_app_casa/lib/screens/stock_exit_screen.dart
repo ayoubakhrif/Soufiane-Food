@@ -32,7 +32,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
   List<DriverItem> _drivers = [];
   List<StockCard> _allStock = [];
 
-  DriverItem? _selectedDriver;
+  
   DateTime? _selectedDate = DateTime.now();
   
   ClientItem? _lastSelectedClient;
@@ -403,7 +403,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
     }
 
     final date = (_selectedDate ?? DateTime.now()).toIso8601String().split('T')[0];
-    final orderRef = 'TOUR-${_selectedDriver!.name.toUpperCase()}-$date-${DateTime.now().millisecondsSinceEpoch}';
+    final orderRef = 'TOUR-$date-${DateTime.now().millisecondsSinceEpoch}';
 
     final parsedLines = _tourLines.map((line) => {
       'product_id': line.stock.productId,
@@ -419,7 +419,7 @@ class _StockExitScreenState extends State<StockExitScreen> {
     setState(() => _isLoading = true);
     try {
       final res = await ApiService.createBulkExit({
-        'driver_id': _selectedDriver!.id,
+        'driver_id': 0,
         'order_reference': orderRef,
         'lines': parsedLines,
       });

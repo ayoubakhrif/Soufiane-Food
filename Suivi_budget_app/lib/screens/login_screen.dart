@@ -96,15 +96,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Logo / En-tête
                     Center(
                       child: Container(
-                        padding: const EdgeInsets.all(22),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0284C7).withOpacity(0.1),
+                          color: Colors.white,
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: const Icon(
-                          Icons.account_balance_wallet_rounded,
-                          size: 60,
-                          color: Color(0xFF0284C7),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 80,
+                          height: 80,
                         ),
                       ),
                     ),

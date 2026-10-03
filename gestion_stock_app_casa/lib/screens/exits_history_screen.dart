@@ -53,6 +53,7 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
   String _getStateText(String state) {
     if (state == 'delivered') return 'Livré';
     if (state == 'done') return 'Confirmé';
+    if (state == 'registered') return 'Enregistré';
     return state;
   }
 
@@ -171,8 +172,9 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
                       final dateDay = parts.length > 1 ? parts[1] : '';
                       
                       bool allDelivered = items.every((i) => i['state'] == 'delivered');
-                      String groupState = allDelivered ? 'Livré' : 'Confirmé';
-                      Color groupColor = allDelivered ? Colors.green : Colors.orange;
+                      bool anyRegistered = items.any((i) => i['state'] == 'registered');
+                      String groupState = allDelivered ? 'Livré' : (anyRegistered ? 'Enregistré' : 'Confirmé');
+                      Color groupColor = allDelivered ? Colors.green : (anyRegistered ? Colors.blue : Colors.orange);
 
                       return Card(
                         elevation: 3,

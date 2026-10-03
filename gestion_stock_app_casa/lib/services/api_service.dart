@@ -265,6 +265,15 @@ class ApiService {
     }
   }
 
+    static Future<void> confirmExit(int exitId) async {
+    final uri = Uri.parse('$baseUrl/api/casa/exit/confirm');
+    final response = await http.post(uri, headers: _headers, body: jsonEncode({'exit_id': exitId}));
+    final data = jsonDecode(response.body);
+    if (response.statusCode != 200 || data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Erreur de confirmation');
+    }
+  }
+
   static Future<List<Map<String, dynamic>>> fetchCommercialOrders(int agentId) async {
     final uri = Uri.parse('$baseUrl/api/casa/commercial/orders_history');
     final response = await http.post(uri, headers: _headers, body: jsonEncode({'commercial_id': agentId}));

@@ -6,6 +6,7 @@ import '../services/local_storage_service.dart';
 import 'login_screen.dart';
 import 'stock_entry_screen.dart';
 import 'stock_exit_screen.dart';
+import 'agent_exits_list_screen.dart';
 import 'exits_history_screen.dart';
 import 'stock_consultation_screen.dart';
 import 'order_creation_screen.dart';
@@ -363,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.local_shipping_rounded,
                 color: Colors.red.shade700,
                 onTap: () async {
-                  await Navigator.push(context, MaterialPageRoute(builder: (_) => StockExitScreen(agent: widget.agent)));
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => AgentExitsListScreen(agent: widget.agent)));
                   _checkPendingOperations();
                 },
               ),

@@ -183,6 +183,10 @@ class DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0, top: 8.0, bottom: 8.0, right: 4.0),
+          child: Image.asset('assets/images/logo.png'),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

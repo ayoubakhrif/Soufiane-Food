@@ -68,7 +68,7 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
                     return Card(
                       child: ListTile(
                         title: Text(line['product_name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Qté: ${line['quantity']} | Poids: ${line['weight']} Kg | Total: ${line['tonnage']} Kg\nnote: ${line['note']}'),
+                        subtitle: Text('Qté: ${line['quantity']} | Poids: ${line['weight']} Kg | Total: ${line['tonnage']} Kg\nNote: ${line['note']}'),
                       ),
                     );
                   },
@@ -106,7 +106,7 @@ class _CommercialOrdersListScreenState extends State<CommercialOrdersListScreen>
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
-                      title: Text('${order['name']} - ${order['lclient_name']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      title: Text('${order['name']} - ${order['client_name']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       subtitle: Text('Date: ${order['date']}'),
                       trailing: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

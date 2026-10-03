@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'package:collection/collection.dart';
@@ -32,7 +31,7 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
         _groupedExits = groupBy(_exits, (Map<String, dynamic> e) {
           final dateDay = e['date'].toString().split(' ')[0];
           final client = e['client_name']?.toString().isEmpty ?? true ? 'Client Inconnu' : e['client_name'];
-          return '\|';
+          return '${client}|${dateDay}';
         });
         
         _isLoading = false;
@@ -77,8 +76,8 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Sorties : ', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              Text('Date : ', style: const TextStyle(fontSize: 16, color: Colors.grey)),
+              Text('Sorties : ${clientName}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('Date : ${dateDay}', style: const TextStyle(fontSize: 16, color: Colors.grey)),
               const SizedBox(height: 16),
               Expanded(
                 child: ListView.builder(
@@ -116,8 +115,8 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
                                 children: [
                                   Text(item['product_name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                   const SizedBox(height: 4),
-                                  Text('Qté: \ | Tonnage: \ Kg', style: const TextStyle(color: Colors.black87)),
-                                  Text('Chauffeur: ', style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                  Text('Qté: ${item['qty']} | Tonnage: ${item['tonnage']} Kg', style: const TextStyle(color: Colors.black87)),
+                                  Text('Chauffeur: ${item['driver_name']}', style: const TextStyle(color: Colors.black54, fontSize: 12)),
                                   const SizedBox(height: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -186,7 +185,7 @@ class _ExitsHistoryScreenState extends State<ExitsHistoryScreen> {
                             child: const Icon(Icons.local_shipping, color: Colors.blue),
                           ),
                           title: Text(clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          subtitle: Text('\ • \ produit(s)'),
+                          subtitle: Text('${dateDay} • ${items.length} produit(s)'),
                           trailing: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(

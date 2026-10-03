@@ -52,6 +52,7 @@ class CasaStockExit(models.Model):
     
     state = fields.Selection([
         ('draft', 'Brouillon'),
+        ('registered', 'Enregistré'),
         ('done', 'Confirmé'),
         ('delivered', 'Livré'),
         ('cancel', 'Annulé'),
